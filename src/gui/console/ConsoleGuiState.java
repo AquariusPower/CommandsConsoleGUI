@@ -74,7 +74,6 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
-import com.jme3.system.AppSettings;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
@@ -276,81 +275,6 @@ public class ConsoleGuiState implements AppState{
 	protected DocumentModel	dmInputFieldHK;
 	
 	protected String	strPreparedCmdLine = "";
-	
-	public static class TimedDelay{
-		protected static Long lCurrentTime;
-		public static final long lNano = 1000000000L;
-		public static final float fNanoToSeconds = 1f/lNano;
-		
-		protected Long	lNanoTime;
-		protected float	fDelayLimit;
-		protected Long	lNanoDelayLimit;
-		
-		/**
-		 * use this to prevent current time to read from realtime
-		 * @param lCurrentTime if null, will use realtime
-		 */
-		public static void setCurrentTime(Long lCurrentTime){
-			TimedDelay.lCurrentTime = lCurrentTime;
-		}
-		
-		public static long getCurrentTime(){
-			if(lCurrentTime==null)return System.nanoTime();
-			return lCurrentTime;
-		}
-		
-		public TimedDelay(float fDelay) {
-			super();
-			this.fDelayLimit = fDelay;
-			this.lNanoDelayLimit = (long) (this.fDelayLimit * lNano);;
-		}
-		public long getCurrentDelay() {
-			if(!isActive())throw new NullPointerException("inactive"); //this, of course, affects all others using this method
-//			System.err.println(getCurrentTime()-lNanoTime);
-			return getCurrentTime()-lNanoTime;
-		}
-		public void updateTime() {
-			lNanoTime = getCurrentTime();
-		}
-		public boolean isReady() {
-			return isReady(false);
-		}
-		public boolean isReady(boolean bIfReadyWillAlsoUpdate) {
-			boolean bReady = getCurrentDelay() >= lNanoDelayLimit;
-			if(bIfReadyWillAlsoUpdate){
-				if(bReady)updateTime();
-			}
-			return bReady;
-		}
-		public void reset() {
-			lNanoTime=null;
-		}
-		public boolean isActive() {
-			return lNanoTime!=null;
-		}
-		public float getCurrentDelayPercentual() {
-			float f = 1.0f - ((lNanoDelayLimit-getCurrentDelay())*fNanoToSeconds);
-			if(f<0f)throw new NullPointerException("negative value: "+f);
-			return f;
-		}
-		public float getCurrentDelayPercentualWithinBounds() {
-			float f = getCurrentDelayPercentual();
-			if(f>1f)return 1f;
-			return f;
-		}
-		
-		/**
-		 * will use the delay value to sleep the thread
-		 */
-		public void sleepThread(){
-			try {
-				Thread.sleep(lNanoDelayLimit/1000000L);
-			} catch (InterruptedException e) {
-				// put NO message on this one!!! may be too much spam..
-				e.printStackTrace();
-			}
-		}
-	}
 	
 	public ConsoleGuiState() {
 	}

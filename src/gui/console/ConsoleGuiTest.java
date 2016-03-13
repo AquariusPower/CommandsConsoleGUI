@@ -27,8 +27,6 @@
 
 package gui.console;
 
-import gui.console.ConsoleGuiState.TimedDelay;
-
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
 import com.jme3.system.AppSettings;
