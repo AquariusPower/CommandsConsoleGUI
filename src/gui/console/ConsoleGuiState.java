@@ -484,14 +484,14 @@ public class ConsoleGuiState implements AppState{
 		String strCurrent = tfInput.getText();
 		int iMoveCaratTo = 0;
 		if(efHK!=null){
-			iMoveCaratTo = efHK.pasteAtCaratPositionHK(strCurrent,strPasted);
+			strCurrent = efHK.pasteAtCaratPositionHK(strCurrent,strPasted);
 		}else{
 			strCurrent+=strPasted;
 		}
 		
 		tfInput.setText(strCurrent); 
 		
-		if(efHK!=null)efHK.positionCaratProperlyHK(iMoveCaratTo);
+		if(efHK!=null)efHK.positionCaratProperlyHK();
 	}
 	
 	protected void cmdHistSave(String strCmd) {

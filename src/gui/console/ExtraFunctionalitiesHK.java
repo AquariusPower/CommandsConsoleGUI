@@ -66,6 +66,8 @@ public class ExtraFunctionalitiesHK {
 	protected boolean bBlinkingTextCursorHK = true;
 	protected TimedDelay tdTextCursorBlinkHK = new TimedDelay(1f);
 	protected DocumentModel	dmInputFieldHK;
+
+	private int	iMoveCaratTo;
 	
 
 	public ExtraFunctionalitiesHK(ConsoleGuiState cgs){
@@ -224,21 +226,21 @@ public class ExtraFunctionalitiesHK {
 			
 	}
 
-	public Integer pasteAtCaratPositionHK(String strCurrent, String strPasted) {
+	public String pasteAtCaratPositionHK(String strCurrent, String strPasted) {
 		if(dmInputFieldHK!=null){ //insert at carat position
 			int iCarat = dmInputFieldHK.getCarat();
 			String strBefore = strCurrent.substring(0,iCarat);
 			String strAfter = strCurrent.substring(iCarat);
 			strCurrent = strBefore + strPasted;
-			int iMoveCaratTo = strCurrent.length();
+			iMoveCaratTo = strCurrent.length();
 			strCurrent += strAfter;
-			return iMoveCaratTo;
+			return strCurrent;
 		}
 		
 		return null;
 	}
 
-	public void positionCaratProperlyHK(int iMoveCaratTo) {
+	public void positionCaratProperlyHK() {
 		// position carat properly
 		if(dmInputFieldHK!=null){
 			dmInputFieldHK.home(true);
