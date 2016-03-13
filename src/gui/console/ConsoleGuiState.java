@@ -133,6 +133,17 @@ public class ConsoleGuiState implements AppState{
 	protected TimedDelay tdStatsRefresh = new TimedDelay(0.5f);
 	
 	/**
+	 * keep guesses together!
+	 * guesses should not exist... 
+	 * they are imprecise, they just "work" therefore they may "just break"... 
+	 * TODO better algorithms/calculations are required...
+	 */
+	protected int	iJumpBackGUESSED = 1;
+	protected int	iDotsMarginSafetyGUESSED = 0;
+	protected int	iSkipCharsSafetyGUESSED = 1;
+	protected float	fSafetyMarginGUESSED = 20f;
+	
+	/**
 	 * some day this one may not be required
 	 */
 	ExtraFunctionalitiesHK efHK = null;
@@ -205,7 +216,7 @@ public class ConsoleGuiState implements AppState{
 	protected Button	btnClipboardShow;
 	protected boolean	bConsoleStyleCreated;
 //	protected boolean	bUseDumbWrap = true;
-	protected Integer	iConsoleMaxWidthInCharsForLineWrap = 80; // if set to null, disables linewrap limit
+	protected Integer	iConsoleMaxWidthInCharsForLineWrap = 0;
 	protected BitmapFont	fntMakeFixedWidth;
 	protected StatsAppState	stateStats;
 	protected boolean	bEngineStatsFps;
@@ -217,8 +228,9 @@ public class ConsoleGuiState implements AppState{
 	protected Button	btnPaste;
 	protected boolean	bAddEmptyLineAfterCommand = true;
 //	protected String	strLineEncloseChar = "'";
-	
 	protected String	strPreparedCmdLine = "";
+	protected CharSequence	strReplaceTAB = "  ";
+	protected float	fWidestCharForCurrentStyleFont;
 	
 	public ConsoleGuiState() {
 	}
@@ -323,7 +335,7 @@ public class ConsoleGuiState implements AppState{
 		
 		createMonoSpaceFontStyle();
 		
-		// top container
+		// main container
 		ctnrConsole = new Container(new BorderLayout(), strStyle);
 		int iMargin=10;
 		Vector3f v3fWindowSize = new Vector3f(
@@ -337,7 +349,9 @@ public class ConsoleGuiState implements AppState{
 			sapp.getContext().getSettings().getHeight()-iMargin, 
 			0);
 		
-		// top element
+		/**
+		 * TOP ELEMENT
+		 */
 		ctnrStatsAndControls = new Container(strStyle);
 		ctnrConsole.addChild(ctnrStatsAndControls, BorderLayout.Position.North);
 		
@@ -364,6 +378,9 @@ public class ConsoleGuiState implements AppState{
 		btnPaste.addClickCommands(new ButtonClick());
 		ctnrStatsAndControls.addChild(btnPaste,0,++iButtonIndex);
 		
+		/**
+		 * CENTER ELEMENT
+		 */
 		// dump entries area
 		lstbx = new ListBox<String>(new VersionedList<String>(),strStyle);
 		Vector3f v3fLstbxSize = v3fWindowSize.clone();
@@ -376,6 +393,9 @@ public class ConsoleGuiState implements AppState{
 		
 		gridPanel = lstbx.getGridPanel();
 		
+		/**
+		 * BOTTOM ELEMENT
+		 */
 		// input
 		tfInput = new TextField(strCommandPrefixChar,strStyle);
 		fInputHeight = retrieveBitmapTextFor(tfInput).getLineHeight();
@@ -457,7 +477,7 @@ public class ConsoleGuiState implements AppState{
 					 * this overrides wrap mode, as user may not want other lines
 					 * as he/she used a multi-line mode.
 					 */
-					if(iCopyFrom==iCopyTo)break;
+					if((iCopyFrom-iCopyTo)==0)break;
 					
 					iCopyFrom++;
 				}else{ // single line mode
@@ -472,6 +492,7 @@ public class ConsoleGuiState implements AppState{
 			
 			lstbx.getSelectionModel().setSelection(-1); //clear selection
 		}
+		
 		iCopyFrom=null;
 	}
 
@@ -666,10 +687,12 @@ public class ConsoleGuiState implements AppState{
 	}
 	
 	protected float fontWidth(String strChars){
-		return fontWidth(strChars, strStyle);
+		return fontWidth(strChars, strStyle, true);
 	}
-	protected float fontWidth(String strChars, String strStyle){
-		return retrieveBitmapTextFor(new Label(strChars,strStyle)).getLineWidth()/strChars.length();
+	protected float fontWidth(String strChars, String strStyle, boolean bAveraged){
+		float f = retrieveBitmapTextFor(new Label(strChars,strStyle)).getLineWidth();
+		if(bAveraged)f/=strChars.length();
+		return f;
 	}
 	
 	protected void mapKeysForInputField(){
@@ -1204,16 +1227,41 @@ public class ConsoleGuiState implements AppState{
 				if(strLineOriginal.isEmpty()){
 					astr.add(strLineOriginal);
 				}else{
-					if(iConsoleMaxWidthInCharsForLineWrap>0){
-						String strLine = strLineOriginal.replace("\t", "  ");
-						strLine=strLine.replace("\r", "");
-						for (int i=0;i<strLine.length();i+=iConsoleMaxWidthInCharsForLineWrap){
-							astr.add(strLine.substring(i, Math.min(strLine.length(),i+iConsoleMaxWidthInCharsForLineWrap)));
+					String strLine = strLineOriginal.replace("\t", strReplaceTAB);
+					strLine=strLine.replace("\r", "");
+					
+					int iWrapAt = iConsoleMaxWidthInCharsForLineWrap;
+					if(strStyle.equals(STYLE_CONSOLE)){ //TODO is faster?
+						iWrapAt = (int) (widthForDumpEntryField() / fWidestCharForCurrentStyleFont ); //'W' but any char will do for monospaced font
+					}
+					
+					if(iWrapAt>0){ //fixed chars wrap
+						for (int i=0;i<strLine.length();i+=iWrapAt){
+							astr.add(strLine.substring(
+								i, 
+								Math.min(strLine.length(),i+iWrapAt)
+							));
 						}
-					}else{
-						//TODO auto wrap
+					}else{ // auto wrap
+						//TODO too slow right? isnt there a better way to do that?
+						String strAfter = "";
+						float fMaxWidth = widthForDumpEntryField() - iDotsMarginSafetyGUESSED;
+						while(strLine.length()>0){
+							while(fontWidth(strLine, strStyle, false) > fMaxWidth){
+								int iLimit = strLine.length()-iJumpBackGUESSED;
+								strAfter = strLine.substring(iLimit) + strAfter;
+								strLine = strLine.substring(0, iLimit);
+							}
+							astr.add(strLine);
+							strLine = strAfter;
+							strAfter="";
+						}
 					}
 				}
+				
+				/**
+				 * LINE WRAP INDICATOR
+				 */
 //				for(String strPart : Splitter.fixedLength(iConsoleWidthInChars ).split(strLine)){
 //				for(String strPart : astr){ //strPart.length();
 				for(int i=0;i<astr.size();i++){
@@ -1656,6 +1704,7 @@ public class ConsoleGuiState implements AppState{
 					iConsoleMaxWidthInCharsForLineWrap=null;
 				}
 			}
+			updateWrapAt();
 			bOk=true;
 		}else
 		if(checkCmdValidity(CMD_MODIFY_CONSOLE_HEIGHT,"[fPercent] of the application window")){
@@ -1732,7 +1781,7 @@ public class ConsoleGuiState implements AppState{
 		return bOk;
 	}
 	
-	private void showHelp(String strFilter) {
+	protected void showHelp(String strFilter) {
 		if(strFilter==null){
 			dumpInfoEntry("Available Commands:");
 		}else{
@@ -1802,6 +1851,18 @@ public class ConsoleGuiState implements AppState{
 	protected boolean styleCheck(String strStyle) {
 		return astrStyleList.contains(strStyle);
 	}
+	
+	protected void updateWrapAt(){
+		if(iConsoleMaxWidthInCharsForLineWrap!=null){
+			fWidestCharForCurrentStyleFont = fontWidth("W"); //W seems to be the widest in most/all chars sets
+			
+			if(iConsoleMaxWidthInCharsForLineWrap>0){
+				iConsoleMaxWidthInCharsForLineWrap = (int) //like trunc
+					((widthForDumpEntryField()/fWidestCharForCurrentStyleFont)-iSkipCharsSafetyGUESSED);
+			}
+		}
+	}
+	
 	protected boolean styleApply(String strStyleNew) {
 		boolean bOk = styleCheck(strStyleNew);
 		if(bOk){
@@ -1824,16 +1885,17 @@ public class ConsoleGuiState implements AppState{
 //				iConsoleMaxWidthInCharsForLineWrap = (int) //like trunc
 //						((fListboxWidth/fFontWidth)-iSkipCharsSafety);
 //			}
-			if(iConsoleMaxWidthInCharsForLineWrap!=null){
-				if(iConsoleMaxWidthInCharsForLineWrap>0){
-					int iSkipCharsSafety = 3;
-					float fListboxWidth = lstbx.getSize().x;
-					Float fFontWidth = fontWidth("W"); //W seems to be the widest in most/all chars sets
-					
-					iConsoleMaxWidthInCharsForLineWrap = (int) //like trunc
-							((fListboxWidth/fFontWidth)-iSkipCharsSafety);
-				}
-			}
+			
+//			if(iConsoleMaxWidthInCharsForLineWrap!=null){
+//				if(iConsoleMaxWidthInCharsForLineWrap>0){
+//					int iSkipCharsSafety = 3;
+//					fWidestCharForCurrentStyleFont = fontWidth("W"); //W seems to be the widest in most/all chars sets
+//					
+//					iConsoleMaxWidthInCharsForLineWrap = (int) //like trunc
+//							((listboxWidth()/fWidestCharForCurrentStyleFont)-iSkipCharsSafety);
+//				}
+//			}
+			updateWrapAt();
 			
 			sapp.enqueue(new Callable<Void>() {
 				@Override
@@ -1859,6 +1921,15 @@ public class ConsoleGuiState implements AppState{
 		
 		return bOk;
 	}
+	
+	protected float widthForListbox(){
+		return lstbx.getSize().x;
+	}
+	
+	protected float widthForDumpEntryField(){
+		return widthForListbox() -lstbx.getSlider().getSize().x -fSafetyMarginGUESSED;
+	}
+	
 	protected void exit(){
 		sapp.stop();
 		System.exit(0);
@@ -1925,7 +1996,7 @@ public class ConsoleGuiState implements AppState{
 		dumpSubEntry("Console Height = "+fmtFloat(ctnrConsole.getSize().y));
 		
 		dumpSubEntry("Visible Rows = "+lstbx.getGridPanel().getVisibleRows());
-		dumpSubEntry("Max character columns = "+iConsoleMaxWidthInCharsForLineWrap);
+		dumpSubEntry("Line Wrap At = "+iConsoleMaxWidthInCharsForLineWrap);
 		dumpSubEntry("ListBox Height = "+fmtFloat(lstbx.getSize().y));
 		dumpSubEntry("ListBox Entry Height = "+fmtFloat(fLstbxEntryHeight));
 		
