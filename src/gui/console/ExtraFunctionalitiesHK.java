@@ -66,6 +66,7 @@ public class ExtraFunctionalitiesHK {
 	protected boolean bBlinkingTextCursorHK = true;
 	protected TimedDelay tdTextCursorBlinkHK = new TimedDelay(1f);
 	protected DocumentModel	dmInputFieldHK;
+	protected boolean	bFixInvisibleTextInputCursorHK = false;
 
 	private int	iMoveCaratTo;
 	
@@ -103,7 +104,7 @@ public class ExtraFunctionalitiesHK {
 	protected void updateFixInvisibleCursorHK() {
 		if(!bAllowHK)return;
 		
-		if(!cgs.bFixInvisibleTextInputCursor)return;
+		if(!bFixInvisibleTextInputCursorHK)return;
 		
 		if(!bInitializedFixInvisibleCursorHK)fixInvisibleTextInputCursorHK();
 	}
@@ -182,9 +183,9 @@ public class ExtraFunctionalitiesHK {
 		tdTextCursorBlinkHK.updateTime();
 		
 		if(geomCursorHK!=null && focusStateHK!=null){
-			cgs.dumpInfoEntry("ready to blink cursor!");
+			cgs.dumpInfoEntry("Text cursor can blink now!");
 		}else{
-			cgs.dumpWarnEntry("unable to blink cursor :(");
+			cgs.dumpWarnEntry("Unable to let Text cursor blink :(");
 		}
 		
 		bInitializedBlinkingCursorHK=true;

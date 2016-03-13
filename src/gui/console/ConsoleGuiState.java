@@ -39,9 +39,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -67,17 +64,13 @@ import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.Trigger;
-import com.jme3.material.MatParam;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
-import com.jme3.scene.Spatial.CullHint;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
-import com.simsilica.lemur.DocumentModel;
 import com.simsilica.lemur.GridPanel;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.Label;
@@ -90,7 +83,6 @@ import com.simsilica.lemur.component.TextEntryComponent;
 import com.simsilica.lemur.core.VersionedList;
 import com.simsilica.lemur.event.KeyAction;
 import com.simsilica.lemur.event.KeyActionListener;
-import com.simsilica.lemur.focus.FocusManagerState;
 import com.simsilica.lemur.style.Attributes;
 import com.simsilica.lemur.style.BaseStyles;
 import com.simsilica.lemur.style.StyleLoader;
@@ -118,6 +110,8 @@ public class ConsoleGuiState implements AppState{
 	public static final String CMD_MODIFY_CONSOLE_HEIGHT = "consoleHeight";
 	public static final String CMD_SCROLL_BOTTOM = "consoleScrollBottom";
 	public static final String CMD_FIX_LINEWRAP = "fixLineWrap";
+	public static final String CMD_HK_TOGGLE = "HKtoggle";
+	public static final String CMD_FIX_CURSOR_VISIBILITY = "fixCursor";
 	
 	public static final String STYLE_CONSOLE="console";
 	
@@ -170,7 +164,6 @@ public class ConsoleGuiState implements AppState{
 	protected	String	strCommentPrefixChar="#";
 	protected	String	strCommandPrefixChar="/";
 	protected Panel	pnlTest;
-	protected boolean	bFixInvisibleTextInputCursor = false;
 	protected String	strTypeCmd="Cmd";
 	protected Label	lblStats;
 	protected Float	fLstbxEntryHeight;
@@ -1538,8 +1531,13 @@ public class ConsoleGuiState implements AppState{
 			exit();
 			bOk=true;
 		}else
-		if(checkCmdValidity("fixCursor ","in case cursor is invisible")){
-			bFixInvisibleTextInputCursor=true;
+		if(checkCmdValidity(CMD_FIX_CURSOR_VISIBILITY ,"in case cursor is invisible")){
+			if(efHK==null){
+				dumpWarnEntry("requires command: "+CMD_HK_TOGGLE);
+			}else{
+				dumpInfoEntry("requesting: "+CMD_FIX_CURSOR_VISIBILITY);
+				efHK.bFixInvisibleTextInputCursorHK=true;
+			}
 			bOk = true;
 		}else
 		if(checkCmdValidity(CMD_FIX_LINEWRAP ,"in case words are overlapping")){
@@ -1593,7 +1591,7 @@ public class ConsoleGuiState implements AppState{
 			}
 			bOk=true;
 		}else
-		if(checkCmdValidity("HKtoggle ","[bEnable] allow hacks to provide workarounds")){
+		if(checkCmdValidity(CMD_HK_TOGGLE ,"[bEnable] allow hacks to provide workarounds")){
 			if(paramBooleanCheckForToggle(1)){
 				Boolean bEnable = paramBoolean(1);
 				if(efHK==null && (bEnable==null || bEnable)){
