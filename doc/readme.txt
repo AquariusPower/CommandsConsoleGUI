@@ -31,6 +31,8 @@ DONE:
 	= when pasting text, insert the text where the cursor is...
 
 TODO:
+	+ When date changes, report on console. On startup report date on console.
+	+ Optional hundredth of a second at console log.
 	+ navigate thru words with ctrl+left/right
 	+ optionally keep all dump logs by moving files to name datetimed ones
 

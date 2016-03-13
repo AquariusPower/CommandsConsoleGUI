@@ -128,17 +128,19 @@ public class ConsoleGuiState implements AppState{
 	 * keep "initialized" vars together!
 	 */
 	protected boolean	bInitialized;
-	protected boolean	bInitializedFixInvisibleCursorHK;
-	protected boolean	bInitializedBlinkingCursorHK;
 	
 	/**
 	 * keep delayers together!
 	 */
 	protected TimedDelay tdScrollToBottomRequestAndSuspend = new TimedDelay(0.5f);
 	protected TimedDelay tdScrollToBottomRetry = new TimedDelay(0.1f);
-	protected TimedDelay tdTextCursorBlinkHK = new TimedDelay(1f);
 	protected TimedDelay tdLetCpuRest = new TimedDelay(0.1f);
 	protected TimedDelay tdStatsRefresh = new TimedDelay(0.5f);
+	
+	/**
+	 * some day this one may not be required
+	 */
+	ExtraFunctionalitiesHK efHK = null;
 	
 	/**
 	 * other vars!
@@ -176,11 +178,6 @@ public class ConsoleGuiState implements AppState{
 	protected Float	fInputHeight;
 	protected int	iScrollRetryAttemptsDBG;
 	protected int	iScrollRetryAttemptsMaxDBG;
-	protected TextEntryComponent	tecInputFieldHK;
-	protected Geometry	geomCursorHK;
-	protected FocusManagerState	focusStateHK;
-	protected boolean bAllowHK = false;
-	protected boolean bBlinkingTextCursorHK = true;
 	protected int iMaxCmdHistSize = 1000;
 	protected int iMaxDumpEntriesAmount = 100000;
 	protected boolean	bShowInfo = true;
@@ -225,7 +222,6 @@ public class ConsoleGuiState implements AppState{
 	protected Button	btnPaste;
 	protected boolean	bAddEmptyLineAfterCommand = true;
 //	protected String	strLineEncloseChar = "'";
-	protected DocumentModel	dmInputFieldHK;
 	
 	protected String	strPreparedCmdLine = "";
 	
@@ -487,27 +483,15 @@ public class ConsoleGuiState implements AppState{
 		
 		String strCurrent = tfInput.getText();
 		int iMoveCaratTo = 0;
-		if(dmInputFieldHK!=null){ //insert at carat position
-			int iCarat = dmInputFieldHK.getCarat();
-			String strBefore = strCurrent.substring(0,iCarat);
-			String strAfter = strCurrent.substring(iCarat);
-			strCurrent = strBefore + strPasted;
-			iMoveCaratTo = strCurrent.length();
-			strCurrent += strAfter;
+		if(efHK!=null){
+			iMoveCaratTo = efHK.pasteAtCaratPositionHK(strCurrent,strPasted);
 		}else{
 			strCurrent+=strPasted;
 		}
 		
 		tfInput.setText(strCurrent); 
 		
-		// position carat properly
-		if(dmInputFieldHK!=null){
-			dmInputFieldHK.home(true);
-			for(int i=0;i<iMoveCaratTo;i++){
-				dmInputFieldHK.right();
-			}
-			reflexMethodCallHK(tecInputFieldHK, "resetCursorPosition");
-		}
+		if(efHK!=null)efHK.positionCaratProperlyHK(iMoveCaratTo);
 	}
 	
 	protected void cmdHistSave(String strCmd) {
@@ -567,92 +551,6 @@ public class ConsoleGuiState implements AppState{
 		} catch (IOException e) {
 			dumpExceptionEntry(e);
 		}
-	}
-	
-	/**
-	 * We shouldnt access private fields/methods as things may break.
-	 * Any code depending on this must ALWAYS be optional!
-	 * 
-	 * @param clazzOfObjectFrom what superclass of the object from is to be used?
-	 * @param objFrom
-	 * @param strFieldName will break if changed..
-	 * @return field value
-	 */
-	protected Object reflexFieldHK(Class<?> clazzOfObjectFrom, Object objFrom, String strFieldName){
-		if(!bAllowHK)return null;
-		
-		Object objFieldValue = null;
-		try{
-			Field field = clazzOfObjectFrom.getDeclaredField(strFieldName);
-			field.setAccessible(true);
-			objFieldValue = field.get(objFrom);
-			field.setAccessible(false);
-		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
-			dumpExceptionEntry(e);
-		}
-		
-		return objFieldValue;
-	}
-	protected Object reflexFieldHK(Object objFrom, String strFieldName){
-		if(!bAllowHK)return null;
-		
-		return reflexFieldHK(objFrom.getClass(), objFrom, strFieldName);
-	}
-	
-	/**
-	 * We shouldnt access private fields/methods as things may break.
-	 * Any code depending on this must ALWAYS be optional!
-	 * 
-	 * @param objInvoker
-	 * @param strMethodName
-	 * @param aobjParams
-	 */
-	protected Object reflexMethodCallHK(Object objInvoker, String strMethodName, Object... aobjParams) {
-		if(!bAllowHK)return null;
-		
-		Object objReturn = null;
-		try {
-			Method m = objInvoker.getClass().getDeclaredMethod(strMethodName);
-			boolean bWasAccessible=m.isAccessible();
-			if(!bWasAccessible)m.setAccessible(true);
-			objReturn = m.invoke(objInvoker);
-			if(!bWasAccessible)m.setAccessible(false);
-		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			dumpExceptionEntry(e);
-		}
-		return objReturn;
-	}
-	
-	protected void prepareInputFieldHK(){
-		if(!bAllowHK)return;
-		tecInputFieldHK = ((TextEntryComponent)reflexFieldHK(tfInput, "text"));
-		dmInputFieldHK = ((DocumentModel)reflexFieldHK(tecInputFieldHK, "model"));
-	}
-	
-	/**
-	 * a proper fix suggestion is appreciated!
-	 * @return
-	 */
-	protected boolean fixInvisibleTextInputCursorHK(){
-		if(!bAllowHK)return false;			// too much spam...	dumpWarnEntry("this fix requires HK enabled");
-		
-		prepareInputFieldHK();
-		tecInputFieldHK.setAlpha(1);
-		
-		boolean bOk=true;
-		if(tecInputFieldHK!=null){
-			dumpInfoEntry("cursor fix applied.");
-		}else{
-			dumpWarnEntry("cursor fix failed...");
-			bOk=false;
-		}
-		
-		/**
-		 * if it fails, this here will prevent unnecessary retry attempts...
-		 */
-		bInitializedFixInvisibleCursorHK=true;
-		
-		return bOk;
 	}
 	
 	protected void test1(){
@@ -960,21 +858,12 @@ public class ConsoleGuiState implements AppState{
 		updateVisibleRowsAmount();
 		updateStats();
 		updateScrollToBottom();
-		updateBlinkInputFieldTextCursorHK();
-		updateFixInvisibleCursorHK();
+		if(efHK!=null)efHK.updateHK();
 		updateExecConsoleCmdQueue();
 		updateInputFieldFillWithSelectedEntry();
 		updateAutoCompleteHint();
 		
 		GuiGlobals.getInstance().requestFocus(tfInput);
-	}
-	
-	protected void updateFixInvisibleCursorHK() {
-		if(!bAllowHK)return;
-		
-		if(!bFixInvisibleTextInputCursor)return;
-		
-		if(!bInitializedFixInvisibleCursorHK)fixInvisibleTextInputCursorHK();
 	}
 	
 	protected void updateAutoCompleteHint() {
@@ -1076,58 +965,6 @@ public class ConsoleGuiState implements AppState{
 		}
 	}
 	
-	protected void prepareForBlinkingCursorHK(){
-		if(!bAllowHK)return;
-		
-		prepareInputFieldHK();
-		geomCursorHK = ((Geometry)reflexFieldHK(tecInputFieldHK, "cursor"));
-		focusStateHK = ((FocusManagerState)reflexFieldHK(GuiGlobals.getInstance(), "focusState"));
-		tdTextCursorBlinkHK.updateTime();
-		
-		if(geomCursorHK!=null && focusStateHK!=null){
-			dumpInfoEntry("ready to blink cursor!");
-		}else{
-			dumpWarnEntry("unable to blink cursor :(");
-		}
-		
-		bInitializedBlinkingCursorHK=true;
-	}
-	protected void updateBlinkInputFieldTextCursorHK() {
-		if(!bAllowHK)return;
-		
-		if(!bBlinkingTextCursorHK)return;
-		if(!bInitializedBlinkingCursorHK)prepareForBlinkingCursorHK();
-		if(!focusStateHK.getFocus().equals(tfInput))return;
-		
-		long lDelay = tdTextCursorBlinkHK.getCurrentDelay();
-		
-		boolean bUseCursorFade = false; //it actually is the same material used on the text, so will be a problem...
-		if(bUseCursorFade){
-		//		if(lDelay > lTextCursorBlinkDelay){
-			MatParam param = geomCursorHK.getMaterial().getParam("Color");
-			ColorRGBA color = (ColorRGBA)param.getValue();
-//			color.a = (tdTextCursorBlink.lDelayLimit-lDelay)*fNanoToSeconds;
-			color.a = tdTextCursorBlinkHK.getCurrentDelayPercentual();
-			if(color.a<0)color.a=0;
-			if(color.a>1)color.a=1;
-			geomCursorHK.getMaterial().setColor("Color", color);
-			
-			if(lDelay > tdTextCursorBlinkHK.lNanoDelayLimit){
-				tdTextCursorBlinkHK.updateTime();
-			}
-		}else{
-			if(lDelay > tdTextCursorBlinkHK.lNanoDelayLimit){
-				if(geomCursorHK.getCullHint().compareTo(CullHint.Never)==0){
-					geomCursorHK.setCullHint(CullHint.Always);
-				}else{
-					geomCursorHK.setCullHint(CullHint.Inherit);
-				}
-				
-				tdTextCursorBlinkHK.updateTime();
-			}
-		}
-			
-	}
 	
 	protected void fixLineWrap(){
 		for(Spatial spt:gridPanel.getChildren()){
@@ -1759,12 +1596,19 @@ public class ConsoleGuiState implements AppState{
 		if(checkCmdValidity("HKtoggle ","[bEnable] allow hacks to provide workarounds")){
 			if(paramBooleanCheckForToggle(1)){
 				Boolean bEnable = paramBoolean(1);
-				bAllowHK = bEnable==null ? !bAllowHK : bEnable; //override
-				if(bAllowHK){
-					dumpWarnEntry("Hacks enabled!");
-				}else{
-					dumpWarnEntry("Hacks may not be completely disabled/cleaned!");
+				if(efHK==null && (bEnable==null || bEnable)){
+					efHK=new ExtraFunctionalitiesHK(this);
 				}
+				
+				if(efHK!=null){
+					efHK.bAllowHK = bEnable==null ? !efHK.bAllowHK : bEnable; //override
+					if(efHK.bAllowHK){
+						dumpWarnEntry("Hacks enabled!");
+					}else{
+						dumpWarnEntry("Hacks may not be completely disabled/cleaned!");
+					}
+				}
+				
 				bOk=true;
 			}
 		}else
@@ -1990,8 +1834,7 @@ public class ConsoleGuiState implements AppState{
     sapp.getInputManager().removeListener(alConsoleToggle);
      */
     
-    bInitializedFixInvisibleCursorHK=false;
-    bInitializedBlinkingCursorHK=false;
+    if(efHK!=null)efHK.cleanupHK();
     bInitialized=false;
 	}
 	
