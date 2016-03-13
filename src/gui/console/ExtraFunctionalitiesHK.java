@@ -43,6 +43,7 @@ import com.simsilica.lemur.focus.FocusManagerState;
 /**
  * These are hacks to provide extra functionalities.
  * This class functionality may break, therefore it's usage is optional.
+ * Proper coding suggestions (less prone to break) are most welcome/appreciated!
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
@@ -69,6 +70,8 @@ public class ExtraFunctionalitiesHK {
 	protected boolean	bFixInvisibleTextInputCursorHK = false;
 
 	private int	iMoveCaratTo;
+
+	private String	strPrefixHK = "(HK) ";
 	
 
 	public ExtraFunctionalitiesHK(ConsoleGuiState cgs){
@@ -87,9 +90,9 @@ public class ExtraFunctionalitiesHK {
 		
 		boolean bOk=true;
 		if(tecInputFieldHK!=null){
-			cgs.dumpInfoEntry("cursor fix applied.");
+			cgs.dumpInfoEntry(strPrefixHK+"cursor fix applied.");
 		}else{
-			cgs.dumpWarnEntry("cursor fix failed...");
+			cgs.dumpWarnEntry(strPrefixHK+"cursor fix failed...");
 			bOk=false;
 		}
 		
@@ -183,9 +186,9 @@ public class ExtraFunctionalitiesHK {
 		tdTextCursorBlinkHK.updateTime();
 		
 		if(geomCursorHK!=null && focusStateHK!=null){
-			cgs.dumpInfoEntry("Text cursor can blink now!");
+			cgs.dumpInfoEntry(strPrefixHK+"Text cursor can blink now!");
 		}else{
-			cgs.dumpWarnEntry("Unable to let Text cursor blink :(");
+			cgs.dumpWarnEntry(strPrefixHK+"Unable to let Text cursor blink :(");
 		}
 		
 		bInitializedBlinkingCursorHK=true;

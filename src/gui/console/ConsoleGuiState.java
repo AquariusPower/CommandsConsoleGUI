@@ -256,6 +256,7 @@ public class ConsoleGuiState implements AppState{
 		// other inits
 		if(bInitiallyClosed){
 			addToExecConsoleCommandQueue(CMD_FIX_LINEWRAP);
+			addToExecConsoleCommandQueue(CMD_SCROLL_BOTTOM);
 			addToExecConsoleCommandQueue(CMD_CLOSE_CONSOLE);
 		}
 		
@@ -387,9 +388,9 @@ public class ConsoleGuiState implements AppState{
 		GuiGlobals.getInstance().requestFocus(tfInput);
 		
 		// help (last thing)
-		dumpInfoEntry("ListBox height = "+fLstbxHeight);
-		dumpAllStats();
-		dumpInfoEntry("Hit F10 to toggle console.");
+//		dumpInfoEntry("ListBox height = "+fLstbxHeight);
+//		dumpAllStats();
+//		dumpInfoEntry("Hit F10 to toggle console.");
 		
 		// LAST THING
 		bInitialized=true;
@@ -466,6 +467,8 @@ public class ConsoleGuiState implements AppState{
 				}
 			}
 			putStringToClipboard(str);
+			
+			lstbx.getSelectionModel().setSelection(-1); //clear selection
 		}
 		iCopyFrom=null;
 	}
@@ -1041,7 +1044,7 @@ public class ConsoleGuiState implements AppState{
 	 * @param strCmd
 	 * @return false if was a comment, empty or invalid
 	 */
-	public boolean actionSubmit(String strCmd){
+	public boolean actionSubmit(final String strCmd){
 		if(strCmd.isEmpty() || strCmd.trim().equals(strCommandPrefixChar)){
 			tfInput.setText(strCommandPrefixChar); //clear
 			return false;
@@ -1049,6 +1052,7 @@ public class ConsoleGuiState implements AppState{
 		
 		String strType=strTypeCmd;
 		boolean bIsCmd=true;
+		boolean bShowInfo=true;
 		if(strCmd.trim().startsWith(strCommentPrefixChar)){
 			strType="Cmt";
 			bIsCmd=false;
@@ -1058,8 +1062,14 @@ public class ConsoleGuiState implements AppState{
 			bIsCmd=false;
 		}
 		
+		if(bIsCmd){
+			if(strCmd.trim().endsWith(strCommentPrefixChar)){
+				bShowInfo=false;
+			}
+		}
+		
 //		String strTime = new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime())+": ";
-		dumpInfoEntry(strType+": "+strCmd);
+		if(bShowInfo)dumpInfoEntry(strType+": "+strCmd);
 		
 		tfInput.setText(strCommandPrefixChar); //clear
 		
@@ -1467,7 +1477,14 @@ public class ConsoleGuiState implements AppState{
 			// a comment shall not create any warning based on false return value...
 			if(strFullCmdLine.startsWith(strCommentPrefixChar))return; //comment is a "dummy command"
 			
+			// now it is possibly a command
+			
 			strFullCmdLine = strFullCmdLine.substring(strCommandPrefixChar.length());
+			strFullCmdLine = strFullCmdLine.trim();
+			
+			if(strFullCmdLine.endsWith(strCommentPrefixChar)){
+				strFullCmdLine=strFullCmdLine.substring(0,strFullCmdLine.length()-strCommentPrefixChar.length());
+			}
 			
 			astrCmdParams = convertToCmdParams(strFullCmdLine);
 			
@@ -1500,7 +1517,11 @@ public class ConsoleGuiState implements AppState{
 			bOk=styleApply(strStyle);
 		}else
 		if(checkCmdValidity(CMD_ECHO," simply echo something")){
-			String strToEcho = strPreparedCmdLine.substring(strCommandPrefixChar.length()+CMD_ECHO.length());
+			int iTextFrom=strCommandPrefixChar.length()+CMD_ECHO.length();
+			String strToEcho="";
+			if(iTextFrom < strPreparedCmdLine.length()){
+				strToEcho = strPreparedCmdLine.substring(iTextFrom);
+			}
 			dumpEntry(strToEcho);
 			bOk=true;
 		}else
@@ -1709,7 +1730,7 @@ public class ConsoleGuiState implements AppState{
 	 * @param strFullCmdLineOriginal if null will populate the array of valid commands
 	 * @return
 	 */
-	protected boolean executeCommand(String strFullCmdLineOriginal){
+	protected boolean executeCommand(final String strFullCmdLineOriginal){
 		boolean bOk = false;
 		try{
 			prepareCmdAndParams(strFullCmdLineOriginal);

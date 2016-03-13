@@ -18,6 +18,7 @@ Features:
 	___Commands___
 	= Several commands available already, see command /help
 	= Comment detection, line starting with such token will be ignored
+	= Omit the "command being run" info entry by ending a line with '#', good at init file, mainly for /echo commands.   
 	___Editing___ 
 	= Multi-line copy: Ctrl+b mark CopyFrom "begin", Ctrl+c does CopyTo "end".
 	= Single line wrap detection when copying.
@@ -31,9 +32,9 @@ DONE:
 	= Log all to file. But show only enabled ones
 	= Copy/paste buttons
 	= when pasting text, insert the text where the cursor is...
+	= ListboxSelectorClearAfterCopy
 
 TODO.FastToImplement:
-	+ ListboxSelectorNullAfterCopy
 	+ UseChar "W" toSimpleGuessMaxColumns!
 	+ let multiple commands in a single line separated by ';'
 	+ When date(day) changes, report on console. On startup report date on console.
@@ -42,9 +43,11 @@ TODO.FastToImplement:
 	+ Java7 (instead of 8)
 	
 TODO.TimeConsuming:
-	+ navigate thru words with ctrl+left/right
+	.Important
 	+ SeparateGUIfromCommandsManagement
 	+ HK - ReflexByFieldType.singleMatchIsSafe
+	.Good
+	+ navigate thru words with ctrl+left/right
 	+ BitmapFontBkgColor.shiftRightLeftSelect.inputField
 	+ ListboxEntry(btn)FontColorWarnExceptionSelectHK
 
@@ -54,6 +57,7 @@ TODO.OneDay:
 	+ CloneCursorMaterialForFading"blink"
 	+ consoleStyle strTtype s=16.34 #ff4d8a0b|c=255,255,128,50|c=0.5,.85,1.0,.25 "f=Interface/Font/Console.fnt"
 	+ FailProof (if console bugs, app must not crash): Update.tryCatch; Listeners-»listenerAction(enum,aobj); UpdtLstnrAct; DumpException(e,aobj); Init.simplyStderrPrintExceptionWithoutExitApp.retryInitWithDefaultsOnce?
+	+ Extract all annotations values concerning styles attributes (see at Label.java) and auto generate a class code with final strings. 
 	
 TODO.REALLY???:
 	? EachLine1stControlCharMarker.w.e.multiline. To be used as filters
