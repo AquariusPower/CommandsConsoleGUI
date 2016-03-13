@@ -1,7 +1,9 @@
+ConsoleGui: a State for JMonkeyEngine 3D, using Lemur GUI.
+
 Hit F10 (on the test) to toggle console (initially closed).
 
 Features:
-	.Main
+	___Main___
 	= Command (and params) auto complete, key TAB, case insensitive
 	= Command history, key up/down. Saved and loaded from file, see /statsShowAll.
 	= Command params can be enclosed into double quotes.
@@ -10,13 +12,13 @@ Features:
 	= Batch execute initialization console commands. Configurable at file, see /statsShowAll.
 	= Console style can be changed on the fly.
 	= New style "console", with monospaced font, helps on proper line wrapping.
-	.Nagivation
+	___Nagivation___
 	= Navigate dump area, key pgup/pgdown or mouse scroll. Dump is saved to a file, see /statsShowAll.
 	= Auto scroll after command.
-	.Commands
+	___Commands___
 	= Several commands available already, see command /help
 	= Comment detection, line starting with such token will be ignored
-	.Editing 
+	___Editing___ 
 	= Multi-line copy: Ctrl+b mark CopyFrom "begin", Ctrl+c does CopyTo "end".
 	= Single line wrap detection when copying.
 	= Ctrl+del clear the input command line
@@ -30,19 +32,32 @@ DONE:
 	= Copy/paste buttons
 	= when pasting text, insert the text where the cursor is...
 
-TODO:
-	+ When date changes, report on console. On startup report date on console.
-	+ Optional hundredth of a second at console log.
+TODO.FastToImplement:
+	+ ListboxSelectorNullAfterCopy
+	+ UseChar "W" toSimpleGuessMaxColumns!
+	+ let multiple commands in a single line separated by ';'
+	+ When date(day) changes, report on console. On startup report date on console.
+	+ Optional hundredth/tenth of a second at console log.
+	+ optionally keep all dump logs by moving files to name datetimed ones;bKeepAllLogs.transportFlDtTimeToName
+	+ Java7 (instead of 8)
+	
+TODO.TimeConsuming:
 	+ navigate thru words with ctrl+left/right
-	+ optionally keep all dump logs by moving files to name datetimed ones
+	+ SeparateGUIfromCommandsManagement
+	+ HK - ReflexByFieldType.singleMatchIsSafe
+	+ BitmapFontBkgColor.shiftRightLeftSelect.inputField
+	+ ListboxEntry(btn)FontColorWarnExceptionSelectHK
 
-TODO-later:
+TODO.OneDay:
+	+ FontCharWidthTable.SumToWrap
 	+ Reload from file with filters by warn/info/exception
-	+ ConsStyle strTtype s=16.34 #ff4d8a0b|c=255,255,128,50|c=0.5,.85,1.0,.25 "f=Interface/Font/Console.fnt"
-
-TODO-REALLY?:
+	+ CloneCursorMaterialForFading"blink"
+	+ consoleStyle strTtype s=16.34 #ff4d8a0b|c=255,255,128,50|c=0.5,.85,1.0,.25 "f=Interface/Font/Console.fnt"
+	+ FailProof (if console bugs, app must not crash): Update.tryCatch; Listeners-»listenerAction(enum,aobj); UpdtLstnrAct; DumpException(e,aobj); Init.simplyStderrPrintExceptionWithoutExitApp.retryInitWithDefaultsOnce?
+	
+TODO.REALLY???:
 	? EachLine1stControlCharMarker.w.e.multiline. To be used as filters
 	? Easteregg(shhh!) 01f+lrtC , elosnoCpord gnitativel , nips scisyhp ylf , 01F ot revocer 
 	? radioStationStream strUrl
 
-Ps.: see the bFix... variables if you have some problem that may already have a fix here.
+Ps.: having some problem? check the /fix.* commands, and add them to the Init file.
