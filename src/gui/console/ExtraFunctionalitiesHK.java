@@ -254,10 +254,13 @@ public class ExtraFunctionalitiesHK {
 			reflexMethodCallHK(tecInputFieldHK, "resetCursorPosition");
 		}
 	}
-
+	
 	public void cleanupHK() {
-    bInitializedFixInvisibleCursorHK=false;
-    bInitializedBlinkingCursorHK=false;
+		bInitializedFixInvisibleCursorHK=false;
+		bInitializedBlinkingCursorHK=false;
 	}
-
+	
+	public void test(){
+		tecInputFieldHK.getFont().getCharSet().getCharacter(32).getWidth();
+	}
 }

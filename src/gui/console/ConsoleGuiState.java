@@ -110,6 +110,7 @@ public class ConsoleGuiState implements AppState{
 	public static final String CMD_MODIFY_CONSOLE_HEIGHT = "consoleHeight";
 	public static final String CMD_SCROLL_BOTTOM = "consoleScrollBottom";
 	public static final String CMD_FIX_LINEWRAP = "fixLineWrap";
+	public static final String CMD_LINEWRAP_AT = "lineWrapAt";
 	public static final String CMD_HK_TOGGLE = "HKtoggle";
 	public static final String CMD_FIX_CURSOR_VISIBILITY = "fixCursor";
 	
@@ -203,12 +204,13 @@ public class ConsoleGuiState implements AppState{
 	protected Vector3f	v3fStatsAndControlsSize;
 	protected Button	btnClipboardShow;
 	protected boolean	bConsoleStyleCreated;
-	protected Integer	iConsoleMaxWidthInCharsForLineWrap = null; // if set to null, disables linewrap limit
+//	protected boolean	bUseDumbWrap = true;
+	protected Integer	iConsoleMaxWidthInCharsForLineWrap = 80; // if set to null, disables linewrap limit
 	protected BitmapFont	fntMakeFixedWidth;
 	protected StatsAppState	stateStats;
 	protected boolean	bEngineStatsFps;
 	protected boolean	bEngineStatsView;
-	protected float	fMonofontCharWidth;
+//	protected float	fMonofontCharWidth;
 	protected GridPanel	gridPanel;
 	protected Integer	iCopyFrom = null;
 	protected Button	btnCopy;
@@ -549,8 +551,16 @@ public class ConsoleGuiState implements AppState{
 		}
 	}
 	
-	protected void test1(){
+	protected void test(){
 		dumpInfoEntry("testing...");
+		
+		dumpSubEntry("["+paramString(1)+"]");
+		dumpSubEntry("["+paramString(2)+"]");
+		dumpSubEntry("["+paramString(3)+"]");
+		
+		if(iSelectionIndex!=null){
+			dumpSubEntry("Selection:"+iSelectionIndex+": '"+vlstrDumpEntries.get(iSelectionIndex)+"'");
+		}
 		
 //		tfInput.getActionMap().get
 		
@@ -649,13 +659,17 @@ public class ConsoleGuiState implements AppState{
 //			attrs.set("background", new QuadBackgroundComponent(new ColorRGBA(0,0,0.25f,1)));
 		}
 		
-//		String strAllChars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-		String strAllChars="W";
-		fMonofontCharWidth = retrieveBitmapTextFor(new Label(strAllChars,STYLE_CONSOLE))
-			.getLineWidth();
-		fMonofontCharWidth /= strAllChars.length();
+//		String strAllChars="W";
+//		fMonofontCharWidth = fontWidth(strAllChars,STYLE_CONSOLE);
 		
 		bConsoleStyleCreated=true;
+	}
+	
+	protected float fontWidth(String strChars){
+		return fontWidth(strChars, strStyle);
+	}
+	protected float fontWidth(String strChars, String strStyle){
+		return retrieveBitmapTextFor(new Label(strChars,strStyle)).getLineWidth()/strChars.length();
 	}
 	
 	protected void mapKeysForInputField(){
@@ -1190,10 +1204,14 @@ public class ConsoleGuiState implements AppState{
 				if(strLineOriginal.isEmpty()){
 					astr.add(strLineOriginal);
 				}else{
-					String strLine = strLineOriginal.replace("\t", "  ");
-					strLine=strLine.replace("\r", "");
-					for (int i=0;i<strLine.length();i+=iConsoleMaxWidthInCharsForLineWrap){
-						astr.add(strLine.substring(i, Math.min(strLine.length(),i+iConsoleMaxWidthInCharsForLineWrap)));
+					if(iConsoleMaxWidthInCharsForLineWrap>0){
+						String strLine = strLineOriginal.replace("\t", "  ");
+						strLine=strLine.replace("\r", "");
+						for (int i=0;i<strLine.length();i+=iConsoleMaxWidthInCharsForLineWrap){
+							astr.add(strLine.substring(i, Math.min(strLine.length(),i+iConsoleMaxWidthInCharsForLineWrap)));
+						}
+					}else{
+						//TODO auto wrap
 					}
 				}
 //				for(String strPart : Splitter.fixedLength(iConsoleWidthInChars ).split(strLine)){
@@ -1631,6 +1649,15 @@ public class ConsoleGuiState implements AppState{
 				bOk=true;
 			}
 		}else
+		if(checkCmdValidity(CMD_LINEWRAP_AT,"[iMaxChars] -1 = will trunc big lines, 0 = wrap will be automatic")){
+			iConsoleMaxWidthInCharsForLineWrap = paramInt(1);
+			if(iConsoleMaxWidthInCharsForLineWrap!=null){
+				if(iConsoleMaxWidthInCharsForLineWrap==-1){
+					iConsoleMaxWidthInCharsForLineWrap=null;
+				}
+			}
+			bOk=true;
+		}else
 		if(checkCmdValidity(CMD_MODIFY_CONSOLE_HEIGHT,"[fPercent] of the application window")){
 			Float f = paramFloat(1);
 			modifyConsoleHeight(f);
@@ -1694,14 +1721,8 @@ public class ConsoleGuiState implements AppState{
 			}
 		}else
 		if(checkCmdValidity("test ","temporary developer tests")){
-			dumpSubEntry("["+paramString(1)+"]");
-			dumpSubEntry("["+paramString(2)+"]");
-			dumpSubEntry("["+paramString(3)+"]");
-			
-			if(iSelectionIndex!=null){
-				dumpSubEntry("Selection:"+iSelectionIndex+": '"+vlstrDumpEntries.get(iSelectionIndex)+"'");
-			}
-			test1();
+			test();
+			if(efHK!=null)efHK.test();
 			bOk=true;
 		}else
 		if(checkCmdValidity(TOKEN_CMD_NOT_WORKING_YET+"test2 "," just to show how to keep it for later...")){
@@ -1781,16 +1802,37 @@ public class ConsoleGuiState implements AppState{
 	protected boolean styleCheck(String strStyle) {
 		return astrStyleList.contains(strStyle);
 	}
-	protected boolean styleApply(String strStyle) {
-		boolean bOk = styleCheck(strStyle);
+	protected boolean styleApply(String strStyleNew) {
+		boolean bOk = styleCheck(strStyleNew);
 		if(bOk){
-			this.strStyle=strStyle;
+			strStyle=strStyleNew;
 			
-			if(this.strStyle.equals(STYLE_CONSOLE)){
-				iConsoleMaxWidthInCharsForLineWrap = (int) //like trunc
-					((lstbx.getSize().x / fMonofontCharWidth)-3); //-3 is safety
-			}else{
-				iConsoleMaxWidthInCharsForLineWrap = null;
+//			int iSkipCharsSafety = 3;
+//			float fListboxWidth = lstbx.getSize().x;
+//			Float fFontWidth = fontWidth("W"); //W seems to be the widest in most/all chars sets
+			
+//			Float fFontWidth = null;
+//			if(strStyle.equals(STYLE_CONSOLE)){
+//				fFontWidth = fMonofontCharWidth;
+//			}else
+//			if(bUseDumbWrap){
+//				fFontWidth = fontWidth("W"); //W seems to be the widest in most/all chars sets
+//			}
+			
+//			iConsoleMaxWidthInCharsForLineWrap = null;
+//			if(fFontWidth!=null){
+//				iConsoleMaxWidthInCharsForLineWrap = (int) //like trunc
+//						((fListboxWidth/fFontWidth)-iSkipCharsSafety);
+//			}
+			if(iConsoleMaxWidthInCharsForLineWrap!=null){
+				if(iConsoleMaxWidthInCharsForLineWrap>0){
+					int iSkipCharsSafety = 3;
+					float fListboxWidth = lstbx.getSize().x;
+					Float fFontWidth = fontWidth("W"); //W seems to be the widest in most/all chars sets
+					
+					iConsoleMaxWidthInCharsForLineWrap = (int) //like trunc
+							((fListboxWidth/fFontWidth)-iSkipCharsSafety);
+				}
 			}
 			
 			sapp.enqueue(new Callable<Void>() {
@@ -1811,7 +1853,7 @@ public class ConsoleGuiState implements AppState{
 				}
 			});
 		}else{
-			dumpWarnEntry("invalid style: "+strStyle);
+			dumpWarnEntry("invalid style: "+strStyleNew);
 			styleHelp();
 		}
 		
@@ -1940,7 +1982,7 @@ public class ConsoleGuiState implements AppState{
 			-lstbx.getGridPanel().getVisibleRows();
 		if(dSliderHumanReadableValue<0)dSliderHumanReadableValue=0;
 		
-		strStatsLast = "Stats: "
+		strStatsLast = ""
 				// user important
 				+"CpFm="+iCopyFrom+"', "
 				
