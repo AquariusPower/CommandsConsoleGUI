@@ -11,7 +11,7 @@ Features:
 	= If a clicked dump entry is a valid command, it will replace the input field text.
 	= Batch execute initialization console commands. Configurable at file, see /statsShowAll.
 	= Console style can be changed on the fly.
-	= New style "console", with monospaced font, helps on proper line wrapping.
+	= Line wrapping works for all styles.
 	___Nagivation___
 	= Navigate dump area, key pgup/pgdown or mouse scroll. Dump is saved to a file, see /statsShowAll.
 	= Auto scroll after command.
@@ -20,7 +20,7 @@ Features:
 	= Comment detection, line starting with such token will be ignored
 	= Omit the "command being run" info entry by ending a line with '#', good at init file, mainly for /echo commands.   
 	___Editing___ 
-	= Multi-line copy: Ctrl+b mark CopyFrom "begin", Ctrl+c does CopyTo "end".
+	= Multi-line copy: Ctrl+b (or Shift+click) mark CopyFrom "begin", Ctrl+c does CopyTo "end".
 	= Single line wrap detection when copying.
 	= Ctrl+del clear the input command line
 	= ctrl+home sroll top, ctrl+end scroll bottom
@@ -35,12 +35,11 @@ DONE:
 	= ListboxSelectorClearAfterCopy
 
 TODO.FastToImplement:
-	+ UseChar "W" toSimpleGuessMaxColumns!
+	+ Java7 (instead of 8)
 	+ let multiple commands in a single line separated by ';'
 	+ When date(day) changes, report on console. On startup report date on console.
 	+ Optional hundredth/tenth of a second at console log.
 	+ optionally keep all dump logs by moving files to name datetimed ones;bKeepAllLogs.transportFlDtTimeToName
-	+ Java7 (instead of 8)
 	
 TODO.TimeConsuming:
 	.Important

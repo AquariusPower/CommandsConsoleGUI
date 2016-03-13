@@ -101,6 +101,7 @@ public class ConsoleGuiState implements AppState{
 //	public static final String INPUT_MAPPING_CONSOLE_HIST_NEXT = "CONSOLE_HistNext";
 	public static final String INPUT_MAPPING_CONSOLE_SCROLLUP = "CONSOLE_ScrollUp";
 	public static final String INPUT_MAPPING_CONSOLE_SCROLLDOWN = "CONSOLE_ScrollDown";
+	public static final String INPUT_MAPPING_SHIFT_PRESSED	= "CONSOLE_ShiftPressed";
 	
 	public static final String CMD_CLOSE_CONSOLE="closeConsole";
 	public static final String CMD_CONSOLE_STYLE = "consoleStyle";
@@ -231,6 +232,7 @@ public class ConsoleGuiState implements AppState{
 	protected String	strPreparedCmdLine = "";
 	protected CharSequence	strReplaceTAB = "  ";
 	protected float	fWidestCharForCurrentStyleFont;
+	protected boolean	bKeyShiftIsPressed;
 	
 	public ConsoleGuiState() {
 	}
@@ -579,6 +581,8 @@ public class ConsoleGuiState implements AppState{
 		dumpSubEntry("["+paramString(2)+"]");
 		dumpSubEntry("["+paramString(3)+"]");
 		
+//		lstbx.getSelectionModel().
+		
 		if(iSelectionIndex!=null){
 			dumpSubEntry("Selection:"+iSelectionIndex+": '"+vlstrDumpEntries.get(iSelectionIndex)+"'");
 		}
@@ -841,6 +845,20 @@ public class ConsoleGuiState implements AppState{
 			}
 		}
 		
+		if(!sapp.getInputManager().hasMapping(INPUT_MAPPING_SHIFT_PRESSED)){
+			sapp.getInputManager().addMapping(INPUT_MAPPING_SHIFT_PRESSED, 
+				new KeyTrigger(KeyInput.KEY_LSHIFT),
+				new KeyTrigger(KeyInput.KEY_RSHIFT));
+				
+			ActionListener al = new ActionListener() {
+				@Override
+				public void onAction(String name, boolean isPressed, float tpf) {
+					bKeyShiftIsPressed  = isPressed;
+				}
+			};
+			sapp.getInputManager().addListener(al, INPUT_MAPPING_SHIFT_PRESSED);            
+		}
+		
 		// mouse scroll
     Trigger[] tggScrollUp = {new MouseAxisTrigger(MouseInput.AXIS_WHEEL, true)};
     Trigger[] tggScrollDown = {new MouseAxisTrigger(MouseInput.AXIS_WHEEL, false)};
@@ -985,19 +1003,52 @@ public class ConsoleGuiState implements AppState{
 //		return strCmdFull.split("[^"+strValidCmdCharsRegex+"]")[0];
 //	}
 	
+	protected boolean checkInputEmpty(){
+		return checkInputEmpty(false);
+	}
+	/**
+	 * after trim(), if empty or have only the command prefix char, 
+	 * will return true.
+	 * @return
+	 */
+	protected boolean checkInputEmpty(boolean bDumpContentsIfNotEmpty){
+		String strCurrentInputText = tfInput.getText().trim();
+		
+		if(strCurrentInputText.isEmpty())return true;
+		
+		if(strCurrentInputText.equals(strCommandPrefixChar))return true;
+		
+		dumpInfoEntry("Not issued command below:");
+		dumpEntry(strCurrentInputText); //so user will not lose what was typing...
+		/**
+		 * Do not scroll in this case. No command was issued...
+		 */
+		
+		return false;
+	}
+	
 	protected void updateInputFieldFillWithSelectedEntry() {
 		// auto-fill with selected command
 		if(iSelectionIndex!=null){
 			if(iSelectionIndexPrevious!=iSelectionIndex){ //to let user type things...
+				updateCopyFrom();
+				
 				String strCmdChk = vlstrDumpEntries.get(iSelectionIndex).trim();
 				if(validateBaseCommand(strCmdChk)){
+					checkInputEmpty(true);
 					tfInput.setText(strCmdChk);
 				}
+				
 				iSelectionIndexPrevious = iSelectionIndex;
 			}
 		}
 	}
 	
+	protected void updateCopyFrom(){
+		if(bKeyShiftIsPressed){
+			iCopyFrom = iSelectionIndex;
+		}
+	}
 	
 	protected void fixLineWrap(){
 		for(Spatial spt:gridPanel.getChildren()){
