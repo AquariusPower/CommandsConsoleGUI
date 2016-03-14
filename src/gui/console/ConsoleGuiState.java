@@ -181,8 +181,8 @@ public class ConsoleGuiState implements AppState{
 	protected ArrayList<String> astrCmdCmtValidList = new ArrayList<String>();
 	protected ArrayList<String> astrBaseCmdValidList = new ArrayList<String>();
 	protected ArrayList<String> astrStyleList = new ArrayList<String>();
-	protected Integer	iCmdHistoryCurrent = null;
-	protected	String	strNotSubmitedCmd="";
+	protected int	iCmdHistoryCurrentIndex = 0;
+	protected	String	strNotSubmitedCmd=null; //null is a marker here
 	protected	String	strCommentPrefixChar="#";
 	protected	String	strCommandPrefixChar="/";
 	protected Panel	pnlTest;
@@ -246,6 +246,9 @@ public class ConsoleGuiState implements AppState{
 	private ListBox<String>	lstbxAutoCompleteHint;
 	private Vector3f	v3fConsoleSize;
 	private Vector3f	v3fApplicationWindowSize;
+//	private String	strPreviousCmdHistoryKey;
+	private String	strPreviousInputValue;
+	private int	iCmdHistoryPreviousIndex;
 	
 	public ConsoleGuiState() {
 	}
@@ -527,7 +530,7 @@ public class ConsoleGuiState implements AppState{
 		
 		String strCurrent = getInputText();
 //		if(checkInputEmpty() && validateBaseCommand(strPasted)){
-		if(checkInputEmpty() && strPasted.trim().startsWith(strCommandPrefixChar)){
+		if(isInputTextFieldEmpty() && strPasted.trim().startsWith(strCommandPrefixChar)){
 			strCurrent = strPasted.trim(); //replace "empty" line with command (can be invalid in this case, user may complete it properly)
 		}else{
 			if(efHK!=null){
@@ -756,7 +759,7 @@ public class ConsoleGuiState implements AppState{
 						autoCompleteInputField(bControl);
 						break;
 					case KeyInput.KEY_DELETE:
-						if(bControl)tfInput.setText(strCommandPrefixChar);
+						if(bControl)clearInputTextField();
 						break;
 					case KeyInput.KEY_SLASH:
 						if(bControl){
@@ -783,54 +786,49 @@ public class ConsoleGuiState implements AppState{
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_SLASH,KeyAction.CONTROL_DOWN), actSimpleActions);
 		
 		// cmd history select action
-		KeyActionListener actCmdSelectAction = new KeyActionListener() {
+		KeyActionListener actCmdHistoryEntrySelectAction = new KeyActionListener() {
 			@Override
 			public void keyAction(TextEntryComponent source, KeyAction key) {
-				if(iCmdHistoryCurrent==null){
-					iCmdHistoryCurrent=astrCmdHistory.size();
-				}
+//				if(iCmdHistoryCurrentIndex==null){
+//					iCmdHistoryCurrentIndex=astrCmdHistory.size();
+//				}
 				
-				if(iCmdHistoryCurrent<0)iCmdHistoryCurrent=0; //cant underflow
-				if(iCmdHistoryCurrent>=astrCmdHistory.size())iCmdHistoryCurrent=astrCmdHistory.size(); //can overflow by 1
+				if(iCmdHistoryCurrentIndex<0)iCmdHistoryCurrentIndex=0; //cant underflow
+				if(iCmdHistoryCurrentIndex>astrCmdHistory.size())resetCmdHistoryCursor(); //iCmdHistoryCurrentIndex=astrCmdHistory.size(); //can overflow by 1
 				
 				switch(key.getKeyCode()){
 					case KeyInput.KEY_UP	:
 						if(!navigateHint(-1)){
-							iCmdHistoryCurrent--;
+							iCmdHistoryCurrentIndex--;
 							/**
 							 * to not lose last possibly typed (but not issued) cmd
 							 */
-							if(iCmdHistoryCurrent==(astrCmdHistory.size()-1)){ //requested last entry
-								strNotSubmitedCmd = getInputText();
+							if(iCmdHistoryCurrentIndex==(astrCmdHistory.size()-1)){ //requested last entry
+//								strNotSubmitedCmd = getInputText();
+								strNotSubmitedCmd = dumpAndClearInputField();
+//								checkInputEmptyDumpIfNot(true);
 							}
-							applyHistoryIndex(iCmdHistoryCurrent);
+							fillInputFieldWithHistoryDataAtIndex(iCmdHistoryCurrentIndex);
 						}
 						
 						break;
 					case KeyInput.KEY_DOWN:
 						if(!navigateHint(+1)){
-//						if(isHintActive()){
-//							if(
-//									getSelectedHint()!=null
-//									||
-//									(iHistCurrent+1)>=astrCmdHistory.size() // end of cmd history
-//							){
-//								navigateHint(+1);
-//							}
-//						}else{
-							iCmdHistoryCurrent++;
-							if(iCmdHistoryCurrent>=astrCmdHistory.size()){
-								tfInput.setText(strNotSubmitedCmd);
+							iCmdHistoryCurrentIndex++;
+							if(iCmdHistoryCurrentIndex>=astrCmdHistory.size()){
+								if(strNotSubmitedCmd!=null){
+									tfInput.setText(strNotSubmitedCmd);
+								}
 							}
-							applyHistoryIndex(iCmdHistoryCurrent);
+							fillInputFieldWithHistoryDataAtIndex(iCmdHistoryCurrentIndex);
 						}
 						
 						break;
 				}
 			}
 		};
-		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_UP), actCmdSelectAction);
-		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_DOWN), actCmdSelectAction);
+		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_UP), actCmdHistoryEntrySelectAction);
+		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_DOWN), actCmdHistoryEntrySelectAction);
 		
 		// scroll actions
 		KeyActionListener actDumpNavigate = new KeyActionListener() {
@@ -873,7 +871,7 @@ public class ConsoleGuiState implements AppState{
 		if(
 				getSelectedHint()!=null
 				||
-				(iCmdHistoryCurrent+1)>=astrCmdHistory.size() // end of cmd history
+				(iCmdHistoryCurrentIndex+1)>=astrCmdHistory.size() // end of cmd history
 		){
 			int iMaxIndex = vlstrAutoCompleteHint.size()-1;
 			if(iMaxIndex<0)return false;
@@ -887,6 +885,8 @@ public class ConsoleGuiState implements AppState{
 			if(iCurrentIndex>iMaxIndex)iCurrentIndex=iMaxIndex;
 			
 			lstbxAutoCompleteHint.getSelectionModel().setSelection(iCurrentIndex);
+			
+			scrollHintToIndex(iCurrentIndex);
 			
 			return iCurrentIndex>-1;
 		}
@@ -985,7 +985,7 @@ public class ConsoleGuiState implements AppState{
     sapp.getInputManager().addListener(alConsoleScroll, INPUT_MAPPING_CONSOLE_SCROLLDOWN);
 	}
 	
-	protected void applyHistoryIndex(int iIndex){
+	protected void fillInputFieldWithHistoryDataAtIndex(int iIndex){
 		if(astrCmdHistory.size()==0)return;
 		if(iIndex<0)return;
 		if(iIndex>=astrCmdHistory.size())return;
@@ -1008,17 +1008,38 @@ public class ConsoleGuiState implements AppState{
 		updateInputFieldFillWithSelectedEntry();
 		updateAutoCompleteHint();
 		
+		updateCurrentCmdHistoryEntryReset();
+		
 		GuiGlobals.getInstance().requestFocus(tfInput);
 	}
 	
+	protected void resetCmdHistoryCursor(){
+		iCmdHistoryCurrentIndex = astrCmdHistory.size();
+	}
+	
+	private void updateCurrentCmdHistoryEntryReset() {
+		String strNewInputValue = getInputText();
+		if((iCmdHistoryCurrentIndex-iCmdHistoryPreviousIndex)==0){
+			if(!strNewInputValue.equals(strPreviousInputValue)){
+				/**
+				 * user has deleted or typed some character
+				 */
+				resetCmdHistoryCursor();
+			}
+		}
+		
+		strPreviousInputValue=strNewInputValue;
+		iCmdHistoryPreviousIndex=iCmdHistoryCurrentIndex;
+	}
 	protected void updateAutoCompleteHint() {
 		String strInputText = getInputText();
 		if(strInputText.isEmpty())return;
-		strInputText=strInputText.substring(strCommandPrefixChar.length());
+		strInputText=extractCommandPart(strInputText,0);
+//		strInputText=strInputText.substring(strCommandPrefixChar.length());
 //	if(tfAutoCompleteHint.getParent()==null && bKeyControlIsPressed){
 		if(lstbxAutoCompleteHint.getParent()==null && bKeyControlIsPressed){
 			/**
-			 * in this case, there is no hint, 
+			 * in this case, there is no hint,
 			 * and match mode: "contains" was requested by user,
 			 * so fill it with something!
 			 */
@@ -1029,17 +1050,29 @@ public class ConsoleGuiState implements AppState{
 		ArrayList<String> astr = autoComplete(strInputText, astrCmdCmtValidList, bKeyControlIsPressed);
 		
 		boolean bShowHint = false;
-		if( astr.size()==1 && (astr.get(0).length() > strInputText.length()) ){ 
-			//was a single match
-			bShowHint=true;
+		
+		if(astr.size()==0){
+			bShowHint=false; //empty string, or simply no matches
 		}else
-		if(astr.size()<=1){
-			// no match, only what was already typed was returned
+		if(astr.size()==1 && strInputText.equals(extractCommandPart(astr.get(0),0))){
+			// no extra matches found, only what was already typed was returned
 			bShowHint=false;
 		}else{
-			// >1 matches
-			bShowHint=true;
+//		if(astr.size()>1){
+			bShowHint=true; //show all extra matches
 		}
+		
+//		if( astr.size()==1 && (astr.get(0).length() > strInputText.length()) ){ 
+//			//was a single match
+//			bShowHint=true;
+//		}else
+//		if(astr.size()<=1){
+//			// no match, only what was already typed was returned
+//			bShowHint=false;
+//		}else{
+//			// >1 matches
+//			bShowHint=true;
+//		}
 		
 		if(bShowHint){
 			/*
@@ -1096,11 +1129,37 @@ public class ConsoleGuiState implements AppState{
 			
 			lineWrapDisableFor(lstbxAutoCompleteHint.getGridPanel());
 			
+			scrollHintToIndex(0);
 		}else{
 			closeHint();
 		}
 		
 		strInputTextPrevious = strInputText;
+	}
+	
+	protected void scrollHintToIndex(int i){
+		int iVisibleCount = lstbxAutoCompleteHint.getVisibleItems();
+		
+		int iVisibleMinIndex = (int)(
+			lstbxAutoCompleteHint.getSlider().getModel().getMaximum()
+			-lstbxAutoCompleteHint.getSlider().getModel().getValue()
+		);
+		
+		int iVisibleMaxIndex = iVisibleMinIndex + iVisibleCount;
+		Integer iScrollMinIndexTo = null;
+		if(i < iVisibleMinIndex){
+			iScrollMinIndexTo = i;
+		}else
+		if(i >= iVisibleMaxIndex){
+			iScrollMinIndexTo = i -iVisibleCount +1;
+		}
+		
+		if(iScrollMinIndexTo!=null){
+			double d = lstbxAutoCompleteHint.getSlider().getModel().getMaximum();
+			d -= iScrollMinIndexTo;
+			if(d<0)d=0;
+			lstbxAutoCompleteHint.getSlider().getModel().setValue(d);
+		}
 	}
 	
 	protected void closeHint(){
@@ -1162,28 +1221,42 @@ public class ConsoleGuiState implements AppState{
 //		return strCmdFull.split("[^"+strValidCmdCharsRegex+"]")[0];
 //	}
 	
-	protected boolean checkInputEmpty(){
-		return checkInputEmpty(false);
-	}
+//	protected boolean checkInputEmpty(){
+//		return checkInputEmptyDumpIfNot(false);
+//	}
 	/**
 	 * after trim(), if empty or have only the command prefix char, 
 	 * will return true.
 	 * @return
 	 */
-	protected boolean checkInputEmpty(boolean bDumpContentsIfNotEmpty){
+	protected boolean isInputTextFieldEmpty(){
+//	protected boolean checkInputEmptyDumpIfNot(boolean bDumpContentsIfNotEmpty){
 		String strCurrentInputText = getInputText().trim();
 		
 		if(strCurrentInputText.isEmpty())return true;
 		
 		if(strCurrentInputText.equals(strCommandPrefixChar))return true;
 		
-		dumpInfoEntry("Not issued command below:");
-		dumpEntry(strCurrentInputText); //so user will not lose what was typing...
-		/**
-		 * Do not scroll in this case. No command was issued...
-		 */
+//		if(bDumpContentsIfNotEmpty){
+//			dumpInfoEntry("Not issued command below:");
+//			dumpEntry(strCurrentInputText); //so user will not lose what was typing...
+//			/**
+//			 * Do not scroll in this case. No command was issued...
+//			 */
+//		}
 		
 		return false;
+	}
+	
+	protected String dumpAndClearInputField(){
+		if(!isInputTextFieldEmpty()){
+			dumpInfoEntry("Not issued command below:");
+			String str = getInputText();
+			dumpEntry(str); //so user will not lose what was typing...
+			clearInputTextField();
+			return str;
+		}
+		return null;
 	}
 	
 	protected void updateInputFieldFillWithSelectedEntry() {
@@ -1194,7 +1267,8 @@ public class ConsoleGuiState implements AppState{
 				
 				String strCmdChk = vlstrDumpEntries.get(iSelectionIndex).trim();
 				if(validateBaseCommand(strCmdChk)){
-					checkInputEmpty(true);
+					dumpAndClearInputField();
+//					checkInputEmptyDumpIfNot(true);
 					tfInput.setText(strCmdChk);
 				}
 				
@@ -1316,6 +1390,10 @@ public class ConsoleGuiState implements AppState{
 		return actionSubmitDumpArea(strCmd);
 	}
 	
+	private void clearInputTextField() {
+		tfInput.setText(strCommandPrefixChar);
+	}
+	
 	private String getInputText() {
 		return tfInput.getText();
 	}
@@ -1327,7 +1405,7 @@ public class ConsoleGuiState implements AppState{
 	 */
 	public boolean actionSubmitDumpArea(final String strCmd){
 		if(strCmd.isEmpty() || strCmd.trim().equals(strCommandPrefixChar)){
-			tfInput.setText(strCommandPrefixChar); //clear
+			clearInputTextField(); //clear
 			return false;
 		}
 		
@@ -1352,7 +1430,7 @@ public class ConsoleGuiState implements AppState{
 //		String strTime = new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime())+": ";
 		if(bShowInfo)dumpInfoEntry(strType+": "+strCmd);
 		
-		tfInput.setText(strCommandPrefixChar); //clear
+		clearInputTextField(); //clear
 		
 		// history
 		boolean bAdd=true;
@@ -1371,7 +1449,8 @@ public class ConsoleGuiState implements AppState{
 			}
 		}
 		
-		iCmdHistoryCurrent = null; //reset
+		resetCmdHistoryCursor();
+//		iCmdHistoryCurrentIndex = astrCmdHistory.size(); //reset
 		
 		if(strType.equals(strTypeCmd)){
 			if(!executeCommand(strCmd)){
@@ -2337,7 +2416,7 @@ public class ConsoleGuiState implements AppState{
 					+"to"+(iSelectionIndex==null?" ":iSelectionIndex)
 					+","
 				
-				+"Hst"+iCmdHistoryCurrent+"/"+(astrCmdHistory.size()-1)
+				+"Hst"+iCmdHistoryCurrentIndex+"/"+(astrCmdHistory.size()-1)
 					+","
 				
 				+"Tot"+vlstrDumpEntries.size()

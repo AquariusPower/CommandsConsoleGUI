@@ -27,6 +27,7 @@ Features:
 	= ctrl+home sroll top, ctrl+end scroll bottom
 	= Big lines are wrapped, each part ends with '\'
 	= Ctrl+/ comment toggle on the input line.
+	= Any changes to the input text will reset the command history cursor, hit Down to access your last non issued command.
 
 DONE:
 	= BaseOutputFilemameOnVar
