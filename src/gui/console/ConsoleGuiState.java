@@ -67,6 +67,7 @@ import com.jme3.input.controls.Trigger;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
+import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
@@ -96,13 +97,18 @@ import com.simsilica.lemur.style.Styles;
  *
  */
 public class ConsoleGuiState implements AppState{
-	public static final String INPUT_MAPPING_CONSOLE_TOGGLE = "CONSOLE_Toggle";
+	public static final String IMCPREFIX = "CONSOLEGUISTATE_";
+	public static final String INPUT_MAPPING_CONSOLE_TOGGLE = IMCPREFIX+"Toggle";
 //	public static final String INPUT_MAPPING_CONSOLE_HIST_PREV = "CONSOLE_HistPrev";
 //	public static final String INPUT_MAPPING_CONSOLE_HIST_NEXT = "CONSOLE_HistNext";
-	public static final String INPUT_MAPPING_CONSOLE_SCROLLUP = "CONSOLE_ScrollUp";
-	public static final String INPUT_MAPPING_CONSOLE_SCROLLDOWN = "CONSOLE_ScrollDown";
-	public static final String INPUT_MAPPING_SHIFT_PRESSED	= "CONSOLE_ShiftPressed";
+	public static final String INPUT_MAPPING_CONSOLE_SCROLLUP = IMCPREFIX+"ScrollUp";
+	public static final String INPUT_MAPPING_CONSOLE_SCROLLDOWN = IMCPREFIX+"ScrollDown";
+	public static final String INPUT_MAPPING_CONSOLE_SHIFT_PRESSED	= IMCPREFIX+"ShiftPressed";
+	public static final String INPUT_MAPPING_CONSOLE_CONTROL_PRESSED	= IMCPREFIX+"ControlPressed";
 	
+	/**
+	 * user can type these below at console
+	 */
 	public static final String CMD_CLOSE_CONSOLE="closeConsole";
 	public static final String CMD_CONSOLE_STYLE = "consoleStyle";
 	public static final String CMD_ECHO = "echo";
@@ -117,7 +123,7 @@ public class ConsoleGuiState implements AppState{
 	
 	public static final String STYLE_CONSOLE="console";
 	
-	// not public...
+	// not public... development token... 
 	protected static final String	TOKEN_CMD_NOT_WORKING_YET = "[NOTWORKINGYET]";
 	
 	/**
@@ -155,16 +161,19 @@ public class ConsoleGuiState implements AppState{
 	protected Container	ctnrConsole;
 	protected ListBox<String>	lstbx;
 	protected TextField	tfInput;
-	protected TextField tfAutoCompleteHint;
+//	protected TextField tfAutoCompleteHint;
 	protected SimpleApplication	sapp;
 	protected boolean	bEnabled;
 	protected VersionedList<String>	vlstrDumpEntries = new VersionedList<String>();;
+	protected VersionedList<String>	vlstrAutoCompleteHint = new VersionedList<String>();;
 	protected int	iShowRows = 1;
 	protected Integer	iToggleConsoleKey;
 	protected Integer	iVisibleRowsAdjustRequest = 0; //0 means dynamic
 	protected String	strInfoEntryPrefix			=". ";
 	protected String	strWarnEntryPrefix			="?Warn: ";
 	protected String	strExceptionEntryPrefix	="!EXCEPTION: ";
+	private boolean	bShowDeveloperWarn=false;
+	private String	strDevWarnEntryPrefix="?DeveloperWarning: ";
 	protected String	strSubEntryPrefix="\t";
 	protected boolean	bShowWarn = true;
 	protected boolean	bInitiallyClosed = true;
@@ -172,7 +181,7 @@ public class ConsoleGuiState implements AppState{
 	protected ArrayList<String> astrCmdCmtValidList = new ArrayList<String>();
 	protected ArrayList<String> astrBaseCmdValidList = new ArrayList<String>();
 	protected ArrayList<String> astrStyleList = new ArrayList<String>();
-	protected Integer	iHistCurrent = null;
+	protected Integer	iCmdHistoryCurrent = null;
 	protected	String	strNotSubmitedCmd="";
 	protected	String	strCommentPrefixChar="#";
 	protected	String	strCommandPrefixChar="/";
@@ -223,7 +232,7 @@ public class ConsoleGuiState implements AppState{
 	protected boolean	bEngineStatsFps;
 	protected boolean	bEngineStatsView;
 //	protected float	fMonofontCharWidth;
-	protected GridPanel	gridPanel;
+//	protected GridPanel	gpListboxDumpArea;
 	protected Integer	iCopyFrom = null;
 	protected Button	btnCopy;
 	protected Button	btnPaste;
@@ -233,6 +242,10 @@ public class ConsoleGuiState implements AppState{
 	protected CharSequence	strReplaceTAB = "  ";
 	protected float	fWidestCharForCurrentStyleFont;
 	protected boolean	bKeyShiftIsPressed;
+	protected boolean	bKeyControlIsPressed;
+	private ListBox<String>	lstbxAutoCompleteHint;
+	private Vector3f	v3fConsoleSize;
+	private Vector3f	v3fApplicationWindowSize;
 	
 	public ConsoleGuiState() {
 	}
@@ -306,6 +319,7 @@ public class ConsoleGuiState implements AppState{
 				GuiGlobals.getInstance().requestFocus(tfInput);
 			}else{
 				ctnrConsole.removeFromParent();
+				closeHint();
 				GuiGlobals.getInstance().requestFocus(null);
 			}
 			
@@ -337,14 +351,19 @@ public class ConsoleGuiState implements AppState{
 		
 		createMonoSpaceFontStyle();
 		
+		v3fApplicationWindowSize = new Vector3f(
+			sapp.getContext().getSettings().getWidth(),
+			sapp.getContext().getSettings().getHeight(),
+			0);
+		
 		// main container
 		ctnrConsole = new Container(new BorderLayout(), strStyle);
 		int iMargin=10;
-		Vector3f v3fWindowSize = new Vector3f(
-				sapp.getContext().getSettings().getWidth() -(iMargin*2),
-				(sapp.getContext().getSettings().getHeight()*fConsoleHeightPerc) -iMargin,
-				0); //TODO why Z shouldnt be 0? changed to 0.1 and 1, but made no difference.
-		ctnrConsole.setPreferredSize(v3fWindowSize); //setSize() does not work well..
+		v3fConsoleSize = new Vector3f(
+			v3fApplicationWindowSize.x -(iMargin*2),
+			(v3fApplicationWindowSize.y * fConsoleHeightPerc) -iMargin,
+			0); //TODO why Z shouldnt be 0? changed to 0.1 and 1, but made no difference.
+		ctnrConsole.setPreferredSize(v3fConsoleSize); //setSize() does not work well..
 		sapp.getGuiNode().attachChild(ctnrConsole);
 		ctnrConsole.setLocalTranslation(
 			iMargin, 
@@ -385,15 +404,16 @@ public class ConsoleGuiState implements AppState{
 		 */
 		// dump entries area
 		lstbx = new ListBox<String>(new VersionedList<String>(),strStyle);
-		Vector3f v3fLstbxSize = v3fWindowSize.clone();
+		Vector3f v3fLstbxSize = v3fConsoleSize.clone();
 		lstbx.setSize(v3fLstbxSize); // no need to update fLstbxHeight, will be automatic
 		//TODO not working? lstbx.getSelectionModel().setSelectionMode(SelectionMode.Multi);
 		
 		lstbx.setModel(vlstrDumpEntries);
-		lstbx.getGridPanel().setVisibleSize(iShowRows,1);
+		lstbx.setVisibleItems(iShowRows);
+//		lstbx.getGridPanel().setVisibleSize(iShowRows,1);
 		ctnrConsole.addChild(lstbx, BorderLayout.Position.Center);
 		
-		gridPanel = lstbx.getGridPanel();
+//		gpListboxDumpArea = lstbx.getGridPanel();
 		
 		/**
 		 * BOTTOM ELEMENT
@@ -404,7 +424,9 @@ public class ConsoleGuiState implements AppState{
 		ctnrConsole.addChild( tfInput, BorderLayout.Position.South );
 		
 		// auto complete hint
-		tfAutoCompleteHint = new TextField("No hints yet...",strStyle);
+//		tfAutoCompleteHint = new TextField("No hints yet...",strStyle);
+		lstbxAutoCompleteHint = new ListBox<String>(new VersionedList<String>(),strStyle);
+		lstbxAutoCompleteHint.setModel(vlstrAutoCompleteHint);
 		
 		mapKeys();
 		
@@ -429,6 +451,7 @@ public class ConsoleGuiState implements AppState{
 				dumpInfoEntry("Clipboard contents, size="+strClipboard.length()+":");
 				String[] astr = strClipboard.split("\n");
 //				for(String str:astr)dumpEntry(strLineEncloseChar+str+strLineEncloseChar);
+//				dumpEntry(""); // this empty line for clipboard content display is i
 				dumpEntry(">>> Clipboard BEGIN");
 				for(String str:astr)dumpEntry(str);
 				dumpEntry("<<< Clipboard END");
@@ -502,12 +525,16 @@ public class ConsoleGuiState implements AppState{
 		String strPasted = retrieveClipboardString(true);
 		if(strPasted.endsWith("\\n"))strPasted=strPasted.substring(0, strPasted.length()-2);
 		
-		String strCurrent = tfInput.getText();
-		int iMoveCaratTo = 0;
-		if(efHK!=null){
-			strCurrent = efHK.pasteAtCaratPositionHK(strCurrent,strPasted);
+		String strCurrent = getInputText();
+//		if(checkInputEmpty() && validateBaseCommand(strPasted)){
+		if(checkInputEmpty() && strPasted.trim().startsWith(strCommandPrefixChar)){
+			strCurrent = strPasted.trim(); //replace "empty" line with command (can be invalid in this case, user may complete it properly)
 		}else{
-			strCurrent+=strPasted;
+			if(efHK!=null){
+				strCurrent = efHK.pasteAtCaratPositionHK(strCurrent,strPasted);
+			}else{
+				strCurrent+=strPasted;
+			}
 		}
 		
 		tfInput.setText(strCurrent); 
@@ -723,17 +750,17 @@ public class ConsoleGuiState implements AppState{
 						break;
 					case KeyInput.KEY_NUMPADENTER:
 					case KeyInput.KEY_RETURN:
-						actionSubmit(tfInput.getText());
+						actionSubmit(getInputText());
 						break;
 					case KeyInput.KEY_TAB:
-						autoComplete(tfInput.getText());
+						autoCompleteInputField(bControl);
 						break;
 					case KeyInput.KEY_DELETE:
 						if(bControl)tfInput.setText(strCommandPrefixChar);
 						break;
 					case KeyInput.KEY_SLASH:
 						if(bControl){
-							String str = tfInput.getText();
+							String str = getInputText();
 							if(str.startsWith(strCommentPrefixChar)){
 								str=str.substring(1);
 							}else{
@@ -746,6 +773,7 @@ public class ConsoleGuiState implements AppState{
 			}
 		};
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_TAB), actSimpleActions);
+		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_TAB,KeyAction.CONTROL_DOWN), actSimpleActions);
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_RETURN), actSimpleActions);
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_NUMPADENTER), actSimpleActions);
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_B,KeyAction.CONTROL_DOWN), actSimpleActions);
@@ -758,31 +786,45 @@ public class ConsoleGuiState implements AppState{
 		KeyActionListener actCmdSelectAction = new KeyActionListener() {
 			@Override
 			public void keyAction(TextEntryComponent source, KeyAction key) {
-				if(iHistCurrent==null){
-					iHistCurrent=astrCmdHistory.size();
+				if(iCmdHistoryCurrent==null){
+					iCmdHistoryCurrent=astrCmdHistory.size();
 				}
 				
-				if(iHistCurrent<0)iHistCurrent=0; //cant underflow
-				if(iHistCurrent>=astrCmdHistory.size())iHistCurrent=astrCmdHistory.size(); //can overflow by 1
+				if(iCmdHistoryCurrent<0)iCmdHistoryCurrent=0; //cant underflow
+				if(iCmdHistoryCurrent>=astrCmdHistory.size())iCmdHistoryCurrent=astrCmdHistory.size(); //can overflow by 1
 				
 				switch(key.getKeyCode()){
 					case KeyInput.KEY_UP	:
-						--iHistCurrent;
-						/**
-						 * to not lose last possibly typed (but not issued) cmd
-						 */
-						if(iHistCurrent==(astrCmdHistory.size()-1)){ //requested last entry
-							strNotSubmitedCmd = tfInput.getText();
+						if(!navigateHint(-1)){
+							iCmdHistoryCurrent--;
+							/**
+							 * to not lose last possibly typed (but not issued) cmd
+							 */
+							if(iCmdHistoryCurrent==(astrCmdHistory.size()-1)){ //requested last entry
+								strNotSubmitedCmd = getInputText();
+							}
+							applyHistoryIndex(iCmdHistoryCurrent);
 						}
-						applyHistoryIndex(iHistCurrent);
+						
 						break;
 					case KeyInput.KEY_DOWN:
-						iHistCurrent++;
-						if(iHistCurrent>=astrCmdHistory.size()){
-							tfInput.setText(strNotSubmitedCmd);
-//							strNotSubmitedCmd=""; //reset
+						if(!navigateHint(+1)){
+//						if(isHintActive()){
+//							if(
+//									getSelectedHint()!=null
+//									||
+//									(iHistCurrent+1)>=astrCmdHistory.size() // end of cmd history
+//							){
+//								navigateHint(+1);
+//							}
+//						}else{
+							iCmdHistoryCurrent++;
+							if(iCmdHistoryCurrent>=astrCmdHistory.size()){
+								tfInput.setText(strNotSubmitedCmd);
+							}
+							applyHistoryIndex(iCmdHistoryCurrent);
 						}
-						applyHistoryIndex(iHistCurrent);
+						
 						break;
 				}
 			}
@@ -821,6 +863,44 @@ public class ConsoleGuiState implements AppState{
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_END, KeyAction.CONTROL_DOWN), actDumpNavigate);
 	}
 	
+	protected boolean isHintActive(){
+		return lstbxAutoCompleteHint.getParent()!=null;
+	}
+	
+	protected boolean navigateHint(int iAdd){
+		if(!isHintActive())return false;
+		
+		if(
+				getSelectedHint()!=null
+				||
+				(iCmdHistoryCurrent+1)>=astrCmdHistory.size() // end of cmd history
+		){
+			int iMaxIndex = vlstrAutoCompleteHint.size()-1;
+			if(iMaxIndex<0)return false;
+			
+			Integer iCurrentIndex = lstbxAutoCompleteHint.getSelectionModel().getSelection();
+			if(iCurrentIndex==null)iCurrentIndex=0;
+			
+			iCurrentIndex+=iAdd;
+			
+			if(iCurrentIndex<-1)iCurrentIndex=-1; //will clear the listbox selection
+			if(iCurrentIndex>iMaxIndex)iCurrentIndex=iMaxIndex;
+			
+			lstbxAutoCompleteHint.getSelectionModel().setSelection(iCurrentIndex);
+			
+			return iCurrentIndex>-1;
+		}
+		
+		return false;
+	}
+	
+	protected String getSelectedHint(){
+		if(!isHintActive())return null;
+		Integer i = lstbxAutoCompleteHint.getSelectionModel().getSelection();
+		if(i==null)return null;
+		return vlstrAutoCompleteHint.get(i);
+	}
+	
 	protected void mapKeys(){
 		mapKeysForInputField();
 		
@@ -845,8 +925,22 @@ public class ConsoleGuiState implements AppState{
 			}
 		}
 		
-		if(!sapp.getInputManager().hasMapping(INPUT_MAPPING_SHIFT_PRESSED)){
-			sapp.getInputManager().addMapping(INPUT_MAPPING_SHIFT_PRESSED, 
+		if(!sapp.getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_CONTROL_PRESSED)){
+			sapp.getInputManager().addMapping(INPUT_MAPPING_CONSOLE_CONTROL_PRESSED, 
+					new KeyTrigger(KeyInput.KEY_LCONTROL),
+					new KeyTrigger(KeyInput.KEY_RCONTROL));
+			
+			ActionListener al = new ActionListener() {
+				@Override
+				public void onAction(String name, boolean isPressed, float tpf) {
+					bKeyControlIsPressed  = isPressed;
+				}
+			};
+			sapp.getInputManager().addListener(al, INPUT_MAPPING_CONSOLE_CONTROL_PRESSED);            
+		}
+		
+		if(!sapp.getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_SHIFT_PRESSED)){
+			sapp.getInputManager().addMapping(INPUT_MAPPING_CONSOLE_SHIFT_PRESSED, 
 				new KeyTrigger(KeyInput.KEY_LSHIFT),
 				new KeyTrigger(KeyInput.KEY_RSHIFT));
 				
@@ -856,7 +950,7 @@ public class ConsoleGuiState implements AppState{
 					bKeyShiftIsPressed  = isPressed;
 				}
 			};
-			sapp.getInputManager().addListener(al, INPUT_MAPPING_SHIFT_PRESSED);            
+			sapp.getInputManager().addListener(al, INPUT_MAPPING_CONSOLE_SHIFT_PRESSED);            
 		}
 		
 		// mouse scroll
@@ -918,12 +1012,21 @@ public class ConsoleGuiState implements AppState{
 	}
 	
 	protected void updateAutoCompleteHint() {
-		String strInputText = tfInput.getText();
+		String strInputText = getInputText();
 		if(strInputText.isEmpty())return;
 		strInputText=strInputText.substring(strCommandPrefixChar.length());
-		if(strInputTextPrevious.equals(strInputText))return;
+//	if(tfAutoCompleteHint.getParent()==null && bKeyControlIsPressed){
+		if(lstbxAutoCompleteHint.getParent()==null && bKeyControlIsPressed){
+			/**
+			 * in this case, there is no hint, 
+			 * and match mode: "contains" was requested by user,
+			 * so fill it with something!
+			 */
+		}else{
+			if(strInputTextPrevious.equals(strInputText))return;
+		}
 		
-		ArrayList<String> astr = autoComplete(strInputText, astrCmdCmtValidList);
+		ArrayList<String> astr = autoComplete(strInputText, astrCmdCmtValidList, bKeyControlIsPressed);
 		
 		boolean bShowHint = false;
 		if( astr.size()==1 && (astr.get(0).length() > strInputText.length()) ){ 
@@ -939,24 +1042,79 @@ public class ConsoleGuiState implements AppState{
 		}
 		
 		if(bShowHint){
+			/*
 			String strHint = "";
 			for(String str:astr){
 				//if(str.equals(strInputText))continue;
 				if(astr.size()>1 && str.equals(astr.get(0)))continue; //skip the 1st that is still a partial match
 				strHint+=str+"\n";
 			}
+			
 			tfAutoCompleteHint.setText(strHint);
 			if(!tfInput.hasChild(tfAutoCompleteHint)){
 				tfInput.attachChild(tfAutoCompleteHint);
 				tfAutoCompleteHint.setLocalTranslation(new Vector3f(0, -this.fInputHeight, 0));
 			}
+			*/
+			
+			vlstrAutoCompleteHint.clear();
+			vlstrAutoCompleteHint.addAll(astr);
+//			lstbxAutoCompleteHint.updateLogicalState(0f);
+			lstbxAutoCompleteHint.getSelectionModel().setSelection(-1);
+			
+			Node nodeParent = sapp.getGuiNode();
+			if(!nodeParent.hasChild(lstbxAutoCompleteHint)){
+				nodeParent.attachChild(lstbxAutoCompleteHint);
+			}
+			
+			//lstbxAutoCompleteHint.setLocalTranslation(new Vector3f(0, -fInputHeight, 0));
+			Vector3f v3f = tfInput.getWorldTranslation().clone();
+			v3f.y -= tfInput.getSize().y;
+			lstbxAutoCompleteHint.setLocalTranslation(v3f);
+			
+			float fEntryHeightGUESSED = fInputHeight; //TODO should be the listbox entry height
+			float fAvailableHeight = v3fApplicationWindowSize.y -v3fConsoleSize.y -fEntryHeightGUESSED;
+			int iVisibleItems = (int) (fAvailableHeight/fEntryHeightGUESSED);
+			if(iVisibleItems==0)iVisibleItems=1;
+			if(iVisibleItems>vlstrAutoCompleteHint.size())iVisibleItems=vlstrAutoCompleteHint.size();
+			float fHintHeight = fEntryHeightGUESSED*iVisibleItems;
+			if(fHintHeight>fAvailableHeight){
+				dumpDevWarnEntry("fHintHeight="+fHintHeight+",fAvailableHeight="+fAvailableHeight);
+				fHintHeight=fAvailableHeight;
+			}
+			int iMinLinesGUESSED = 3; //seems to be required because the slider counts as 3 (up arrow, thumb, down arrow)
+			float fMinimumHeightGUESSED = fEntryHeightGUESSED*iMinLinesGUESSED;
+			if(fHintHeight<fMinimumHeightGUESSED)fHintHeight=fMinimumHeightGUESSED;
+//				int iCount = astr.size();
+//				if(iCount==1)iCount++; // must not be 1 or will crash
+			lstbxAutoCompleteHint.setPreferredSize(new Vector3f(
+				widthForListbox(),
+				fHintHeight, //fInputHeight*iCount,
+				0));
+//				lstbxAutoCompleteHint.getGridPanel().setVisibleSize(iShowRows,1);
+			lstbxAutoCompleteHint.setVisibleItems(iVisibleItems);//astr.size());
+			
+			lineWrapDisableFor(lstbxAutoCompleteHint.getGridPanel());
+			
 		}else{
-			tfAutoCompleteHint.setText("");
-			tfAutoCompleteHint.removeFromParent();
+			closeHint();
 		}
 		
 		strInputTextPrevious = strInputText;
 	}
+	
+	protected void closeHint(){
+		/*
+		tfAutoCompleteHint.setText("");
+		tfAutoCompleteHint.removeFromParent();
+		*/
+		vlstrAutoCompleteHint.clear();
+		lstbxAutoCompleteHint.removeFromParent();
+	}
+	
+//	protected void fillAutoCompleteHint(ArrayList<String> astr){
+//		lstbxAutoCompleteHint;
+//	}
 	
 	protected void updateExecConsoleCmdQueue() {
 		if(astrExecConsoleCmdsQueue.size()>0){ // one per time! NO while here!!!!
@@ -965,6 +1123,7 @@ public class ConsoleGuiState implements AppState{
 	}
 	
 	/**
+	 * Validates if the first extracted word is a valid command.
 	 * 
 	 * @param strCmdFullChk can be the full command line here
 	 * @return
@@ -1012,7 +1171,7 @@ public class ConsoleGuiState implements AppState{
 	 * @return
 	 */
 	protected boolean checkInputEmpty(boolean bDumpContentsIfNotEmpty){
-		String strCurrentInputText = tfInput.getText().trim();
+		String strCurrentInputText = getInputText().trim();
 		
 		if(strCurrentInputText.isEmpty())return true;
 		
@@ -1050,8 +1209,11 @@ public class ConsoleGuiState implements AppState{
 		}
 	}
 	
-	protected void fixLineWrap(){
-		for(Spatial spt:gridPanel.getChildren()){
+	protected void lineWrapDisableDumpArea(){
+		lineWrapDisableFor(lstbx.getGridPanel());
+	}
+	protected void lineWrapDisableFor(GridPanel gp){
+		for(Spatial spt:gp.getChildren()){
 			if(spt instanceof Button){
 				retrieveBitmapTextFor((Button)spt).setLineWrapMode(LineWrapMode.NoWrap);
 			}
@@ -1068,14 +1230,15 @@ public class ConsoleGuiState implements AppState{
 		Integer iForceAmount = iVisibleRowsAdjustRequest;
 		if(iForceAmount>0){
 			iShowRows=iForceAmount;
-			lstbx.getGridPanel().setVisibleSize(iShowRows,1);
+			lstbx.setVisibleItems(iShowRows);
+//			lstbx.getGridPanel().setVisibleSize(iShowRows,1);
 			return;
 		}
 		
-		if(gridPanel.getChildren().isEmpty())return;
+		if(lstbx.getGridPanel().getChildren().isEmpty())return;
 		
 		Button	btnFixVisibleRowsHelper = null;
-		for(Spatial spt:gridPanel.getChildren()){
+		for(Spatial spt:lstbx.getGridPanel().getChildren()){
 			if(spt instanceof Button){
 				btnFixVisibleRowsHelper = (Button)spt;
 				break;
@@ -1094,12 +1257,13 @@ public class ConsoleGuiState implements AppState{
 //				fHeightAvailable-=fStatsHeight;
 //			}
 		iShowRows = (int) (fHeightAvailable / fLstbxEntryHeight);
-		lstbx.getGridPanel().setVisibleSize(iShowRows,1);
+		lstbx.setVisibleItems(iShowRows);
+//		lstbx.getGridPanel().setVisibleSize(iShowRows,1);
 		dumpInfoEntry("fLstbxEntryHeight="+fmtFloat(fLstbxEntryHeight)+", "+"iShowRows="+iShowRows);
 		
 		iVisibleRowsAdjustRequest=null;
 		
-		fixLineWrap();
+		lineWrapDisableDumpArea();
 	}
 	
 //	protected BitmapFont retrieveBitmapFontFor(Panel pnl){
@@ -1127,12 +1291,41 @@ public class ConsoleGuiState implements AppState{
 		return null;
 	}
 
+	public boolean actionSubmit(final String strCmd){
+		/**
+		 * if hint area is active and has a selected entry, 
+		 * it will override default command submit.
+		 */
+		if(isHintActive()){
+			String strHintCmd = getSelectedHint();
+//			Integer i =lstbxAutoCompleteHint.getSelectionModel().getSelection();
+			if(strHintCmd!=null){
+				strHintCmd=strCommandPrefixChar+extractCommandPart(strHintCmd,0)+" ";
+				if(!getInputText().equals(strHintCmd)){
+					tfInput.setText(strHintCmd);
+//				strCommandPrefixChar
+////				+extractCommandPart(vlstrAutoCompleteHint.get(i), 0)
+//			+extractCommandPart(strHintCmd,0)
+//			+" ");
+////		lstbxAutoCompleteHint.getSelectionModel().setSelection(-1);
+					return true;
+				}
+			}
+		}
+		
+		return actionSubmitDumpArea(strCmd);
+	}
+	
+	private String getInputText() {
+		return tfInput.getText();
+	}
+	
 	/**
 	 * This is what happens when Enter key is pressed.
 	 * @param strCmd
 	 * @return false if was a comment, empty or invalid
 	 */
-	public boolean actionSubmit(final String strCmd){
+	public boolean actionSubmitDumpArea(final String strCmd){
 		if(strCmd.isEmpty() || strCmd.trim().equals(strCommandPrefixChar)){
 			tfInput.setText(strCommandPrefixChar); //clear
 			return false;
@@ -1178,7 +1371,7 @@ public class ConsoleGuiState implements AppState{
 			}
 		}
 		
-		iHistCurrent = null; //reset
+		iCmdHistoryCurrent = null; //reset
 		
 		if(strType.equals(strTypeCmd)){
 			if(!executeCommand(strCmd)){
@@ -1342,6 +1535,14 @@ public class ConsoleGuiState implements AppState{
 		dumpEntry(bShowWarn, getSimpleTime()+strWarnEntryPrefix+str);
 	}
 	
+	/**
+	 * warnings that should not bother end users...
+	 * @param str
+	 */
+	protected void dumpDevWarnEntry(String str){
+		dumpEntry(bShowDeveloperWarn, getSimpleTime()+strDevWarnEntryPrefix+str);
+	}
+	
 	protected void dumpExceptionEntry(Exception e){
 		dumpEntry(bShowException, getSimpleTime()+strExceptionEntryPrefix+e.toString());
 		e.printStackTrace();
@@ -1395,8 +1596,17 @@ public class ConsoleGuiState implements AppState{
 		return paramString(0).equalsIgnoreCase(strValidCmd);
 	}
 	
-	protected void autoComplete(String strCmdPart){
-		String strCompletedCmd = autoCompleteWork(strCmdPart);
+	protected void autoCompleteInputField(){
+		autoCompleteInputField(false);
+	}
+	protected void autoCompleteInputField(boolean bMatchContains){
+		final String strCmdPart = getInputText();
+		
+		String strCompletedCmd = autoCompleteWork(strCmdPart,bMatchContains);
+		
+		/**
+		 * parameters completion!
+		 */
 		if(strCompletedCmd.equals(strCmdPart)){
 			String strBaseCmd = extractCommandPart(strCmdPart,0);
 			String strParam1 = extractCommandPart(strCmdPart,1);
@@ -1404,18 +1614,19 @@ public class ConsoleGuiState implements AppState{
 				switch(strBaseCmd){
 					case CMD_CONSOLE_STYLE:
 						strCompletedCmd=strCommandPrefixChar+
-							CMD_CONSOLE_STYLE+" "+autoComplete(strParam1, astrStyleList).get(0);
+							CMD_CONSOLE_STYLE+" "+autoComplete(strParam1, astrStyleList, bMatchContains).get(0);
 						break;
 				}
 			}
 		}
 		
+		if(strCompletedCmd.trim().isEmpty())strCompletedCmd=strCommandPrefixChar;
 		tfInput.setText(strCompletedCmd);
 		
 		scrollToBottomRequest();
 	}
 	
-	protected String autoCompleteWork(String strCmdPart){
+	protected String autoCompleteWork(String strCmdPart, boolean bMatchContains){
 		String strCmdPartOriginal = strCmdPart;
 		strCmdPart=strCmdPart.trim();
 		
@@ -1429,7 +1640,7 @@ public class ConsoleGuiState implements AppState{
 		if(!strCmdPart.matches("["+strValidCmdCharsRegex+"]*"))
 			return strCmdPartOriginal;
 		
-		ArrayList<String> astr = autoComplete(strCmdPart, astrCmdCmtValidList);
+		ArrayList<String> astr = autoComplete(strCmdPart, astrCmdCmtValidList, bMatchContains);
 		String strFirst=astr.get(0);
 		String strAppendSpace = "";
 		if(astr.size()==1 && strFirst.length() > strCmdPart.length()){
@@ -1458,15 +1669,21 @@ public class ConsoleGuiState implements AppState{
 	 * 	If it has only one entry, or it will be the unmodified part, 
 	 *		or (if its length is bigger) it will be an exact match!
 	 */
-	public static ArrayList<String> autoComplete(String strPart, ArrayList<String> astrAllPossibilities){
+	public static ArrayList<String> autoComplete(String strPart, ArrayList<String> astrAllPossibilities, boolean bMatchContains){
 		ArrayList<String> astrPossibleMatches = new ArrayList<String>();
 		
 		strPart=strPart.trim();
 		if(strPart.isEmpty())return astrPossibleMatches;
 //		if(strPart.matches("[^"+strValidCmdCharsRegex+"]"))return astrPossibleMatches;
 		for(String str:astrAllPossibilities){
-			if(str.toLowerCase().startsWith(strPart.toLowerCase())){
-				astrPossibleMatches.add(str);
+			if(bMatchContains){
+				if(str.toLowerCase().contains(strPart.toLowerCase())){
+					astrPossibleMatches.add(str);
+				}
+			}else{
+				if(str.toLowerCase().startsWith(strPart.toLowerCase())){
+					astrPossibleMatches.add(str);
+				}
 			}
 		}
 		
@@ -1679,7 +1896,7 @@ public class ConsoleGuiState implements AppState{
 			bOk = true;
 		}else
 		if(checkCmdValidity(CMD_FIX_LINEWRAP ,"in case words are overlapping")){
-			fixLineWrap();
+			lineWrapDisableDumpArea();
 			bOk = true;
 		}else
 		if(checkCmdValidity("fixVisibleRowsAmount ","[iAmount] in case it is not showing as many rows as it should")){
@@ -1691,34 +1908,39 @@ public class ConsoleGuiState implements AppState{
 			showHelp(paramString(1));
 			bOk=true; //ALWAYS TRUE, to avoid infinite loop when improving some failed command help info!
 		}else
-		if(checkCmdValidity(CMD_HISTORY,"[iIndexToRepeatExecution|strFilter] of typed commands. Click on an entry and its index will be filled here.")){
-			Integer iIndex = null;
-			
-			try{
-				iIndex = paramInt(1);
-			}catch(NumberFormatException e){
-				/**
-				 * This is an expected exception as it can be the string filter
-				 */
-			}
-			
-			if(iIndex!=null){
-				String strRepeat = vlstrDumpEntries.get(iIndex);
-				dumpInfoEntry("Repeat: "+strRepeat);
-				astrExecConsoleCmdsQueue.add(strRepeat);
-			}else{
-				String strFilter = paramString(1);
-				
-				ArrayList<String> astrUniques = new ArrayList<String>();
+//		if(checkCmdValidity(CMD_HISTORY,"[iIndexToRepeatExecution|strFilter] of typed commands. Click on an entry and its index will be filled here.")){
+		if(checkCmdValidity(CMD_HISTORY,"[strFilter] of issued commands (the filter results in sorted uniques)")){
+//			Integer iIndex = null;
+//			try{
+//				iIndex = paramInt(1);
+//			}catch(NumberFormatException e){
+//				/**
+//				 * This is an expected exception as it can be the string filter
+//				 */
+//			}
+//			
+//			if(iIndex!=null){
+//				String strRepeat = vlstrDumpEntries.get(iIndex);
+//				dumpInfoEntry("Repeat: "+strRepeat);
+//				astrExecConsoleCmdsQueue.add(strRepeat);
+//			}else{
+			String strFilter = paramString(1);
+			ArrayList<String> astrToDump = new ArrayList<String>();
+			if(strFilter!=null){
 				for(String str:astrCmdHistory){
-					if(strFilter!=null && !str.toLowerCase().contains(strFilter.toLowerCase()))continue;
-					str=str.trim();
-					if(!astrUniques.contains(str))astrUniques.add(str);
+					if(!str.toLowerCase().contains(strFilter.toLowerCase()))continue;
+					str=str.trim(); // to prevent fail of unique check by spaces presence
+					if(!astrToDump.contains(str))astrToDump.add(str);
+					Collections.sort(astrToDump);
 				}
-				for(String str:astrUniques){
-					dumpSubEntry(str);
-				}
+			}else{
+				astrToDump.addAll(astrCmdHistory);
 			}
+			
+			for(String str:astrToDump){
+				dumpSubEntry(str);
+			}
+//			}
 			
 			bOk=true;
 		}else
@@ -1871,19 +2093,23 @@ public class ConsoleGuiState implements AppState{
 	 * @param fNewHeightPercent null to use the default
 	 */
 	protected void modifyConsoleHeight(Float fNewHeightPercent) {
-		Vector3f v3f = ctnrConsole.getPreferredSize(); //getSize() does not work well..
+		Vector3f v3fNew = ctnrConsole.getPreferredSize(); //getSize() does not work well..
+		if(!v3fNew.equals(v3fConsoleSize)){
+			dumpDevWarnEntry("sizes should be equal: "+v3fNew+v3fConsoleSize);
+		}
 		
 		if(fNewHeightPercent==null)fNewHeightPercent=fConsoleHeightPercDefault;
 		
 		if(fNewHeightPercent>0.95f)fNewHeightPercent=0.95f;
 		
-		v3f.y = fNewHeightPercent * sapp.getContext().getSettings().getHeight();
+		v3fNew.y = fNewHeightPercent * sapp.getContext().getSettings().getHeight();
 		
 		float fMin = fInputHeight + fStatsHeight + fLstbxEntryHeight*3; //will show only 2 rows, the 3 value is a safety margin
 		
-		if(v3f.y<fMin)v3f.y=fMin;
+		if(v3fNew.y<fMin)v3fNew.y=fMin;
 		
-		ctnrConsole.setPreferredSize(v3f); //setSize() does not work well..
+		ctnrConsole.setPreferredSize(v3fNew); //setSize() does not work well..
+		v3fConsoleSize.set(v3fNew);
 		
 		fConsoleHeightPerc = fNewHeightPercent;
 		
@@ -2002,7 +2228,8 @@ public class ConsoleGuiState implements AppState{
 //		tdTextCursorBlinkHK.reset();
 		
 		ctnrConsole.clearChildren();
-		tfAutoCompleteHint.removeFromParent();
+//		tfAutoCompleteHint.removeFromParent();
+		lstbxAutoCompleteHint.removeFromParent();
 		ctnrConsole.removeFromParent();
 		
 		//TODO should keymappings be at setEnabled() ?
@@ -2106,21 +2333,30 @@ public class ConsoleGuiState implements AppState{
 		
 		strStatsLast = ""
 				// user important
-				+"CpFm="+iCopyFrom+"', "
+				+"CpFrom"+(iCopyFrom==null?" ":iCopyFrom)
+					+"to"+(iSelectionIndex==null?" ":iSelectionIndex)
+					+","
 				
-				// good to know
-				+"Slct='"+iSelectionIndex+"', "
+				+"Hst"+iCmdHistoryCurrent+"/"+(astrCmdHistory.size()-1)
+					+","
 				
-				// less important (mainly for debug)
-				+"Sld%='"+fmtFloat(1.0f -lstbx.getSlider().getModel().getPercent())+"', "
-				+"SldV='"+fmtFloat(dSliderHumanReadableValue)+"', "
-				+"TotL='"+vlstrDumpEntries.size()+"', "
-				
+				+"Tot"+vlstrDumpEntries.size()
+					+","
+					
 				/**
+				 * KEEP HERE AS REFERENCE!
 				 * IMPORTANT, DO NOT USE
 				 * clipboard reading is too heavy...
 				+"Cpbd='"+retrieveClipboardString()+"', "
 				 */
+					
+				// less important (mainly for debug)
+				+"Slider"
+					+fmtFloat(dSliderHumanReadableValue)
+					+"/"
+					+fmtFloat(1.0f -lstbx.getSlider().getModel().getPercent())+"%"
+					+","
+					
 		;
 		
 		return strStatsLast;
