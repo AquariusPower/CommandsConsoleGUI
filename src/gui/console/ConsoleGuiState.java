@@ -208,8 +208,8 @@ public class ConsoleGuiState implements AppState{
 	protected ArrayList<String>	astrExecConsoleCmdsQueue = new ArrayList<String>();
 	protected File	flInit;
 	protected float	fLstbxHeight;
-	protected Integer	iSelectionIndex;
-	protected Integer	iSelectionIndexPrevious;
+	protected int	iSelectionIndex = -1;
+	protected int	iSelectionIndexPreviousForFill = -1;
 	protected Double	dMouseMaxScrollBy = null; //max scroll if set
 //	protected boolean bShowLineIndex = true;
 	protected String strStyle = BaseStyles.GLASS;
@@ -233,7 +233,8 @@ public class ConsoleGuiState implements AppState{
 	protected boolean	bEngineStatsView;
 //	protected float	fMonofontCharWidth;
 //	protected GridPanel	gpListboxDumpArea;
-	protected Integer	iCopyFrom = null;
+	protected int	iCopyFrom = -1;
+	protected int	iCopyTo = -1;
 	protected Button	btnCopy;
 	protected Button	btnPaste;
 	protected boolean	bAddEmptyLineAfterCommand = true;
@@ -472,10 +473,10 @@ public class ConsoleGuiState implements AppState{
 	}
 	
 	protected void editCopy() {
-		Integer iCopyTo = lstbx.getSelectionModel().getSelection();
-		if(iCopyTo!=null){
+//		Integer iCopyTo = getDumpAreaSelectedIndex();
+		if(iCopyTo>=0){
 			
-			if(iCopyFrom==null)iCopyFrom=iCopyTo;
+			if(iCopyFrom==-1)iCopyFrom=iCopyTo;
 			
 			// wrap mode overrides this behavior
 			boolean bMultiLineMode = iCopyFrom!=iCopyTo;
@@ -521,7 +522,8 @@ public class ConsoleGuiState implements AppState{
 			lstbx.getSelectionModel().setSelection(-1); //clear selection
 		}
 		
-		iCopyFrom=null;
+		iCopyFrom=-1;
+		iCopyTo=-1;
 	}
 
 	protected void editPaste() {
@@ -613,8 +615,8 @@ public class ConsoleGuiState implements AppState{
 		
 //		lstbx.getSelectionModel().
 		
-		if(iSelectionIndex!=null){
-			dumpSubEntry("Selection:"+iSelectionIndex+": '"+vlstrDumpEntries.get(iSelectionIndex)+"'");
+		if(getDumpAreaSelectedIndex()>=0){
+			dumpSubEntry("Selection:"+getDumpAreaSelectedIndex()+": '"+vlstrDumpEntries.get(getDumpAreaSelectedIndex())+"'");
 		}
 		
 //		tfInput.getActionMap().get
@@ -743,7 +745,7 @@ public class ConsoleGuiState implements AppState{
 				
 				switch(key.getKeyCode()){
 					case KeyInput.KEY_B: 
-						if(bControl)iCopyFrom = lstbx.getSelectionModel().getSelection();
+						if(bControl)iCopyFrom = getDumpAreaSelectedIndex();
 						break;
 					case KeyInput.KEY_C: 
 						if(bControl)editCopy();
@@ -999,7 +1001,7 @@ public class ConsoleGuiState implements AppState{
 		
 		if(!tdLetCpuRest.isReady(true))return;
 		
-		iSelectionIndex = lstbx.getSelectionModel().getSelection();
+		updateDumpAreaSelectedIndex();
 		updateVisibleRowsAmount();
 		updateStats();
 		updateScrollToBottom();
@@ -1261,25 +1263,43 @@ public class ConsoleGuiState implements AppState{
 	
 	protected void updateInputFieldFillWithSelectedEntry() {
 		// auto-fill with selected command
-		if(iSelectionIndex!=null){
-			if(iSelectionIndexPrevious!=iSelectionIndex){ //to let user type things...
+		if(getDumpAreaSelectedIndex()>=0){
+			if(iSelectionIndexPreviousForFill!=getDumpAreaSelectedIndex()){ //to let user type things...
 				updateCopyFrom();
 				
-				String strCmdChk = vlstrDumpEntries.get(iSelectionIndex).trim();
+				String strCmdChk = vlstrDumpEntries.get(getDumpAreaSelectedIndex()).trim();
 				if(validateBaseCommand(strCmdChk)){
 					dumpAndClearInputField();
 //					checkInputEmptyDumpIfNot(true);
 					tfInput.setText(strCmdChk);
 				}
 				
-				iSelectionIndexPrevious = iSelectionIndex;
+				iSelectionIndexPreviousForFill = getDumpAreaSelectedIndex();
 			}
 		}
 	}
 	
+	protected void updateDumpAreaSelectedIndex(){
+		Integer i = lstbx.getSelectionModel().getSelection();
+		iSelectionIndex = i==null ? -1 : i;
+	}
+	
+	protected int getDumpAreaSelectedIndex(){
+		return iSelectionIndex;
+	}
+	
 	protected void updateCopyFrom(){
-		if(bKeyShiftIsPressed){
-			iCopyFrom = iSelectionIndex;
+		int i = getDumpAreaSelectedIndex();
+		if(i>=0){
+			if(iCopyTo>=0){
+				if(bKeyShiftIsPressed){
+					if(iCopyTo != i){ 	// another entry selected
+						iCopyFrom = iCopyTo;
+					}
+				}
+			}
+			
+			iCopyTo = i;
 		}
 	}
 	
@@ -2412,8 +2432,8 @@ public class ConsoleGuiState implements AppState{
 		
 		strStatsLast = ""
 				// user important
-				+"CpFrom"+(iCopyFrom==null?" ":iCopyFrom)
-					+"to"+(iSelectionIndex==null?" ":iSelectionIndex)
+				+"CpFrom"+iCopyFrom
+					+"to"+getDumpAreaSelectedIndex()
 					+","
 				
 				+"Hst"+iCmdHistoryCurrentIndex+"/"+(astrCmdHistory.size()-1)

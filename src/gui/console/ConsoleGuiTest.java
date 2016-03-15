@@ -40,9 +40,43 @@ public class ConsoleGuiTest extends SimpleApplication {
 	protected ConsoleGuiState	stateConsDev;	
 	protected boolean bHideSettings=true; 
 	protected TimedDelay tdSpareGpuFan = new TimedDelay(1.0f/60f); // like 60 FPS
+	
+	public boolean endUserCustomMethod(Integer i){
+		stateConsDev.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
+		return true;
+	}
+	
+	class ConsoleGuiStateEndUser extends ConsoleGuiState{
+		
+		public static final String CMD_END_USER_COMMAND="endUserCommandTest";
+		
+		public ConsoleGuiStateEndUser() {
+			super(KeyInput.KEY_F10);
+		}
+		
+		@Override
+		protected boolean executePreparedCommand() {
+			boolean bOk = false;
+			
+			if(checkCmdValidity(CMD_END_USER_COMMAND,"[iHowMany] users working")){
+				bOk = endUserCustomMethod(paramInt(1));
+			}else{
+				return super.executePreparedCommand();
+			}
+			
+			return bOk;
+		}
+		
+	}
+	
+	@Override
+	public void simpleInitApp() {
+		stateConsDev = new ConsoleGuiStateEndUser();
+		getStateManager().attach(stateConsDev);
+	}
+	
 	public static void main( String... args ) {
 		ConsoleGuiTest main = new ConsoleGuiTest();
-		
 		if(main.bHideSettings){
 			AppSettings as = new AppSettings(true);
 			as.setResizable(true);
@@ -51,34 +85,9 @@ public class ConsoleGuiTest extends SimpleApplication {
 			main.setSettings(as);
 			main.setShowSettings(false);
 		}
-		
 		main.start();
 	}
-	public boolean endUserCustomMethod(Integer i){
-		stateConsDev.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
-		return true;
-	}
-	class ConsoleGuiStateEndUser extends ConsoleGuiState{
-		public static final String CMD_END_USER_COMMAND="endUserCommand";
-		public ConsoleGuiStateEndUser() {
-			super(KeyInput.KEY_F10);
-		}
-		@Override
-		protected boolean executePreparedCommand() {
-			boolean bOk = false;
-			if(checkCmdValidity(CMD_END_USER_COMMAND,"[iHowMany] users working")){
-				bOk = endUserCustomMethod(paramInt(1));
-			}else{
-				return super.executePreparedCommand();
-			}
-			return bOk;
-		}
-	}
-	@Override
-	public void simpleInitApp() {
-		stateConsDev = new ConsoleGuiStateEndUser();
-		getStateManager().attach(stateConsDev);
-	}
+	
 	@Override
 	public void simpleUpdate(float tpf) {
 		super.simpleUpdate(tpf);

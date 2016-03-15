@@ -21,10 +21,10 @@ Features:
 	= Comment detection, line starting with such token will be ignored
 	= Omit the "command being run" info entry by ending a line with '#', good at init file, mainly for /echo commands.   
 	___Editing___ 
-	= Multi-line copy: Ctrl+b (or Shift+click) marks CopyFrom "begin", Ctrl+c marks CopyTo "end".
+	= Multi-line copy: Ctrl+b marks CopyFromIndex "begin", Ctrl+c marks CopyToIndex "end", Shift+click stores the previous CopyToIndex into CopyFromIndex.
 	= Single line wrap detection when copying.
 	= Ctrl+del clear the input command line
-	= ctrl+home sroll top, ctrl+end scroll bottom
+	= Ctrl+home sroll top, Ctrl+end scroll bottom
 	= Big lines are wrapped, each part ends with '\'
 	= Ctrl+/ comment toggle on the input line.
 	= Any changes to the input text will reset the command history cursor, hit Down to access your last non issued command.
@@ -36,6 +36,7 @@ DONE:
 	= when pasting text, insert the text where the cursor is...
 	= ListboxSelectorClearAfterCopy
 	= Java7 compliance (instead of 8)
+	= FIX: Copy from/to is inverted concerning SHIFT key. Holding shift must mark copyTo.
 
 TODO.FastToImplement:
 	+ let multiple commands in a single line separated by ';'
