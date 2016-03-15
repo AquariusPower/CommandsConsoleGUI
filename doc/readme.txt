@@ -16,10 +16,10 @@ Features:
 	___Nagivation___
 	= Navigate dump area, key pgup/pgdown or mouse scroll. Dump is saved to a file, see /statsShowAll.
 	= Auto scroll after command.
-	___Commands___
-	= Several commands available already, see command /help
-	= Comment detection, line starting with such token will be ignored
-	= Omit the "command being run" info entry by ending a line with '#', good at init file, mainly for /echo commands.   
+	___Commands___ (see /help)
+	= Alias to run multiple commands (like a function).
+	= Comment token detection, after it, line is ignored.
+	= Omit the "command being run" info entry by ending a line with '#', good at init file, mainly for /echo commands.
 	___Editing___ 
 	= Multi-line copy: Ctrl+b marks CopyFromIndex "begin", Ctrl+c marks CopyToIndex "end", Shift+click stores the previous CopyToIndex into CopyFromIndex.
 	= Single line wrap detection when copying.
@@ -37,9 +37,10 @@ DONE:
 	= ListboxSelectorClearAfterCopy
 	= Java7 compliance (instead of 8)
 	= FIX: Copy from/to is inverted concerning SHIFT key. Holding shift must mark copyTo.
+	= let multiple commands in a single line separated by ';'
 
 TODO.FastToImplement:
-	+ let multiple commands in a single line separated by ';'
+	+ Auto complete with aliases if line begins with alias token.
 	+ When date(day) changes, report on console. On startup report date on console.
 	+ Optional hundredth/tenth of a second at console log.
 	+ optionally keep all dump logs by moving files to name datetimed ones;bKeepAllLogs.transportFlDtTimeToName

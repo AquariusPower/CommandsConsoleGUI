@@ -238,7 +238,7 @@ public class ConsoleGuiState implements AppState{
 	protected Button	btnPaste;
 	protected boolean	bAddEmptyLineAfterCommand = true;
 //	protected String	strLineEncloseChar = "'";
-	protected String	strPreparedCmdLine = "";
+	protected String	strCmdLinePrepared = "";
 	protected CharSequence	strReplaceTAB = "  ";
 	protected float	fWidestCharForCurrentStyleFont;
 	protected boolean	bKeyShiftIsPressed;
@@ -252,6 +252,10 @@ public class ConsoleGuiState implements AppState{
 	protected String	strCommandDelimiter = ";";
 //	private boolean	bShowExecQueuedInfo = false;
 	protected ConsoleCommands	cc;
+	protected ArrayList<Alias> aAliasList = new ArrayList<Alias>();
+	private String	strCmdLineOriginal;
+	private boolean	bLastAliasCreatedSuccessfuly;
+	private String	strAliasPrefix = "$";
 	
 	public ConsoleGuiState() {
 		cc = new ConsoleCommands();
@@ -1038,6 +1042,7 @@ public class ConsoleGuiState implements AppState{
 		String strInputText = getInputText();
 		if(strInputText.isEmpty())return;
 		strInputText=extractCommandPart(strInputText,0);
+		if(strInputText==null)return; //something invalid was typed...
 //		strInputText=strInputText.substring(strCommandPrefixChar.length());
 //	if(tfAutoCompleteHint.getParent()==null && bKeyControlIsPressed){
 		if(lstbxAutoCompleteHint.getParent()==null && bKeyControlIsPressed){
@@ -1203,7 +1208,7 @@ public class ConsoleGuiState implements AppState{
 			strCmdFull=strCmdFull.substring(strCommandPrefixChar.length());
 		}
 		
-		String[] astr = strCmdFull.split("[^"+strValidCmdCharsRegex+"]");
+		String[] astr = strCmdFull.split("[^$"+strValidCmdCharsRegex+"]");
 		if(astr.length>iPart){
 			return astr[iPart];
 		}
@@ -1700,15 +1705,15 @@ public class ConsoleGuiState implements AppState{
 	}
 	
 	protected boolean isCommentedLine(){
-		if(strPreparedCmdLine==null)return false;
-		return strPreparedCmdLine.trim().startsWith(strCommentPrefixChar);
+		if(strCmdLinePrepared==null)return false;
+		return strCmdLinePrepared.trim().startsWith(strCommentPrefixChar);
 	}
 	
 	protected boolean checkCmdValidity(String strValidCmd){
 		return checkCmdValidity(strValidCmd, null);
 	}
 	protected boolean checkCmdValidity(String strValidCmd, String strComment){
-		if(strPreparedCmdLine==null){
+		if(strCmdLinePrepared==null){
 			if(strComment!=null){
 				strValidCmd+=" "+strCommentPrefixChar+strComment;
 			}
@@ -1718,9 +1723,9 @@ public class ConsoleGuiState implements AppState{
 			return false;
 		}
 		
-		if(strPreparedCmdLine.equals(TOKEN_MULTI_COMMAND_LINE))return false;
+		if(strCmdLinePrepared.equals(TOKEN_MULTI_COMMAND_LINE))return false;
 		if(isCommentedLine())return false;
-		if(strPreparedCmdLine.trim().isEmpty())return false;
+		if(strCmdLinePrepared.trim().isEmpty())return false;
 		
 //		String strCheck = strPreparedCmdLine;
 //		strCheck = strCheck.trim().split(" ")[0];
@@ -1872,6 +1877,9 @@ public class ConsoleGuiState implements AppState{
 		if(strFullCmdLine.contains(strCommandDelimiter)){
 			ArrayList<String> astrMulti = new ArrayList<String>();
 			astrMulti.addAll(Arrays.asList(strFullCmdLine.split(strCommandDelimiter)));
+			for(int i=0;i<astrMulti.size();i++){
+				astrMulti.set(i,astrMulti.get(i)+strCommentPrefixChar+i);
+			}
 			
 //			strFullCmdLine=null;
 			addToExecConsoleCommandQueue(astrMulti,true);
@@ -2037,15 +2045,14 @@ public class ConsoleGuiState implements AppState{
 //		return null;
 //	}
 	
-	protected void prepareCmdAndParams(String strFullCmdLine){
-		strPreparedCmdLine = null;
+	protected String prepareCmdAndParams(String strFullCmdLine){
 		if(strFullCmdLine!=null){
 			strFullCmdLine = strFullCmdLine.trim();
 			
-			if(strFullCmdLine.isEmpty())return; //dummy line
+			if(strFullCmdLine.isEmpty())return null; //dummy line
 			
 			// a comment shall not create any warning based on false return value...
-			if(strFullCmdLine.startsWith(strCommentPrefixChar))return; //comment is a "dummy command"
+			if(strFullCmdLine.startsWith(strCommentPrefixChar))return null; //comment is a "dummy command"
 			
 			// now it is possibly a command
 			
@@ -2056,17 +2063,99 @@ public class ConsoleGuiState implements AppState{
 				strFullCmdLine=strFullCmdLine.substring(0,strFullCmdLine.length()-strCommentPrefixChar.length());
 			}
 			
-			strPreparedCmdLine = convertToCmdParams(strFullCmdLine);
+			return convertToCmdParams(strFullCmdLine);
 		}
+		
+		return null;
 	}
 	
 	public String getPreparedCmdLine(){
-		return strPreparedCmdLine;
+		return strCmdLinePrepared;
+	}
+	
+	public class Alias{
+		String strAliasId;
+		String strCmdLine; // may contain ending comment too
+		boolean	bBlocked;
+		@Override
+		public String toString() {
+			return strCommandPrefixChar+"alias "
+					+(bBlocked?"[BLOCKED]":"")
+					+strAliasId+" "+strCmdLine;
+		}
+	}
+	
+	protected boolean checkAlias(){
+		bLastAliasCreatedSuccessfuly=false;
+		if(strCmdLineOriginal==null)return false;
+		String str = strCmdLineOriginal.trim();
+		String strExecAliasPrefix = strCommandPrefixChar+strAliasPrefix;
+		if(str.startsWith(strCommandPrefixChar+"alias ")){
+			/**
+			 * create
+			 */
+			Alias alias = new Alias();
+			
+			String[] astr = str.split(" ");
+			if(astr.length>=3){
+				alias.strAliasId=astr[1];
+				alias.strCmdLine=String.join(" ", Arrays.copyOfRange(astr, 2, astr.length));
+				
+				Alias aliasFound=null;
+				for(Alias aliasCheck : aAliasList){
+					if(aliasCheck.strAliasId.toLowerCase().equals(alias.strAliasId.toLowerCase())){
+						aliasFound = aliasCheck;
+						break;
+					}
+				}
+				
+				if(aliasFound!=null)aAliasList.remove(aliasFound);
+				
+				aAliasList.add(alias);
+				
+				bLastAliasCreatedSuccessfuly = true;
+			}
+		}else
+		if(str.startsWith(strExecAliasPrefix)){
+			/**
+			 * execute
+			 */
+			str=str.split(" ")[0].substring(strExecAliasPrefix.length()).toLowerCase();
+			for(Alias alias:aAliasList){
+				if(alias.strAliasId.toLowerCase().equals(str)){
+					if(!alias.bBlocked){
+						addToExecConsoleCommandQueue(alias.strCmdLine, true);
+						return true;
+					}else{
+						dumpWarnEntry(alias.toString());
+					}
+				}
+			}
+		}
+			
+		return bLastAliasCreatedSuccessfuly;
 	}
 	
 	protected boolean executePreparedCommand(){
 		boolean bOk = false;
 		
+		if(checkCmdValidity("alias","<identifier> [many commands] to execute an alias 'tst' prefix with '"+strAliasPrefix+"', ex.: "+strCommandPrefixChar+strAliasPrefix +"tst")){
+			bOk=bLastAliasCreatedSuccessfuly;
+		}else
+		if(checkCmdValidity("aliasBlock","<identifier> all nexts attempts to run the alias will be blocked")){
+			bOk=aliasBlock(paramString(1),true);
+		}else
+		if(checkCmdValidity("aliasList","[strFilter] list available aliases")){
+			String strFilter = paramString(1);
+			for(Alias alias:aAliasList){
+				if(strFilter!=null && !alias.toString().toLowerCase().contains(strFilter))continue;
+				dumpSubEntry(alias.toString());
+			}
+			bOk=true;
+		}else
+		if(checkCmdValidity("aliasUnblock","<identifier>")){
+			bOk=aliasBlock(paramString(1),false);
+		}else
 		if(checkCmdValidity("clearCommandsHistory")){
 			astrCmdHistory.clear();
 			bOk=true;
@@ -2260,8 +2349,8 @@ public class ConsoleGuiState implements AppState{
 		if(checkCmdValidity(TOKEN_CMD_NOT_WORKING_YET+"zDisabledCommand"," just to show how to use it")){
 			// keep this as reference
 		}else{
-			if(strPreparedCmdLine!=null){
-				if(strPreparedCmdLine.equals(TOKEN_MULTI_COMMAND_LINE)){
+			if(strCmdLinePrepared!=null){
+				if(strCmdLinePrepared.equals(TOKEN_MULTI_COMMAND_LINE)){
 					bOk=true;
 				}
 			}
@@ -2270,6 +2359,15 @@ public class ConsoleGuiState implements AppState{
 		return bOk;
 	}
 	
+	private boolean aliasBlock(String strAliasId, boolean bBlock) {
+		for(Alias alias : aAliasList){
+			if(alias.strAliasId.toLowerCase().equals(strAliasId.toLowerCase())){
+				alias.bBlocked=bBlock;
+				return true;
+			}
+		}
+		return false;
+	}
 	protected void showHelp(String strFilter) {
 		if(strFilter==null){
 			dumpInfoEntry("Available Commands:");
@@ -2291,9 +2389,13 @@ public class ConsoleGuiState implements AppState{
 	 */
 	protected boolean executeCommand(final String strFullCmdLineOriginal){
 		boolean bOk = false;
+		this.strCmdLineOriginal = strFullCmdLineOriginal;
 		try{
-			prepareCmdAndParams(strFullCmdLineOriginal);
-			bOk = executePreparedCommand();
+			bOk=checkAlias();
+			if(!bOk){
+				strCmdLinePrepared = prepareCmdAndParams(strFullCmdLineOriginal);
+				bOk = executePreparedCommand();
+			}
 		}catch(NumberFormatException e){
 			// keep this one as "warning", as user may simply fix the typed value
 			dumpWarnEntry("NumberFormatException: "+e.getMessage());
