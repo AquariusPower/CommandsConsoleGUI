@@ -27,6 +27,7 @@
 
 package gui.console;
 
+import groovyjarjarcommonscli.ParseException;
 import gui.console.ReflexFill.IReflexFillCfgVariant;
 import gui.console.ReflexFill.ReflexFillCfg;
 
@@ -52,6 +53,7 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.Lists;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
@@ -162,6 +164,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	protected Integer	iVisibleRowsAdjustRequest = 0; //0 means dynamic
 	protected String	strInfoEntryPrefix			=". ";
 	protected String	strWarnEntryPrefix			="?Warn: ";
+	protected String	strErrorEntryPrefix			="!ERROR: ";
 	protected String	strExceptionEntryPrefix	="!EXCEPTION: ";
 	protected String	strDevWarnEntryPrefix="?DevWarn: ";
 	protected String	strDevInfoEntryPrefix=". DevInfo: ";
@@ -240,12 +243,13 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	protected String	strCommandDelimiter = ";";
 //	protected boolean	bShowExecQueuedInfo = false;
 	protected ConsoleCommands	cc;
-	Hashtable<String,Object> ahkVariables = new Hashtable<String,Object>();
+	protected Hashtable<String,Object> ahtVariables = new Hashtable<String,Object>();
 	protected ArrayList<Alias> aAliasList = new ArrayList<Alias>();
 	protected String	strCmdLineOriginal;
 	protected boolean	bLastAliasCreatedSuccessfuly;
 	protected String	strAliasPrefix = "$";
-	private BoolToggler	btgReferenceMatched;
+	protected BoolToggler	btgReferenceMatched;
+	protected String	strVariableExpandPrefix = strAliasPrefix;
 	
 	protected static ConsoleGuiState i;
 	public static ConsoleGuiState i(){
@@ -473,7 +477,11 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 //				for(String str:astr)dumpEntry(strLineEncloseChar+str+strLineEncloseChar);
 //				dumpEntry(""); // this empty line for clipboard content display is i
 				dumpEntry(">>> Clipboard BEGIN");
-				for(String str:astr)dumpEntry(str);
+				for(int i=0;i<astr.length;i++){
+					String str=astr[i];
+					if(i<(astr.length-1))str+="\\n";
+					dumpEntry(false,true,str);
+				}
 				dumpEntry("<<< Clipboard END");
 				if(bAddEmptyLineAfterCommand)dumpEntry("");
 //				dumpEntry("");
@@ -1112,6 +1120,14 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 			}
 			*/
 			
+			for(int i=0;i<astr.size();i++){
+				String str=astr.get(i);
+				int iNL = str.indexOf("\n");
+				if(iNL>=0){
+					astr.set(i,str.substring(0,iNL));
+				}
+			}
+			
 			vlstrAutoCompleteHint.clear();
 			vlstrAutoCompleteHint.addAll(astr);
 //			lstbxAutoCompleteHint.updateLogicalState(0f);
@@ -1742,6 +1758,10 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		dumpEntry(false, cc.btgShowWarn.get(), getSimpleTime()+strWarnEntryPrefix+str);
 	}
 	
+	protected void dumpErrorEntry(String str){
+		dumpEntry(false, cc.btgShowWarn.get(), getSimpleTime()+strErrorEntryPrefix+str);
+	}
+	
 	/**
 	 * warnings that should not bother end users...
 	 * @param str
@@ -1966,20 +1986,14 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 				astrMulti.set(i,astrMulti.get(i)+strCommentPrefixChar+i);
 			}
 			
-//			strFullCmdLine=null;
 			addToExecConsoleCommandQueue(astrMulti,true);
-//			Collections.reverse(astrMulti);
-//			for(String strCmd : astrMulti){
-//				addToExecConsoleCommandQueue(strCmd);
-////				if(strFullCmdLine==null){
-////					strFullCmdLine = strCmd;
-////				}else{
-////					addToExecConsoleCommandQueue(strCmd);
-////				}
-//			}
 			return TOKEN_MULTI_COMMAND_LINE;
 		}
 		
+		/**
+		 * Prepare parameters, that can be enclosed in double quotes.
+		 * Param 0 is the actual command
+		 */
 		Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(strFullCmdLine);
 		while (m.find()){
 			String str=m.group(1);
@@ -1987,62 +2001,12 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 				if(str.trim().startsWith(strCommentPrefixChar))break; //ignore comments
 				str=str.trim();
 				str=str.replace("\"", ""); //remove all quotes on the string TODO could be only 1st and last? mmm... too much trouble...
-//				if(str.startsWith("\"") && str.endsWith("\"")){
-//					str=str.replace("\"", ""); //remove all quotes on the string TODO could be only 1st and last? mmm... too much trouble...
-//				}else{
-////					str=str.replace(strCommandDelimiter, " ;"); //good to help on splitting multi-commands line
-//					if(str.contains(strCommandDelimiter)){
-//						for(String strPart:str.split(strCommandDelimiter)){
-//							astr.add(strPart+strCommandDelimiter);
-//						}
-////						astr.addAll(Arrays.asList(str.split(strCommandDelimiter)));
-//						str = null;
-//					}
-//				}
-//				if(str!=null)astr.add(str);
 				astrCmdAndParams.add(str);
 			}
 		}
 		
 		return strFullCmdLine;
 	}
-	
-//	protected ArrayList<String> splitMultiCommandsLine(ArrayList<String> astr){
-//		dumpDevInfoEntry("splitting:"+astr);
-//		
-//		ArrayList<String> astrNew = new ArrayList<String>();
-//		ArrayList<String> astrMulti = new ArrayList<String>();
-//		boolean bMultiCommand=false;
-//		for(String strParam : astr){
-//			if(!bMultiCommand){
-//				/**
-//				 * commands MUST NEVER have spaces
-//				 * so trim() is only applied if it is a command
-//				 */
-//				if(
-//						strParam.trim().startsWith(strCommandDelimiter)
-//						||
-//						strParam.trim().endsWith(strCommandDelimiter)
-//				){
-//					// remove first delimiter only one only
-//					strParam=strParam.trim().substring(strCommandDelimiter.length());
-//					bMultiCommand=true;
-//				}
-//			}
-//			
-//			if(bMultiCommand){
-//				astrMulti.add(strParam);
-//			}else{
-//				astrNew.add(strParam);
-//			}
-//		}
-//		
-//		if(astrMulti.size()>0){
-//			addToExecConsoleCommandQueue("\""+String.join("\" \"", astrMulti)+"\"");
-//		}
-//		
-//		return astrNew;
-//	}
 	
 	/**
 	 * 
@@ -2057,8 +2021,13 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	 * @return
 	 */
 	protected String paramString(int iIndex){
-		if(astrCmdAndParams.size()>iIndex){
-			return astrCmdAndParams.get(iIndex);
+		if(iIndex<astrCmdAndParams.size()){
+			String str=astrCmdAndParams.get(iIndex);
+			if(str.startsWith(strVariableExpandPrefix)){
+				return varGetValueString(str.substring(strVariableExpandPrefix.length()));
+			}else{
+				return str;
+			}
 		}
 		return null;
 	}
@@ -2170,6 +2139,21 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		}
 	}
 	
+	protected Alias getAlias(String strAliasId){
+		Alias aliasFound=null;
+		for(Alias aliasCheck : aAliasList){
+			if(aliasCheck.strAliasId.toLowerCase().equals(strAliasId.toLowerCase())){
+				aliasFound = aliasCheck;
+				break;
+			}
+		}
+		return aliasFound;
+	}
+	
+	protected boolean hasVar(String strId){
+		return ahtVariables.get(strId)!=null;
+	}
+	
 	protected boolean checkAlias(){
 		bLastAliasCreatedSuccessfuly=false;
 		if(strCmdLineOriginal==null)return false;
@@ -2184,16 +2168,14 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 			String[] astr = str.split(" ");
 			if(astr.length>=3){
 				alias.strAliasId=astr[1];
-				alias.strCmdLine=String.join(" ", Arrays.copyOfRange(astr, 2, astr.length));
-				
-				Alias aliasFound=null;
-				for(Alias aliasCheck : aAliasList){
-					if(aliasCheck.strAliasId.toLowerCase().equals(alias.strAliasId.toLowerCase())){
-						aliasFound = aliasCheck;
-						break;
-					}
+				if(hasVar(alias.strAliasId)){
+					dumpErrorEntry("Alias identifier '"+alias.strAliasId+"' conflicts with existing variable!");
+					return false;
 				}
 				
+				alias.strCmdLine=String.join(" ", Arrays.copyOfRange(astr, 2, astr.length));
+				
+				Alias aliasFound=getAlias(alias.strAliasId);
 				if(aliasFound!=null)aAliasList.remove(aliasFound);
 				
 				aAliasList.add(alias);
@@ -2227,7 +2209,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		if(checkCmdValidityBoolTogglers()){
 			bOk=toggle(btgReferenceMatched);
 		}else
-		if(checkCmdValidity("alias","[<[+|-|~]identifier>] [commands]\n"
+		if(checkCmdValidity("alias","[<identifier> <commands>] | [<+|->identifier] | [~filter]\n"
 				+"\t\tWithout params, will list all aliases\n"
 				+"\t\t~filter - will filter (contains) the alias list\n"
 				+"\t\t-identifier - will block that alias execution\n"
@@ -2423,9 +2405,25 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 			scrollToBottomRequest();
 			bOk=true;
 		}else
-		if(checkCmdValidity("set","<varId> <value> can be a number or a string, use as: $varId")){
-			ahkVariables.put(paramString(1),paramString(2));
-			bOk=true;
+		if(checkCmdValidity("varAdd","<varId> <[-]value>")){
+			bOk=varAdd(paramString(1),paramString(2),false);
+		}else
+		if(checkCmdValidity("varSet","[<varId> <value>] | [~filter] - can be a number or a string, retrieve it's value with: $varId")){
+			String strVarIdOrFilter = paramString(1);
+			if(strVarIdOrFilter==null || strVarIdOrFilter.startsWith("~")){
+				dumpInfoEntry("Variables list:");
+				if(strVarIdOrFilter!=null)strVarIdOrFilter=strVarIdOrFilter.substring(1);
+				for(String strVarId : Lists.newArrayList(ahtVariables.keySet().iterator())){
+					if(strVarIdOrFilter!=null && !strVarId.toLowerCase().equals(strVarIdOrFilter.toLowerCase())){
+						continue;
+					}
+					
+					varReport(strVarId);
+				}
+				bOk=true;
+			}else{
+				bOk=varSet(paramString(1),paramString(2));
+			}
 		}else
 //		if(checkCmdValidity(cc.btgShowDeveloperInfo.getCmdId(),"[bEnable] messages")){
 //			bOk = toggle(cc.btgShowDeveloperInfo);
@@ -2490,6 +2488,125 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		
 		return bOk;
 	}
+	
+	protected Boolean parseBoolean(String strValue){
+		if(strValue.equalsIgnoreCase("true"))return new Boolean(true);
+		if(strValue.equalsIgnoreCase("1"))return new Boolean(true);
+		if(strValue.equalsIgnoreCase("false"))return new Boolean(false);
+		if(strValue.equalsIgnoreCase("0"))return new Boolean(false);
+		throw new NumberFormatException("invalid boolean value: "+strValue);
+	}
+	
+	protected boolean varAdd(String strVarId, String strValueAdd, boolean bOverwrite){
+		Object objValueNew = null;
+		Object objValueCurrent = ahtVariables.get(strVarId);
+		if(objValueCurrent!=null){
+			if(Boolean.class.isAssignableFrom(objValueCurrent.getClass())){
+				// boolean is always overwrite
+				objValueNew = parseBoolean(strValueAdd);
+			}else
+			if(Long.class.isAssignableFrom(objValueCurrent.getClass())){
+				Long lValueCurrent = (Long)objValueCurrent;
+				Long lValueAdd=null;
+				try{lValueAdd = Long.parseLong(strValueAdd);}catch(NumberFormatException e){}// accepted exception!
+				if(lValueAdd!=null){
+					if(bOverwrite)lValueCurrent=0L;
+					lValueCurrent+=lValueAdd;
+					objValueNew = lValueCurrent;
+				}else{
+					dumpWarnEntry("Add value should be: "+Long.class.getSimpleName());
+				}
+			}else
+			if(Double.class.isAssignableFrom(objValueCurrent.getClass())){
+				Double dValueCurrent = (Double)objValueCurrent;
+				Double dValueAdd=null;
+				try{dValueAdd = Double.parseDouble(strValueAdd);}catch(NumberFormatException e){}// accepted exception!
+				if(dValueAdd!=null){
+					if(bOverwrite)dValueCurrent=0.0;
+					dValueCurrent+=dValueAdd;
+					objValueNew = dValueCurrent;
+				}else{
+					dumpWarnEntry("Add value should be: "+Double.class.getSimpleName());
+				}
+			}else{
+				if(bOverwrite)objValueCurrent="";
+				objValueNew = ""+objValueCurrent+strValueAdd;
+			}
+		}else{
+			return varSet(strVarId, strValueAdd);
+		}
+		
+		if(objValueNew==null)return false;
+		
+		varApply(strVarId,objValueNew);
+		return true;
+	}
+	
+	protected boolean varApply(String strVarId, Object objValue){
+		ahtVariables.put(strVarId,objValue);
+		varReport(strVarId);
+		return true;
+	}
+	
+	private void varReport(String strVarId) {
+		Object objValue=ahtVariables.get(strVarId);
+		if(objValue!=null){
+			dumpSubEntry(strVarId+" = \""+objValue+"\"");
+		}else{
+			dumpSubEntry(strVarId+" is not set...");
+		}
+	}
+	
+	protected boolean varSet(String strVarId, String strValue) {
+		if(getAlias(strVarId)!=null){
+			dumpErrorEntry("Variable identifier '"+strVarId+"' conflicts with existing alias!");
+			return false;
+		}
+		
+		if(strValue==null)return false; //strValue=""; //just creates the var
+		
+		if(hasVar(strVarId)){
+			return varAdd(strVarId, strValue, true);
+		}
+		
+		boolean bOk=false;
+		
+		if(!bOk){
+			try{bOk=varApply(strVarId, Long  .parseLong  (strValue));}catch(NumberFormatException e){}// accepted exception!
+		}
+		
+		if(!bOk){
+			try{bOk=varApply(strVarId, Double.parseDouble(strValue));}catch(NumberFormatException e){}// accepted exception!
+		}
+		
+		if(!bOk){
+			try{bOk=varApply(strVarId, parseBoolean      (strValue));}catch(NumberFormatException e){}// accepted exception!
+		}
+		
+		if(!bOk){
+			bOk=varApply(strVarId,strValue);
+		}
+		
+		return bOk;
+	}
+	
+	/**
+	 * 
+	 * @param strVarId
+	 * @return "null" if not set
+	 */
+	protected String varGetValueString(String strVarId){
+		Object obj = ahtVariables.get(strVarId);
+		if(obj==null)return "null";
+		return ""+obj;
+	}
+//	protected Double varGetValueDouble(String strVarId){
+//		Object obj = ahkVariables.get(strVarId);
+//		if(obj==null)return null;
+//		if(obj instanceof Double)return (Double)obj;
+//		dumpExceptionEntry(new typeex);
+//		return null;
+//	}
 	
 	protected boolean aliasBlock(String strAliasId, boolean bBlock) {
 		for(Alias alias : aAliasList){
