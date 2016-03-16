@@ -27,6 +27,9 @@
 
 package gui.console;
 
+import gui.console.ReflexFill.IReflexFillCfgVariant;
+import gui.console.ReflexFill.ReflexFillCfg;
+
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
@@ -44,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -97,37 +101,21 @@ import com.simsilica.lemur.style.Styles;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleGuiState implements AppState{
-	public static final String IMCPREFIX = "CONSOLEGUISTATE_";
-	public static final String INPUT_MAPPING_CONSOLE_TOGGLE = IMCPREFIX+"Toggle";
-//	public static final String INPUT_MAPPING_CONSOLE_HIST_PREV = "CONSOLE_HistPrev";
-//	public static final String INPUT_MAPPING_CONSOLE_HIST_NEXT = "CONSOLE_HistNext";
-	public static final String INPUT_MAPPING_CONSOLE_SCROLLUP = IMCPREFIX+"ScrollUp";
-	public static final String INPUT_MAPPING_CONSOLE_SCROLLDOWN = IMCPREFIX+"ScrollDown";
-	public static final String INPUT_MAPPING_CONSOLE_SHIFT_PRESSED	= IMCPREFIX+"ShiftPressed";
-	public static final String INPUT_MAPPING_CONSOLE_CONTROL_PRESSED	= IMCPREFIX+"ControlPressed";
+public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	
-	/**
-	 * user can type these below at console
-	 */
-	public static final String CMD_CLOSE_CONSOLE="closeConsole";
-	public static final String CMD_CONSOLE_STYLE = "consoleStyle";
-	public static final String CMD_ECHO = "echo";
-	public static final String CMD_HELP="help";
-	public static final String CMD_HISTORY="history";
-	public static final String CMD_MODIFY_CONSOLE_HEIGHT = "consoleHeight";
-	public static final String CMD_SCROLL_BOTTOM = "consoleScrollBottom";
-	public static final String CMD_FIX_LINEWRAP = "fixLineWrap";
-	public static final String CMD_LINEWRAP_AT = "lineWrapAt";
-	public static final String CMD_HK_TOGGLE = "HKtoggle";
-	public static final String CMD_FIX_CURSOR_VISIBILITY = "fixCursor";
+	public final String IMCPREFIX = "CONSOLEGUISTATE_";
+	public final StringField INPUT_MAPPING_CONSOLE_TOGGLE = new StringField(this);
+	public final StringField INPUT_MAPPING_CONSOLE_SCROLL_UP = new StringField(this);
+	public final StringField INPUT_MAPPING_CONSOLE_SCROLL_DOWN = new StringField(this);
+	public final StringField INPUT_MAPPING_CONSOLE_SHIFT_PRESSED	= new StringField(this);
+	public final StringField INPUT_MAPPING_CONSOLE_CONTROL_PRESSED	= new StringField(this);
 	
-	public static final String STYLE_CONSOLE="console";
+	public final String STYLE_CONSOLE="console";
 	
-	public static final String	TOKEN_MULTI_COMMAND_LINE	= "_MultiCommandLineToken";
+	public final String	TOKEN_MULTI_COMMAND_LINE	= "_MultiCommandLineToken";
 	
 	// not public... development token... 
-	protected static final String	TOKEN_CMD_NOT_WORKING_YET = "[NOTWORKINGYET]";
+	protected final String	TOKEN_CMD_NOT_WORKING_YET = "[NOTWORKINGYET]";
 	
 	/**
 	 * keep "initialized" vars together!
@@ -250,14 +238,21 @@ public class ConsoleGuiState implements AppState{
 	protected String	strPreviousInputValue;
 	protected int	iCmdHistoryPreviousIndex;
 	protected String	strCommandDelimiter = ";";
-//	private boolean	bShowExecQueuedInfo = false;
+//	protected boolean	bShowExecQueuedInfo = false;
 	protected ConsoleCommands	cc;
+	Hashtable<String,Object> ahkVariables = new Hashtable<String,Object>();
 	protected ArrayList<Alias> aAliasList = new ArrayList<Alias>();
-	private String	strCmdLineOriginal;
-	private boolean	bLastAliasCreatedSuccessfuly;
-	private String	strAliasPrefix = "$";
+	protected String	strCmdLineOriginal;
+	protected boolean	bLastAliasCreatedSuccessfuly;
+	protected String	strAliasPrefix = "$";
+	private BoolToggler	btgReferenceMatched;
 	
+	protected static ConsoleGuiState i;
+	public static ConsoleGuiState i(){
+		return i;
+	}
 	public ConsoleGuiState() {
+		if(i==null)i=this;
 		cc = new ConsoleCommands();
 	}
 	public ConsoleGuiState(int iToggleConsoleKey) {
@@ -295,15 +290,15 @@ public class ConsoleGuiState implements AppState{
 		}
 		
 		// other inits
-		addToExecConsoleCommandQueue(CMD_FIX_LINEWRAP);
-		addToExecConsoleCommandQueue(CMD_SCROLL_BOTTOM);
+		addToExecConsoleCommandQueue(cc.CMD_FIX_LINE_WRAP);
+		addToExecConsoleCommandQueue(cc.CMD_CONSOLE_SCROLL_BOTTOM);
 		if(bInitiallyClosed){
-			addToExecConsoleCommandQueue(CMD_CLOSE_CONSOLE);
+			addToExecConsoleCommandQueue(cc.CMD_CLOSE_CONSOLE);
 		}
 		/**
 		 * must be the last queued command after all init ones!
 		 */
-		addToExecConsoleCommandQueue(cc.bhShowExecQueuedInfo.getCmdId()+" "+true);
+		addToExecConsoleCommandQueue(cc.btgShowExecQueuedInfo.getCmdId()+" "+true);
 		
 		astrStyleList.add(BaseStyles.GLASS);
 		astrStyleList.add(Styles.ROOT_STYLE);
@@ -416,13 +411,18 @@ public class ConsoleGuiState implements AppState{
 		ctnrStatsAndControls.addChild(btnPaste,0,++iButtonIndex);
 		
 		/**
-		 * CENTER ELEMENT
+		 * CENTER ELEMENT (dump entries area)
 		 */
-		// dump entries area
 		lstbx = new ListBox<String>(new VersionedList<String>(),strStyle);
 		Vector3f v3fLstbxSize = v3fConsoleSize.clone();
 		lstbx.setSize(v3fLstbxSize); // no need to update fLstbxHeight, will be automatic
 		//TODO not working? lstbx.getSelectionModel().setSelectionMode(SelectionMode.Multi);
+		
+		/**
+		 * The existance of at least one entry is very important to help on initialization.
+		 * Actually to determine the listbox entry height.
+		 */
+		if(vlstrDumpEntries.isEmpty())vlstrDumpEntries.add(strCommentPrefixChar+" Initializing console.");
 		
 		lstbx.setModel(vlstrDumpEntries);
 		lstbx.setVisibleItems(iShowRows);
@@ -508,11 +508,23 @@ public class ConsoleGuiState implements AppState{
 				if(iCopyFrom>=vlstrDumpEntries.size())break;
 				
 				String strEntry = vlstrDumpEntries.get(iCopyFrom);
+//				strEntry=strEntry.replace("\\n","\n"); //translate in-between newline requests into newline
 				
-				boolean bJoinWithNext = strEntry.endsWith("\\"); //wrap mode
+				boolean bJoinWithNext = false;
+				if(strEntry.endsWith("\\")){
+					bJoinWithNext=true;
+					
+					/**
+					 * removes trailing linewrap indicator
+					 */
+					strEntry = strEntry.substring(0, strEntry.length()-1); 
+				}else
+				if(strEntry.endsWith("\\n")){
+					bJoinWithNext=true;
+					strEntry = strEntry.substring(0, strEntry.length()-2);
+					strEntry+="\n";
+				}
 				
-				//removes trailing escape char
-				if(bJoinWithNext)strEntry = strEntry.substring(0, strEntry.length()-1); 
 				str+=strEntry;
 				
 				if(!bJoinWithNext)str+="\n";
@@ -764,18 +776,11 @@ public class ConsoleGuiState implements AppState{
 						if(bControl)clearInputTextField();
 						break;
 					case KeyInput.KEY_SLASH:
-						if(bControl){
-							String str = getInputText();
-							if(str.startsWith(strCommentPrefixChar)){
-								str=str.substring(1);
-							}else{
-								str=strCommentPrefixChar+str;
-							}
-							tfInput.setText(str);
-						}
+						if(bControl)toggleLineCommentOrCommand();
 						break;
 				}
 			}
+
 		};
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_TAB), actSimpleActions);
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_TAB,KeyAction.CONTROL_DOWN), actSimpleActions);
@@ -837,23 +842,23 @@ public class ConsoleGuiState implements AppState{
 			@Override
 			public void keyAction(TextEntryComponent source, KeyAction key) {
 				boolean bControl = key.hasModifier(KeyAction.CONTROL_DOWN); //0x1
-				double dCurrent = lstbx.getSlider().getModel().getValue();
+				double dCurrent = getScrollDumpAreaFlindex();
 				double dAdd = 0;
 				switch(key.getKeyCode()){
 					case KeyInput.KEY_PGUP:
-						dAdd = +iShowRows;
-						break;
-					case KeyInput.KEY_PGDN:
 						dAdd = -iShowRows;
 						break;
-					case KeyInput.KEY_HOME:
-						if(bControl)dAdd = vlstrDumpEntries.size();
+					case KeyInput.KEY_PGDN:
+						dAdd = +iShowRows;
 						break;
-					case KeyInput.KEY_END:
+					case KeyInput.KEY_HOME:
 						if(bControl)dAdd = -dCurrent;
 						break;
+					case KeyInput.KEY_END:
+						if(bControl)dAdd = vlstrDumpEntries.size();
+						break;
 				}
-				lstbx.getSlider().getModel().setValue(dCurrent + dAdd);
+				scrollDumpArea(dCurrent + dAdd);
 				scrollToBottomRequestSuspend();
 			}
 		};
@@ -863,6 +868,15 @@ public class ConsoleGuiState implements AppState{
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_END, KeyAction.CONTROL_DOWN), actDumpNavigate);
 	}
 	
+	protected void toggleLineCommentOrCommand() {
+		String str = getInputText();
+		if(str.startsWith(strCommentPrefixChar)){
+			str=str.substring(1);
+		}else{
+			str=strCommentPrefixChar+str;
+		}
+		tfInput.setText(str);
+	}
 	protected boolean isHintActive(){
 		return lstbxAutoCompleteHint.getParent()!=null;
 	}
@@ -908,8 +922,8 @@ public class ConsoleGuiState implements AppState{
 		
 		// console toggle
 		if(iToggleConsoleKey!=null){
-			if(!sapp.getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_TOGGLE)){
-				sapp.getInputManager().addMapping(INPUT_MAPPING_CONSOLE_TOGGLE, 
+			if(!sapp.getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_TOGGLE.toString())){
+				sapp.getInputManager().addMapping(INPUT_MAPPING_CONSOLE_TOGGLE.toString(), 
 					new KeyTrigger(iToggleConsoleKey));
 					
 				alConsoleToggle = new ActionListener() {
@@ -923,12 +937,12 @@ public class ConsoleGuiState implements AppState{
 						}
 					}
 				};
-				sapp.getInputManager().addListener(alConsoleToggle, INPUT_MAPPING_CONSOLE_TOGGLE);            
+				sapp.getInputManager().addListener(alConsoleToggle, INPUT_MAPPING_CONSOLE_TOGGLE.toString());            
 			}
 		}
 		
-		if(!sapp.getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_CONTROL_PRESSED)){
-			sapp.getInputManager().addMapping(INPUT_MAPPING_CONSOLE_CONTROL_PRESSED, 
+		if(!sapp.getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_CONTROL_PRESSED.toString())){
+			sapp.getInputManager().addMapping(INPUT_MAPPING_CONSOLE_CONTROL_PRESSED.toString(), 
 					new KeyTrigger(KeyInput.KEY_LCONTROL),
 					new KeyTrigger(KeyInput.KEY_RCONTROL));
 			
@@ -938,11 +952,11 @@ public class ConsoleGuiState implements AppState{
 					bKeyControlIsPressed  = isPressed;
 				}
 			};
-			sapp.getInputManager().addListener(al, INPUT_MAPPING_CONSOLE_CONTROL_PRESSED);            
+			sapp.getInputManager().addListener(al, INPUT_MAPPING_CONSOLE_CONTROL_PRESSED.toString());            
 		}
 		
-		if(!sapp.getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_SHIFT_PRESSED)){
-			sapp.getInputManager().addMapping(INPUT_MAPPING_CONSOLE_SHIFT_PRESSED, 
+		if(!sapp.getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_SHIFT_PRESSED.toString())){
+			sapp.getInputManager().addMapping(INPUT_MAPPING_CONSOLE_SHIFT_PRESSED.toString(), 
 				new KeyTrigger(KeyInput.KEY_LSHIFT),
 				new KeyTrigger(KeyInput.KEY_RSHIFT));
 				
@@ -952,39 +966,39 @@ public class ConsoleGuiState implements AppState{
 					bKeyShiftIsPressed  = isPressed;
 				}
 			};
-			sapp.getInputManager().addListener(al, INPUT_MAPPING_CONSOLE_SHIFT_PRESSED);            
+			sapp.getInputManager().addListener(al, INPUT_MAPPING_CONSOLE_SHIFT_PRESSED.toString());            
 		}
 		
 		// mouse scroll
-    Trigger[] tggScrollUp = {new MouseAxisTrigger(MouseInput.AXIS_WHEEL, true)};
-    Trigger[] tggScrollDown = {new MouseAxisTrigger(MouseInput.AXIS_WHEEL, false)};
+    Trigger[] tggScrollUp = {new MouseAxisTrigger(MouseInput.AXIS_WHEEL, false)};
+    Trigger[] tggScrollDown = {new MouseAxisTrigger(MouseInput.AXIS_WHEEL, true)};
     
     alConsoleScroll = new AnalogListener() {
 			@Override
 			public void onAnalog(String name, float value, float tpf) {
 	      if (isEnabled()) {
-	      	double d = lstbx.getSlider().getModel().getValue();
+	      	double dScrollCurrentFlindex = getScrollDumpAreaFlindex();
 	      	double dScrollBy = iShowRows/5; //20% of the visible rows
 	      	if(dMouseMaxScrollBy!=null){
 		      	if(dScrollBy > dMouseMaxScrollBy)dScrollBy = dMouseMaxScrollBy;
 	      	}
 	      	if(dScrollBy < 1)dScrollBy = 1;
 	      	
-					if(name.equals(INPUT_MAPPING_CONSOLE_SCROLLUP)){
-						lstbx.getSlider().getModel().setValue(d - dScrollBy);
+					if(INPUT_MAPPING_CONSOLE_SCROLL_UP.equals(name)){
+						scrollDumpArea(dScrollCurrentFlindex - dScrollBy);
 					}else
-					if(name.equals(INPUT_MAPPING_CONSOLE_SCROLLDOWN)){
-						lstbx.getSlider().getModel().setValue(d + dScrollBy);
+					if(INPUT_MAPPING_CONSOLE_SCROLL_DOWN.equals(name)){
+						scrollDumpArea(dScrollCurrentFlindex + dScrollBy);
 					}
 	      }
 			}
 		};
     
-    sapp.getInputManager().addMapping(INPUT_MAPPING_CONSOLE_SCROLLUP, tggScrollUp);
-    sapp.getInputManager().addListener(alConsoleScroll, INPUT_MAPPING_CONSOLE_SCROLLUP);
+    sapp.getInputManager().addMapping(INPUT_MAPPING_CONSOLE_SCROLL_UP+"", tggScrollUp);
+    sapp.getInputManager().addListener(alConsoleScroll, INPUT_MAPPING_CONSOLE_SCROLL_UP+"");
     
-    sapp.getInputManager().addMapping(INPUT_MAPPING_CONSOLE_SCROLLDOWN, tggScrollDown);
-    sapp.getInputManager().addListener(alConsoleScroll, INPUT_MAPPING_CONSOLE_SCROLLDOWN);
+    sapp.getInputManager().addMapping(INPUT_MAPPING_CONSOLE_SCROLL_DOWN+"", tggScrollDown);
+    sapp.getInputManager().addListener(alConsoleScroll, INPUT_MAPPING_CONSOLE_SCROLL_DOWN+"");
 	}
 	
 	protected void fillInputFieldWithHistoryDataAtIndex(int iIndex){
@@ -1016,9 +1030,9 @@ public class ConsoleGuiState implements AppState{
 		GuiGlobals.getInstance().requestFocus(tfInput);
 	}
 	
-	private void updateToggles() {
-		if(cc.bhEngineStatsView.checkChangedAndUpdate())updateEngineStats();
-		if(cc.bhEngineStatsFps.checkChangedAndUpdate())updateEngineStats();
+	protected void updateToggles() {
+		if(cc.btgEngineStatsView.checkChangedAndUpdate())updateEngineStats();
+		if(cc.btgEngineStatsFps.checkChangedAndUpdate())updateEngineStats();
 	}
 	protected void resetCmdHistoryCursor(){
 		iCmdHistoryCurrentIndex = astrCmdHistory.size();
@@ -1499,6 +1513,9 @@ public class ConsoleGuiState implements AppState{
 			addToExecConsoleCommandQueue(str, bPrepend);
 		}
 	}
+	protected void addToExecConsoleCommandQueue(StringField strfFullCmdLine){
+		addToExecConsoleCommandQueue(strfFullCmdLine.toString());
+	}
 	protected void addToExecConsoleCommandQueue(String strFullCmdLine){
 		addToExecConsoleCommandQueue(strFullCmdLine,false);
 	}
@@ -1526,7 +1543,7 @@ public class ConsoleGuiState implements AppState{
 		if(astrExecConsoleCmdsQueue.size()>0){ // one per time! NO while here!!!!
 			String str=astrExecConsoleCmdsQueue.remove(0);
 			if(!str.trim().endsWith(strCommentPrefixChar)){
-				if(cc.bhShowExecQueuedInfo.get()){ // prevent messing user init cfg console log
+				if(cc.btgShowExecQueuedInfo.get()){ // prevent messing user init cfg console log
 					dumpInfoEntry("ExecQueued: "+str);
 				}
 			}
@@ -1538,7 +1555,7 @@ public class ConsoleGuiState implements AppState{
 	
 	protected void showHelpForFailedCommand(String strFullCmdLine){
 		if(validateBaseCommand(strFullCmdLine)){
-//			addToExecConsoleCommandQueue(CMD_HELP+" "+extractCommandPart(strFullCmdLine,0));
+//			addToExecConsoleCommandQueue(cc.CMD_HELP+" "+extractCommandPart(strFullCmdLine,0));
 			showHelp(extractCommandPart(strFullCmdLine,0));
 		}else{
 			dumpWarnEntry("Invalid command: "+strFullCmdLine);
@@ -1579,18 +1596,43 @@ public class ConsoleGuiState implements AppState{
 			}
 		}
 		
-		lstbx.getSlider().getModel().setPercent(0.0);
-		lstbx.getSlider().getModel().setValue(0);
+		scrollDumpArea(-1);
 		tdScrollToBottomRetry.updateTime();
 		iScrollRetryAttemptsDBG++;
 	}	
 	
+	/**
+	 * 
+	 * @param dIndex if -1, means max index (bottom)
+	 */
+	protected void scrollDumpArea(double dIndex){
+		/**
+		 * the index is actually inverted
+		 */
+		double dMax = lstbx.getSlider().getModel().getMaximum();
+		if(dIndex==-1)dIndex=dMax;
+		dIndex = dMax-dIndex;
+		double dPerc = dIndex/dMax;
+		
+		lstbx.getSlider().getModel().setPercent(dPerc);
+		lstbx.getSlider().getModel().setValue(dIndex);
+	}
+	
+	/**
+	 * 
+	 * @return a "floating point index" (Dlindex)
+	 */
+	public double getScrollDumpAreaFlindex(){
+		return lstbx.getSlider().getModel().getMaximum()
+				-lstbx.getSlider().getModel().getValue();
+	}
+	
 	protected String getSimpleTime(){
-		return "["+new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime())+"]";
+		return "["+new SimpleDateFormat("HH:mm:ss"+(cc.btgShowMiliseconds.get()?".SSS":"")).format(Calendar.getInstance().getTime())+"]";
 	}
 	
 	protected void dumpEntry(String strLineOriginal){
-		dumpEntry(true, strLineOriginal);
+		dumpEntry(true, true, strLineOriginal);
 	}
 	/**
 	 * Simplest dump entry method, but still provides line-wrap.
@@ -1598,7 +1640,7 @@ public class ConsoleGuiState implements AppState{
 	 * @param bDump if false, will only log to file
 	 * @param strLineOriginal
 	 */
-	protected void dumpEntry(boolean bDump, String strLineOriginal){
+	protected void dumpEntry(boolean bApplyNewLineRequests, boolean bDump, String strLineOriginal){
 		if(bDump){
 			if(iConsoleMaxWidthInCharsForLineWrap!=null){
 				ArrayList<String> astr = new ArrayList<String>();
@@ -1606,22 +1648,51 @@ public class ConsoleGuiState implements AppState{
 					astr.add(strLineOriginal);
 				}else{
 					String strLine = strLineOriginal.replace("\t", strReplaceTAB);
-					strLine=strLine.replace("\r", "");
+					strLine=strLine.replace("\r", ""); //removes carriage return
+					
+					if(bApplyNewLineRequests){
+						strLine=strLine.replace("\\n","\n"); //converts newline request into newline char
+					}else{
+						strLine=strLine.replace("\n","\\n"); //disables any newline char without losing it
+					}
 					
 					int iWrapAt = iConsoleMaxWidthInCharsForLineWrap;
-					if(strStyle.equals(STYLE_CONSOLE)){ //TODO is faster?
+					if(STYLE_CONSOLE.equals(strStyle)){ //TODO is faster?
 						iWrapAt = (int) (widthForDumpEntryField() / fWidestCharForCurrentStyleFont ); //'W' but any char will do for monospaced font
 					}
 					
+					//TODO use \n to create a new line properly
 					if(iWrapAt>0){ //fixed chars wrap
-						for (int i=0;i<strLine.length();i+=iWrapAt){
-							astr.add(strLine.substring(
-								i, 
-								Math.min(strLine.length(),i+iWrapAt)
-							));
+						String strLineToDump="";
+						boolean bDumpAdd=false;
+						for (int i=0;i<strLine.length();i++){
+							char ch = strLine.charAt(i);
+							strLineToDump+=ch;
+							if(ch=='\n'){
+								bDumpAdd=true;
+							}else
+							if(strLineToDump.length()==iWrapAt){
+								bDumpAdd=true;
+							}else
+							if(i==(strLine.length()-1)){
+								bDumpAdd=true;
+							}
+							
+							if(bDumpAdd){
+								astr.add(strLineToDump);
+								strLineToDump="";
+								bDumpAdd=false;
+							}
 						}
-					}else{ // auto wrap
-						//TODO too slow right? isnt there a better way to do that?
+						
+//						for (int i=0;i<strLine.length();i+=iWrapAt){
+//							String strLineToDump = strLine.substring(
+//									i, 
+//									Math.min(strLine.length(),i+iWrapAt)
+//								);
+//							astr.add(strLineToDump);
+//						}
+					}else{ // auto wrap, TODO is this slow?
 						String strAfter = "";
 						float fMaxWidth = widthForDumpEntryField() - iDotsMarginSafetyGUESSED;
 						while(strLine.length()>0){
@@ -1638,14 +1709,16 @@ public class ConsoleGuiState implements AppState{
 				}
 				
 				/**
-				 * LINE WRAP INDICATOR
+				 * ADD LINE WRAP INDICATOR
 				 */
-//				for(String strPart : Splitter.fixedLength(iConsoleWidthInChars ).split(strLine)){
-//				for(String strPart : astr){ //strPart.length();
 				for(int i=0;i<astr.size();i++){
 					String strPart = astr.get(i);
 					if(i<(astr.size()-1)){
-						strPart+="\\"; // line wrap indicator
+						if(strPart.endsWith("\n")){
+							strPart=strPart.substring(0, strPart.length()-1)+"\\n"; // new line indicator
+						}else{
+							strPart+="\\"; // line wrap indicator
+						}
 					}
 					vlstrDumpEntries.add(strPart);
 				}
@@ -1662,11 +1735,11 @@ public class ConsoleGuiState implements AppState{
 	}
 	
 	protected void dumpInfoEntry(String str){
-		dumpEntry(cc.bhShowInfo.get(), getSimpleTime()+strInfoEntryPrefix+str);
+		dumpEntry(false, cc.btgShowInfo.get(), getSimpleTime()+strInfoEntryPrefix+str);
 	}
 	
 	protected void dumpWarnEntry(String str){
-		dumpEntry(cc.bhShowWarn.get(), getSimpleTime()+strWarnEntryPrefix+str);
+		dumpEntry(false, cc.btgShowWarn.get(), getSimpleTime()+strWarnEntryPrefix+str);
 	}
 	
 	/**
@@ -1674,15 +1747,15 @@ public class ConsoleGuiState implements AppState{
 	 * @param str
 	 */
 	protected void dumpDevWarnEntry(String str){
-		dumpEntry(cc.bhShowDeveloperWarn.get(), getSimpleTime()+strDevWarnEntryPrefix+str);
+		dumpEntry(false, cc.btgShowDeveloperWarn.get(), getSimpleTime()+strDevWarnEntryPrefix+str);
 	}
 	
 	protected void dumpDevInfoEntry(String str){
-		dumpEntry(cc.bhShowDeveloperInfo.get(), getSimpleTime()+strDevInfoEntryPrefix+str);
+		dumpEntry(false, cc.btgShowDeveloperInfo.get(), getSimpleTime()+strDevInfoEntryPrefix+str);
 	}
 	
 	protected void dumpExceptionEntry(Exception e){
-		dumpEntry(cc.bhShowException.get(), getSimpleTime()+strExceptionEntryPrefix+e.toString());
+		dumpEntry(false, cc.btgShowException.get(), getSimpleTime()+strExceptionEntryPrefix+e.toString());
 		e.printStackTrace();
 	}
 	
@@ -1709,8 +1782,21 @@ public class ConsoleGuiState implements AppState{
 		return strCmdLinePrepared.trim().startsWith(strCommentPrefixChar);
 	}
 	
+	protected boolean checkCmdValidityBoolTogglers(){
+		btgReferenceMatched=null;
+		for(BoolToggler btg : BoolToggler.getBoolTogglerListCopy()){
+			if(checkCmdValidity(btg.getCmdId(), "[bEnable]")){
+				btgReferenceMatched = btg;
+				break;
+			}
+		}
+		return btgReferenceMatched!=null;
+	}
 	protected boolean checkCmdValidity(String strValidCmd){
 		return checkCmdValidity(strValidCmd, null);
+	}
+	protected boolean checkCmdValidity(StringField strfValidCmd, String strComment){
+		return checkCmdValidity(strfValidCmd.toString(), strComment);
 	}
 	protected boolean checkCmdValidity(String strValidCmd, String strComment){
 		if(strCmdLinePrepared==null){
@@ -1723,7 +1809,7 @@ public class ConsoleGuiState implements AppState{
 			return false;
 		}
 		
-		if(strCmdLinePrepared.equals(TOKEN_MULTI_COMMAND_LINE))return false;
+		if(TOKEN_MULTI_COMMAND_LINE.equals(strCmdLinePrepared))return false;
 		if(isCommentedLine())return false;
 		if(strCmdLinePrepared.trim().isEmpty())return false;
 		
@@ -1750,11 +1836,10 @@ public class ConsoleGuiState implements AppState{
 			String strBaseCmd = extractCommandPart(strCmdPart,0);
 			String strParam1 = extractCommandPart(strCmdPart,1);
 			if(strParam1!=null){
-				switch(strBaseCmd){
-					case CMD_CONSOLE_STYLE:
-						strCompletedCmd=strCommandPrefixChar+
-							CMD_CONSOLE_STYLE+" "+autoComplete(strParam1, astrStyleList, bMatchContains).get(0);
-						break;
+				if(cc.CMD_CONSOLE_STYLE.equals(strBaseCmd)){
+					strCompletedCmd=strCommandPrefixChar+
+						cc.CMD_CONSOLE_STYLE+" "
+						+autoComplete(strParam1, astrStyleList, bMatchContains).get(0);
 				}
 			}
 		}
@@ -1982,11 +2067,11 @@ public class ConsoleGuiState implements AppState{
 	 * 
 	 * @return false if toggle failed
 	 */
-	protected boolean toggle(BoolToggler bh){
+	protected boolean toggle(BoolToggler btg){
 		if(paramBooleanCheckForToggle(1)){
 			Boolean bEnable = paramBoolean(1);
-			bh.set(bEnable==null ? !bh.get() : bEnable); //override
-			dumpInfoEntry("Toggle, setting "+paramString(0)+" to "+bh.get());
+			btg.set(bEnable==null ? !btg.get() : bEnable); //override
+			dumpInfoEntry("Toggle, setting "+paramString(0)+" to "+btg.get());
 			return true;
 		}
 		return false;
@@ -2139,23 +2224,57 @@ public class ConsoleGuiState implements AppState{
 	protected boolean executePreparedCommand(){
 		boolean bOk = false;
 		
-		if(checkCmdValidity("alias","<identifier> [many commands] to execute an alias 'tst' prefix with '"+strAliasPrefix+"', ex.: "+strCommandPrefixChar+strAliasPrefix +"tst")){
-			bOk=bLastAliasCreatedSuccessfuly;
+		if(checkCmdValidityBoolTogglers()){
+			bOk=toggle(btgReferenceMatched);
 		}else
-		if(checkCmdValidity("aliasBlock","<identifier> all nexts attempts to run the alias will be blocked")){
-			bOk=aliasBlock(paramString(1),true);
-		}else
-		if(checkCmdValidity("aliasList","[strFilter] list available aliases")){
-			String strFilter = paramString(1);
-			for(Alias alias:aAliasList){
-				if(strFilter!=null && !alias.toString().toLowerCase().contains(strFilter))continue;
-				dumpSubEntry(alias.toString());
+		if(checkCmdValidity("alias","[<[+|-|~]identifier>] [commands]\n"
+				+"\t\tWithout params, will list all aliases\n"
+				+"\t\t~filter - will filter (contains) the alias list\n"
+				+"\t\t-identifier - will block that alias execution\n"
+				+"\t\t+identifier - will un-block that alias execution\n"
+				+"\t\tObs.: to execute an alias prefix the identifier with '"+strAliasPrefix+"', ex.: "+strCommandPrefixChar+strAliasPrefix +"tst123")
+		){
+			String strAliasId = paramString(1);
+			if(strAliasId!=null && strAliasId.startsWith("+")){
+				bOk=aliasBlock(strAliasId.substring(1),false);
+			}else
+			if(strAliasId!=null && strAliasId.startsWith("-")){
+				bOk=aliasBlock(strAliasId.substring(1),true);
+			}else{
+				String strFilter=null;
+				if(strAliasId!=null && strAliasId.startsWith("~")){
+					if(strAliasId.length()>1)strFilter = strAliasId.substring(1);
+					strAliasId=null;
+				}
+				
+				if(strAliasId==null){
+					/**
+					 * will list all aliases (or filtered)
+					 */
+					for(Alias alias:aAliasList){
+						if(strFilter!=null && !alias.toString().toLowerCase().contains(strFilter.toLowerCase()))continue;
+						dumpSubEntry(alias.toString());
+					}
+					bOk=true;
+				}else{
+					bOk=bLastAliasCreatedSuccessfuly;
+				}
 			}
-			bOk=true;
 		}else
-		if(checkCmdValidity("aliasUnblock","<identifier>")){
-			bOk=aliasBlock(paramString(1),false);
-		}else
+//		if(checkCmdValidity("aliasBlock","<identifier> all nexts attempts to run the alias will be blocked")){
+//			bOk=aliasBlock(paramString(1),true);
+//		}else
+//		if(checkCmdValidity("aliasList","[strFilter] list available aliases")){
+//			String strFilter = paramString(1);
+//			for(Alias alias:aAliasList){
+//				if(strFilter!=null && !alias.toString().toLowerCase().contains(strFilter))continue;
+//				dumpSubEntry(alias.toString());
+//			}
+//			bOk=true;
+//		}else
+//		if(checkCmdValidity("aliasUnblock","<identifier>")){
+//			bOk=aliasBlock(paramString(1),false);
+//		}else
 		if(checkCmdValidity("clearCommandsHistory")){
 			astrCmdHistory.clear();
 			bOk=true;
@@ -2164,16 +2283,16 @@ public class ConsoleGuiState implements AppState{
 			vlstrDumpEntries.clear();
 			bOk=true;
 		}else
-		if(checkCmdValidity(CMD_CLOSE_CONSOLE,"like the bound key to do it")){
+		if(checkCmdValidity(cc.CMD_CLOSE_CONSOLE,"like the bound key to do it")){
 			setEnabled(false);
 			bOk=true;
 		}else
-		if(checkCmdValidity(CMD_CONSOLE_STYLE,"[strStyleName] changes the style of the console on the fly, empty for a list")){
+		if(checkCmdValidity(cc.CMD_CONSOLE_STYLE,"[strStyleName] changes the style of the console on the fly, empty for a list")){
 			String strStyle = paramString(1);
 			if(strStyle==null)strStyle="";
 			bOk=styleApply(strStyle);
 		}else
-		if(checkCmdValidity(CMD_ECHO," simply echo something")){
+		if(checkCmdValidity(cc.CMD_ECHO," simply echo something")){
 			String strToEcho="";
 			String strPart="";
 			int iParam=1;
@@ -2187,12 +2306,12 @@ public class ConsoleGuiState implements AppState{
 			dumpEntry(strToEcho);
 			bOk=true;
 		}else
-		if(checkCmdValidity(cc.bhEngineStatsView.getCmdId(),"[bEnable] messages")){
-			bOk = toggle(cc.bhEngineStatsView);
-		}else
-		if(checkCmdValidity(cc.bhEngineStatsFps.getCmdId(),"[bEnable] messages")){
-			bOk = toggle(cc.bhEngineStatsFps);
-		}else
+//		if(checkCmdValidity(cc.btgEngineStatsView.getCmdId(),"[bEnable] messages")){
+//			bOk = toggle(cc.btgEngineStatsView);
+//		}else
+//		if(checkCmdValidity(cc.btgEngineStatsFps.getCmdId(),"[bEnable] messages")){
+//			bOk = toggle(cc.btgEngineStatsFps);
+//		}else
 		if(checkCmdValidity("execBatchCmdsFromFile ","<strFileName>")){
 			String strFile = paramString(1);
 			if(strFile!=null){
@@ -2204,16 +2323,16 @@ public class ConsoleGuiState implements AppState{
 			exit();
 			bOk=true;
 		}else
-		if(checkCmdValidity(CMD_FIX_CURSOR_VISIBILITY ,"in case cursor is invisible")){
+		if(checkCmdValidity(cc.CMD_FIX_CURSOR ,"in case cursor is invisible")){
 			if(efHK==null){
-				dumpWarnEntry("requires command: "+CMD_HK_TOGGLE);
+				dumpWarnEntry("requires command: "+cc.CMD_HK_TOGGLE);
 			}else{
-				dumpInfoEntry("requesting: "+CMD_FIX_CURSOR_VISIBILITY);
+				dumpInfoEntry("requesting: "+cc.CMD_FIX_CURSOR);
 				efHK.bFixInvisibleTextInputCursorHK=true;
 			}
 			bOk = true;
 		}else
-		if(checkCmdValidity(CMD_FIX_LINEWRAP ,"in case words are overlapping")){
+		if(checkCmdValidity(cc.CMD_FIX_LINE_WRAP ,"in case words are overlapping")){
 			lineWrapDisableDumpArea();
 			bOk = true;
 		}else
@@ -2222,11 +2341,11 @@ public class ConsoleGuiState implements AppState{
 			if(iVisibleRowsAdjustRequest==null)iVisibleRowsAdjustRequest=0;
 			bOk=true;
 		}else
-		if(checkCmdValidity(CMD_HELP,"[strFilter] show (filtered) available commands")){
+		if(checkCmdValidity(cc.CMD_HELP,"[strFilter] show (filtered) available commands")){
 			showHelp(paramString(1));
 			bOk=true; //ALWAYS TRUE, to avoid infinite loop when improving some failed command help info!
 		}else
-		if(checkCmdValidity(CMD_HISTORY,"[strFilter] of issued commands (the filter results in sorted uniques)")){
+		if(checkCmdValidity(cc.CMD_HISTORY,"[strFilter] of issued commands (the filter results in sorted uniques)")){
 			String strFilter = paramString(1);
 			ArrayList<String> astrToDump = new ArrayList<String>();
 			if(strFilter!=null){
@@ -2246,6 +2365,15 @@ public class ConsoleGuiState implements AppState{
 			
 			bOk=true;
 		}else
+		if(checkCmdValidity("showBinds","")){
+			dumpInfoEntry("Key bindings: ");
+			dumpSubEntry("Ctrl+B - marks dump area begin selection marker for copy");
+			dumpSubEntry("Ctrl+Del - clear input field");
+			dumpSubEntry("TAB - autocomplete (starting with)");
+			dumpSubEntry("Ctrl+TAB - autocomplete (contains)");
+			dumpSubEntry("Ctrl+/ - toggle input field comment");
+			bOk=true;
+		}else
 		if(checkCmdValidity("initFileShow ","show contents of init file at dump area")){
 			dumpInfoEntry("Init file data: ");
 			for(String str : fileLoad(flInit)){
@@ -2253,7 +2381,7 @@ public class ConsoleGuiState implements AppState{
 			}
 			bOk=true;
 		}else
-		if(checkCmdValidity(CMD_HK_TOGGLE ,"[bEnable] allow hacks to provide workarounds")){
+		if(checkCmdValidity(cc.CMD_HK_TOGGLE ,"[bEnable] allow hacks to provide workarounds")){
 			if(paramBooleanCheckForToggle(1)){
 				Boolean bEnable = paramBoolean(1);
 				if(efHK==null && (bEnable==null || bEnable)){
@@ -2272,7 +2400,7 @@ public class ConsoleGuiState implements AppState{
 				bOk=true;
 			}
 		}else
-		if(checkCmdValidity(CMD_LINEWRAP_AT,"[iMaxChars] -1 = will trunc big lines, 0 = wrap will be automatic")){
+		if(checkCmdValidity(cc.CMD_LINE_WRAP_AT,"[iMaxChars] -1 = will trunc big lines, 0 = wrap will be automatic")){
 			iConsoleMaxWidthInCharsForLineWrap = paramInt(1);
 			if(iConsoleMaxWidthInCharsForLineWrap!=null){
 				if(iConsoleMaxWidthInCharsForLineWrap==-1){
@@ -2282,7 +2410,7 @@ public class ConsoleGuiState implements AppState{
 			updateWrapAt();
 			bOk=true;
 		}else
-		if(checkCmdValidity(CMD_MODIFY_CONSOLE_HEIGHT,"[fPercent] of the application window")){
+		if(checkCmdValidity(cc.CMD_CONSOLE_HEIGHT,"[fPercent] of the application window")){
 			Float f = paramFloat(1);
 			modifyConsoleHeight(f);
 			bOk=true;
@@ -2291,28 +2419,32 @@ public class ConsoleGuiState implements AppState{
 			exit();
 			bOk=true;
 		}else
-		if(checkCmdValidity(CMD_SCROLL_BOTTOM)){
+		if(checkCmdValidity(cc.CMD_CONSOLE_SCROLL_BOTTOM,"")){
 			scrollToBottomRequest();
 			bOk=true;
 		}else
-		if(checkCmdValidity(cc.bhShowDeveloperInfo.getCmdId(),"[bEnable] messages")){
-			bOk = toggle(cc.bhShowDeveloperInfo);
+		if(checkCmdValidity("set","<varId> <value> can be a number or a string, use as: $varId")){
+			ahkVariables.put(paramString(1),paramString(2));
+			bOk=true;
 		}else
-		if(checkCmdValidity(cc.bhShowDeveloperWarn.getCmdId(),"[bEnable] messages")){
-			bOk = toggle(cc.bhShowDeveloperWarn);
-		}else
-		if(checkCmdValidity(cc.bhShowExecQueuedInfo.getCmdId(),"[bEnable] messages")){
-			bOk = toggle(cc.bhShowExecQueuedInfo);
-		}else
-		if(checkCmdValidity(cc.bhShowInfo.getCmdId(),"[bEnable] messages")){
-			bOk = toggle(cc.bhShowInfo);
-		}else
-		if(checkCmdValidity(cc.bhShowWarn.getCmdId(),"[bEnable] messages")){
-			bOk = toggle(cc.bhShowWarn);
-		}else
-		if(checkCmdValidity(cc.bhShowException.getCmdId(),"[bEnable] messages")){
-			bOk = toggle(cc.bhShowException);
-		}else
+//		if(checkCmdValidity(cc.btgShowDeveloperInfo.getCmdId(),"[bEnable] messages")){
+//			bOk = toggle(cc.btgShowDeveloperInfo);
+//		}else
+//		if(checkCmdValidity(cc.btgShowDeveloperWarn.getCmdId(),"[bEnable] messages")){
+//			bOk = toggle(cc.btgShowDeveloperWarn);
+//		}else
+//		if(checkCmdValidity(cc.btgShowExecQueuedInfo.getCmdId(),"[bEnable] messages")){
+//			bOk = toggle(cc.btgShowExecQueuedInfo);
+//		}else
+//		if(checkCmdValidity(cc.btgShowInfo.getCmdId(),"[bEnable] messages")){
+//			bOk = toggle(cc.btgShowInfo);
+//		}else
+//		if(checkCmdValidity(cc.btgShowWarn.getCmdId(),"[bEnable] messages")){
+//			bOk = toggle(cc.btgShowWarn);
+//		}else
+//		if(checkCmdValidity(cc.btgShowException.getCmdId(),"[bEnable] messages")){
+//			bOk = toggle(cc.btgShowException);
+//		}else
 		if(checkCmdValidity("statsShowAll ","show all console stats")){
 			dumpAllStats();
 			bOk=true;
@@ -2350,7 +2482,7 @@ public class ConsoleGuiState implements AppState{
 			// keep this as reference
 		}else{
 			if(strCmdLinePrepared!=null){
-				if(strCmdLinePrepared.equals(TOKEN_MULTI_COMMAND_LINE)){
+				if(TOKEN_MULTI_COMMAND_LINE.equals(strCmdLinePrepared)){
 					bOk=true;
 				}
 			}
@@ -2359,9 +2491,10 @@ public class ConsoleGuiState implements AppState{
 		return bOk;
 	}
 	
-	private boolean aliasBlock(String strAliasId, boolean bBlock) {
+	protected boolean aliasBlock(String strAliasId, boolean bBlock) {
 		for(Alias alias : aAliasList){
 			if(alias.strAliasId.toLowerCase().equals(strAliasId.toLowerCase())){
+				dumpInfoEntry((bBlock?"Blocking":"Unblocking")+" alias "+alias.strAliasId);
 				alias.bBlocked=bBlock;
 				return true;
 			}
@@ -2422,7 +2555,7 @@ public class ConsoleGuiState implements AppState{
 		
 		v3fNew.y = fNewHeightPercent * sapp.getContext().getSettings().getHeight();
 		
-		float fMin = fInputHeight + fStatsHeight + fLstbxEntryHeight*3; //will show only 2 rows, the 3 value is a safety margin
+		float fMin = fInputHeight +fStatsHeight +fLstbxEntryHeight*3; //will show only 2 rows, the 3 value is a safety margin
 		
 		if(v3fNew.y<fMin)v3fNew.y=fMin;
 		
@@ -2434,8 +2567,8 @@ public class ConsoleGuiState implements AppState{
 		iVisibleRowsAdjustRequest = 0; //dynamic
 	}
 	protected void updateEngineStats() {
-		stateStats.setDisplayStatView(cc.bhEngineStatsView.get());
-		stateStats.setDisplayFps(cc.bhEngineStatsFps.get());
+		stateStats.setDisplayStatView(cc.btgEngineStatsView.get());
+		stateStats.setDisplayFps(cc.btgEngineStatsFps.get());
 	}
 	protected void styleHelp(){
 		dumpInfoEntry("Available styles:");
@@ -2463,33 +2596,6 @@ public class ConsoleGuiState implements AppState{
 		if(bOk){
 			strStyle=strStyleNew;
 			
-//			int iSkipCharsSafety = 3;
-//			float fListboxWidth = lstbx.getSize().x;
-//			Float fFontWidth = fontWidth("W"); //W seems to be the widest in most/all chars sets
-			
-//			Float fFontWidth = null;
-//			if(strStyle.equals(STYLE_CONSOLE)){
-//				fFontWidth = fMonofontCharWidth;
-//			}else
-//			if(bUseDumbWrap){
-//				fFontWidth = fontWidth("W"); //W seems to be the widest in most/all chars sets
-//			}
-			
-//			iConsoleMaxWidthInCharsForLineWrap = null;
-//			if(fFontWidth!=null){
-//				iConsoleMaxWidthInCharsForLineWrap = (int) //like trunc
-//						((fListboxWidth/fFontWidth)-iSkipCharsSafety);
-//			}
-			
-//			if(iConsoleMaxWidthInCharsForLineWrap!=null){
-//				if(iConsoleMaxWidthInCharsForLineWrap>0){
-//					int iSkipCharsSafety = 3;
-//					fWidestCharForCurrentStyleFont = fontWidth("W"); //W seems to be the widest in most/all chars sets
-//					
-//					iConsoleMaxWidthInCharsForLineWrap = (int) //like trunc
-//							((listboxWidth()/fWidestCharForCurrentStyleFont)-iSkipCharsSafety);
-//				}
-//			}
 			updateWrapAt();
 			
 			sapp.enqueue(new Callable<Void>() {
@@ -2504,8 +2610,8 @@ public class ConsoleGuiState implements AppState{
 					}
 					modifyConsoleHeight(fConsoleHeightPerc);
 					scrollToBottomRequest();
-//					addToExecConsoleCommandQueue(CMD_MODIFY_CONSOLE_HEIGHT+" "+fConsoleHeightPerc);
-//					addToExecConsoleCommandQueue(CMD_SCROLL_BOTTOM);
+//					addToExecConsoleCommandQueue(cc.CMD_MODIFY_CONSOLE_HEIGHT+" "+fConsoleHeightPerc);
+//					addToExecConsoleCommandQueue(cc.CMD_SCROLL_BOTTOM);
 					return null;
 				}
 			});
@@ -2551,8 +2657,8 @@ public class ConsoleGuiState implements AppState{
 		ctnrConsole.removeFromParent();
 		
 		//TODO should keymappings be at setEnabled() ?
-    sapp.getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_SCROLLUP);
-    sapp.getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_SCROLLDOWN);
+    sapp.getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_SCROLL_UP+"");
+    sapp.getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_SCROLL_DOWN+"");
     sapp.getInputManager().removeListener(alConsoleScroll);
     
     /**
@@ -2603,11 +2709,6 @@ public class ConsoleGuiState implements AppState{
 		for(BoolToggler bh : BoolToggler.getBoolTogglerListCopy()){
 			dumpSubEntry(bh.getCmdId()+" = "+bh.get());
 		}
-//		dumpSubEntry("Message Info = "+cc.bhShowInfo);
-//		dumpSubEntry("Message Warn = "+cc.bhShowWarn.get());
-//		dumpSubEntry("Message Exception = "+cc.bhShowException);
-//		dumpSubEntry("Message DevInfo = "+cc.bhShowDeveloperInfo);
-//		dumpSubEntry("Message DevWarn = "+cc.bhShowDeveloperWarn);
 		
 		dumpSubEntry("Stats Text Field Height = "+fmtFloat(fStatsHeight));
 		dumpSubEntry("Stats Container Height = "+fmtFloat(ctnrStatsAndControls.getSize().y));
@@ -2615,7 +2716,7 @@ public class ConsoleGuiState implements AppState{
 		dumpSubEntry("Input Field Height = "+fmtFloat(fInputHeight));
 		dumpSubEntry("Input Field Final Height = "+fmtFloat(tfInput.getSize().y));
 		
-		dumpSubEntry("Slider Value (orinal) = "+fmtFloat(lstbx.getSlider().getModel().getValue()));
+		dumpSubEntry("Slider Value = "+fmtFloat(getScrollDumpAreaFlindex()));
 		
 		dumpSubEntry("Slider Scroll request max retry attempts = "+iScrollRetryAttemptsMaxDBG);
 		
@@ -2656,11 +2757,12 @@ public class ConsoleGuiState implements AppState{
 		if(!tdStatsRefresh.isReady(true))return strStatsLast;
 		
 		// this value is the top entry index
-		double dSliderHumanReadableValue = 
-			vlstrDumpEntries.size() 
-			-lstbx.getSlider().getModel().getValue()
-			-lstbx.getGridPanel().getVisibleRows();
-		if(dSliderHumanReadableValue<0)dSliderHumanReadableValue=0;
+//		double dSliderHumanReadableValue = getScrollDumpAreaIndex();
+//			vlstrDumpEntries.size() 
+//			-getScrollDumpAreaIndex()
+//			-lstbx.getGridPanel().getVisibleRows();
+//		if(dSliderHumanReadableValue<0)dSliderHumanReadableValue=0;
+		int iMaxSliderIndex=vlstrDumpEntries.size()-lstbx.getGridPanel().getVisibleRows();
 		
 		strStatsLast = ""
 				// user important
@@ -2683,9 +2785,10 @@ public class ConsoleGuiState implements AppState{
 					
 				// less important (mainly for debug)
 				+"Slider"
-					+fmtFloat(dSliderHumanReadableValue,0)+"/"+vlstrDumpEntries.size()
-					+":"
-					+fmtFloat(100.0f -lstbx.getSlider().getModel().getPercent()*100f,0)+"%"
+//				+fmtFloat(dSliderHumanReadableValue,0)+"/"+vlstrDumpEntries.size()
+					+fmtFloat(getScrollDumpAreaFlindex(),0)+"/"+iMaxSliderIndex+"+"+lstbx.getGridPanel().getVisibleRows()
+//					+":"
+					+"("+fmtFloat(100.0f -lstbx.getSlider().getModel().getPercent()*100f,0)+"%)"
 					+","
 					
 		;
@@ -2702,6 +2805,17 @@ public class ConsoleGuiState implements AppState{
 	}
 	public void setCfgInitiallyClosed(boolean bInitiallyClosed) {
 		this.bInitiallyClosed = bInitiallyClosed;
+	}
+	@Override
+	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+		ReflexFillCfg rfcfg = new ReflexFillCfg();
+		if(rfcv.getClass().isAssignableFrom(StringField.class)){
+			rfcfg.strCodingStyleFieldNamePrefix = "INPUT_MAPPING_CONSOLE_";
+			rfcfg.strCommandPrefix = IMCPREFIX;
+			rfcfg.bFirstLetterUpperCase = true;
+		}
+		
+		return rfcfg;
 	}
 }
 

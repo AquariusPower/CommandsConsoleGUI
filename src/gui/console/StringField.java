@@ -30,82 +30,44 @@ package gui.console;
 import gui.console.ReflexFill.IReflexFillCfg;
 import gui.console.ReflexFill.IReflexFillCfgVariant;
 
-import java.util.ArrayList;
-
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class BoolToggler implements IReflexFillCfgVariant{
-	protected static ArrayList<BoolToggler> abtgList = new ArrayList<BoolToggler>();
-	
-	protected boolean bPrevious;
-	protected boolean bCurrent;
-	protected String strCommand;
-	protected IReflexFillCfg	rfcfgOwner;
-
+public class StringField implements IReflexFillCfgVariant{
+	String str;
+	IReflexFillCfg rfcfgOwner;
 	private int	iReflexFillCfgVariant;
 	
-	public static ArrayList<BoolToggler> getBoolTogglerListCopy(){
-		return new ArrayList<BoolToggler>(abtgList);
+	public StringField(IReflexFillCfg rfcfgOwner){
+		this(rfcfgOwner,0);
 	}
-	
-	private BoolToggler(){
-		abtgList.add(this);
-	}
-	public BoolToggler(IReflexFillCfg rfcfgOwner, boolean bInitValue){
-		this(rfcfgOwner, bInitValue, 0);
-	}
-	public BoolToggler(IReflexFillCfg rfcfgOwner, boolean bInitValue, int iReflexFillCfgVariant){
-		this();
+	public StringField(IReflexFillCfg rfcfgOwner, int iReflexFillCfgVariant){
 		this.iReflexFillCfgVariant=iReflexFillCfgVariant;
+		if(rfcfgOwner==null)throw new NullPointerException("cant be null for: "+IReflexFillCfg.class.getName());
 		this.rfcfgOwner=rfcfgOwner;
-		set(bInitValue);
 	}
-	public BoolToggler(boolean bInitValue, String strCustomCmdId){
-		this();
-		set(bInitValue);
-		setCustomCmdId(strCustomCmdId);
-	}
-	
-	/**
-	 * sets the command identifier that user will type in the console
-	 * @param strCmd
-	 */
-	protected void setCustomCmdId(String strCmd) {
-		this.strCommand=strCmd;
-	}
-	public String getCmdId(){
-		if(strCommand!=null)return strCommand;
-		strCommand=ReflexFill.i().createIdentifierWithFieldName(rfcfgOwner,this);
-		return strCommand;
-	}
-	
-	public boolean get(){return bCurrent;}
-	public boolean getBoolean(){return bCurrent;}
-	public boolean getBool(){return bCurrent;}
-	public boolean is(){return bCurrent;}
-	public boolean b(){return bCurrent;}
-	
-	public void set(boolean b){this.bCurrent=b;}
-	
-	/**
-	 * @return true if value changed
-	 */
-	public boolean checkChangedAndUpdate(){
-		if(bCurrent != bPrevious){
-			bPrevious=bCurrent;
-			return true;
-		}
-		return false;
+	public StringField(String str){
+		this.str=str;
 	}
 	
 	@Override
 	public String toString() {
-		return ""+bCurrent;
+		if(this.str==null)this.str=ReflexFill.i().createIdentifierWithFieldName(rfcfgOwner, this);
+		return this.str;
 	}
-
+	
+	@Override
+	public boolean equals(Object obj) {
+		return this.str.equals(obj);
+	}
+	
+	@Override
+	public int hashCode() {
+		return str.hashCode();
+	}
+	
 	@Override
 	public int getReflexFillCfgVariant() {
 		return iReflexFillCfgVariant;

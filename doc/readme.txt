@@ -1,5 +1,7 @@
 ConsoleGui: a State for JMonkeyEngine 3D, using Lemur GUI.
 
+WIP: Work in progress!
+
 Hit F10 (on the test) to toggle console (initially closed).
 
 Features:
@@ -40,7 +42,7 @@ DONE:
 	= let multiple commands in a single line separated by ';'
 
 TODO.FastToImplement:
-	+ Auto complete with aliases if line begins with alias token.
+	+ Alias -tst;Alias +tst;CMD_TEST_ABC reflex testAbc
 	+ When date(day) changes, report on console. On startup report date on console.
 	+ Optional hundredth/tenth of a second at console log.
 	+ optionally keep all dump logs by moving files to name datetimed ones;bKeepAllLogs.transportFlDtTimeToName
@@ -50,6 +52,8 @@ TODO.TimeConsuming:
 	+ SeparateGUIfromCommandsManagement
 	+ HK - ReflexByFieldType.singleMatchIsSafe
 	.Good
+	+ Auto complete with aliases if line begins with alias token.
+	+ Set nCount .75;Set nStep .25;Alias 3.5 loopCheck if $nCount<10 then add nCount $nStep;$loopCheck else echo "ended"
 	+ navigate thru words with ctrl+left/right
 	+ BitmapFontBkgColor.shiftRightLeftSelect.inputField
 	+ ListboxEntry(btn)FontColorWarnExceptionSelectHK
