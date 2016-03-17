@@ -35,8 +35,8 @@ package gui.console;
  */
 public class TimedDelay{
 	protected static Long lCurrentTime;
-	public static final long lNano = 1000000000L;
-	public static final float fNanoToSeconds = 1f/lNano;
+	public static final long lNanoOneSecond = 1000000000L; // 1s in nano time
+	public static final float fNanoToSeconds = 1f/lNanoOneSecond;
 	
 	protected Long	lNanoTime;
 	protected float	fDelayLimit;
@@ -58,7 +58,7 @@ public class TimedDelay{
 	public TimedDelay(float fDelay) {
 		super();
 		this.fDelayLimit = fDelay;
-		this.lNanoDelayLimit = (long) (this.fDelayLimit * lNano);;
+		this.lNanoDelayLimit = (long) (this.fDelayLimit * lNanoOneSecond);;
 	}
 	public long getCurrentDelay() {
 		if(!isActive())throw new NullPointerException("inactive"); //this, of course, affects all others using this method
@@ -98,9 +98,17 @@ public class TimedDelay{
 	/**
 	 * will use the delay value to sleep the thread
 	 */
-	public void sleepThread(){
+	public void sleepThread(Float tpf){
 		try {
-			Thread.sleep(lNanoDelayLimit/1000000L);
+			long lNanoSleep = lNanoDelayLimit;
+			if(tpf!=null){
+				lNanoSleep -= tpf*lNanoOneSecond;
+				if(lNanoSleep<0L)lNanoSleep=0L;
+			}
+			
+			if(lNanoSleep>0L){
+				Thread.sleep(lNanoSleep/1000000L); //milis
+			}
 		} catch (InterruptedException e) {
 			// put NO message on this one!!! may be too much spam..
 			e.printStackTrace();

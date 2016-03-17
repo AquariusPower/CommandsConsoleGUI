@@ -50,6 +50,8 @@ public class ConsoleCommands implements IReflexFillCfg{
 	protected BoolToggler	btgShowDeveloperWarn=new BoolToggler(this,false);
 	protected BoolToggler	btgShowExecQueuedInfo=new BoolToggler(this,false);
 	protected BoolToggler	btgShowMiliseconds=new BoolToggler(this,false);
+	protected BoolToggler	btgFpsLimit=new BoolToggler(this,false);
+	protected BoolToggler	btgReferenceMatched;
 	
 	/**
 	 * user can type these below at console (the actual commands are prepared by reflex)
@@ -57,6 +59,7 @@ public class ConsoleCommands implements IReflexFillCfg{
 	public final StringField CMD_ECHO = new StringField(this);
 	public final StringField CMD_CLOSE_CONSOLE = new StringField(this);
 	public final StringField CMD_CONSOLE_STYLE = new StringField(this);
+	public final StringField CMD_DB = new StringField(this);
 	public final StringField CMD_HELP = new StringField(this);
 	public final StringField CMD_HISTORY = new StringField(this);
 	public final StringField CMD_CONSOLE_HEIGHT = new StringField(this);
@@ -65,6 +68,7 @@ public class ConsoleCommands implements IReflexFillCfg{
 	public final StringField CMD_LINE_WRAP_AT = new StringField(this);
 	public final StringField CMD_HK_TOGGLE = new StringField(this);
 	public final StringField CMD_FIX_CURSOR = new StringField(this);
+	public final StringField	CMD_VAR_SET = new StringField(this);;
 	
 	private static ConsoleCommands i;
 	public static ConsoleCommands i(){return i;}

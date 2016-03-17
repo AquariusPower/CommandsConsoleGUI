@@ -33,6 +33,8 @@ import gui.console.ReflexFill.IReflexFillCfgVariant;
 import java.util.ArrayList;
 
 /**
+ * This class can provide automatic boolean console options toggle.
+ * You just need to create the variable properly and it will be automatically recognized.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *

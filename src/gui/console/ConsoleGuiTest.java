@@ -91,6 +91,6 @@ public class ConsoleGuiTest extends SimpleApplication {
 	@Override
 	public void simpleUpdate(float tpf) {
 		super.simpleUpdate(tpf);
-		tdSpareGpuFan.sleepThread();
+		tdSpareGpuFan.sleepThread(null);
 	}
 }	

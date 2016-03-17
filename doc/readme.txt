@@ -20,6 +20,7 @@ Features:
 	= Auto scroll after command.
 	___Commands___ (see /help)
 	= Alias to run multiple commands (like a function).
+	= Variables can be set and evaluated to run console commands (minimal scripting).
 	= Comment token detection, after it, line is ignored.
 	= Omit the "command being run" info entry by ending a line with '#', good at init file, mainly for /echo commands.
 	___Editing___ 
@@ -32,7 +33,7 @@ Features:
 	= Any changes to the input text will reset the command history cursor, hit Down to access your last non issued command.
 
 DONE:
-	= BaseOutputFilemameOnVar
+	= BaseOutputFilemameOnClass
 	= Log all to file. But show only enabled ones
 	= Copy/paste buttons
 	= when pasting text, insert the text where the cursor is...
@@ -40,9 +41,10 @@ DONE:
 	= Java7 compliance (instead of 8)
 	= FIX: Copy from/to is inverted concerning SHIFT key. Holding shift must mark copyTo.
 	= let multiple commands in a single line separated by ';'
+	= Alias -tst;Alias +tst;CMD_TEST_ABC reflex testAbc
 
 TODO.FastToImplement:
-	+ Alias -tst;Alias +tst;CMD_TEST_ABC reflex testAbc
+	+ $commandId to retrieve its return value
 	+ When date(day) changes, report on console. On startup report date on console.
 	+ Optional hundredth/tenth of a second at console log.
 	+ optionally keep all dump logs by moving files to name datetimed ones;bKeepAllLogs.transportFlDtTimeToName
