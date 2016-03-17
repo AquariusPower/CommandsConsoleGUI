@@ -46,8 +46,7 @@ public class ConsoleGuiTest extends SimpleApplication {
 	}
 	
 	class ConsoleGuiStateEndUser extends ConsoleGuiState{
-		
-		public static final String CMD_END_USER_COMMAND="endUserCommandTest";
+		public final StringField CMD_END_USER_COMMAND_TEST=new StringField(this);
 		
 		public ConsoleGuiStateEndUser() {
 			super(KeyInput.KEY_F10);
@@ -57,7 +56,7 @@ public class ConsoleGuiTest extends SimpleApplication {
 		protected boolean executePreparedCommand() {
 			boolean bOk = false;
 			
-			if(checkCmdValidity(CMD_END_USER_COMMAND,"[iHowMany] users working")){
+			if(checkCmdValidity(CMD_END_USER_COMMAND_TEST,"[iHowMany] users working")){
 				bOk = endUserCustomMethod(paramInt(1));
 			}else{
 				return super.executePreparedCommand();
