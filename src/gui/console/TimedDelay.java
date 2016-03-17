@@ -35,12 +35,16 @@ package gui.console;
  */
 public class TimedDelay{
 	protected static Long lCurrentTime;
+	
 	public static final long lNanoOneSecond = 1000000000L; // 1s in nano time
-	public static final float fNanoToSeconds = 1f/lNanoOneSecond;
+	public static final float fNanoToSeconds = 1f/lNanoOneSecond; //multiply nano by it to get in seconds
 	
 	protected Long	lNanoTime;
 	protected float	fDelayLimit;
 	protected Long	lNanoDelayLimit;
+//	private long	lNanoTimePrevious;
+//	private long	lNanoFrameDelay;
+	private long	lNanoThreadSleep;
 	
 	/**
 	 * use this to prevent current time to read from realtime
@@ -95,23 +99,36 @@ public class TimedDelay{
 		return f;
 	}
 	
-	/**
-	 * will use the delay value to sleep the thread
-	 */
-	public void sleepThread(Float tpf){
-		try {
-			long lNanoSleep = lNanoDelayLimit;
-			if(tpf!=null){
-				lNanoSleep -= tpf*lNanoOneSecond;
-				if(lNanoSleep<0L)lNanoSleep=0L;
-			}
-			
-			if(lNanoSleep>0L){
-				Thread.sleep(lNanoSleep/1000000L); //milis
-			}
-		} catch (InterruptedException e) {
-			// put NO message on this one!!! may be too much spam..
-			e.printStackTrace();
-		}
-	}
+//	/**
+//	 * Will use the delay value to sleep the thread.
+//	 * 
+//	 * FPS Limiter:
+//	 * 	The TimePerFrame (tpf) is measured from after the sleepCode to just before the sleepCode,
+//	 * 	therefore, this is the tpf based on CPU usage/encumberance.
+//	 * 
+//	 * 	For the limiter to work properly, this method MUST be called at every frame update,
+//	 * 	and only from a single place!
+//	 * 
+//	 * @param bFpsLimiter
+//	 */
+//	public void updateSleepThread(boolean bFpsLimiter){
+//		try {
+//			if(bFpsLimiter){
+//				lNanoFrameDelay = System.nanoTime() - lNanoTimePrevious; //MUST BE BEFORE THE SLEEP!!!!!!
+//				lNanoThreadSleep = lNanoDelayLimit -lNanoFrameDelay;
+//				if(lNanoThreadSleep<0L)lNanoThreadSleep=0L;
+//			}else{
+//				lNanoThreadSleep = lNanoDelayLimit;
+//			}
+//			
+//			if(lNanoThreadSleep>0L)Thread.sleep(lNanoDelayLimit/1000000L); //milis
+//			
+//			if(bFpsLimiter){
+//				lNanoTimePrevious = System.nanoTime(); //MUST BE AFTER THE SLEEP!!!!!!!
+//			}
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//	}
+	
 }

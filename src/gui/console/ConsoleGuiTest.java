@@ -37,12 +37,11 @@ import com.jme3.system.AppSettings;
  *
  */
 public class ConsoleGuiTest extends SimpleApplication {
-	protected ConsoleGuiState	stateConsDev;	
+	protected ConsoleGuiStateEndUser	cgsCustomizedState;	
 	protected boolean bHideSettings=true; 
-	protected TimedDelay tdSpareGpuFan = new TimedDelay(1.0f/60f); // like 60 FPS
 	
 	public boolean endUserCustomMethod(Integer i){
-		stateConsDev.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
+		cgsCustomizedState.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
 		return true;
 	}
 	
@@ -71,8 +70,13 @@ public class ConsoleGuiTest extends SimpleApplication {
 	
 	@Override
 	public void simpleInitApp() {
-		stateConsDev = new ConsoleGuiStateEndUser();
-		getStateManager().attach(stateConsDev);
+		cgsCustomizedState = new ConsoleGuiStateEndUser();
+		getStateManager().attach(cgsCustomizedState);
+	}
+	
+	@Override
+	public void simpleUpdate(float tpf) {
+		super.simpleUpdate(tpf);
 	}
 	
 	public static void main( String... args ) {
@@ -88,9 +92,4 @@ public class ConsoleGuiTest extends SimpleApplication {
 		main.start();
 	}
 	
-	@Override
-	public void simpleUpdate(float tpf) {
-		super.simpleUpdate(tpf);
-		tdSpareGpuFan.sleepThread(null);
-	}
 }	

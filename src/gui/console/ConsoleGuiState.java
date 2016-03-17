@@ -103,6 +103,7 @@ import com.simsilica.lemur.style.Styles;
  *
  */
 public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
+	protected FpsLimiter fpslState = new FpsLimiter();
 	
 	public final String IMCPREFIX = "CONSOLEGUISTATE_";
 	public final StringField INPUT_MAPPING_CONSOLE_TOGGLE = new StringField(this);
@@ -262,9 +263,12 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	protected	Character	chCommentPrefix='#';
 	protected	Character	chCommandPrefix='/';
 	private float	fTPF;
-	private int	iFpsCount;
-	private long	lNanoPreviousSecond;
-	private int	lPreviousSecondFPS;
+//	private int	iFpsCount;
+//	private long	lNanoPreviousSecond;
+//	private int	lPreviousSecondFPS;
+//	private int	iUpdateCount;
+	private long	lNanoFrameTime;
+	private long	lNanoFpsLimiterTime;
 	
 	protected static ConsoleGuiState i;
 	public static ConsoleGuiState i(){
@@ -285,6 +289,8 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		if(isInitialized())throw new NullPointerException("already initialized...");
 		
 		sapp = (SimpleApplication)app;
+		
+		sapp.getStateManager().attach(fpslState);
 		
 		GuiGlobals.initialize(sapp);
 		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
@@ -1051,10 +1057,15 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	public void update(float tpf) {
 		if(!isEnabled())return;
 		
+		fTPF = tpf;
+		
+//		updateEveryFrame();
+		
+		/**
+		 * CPU rest must be after the fps limiter.
+		 */
 		if(!tdLetCpuRest.isReady(true))return;
 		
-//		fTPF = updateFpsCount(); 
-		fTPF = tpf;
 		updateToggles();
 		updateDumpAreaSelectedIndex();
 		updateVisibleRowsAmount();
@@ -1065,50 +1076,16 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		updateInputFieldFillWithSelectedEntry();
 		updateAutoCompleteHint();
 		updateDumpQueueEntry();
-//		updateFpsLimiterConsole(fTPF);
 		
 		updateCurrentCmdHistoryEntryReset();
 		
 		GuiGlobals.getInstance().requestFocus(tfInput);
 	}
 	
-	/**
-	 * This will only run while the console is opened.
-	 * @param tpf
-	 */
-	protected void updateFpsLimiterConsole(float tpf){
-		if(!bStartupCmdQueueDone)return;
-		updateFpsLimiter(tpf);
-	}
-	
-	/**
-	 * This can be used outside of console update.
-	 * @param tpf
-	 */
-	public void updateFpsLimiter(float tpf){
-		if(!cc.btgFpsLimit.b())return;
-		tdSpareGpuFan.sleepThread(tpf);
-	}
-	
-	/**
-	 * This can be used outside of console update.
-	 */
-	public float updateFpsCount(){
-		long lNanoNow = System.nanoTime();
-		if((lNanoNow-lNanoPreviousSecond) > TimedDelay.lNanoOneSecond){
-			lNanoPreviousSecond = lNanoNow;
-			lPreviousSecondFPS=iFpsCount;
-			iFpsCount=0;
-		}else{
-			iFpsCount++;
-		}
-		
-		return 1f/lPreviousSecondFPS;//*TimedDelay.fNanoToSeconds;
-	}
-	
 	protected void updateToggles() {
 		if(cc.btgEngineStatsView.checkChangedAndUpdate())updateEngineStats();
 		if(cc.btgEngineStatsFps.checkChangedAndUpdate())updateEngineStats();
+		if(cc.btgFpsLimit.checkChangedAndUpdate())fpslState.setEnabled(cc.btgFpsLimit.b());
 	}
 	protected void resetCmdHistoryCursor(){
 		iCmdHistoryCurrentIndex = astrCmdHistory.size();
@@ -1457,22 +1434,6 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		
 		lineWrapDisableDumpArea();
 	}
-	
-//	protected BitmapFont retrieveBitmapFontFor(Panel pnl){
-//		return retrieveBitmapTextFor(pnl).getFont();
-//	}
-//	
-//protected Float retrieveBitmapTextHeightFor(Panel pnl){
-//for(Spatial c : pnl.getChildren()){
-//	if(c instanceof BitmapText){
-//		BitmapText bt = (BitmapText)c;
-//		return bt.getLineHeight();
-////		return bt.getHeight();
-//	}
-//}
-//return null;
-//}
-//	
 	
 	protected BitmapText retrieveBitmapTextFor(Panel pnl){
 		for(Spatial c : pnl.getChildren()){
@@ -2191,20 +2152,6 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		return Float.parseFloat(str);
 	}
 	
-//	/**
-//	 * 
-//	 * @param bToggling
-//	 * @return null means toggle force param evaluation failed
-//	 */
-//	protected Boolean executeCommandToggleHelper(boolean bToggling){
-//		if(paramBooleanCheckForToggle(1)){
-//			Boolean bEnable = paramBoolean(1);
-//			bToggling = bEnable==null ? !bToggling : bEnable; //override
-//			return bToggling;
-//		}
-//		return null;
-//	}
-	
 	protected String prepareCmdAndParams(String strFullCmdLine){
 		if(strFullCmdLine!=null){
 			strFullCmdLine = strFullCmdLine.trim();
@@ -2332,6 +2279,10 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 			setEnabled(false);
 			bOk=true;
 		}else
+		if(checkCmdValidity(cc.CMD_CONSOLE_SCROLL_BOTTOM,"")){
+			scrollToBottomRequest();
+			bOk=true;
+		}else
 		if(checkCmdValidity(cc.CMD_CONSOLE_STYLE,"[strStyleName] changes the style of the console on the fly, empty for a list")){
 			String strStyle = paramString(1);
 			if(strStyle==null)strStyle="";
@@ -2383,21 +2334,23 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 			if(iVisibleRowsAdjustRequest==null)iVisibleRowsAdjustRequest=0;
 			bOk=true;
 		}else
+		if(checkCmdValidity("fpsLimit","[iMaxFps]")){
+			Integer iMaxFps = paramInt(1);
+			if(iMaxFps!=null){
+				fpslState.setMaxFps(iMaxFps);
+				bOk=true;
+			}
+			dumpSubEntry("FpsLimit = "+fpslState.getFpsLimit());
+		}else
 		if(checkCmdValidity(cc.CMD_HELP,"[strFilter] show (filtered) available commands")){
 			showHelp(paramString(1));
-			bOk=true; //ALWAYS TRUE, to avoid infinite loop when improving some failed command help info!
+			/**
+			 * ALWAYS return TRUE here, to avoid infinite loop when improving some failed command help info!
+			 */
+			bOk=true; 
 		}else
 		if(checkCmdValidity(cc.CMD_HISTORY,"[strFilter] of issued commands (the filter results in sorted uniques)")){
 			bOk=showHistory();
-		}else
-		if(checkCmdValidity("showBinds","")){
-			dumpInfoEntry("Key bindings: ");
-			dumpSubEntry("Ctrl+B - marks dump area begin selection marker for copy");
-			dumpSubEntry("Ctrl+Del - clear input field");
-			dumpSubEntry("TAB - autocomplete (starting with)");
-			dumpSubEntry("Ctrl+TAB - autocomplete (contains)");
-			dumpSubEntry("Ctrl+/ - toggle input field comment");
-			bOk=true;
 		}else
 		if(checkCmdValidity("initFileShow ","show contents of init file at dump area")){
 			dumpInfoEntry("Init file data: ");
@@ -2444,8 +2397,13 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 			exit();
 			bOk=true;
 		}else
-		if(checkCmdValidity(cc.CMD_CONSOLE_SCROLL_BOTTOM,"")){
-			scrollToBottomRequest();
+		if(checkCmdValidity("showBinds","")){
+			dumpInfoEntry("Key bindings: ");
+			dumpSubEntry("Ctrl+B - marks dump area begin selection marker for copy");
+			dumpSubEntry("Ctrl+Del - clear input field");
+			dumpSubEntry("TAB - autocomplete (starting with)");
+			dumpSubEntry("Ctrl+TAB - autocomplete (contains)");
+			dumpSubEntry("Ctrl+/ - toggle input field comment");
 			bOk=true;
 		}else
 		if(checkCmdValidity("varAdd","<varId> <[-]value>")){
@@ -3103,7 +3061,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		dumpSubEntry("Database Variables = "+getAllVariablesIdentifiers().size());
 		dumpSubEntry("Database Aliases = "+aAliasList.size());
 		
-		dumpSubEntry("Previous Second FPS  = "+lPreviousSecondFPS);
+//		dumpSubEntry("Previous Second FPS  = "+lPreviousSecondFPS);
 		
 		for(BoolToggler bh : BoolToggler.getBoolTogglerListCopy()){
 			dumpSubEntry(bh.getCmdId()+" = "+bh.get());
@@ -3147,11 +3105,6 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		if(!tdStatsRefresh.isReady(true))return strStatsLast;
 		
 		// this value is the top entry index
-//		double dSliderHumanReadableValue = getScrollDumpAreaIndex();
-//			vlstrDumpEntries.size() 
-//			-getScrollDumpAreaIndex()
-//			-lstbx.getGridPanel().getVisibleRows();
-//		if(dSliderHumanReadableValue<0)dSliderHumanReadableValue=0;
 		int iMaxSliderIndex=vlstrDumpEntries.size()-lstbx.getGridPanel().getVisibleRows();
 		
 		strStatsLast = ""
@@ -3163,9 +3116,6 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 				+"Hst"+iCmdHistoryCurrentIndex+"/"+(astrCmdHistory.size()-1)
 					+","
 				
-//				+"Tot"+vlstrDumpEntries.size()
-//					+","
-					
 				/**
 				 * KEEP HERE AS REFERENCE!
 				 * IMPORTANT, DO NOT USE
@@ -3175,13 +3125,14 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 					
 				// less important (mainly for debug)
 				+"Slider"
-//				+fmtFloat(dSliderHumanReadableValue,0)+"/"+vlstrDumpEntries.size()
 					+fmtFloat(getScrollDumpAreaFlindex(),0)+"/"+iMaxSliderIndex+"+"+lstbx.getGridPanel().getVisibleRows()
-//					+":"
 					+"("+fmtFloat(100.0f -lstbx.getSlider().getModel().getPercent()*100f,0)+"%)"
 					+","
 				
-				+"Tpf"+fmtFloat(fTPF,3)
+				+"Tpf"+((int)(fTPF*1000.0f))
+					+(fpslState.isEnabled()?
+						"="+fpslState.getFrameDelayByCpuUsageMilis()+"+"+fpslState.getThreadSleepTimeMilis()
+						:"")
 					+","
 					
 		;
