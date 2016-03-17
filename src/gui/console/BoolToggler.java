@@ -112,4 +112,13 @@ public class BoolToggler implements IReflexFillCfgVariant{
 	public int getReflexFillCfgVariant() {
 		return iReflexFillCfgVariant;
 	}
+	
+//	public static String getPrefix() {
+//		return rfcfgOwner.;
+//	}
+//	
+//	public static String getSuffix() {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
 }
