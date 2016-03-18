@@ -79,6 +79,7 @@ import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GridPanel;
 import com.simsilica.lemur.GuiGlobals;
+import com.simsilica.lemur.HAlignment;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.ListBox;
 import com.simsilica.lemur.Panel;
@@ -275,6 +276,8 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	private boolean	bLastIfConditionWasValid;
 
 	protected ArrayList<DumpEntry> adeDumpEntryFastQueue = new ArrayList<DumpEntry>();
+
+	private Button	btnCut;
 	
 	protected static ConsoleGuiState instance;
 	public static ConsoleGuiState i(){
@@ -402,7 +405,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		tdStatsRefresh.updateTime();
 		tdDumpQueuedEntry.updateTime();
 		
-		createMonoSpaceFontStyle();
+		createMonoSpaceFixedFontStyle();
 		
 		v3fApplicationWindowSize = new Vector3f(
 			sapp.getContext().getSettings().getWidth(),
@@ -430,27 +433,42 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		ctnrConsole.addChild(ctnrStatsAndControls, BorderLayout.Position.North);
 		
 		// console stats
-		lblStats = new Label("Console stats.",Styles.ROOT_STYLE); //TODO make use chosen style... root one is more readable...
-		lblStats.setColor(ColorRGBA.Yellow);
+		lblStats = new Label("Console stats.",strStyle);
+		lblStats.setColor(new ColorRGBA(1,1,0.5f,1));
 		fStatsHeight = retrieveBitmapTextFor(lblStats).getLineHeight();
 		ctnrStatsAndControls.addChild(lblStats,0,0);
 		
-		// buttons 
+		// buttons
+		ArrayList<Button> abu = new ArrayList<Button>();
 		int iButtonIndex=0;
-		btnClipboardShow = new Button("ShwClpbrd",Styles.ROOT_STYLE); //TODO make use chosen style... root one is more readable...
-//		btnClipboardShow.setPreferredSize(new Vector3f(100,20,0));
-		btnClipboardShow.addClickCommands(new ButtonClick());
-		ctnrStatsAndControls.addChild(btnClipboardShow,0,++iButtonIndex);
+		btnClipboardShow = new Button("ShwClpbrd",strStyle);
+		abu.add(btnClipboardShow);
+//		btnClipboardShow.setTextHAlignment(HAlignment.Center);
+////		btnClipboardShow.setPreferredSize(new Vector3f(100,20,0));
+//		btnClipboardShow.addClickCommands(new ButtonClick());
+//		ctnrStatsAndControls.addChild(btnClipboardShow,0,++iButtonIndex);
 		
-		btnCopy = new Button("Copy",Styles.ROOT_STYLE); //TODO make use chosen style... root one is more readable...
-//		btnClipboardShow.setPreferredSize(new Vector3f(100,20,0));
-		btnCopy.addClickCommands(new ButtonClick());
-		ctnrStatsAndControls.addChild(btnCopy,0,++iButtonIndex);
+		btnCopy = new Button("Copy",strStyle);
+		abu.add(btnCopy);
+//		btnCopy.addClickCommands(new ButtonClick());
+//		ctnrStatsAndControls.addChild(btnCopy,0,++iButtonIndex);
 		
-		btnPaste = new Button("Paste",Styles.ROOT_STYLE); //TODO make use chosen style... root one is more readable...
-//		btnClipboardShow.setPreferredSize(new Vector3f(100,20,0));
-		btnPaste.addClickCommands(new ButtonClick());
-		ctnrStatsAndControls.addChild(btnPaste,0,++iButtonIndex);
+		btnPaste = new Button("Paste",strStyle);
+		abu.add(btnPaste);
+//		btnPaste.addClickCommands(new ButtonClick());
+//		ctnrStatsAndControls.addChild(btnPaste,0,++iButtonIndex);
+		
+		btnCut = new Button("Cut",strStyle);
+		abu.add(btnCut);
+//		btnCut.addClickCommands(new ButtonClick());
+//		ctnrStatsAndControls.addChild(btnCut,0,++iButtonIndex);
+		
+		for(Button btn:abu){
+			btn.setTextHAlignment(HAlignment.Center);
+			//btnClipboardShow.setPreferredSize(new Vector3f(100,20,0));
+			btn.addClickCommands(new ButtonClick());
+			ctnrStatsAndControls.addChild(btn,0,++iButtonIndex);
+		}
 		
 		/**
 		 * CENTER ELEMENT (dump entries area) ===========================================
@@ -526,7 +544,10 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 				scrollToBottomRequest();
 			}else
 			if(source.equals(btnCopy)){
-				editCopy(false);
+				editCopyOrCut(false,false);
+			}else
+			if(source.equals(btnCut)){
+				editCopyOrCut(false,true);
 			}else
 			if(source.equals(btnPaste)){
 				editPaste();
@@ -534,27 +555,32 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		}
 	}
 	
-	protected String editCopy(boolean bJustCollectText) {
+	protected String editCopyOrCut(boolean bJustCollectText, boolean bCut) {
 //		Integer iCopyTo = getDumpAreaSelectedIndex();
 		String strTextToCopy = null;
-		if(iCopyTo>=0){
+		
+		int iCopyToWork = iCopyTo;
+		int iCopyFromWork = iCopyFrom;
+		
+		if(iCopyToWork>=0){
 			
-			if(iCopyFrom==-1)iCopyFrom=iCopyTo;
+			if(iCopyFromWork==-1)iCopyFromWork=iCopyToWork;
 			
 			// wrap mode overrides this behavior
-			boolean bMultiLineMode = iCopyFrom!=iCopyTo;
+			boolean bMultiLineMode = iCopyFromWork!=iCopyToWork;
 			
-			if(iCopyFrom>iCopyTo){
-				int iCopyFromBkp=iCopyFrom;
-				iCopyFrom=iCopyTo;
-				iCopyTo=iCopyFromBkp;
+			if(iCopyFromWork>iCopyToWork){
+				int iCopyFromBkp=iCopyFromWork;
+				iCopyFromWork=iCopyToWork;
+				iCopyToWork=iCopyFromBkp;
 			}
 			
 			strTextToCopy="";
 			while(true){ //multi-line copy
-				if(iCopyFrom>=vlstrDumpEntries.size())break;
+				if(iCopyFromWork>=vlstrDumpEntries.size())break;
 				
-				String strEntry = vlstrDumpEntries.get(iCopyFrom);
+				String strEntry =	bCut ? vlstrDumpEntries.remove(iCopyFromWork) :
+					vlstrDumpEntries.get(iCopyFromWork);
 //				strEntry=strEntry.replace("\\n","\n"); //translate in-between newline requests into newline
 				
 				boolean bJoinWithNext = false;
@@ -581,12 +607,12 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 					 * this overrides wrap mode, as user may not want other lines
 					 * as he/she used a multi-line mode.
 					 */
-					if((iCopyFrom-iCopyTo)==0)break;
+					if((iCopyFromWork-iCopyToWork)==0)break;
 					
-					iCopyFrom++;
+					if(bCut){iCopyToWork--;}else{iCopyFromWork++;};
 				}else{ // single line mode
 					if(bJoinWithNext){
-						iCopyFrom++;
+						if(bCut){iCopyToWork--;}else{iCopyFromWork++;};
 					}else{
 						break;
 					}
@@ -600,8 +626,10 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 			}
 		}
 		
-		iCopyFrom=-1;
-		iCopyTo=-1;
+		if(!bJustCollectText){
+			iCopyFrom=-1;
+			iCopyTo=-1;
+		}
 		
 		return strTextToCopy;
 	}
@@ -697,11 +725,16 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	
 	protected void cmdTest(){
 		dumpInfoEntry("testing...");
-		
 		String strParam1 = paramString(1);
 		
-		dumpSubEntry("["+(char)Integer.parseInt(strParam1, 16)+"]");
 		
+		String strAllChars="";
+		for(char ch=0;ch<256;ch++){
+			strAllChars+=Character.toString(ch);
+		}
+		dumpSubEntry("AllChars:"+strAllChars);
+		
+//	dumpSubEntry("["+(char)Integer.parseInt(strParam1, 16)+"]");
 //		if(getDumpAreaSelectedIndex()>=0){
 //			dumpSubEntry("Selection:"+getDumpAreaSelectedIndex()+": '"+vlstrDumpEntries.get(getDumpAreaSelectedIndex())+"'");
 //		}
@@ -723,43 +756,44 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		GuiGlobals.getInstance().getStyles().setDefault(fntMakeFixedWidth);
 	}
 	
-	protected void createMonoSpaceFontStyle(){
+	protected void createMonoSpaceFixedFontStyle(){
 		if(bConsoleStyleCreated)return;
 		
 		BitmapFont font = sapp.getAssetManager().loadFont("Interface/Fonts/Console.fnt");
+//		BitmapFont font = sapp.getAssetManager().loadFont("Interface/Fonts/Console512x.fnt");
 		//TODO improve the font quality to be more readable, how???
 		
 		Styles styles = GuiGlobals.getInstance().getStyles();
 		
-		ColorRGBA cl;
+		ColorRGBA clBg;
 		
 		Attributes attrs;
 		attrs = styles.getSelector(STYLE_CONSOLE); // this also creates the style
 		attrs.set("fontSize", 16);
 		attrs.set("color", ColorRGBA.White.clone());
-		cl = ColorRGBA.Blue.clone();cl.b=0.25f;cl.a=0.75f;
-		attrs.set("background", new QuadBackgroundComponent(cl));
+		clBg = ColorRGBA.Blue.clone();clBg.b=0.25f;clBg.a=0.75f;
+		attrs.set("background", new QuadBackgroundComponent(clBg));
 		attrs.set("font", font);
 		
 //			attrs = styles.getSelector("grid", STYLE_CONSOLE);
 //			attrs.set("background", new QuadBackgroundComponent(new ColorRGBA(0,1,0,1)));
 		
 		attrs = styles.getSelector(Button.ELEMENT_ID, STYLE_CONSOLE);
-		attrs.set("color", ColorRGBA.Green.clone());
-		cl = ColorRGBA.Blue.clone();cl.a = 0.5f;
-		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(cl));
+		attrs.set("color", new ColorRGBA(0,1,0.5f,1));
+		clBg = new ColorRGBA(0,0,0.125f,1);
+		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
 		attrs = styles.getSelector(TextField.ELEMENT_ID, STYLE_CONSOLE);
 		attrs.set("color", new ColorRGBA(0.75f,1,1,1));
-		cl = new ColorRGBA(0.15f, 0.25f, 0, 1);
-		attrs.set(TextField.LAYER_BACKGROUND, new QuadBackgroundComponent(cl));
+		clBg = new ColorRGBA(0.15f, 0.25f, 0, 1);
+		attrs.set(TextField.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
 //		lstbx.getElementId().child(ListBox.SELECTOR_ID);
 		attrs = styles.getSelector(ListBox.ELEMENT_ID, ListBox.SELECTOR_ID, STYLE_CONSOLE);
 //			attrs = styles.getSelector("list", "selector", STYLE_CONSOLE);
 //			attrs.set("color", ColorRGBA.Red.clone());
-		cl = ColorRGBA.Yellow.clone();cl.a=0.25f;
-		attrs.set(ListBox.LAYER_BACKGROUND, new QuadBackgroundComponent(cl));
+		clBg = ColorRGBA.Yellow.clone();clBg.a=0.25f;
+		attrs.set(ListBox.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
 //			attrs.set("background", new QuadBackgroundComponent(new ColorRGBA(0,0,0.25f,1)));
 //
@@ -803,10 +837,13 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 						if(bControl)iCopyFrom = getDumpAreaSelectedIndex();
 						break;
 					case KeyInput.KEY_C: 
-						if(bControl)editCopy(false);
+						if(bControl)editCopyOrCut(false,false);
 						break;
 					case KeyInput.KEY_V: 
 						if(bControl)editPaste();
+						break;
+					case KeyInput.KEY_X: 
+						if(bControl)editCopyOrCut(false,true);
 						break;
 					case KeyInput.KEY_NUMPADENTER:
 					case KeyInput.KEY_RETURN:
@@ -832,6 +869,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_B,KeyAction.CONTROL_DOWN), actSimpleActions);
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_C,KeyAction.CONTROL_DOWN), actSimpleActions);
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_V,KeyAction.CONTROL_DOWN), actSimpleActions);
+		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_X,KeyAction.CONTROL_DOWN), actSimpleActions);
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_DELETE,KeyAction.CONTROL_DOWN), actSimpleActions);
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_SLASH,KeyAction.CONTROL_DOWN), actSimpleActions);
 		
@@ -1055,15 +1093,8 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	@Override
 	public void update(float tpf) {
 		if(!isEnabled())return;
-		
 		fTPF = tpf;
-		
-//		updateEveryFrame();
-		
-		/**
-		 * CPU rest must be after the fps limiter.
-		 */
-		if(!tdLetCpuRest.isReady(true))return;
+		if(tdLetCpuRest.isActive() && !tdLetCpuRest.isReady(true))return;
 		
 		updateToggles();
 		updateDumpAreaSelectedIndex();
@@ -1085,6 +1116,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		if(cc.btgEngineStatsView.checkChangedAndUpdate())updateEngineStats();
 		if(cc.btgEngineStatsFps.checkChangedAndUpdate())updateEngineStats();
 		if(cc.btgFpsLimit.checkChangedAndUpdate())fpslState.setEnabled(cc.btgFpsLimit.b());
+		if(cc.btgConsoleCpuRest.checkChangedAndUpdate())tdLetCpuRest.setActive(cc.btgConsoleCpuRest.b());
 	}
 	protected void resetCmdHistoryCursor(){
 		iCmdHistoryCurrentIndex = astrCmdHistory.size();
@@ -1308,10 +1340,11 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 			if(iSelectionIndexPreviousForFill!=getDumpAreaSelectedIndex()){ //to let user type things...
 				updateCopyFrom();
 				
-				String strCmdChk = editCopy(true); //vlstrDumpEntries.get(getDumpAreaSelectedIndex()).trim();
-				if(validateBaseCommand(strCmdChk.trim())){
+				String strCmdChk = editCopyOrCut(true,false); //vlstrDumpEntries.get(getDumpAreaSelectedIndex()).trim();
+				strCmdChk=strCmdChk.trim();
+				if(validateBaseCommand(strCmdChk)){
+					if(!strCmdChk.startsWith(""+chCommandPrefix))strCmdChk=chCommandPrefix+strCmdChk;
 					dumpAndClearInputField();
-//					checkInputEmptyDumpIfNot(true);
 					int iCommentBegin = strCmdChk.indexOf(chCommentPrefix);
 					if(iCommentBegin>=0)strCmdChk=strCmdChk.substring(0,iCommentBegin);
 					if(strCmdChk.endsWith("\\n"))strCmdChk=strCmdChk.substring(0,strCmdChk.length()-2);
@@ -1325,7 +1358,6 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	}
 	
 	protected void setInputField(String str){
-//		tfInput.setText(str.replace("\n", "\\n").replace("\r", "").trim());
 		/**
 		 * do NOT trim() the string, it may be being auto completed and 
 		 * an space being appended to help on typing new parameters.
@@ -1343,17 +1375,43 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	}
 	
 	protected void updateCopyFrom(){
-		int i = getDumpAreaSelectedIndex();
-		if(i>=0){
-			if(iCopyTo>=0){
-				if(bKeyShiftIsPressed){
-					if(iCopyTo != i){ 	// another entry selected
-						iCopyFrom = iCopyTo;
-					}
+		int iSelected = getDumpAreaSelectedIndex();
+		boolean bMultiLineMode = bKeyShiftIsPressed;
+		if(iSelected>=0){
+			if(bMultiLineMode){
+				if(iCopyTo==-1){
+					iCopyFrom = iSelected;
+					iCopyTo = iSelected;
+				}else{
+					iCopyFrom = iCopyTo;
+					iCopyTo = iSelected;
 				}
+			}else{
+				iCopyFrom = iSelected;
+				iCopyTo = iSelected;
 			}
 			
-			iCopyTo = i;
+//			int iCopyToBkp = iCopyTo;
+//			iCopyTo = iSelected;
+//			
+//			if(bKeyShiftIsPressed){
+//				
+//			}else{
+//				iCopyFrom = iSelected;
+//			}
+//			
+//			if(iCopyTo==-1){
+//				iCopyFrom = iSelected;
+//				iCopyTo = iSelected;
+//			}else{
+//				if(bKeyShiftIsPressed){
+//					if(iCopyTo != iSelected){ 	// another entry selected
+//						iCopyFrom = iCopyTo;
+//					}
+//				}
+//			}
+//			
+//			iCopyTo = iSelected;
 		}
 	}
 	
@@ -1933,7 +1991,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	protected boolean checkCmdValidityBoolTogglers(){
 		cc.btgReferenceMatched=null;
 		for(BoolToggler btg : BoolToggler.getBoolTogglerListCopy()){
-			if(checkCmdValidity(btg.getCmdId(), "[bEnable]", true)){
+			if(checkCmdValidity(btg.getCmdId(), "[bEnable] "+btg.getHelp(), true)){
 				cc.btgReferenceMatched = btg;
 				break;
 			}
@@ -3309,7 +3367,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		strStatsLast = ""
 				// user important
 				+"CpFrom"+iCopyFrom
-					+"to"+getDumpAreaSelectedIndex()
+					+"to"+iCopyTo //getDumpAreaSelectedIndex()
 					+","
 				
 				+"Hst"+iCmdHistoryCurrentIndex+"/"+(astrCmdHistory.size()-1)
@@ -3328,9 +3386,9 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 					+"("+fmtFloat(100.0f -lstbx.getSlider().getModel().getPercent()*100f,0)+"%)"
 					+","
 				
-				+"Tpf"+((int)(fTPF*1000.0f))
+				+"Tpf"+(fpslState.isEnabled() ? (int)(fTPF*1000.0f) : fmtFloat(fTPF,6)+"s")
 					+(fpslState.isEnabled()?
-						"="+fpslState.getFrameDelayByCpuUsageMilis()+"+"+fpslState.getThreadSleepTimeMilis()
+						"="+fpslState.getFrameDelayByCpuUsageMilis()+"+"+fpslState.getThreadSleepTimeMilis()+"ms"
 						:"")
 					+","
 					

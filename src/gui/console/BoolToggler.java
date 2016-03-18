@@ -46,8 +46,7 @@ public class BoolToggler implements IReflexFillCfgVariant{
 	protected boolean bCurrent;
 	protected String strCommand;
 	protected IReflexFillCfg	rfcfgOwner;
-
-	private int	iReflexFillCfgVariant;
+	protected String strHelp="";
 
 	private String	strReflexFillCfgCodePrefixVariant;
 	
@@ -58,14 +57,14 @@ public class BoolToggler implements IReflexFillCfgVariant{
 	private BoolToggler(){
 		abtgList.add(this);
 	}
-//	public BoolToggler(IReflexFillCfg rfcfgOwner, boolean bInitValue){
-//		this(rfcfgOwner, bInitValue, 0);
-//	}
-	public BoolToggler(IReflexFillCfg rfcfgOwner, boolean bInitValue, String strReflexFillCfgCodePrefixVariant){ // int iReflexFillCfgVariant){
+	public BoolToggler(IReflexFillCfg rfcfgOwner, boolean bInitValue, String strReflexFillCfgCodePrefixVariant){
+		this( rfcfgOwner,  bInitValue,  strReflexFillCfgCodePrefixVariant, "");
+	}
+	public BoolToggler(IReflexFillCfg rfcfgOwner, boolean bInitValue, String strReflexFillCfgCodePrefixVariant, String strHelp){
 		this();
-//		this.iReflexFillCfgVariant=iReflexFillCfgVariant;
 		this.strReflexFillCfgCodePrefixVariant=strReflexFillCfgCodePrefixVariant;
 		this.rfcfgOwner=rfcfgOwner;
+		this.strHelp=strHelp;
 		set(bInitValue);
 	}
 	public BoolToggler(boolean bInitValue, String strCustomCmdId){
@@ -85,6 +84,10 @@ public class BoolToggler implements IReflexFillCfgVariant{
 		if(strCommand!=null)return strCommand;
 		strCommand=ReflexFill.i().createIdentifierWithFieldName(rfcfgOwner,this);
 		return strCommand;
+	}
+	
+	public String getHelp(){
+		return strHelp;
 	}
 	
 	public boolean get(){return bCurrent;}

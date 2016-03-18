@@ -88,6 +88,13 @@ public class TimedDelay{
 	public boolean isActive() {
 		return lNanoTime!=null;
 	}
+	public void setActive(boolean b){
+		if(b){
+			if(!isActive())updateTime();
+		}else{
+			reset();
+		}
+	}
 	public float getCurrentDelayPercentual() {
 		float f = 1.0f - ((lNanoDelayLimit-getCurrentDelay())*fNanoToSeconds);
 		if(f<0f)throw new NullPointerException("negative value: "+f);

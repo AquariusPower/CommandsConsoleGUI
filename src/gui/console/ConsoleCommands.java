@@ -52,6 +52,7 @@ public class ConsoleCommands implements IReflexFillCfg{
 	protected BoolToggler	btgShowExecQueuedInfo=new BoolToggler(this,false,strTogglerCodePrefix);
 	protected BoolToggler	btgShowMiliseconds=new BoolToggler(this,false,strTogglerCodePrefix);
 	protected BoolToggler	btgFpsLimit=new BoolToggler(this,false,strTogglerCodePrefix);
+	protected BoolToggler	btgConsoleCpuRest=new BoolToggler(this,false,strTogglerCodePrefix,"Console update steps will be skipped if this is enabled.");
 	protected BoolToggler	btgReferenceMatched;
 	
 	/**
@@ -85,36 +86,13 @@ public class ConsoleCommands implements IReflexFillCfg{
 		if(rfcv.getClass().isAssignableFrom(BoolToggler.class)){
 			if(strTogglerCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
-//				rfcfg.strCodingStyleFieldNamePrefix=strTogglerCodePrefix;
 				rfcfg.strCommandSuffix="Toggle";
 			}
-//			switch(rfcv.getReflexFillCfgVariant()){
-//				case 0:
-//					rfcfg = new ReflexFillCfg();
-//					rfcfg.strCodingStyleFieldNamePrefix="btg";
-//					rfcfg.strCommandSuffix="Toggle";
-//					break;
-//			}
 		}else
 		if(rfcv.getClass().isAssignableFrom(StringField.class)){
 			if(strFinalCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
-//				rfcfg.strCodingStyleFinalFieldNamePrefix=strCmdCodePrefix;
 			}
-			
-//			switch(rfcv.getReflexFillCfgVariant()){
-////				case 0:
-////					rfcfg = new ReflexFillCfg();
-////					rfcfg.strCodingStyleFinalFieldNamePrefix="CMD_";
-////					rfcfg.strCodingStyleFieldNamePrefix="sf";
-////					break;
-//				case 1:
-//					rfcfg = new ReflexFillCfg();
-//					rfcfg.strCodingStyleFieldNamePrefix = "INPUT_MAPPING_CONSOLE_";
-//					rfcfg.strCommandPrefix = IMCPREFIX;
-//					rfcfg.bFirstLetterUpperCase = true;
-//					break;
-//			}
 		}
 		
 		return rfcfg;

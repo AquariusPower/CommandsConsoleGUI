@@ -24,7 +24,7 @@ Features:
 	= Comment token detection, after it, line is ignored.
 	= Omit the "command being run" info entry by ending a line with '#', good at init file, mainly for /echo commands.
 	___Editing___ 
-	= Multi-line copy: Ctrl+b marks CopyFromIndex "begin", Ctrl+c marks CopyToIndex "end", Shift+click stores the previous CopyToIndex into CopyFromIndex.
+	= Multi-line copy: Ctrl+b marks CopyFromIndex "begin", Ctrl+c/x marks CopyToIndex "end", Shift+click stores the previous CopyToIndex into CopyFromIndex.
 	= Single line wrap detection when copying.
 	= Ctrl+del clear the input command line
 	= Ctrl+home sroll top, Ctrl+end scroll bottom
