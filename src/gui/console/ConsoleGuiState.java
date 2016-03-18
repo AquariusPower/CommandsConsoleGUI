@@ -161,7 +161,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 //	protected TextField tfAutoCompleteHint;
 	protected SimpleApplication	sapp;
 	protected boolean	bEnabled;
-	protected VersionedList<String>	vlstrDumpEntriesQueue = new VersionedList<String>();;
+	protected VersionedList<String>	vlstrDumpEntriesSlowedQueue = new VersionedList<String>();;
 	protected VersionedList<String>	vlstrDumpEntries = new VersionedList<String>();;
 	protected VersionedList<String>	vlstrAutoCompleteHint = new VersionedList<String>();;
 	protected int	iShowRows = 1;
@@ -269,13 +269,15 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	private long	lNanoFpsLimiterTime;
 
 	private boolean	bLastIfConditionWasValid;
+
+	protected ArrayList<DumpEntry> adeDumpEntryFastQueue = new ArrayList<DumpEntry>();
 	
-	protected static ConsoleGuiState i;
+	protected static ConsoleGuiState instance;
 	public static ConsoleGuiState i(){
-		return i;
+		return instance;
 	}
 	public ConsoleGuiState() {
-		if(i==null)i=this;
+		if(instance==null)instance=this;
 		cc = new ConsoleCommands();
 	}
 	public ConsoleGuiState(int iToggleConsoleKey) {
@@ -320,18 +322,20 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		// other inits
 		addToExecConsoleCommandQueue(cc.CMD_FIX_LINE_WRAP);
 		addToExecConsoleCommandQueue(cc.CMD_CONSOLE_SCROLL_BOTTOM);
-		if(bInitiallyClosed){
-			addToExecConsoleCommandQueue(cc.CMD_CLOSE_CONSOLE);
-		}
 		addToExecConsoleCommandQueue(cc.CMD_DB+" "+EDataBaseOperations.load);
-		addToExecConsoleCommandQueue(cc.CMD_DB+" "+EDataBaseOperations.saveShrinking); //to shrink it
+		addToExecConsoleCommandQueue(
+			cc.CMD_DB+" "+EDataBaseOperations.save+" "+chCommentPrefix+"to shrink it");
 		/**
 		 * KEEP AS LAST queued cmds below!!!
 		 */
 		// must be the last queued command after all init ones!
-		addToExecConsoleCommandQueue(cc.btgShowExecQueuedInfo.getCmdId()+" "+true);
+		addToExecConsoleCommandQueue(cc.btgShowExecQueuedInfo.getCmdIdAsCommand(true));
 		// end of initialization
 		addToExecConsoleCommandQueue(SPECIAL_CMD_END_OF_STARTUP_CMDQUEUE);
+		if(bInitiallyClosed){
+			// after all, close the console
+			addToExecConsoleCommandQueue(cc.CMD_CLOSE_CONSOLE);
+		}
 		
 		astrStyleList.add(BaseStyles.GLASS);
 		astrStyleList.add(Styles.ROOT_STYLE);
@@ -657,8 +661,9 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		astrCmdHistory.addAll(fileLoad(flCmdHist));
 	}
 	
-	protected void dumpSave(String str) {
-		fileAppendLine(flLastDump,str);
+	protected void dumpSave(DumpEntry de) {
+//		if(de.isSavedToLogFile())return;
+		fileAppendLine(flLastDump,de.getStrLineOriginal());
 	}
 	
 	protected void fileAppendList(File fl, ArrayList<String> astr) {
@@ -1316,7 +1321,12 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	}
 	
 	protected void setInputField(String str){
-		tfInput.setText(str.replace("\n", "\\n").replace("\r", "").trim());
+//		tfInput.setText(str.replace("\n", "\\n").replace("\r", "").trim());
+		/**
+		 * do NOT trim() the string, it may be being auto completed and 
+		 * an space being appended to help on typing new parameters.
+		 */
+		tfInput.setText(str.replace("\n", "\\n").replace("\r", ""));
 	}
 	
 	protected void updateDumpAreaSelectedIndex(){
@@ -1506,17 +1516,26 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	}
 	
 	protected void addToExecConsoleCommandQueue(ArrayList<String> astrCmdList){
-		addToExecConsoleCommandQueue(astrCmdList,false);
+		addToExecConsoleCommandQueue(astrCmdList,false,true);
 	}
 	/**
 	 * 
 	 * @param astrCmdList
 	 * @param bPrepend will append if false
 	 */
-	protected void addToExecConsoleCommandQueue(ArrayList<String> astrCmdList, boolean bPrepend){
+	protected void addToExecConsoleCommandQueue(ArrayList<String> astrCmdList, boolean bPrepend, boolean bShowExecIndex){
+		astrCmdList = new ArrayList<String>(astrCmdList);
+		
+		for(int i=0;i<astrCmdList.size();i++){
+			/**
+			 * replace entry with useful comment
+			 */
+			astrCmdList.set(i, astrCmdList.get(i)
+				+(bShowExecIndex?" "+chCommentPrefix+"ExecIndex="+i:""));
+		}
+		
 		if(bPrepend){
-			astrCmdList = new ArrayList<String>(astrCmdList);
-			Collections.reverse(astrCmdList);;
+			Collections.reverse(astrCmdList);
 		}
 		
 		for(String str:astrCmdList){
@@ -1542,7 +1561,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 			}
 		}
 		
-		dumpDevInfoEntry("CmdQueued:["+strFullCmdLine+"]");
+		dumpDevInfoEntry("CmdQueued: "+strFullCmdLine+(bPrepend?" #Prepended":""));
 		
 		if(bPrepend){
 			astrExecConsoleCmdsQueue.add(0,strFullCmdLine);
@@ -1646,57 +1665,125 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	protected void dumpEntry(String strLineOriginal){
 		dumpEntry(true, true, false, strLineOriginal);
 	}
+	
+	/**
+	 * dump strings will always be logged to file even if disabled.
+	 */
+	public static class DumpEntry{
+		/**
+		 * Beware, better do NOT change these defaults,
+		 * as many usages of DumpEntry may depend on it.
+		 * Maybe extend this class to have other defaults.
+		 */
+		boolean bApplyNewLineRequests = false; //this is a special behavior, disabled by default
+		boolean bDumpToConsole = true;
+		boolean bUseSlowQueue = false;
+		String strLineOriginal = null;
+		
+		public boolean isbApplyNewLineRequests() {
+			return bApplyNewLineRequests;
+		}
+		public DumpEntry setApplyNewLineRequests(boolean bApplyNewLineRequests) {
+			this.bApplyNewLineRequests = bApplyNewLineRequests;
+			return this;
+		}
+		public boolean isbDump() {
+			return bDumpToConsole;
+		}
+		public DumpEntry setDumpToConsole(boolean bDump) {
+			this.bDumpToConsole = bDump;
+			return this;
+		}
+		public boolean isbUseQueue() {
+			return bUseSlowQueue;
+		}
+		public DumpEntry setUseSlowQueue(boolean bUseQueue) {
+			this.bUseSlowQueue = bUseQueue;
+			return this;
+		}
+		public String getStrLineOriginal() {
+			return strLineOriginal;
+		}
+		public DumpEntry setLineOriginal(String strLineOriginal) {
+			this.strLineOriginal = strLineOriginal;
+			return this;
+		}
+		
+	}
+	
+	protected void dumpEntry(boolean bApplyNewLineRequests, boolean bDump, boolean bUseSlowQueue, String strLineOriginal){
+		DumpEntry de = new DumpEntry()
+			.setApplyNewLineRequests(bApplyNewLineRequests)
+			.setDumpToConsole(bDump)
+			.setUseSlowQueue(bUseSlowQueue)
+			.setLineOriginal(strLineOriginal);
+		
+		dumpEntry(de);
+	}
+	
 	/**
 	 * Simplest dump entry method, but still provides line-wrap.
 	 * 
-	 * @param bDump if false, will only log to file
+	 * @param bDumpToConsole if false, will only log to file
 	 * @param strLineOriginal
 	 */
-	protected void dumpEntry(boolean bApplyNewLineRequests, boolean bDump, boolean bUseQueue, String strLineOriginal){
-		if(bDump){
-			if(iConsoleMaxWidthInCharsForLineWrap!=null){
-				ArrayList<String> astr = new ArrayList<String>();
-				if(strLineOriginal.isEmpty()){
-					astr.add(strLineOriginal);
-				}else{
-					String strLine = strLineOriginal.replace("\t", strReplaceTAB);
-					strLine=strLine.replace("\r", ""); //removes carriage return
-					
-					if(bApplyNewLineRequests){
-						strLine=strLine.replace("\\n","\n"); //converts newline request into newline char
-					}else{
-						strLine=strLine.replace("\n","\\n"); //disables any newline char without losing it
+	protected void dumpEntry(DumpEntry de){
+		dumpSave(de);
+		
+		if(!isInitialized()){
+			adeDumpEntryFastQueue.add(de);
+			return;
+		}
+		
+		if(!de.bDumpToConsole)return;
+		
+		if(iConsoleMaxWidthInCharsForLineWrap==null){
+			applyDumpEntryOrPutToSlowQueue(de.bUseSlowQueue, de.strLineOriginal);
+			return;
+		}
+		
+		ArrayList<String> astr = new ArrayList<String>();
+		if(de.strLineOriginal.isEmpty()){
+			astr.add(de.strLineOriginal);
+		}else{
+			String strLine = de.strLineOriginal.replace("\t", strReplaceTAB);
+			strLine=strLine.replace("\r", ""); //removes carriage return
+			
+			if(de.bApplyNewLineRequests){
+				strLine=strLine.replace("\\n","\n"); //converts newline request into newline char
+			}else{
+				strLine=strLine.replace("\n","\\n"); //disables any newline char without losing it
+			}
+			
+			int iWrapAt = iConsoleMaxWidthInCharsForLineWrap;
+			if(STYLE_CONSOLE.equals(strStyle)){ //TODO is faster?
+				iWrapAt = (int) (widthForDumpEntryField() / fWidestCharForCurrentStyleFont ); //'W' but any char will do for monospaced font
+			}
+			
+			//TODO use \n to create a new line properly
+			if(iWrapAt>0){ //fixed chars wrap
+				String strLineToDump="";
+				boolean bDumpAdd=false;
+				for (int i=0;i<strLine.length();i++){
+					char ch = strLine.charAt(i);
+					strLineToDump+=ch;
+					if(ch=='\n'){
+						bDumpAdd=true;
+					}else
+					if(strLineToDump.length()==iWrapAt){
+						bDumpAdd=true;
+					}else
+					if(i==(strLine.length()-1)){
+						bDumpAdd=true;
 					}
 					
-					int iWrapAt = iConsoleMaxWidthInCharsForLineWrap;
-					if(STYLE_CONSOLE.equals(strStyle)){ //TODO is faster?
-						iWrapAt = (int) (widthForDumpEntryField() / fWidestCharForCurrentStyleFont ); //'W' but any char will do for monospaced font
+					if(bDumpAdd){
+						astr.add(strLineToDump);
+						strLineToDump="";
+						bDumpAdd=false;
 					}
-					
-					//TODO use \n to create a new line properly
-					if(iWrapAt>0){ //fixed chars wrap
-						String strLineToDump="";
-						boolean bDumpAdd=false;
-						for (int i=0;i<strLine.length();i++){
-							char ch = strLine.charAt(i);
-							strLineToDump+=ch;
-							if(ch=='\n'){
-								bDumpAdd=true;
-							}else
-							if(strLineToDump.length()==iWrapAt){
-								bDumpAdd=true;
-							}else
-							if(i==(strLine.length()-1)){
-								bDumpAdd=true;
-							}
-							
-							if(bDumpAdd){
-								astr.add(strLineToDump);
-								strLineToDump="";
-								bDumpAdd=false;
-							}
-						}
-						
+				}
+				
 //						for (int i=0;i<strLine.length();i+=iWrapAt){
 //							String strLineToDump = strLine.substring(
 //									i, 
@@ -1704,62 +1791,57 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 //								);
 //							astr.add(strLineToDump);
 //						}
-					}else{ // auto wrap, TODO is this slow?
-						String strAfter = "";
-						float fMaxWidth = widthForDumpEntryField() - iDotsMarginSafetyGUESSED;
-						while(strLine.length()>0){
-							while(fontWidth(strLine, strStyle, false) > fMaxWidth){
-								int iLimit = strLine.length()-iJumpBackGUESSED;
-								strAfter = strLine.substring(iLimit) + strAfter;
-								strLine = strLine.substring(0, iLimit);
-							}
-							astr.add(strLine);
-							strLine = strAfter;
-							strAfter="";
-						}
+			}else{ // auto wrap, TODO is this slow?
+				String strAfter = "";
+				float fMaxWidth = widthForDumpEntryField() - iDotsMarginSafetyGUESSED;
+				while(strLine.length()>0){
+					while(fontWidth(strLine, strStyle, false) > fMaxWidth){
+						int iLimit = strLine.length()-iJumpBackGUESSED;
+						strAfter = strLine.substring(iLimit) + strAfter;
+						strLine = strLine.substring(0, iLimit);
 					}
+					astr.add(strLine);
+					strLine = strAfter;
+					strAfter="";
 				}
-				
-				/**
-				 * ADD LINE WRAP INDICATOR
-				 */
-				for(int i=0;i<astr.size();i++){
-					String strPart = astr.get(i);
-					if(i<(astr.size()-1)){
-						if(strPart.endsWith("\n")){
-							strPart=strPart.substring(0, strPart.length()-1)+"\\n"; // new line indicator
-						}else{
-							strPart+="\\"; // line wrap indicator
-						}
-					}
-					
-					addDumpEntryQueue(bUseQueue,strPart);
-				}
-			}else{
-				addDumpEntryQueue(bUseQueue,strLineOriginal);
 			}
-			
-//			while(vlstrDumpEntries.size() > iMaxDumpEntriesAmount){
-//				vlstrDumpEntries.remove(0);
-//			}
 		}
 		
-		dumpSave(strLineOriginal);
+		/**
+		 * ADD LINE WRAP INDICATOR
+		 */
+		for(int i=0;i<astr.size();i++){
+			String strPart = astr.get(i);
+			if(i<(astr.size()-1)){
+				if(strPart.endsWith("\n")){
+					strPart=strPart.substring(0, strPart.length()-1)+"\\n"; // new line indicator
+				}else{
+					strPart+="\\"; // line wrap indicator
+				}
+			}
+			
+			applyDumpEntryOrPutToSlowQueue(de.bUseSlowQueue, strPart);
+		}
+		
 	}
 	
-	protected void addDumpEntryQueue(boolean bUseQueue, String str) {
-		if(bUseQueue){
-			vlstrDumpEntriesQueue.add(str);
+	protected void applyDumpEntryOrPutToSlowQueue(boolean bUseSlowQueue, String str) {
+		if(bUseSlowQueue){
+			vlstrDumpEntriesSlowedQueue.add(str);
 		}else{
 			vlstrDumpEntries.add(str);
 		}
 	}
 	
 	protected void updateDumpQueueEntry(){
+		while(adeDumpEntryFastQueue.size()>0){
+			dumpEntry(adeDumpEntryFastQueue.remove(0));
+		}
+			
 		if(!tdDumpQueuedEntry.isReady(true))return;
 		
-		if(vlstrDumpEntriesQueue.size()>0){
-			vlstrDumpEntries.add(vlstrDumpEntriesQueue.remove(0));
+		if(vlstrDumpEntriesSlowedQueue.size()>0){
+			vlstrDumpEntries.add(vlstrDumpEntriesSlowedQueue.remove(0));
 			
 			while(vlstrDumpEntries.size() > iMaxDumpEntriesAmount){
 				vlstrDumpEntries.remove(0);
@@ -1776,7 +1858,11 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	}
 	
 	protected void dumpErrorEntry(String str){
-		dumpEntry(false, cc.btgShowWarn.get(), false, getSimpleTime()+strErrorEntryPrefix+str);
+		dumpEntry(new DumpEntry()
+			.setDumpToConsole(cc.btgShowWarn.get())
+			.setLineOriginal(getSimpleTime()+strErrorEntryPrefix+str)
+		);
+//		dumpEntry(false, cc.btgShowWarn.get(), false, getSimpleTime()+strErrorEntryPrefix+str);
 	}
 	
 	/**
@@ -1789,8 +1875,12 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	}
 	
 	protected void dumpDevInfoEntry(String str){
-		dumpEntry(false, cc.btgShowDeveloperInfo.get(), false, 
-			getSimpleTime()+strDevInfoEntryPrefix+str);
+		dumpEntry(new DumpEntry()
+			.setDumpToConsole(cc.btgShowDeveloperInfo.get())
+			.setLineOriginal(getSimpleTime()+strDevInfoEntryPrefix+str)
+		);
+//		dumpEntry(false, cc.btgShowDeveloperInfo.get(), false, 
+//			getSimpleTime()+strDevInfoEntryPrefix+str);
 	}
 	
 	protected void dumpExceptionEntry(Exception e){
@@ -1938,11 +2028,15 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 			return strCmdPartOriginal;
 		
 		ArrayList<String> astr = autoComplete(strCmdPart, astrCmdWithCmtValidList, bMatchContains);
-		String strFirst=astr.get(0);
+		String strFirst=astr.get(0); //the actual stored command may come with comments appended
 		String strAppendSpace = "";
-		if(astr.size()==1 && strFirst.length() > strCmdPart.length()){
+		if(astr.size()==1 && validateBaseCommand(strFirst)){
 			strAppendSpace=" "; //found an exact command valid match, so add space
 		}
+////		if(astr.size()==1 && extractCommandPart(strFirst,0).length() > strCmdPart.length()){
+//		if(astr.size()==1 && strFirst.length() > strCmdPart.length()){
+//			strAppendSpace=" "; //found an exact command valid match, so add space
+//		}
 		
 		// many possible matches
 		if(astr.size()>1){
@@ -2027,7 +2121,9 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		 * remove comment
 		 */
 		int iCommentAt = strFullCmdLine.indexOf(chCommentPrefix);
+		String strComment = "";
 		if(iCommentAt>=0){
+			strComment=strFullCmdLine.substring(iCommentAt);
 			strFullCmdLine=strFullCmdLine.substring(0,iCommentAt);
 		}
 		
@@ -2038,10 +2134,12 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 			ArrayList<String> astrMulti = new ArrayList<String>();
 			astrMulti.addAll(Arrays.asList(strFullCmdLine.split(strCommandDelimiter)));
 			for(int i=0;i<astrMulti.size();i++){
-				astrMulti.set(i,astrMulti.get(i)+chCommentPrefix+i);
+				/**
+				 * replace by propagating the existing comment to each part that will be executed
+				 */
+				astrMulti.set(i, astrMulti.get(i).trim()+" "+chCommentPrefix+"SplitCmdLine "+strComment);
 			}
-			
-			addToExecConsoleCommandQueue(astrMulti,true);
+			addToExecConsoleCommandQueue(astrMulti,true,true);
 			return SPECIAL_CMD_SKIP_CURRENT_COMMAND;
 		}
 		
@@ -2252,6 +2350,8 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 				if(aliasFound!=null)aAliasList.remove(aliasFound);
 				
 				aAliasList.add(alias);
+				fileAppendLine(flDB, alias.toString());
+				dumpSubEntry(alias.toString());
 				
 				bLastAliasCreatedSuccessfuly = true;
 			}
@@ -2264,7 +2364,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 			for(Alias alias:aAliasList){
 				if(alias.strAliasId.toLowerCase().equals(str)){
 					if(!alias.bBlocked){
-						addToExecConsoleCommandQueue(alias.strCmdLine, true);
+						addToExecConsoleCommandQueue(alias.strCmdLine+" "+chCommentPrefix+"alias="+alias.strAliasId, true);
 						return true;
 					}else{
 						dumpWarnEntry(alias.toString());
@@ -2460,9 +2560,13 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	}
 	
 	public static enum EDataBaseOperations{
-		saveShrinking,
+		/** saving also will shrink the DB */
+		save,
+		
 		load,
+		
 		show,
+		
 		;
 		public static String help(){
 			String str = null;
@@ -2501,9 +2605,13 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		
 		switch(e){
 			case load:
-				addToExecConsoleCommandQueue(fileLoad(flDB));
+				/**
+				 * prepend on the queue is important mainly at the initialization
+				 */
+				dumpInfoEntry("Loading Console Database:");
+				addToExecConsoleCommandQueue(fileLoad(flDB),true,false);
 				return true;
-			case saveShrinking:
+			case save:
 				ArrayList<String> astr = new ArrayList<>();
 				
 				ArrayList<String> astrVarList = getAllVariablesIdentifiers();
@@ -2742,10 +2850,10 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		return true;
 	}
 	
-	protected boolean elseCommand(){
+	protected boolean cmdElse(){
 		if(bLastIfConditionWasValid)return true; //true meaning it is a skipper, no problem happenend.
 		
-		//TODO
+		//TODO @@@ nested if/else will not work tho...
 		
 		return true;
 	}
@@ -3230,6 +3338,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		ReflexFillCfg rfcfg = new ReflexFillCfg();
+		
 		if(rfcv.getClass().isAssignableFrom(StringField.class)){
 			rfcfg.strCodingStyleFieldNamePrefix = "INPUT_MAPPING_CONSOLE_";
 			rfcfg.strCommandPrefix = IMCPREFIX;

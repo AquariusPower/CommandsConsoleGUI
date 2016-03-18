@@ -46,8 +46,8 @@ public class ConsoleCommands implements IReflexFillCfg{
 	protected BoolToggler	btgEngineStatsView = new BoolToggler(this,false);
 	protected BoolToggler	btgEngineStatsFps = new BoolToggler(this,false);
 	// developer vars, keep together!
-	protected BoolToggler	btgShowDeveloperInfo=new BoolToggler(this,false);
-	protected BoolToggler	btgShowDeveloperWarn=new BoolToggler(this,false);
+	protected BoolToggler	btgShowDeveloperInfo=new BoolToggler(this,true);
+	protected BoolToggler	btgShowDeveloperWarn=new BoolToggler(this,true);
 	protected BoolToggler	btgShowExecQueuedInfo=new BoolToggler(this,false);
 	protected BoolToggler	btgShowMiliseconds=new BoolToggler(this,false);
 	protected BoolToggler	btgFpsLimit=new BoolToggler(this,false);
@@ -68,17 +68,18 @@ public class ConsoleCommands implements IReflexFillCfg{
 	public final StringField CMD_LINE_WRAP_AT = new StringField(this);
 	public final StringField CMD_HK_TOGGLE = new StringField(this);
 	public final StringField CMD_FIX_CURSOR = new StringField(this);
-	public final StringField	CMD_VAR_SET = new StringField(this);;
+	public final StringField	CMD_VAR_SET = new StringField(this);
 	
-	private static ConsoleCommands i;
-	public static ConsoleCommands i(){return i;}
+	private static ConsoleCommands instance;
+	public static ConsoleCommands i(){return instance;}
 	public ConsoleCommands(){
-		i=this;
+		instance=this;
 	}
 
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		ReflexFillCfg rfcfg = new ReflexFillCfg();
+		
 		if(rfcv.getClass().isAssignableFrom(BoolToggler.class)){
 			switch(rfcv.getReflexFillCfgVariant()){
 				case 0:

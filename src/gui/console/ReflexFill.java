@@ -60,14 +60,14 @@ public class ReflexFill {
 		boolean bFirstLetterUpperCase = false;
 	}
 	
-	private static ReflexFill i = new ReflexFill();
+	private static ReflexFill instance = new ReflexFill();
 	
 	/**
 	 * 
 	 * @return instance
 	 */
 	public static ReflexFill i(){
-		return i;
+		return instance;
 	}
 	
 	/**

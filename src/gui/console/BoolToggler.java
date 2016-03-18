@@ -112,6 +112,10 @@ public class BoolToggler implements IReflexFillCfgVariant{
 	public int getReflexFillCfgVariant() {
 		return iReflexFillCfgVariant;
 	}
+
+	public String getCmdIdAsCommand(boolean bForceState) {
+		return getCmdId()+" "+bForceState;
+	}
 	
 //	public static String getPrefix() {
 //		return rfcfgOwner.;
