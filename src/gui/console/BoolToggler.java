@@ -48,6 +48,8 @@ public class BoolToggler implements IReflexFillCfgVariant{
 	protected IReflexFillCfg	rfcfgOwner;
 
 	private int	iReflexFillCfgVariant;
+
+	private String	strReflexFillCfgCodePrefixVariant;
 	
 	public static ArrayList<BoolToggler> getBoolTogglerListCopy(){
 		return new ArrayList<BoolToggler>(abtgList);
@@ -56,12 +58,13 @@ public class BoolToggler implements IReflexFillCfgVariant{
 	private BoolToggler(){
 		abtgList.add(this);
 	}
-	public BoolToggler(IReflexFillCfg rfcfgOwner, boolean bInitValue){
-		this(rfcfgOwner, bInitValue, 0);
-	}
-	public BoolToggler(IReflexFillCfg rfcfgOwner, boolean bInitValue, int iReflexFillCfgVariant){
+//	public BoolToggler(IReflexFillCfg rfcfgOwner, boolean bInitValue){
+//		this(rfcfgOwner, bInitValue, 0);
+//	}
+	public BoolToggler(IReflexFillCfg rfcfgOwner, boolean bInitValue, String strReflexFillCfgCodePrefixVariant){ // int iReflexFillCfgVariant){
 		this();
-		this.iReflexFillCfgVariant=iReflexFillCfgVariant;
+//		this.iReflexFillCfgVariant=iReflexFillCfgVariant;
+		this.strReflexFillCfgCodePrefixVariant=strReflexFillCfgCodePrefixVariant;
 		this.rfcfgOwner=rfcfgOwner;
 		set(bInitValue);
 	}
@@ -108,11 +111,16 @@ public class BoolToggler implements IReflexFillCfgVariant{
 		return ""+bCurrent;
 	}
 
-	@Override
-	public int getReflexFillCfgVariant() {
-		return iReflexFillCfgVariant;
-	}
+//	@Override
+//	public int getReflexFillCfgVariant() {
+//		return iReflexFillCfgVariant;
+//	}
 
+	@Override
+	public String getCodePrefixVariant() {
+		return strReflexFillCfgCodePrefixVariant;
+	}
+	
 	public String getCmdIdAsCommand(boolean bForceState) {
 		return getCmdId()+" "+bForceState;
 	}

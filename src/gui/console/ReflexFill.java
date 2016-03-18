@@ -44,14 +44,17 @@ public class ReflexFill {
 	 * for the same class, there may have user preferred prefix/suffix
 	 */
 	public static interface IReflexFillCfgVariant{
-		public int getReflexFillCfgVariant();
+//		public int getReflexFillCfgVariant();
+		public String getCodePrefixVariant();
 	}
 	
 	public static class ReflexFillCfg{
 		/**
-		 * to be removed from the final identifier string
+		 * to validate and also be removed from the identifier string
 		 */
-		String	strCodingStyleFieldNamePrefix="";
+		String	strCodingStyleFieldNamePrefix=null;
+//		String	strCodingStyleFieldNamePrefix=null;
+//		String	strCodingStyleFinalFieldNamePrefix=null;
 		
 		String	strCommandPrefix="";
 		
@@ -71,28 +74,57 @@ public class ReflexFill {
 	}
 	
 	/**
-	 * based on reflected variable name
-	 * @param rfcfgOwner 
-	 * @param strCodingStyleFieldNamePrefix 
-	 * @param strCommandPrefix 
-	 * @param strCommandSuffix 
+	 * Works on reflected variable name.
+	 * @param rfcfgOwnerOfField
+	 * @param rfcvFieldAtTheOwner
 	 * @return
 	 */
-	protected String createIdentifierWithFieldName(IReflexFillCfg rfcfgOwner, IReflexFillCfgVariant rfcv){
-		ReflexFillCfg rfcfg = rfcfgOwner.getReflexFillCfg(rfcv);
-		Class<?> cl = rfcfgOwner.getClass();
+	protected String createIdentifierWithFieldName(IReflexFillCfg rfcfgOwnerOfField, IReflexFillCfgVariant rfcvFieldAtTheOwner){
+		ReflexFillCfg rfcfg = rfcfgOwnerOfField.getReflexFillCfg(rfcvFieldAtTheOwner);
+		if(rfcfg==null){
+			throw new NullPointerException("Configuration is missing for "
+				+rfcfgOwnerOfField.getClass().getName()
+				+" -> "
+				+rfcvFieldAtTheOwner.getClass().getName()
+				+":"
+				+rfcvFieldAtTheOwner.getCodePrefixVariant());
+		}
+		
+		Class<?> cl = rfcfgOwnerOfField.getClass();
+		String strExceptionLog="Field object not found at: ";
 		while(true){
+			strExceptionLog+=cl.getName();
+			if(cl.getName().equals(Object.class.getName())){
+				strExceptionLog+="";
+				break;
+			}else{
+				strExceptionLog+=" <= ";
+			}
+			
 			for(Field fld:cl.getDeclaredFields()){
 				try {
 					boolean bWasAccessible = fld.isAccessible();
 					if(!bWasAccessible)fld.setAccessible(true);
-					if(fld.get(rfcfgOwner)==rfcv){
-						String strCommand=fld.getName();
-						if(strCommand.startsWith(rfcfg.strCodingStyleFieldNamePrefix)){
-							//remove prefix
-							strCommand=strCommand.substring(rfcfg.strCodingStyleFieldNamePrefix.length());
+					if(fld.get(rfcfgOwnerOfField)==rfcvFieldAtTheOwner){ // same object
+						String strFieldName=fld.getName();
+						
+						boolean bFinal=false;
+						if(Modifier.isFinal(fld.getModifiers()))bFinal=true;
+						
+						String strCodeTypePrefix = rfcfg.strCodingStyleFieldNamePrefix;
+//						if(bFinal)strCodeTypePrefix = rfcfg.strCodingStyleFinalFieldNamePrefix;
+						if(strCodeTypePrefix==null){
+							strCodeTypePrefix=rfcvFieldAtTheOwner.getCodePrefixVariant();
+						}
+						
+						String strCommand = strFieldName;
+						if(strCodeTypePrefix==null || strFieldName.startsWith(strCodeTypePrefix)){
+							if(strCodeTypePrefix!=null){
+								//remove prefix
+								strCommand=strCommand.substring(strCodeTypePrefix.length());
+							}
 							
-							if(Modifier.isFinal(fld.getModifiers())){
+							if(bFinal){
 								/**
 								 * upper case with underscores
 								 */
@@ -127,10 +159,11 @@ public class ReflexFill {
 			}
 			
 			cl=cl.getSuperclass();
-			if(cl.getName().equals(Object.class.getName()))break;
 		}
 		
-		throw new NullPointerException("failed to automatically set command id for: "+this);
+		throw new NullPointerException("Failed to automatically set command id. "
+				+"Was "+rfcvFieldAtTheOwner.getClass()+" object owner properly set to the class where it is instantiated? "
+				+strExceptionLog);
 	}
 	
 	/**

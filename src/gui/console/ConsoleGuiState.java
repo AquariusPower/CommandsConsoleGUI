@@ -103,12 +103,13 @@ import com.simsilica.lemur.style.Styles;
 public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	protected FpsLimiter fpslState = new FpsLimiter();
 	
-	public final String IMCPREFIX = "CONSOLEGUISTATE_";
-	public final StringField INPUT_MAPPING_CONSOLE_TOGGLE = new StringField(this);
-	public final StringField INPUT_MAPPING_CONSOLE_SCROLL_UP = new StringField(this);
-	public final StringField INPUT_MAPPING_CONSOLE_SCROLL_DOWN = new StringField(this);
-	public final StringField INPUT_MAPPING_CONSOLE_SHIFT_PRESSED	= new StringField(this);
-	public final StringField INPUT_MAPPING_CONSOLE_CONTROL_PRESSED	= new StringField(this);
+//	public final String strInputIMCPREFIX = "CONSOLEGUISTATE_";
+	protected final String strFinalFieldInputCodePrefix="INPUT_MAPPING_CONSOLE_";
+	public final StringField INPUT_MAPPING_CONSOLE_TOGGLE = new StringField(this,strFinalFieldInputCodePrefix);
+	public final StringField INPUT_MAPPING_CONSOLE_SCROLL_UP = new StringField(this,strFinalFieldInputCodePrefix);
+	public final StringField INPUT_MAPPING_CONSOLE_SCROLL_DOWN = new StringField(this,strFinalFieldInputCodePrefix);
+	public final StringField INPUT_MAPPING_CONSOLE_SHIFT_PRESSED	= new StringField(this,strFinalFieldInputCodePrefix);
+	public final StringField INPUT_MAPPING_CONSOLE_CONTROL_PRESSED	= new StringField(this,strFinalFieldInputCodePrefix);
 	
 	public final String STYLE_CONSOLE="console";
 	
@@ -3335,15 +3336,30 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	public void setCfgInitiallyClosed(boolean bInitiallyClosed) {
 		this.bInitiallyClosed = bInitiallyClosed;
 	}
+	
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
-		ReflexFillCfg rfcfg = new ReflexFillCfg();
+		ReflexFillCfg rfcfg = null;
 		
 		if(rfcv.getClass().isAssignableFrom(StringField.class)){
-			rfcfg.strCodingStyleFieldNamePrefix = "INPUT_MAPPING_CONSOLE_";
-			rfcfg.strCommandPrefix = IMCPREFIX;
-			rfcfg.bFirstLetterUpperCase = true;
+			if(rfcv.getCodePrefixVariant().equals(strFinalFieldInputCodePrefix)){
+				rfcfg = new ReflexFillCfg();
+//				rfcfg.strCodingStyleFieldNamePrefix = strInputCodePrefix;
+				rfcfg.strCommandPrefix = "CONSOLEGUISTATE_";
+//				rfcfg.strCommandPrefix = strInputIMCPREFIX;
+				rfcfg.bFirstLetterUpperCase = true;
+			}
+//			switch(rfcv.getReflexFillCfgVariant()){
+//				case 0:
+//					rfcfg = new ReflexFillCfg();
+//					rfcfg.strCodingStyleFieldNamePrefix = "INPUT_MAPPING_CONSOLE_";
+//					rfcfg.strCommandPrefix = IMCPREFIX;
+//					rfcfg.bFirstLetterUpperCase = true;
+//					break;
+//			}
 		}
+		
+		if(rfcfg==null)rfcfg = cc.getReflexFillCfg(rfcv);
 		
 		return rfcfg;
 	}

@@ -27,6 +27,9 @@
 
 package gui.console;
 
+import gui.console.ReflexFill.IReflexFillCfgVariant;
+import gui.console.ReflexFill.ReflexFillCfg;
+
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
 import com.jme3.system.AppSettings;
@@ -42,11 +45,19 @@ public class ConsoleGuiTest extends SimpleApplication {
 	
 	public boolean endUserCustomMethod(Integer i){
 		cgsCustomizedState.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
+		cgsCustomizedState.dumpSubEntry("CommandTest: "+cgsCustomizedState.sfTestCommandAutoFillVariant);
+		cgsCustomizedState.dumpSubEntry("VariantCommandTest: "+cgsCustomizedState.testCommandAutoFillPrefixLessVariant);
 		return true;
 	}
 	
 	class ConsoleGuiStateEndUser extends ConsoleGuiState{
-		public final StringField CMD_END_USER_COMMAND_TEST=new StringField(this);
+//		private final String strFinalFieldCodePrefix="CMD_";
+		private final String strFieldCodePrefix="sf";
+		private final String strFieldCodePrefixLess = "VariantAsPrefixLess";
+		
+		public final StringField CMD_END_USER_COMMAND_TEST = new StringField(this,cc.strFinalCmdCodePrefix);
+		private StringField sfTestCommandAutoFillVariant = new StringField(this,strFieldCodePrefix);
+		private StringField testCommandAutoFillPrefixLessVariant = new StringField(this,strFieldCodePrefixLess );
 		
 		public ConsoleGuiStateEndUser() {
 			super(KeyInput.KEY_F10);
@@ -65,6 +76,43 @@ public class ConsoleGuiTest extends SimpleApplication {
 			return bOk;
 		}
 		
+		@Override
+		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+			ReflexFillCfg rfcfg = null;
+			
+			if(rfcv.getClass().isAssignableFrom(StringField.class)){
+				if(rfcv.getCodePrefixVariant().equals(strFieldCodePrefix)){
+					rfcfg = new ReflexFillCfg();
+					rfcfg.strCommandPrefix = "Niceprefix";
+					rfcfg.strCommandSuffix = "Nicesuffix";
+					rfcfg.bFirstLetterUpperCase = true;
+				}else
+				if(rfcv.getCodePrefixVariant().equals(strFieldCodePrefixLess)){
+					rfcfg = new ReflexFillCfg();
+					rfcfg.strCodingStyleFieldNamePrefix=null;
+					rfcfg.bFirstLetterUpperCase = true;
+				}
+//				switch(rfcv.getReflexFillCfgVariant()){
+//					case 1:
+//						rfcfg = new ReflexFillCfg();
+//						rfcfg.strCodingStyleFieldNamePrefix = "sf";
+//						rfcfg.strCommandPrefix = "Niceprefix";
+//						rfcfg.strCommandSuffix = "Nicesuffix";
+//						rfcfg.bFirstLetterUpperCase = true;
+//						break;
+//				}
+			}
+			
+			/**
+			 * If you are coding in the same style of another class,
+			 * just call it!
+			 * Remember to set the same variant!
+			 */
+//			if(rfcfg==null)rfcfg = cc.getReflexFillCfg(rfcv);
+			if(rfcfg==null)rfcfg = super.getReflexFillCfg(rfcv);
+			
+			return rfcfg;
+		}
 	}
 	
 	@Override

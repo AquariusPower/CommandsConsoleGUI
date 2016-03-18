@@ -36,40 +36,72 @@ import gui.console.ReflexFill.IReflexFillCfgVariant;
  *
  */
 public class StringField implements IReflexFillCfgVariant{
-	String str;
-	IReflexFillCfg rfcfgOwner;
-	private int	iReflexFillCfgVariant;
+//	String str = "ERROR: NOT SET"; // hashcode depends on it not being null
+	protected String strValue = null;
+	protected IReflexFillCfg rfcfgOwner;
+//	protected int	iReflexFillCfgVariant;
+	protected String	strReflexFillCfgCodePrefixVariant;
 	
-	public StringField(IReflexFillCfg rfcfgOwner){
-		this(rfcfgOwner,0);
-	}
-	public StringField(IReflexFillCfg rfcfgOwner, int iReflexFillCfgVariant){
-		this.iReflexFillCfgVariant=iReflexFillCfgVariant;
-		if(rfcfgOwner==null)throw new NullPointerException("cant be null for: "+IReflexFillCfg.class.getName());
+//	public StringField(IReflexFillCfg rfcfgOwner){
+//		this(rfcfgOwner,0);
+//	}
+	
+	/**
+	 * The value cannot be prepared at the constructor, 
+	 * as it has not returned yet, so it's object owner will not have 
+	 * a valid field (will still be null).
+	 */
+	public StringField(IReflexFillCfg rfcfgOwner, String strReflexFillCfgCodePrefixVariant){ // int iReflexFillCfgVariant){
+//		this.iReflexFillCfgVariant=iReflexFillCfgVariant;
+		this.strReflexFillCfgCodePrefixVariant = strReflexFillCfgCodePrefixVariant;
 		this.rfcfgOwner=rfcfgOwner;
+		
+		if(this.rfcfgOwner==null){
+			throw new NullPointerException("cant be null for: "+IReflexFillCfg.class.getName());
+		}
 	}
-	public StringField(String str){
-		this.str=str;
+	public StringField(String strValue){
+		this.strValue=strValue;
 	}
 	
 	@Override
 	public String toString() {
-		if(this.str==null)this.str=ReflexFill.i().createIdentifierWithFieldName(rfcfgOwner, this);
-		return this.str;
+		if(strValue==null){
+			/**
+			 * This basically prevents recursive infinite loop,
+			 * if this is called at reflex fill method.
+			 */
+			strValue=errorMessage();
+			this.strValue = ReflexFill.i().createIdentifierWithFieldName(this.rfcfgOwner, this);
+//			throw new NullPointerException("not initialized properly: "+this);
+		}
+		
+		return this.strValue;
+	}
+	
+	private String errorMessage(){
+		return "ERROR: "+StringField.class.getName()+" not yet properly initialized!";
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
-		return this.str.equals(obj);
+		if(strValue==null)throw new NullPointerException(errorMessage());
+		return this.strValue.equals(obj);
 	}
 	
 	@Override
 	public int hashCode() {
-		return str.hashCode();
+		if(strValue==null)throw new NullPointerException(errorMessage());
+		return strValue.hashCode();
 	}
 	
+//	@Override
+//	public int getReflexFillCfgVariant() {
+//		return iReflexFillCfgVariant;
+//	}
+
 	@Override
-	public int getReflexFillCfgVariant() {
-		return iReflexFillCfgVariant;
+	public String getCodePrefixVariant() {
+		return strReflexFillCfgCodePrefixVariant;
 	}
 }

@@ -40,37 +40,39 @@ public class ConsoleCommands implements IReflexFillCfg{
 	/**
 	 * togglers
 	 */
-	protected BoolToggler	btgShowWarn = new BoolToggler(this,true);
-	protected BoolToggler	btgShowInfo = new BoolToggler(this,true);
-	protected BoolToggler	btgShowException = new BoolToggler(this,true);
-	protected BoolToggler	btgEngineStatsView = new BoolToggler(this,false);
-	protected BoolToggler	btgEngineStatsFps = new BoolToggler(this,false);
+	public final String strTogglerCodePrefix="btg";
+	protected BoolToggler	btgShowWarn = new BoolToggler(this,true,strTogglerCodePrefix);
+	protected BoolToggler	btgShowInfo = new BoolToggler(this,true,strTogglerCodePrefix);
+	protected BoolToggler	btgShowException = new BoolToggler(this,true,strTogglerCodePrefix);
+	protected BoolToggler	btgEngineStatsView = new BoolToggler(this,false,strTogglerCodePrefix);
+	protected BoolToggler	btgEngineStatsFps = new BoolToggler(this,false,strTogglerCodePrefix);
 	// developer vars, keep together!
-	protected BoolToggler	btgShowDeveloperInfo=new BoolToggler(this,true);
-	protected BoolToggler	btgShowDeveloperWarn=new BoolToggler(this,true);
-	protected BoolToggler	btgShowExecQueuedInfo=new BoolToggler(this,false);
-	protected BoolToggler	btgShowMiliseconds=new BoolToggler(this,false);
-	protected BoolToggler	btgFpsLimit=new BoolToggler(this,false);
+	protected BoolToggler	btgShowDeveloperInfo=new BoolToggler(this,true,strTogglerCodePrefix);
+	protected BoolToggler	btgShowDeveloperWarn=new BoolToggler(this,true,strTogglerCodePrefix);
+	protected BoolToggler	btgShowExecQueuedInfo=new BoolToggler(this,false,strTogglerCodePrefix);
+	protected BoolToggler	btgShowMiliseconds=new BoolToggler(this,false,strTogglerCodePrefix);
+	protected BoolToggler	btgFpsLimit=new BoolToggler(this,false,strTogglerCodePrefix);
 	protected BoolToggler	btgReferenceMatched;
 	
 	/**
 	 * user can type these below at console (the actual commands are prepared by reflex)
 	 */
-	public final StringField CMD_ECHO = new StringField(this);
-	public final StringField CMD_CLOSE_CONSOLE = new StringField(this);
-	public final StringField CMD_CONSOLE_STYLE = new StringField(this);
-	public final StringField CMD_DB = new StringField(this);
-	public final StringField CMD_HELP = new StringField(this);
-	public final StringField CMD_HISTORY = new StringField(this);
-	public final StringField CMD_CONSOLE_HEIGHT = new StringField(this);
-	public final StringField CMD_CONSOLE_SCROLL_BOTTOM = new StringField(this);
-	public final StringField CMD_FIX_LINE_WRAP = new StringField(this);
-	public final StringField CMD_LINE_WRAP_AT = new StringField(this);
-	public final StringField CMD_HK_TOGGLE = new StringField(this);
-	public final StringField CMD_FIX_CURSOR = new StringField(this);
-	public final StringField	CMD_VAR_SET = new StringField(this);
+	public final String strFinalCmdCodePrefix="CMD_";
+	public final StringField CMD_ECHO = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_CLOSE_CONSOLE = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_CONSOLE_STYLE = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_DB = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_HELP = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_HISTORY = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_CONSOLE_HEIGHT = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_CONSOLE_SCROLL_BOTTOM = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_FIX_LINE_WRAP = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_LINE_WRAP_AT = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_HK_TOGGLE = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_FIX_CURSOR = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_VAR_SET = new StringField(this,strFinalCmdCodePrefix);
 	
-	private static ConsoleCommands instance;
+	protected static ConsoleCommands instance;
 	public static ConsoleCommands i(){return instance;}
 	public ConsoleCommands(){
 		instance=this;
@@ -78,22 +80,41 @@ public class ConsoleCommands implements IReflexFillCfg{
 
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
-		ReflexFillCfg rfcfg = new ReflexFillCfg();
+		ReflexFillCfg rfcfg = null;
 		
 		if(rfcv.getClass().isAssignableFrom(BoolToggler.class)){
-			switch(rfcv.getReflexFillCfgVariant()){
-				case 0:
-					rfcfg.strCodingStyleFieldNamePrefix="btg";
-					rfcfg.strCommandSuffix="Toggle";
-					break;
+			if(rfcv.getCodePrefixVariant().equals(strTogglerCodePrefix)){
+				rfcfg = new ReflexFillCfg();
+//				rfcfg.strCodingStyleFieldNamePrefix=strTogglerCodePrefix;
+				rfcfg.strCommandSuffix="Toggle";
 			}
+//			switch(rfcv.getReflexFillCfgVariant()){
+//				case 0:
+//					rfcfg = new ReflexFillCfg();
+//					rfcfg.strCodingStyleFieldNamePrefix="btg";
+//					rfcfg.strCommandSuffix="Toggle";
+//					break;
+//			}
 		}else
 		if(rfcv.getClass().isAssignableFrom(StringField.class)){
-			switch(rfcv.getReflexFillCfgVariant()){
-				case 0:
-					rfcfg.strCodingStyleFieldNamePrefix="CMD_";
-					break;
+			if(rfcv.getCodePrefixVariant().equals(strFinalCmdCodePrefix)){
+				rfcfg = new ReflexFillCfg();
+//				rfcfg.strCodingStyleFinalFieldNamePrefix=strCmdCodePrefix;
 			}
+			
+//			switch(rfcv.getReflexFillCfgVariant()){
+////				case 0:
+////					rfcfg = new ReflexFillCfg();
+////					rfcfg.strCodingStyleFinalFieldNamePrefix="CMD_";
+////					rfcfg.strCodingStyleFieldNamePrefix="sf";
+////					break;
+//				case 1:
+//					rfcfg = new ReflexFillCfg();
+//					rfcfg.strCodingStyleFieldNamePrefix = "INPUT_MAPPING_CONSOLE_";
+//					rfcfg.strCommandPrefix = IMCPREFIX;
+//					rfcfg.bFirstLetterUpperCase = true;
+//					break;
+//			}
 		}
 		
 		return rfcfg;
