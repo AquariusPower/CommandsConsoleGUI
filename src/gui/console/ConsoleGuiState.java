@@ -104,7 +104,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	protected FpsLimiter fpslState = new FpsLimiter();
 	
 //	public final String strInputIMCPREFIX = "CONSOLEGUISTATE_";
-	protected final String strFinalFieldInputCodePrefix="INPUT_MAPPING_CONSOLE_";
+	public final String strFinalFieldInputCodePrefix="INPUT_MAPPING_CONSOLE_";
 	public final StringField INPUT_MAPPING_CONSOLE_TOGGLE = new StringField(this,strFinalFieldInputCodePrefix);
 	public final StringField INPUT_MAPPING_CONSOLE_SCROLL_UP = new StringField(this,strFinalFieldInputCodePrefix);
 	public final StringField INPUT_MAPPING_CONSOLE_SCROLL_DOWN = new StringField(this,strFinalFieldInputCodePrefix);
@@ -114,8 +114,11 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	public final String STYLE_CONSOLE="console";
 	
 	public final Character	SPECIAL_CMD_TOKEN	= '&';
-	public final String	SPECIAL_CMD_SKIP_CURRENT_COMMAND	= SPECIAL_CMD_TOKEN+"MultiCommandLineToken";
-	public final String	SPECIAL_CMD_END_OF_STARTUP_CMDQUEUE	= SPECIAL_CMD_TOKEN+"EndStartupCmdQueue";
+	public final String strFinalFieldSpecialCmdCodePrefix="SPECIAL_CMD_";
+//	public final String	SPECIAL_CMD_SKIP_CURRENT_COMMAND	= SPECIAL_CMD_TOKEN+"MultiCommandLineToken";
+//	public final String	SPECIAL_CMD_END_OF_STARTUP_CMDQUEUE	= SPECIAL_CMD_TOKEN+"EndStartupCmdQueue";
+	public final StringField	SPECIAL_CMD_SKIP_CURRENT_COMMAND	= new StringField(this,strFinalFieldSpecialCmdCodePrefix);
+	public final StringField	SPECIAL_CMD_END_OF_STARTUP_CMDQUEUE	= new StringField(this,strFinalFieldSpecialCmdCodePrefix);
 	
 	protected boolean bStartupCmdQueueDone = false; 
 	
@@ -1983,29 +1986,39 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		if(strCompletedCmd.equals(strCmdPart)){
 			String strBaseCmd = extractCommandPart(strCmdPart,0);
 			String strParam1 = extractCommandPart(strCmdPart,1);
-			if(strParam1!=null){
-				String strCmd=null;
-				ArrayList<String> astrOptList = null;
-				if(cc.CMD_CONSOLE_STYLE.equals(strBaseCmd)){
-					strCmd=cc.CMD_CONSOLE_STYLE+" ";
-					astrOptList=astrStyleList;
-//					strCompletedCmd=""+chCommandPrefix+
-//						cc.CMD_CONSOLE_STYLE+" "
-//						+autoComplete(strParam1, astrStyleList, bMatchContains).get(0);
-				}else
-				if(cc.CMD_DB.equals(strBaseCmd)){
-					strCmd=cc.CMD_CONSOLE_STYLE+" ";
-					astrOptList=astrStyleList;
-//					strCompletedCmd=""+chCommandPrefix+
-//						cc.CMD_DB+" "
-//						+autoComplete(strParam1, EDataBaseOperations.getValuesAsArrayList(), bMatchContains).get(0);
-				}
+			
+			String strCmd=null;
+			ArrayList<String> astrOptList = null;
+			if(cc.CMD_CONSOLE_STYLE.equals(strBaseCmd)){
+				strCmd=cc.CMD_CONSOLE_STYLE+" ";
+				astrOptList=astrStyleList;
+			}else
+			if(cc.CMD_DB.equals(strBaseCmd)){
+				strCmd=cc.CMD_DB+" ";
+				astrOptList=EDataBaseOperations.getValuesAsArrayList();
+			}
+			
+//			if(strParam1!=null){
+			if(astrOptList!=null){
+				strCompletedCmd=""+chCommandPrefix+strCmd;
 				
-				if(astrOptList!=null){
-					strCompletedCmd=""+chCommandPrefix
-						+strCmd+autoComplete(strParam1, astrOptList, bMatchContains).get(0);
+				ArrayList<String> astr = strParam1==null ? astrOptList :
+					autoComplete(strParam1, astrOptList, bMatchContains);
+				if(astr.size()==1){
+					strCompletedCmd+=astr.get(0);
+				}else{
+					dumpInfoEntry("Param autocomplete:");
+					for(String str:astr){
+						if(strParam1!=null && str.equals(astr.get(0)))continue;
+						dumpSubEntry(str);
+					}
+					
+					if(strParam1!=null){
+						strCompletedCmd+=astr.get(0); //best partial param match
+					}
 				}
 			}
+//			}
 		}
 		
 		if(strCompletedCmd.trim().isEmpty())strCompletedCmd=""+chCommandPrefix;
@@ -2141,7 +2154,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 				astrMulti.set(i, astrMulti.get(i).trim()+" "+chCommentPrefix+"SplitCmdLine "+strComment);
 			}
 			addToExecConsoleCommandQueue(astrMulti,true,true);
-			return SPECIAL_CMD_SKIP_CURRENT_COMMAND;
+			return SPECIAL_CMD_SKIP_CURRENT_COMMAND.toString();
 		}
 		
 		/**
@@ -3342,13 +3355,18 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		ReflexFillCfg rfcfg = null;
 		
 		if(rfcv.getClass().isAssignableFrom(StringField.class)){
-			if(rfcv.getCodePrefixVariant().equals(strFinalFieldInputCodePrefix)){
+			if(strFinalFieldInputCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
-//				rfcfg.strCodingStyleFieldNamePrefix = strInputCodePrefix;
 				rfcfg.strCommandPrefix = "CONSOLEGUISTATE_";
-//				rfcfg.strCommandPrefix = strInputIMCPREFIX;
+				rfcfg.bFirstLetterUpperCase = true;
+			}else
+			if(strFinalFieldSpecialCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
+				rfcfg = new ReflexFillCfg();
+				rfcfg.strCommandPrefix = ""+SPECIAL_CMD_TOKEN;
 				rfcfg.bFirstLetterUpperCase = true;
 			}
+			
+			
 //			switch(rfcv.getReflexFillCfgVariant()){
 //				case 0:
 //					rfcfg = new ReflexFillCfg();

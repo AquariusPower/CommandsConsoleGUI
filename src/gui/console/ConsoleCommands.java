@@ -83,7 +83,7 @@ public class ConsoleCommands implements IReflexFillCfg{
 		ReflexFillCfg rfcfg = null;
 		
 		if(rfcv.getClass().isAssignableFrom(BoolToggler.class)){
-			if(rfcv.getCodePrefixVariant().equals(strTogglerCodePrefix)){
+			if(strTogglerCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
 //				rfcfg.strCodingStyleFieldNamePrefix=strTogglerCodePrefix;
 				rfcfg.strCommandSuffix="Toggle";
@@ -97,7 +97,7 @@ public class ConsoleCommands implements IReflexFillCfg{
 //			}
 		}else
 		if(rfcv.getClass().isAssignableFrom(StringField.class)){
-			if(rfcv.getCodePrefixVariant().equals(strFinalCmdCodePrefix)){
+			if(strFinalCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
 //				rfcfg.strCodingStyleFinalFieldNamePrefix=strCmdCodePrefix;
 			}

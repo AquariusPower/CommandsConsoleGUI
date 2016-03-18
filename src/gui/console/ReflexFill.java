@@ -36,6 +36,8 @@ import java.lang.reflect.Modifier;
  *
  */
 public class ReflexFill {
+	private static boolean bUseDefaultCfgIfMissing=false;
+	
 	public static interface IReflexFillCfg{
 		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv);
 	}
@@ -82,12 +84,16 @@ public class ReflexFill {
 	protected String createIdentifierWithFieldName(IReflexFillCfg rfcfgOwnerOfField, IReflexFillCfgVariant rfcvFieldAtTheOwner){
 		ReflexFillCfg rfcfg = rfcfgOwnerOfField.getReflexFillCfg(rfcvFieldAtTheOwner);
 		if(rfcfg==null){
-			throw new NullPointerException("Configuration is missing for "
-				+rfcfgOwnerOfField.getClass().getName()
-				+" -> "
-				+rfcvFieldAtTheOwner.getClass().getName()
-				+":"
-				+rfcvFieldAtTheOwner.getCodePrefixVariant());
+			if(bUseDefaultCfgIfMissing){
+				rfcfg = new ReflexFillCfg();
+			}else{
+				throw new NullPointerException("Configuration is missing for "
+					+rfcfgOwnerOfField.getClass().getName()
+					+" -> "
+					+rfcvFieldAtTheOwner.getClass().getName()
+					+":"
+					+rfcvFieldAtTheOwner.getCodePrefixVariant());
+			}
 		}
 		
 		Class<?> cl = rfcfgOwnerOfField.getClass();
@@ -143,10 +149,9 @@ public class ReflexFill {
 								strCommand=strCmdNew;
 							}else{
 								/**
-								 * already nice to read field name
-								 * lower case 1st char
+								 * Already nice to read field name.
 								 */
-								strCommand=firstLetter(strCommand,false);
+								strCommand=firstLetter(strCommand,rfcfg.bFirstLetterUpperCase);
 							}
 						}
 						strCommand=rfcfg.strCommandPrefix+strCommand+rfcfg.strCommandSuffix;
@@ -180,6 +185,14 @@ public class ReflexFill {
 			return Character.toLowerCase(str.charAt(0))
 				+str.substring(1);
 		}
+	}
+
+	public static boolean isbUseDefaultCfgIfMissing() {
+		return bUseDefaultCfgIfMissing;
+	}
+
+	public static void setbUseDefaultCfgIfMissing(boolean bUseDefaultCfgIfMissing) {
+		ReflexFill.bUseDefaultCfgIfMissing = bUseDefaultCfgIfMissing;
 	}
 	
 }

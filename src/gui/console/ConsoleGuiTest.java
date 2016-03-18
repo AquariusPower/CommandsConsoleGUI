@@ -45,8 +45,11 @@ public class ConsoleGuiTest extends SimpleApplication {
 	
 	public boolean endUserCustomMethod(Integer i){
 		cgsCustomizedState.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
-		cgsCustomizedState.dumpSubEntry("CommandTest: "+cgsCustomizedState.sfTestCommandAutoFillVariant);
-		cgsCustomizedState.dumpSubEntry("VariantCommandTest: "+cgsCustomizedState.testCommandAutoFillPrefixLessVariant);
+		cgsCustomizedState.dumpSubEntry("CommandTest1: "+cgsCustomizedState.sfTestCommandAutoFillVariant1);
+		cgsCustomizedState.dumpSubEntry("CommandTest2: "+cgsCustomizedState.testCommandAutoFillPrefixLessVariant2);
+		if(ReflexFill.isbUseDefaultCfgIfMissing()){
+			cgsCustomizedState.dumpSubEntry("CommandTest3: "+cgsCustomizedState.testCommandAutoFillPrefixLessVariantDefaulted3);
+		}
 		return true;
 	}
 	
@@ -56,11 +59,17 @@ public class ConsoleGuiTest extends SimpleApplication {
 		private final String strFieldCodePrefixLess = "VariantAsPrefixLess";
 		
 		public final StringField CMD_END_USER_COMMAND_TEST = new StringField(this,cc.strFinalCmdCodePrefix);
-		private StringField sfTestCommandAutoFillVariant = new StringField(this,strFieldCodePrefix);
-		private StringField testCommandAutoFillPrefixLessVariant = new StringField(this,strFieldCodePrefixLess );
+		private StringField sfTestCommandAutoFillVariant1 = new StringField(this,strFieldCodePrefix);
+		private StringField testCommandAutoFillPrefixLessVariant2 = new StringField(this,strFieldCodePrefixLess);
+		private StringField testCommandAutoFillPrefixLessVariantDefaulted3 = new StringField(this,null);
 		
 		public ConsoleGuiStateEndUser() {
 			super(KeyInput.KEY_F10);
+			
+			/**
+			 *  This allows test3 at endUserCustomMethod() to work.
+			 */
+			ReflexFill.setbUseDefaultCfgIfMissing(true);
 		}
 		
 		@Override
@@ -81,13 +90,13 @@ public class ConsoleGuiTest extends SimpleApplication {
 			ReflexFillCfg rfcfg = null;
 			
 			if(rfcv.getClass().isAssignableFrom(StringField.class)){
-				if(rfcv.getCodePrefixVariant().equals(strFieldCodePrefix)){
+				if(strFieldCodePrefix.equals(rfcv.getCodePrefixVariant())){
 					rfcfg = new ReflexFillCfg();
 					rfcfg.strCommandPrefix = "Niceprefix";
 					rfcfg.strCommandSuffix = "Nicesuffix";
 					rfcfg.bFirstLetterUpperCase = true;
 				}else
-				if(rfcv.getCodePrefixVariant().equals(strFieldCodePrefixLess)){
+				if(strFieldCodePrefixLess.equals(rfcv.getCodePrefixVariant())){
 					rfcfg = new ReflexFillCfg();
 					rfcfg.strCodingStyleFieldNamePrefix=null;
 					rfcfg.bFirstLetterUpperCase = true;

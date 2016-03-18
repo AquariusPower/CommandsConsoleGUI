@@ -66,17 +66,18 @@ public class StringField implements IReflexFillCfgVariant{
 	
 	@Override
 	public String toString() {
-		if(strValue==null){
-			/**
-			 * This basically prevents recursive infinite loop,
-			 * if this is called at reflex fill method.
-			 */
-			strValue=errorMessage();
-			this.strValue = ReflexFill.i().createIdentifierWithFieldName(this.rfcfgOwner, this);
-//			throw new NullPointerException("not initialized properly: "+this);
-		}
-		
+		if(strValue==null)initialize();
 		return this.strValue;
+	}
+	
+	protected void initialize(){
+		/**
+		 * This basically prevents recursive infinite loop,
+		 * if this is called at reflex fill method.
+		 */
+		strValue=errorMessage();
+		this.strValue = ReflexFill.i().createIdentifierWithFieldName(this.rfcfgOwner, this);
+//		throw new NullPointerException("not initialized properly: "+this);
 	}
 	
 	private String errorMessage(){
@@ -85,13 +86,15 @@ public class StringField implements IReflexFillCfgVariant{
 	
 	@Override
 	public boolean equals(Object obj) {
-		if(strValue==null)throw new NullPointerException(errorMessage());
+//		if(strValue==null)throw new NullPointerException(errorMessage());
+		if(strValue==null)initialize();
 		return this.strValue.equals(obj);
 	}
 	
 	@Override
 	public int hashCode() {
-		if(strValue==null)throw new NullPointerException(errorMessage());
+//		if(strValue==null)throw new NullPointerException(errorMessage());
+		if(strValue==null)initialize();
 		return strValue.hashCode();
 	}
 	
