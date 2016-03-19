@@ -73,6 +73,16 @@ public class ConsoleCommands implements IReflexFillCfg{
 	public final StringField CMD_FIX_CURSOR = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_VAR_SET = new StringField(this,strFinalCmdCodePrefix);
 	
+	protected Character	chCommandDelimiter = ';';
+	protected Character	chAliasPrefix = '$';
+	protected Character	chVariableExpandPrefix = chAliasPrefix;
+	protected Character	chFilterToken = '~';
+	protected	Character chAliasBlockedToken = '-';
+	protected Character	chAliasAllowedToken = '+';
+	protected	Character chVarDeleteToken = '-';
+	protected	Character	chCommentPrefix='#';
+	protected	Character	chCommandPrefix='/';
+	
 	protected static ConsoleCommands instance;
 	public static ConsoleCommands i(){return instance;}
 	public ConsoleCommands(){
@@ -96,5 +106,69 @@ public class ConsoleCommands implements IReflexFillCfg{
 		}
 		
 		return rfcfg;
+	}
+	
+	public Character getCommandDelimiter() {
+		return chCommandDelimiter;
+	}
+	public ConsoleCommands setCommandDelimiter(Character chCommandDelimiter) {
+		this.chCommandDelimiter = chCommandDelimiter;
+		return this;
+	}
+	public Character getAliasPrefix() {
+		return chAliasPrefix;
+	}
+	public ConsoleCommands setAliasPrefix(Character chAliasPrefix) {
+		this.chAliasPrefix = chAliasPrefix;
+		return this;
+	}
+	public Character getVariableExpandPrefix() {
+		return chVariableExpandPrefix;
+	}
+	public ConsoleCommands setVariableExpandPrefix(Character chVariableExpandPrefix) {
+		this.chVariableExpandPrefix = chVariableExpandPrefix;
+		return this;
+	}
+	public Character getFilterToken() {
+		return chFilterToken;
+	}
+	public ConsoleCommands setFilterToken(Character chFilterToken) {
+		this.chFilterToken = chFilterToken;
+		return this;
+	}
+	public Character getAliasBlockedToken() {
+		return chAliasBlockedToken;
+	}
+	public ConsoleCommands setAliasBlockedToken(Character chAliasBlockedToken) {
+		this.chAliasBlockedToken = chAliasBlockedToken;
+		return this;
+	}
+	public Character getAliasAllowedToken() {
+		return chAliasAllowedToken;
+	}
+	public ConsoleCommands setAliasAllowedToken(Character chAliasAllowedToken) {
+		this.chAliasAllowedToken = chAliasAllowedToken;
+		return this;
+	}
+	public Character getVarDeleteToken() {
+		return chVarDeleteToken;
+	}
+	public ConsoleCommands setVarDeleteToken(Character chVarDeleteToken) {
+		this.chVarDeleteToken = chVarDeleteToken;
+		return this;
+	}
+	public Character getCommentPrefix() {
+		return chCommentPrefix;
+	}
+	public ConsoleCommands setCommentPrefix(Character chCommentPrefix) {
+		this.chCommentPrefix = chCommentPrefix;
+		return this;
+	}
+	public Character getCommandPrefix() {
+		return chCommandPrefix;
+	}
+	public ConsoleCommands setCommandPrefix(Character chCommandPrefix) {
+		this.chCommandPrefix = chCommandPrefix;
+		return this;
 	}
 }

@@ -38,12 +38,9 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -99,13 +96,13 @@ import com.simsilica.lemur.style.BaseStyles;
 import com.simsilica.lemur.style.Styles;
 
 /**
- * A simple graphical console where developers and users can issue commands. 
- * https://gist.github.com/AquariusPower/73eba57eb999a760a641
+ * A graphical console where developers and users can issue application commands. 
+ * Project at: https://github.com/AquariusPower/CommandsConsoleGUI
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
+public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFillCfg{
 	protected FpsLimiter fpslState = new FpsLimiter();
 	
 //	public final String strInputIMCPREFIX = "CONSOLEGUISTATE_";
@@ -200,12 +197,13 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	protected int	iScrollRetryAttemptsMaxDBG;
 	protected int iMaxCmdHistSize = 1000;
 	protected int iMaxDumpEntriesAmount = 100000;
-	protected String	strFilePrefix = ConsoleGuiState.class.getSimpleName();
+	protected String	strFilePrefix = "Console"; //ConsoleStateAbs.class.getSimpleName();
 	protected String	strFileTypeLog = "log";
 	protected String	strFileTypeConfig = "cfg";
 	protected String	strFileCmdHistory = strFilePrefix+"-CmdHist";
 	protected String	strFileLastDump = strFilePrefix+"-LastDump";
 	protected String	strFileInitConsCmds = strFilePrefix+"-Init";
+	protected String	strFileSetup = strFilePrefix+"-Setup";
 	protected String	strFileDatabase = strFilePrefix+"-DB";
 	protected File	flCmdHist;
 	protected File	flLastDump;
@@ -256,44 +254,38 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 //	protected String	strPreviousCmdHistoryKey;
 	protected String	strPreviousInputValue;
 	protected int	iCmdHistoryPreviousIndex;
-	protected String	strCommandDelimiter = ";";
 //	protected boolean	bShowExecQueuedInfo = false;
 	protected ConsoleCommands	cc;
 	protected Hashtable<String,Object> ahtVariables = new Hashtable<String,Object>();
 	protected ArrayList<Alias> aAliasList = new ArrayList<Alias>();
 	protected String	strCmdLineOriginal;
 	protected boolean	bLastAliasCreatedSuccessfuly;
-	protected Character	chAliasPrefix = '$';
-	protected Character	chVariableExpandPrefix = chAliasPrefix;
-	protected Character	chFilterToken = '~';
-	protected	Character chAliasBlockedToken = '-';
-	protected Character	chAliasAllowedToken = '+';
-	protected	Character chVarDeleteToken = '-';
-	protected	Character	chCommentPrefix='#';
-	protected	Character	chCommandPrefix='/';
-	private float	fTPF;
-//	private int	iFpsCount;
-//	private long	lNanoPreviousSecond;
-//	private int	lPreviousSecondFPS;
-//	private int	iUpdateCount;
-	private long	lNanoFrameTime;
-	private long	lNanoFpsLimiterTime;
+	
+	protected float	fTPF;
+//	protected int	iFpsCount;
+//	protected long	lNanoPreviousSecond;
+//	protected int	lPreviousSecondFPS;
+//	protected int	iUpdateCount;
+	protected long	lNanoFrameTime;
+	protected long	lNanoFpsLimiterTime;
 
-	private boolean	bLastIfConditionWasValid;
+	protected boolean	bLastIfConditionWasValid;
 
 	protected ArrayList<DumpEntry> adeDumpEntryFastQueue = new ArrayList<DumpEntry>();
 
-	private Button	btnCut;
+	protected Button	btnCut;
+
+	protected File	flSetup;
 	
-	protected static ConsoleGuiState instance;
-	public static ConsoleGuiState i(){
+	protected static ConsoleStateAbs instance;
+	public static ConsoleStateAbs i(){
 		return instance;
 	}
-	public ConsoleGuiState() {
+	public ConsoleStateAbs() {
 		if(instance==null)instance=this;
 		cc = new ConsoleCommands();
 	}
-	public ConsoleGuiState(int iToggleConsoleKey) {
+	public ConsoleStateAbs(int iToggleConsoleKey) {
 		this();
 		this.bEnabled=true; //just to let it be initialized at startup by state manager
 		this.iToggleConsoleKey=iToggleConsoleKey;
@@ -322,23 +314,31 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		GuiGlobals.initialize(sapp);
 		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
 		
+		// init dump file, MUST BE THE FIRST!
+		flLastDump = new File(fileNamePrepareLog(strFileLastDump,false));
+		flLastDump.delete(); //each run will have a new file
+		
 		// init cmd history
 		flCmdHist = new File(fileNamePrepareLog(strFileCmdHistory,false));
 		cmdHistLoad();
 		
-		// init dump file
-		flLastDump = new File(fileNamePrepareLog(strFileLastDump,false));
-		flLastDump.delete(); //each run will have a new file
-		
 		// init valid cmd list
 		executeCommand(null); //to populate the array with available commands
+		
+		// init user cfg
+		flSetup = new File(fileNamePrepareCfg(strFileSetup,false));
+		if(flSetup.exists()){
+			addToExecConsoleCommandQueue(fileLoad(flSetup));
+		}else{
+			fileAppendLine(flSetup, cc.getCommentPrefix()+" DO NOT EDIT! This file will be auto modified by the application, to set overrides use the init config file.");
+		}
 		
 		// init user cfg
 		flInit = new File(fileNamePrepareCfg(strFileInitConsCmds,false));
 		if(flInit.exists()){
 			addToExecConsoleCommandQueue(fileLoad(flInit));
 		}else{
-			fileAppendLine(flInit, chCommentPrefix+" console commands here will be executed at startup");
+			fileAppendLine(flInit, cc.getCommentPrefix()+" User console commands here will be executed at startup.");
 		}
 		
 		// init DB
@@ -349,7 +349,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		addToExecConsoleCommandQueue(cc.CMD_CONSOLE_SCROLL_BOTTOM);
 		addToExecConsoleCommandQueue(cc.CMD_DB+" "+EDataBaseOperations.load);
 		addToExecConsoleCommandQueue(
-			cc.CMD_DB+" "+EDataBaseOperations.save+" "+chCommentPrefix+"to shrink it");
+			cc.CMD_DB+" "+EDataBaseOperations.save+" "+cc.getCommentPrefix()+"to shrink it");
 		/**
 		 * KEEP AS LAST queued cmds below!!!
 		 */
@@ -500,7 +500,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		 * The existance of at least one entry is very important to help on initialization.
 		 * Actually to determine the listbox entry height.
 		 */
-		if(vlstrDumpEntries.isEmpty())vlstrDumpEntries.add(""+chCommentPrefix+" Initializing console.");
+		if(vlstrDumpEntries.isEmpty())vlstrDumpEntries.add(""+cc.getCommentPrefix()+" Initializing console.");
 		
 		lstbx.setModel(vlstrDumpEntries);
 		lstbx.setVisibleItems(iShowRows);
@@ -513,7 +513,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		 * BOTTOM ELEMENT =================================================================
 		 */
 		// input
-		tfInput = new TextField(""+chCommandPrefix,strStyle);
+		tfInput = new TextField(""+cc.getCommandPrefix(),strStyle);
 		fInputHeight = retrieveBitmapTextFor(tfInput).getLineHeight();
 		ctnrConsole.addChild( tfInput, BorderLayout.Position.South );
 		
@@ -658,7 +658,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		
 		String strCurrent = getInputText();
 //		if(checkInputEmpty() && validateBaseCommand(strPasted)){
-		if(isInputTextFieldEmpty() && strPasted.trim().startsWith(""+chCommandPrefix)){
+		if(isInputTextFieldEmpty() && strPasted.trim().startsWith(""+cc.getCommandPrefix())){
 			strCurrent = strPasted.trim(); //replace "empty" line with command (can be invalid in this case, user may complete it properly)
 		}else{
 			if(efHK!=null){
@@ -713,7 +713,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	
 	protected void dumpSave(DumpEntry de) {
 //		if(de.isSavedToLogFile())return;
-		fileAppendLine(flLastDump,de.getStrLineOriginal());
+		fileAppendLine(flLastDump,de.getLineOriginal());
 	}
 	
 	protected void fileAppendList(File fl, ArrayList<String> astr) {
@@ -751,6 +751,8 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 			strAllChars+=Character.toString(ch);
 		}
 		dumpSubEntry("AllChars:"+strAllChars);
+		
+		
 		
 //	dumpSubEntry("["+(char)Integer.parseInt(strParam1, 16)+"]");
 //		if(getDumpAreaSelectedIndex()>=0){
@@ -969,10 +971,10 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	
 	protected void toggleLineCommentOrCommand() {
 		String str = getInputText();
-		if(str.startsWith(""+chCommentPrefix)){
+		if(str.startsWith(""+cc.getCommentPrefix())){
 			str=str.substring(1);
 		}else{
-			str=chCommentPrefix+str;
+			str=cc.getCommentPrefix()+str;
 		}
 		setInputField(str);
 	}
@@ -1295,8 +1297,8 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	 * @return
 	 */
 	protected String extractCommandPart(String strCmdFull, int iPart){
-		if(strCmdFull.startsWith(""+chCommandPrefix)){
-			strCmdFull=strCmdFull.substring(1); //1 chCommandPrefixChar
+		if(strCmdFull.startsWith(""+cc.getCommandPrefix())){
+			strCmdFull=strCmdFull.substring(1); //1 cc.getCommandPrefix()Char
 		}
 		
 		String[] astr = strCmdFull.split("[^$"+strValidCmdCharsRegex+"]");
@@ -1328,7 +1330,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		
 		if(strCurrentInputText.isEmpty())return true;
 		
-		if(strCurrentInputText.equals(""+chCommandPrefix))return true;
+		if(strCurrentInputText.equals(""+cc.getCommandPrefix()))return true;
 		
 //		if(bDumpContentsIfNotEmpty){
 //			dumpInfoEntry("Not issued command below:");
@@ -1361,9 +1363,9 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 				String strCmdChk = editCopyOrCut(true,false); //vlstrDumpEntries.get(getDumpAreaSelectedIndex()).trim();
 				strCmdChk=strCmdChk.trim();
 				if(validateBaseCommand(strCmdChk)){
-					if(!strCmdChk.startsWith(""+chCommandPrefix))strCmdChk=chCommandPrefix+strCmdChk;
+					if(!strCmdChk.startsWith(""+cc.getCommandPrefix()))strCmdChk=cc.getCommandPrefix()+strCmdChk;
 					dumpAndClearInputField();
-					int iCommentBegin = strCmdChk.indexOf(chCommentPrefix);
+					int iCommentBegin = strCmdChk.indexOf(cc.getCommentPrefix());
 					if(iCommentBegin>=0)strCmdChk=strCmdChk.substring(0,iCommentBegin);
 					if(strCmdChk.endsWith("\\n"))strCmdChk=strCmdChk.substring(0,strCmdChk.length()-2);
 					if(strCmdChk.endsWith("\n" ))strCmdChk=strCmdChk.substring(0,strCmdChk.length()-1);
@@ -1512,7 +1514,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		if(isHintActive()){
 			String strHintCmd = getSelectedHint();
 			if(strHintCmd!=null){
-				strHintCmd=chCommandPrefix+extractCommandPart(strHintCmd,0)+" ";
+				strHintCmd=cc.getCommandPrefix()+extractCommandPart(strHintCmd,0)+" ";
 				if(!getInputText().equals(strHintCmd)){
 					setInputField(strHintCmd);
 					return true;
@@ -1524,7 +1526,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	}
 	
 	protected void clearInputTextField() {
-		setInputField(""+chCommandPrefix);
+		setInputField(""+cc.getCommandPrefix());
 	}
 	
 	protected String getInputText() {
@@ -1532,7 +1534,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	}
 	
 	public boolean actionSubmitCommand(final String strCmd){
-		if(strCmd.isEmpty() || strCmd.trim().equals(""+chCommandPrefix)){
+		if(strCmd.isEmpty() || strCmd.trim().equals(""+cc.getCommandPrefix())){
 			clearInputTextField(); 
 			return false;
 		}
@@ -1540,17 +1542,17 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		String strType=strTypeCmd;
 		boolean bIsCmd=true;
 		boolean bShowInfo=true;
-		if(strCmd.trim().startsWith(""+chCommentPrefix)){
+		if(strCmd.trim().startsWith(""+cc.getCommentPrefix())){
 			strType="Cmt";
 			bIsCmd=false;
 		}else
-		if(!strCmd.trim().startsWith(""+chCommandPrefix)){
+		if(!strCmd.trim().startsWith(""+cc.getCommandPrefix())){
 			strType="Inv";
 			bIsCmd=false;
 		}
 		
 		if(bIsCmd){
-			if(strCmd.trim().endsWith(""+chCommentPrefix)){
+			if(strCmd.trim().endsWith(""+cc.getCommentPrefix())){
 				bShowInfo=false;
 			}
 		}
@@ -1611,7 +1613,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 			 * replace entry with useful comment
 			 */
 			astrCmdList.set(i, astrCmdList.get(i)
-				+(bShowExecIndex?" "+chCommentPrefix+"ExecIndex="+i:""));
+				+(bShowExecIndex?" "+cc.getCommentPrefix()+"ExecIndex="+i:""));
 		}
 		
 		if(bPrepend){
@@ -1631,13 +1633,13 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	protected void addToExecConsoleCommandQueue(String strFullCmdLine, boolean bPrepend){
 		strFullCmdLine=strFullCmdLine.trim();
 		
-		if(strFullCmdLine.startsWith(""+chCommentPrefix))return;
+		if(strFullCmdLine.startsWith(""+cc.getCommentPrefix()))return;
 		if(strFullCmdLine.isEmpty())return;
-		if(strFullCmdLine.equals(""+chCommandPrefix))return;
+		if(strFullCmdLine.equals(""+cc.getCommandPrefix()))return;
 		
 		if(!strFullCmdLine.startsWith(""+SPECIAL_CMD_TOKEN)){
-			if(!strFullCmdLine.startsWith(""+chCommandPrefix)){
-				strFullCmdLine=chCommandPrefix+strFullCmdLine;
+			if(!strFullCmdLine.startsWith(""+cc.getCommandPrefix())){
+				strFullCmdLine=cc.getCommandPrefix()+strFullCmdLine;
 			}
 		}
 		
@@ -1653,7 +1655,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	protected void updateExecConsoleCmdQueue() {
 		if(astrExecConsoleCmdsQueue.size()>0){ // one per time! NO while here!!!!
 			String str=astrExecConsoleCmdsQueue.remove(0);
-			if(!str.trim().endsWith(""+chCommentPrefix)){
+			if(!str.trim().endsWith(""+cc.getCommentPrefix())){
 				if(cc.btgShowExecQueuedInfo.get()){ // prevent messing user init cfg console log
 					dumpInfoEntry("ExecQueued: "+str);
 				}
@@ -1764,28 +1766,28 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		boolean bUseSlowQueue = false;
 		String strLineOriginal = null;
 		
-		public boolean isbApplyNewLineRequests() {
+		public boolean isApplyNewLineRequests() {
 			return bApplyNewLineRequests;
 		}
 		public DumpEntry setApplyNewLineRequests(boolean bApplyNewLineRequests) {
 			this.bApplyNewLineRequests = bApplyNewLineRequests;
 			return this;
 		}
-		public boolean isbDump() {
+		public boolean isDump() {
 			return bDumpToConsole;
 		}
 		public DumpEntry setDumpToConsole(boolean bDump) {
 			this.bDumpToConsole = bDump;
 			return this;
 		}
-		public boolean isbUseQueue() {
+		public boolean isUseQueue() {
 			return bUseSlowQueue;
 		}
 		public DumpEntry setUseSlowQueue(boolean bUseQueue) {
 			this.bUseSlowQueue = bUseQueue;
 			return this;
 		}
-		public String getStrLineOriginal() {
+		public String getLineOriginal() {
 			return strLineOriginal;
 		}
 		public DumpEntry setLineOriginal(String strLineOriginal) {
@@ -2007,7 +2009,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	
 	protected boolean isCommentedLine(){
 		if(strCmdLinePrepared==null)return false;
-		return strCmdLinePrepared.trim().startsWith(""+chCommentPrefix);
+		return strCmdLinePrepared.trim().startsWith(""+cc.getCommentPrefix());
 	}
 	
 	protected boolean checkCmdValidityBoolTogglers(){
@@ -2032,7 +2034,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	protected boolean checkCmdValidity(String strValidCmd, String strComment, boolean bSkipSortCheck){
 		if(strCmdLinePrepared==null){
 			if(strComment!=null){
-				strValidCmd+=" "+chCommentPrefix+strComment;
+				strValidCmd+=" "+cc.getCommentPrefix()+strComment;
 			}
 			
 			addCmdToValidList(strValidCmd,bSkipSortCheck);
@@ -2080,7 +2082,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 			
 //			if(strParam1!=null){
 			if(astrOptList!=null){
-				strCompletedCmd=""+chCommandPrefix+strCmd;
+				strCompletedCmd=""+cc.getCommandPrefix()+strCmd;
 				
 				ArrayList<String> astr = strParam1==null ? astrOptList :
 					autoComplete(strParam1, astrOptList, bMatchContains);
@@ -2101,7 +2103,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 //			}
 		}
 		
-		if(strCompletedCmd.trim().isEmpty())strCompletedCmd=""+chCommandPrefix;
+		if(strCompletedCmd.trim().isEmpty())strCompletedCmd=""+cc.getCommandPrefix();
 		setInputField(strCompletedCmd);
 		
 		scrollToBottomRequest();
@@ -2112,10 +2114,10 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		strCmdPart=strCmdPart.trim();
 		
 		// no command typed
-		if(strCmdPart.equalsIgnoreCase(""+chCommandPrefix) || strCmdPart.isEmpty())
+		if(strCmdPart.equalsIgnoreCase(""+cc.getCommandPrefix()) || strCmdPart.isEmpty())
 			return strCmdPartOriginal;
 		
-		strCmdPart=strCmdPart.replaceFirst("^"+chCommandPrefix, "");
+		strCmdPart=strCmdPart.replaceFirst("^"+cc.getCommandPrefix(), "");
 		
 		// do not allow invalid chars
 		if(!strCmdPart.matches("["+strValidCmdCharsRegex+"]*"))
@@ -2137,11 +2139,11 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 			dumpInfoEntry("AutoComplete: ");
 			for(String str:astr){
 				if(str.equals(strFirst))continue; //skip the partial improved match, 1st entry
-				dumpSubEntry(chCommandPrefix+str);
+				dumpSubEntry(cc.getCommandPrefix()+str);
 			}
 		}
 		
-		return chCommandPrefix+strFirst.split(" ")[0]+strAppendSpace;
+		return cc.getCommandPrefix()+strFirst.split(" ")[0]+strAppendSpace;
 	}
 	
 	/**
@@ -2214,7 +2216,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		/**
 		 * remove comment
 		 */
-		int iCommentAt = strFullCmdLine.indexOf(chCommentPrefix);
+		int iCommentAt = strFullCmdLine.indexOf(cc.getCommentPrefix());
 		String strComment = "";
 		if(iCommentAt>=0){
 			strComment=strFullCmdLine.substring(iCommentAt);
@@ -2224,14 +2226,14 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		/**
 		 * queue multicommands line
 		 */
-		if(strFullCmdLine.contains(strCommandDelimiter)){
+		if(strFullCmdLine.contains(""+cc.getCommandDelimiter())){
 			ArrayList<String> astrMulti = new ArrayList<String>();
-			astrMulti.addAll(Arrays.asList(strFullCmdLine.split(strCommandDelimiter)));
+			astrMulti.addAll(Arrays.asList(strFullCmdLine.split(""+cc.getCommandDelimiter())));
 			for(int i=0;i<astrMulti.size();i++){
 				/**
 				 * replace by propagating the existing comment to each part that will be executed
 				 */
-				astrMulti.set(i, astrMulti.get(i).trim()+" "+chCommentPrefix+"SplitCmdLine "+strComment);
+				astrMulti.set(i, astrMulti.get(i).trim()+" "+cc.getCommentPrefix()+"SplitCmdLine "+strComment);
 			}
 			addToExecConsoleCommandQueue(astrMulti,true,true);
 			return SPECIAL_CMD_SKIP_CURRENT_COMMAND.toString();
@@ -2245,7 +2247,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		while (m.find()){
 			String str=m.group(1);
 			if(str!=null){
-				if(str.trim().startsWith(""+chCommentPrefix))break; //ignore comments
+				if(str.trim().startsWith(""+cc.getCommentPrefix()))break; //ignore comments
 				str=str.trim();
 				str=str.replace("\"", ""); //remove all quotes on the string TODO could be only 1st and last? mmm... too much trouble...
 				astrCmdAndParams.add(str);
@@ -2301,7 +2303,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	
 	protected String applyVariablesValues(String strParam){
 		for(String strVarId : getAllVariablesIdentifiers()){
-			String strToken=chVariableExpandPrefix+"{"+strVarId+"}";
+			String strToken=cc.getVariableExpandPrefix()+"{"+strVarId+"}";
 			if(strParam.contains(strToken)){
 				strParam=strParam.replace(strToken, ""+ahtVariables.get(strVarId));
 			}
@@ -2369,15 +2371,15 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 			if(strFullCmdLine.isEmpty())return null; //dummy line
 			
 			// a comment shall not create any warning based on false return value...
-			if(strFullCmdLine.startsWith(""+chCommentPrefix))return null; //comment is a "dummy command"
+			if(strFullCmdLine.startsWith(""+cc.getCommentPrefix()))return null; //comment is a "dummy command"
 			
 			// now it is possibly a command
 			
-			strFullCmdLine = strFullCmdLine.substring(1); //1 chCommandPrefixChar
+			strFullCmdLine = strFullCmdLine.substring(1); //1 cc.getCommandPrefix()Char
 			strFullCmdLine = strFullCmdLine.trim();
 			
-			if(strFullCmdLine.endsWith(""+chCommentPrefix)){
-				strFullCmdLine=strFullCmdLine.substring(0,strFullCmdLine.length()-1); //-1 chCommentPrefixChar
+			if(strFullCmdLine.endsWith(""+cc.getCommentPrefix())){
+				strFullCmdLine=strFullCmdLine.substring(0,strFullCmdLine.length()-1); //-1 cc.getCommentPrefix()Char
 			}
 			
 			return convertToCmdParams(strFullCmdLine);
@@ -2390,17 +2392,66 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		return strCmdLinePrepared;
 	}
 	
-	public class Alias{
-		String strAliasId;
-		String strCmdLine; // may contain ending comment too
-		boolean	bBlocked;
-		@Override
-		public String toString() {
-			return chCommandPrefix+"alias "
-				+(bBlocked?chAliasBlockedToken:"")
-				+strAliasId+" "+strCmdLine;
-		}
-	}
+//	public class Alias{
+//		String strAliasId;
+//		String strCmdLine; // may contain ending comment too
+//		boolean	bBlocked;
+//		
+//		@Override
+//		public String toString() {
+//			return cc.getCommandPrefix()+"alias "
+//				+(bBlocked?chAliasBlockedToken:"")
+//				+strAliasId+" "+strCmdLine;
+//		}
+//		
+//		@Override
+//		public boolean equals(Object obj) {
+//			if (this == obj)
+//				return true;
+//			if (obj == null)
+//				return false;
+//			if (getClass() != obj.getClass())
+//				return false;
+//			Alias other = (Alias) obj;
+//			if (!getOuterType().equals(other.getOuterType()))
+//				return false;
+//			if (bBlocked != other.bBlocked)
+//				return false;
+//			if (strAliasId == null) {
+//				if (other.strAliasId != null)
+//					return false;
+//			} else if (!strAliasId.equals(other.strAliasId))
+//				return false;
+//			if (strCmdLine == null) {
+//				if (other.strCmdLine != null)
+//					return false;
+//			} else if (!strCmdLine.equals(other.strCmdLine))
+//				return false;
+//			return true;
+//		}
+//		
+//		/**
+//		 * IMPORTANT:
+//		 * on regenerate, comment out the getOuterType() line!
+//		 * does NOT matter its parent...
+//		 */
+//		@Override
+//		public int hashCode() {
+//			final int prime = 31;
+//			int result = 1;
+//			result = prime * result + getOuterType().hashCode();
+//			result = prime * result + (bBlocked ? 1231 : 1237);
+//			result = prime * result
+//					+ ((strAliasId == null) ? 0 : strAliasId.hashCode());
+//			result = prime * result
+//					+ ((strCmdLine == null) ? 0 : strCmdLine.hashCode());
+//			return result;
+//		}
+//
+//		protected ConsoleGuiState getOuterType() {
+//			return ConsoleGuiState.this;
+//		}
+//	}
 	
 	protected Alias getAlias(String strAliasId){
 		Alias aliasFound=null;
@@ -2423,8 +2474,8 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		if(strCmdLineOriginal==null)return false;
 		
 		String str = strCmdLineOriginal.trim();
-		String strExecAliasPrefix = ""+chCommandPrefix+chAliasPrefix;
-		if(str.startsWith(chCommandPrefix+"alias ")){
+		String strExecAliasPrefix = ""+cc.getCommandPrefix()+cc.getAliasPrefix();
+		if(str.startsWith(cc.getCommandPrefix()+"alias ")){
 			/**
 			 * create
 			 */
@@ -2458,7 +2509,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 			for(Alias alias:aAliasList){
 				if(alias.strAliasId.toLowerCase().equals(str)){
 					if(!alias.bBlocked){
-						addToExecConsoleCommandQueue(alias.strCmdLine+" "+chCommentPrefix+"alias="+alias.strAliasId, true);
+						addToExecConsoleCommandQueue(alias.strCmdLine+" "+cc.getCommentPrefix()+"alias="+alias.strAliasId, true);
 						return true;
 					}else{
 						dumpWarnEntry(alias.toString());
@@ -2630,7 +2681,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		if(checkCmdValidity("varAdd","<varId> <[-]value>")){
 			bCommandWorkedProperly=cmdVarAdd(paramString(1),paramString(2),false);
 		}else
-		if(checkCmdValidity(cc.CMD_VAR_SET,"[<varId> <value>] | [-varId] | ["+chFilterToken+"filter] - can be a number or a string, retrieve it's value with: ${varId}")){
+		if(checkCmdValidity(cc.CMD_VAR_SET,"[<varId> <value>] | [-varId] | ["+cc.getFilterToken()+"filter] - can be a number or a string, retrieve it's value with: ${varId}")){
 			bCommandWorkedProperly=cmdVarSet();
 		}else
 		if(checkCmdValidity("varSetCmp","<varIdBool> <value> <cmp> <value>")){
@@ -2687,7 +2738,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		}
 	}
 	
-	private boolean cmdDb() {
+	protected boolean cmdDb() {
 		String strOpt = paramString(1);
 		if(strOpt!=null){
 			EDataBaseOperations edb = null;
@@ -2778,27 +2829,27 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	}
 	
 	protected String getAliasHelp() {
-		return "[<identifier> <commands>] | [<+|->identifier] | ["+chFilterToken+"filter]\n"
+		return "[<identifier> <commands>] | [<+|->identifier] | ["+cc.getFilterToken()+"filter]\n"
 			+"\t\tWithout params, will list all aliases\n"
-			+"\t\t"+chFilterToken+"filter - will filter (contains) the alias list\n"
+			+"\t\t"+cc.getFilterToken()+"filter - will filter (contains) the alias list\n"
 			+"\t\t-identifier - will block that alias execution\n"
 			+"\t\t+identifier - will un-block that alias execution\n"
 			+"\t\tObs.: to execute an alias, "
-				+"prefix the identifier with '"+chAliasPrefix+"', "
-				+"ex.: "+chCommandPrefix+chAliasPrefix +"tst123";
+				+"prefix the identifier with '"+cc.getAliasPrefix()+"', "
+				+"ex.: "+cc.getCommandPrefix()+cc.getAliasPrefix() +"tst123";
 	}
 	
 	protected boolean cmdAlias() {
 		boolean bOk=false;
 		String strAliasId = paramString(1);
-		if(strAliasId!=null && strAliasId.startsWith(""+chAliasAllowedToken)){
+		if(strAliasId!=null && strAliasId.startsWith(""+cc.getAliasAllowedToken())){
 			bOk=aliasBlock(strAliasId.substring(1),false);
 		}else
-		if(strAliasId!=null && strAliasId.startsWith(""+chAliasBlockedToken)){
+		if(strAliasId!=null && strAliasId.startsWith(""+cc.getAliasBlockedToken())){
 			bOk=aliasBlock(strAliasId.substring(1),true);
 		}else{
 			String strFilter=null;
-			if(strAliasId!=null && strAliasId.startsWith(""+chFilterToken)){
+			if(strAliasId!=null && strAliasId.startsWith(""+cc.getFilterToken())){
 				if(strAliasId.length()>1)strFilter = strAliasId.substring(1);
 				strAliasId=null;
 			}
@@ -2811,6 +2862,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 					if(strFilter!=null && !alias.toString().toLowerCase().contains(strFilter.toLowerCase()))continue;
 					dumpSubEntry(alias.toString());
 				}
+				dumpSubEntry(cc.getCommentPrefix()+"AliasListHashCode="+aAliasList.hashCode());
 				bOk=true;
 			}else{
 				bOk=bLastAliasCreatedSuccessfuly;
@@ -2886,7 +2938,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	protected boolean cmdVarSet() {
 		boolean bOk=false;
 		String strVarIdOrFilter = paramString(1);
-		if(strVarIdOrFilter==null || strVarIdOrFilter.startsWith(""+chFilterToken)){
+		if(strVarIdOrFilter==null || strVarIdOrFilter.startsWith(""+cc.getFilterToken())){
 			dumpInfoEntry("Variables list:");
 			if(strVarIdOrFilter!=null)strVarIdOrFilter=strVarIdOrFilter.substring(1);
 			for(String strVarId : getAllVariablesIdentifiers()){
@@ -2896,9 +2948,10 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 				
 				varReport(strVarId);
 			}
+			dumpSubEntry(cc.getCommentPrefix()+"VarListHashCode="+ahtVariables.hashCode());
 			bOk=true;
 		}else
-		if(strVarIdOrFilter!=null && strVarIdOrFilter.trim().startsWith(""+chVarDeleteToken)){
+		if(strVarIdOrFilter!=null && strVarIdOrFilter.trim().startsWith(""+cc.getVarDeleteToken())){
 			bOk=ahtVariables.remove(strVarIdOrFilter.trim().substring(1))!=null;
 			if(bOk){
 				dumpInfoEntry("Var '"+strVarIdOrFilter+"' deleted.");
@@ -3058,7 +3111,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	
 	protected String varReportPrepare(String strVarId) {
 		Object objValue = ahtVariables.get(strVarId);
-		return chCommandPrefix
+		return cc.getCommandPrefix()
 			+cc.CMD_VAR_SET.toString()
 			+" "
 			+strVarId
@@ -3149,7 +3202,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		Collections.sort(astrCmdWithCmtValidList,String.CASE_INSENSITIVE_ORDER);
 		for(String str:astrCmdWithCmtValidList){
 			if(strFilter!=null && !str.toLowerCase().contains(strFilter.toLowerCase()))continue;
-			dumpSubEntry(chCommandPrefix+str);
+			dumpSubEntry(cc.getCommandPrefix()+str);
 		}
 	}
 	
@@ -3192,14 +3245,14 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		return bOk;
 	}
 	
-	private boolean cmdRawLineCheckEndOfStartupCmdQueue() {
+	protected boolean cmdRawLineCheckEndOfStartupCmdQueue() {
 		if(SPECIAL_CMD_END_OF_STARTUP_CMDQUEUE.equals(strCmdLineOriginal)){
 			bStartupCmdQueueDone=true;
 			return true;
 		}
 		return false;
 	}
-	private boolean cmdRawLineCheckIfElse() {
+	protected boolean cmdRawLineCheckIfElse() {
 		return false;
 	}
 	/**
@@ -3333,19 +3386,6 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
     
     if(efHK!=null)efHK.cleanupHK();
     bInitialized=false;
-	}
-	
-	public String getCommentPrefixChar() {
-		return ""+chCommentPrefix;
-	}
-	public void setCfgCommentPrefixChar(Character chCommentPrefixChar) {
-		this.chCommentPrefix = chCommentPrefixChar;
-	}
-	public Character getCommandPrefixChar() {
-		return chCommandPrefix;
-	}
-	public void setCfgCommandPrefixChar(Character chCommandPrefixChar) {
-		this.chCommandPrefix = chCommandPrefixChar;
 	}
 	
 //	protected String fmtFloat(Float f,int iDecimalPlaces){

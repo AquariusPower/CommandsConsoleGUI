@@ -40,7 +40,7 @@ import com.jme3.system.AppSettings;
  *
  */
 public class ConsoleGuiTest extends SimpleApplication {
-	protected ConsoleGuiStateEndUser	cgsCustomizedState;	
+	protected ConsoleGuiCustomState	cgsCustomizedState;	
 	protected boolean bHideSettings=true; 
 	
 	public boolean endUserCustomMethod(Integer i){
@@ -53,7 +53,7 @@ public class ConsoleGuiTest extends SimpleApplication {
 		return true;
 	}
 	
-	class ConsoleGuiStateEndUser extends ConsoleGuiState{
+	class ConsoleGuiCustomState extends ConsoleGuiLemurState{
 //		private final String strFinalFieldCodePrefix="CMD_";
 		private final String strFieldCodePrefix="sf";
 		private final String strFieldCodePrefixLess = "VariantAsPrefixLess";
@@ -63,7 +63,7 @@ public class ConsoleGuiTest extends SimpleApplication {
 		private StringField testCommandAutoFillPrefixLessVariant2 = new StringField(this,strFieldCodePrefixLess);
 		private StringField testCommandAutoFillPrefixLessVariantDefaulted3 = new StringField(this,null);
 		
-		public ConsoleGuiStateEndUser() {
+		public ConsoleGuiCustomState() {
 			super(KeyInput.KEY_F10);
 			
 			/**
@@ -101,15 +101,6 @@ public class ConsoleGuiTest extends SimpleApplication {
 					rfcfg.strCodingStyleFieldNamePrefix=null;
 					rfcfg.bFirstLetterUpperCase = true;
 				}
-//				switch(rfcv.getReflexFillCfgVariant()){
-//					case 1:
-//						rfcfg = new ReflexFillCfg();
-//						rfcfg.strCodingStyleFieldNamePrefix = "sf";
-//						rfcfg.strCommandPrefix = "Niceprefix";
-//						rfcfg.strCommandSuffix = "Nicesuffix";
-//						rfcfg.bFirstLetterUpperCase = true;
-//						break;
-//				}
 			}
 			
 			/**
@@ -126,7 +117,7 @@ public class ConsoleGuiTest extends SimpleApplication {
 	
 	@Override
 	public void simpleInitApp() {
-		cgsCustomizedState = new ConsoleGuiStateEndUser();
+		cgsCustomizedState = new ConsoleGuiCustomState();
 		getStateManager().attach(cgsCustomizedState);
 	}
 	

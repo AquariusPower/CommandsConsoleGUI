@@ -44,7 +44,11 @@ DONE:
 	= Alias -tst;Alias +tst;CMD_TEST_ABC reflex testAbc
 
 TODO.FastToImplement:
-	+ Alias/var autocomplete 
+	+ DB hash last save
+	+ ToggleAutoBkpIfDBhashChanges
+	+ Setup.cfg.areCchangesMadeIngame.overridenBy.Init.cfg
+	+ AtSetup:windowGeometry.resolution.position;DBhashSavedAtSetupFile;keybinds.sndVplumes;etc
+	+ Alias/var autocomplete  
 	+ $commandId to retrieve its return value
 	+ When date(day) changes, report on console. On startup report date on console.
 	+ Optional hundredth/tenth of a second at console log.
