@@ -38,9 +38,12 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,6 +55,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
@@ -197,10 +201,12 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	protected int iMaxCmdHistSize = 1000;
 	protected int iMaxDumpEntriesAmount = 100000;
 	protected String	strFilePrefix = ConsoleGuiState.class.getSimpleName();
-	protected String	strFileCmdHistory = strFilePrefix+"-CmdHist.txt";
-	protected String	strFileLastDump = strFilePrefix+"-LastDump.txt";
-	protected String	strFileInitConsCmds = strFilePrefix+"-Init.cfg";
-	protected String	strFileDatabase = strFilePrefix+"-DB.cfg";
+	protected String	strFileTypeLog = "log";
+	protected String	strFileTypeConfig = "cfg";
+	protected String	strFileCmdHistory = strFilePrefix+"-CmdHist";
+	protected String	strFileLastDump = strFilePrefix+"-LastDump";
+	protected String	strFileInitConsCmds = strFilePrefix+"-Init";
+	protected String	strFileDatabase = strFilePrefix+"-DB";
 	protected File	flCmdHist;
 	protected File	flLastDump;
 	protected float	fConsoleHeightPercDefault = 0.5f;
@@ -292,7 +298,19 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		this.bEnabled=true; //just to let it be initialized at startup by state manager
 		this.iToggleConsoleKey=iToggleConsoleKey;
 	}
-
+	
+	protected String fileNamePrepare(String strFileBaseName, String strFileType, boolean bAddDateTime){
+		return strFileBaseName
+				+(bAddDateTime?"-"+getDateTimeForFilename():"")
+				+"."+strFileType;
+	}
+	protected String fileNamePrepareCfg(String strFileBaseName, boolean bAddDateTime){
+		return fileNamePrepare(strFileBaseName, strFileTypeConfig, bAddDateTime);
+	}
+	protected String fileNamePrepareLog(String strFileBaseName, boolean bAddDateTime){
+		return fileNamePrepare(strFileBaseName, strFileTypeLog, bAddDateTime);
+	}
+	
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
 		if(isInitialized())throw new NullPointerException("already initialized...");
@@ -305,18 +323,18 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
 		
 		// init cmd history
-		flCmdHist = new File(strFileCmdHistory);
+		flCmdHist = new File(fileNamePrepareLog(strFileCmdHistory,false));
 		cmdHistLoad();
 		
 		// init dump file
-		flLastDump = new File(strFileLastDump);
+		flLastDump = new File(fileNamePrepareLog(strFileLastDump,false));
 		flLastDump.delete(); //each run will have a new file
 		
 		// init valid cmd list
 		executeCommand(null); //to populate the array with available commands
 		
 		// init user cfg
-		flInit = new File(strFileInitConsCmds);
+		flInit = new File(fileNamePrepareCfg(strFileInitConsCmds,false));
 		if(flInit.exists()){
 			addToExecConsoleCommandQueue(fileLoad(flInit));
 		}else{
@@ -324,7 +342,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		}
 		
 		// init DB
-		flDB = new File(strFileDatabase);
+		flDB = new File(fileNamePrepareCfg(strFileDatabase,false));
 		
 		// other inits
 		addToExecConsoleCommandQueue(cc.CMD_FIX_LINE_WRAP);
@@ -401,7 +419,7 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 	protected void initialize(){
 		if(sapp==null)throw new NullPointerException("base initialization required");
 		
-		tdLetCpuRest.updateTime();
+//		tdLetCpuRest.updateTime();
 		tdStatsRefresh.updateTime();
 		tdDumpQueuedEntry.updateTime();
 		
@@ -1720,6 +1738,10 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 				-lstbx.getSlider().getModel().getValue();
 	}
 	
+	protected String getDateTimeForFilename(){
+		return new SimpleDateFormat("yyyyMMdd-HHmmss").format(Calendar.getInstance().getTime());
+	}
+	
 	protected String getSimpleTime(){
 		return "["+new SimpleDateFormat("HH:mm:ss"+(cc.btgShowMiliseconds.get()?".SSS":"")).format(Calendar.getInstance().getTime())+"]";
 	}
@@ -2639,6 +2661,9 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		
 		show,
 		
+		/** A backup is made of the existing file. */
+		backup,
+		
 		;
 		public static String help(){
 			String str = null;
@@ -2672,16 +2697,54 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 		return false;
 	}
 	
-	protected boolean cmdDb(EDataBaseOperations e){
-		if(e==null)return false;
+//	protected boolean fileCopy(File flFrom, File flTo) {
+//    FileChannel source = null;
+//    FileChannel destination = null;
+//    
+//		try{
+//	    if(!flTo.exists())flTo.createNewFile();
+//	
+//			source = new FileInputStream(flFrom).getChannel();
+//			destination = new FileOutputStream(flTo).getChannel();
+//			destination.transferFrom(source, 0, source.size());
+//		} catch (IOException e) {
+//			dumpExceptionEntry(e);
+//			e.printStackTrace();
+//			return false;
+//		}finally{
+//			try{if(source != null)
+//				source.close();}catch(IOException e){e.printStackTrace();}
+//			try{if(destination != null)
+//				destination.close();}catch(IOException e){e.printStackTrace();}
+//		}
+//		
+//		return true;
+//	}
+	
+	protected boolean cmdDb(EDataBaseOperations edbo){
+		if(edbo==null)return false;
 		
-		switch(e){
+		switch(edbo){
 			case load:
 				/**
 				 * prepend on the queue is important mainly at the initialization
 				 */
 				dumpInfoEntry("Loading Console Database:");
 				addToExecConsoleCommandQueue(fileLoad(flDB),true,false);
+				return true;
+			case backup:
+				try {
+					File fl = new File(fileNamePrepareCfg(strFileDatabase,true));
+					Files.copy(flDB, fl);
+					dumpSubEntry("Backup made: "+fl.getAbsolutePath()+"; "+fl.length()+" bytes");
+				} catch (IOException ex) {
+					dumpExceptionEntry(ex);
+					ex.printStackTrace();
+					return false;
+				}
+//				return fileCopy(
+//					flDB,
+//					new File(fileNamePrepareCfg(strFileDatabase,true)));
 				return true;
 			case save:
 				ArrayList<String> astr = new ArrayList<>();
@@ -2698,7 +2761,10 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 				flDB.delete();
 				fileAppendList(flDB, astr);
 				
-				dumpInfoEntry("Database saved: Variables="+astrVarList.size()+", Aliases="+aAliasList.size());
+				dumpInfoEntry("Database saved: "
+					+astrVarList.size()+" vars, "
+					+aAliasList.size()+" aliases, "
+					+flDB.length()+" bytes,");
 				
 				return true;
 			case show:
@@ -3324,10 +3390,10 @@ public class ConsoleGuiState implements AppState, ReflexFill.IReflexFillCfg{
 			dumpSubEntry(bh.getCmdId()+" = "+bh.get());
 		}
 		
-		dumpSubEntry("User Commands History File = "+flCmdHist.getAbsolutePath());
-		dumpSubEntry("User Config File = "+flInit.getAbsolutePath());
 		dumpSubEntry("User Dump File = "+flLastDump.getAbsolutePath());
+		dumpSubEntry("User Commands History File = "+flCmdHist.getAbsolutePath());
 		dumpSubEntry("User Database File = "+flDB.getAbsolutePath());
+		dumpSubEntry("User Config File = "+flInit.getAbsolutePath());
 	}
 	
 	/**

@@ -44,6 +44,7 @@ DONE:
 	= Alias -tst;Alias +tst;CMD_TEST_ABC reflex testAbc
 
 TODO.FastToImplement:
+	+ Alias/var autocomplete 
 	+ $commandId to retrieve its return value
 	+ When date(day) changes, report on console. On startup report date on console.
 	+ Optional hundredth/tenth of a second at console log.
