@@ -60,12 +60,12 @@ public class BoolToggler implements IReflexFillCfgVariant{
 	public BoolToggler(IReflexFillCfg rfcfgOwner, boolean bInitValue, String strReflexFillCfgCodePrefixVariant){
 		this( rfcfgOwner,  bInitValue,  strReflexFillCfgCodePrefixVariant, "");
 	}
-	public BoolToggler(IReflexFillCfg rfcfgOwner, boolean bInitValue, String strReflexFillCfgCodePrefixVariant, String strHelp){
+	public BoolToggler(IReflexFillCfg rfcfgOwner, boolean bInitialValue, String strReflexFillCfgCodePrefixVariant, String strHelp){
 		this();
 		this.strReflexFillCfgCodePrefixVariant=strReflexFillCfgCodePrefixVariant;
 		this.rfcfgOwner=rfcfgOwner;
 		this.strHelp=strHelp;
-		set(bInitValue);
+		set(bInitialValue);
 	}
 	public BoolToggler(boolean bInitValue, String strCustomCmdId){
 		this();

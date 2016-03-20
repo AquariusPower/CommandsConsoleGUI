@@ -30,6 +30,8 @@ package gui.console;
 /**
  * Here is the specific code that works with Lemur GUI.
  * 
+ * TODO bring it from super
+ * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */

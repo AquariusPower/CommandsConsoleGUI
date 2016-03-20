@@ -47,6 +47,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Hashtable;
+import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -114,16 +115,6 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	public final StringField INPUT_MAPPING_CONSOLE_CONTROL_PRESSED	= new StringField(this,strFinalFieldInputCodePrefix);
 	
 	public final String STYLE_CONSOLE="console";
-	
-	/**
-	 * this char indicates something that users (non developers) 
-	 * should not have direct access.
-	 */
-	public final Character	RESTRICTED_TOKEN	= '&';
-	
-	public final String strFinalFieldRestrictedCmdCodePrefix="RESTRICTED_CMD_";
-	public final StringField	RESTRICTED_CMD_SKIP_CURRENT_COMMAND	= new StringField(this,strFinalFieldRestrictedCmdCodePrefix);
-	public final StringField	RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE	= new StringField(this,strFinalFieldRestrictedCmdCodePrefix);
 	
 	protected boolean bStartupCmdQueueDone = false; 
 	
@@ -259,8 +250,12 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	protected int	iCmdHistoryPreviousIndex;
 //	protected boolean	bShowExecQueuedInfo = false;
 	protected ConsoleCommands	cc;
-	protected Hashtable<String,Object> ahtUserVariables = new Hashtable<String,Object>();
-	protected Hashtable<String,Object> ahtRestrictedVariables = new Hashtable<String,Object>();
+//	protected Hashtable<String,Object> htUserVariables = new Hashtable<String,Object>();
+	protected TreeMap<String,Object> tmUserVariables = 
+		new TreeMap<String, Object>(String.CASE_INSENSITIVE_ORDER);
+//	protected Hashtable<String,Object> htRestrictedVariables = new Hashtable<String,Object>();
+	protected TreeMap<String,Object> tmRestrictedVariables =
+		new TreeMap<String, Object>(String.CASE_INSENSITIVE_ORDER);
 	protected ArrayList<Alias> aAliasList = new ArrayList<Alias>();
 	protected String	strCmdLineOriginal;
 	protected boolean	bLastAliasCreatedSuccessfuly;
@@ -329,7 +324,8 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		// init valid cmd list
 		executeCommand(null); //to populate the array with available commands
 		
-		// init user cfg
+		// restricted vars setup
+		setupVars(false);
 		flSetup = new File(fileNamePrepareCfg(strFileSetup,false));
 		if(flSetup.exists()){
 			addToExecConsoleCommandQueue(fileLoad(flSetup));
@@ -358,7 +354,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		// must be the last queued command after all init ones!
 		addToExecConsoleCommandQueue(cc.btgShowExecQueuedInfo.getCmdIdAsCommand(true));
 		// end of initialization
-		addToExecConsoleCommandQueue(RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE);
+		addToExecConsoleCommandQueue(cc.RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE);
 		if(bInitiallyClosed){
 			// after all, close the console
 			addToExecConsoleCommandQueue(cc.CMD_CLOSE_CONSOLE);
@@ -747,14 +743,15 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		dumpInfoEntry("testing...");
 		String strParam1 = paramString(1);
 		
+		tmUserVariables.put("abC",10);
+		tmUserVariables.get("aBc");
+		tmUserVariables.put("Abc",20);
 		
-		String strAllChars="";
-		for(char ch=0;ch<256;ch++){
-			strAllChars+=Character.toString(ch);
-		}
-		dumpSubEntry("AllChars:"+strAllChars);
-		
-		
+//		String strAllChars="";
+//		for(char ch=0;ch<256;ch++){
+//			strAllChars+=Character.toString(ch);
+//		}
+//		dumpSubEntry("AllChars:"+strAllChars);
 		
 //	dumpSubEntry("["+(char)Integer.parseInt(strParam1, 16)+"]");
 //		if(getDumpAreaSelectedIndex()>=0){
@@ -1610,12 +1607,11 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	protected void addToExecConsoleCommandQueue(ArrayList<String> astrCmdList, boolean bPrepend, boolean bShowExecIndex){
 		astrCmdList = new ArrayList<String>(astrCmdList);
 		
-		for(int i=0;i<astrCmdList.size();i++){
-			/**
-			 * replace entry with useful comment
-			 */
-			astrCmdList.set(i, astrCmdList.get(i)
-				+(bShowExecIndex?" "+cc.getCommentPrefix()+"ExecIndex="+i:""));
+		if(bShowExecIndex){
+			for(int i=0;i<astrCmdList.size();i++){
+				astrCmdList.set(i, 
+				astrCmdList.get(i)+cc.commentToAppend("ExecIndex="+i));
+			}
 		}
 		
 		if(bPrepend){
@@ -1639,7 +1635,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		if(strFullCmdLine.isEmpty())return;
 		if(strFullCmdLine.equals(""+cc.getCommandPrefix()))return;
 		
-		if(!strFullCmdLine.startsWith(""+RESTRICTED_TOKEN)){
+		if(!strFullCmdLine.startsWith(""+cc.RESTRICTED_TOKEN)){
 			if(!strFullCmdLine.startsWith(""+cc.getCommandPrefix())){
 				strFullCmdLine=cc.getCommandPrefix()+strFullCmdLine;
 			}
@@ -2036,7 +2032,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	protected boolean checkCmdValidity(String strValidCmd, String strComment, boolean bSkipSortCheck){
 		if(strCmdLinePrepared==null){
 			if(strComment!=null){
-				strValidCmd+=" "+cc.getCommentPrefix()+strComment;
+				strValidCmd+=cc.commentToAppend(strComment);
 			}
 			
 			addCmdToValidList(strValidCmd,bSkipSortCheck);
@@ -2044,7 +2040,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			return false;
 		}
 		
-		if(RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(strCmdLinePrepared))return false;
+		if(cc.RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(strCmdLinePrepared))return false;
 		if(isCommentedLine())return false;
 		if(strCmdLinePrepared.trim().isEmpty())return false;
 		
@@ -2238,7 +2234,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				astrMulti.set(i, astrMulti.get(i).trim()+" "+cc.getCommentPrefix()+"SplitCmdLine "+strComment);
 			}
 			addToExecConsoleCommandQueue(astrMulti,true,true);
-			return RESTRICTED_CMD_SKIP_CURRENT_COMMAND.toString();
+			return cc.RESTRICTED_CMD_SKIP_CURRENT_COMMAND.toString();
 		}
 		
 		/**
@@ -2299,18 +2295,26 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		return str;
 	}
 	
-	protected ArrayList<String> getAllVariablesIdentifiers(){
-		ArrayList<String> astr = Lists.newArrayList(ahtUserVariables.keySet().iterator());
-		astr.addAll(Lists.newArrayList(ahtRestrictedVariables.keySet().iterator()));
+	/**
+	 * 
+	 * @param bAll if false, will bring only user variables
+	 * @return
+	 */
+	protected ArrayList<String> getVariablesIdentifiers(boolean bAll){
+		ArrayList<String> astr = Lists.newArrayList(tmUserVariables.keySet().iterator());
+		if(bAll)astr.addAll(Lists.newArrayList(tmRestrictedVariables.keySet().iterator()));
 		Collections.sort(astr);
 		return astr;
 	}
 	
 	protected String applyVariablesValues(String strParam){
-		for(String strVarId : getAllVariablesIdentifiers()){
-			String strToken=cc.getVariableExpandPrefix()+"{"+strVarId+"}";
-			if(strParam.contains(strToken)){
-				strParam=strParam.replace(strToken, ""+getVarHT(strVarId).get(strVarId));
+		for(String strVarId : getVariablesIdentifiers(true)){
+			String strToReplace=cc.getVariableExpandPrefix()+"{"+strVarId+"}";
+			if(strParam.toLowerCase().contains(strToReplace.toLowerCase())){
+//				strParam=strParam.replace(strToReplace, ""+getVarHT(strVarId).get(strVarId));
+				strParam=strParam.replaceAll(
+					"(?i)"+Pattern.quote(strToReplace), 
+					""+getVarHT(strVarId).get(strVarId));
 			}
 		}
 		return strParam;
@@ -2478,15 +2482,15 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		
 		if(strCmdLineOriginal==null)return false;
 		
-		String str = strCmdLineOriginal.trim();
+		String strCmdLine = strCmdLineOriginal.trim();
 		String strExecAliasPrefix = ""+cc.getCommandPrefix()+cc.getAliasPrefix();
-		if(str.startsWith(cc.getCommandPrefix()+"alias ")){
+		if(strCmdLine.startsWith(cc.getCommandPrefix()+"alias ")){
 			/**
 			 * create
 			 */
 			Alias alias = new Alias();
 			
-			String[] astr = str.split(" ");
+			String[] astr = strCmdLine.split(" ");
 			if(astr.length>=3){
 				alias.strAliasId=astr[1];
 				if(hasVar(alias.strAliasId)){
@@ -2506,19 +2510,23 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				bLastAliasCreatedSuccessfuly = true;
 			}
 		}else
-		if(str.startsWith(strExecAliasPrefix)){
+		if(strCmdLine.startsWith(strExecAliasPrefix)){
 			/**
 			 * execute
 			 */
-			str=str.split(" ")[0].substring(strExecAliasPrefix.length()).toLowerCase();
+			String strAliasId=strCmdLine
+				.split(" ")[0]
+				.substring(strExecAliasPrefix.length())
+				.toLowerCase();
 			for(Alias alias:aAliasList){
-				if(alias.strAliasId.toLowerCase().equals(str)){
-					if(!alias.bBlocked){
-						addToExecConsoleCommandQueue(alias.strCmdLine+" "+cc.getCommentPrefix()+"alias="+alias.strAliasId, true);
-						return true;
-					}else{
-						dumpWarnEntry(alias.toString());
-					}
+				if(!alias.strAliasId.toLowerCase().equals(strAliasId))continue;
+				
+				if(!alias.bBlocked){
+					addToExecConsoleCommandQueue(alias.strCmdLine
+						+cc.commentToAppend("alias="+alias.strAliasId), true);
+					return true;
+				}else{
+					dumpWarnEntry(alias.toString());
 				}
 			}
 		}
@@ -2527,7 +2535,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	}
 	
 	protected boolean executePreparedCommand(){
-		if(RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(strCmdLinePrepared))return true;
+		if(cc.RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(strCmdLinePrepared))return true;
 		
 		/**
 		 * means the command didnt have any problem, didnt fail, requiring a warning message
@@ -2569,6 +2577,15 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		if(checkCmdValidity(cc.CMD_DB,EDataBaseOperations.help())){
 			bCommandWorkedProperly=cmdDb();
 		}else
+//		if(checkCmdValidity("dumpFind","<text> finds, select and scroll to it at dump area")){
+//			bCommandWorkedProperly=cmdFind();
+//		}else
+//		if(checkCmdValidity("dumpFindNext","<text> finds, select and scroll to it at dump area")){
+//			bCommandWorkedProperly=cmdFind();
+//		}else
+//		if(checkCmdValidity("dumpFindPrevious","<text> finds, select and scroll to it at dump area")){
+//			bCommandWorkedProperly=cmdFind();
+//		}else
 		if(checkCmdValidity(cc.CMD_ECHO," simply echo something")){
 			bCommandWorkedProperly=cmdEcho();
 		}else
@@ -2669,6 +2686,12 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			dumpSubEntry("TAB - autocomplete (starting with)");
 			dumpSubEntry("Ctrl+TAB - autocomplete (contains)");
 			dumpSubEntry("Ctrl+/ - toggle input field comment");
+			bCommandWorkedProperly=true;
+		}else
+		if(checkCmdValidity("showSetup","show restricted variables")){
+			for(String str:fileLoad(flSetup)){
+				dumpSubEntry(str);
+			}
 			bCommandWorkedProperly=true;
 		}else
 		if(checkCmdValidity("statsFieldToggle","[bEnable] toggle simple stats field visibility")){
@@ -2780,7 +2803,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	protected boolean databaseSave(){
 		ArrayList<String> astr = new ArrayList<>();
 		
-		ArrayList<String> astrVarList = getAllVariablesIdentifiers();
+		ArrayList<String> astrVarList = getVariablesIdentifiers(false);
 		for(String strVarId:astrVarList){
 			astr.add(varReportPrepare(strVarId));
 		}
@@ -2790,6 +2813,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		}
 		
 		flDB.delete();
+		fileAppendLine(flDB, cc.getCommentPrefix()+" DO NOT MODIFY! auto generated. Set overrides at user init file!");
 		fileAppendList(flDB, astr);
 		
 		dumpInfoEntry("Database saved: "
@@ -2816,7 +2840,12 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			case backup:
 				return databaseBackup();
 			case save:
-				if(isDatabaseChanged())databaseBackup();
+				if(cc.btgDbAutoBkp.b()){
+					if(isDatabaseChanged()){
+						databaseBackup();
+					}
+				}
+				
 				return databaseSave();
 			case show:
 				for(String str:fileLoad(flDB)){
@@ -2829,12 +2858,12 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	}
 	
 	protected boolean hasChanged(ERestrictedVars rv){
-		String strValue = varGetValueString(""+RESTRICTED_TOKEN+rv);
+		String strValue = varGetValueString(""+cc.RESTRICTED_TOKEN+rv);
 		switch(rv){
 			case UserAliasListHashcode:
 				return !(""+aAliasList.hashCode()).equals(strValue);
 			case UserVariableListHashcode:
-				return !(""+ahtUserVariables.hashCode()).equals(strValue);
+				return !(""+tmUserVariables.hashCode()).equals(strValue);
 		}
 		
 		return false;
@@ -2895,7 +2924,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 					if(strFilter!=null && !alias.toString().toLowerCase().contains(strFilter.toLowerCase()))continue;
 					dumpSubEntry(alias.toString());
 				}
-				dumpSubEntry(cc.getCommentPrefix()+"AliasListHashCode="+aAliasList.hashCode());
+				dumpSubEntry(cc.commentToAppend("AliasListHashCode="+aAliasList.hashCode()));
 				bOk=true;
 			}else{
 				bOk=bLastAliasCreatedSuccessfuly;
@@ -2983,21 +3012,21 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			 */
 			dumpInfoEntry("Variables list:");
 			if(strVarIdOrFilter!=null)strVarIdOrFilter=strVarIdOrFilter.substring(1);
-			for(String strVarId : getAllVariablesIdentifiers()){
+			for(String strVarId : getVariablesIdentifiers(true)){
 				if(strVarIdOrFilter!=null && !strVarId.toLowerCase().equals(strVarIdOrFilter.toLowerCase())){
 					continue;
 				}
 				
 				varReport(strVarId);
 			}
-			dumpSubEntry(cc.getCommentPrefix()+"UserVarListHashCode="+ahtUserVariables.hashCode());
+			dumpSubEntry(cc.getCommentPrefix()+"UserVarListHashCode="+tmUserVariables.hashCode());
 			bOk=true;
 		}else
 		if(strVarIdOrFilter!=null && strVarIdOrFilter.trim().startsWith(""+cc.getVarDeleteToken())){
 			/**
 			 * DELETE/UNSET only user variables
 			 */
-			bOk=ahtUserVariables.remove(strVarIdOrFilter.trim().substring(1))!=null;
+			bOk=tmUserVariables.remove(strVarIdOrFilter.trim().substring(1))!=null;
 			if(bOk){
 				dumpInfoEntry("Var '"+strVarIdOrFilter+"' deleted.");
 			}else{
@@ -3008,7 +3037,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			 * SET user or restricted variable
 			 */
 			if(isRestrictedAndDoesNotExist(strVarIdOrFilter))return false;
-			bOk=varSet(strVarIdOrFilter,strValue);
+			bOk=varSet(strVarIdOrFilter,strValue,true);
 		}
 		
 		return bOk;
@@ -3035,34 +3064,34 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		String strValueRight = paramString(4);
 		
 		if(strCmp.equals("==")){
-			return varSet(strVarId, ""+strValueLeft.equals(strValueRight));
+			return varSet(strVarId, ""+strValueLeft.equals(strValueRight), true);
 		}else
 		if(strCmp.equals("!=")){
-			return varSet(strVarId, ""+(!strValueLeft.equals(strValueRight)));
+			return varSet(strVarId, ""+(!strValueLeft.equals(strValueRight)), true);
 		}else
 		if(strCmp.equals("||")){
 			return varSet(strVarId, ""+
-				(parseBoolean(strValueLeft) || parseBoolean(strValueRight)));
+				(parseBoolean(strValueLeft) || parseBoolean(strValueRight)), true);
 		}else
 		if(strCmp.equals("&&")){
 			return varSet(strVarId, ""+
-				(parseBoolean(strValueLeft) && parseBoolean(strValueRight)));
+				(parseBoolean(strValueLeft) && parseBoolean(strValueRight)), true);
 		}else
 		if(strCmp.equals(">")){
 			return varSet(strVarId, ""+
-				(Double.parseDouble(strValueLeft) > Double.parseDouble(strValueRight)));
+				(Double.parseDouble(strValueLeft) > Double.parseDouble(strValueRight)), true);
 		}else
 		if(strCmp.equals(">=")){
 			return varSet(strVarId, ""+
-				(Double.parseDouble(strValueLeft) >= Double.parseDouble(strValueRight)));
+				(Double.parseDouble(strValueLeft) >= Double.parseDouble(strValueRight)), true);
 		}else
 		if(strCmp.equals("<")){
 			return varSet(strVarId, ""+
-				(Double.parseDouble(strValueLeft) < Double.parseDouble(strValueRight)));
+				(Double.parseDouble(strValueLeft) < Double.parseDouble(strValueRight)), true);
 		}else
 		if(strCmp.equals("<=")){
 			return varSet(strVarId, ""+
-					(Double.parseDouble(strValueLeft) <= Double.parseDouble(strValueRight)));
+					(Double.parseDouble(strValueLeft) <= Double.parseDouble(strValueRight)), true);
 		}else{
 			dumpWarnEntry("Invalid comparator: "+strCmp);
 		}
@@ -3120,12 +3149,25 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		throw new NumberFormatException("invalid boolean value: "+strValue);
 	}
 	
+	/**
+	 * In case variable exists will be this method.
+	 * @param strVarId
+	 * @param strValueAdd
+	 * @param bOverwrite
+	 * @return
+	 */
 	protected boolean cmdVarAdd(String strVarId, String strValueAdd, boolean bOverwrite){
 		if(isRestrictedAndDoesNotExist(strVarId))return false;
 		
 		Object objValueNew = null;
 		Object objValueCurrent = getVarHT(strVarId).get(strVarId);
-		if(objValueCurrent!=null){
+		
+		if(objValueCurrent==null){
+			dumpExceptionEntry(new NullPointerException("value is null for var "+strVarId));
+			return false;
+		}
+			
+//		if(objValueCurrent!=null){
 			if(Boolean.class.isAssignableFrom(objValueCurrent.getClass())){
 				// boolean is always overwrite
 				objValueNew = parseBoolean(strValueAdd);
@@ -3157,25 +3199,25 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				if(bOverwrite)objValueCurrent="";
 				objValueNew = ""+objValueCurrent+strValueAdd;
 			}
-		}else{
-			return varSet(strVarId, strValueAdd);
-		}
+//		}else{
+//			return varSet(strVarId, strValueAdd, true);
+//		}
 		
-		if(objValueNew==null)return false;
+//		if(objValueNew==null)return false;
 		
-		varApply(strVarId,objValueNew);
+		varApply(strVarId,objValueNew,true);
 		return true;
 	}
 	
 	protected boolean isRestricted(String strId){
-		return strId.startsWith(""+RESTRICTED_TOKEN);
+		return strId.startsWith(""+cc.RESTRICTED_TOKEN);
 	}
 	
-	protected Hashtable<String, Object> getVarHT(String strVarId){
+	protected TreeMap<String, Object> getVarHT(String strVarId){
 		if(isRestricted(strVarId)){
-			return ahtRestrictedVariables;
+			return tmRestrictedVariables;
 		}else{
-			return ahtUserVariables;
+			return tmUserVariables;
 		}
 	}
 	
@@ -3187,9 +3229,9 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		}
 	}
 	
-	protected boolean varApply(String strVarId, Object objValue){
+	protected boolean varApply(String strVarId, Object objValue, boolean bSave){
 		getVarHT(strVarId).put(strVarId,objValue);
-		fileAppendLine(getVarFile(strVarId),varReportPrepare(strVarId));
+		if(bSave)fileAppendLine(getVarFile(strVarId),varReportPrepare(strVarId));
 		
 		if(isRestricted(strVarId) && cc.btgShowDeveloperInfo.b()){
 			varReport(strVarId);
@@ -3226,7 +3268,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	 * @param strValue
 	 * @return
 	 */
-	protected boolean varSet(String strVarId, String strValue) {
+	protected boolean varSet(String strVarId, String strValue, boolean bSave) {
 		if(getAlias(strVarId)!=null){
 			dumpErrorEntry("Variable identifier '"+strVarId+"' conflicts with existing alias!");
 			return false;
@@ -3245,10 +3287,10 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		 * Double would parse a Long.
 		 * Boolean would be accepted by String that accepts everything. 
 		 */
-		if(!bOk)try{bOk=varApply(strVarId, Long  .parseLong  (strValue));}catch(NumberFormatException e){}// accepted exception!
-		if(!bOk)try{bOk=varApply(strVarId, Double.parseDouble(strValue));}catch(NumberFormatException e){}// accepted exception!
-		if(!bOk)try{bOk=varApply(strVarId, parseBoolean      (strValue));}catch(NumberFormatException e){}// accepted exception!
-		if(!bOk)bOk=varApply(strVarId,strValue);
+		if(!bOk)try{bOk=varApply(strVarId, Long  .parseLong  (strValue),bSave);}catch(NumberFormatException e){}// accepted exception!
+		if(!bOk)try{bOk=varApply(strVarId, Double.parseDouble(strValue),bSave);}catch(NumberFormatException e){}// accepted exception!
+		if(!bOk)try{bOk=varApply(strVarId, parseBoolean      (strValue),bSave);}catch(NumberFormatException e){}// accepted exception!
+		if(!bOk)bOk=varApply(strVarId,strValue,bSave);
 		
 		return bOk;
 	}
@@ -3335,7 +3377,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	}
 	
 	protected boolean cmdRawLineCheckEndOfStartupCmdQueue() {
-		if(RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE.equals(strCmdLineOriginal)){
+		if(cc.RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE.equals(strCmdLineOriginal)){
 			bStartupCmdQueueDone=true;
 			return true;
 		}
@@ -3510,8 +3552,8 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				
 				+"Slider Scroll request max retry attempts = "+iScrollRetryAttemptsMaxDBG);
 		
-		dumpSubEntry("Database Variables = "+getAllVariablesIdentifiers().size());
-		dumpSubEntry("Database Aliases = "+aAliasList.size());
+		dumpSubEntry("Database User Variables Count = "+getVariablesIdentifiers(false).size());
+		dumpSubEntry("Database User Aliases Count = "+aAliasList.size());
 		
 //		dumpSubEntry("Previous Second FPS  = "+lPreviousSecondFPS);
 		
@@ -3613,9 +3655,9 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				rfcfg.strCommandPrefix = "CONSOLEGUISTATE_";
 				rfcfg.bFirstLetterUpperCase = true;
 			}else
-			if(strFinalFieldRestrictedCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
+			if(cc.strFinalFieldRestrictedCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
-				rfcfg.strCommandPrefix = ""+RESTRICTED_TOKEN;
+				rfcfg.strCommandPrefix = ""+cc.RESTRICTED_TOKEN;
 				rfcfg.bFirstLetterUpperCase = true;
 			}
 			
@@ -3649,10 +3691,16 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		fileAppendLine(flSetup, cc.getCommentPrefix()
 			+" To set overrides use the user init config file.");
 		
-		varSet(""+RESTRICTED_TOKEN+ERestrictedVars.UserVariableListHashcode,
-			""+ahtUserVariables.hashCode());
-		varSet(""+RESTRICTED_TOKEN+ERestrictedVars.UserAliasListHashcode,
-			""+aAliasList.hashCode());
+		setupVars(true);
+	}
+	protected void setupVars(boolean bSave){
+		varSet(""+cc.RESTRICTED_TOKEN+ERestrictedVars.UserVariableListHashcode,
+			""+tmUserVariables.hashCode(),
+			bSave);
+		
+		varSet(""+cc.RESTRICTED_TOKEN+ERestrictedVars.UserAliasListHashcode,
+			""+aAliasList.hashCode(),
+			bSave);
 	}
 }
 

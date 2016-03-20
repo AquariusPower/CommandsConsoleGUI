@@ -41,6 +41,7 @@ public class ConsoleCommands implements IReflexFillCfg{
 	 * togglers
 	 */
 	public final String strTogglerCodePrefix="btg";
+	protected BoolToggler	btgDbAutoBkp = new BoolToggler(this,false,strTogglerCodePrefix, "whenever a save happens, if the DB was modified, a backup will be created of the old file");
 	protected BoolToggler	btgShowWarn = new BoolToggler(this,true,strTogglerCodePrefix);
 	protected BoolToggler	btgShowInfo = new BoolToggler(this,true,strTogglerCodePrefix);
 	protected BoolToggler	btgShowException = new BoolToggler(this,true,strTogglerCodePrefix);
@@ -73,6 +74,18 @@ public class ConsoleCommands implements IReflexFillCfg{
 	public final StringField CMD_FIX_CURSOR = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_VAR_SET = new StringField(this,strFinalCmdCodePrefix);
 	
+	/**
+	 * this char indicates something that users (non developers) 
+	 * should not have direct access.
+	 */
+	public final Character	RESTRICTED_TOKEN	= '&';
+	public final String strFinalFieldRestrictedCmdCodePrefix="RESTRICTED_CMD_";
+	public final StringField	RESTRICTED_CMD_SKIP_CURRENT_COMMAND	= new StringField(this,strFinalFieldRestrictedCmdCodePrefix);
+	public final StringField	RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE	= new StringField(this,strFinalFieldRestrictedCmdCodePrefix);
+	
+	/**
+	 * more tokens
+	 */
 	protected Character	chCommandDelimiter = ';';
 	protected Character	chAliasPrefix = '$';
 	protected Character	chVariableExpandPrefix = chAliasPrefix;
@@ -170,5 +183,9 @@ public class ConsoleCommands implements IReflexFillCfg{
 	public ConsoleCommands setCommandPrefix(Character chCommandPrefix) {
 		this.chCommandPrefix = chCommandPrefix;
 		return this;
+	}
+	
+	public String commentToAppend(String strText){
+		return " "+getCommentPrefix()+strText;
 	}
 }

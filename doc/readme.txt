@@ -42,11 +42,15 @@ DONE:
 	= FIX: Copy from/to is inverted concerning SHIFT key. Holding shift must mark copyTo.
 	= let multiple commands in a single line separated by ';'
 	= Alias -tst;Alias +tst;CMD_TEST_ABC reflex testAbc
+	= DB hash last save
+	= ToggleAutoBkpIfDBhashChanges
+	= Setup.cfg.areCchangesMadeIngame.overridenBy.Init.cfg
+
+DOING:
+	... SeparateGUI class from Commands Management
+	... SeparateGUI class from Lemur, so other GUI can use the same abstract class to implement a console GUI
 
 TODO.FastToImplement:
-	+ DB hash last save
-	+ ToggleAutoBkpIfDBhashChanges
-	+ Setup.cfg.areCchangesMadeIngame.overridenBy.Init.cfg
 	+ AtSetup:windowGeometry.resolution.position;DBhashSavedAtSetupFile;keybinds.sndVplumes;etc
 	+ Alias/var autocomplete  
 	+ $commandId to retrieve its return value
@@ -56,7 +60,6 @@ TODO.FastToImplement:
 	
 TODO.TimeConsuming:
 	.Important
-	+ SeparateGUIfromCommandsManagement
 	+ HK - ReflexByFieldType.singleMatchIsSafe
 	.Good
 	+ Auto complete with aliases if line begins with alias token.
