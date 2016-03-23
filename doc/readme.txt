@@ -51,7 +51,9 @@ DOING:
 	... SeparateGUI class from Lemur, so other GUI can use the same abstract class to implement a console GUI
 
 TODO.FastToImplement:
-	+ AtSetup:windowGeometry.resolution.position;DBhashSavedAtSetupFile;keybinds.sndVplumes;etc
+	+ If true, Exec all lines til Else.ElseIf.IfEnd; If.if. Nested index. Requires nested endings;If false, will skip subsequent commands til else or end.
+	+ While stores subsequent commands on array for repeating til WhileEnd. Nestable too.
+	+ AtSetup:windowGeometry.resolution.position;keybinds.sndVplumes;etc
 	+ Alias/var autocomplete  
 	+ $commandId to retrieve its return value
 	+ When date(day) changes, report on console. On startup report date on console.
@@ -60,7 +62,7 @@ TODO.FastToImplement:
 	
 TODO.TimeConsuming:
 	.Important
-	+ HK - ReflexByFieldType.singleMatchIsSafe
+	+ HK - ReflexByFieldType.singleMatchIsSafe.insteadOfSolelyByFieldName.MayBeThrowTheOptionsInConsoleForUserToSet
 	.Good
 	+ Auto complete with aliases if line begins with alias token.
 	+ Set nCount .75;Set nStep .25;Alias 3.5 loopCheck if $nCount<10 then add nCount $nStep;$loopCheck else echo "ended"

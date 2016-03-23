@@ -133,6 +133,7 @@ public class ConsoleGuiTest extends SimpleApplication {
 			as.setResizable(true);
 			as.setWidth(1024);
 			as.setHeight(768);
+			//as.setFrameRate(30);
 			main.setSettings(as);
 			main.setShowSettings(false);
 		}

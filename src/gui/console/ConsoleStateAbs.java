@@ -741,27 +741,28 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	
 	protected void cmdTest(){
 		dumpInfoEntry("testing...");
-		String strParam1 = paramString(1);
+		String strOption = paramString(1);
 		
-		tmUserVariables.put("abC",10);
-		tmUserVariables.get("aBc");
-		tmUserVariables.put("Abc",20);
-		
-//		String strAllChars="";
-//		for(char ch=0;ch<256;ch++){
-//			strAllChars+=Character.toString(ch);
-//		}
-//		dumpSubEntry("AllChars:"+strAllChars);
-		
-//	dumpSubEntry("["+(char)Integer.parseInt(strParam1, 16)+"]");
+		if(strOption.equalsIgnoreCase("fps")){
+//			sapp.setSettings(settings);
+		}else
+		if(strOption.equalsIgnoreCase("allchars")){
+			for(char ch=0;ch<256;ch++){
+				dumpSubEntry(""+(int)ch+"='"+Character.toString(ch)+"'");
+			}
+		}else{
+//		dumpSubEntry("["+(char)Integer.parseInt(strParam1, 16)+"]");
 //		if(getDumpAreaSelectedIndex()>=0){
 //			dumpSubEntry("Selection:"+getDumpAreaSelectedIndex()+": '"+vlstrDumpEntries.get(getDumpAreaSelectedIndex())+"'");
 //		}
+		}
+		
 	}	
 	
 	/**
 	 * DO NOT USE!
-	 * overlapping problem, doesnt work well... 
+	 * overlapping problem, doesnt work well...
+	 * keep this method as reference! 
 	 */
 	protected void tweakDefaultFontToBecomeFixedSize(){
 		fntMakeFixedWidth = sapp.getAssetManager().loadFont("Interface/Fonts/Default.fnt");

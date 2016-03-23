@@ -188,4 +188,6 @@ public class ConsoleCommands implements IReflexFillCfg{
 	public String commentToAppend(String strText){
 		return " "+getCommentPrefix()+strText;
 	}
+	
+	
 }
