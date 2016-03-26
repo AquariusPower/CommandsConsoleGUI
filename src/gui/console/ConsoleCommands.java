@@ -60,18 +60,19 @@ public class ConsoleCommands implements IReflexFillCfg{
 	 * user can type these below at console (the actual commands are prepared by reflex)
 	 */
 	public final String strFinalCmdCodePrefix="CMD_";
-	public final StringField CMD_ECHO = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_CLOSE_CONSOLE = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_CONSOLE_STYLE = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_DB = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_HELP = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_HISTORY = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_CONSOLE_HEIGHT = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_CONSOLE_SCROLL_BOTTOM = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_FIX_LINE_WRAP = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_LINE_WRAP_AT = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_HK_TOGGLE = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_CONSOLE_STYLE = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_DB = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_ECHO = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_FIX_CURSOR = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_FIX_LINE_WRAP = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_HELP = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_HISTORY = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_HK_TOGGLE = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_IF_END = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_LINE_WRAP_AT = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_VAR_SET = new StringField(this,strFinalCmdCodePrefix);
 	
 	/**
@@ -187,6 +188,9 @@ public class ConsoleCommands implements IReflexFillCfg{
 	
 	public String commentToAppend(String strText){
 		return " "+getCommentPrefix()+strText;
+	}
+	public String getCommentPrefixStr() {
+		return ""+chCommentPrefix;
 	}
 	
 	

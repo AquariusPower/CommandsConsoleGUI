@@ -46,7 +46,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Hashtable;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
@@ -268,13 +267,20 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	protected long	lNanoFrameTime;
 	protected long	lNanoFpsLimiterTime;
 
-	protected boolean	bLastIfConditionWasValid;
+	protected Boolean	bIfConditionIsValid;
 
 	protected ArrayList<DumpEntry> adeDumpEntryFastQueue = new ArrayList<DumpEntry>();
 
 	protected Button	btnCut;
 
 	protected File	flSetup;
+
+//	private boolean	bMultiLineIfCondition;
+
+//	private int	iIfConditionNesting;
+	protected ArrayList<Boolean> aIfConditionNestedList = new ArrayList<Boolean>();
+
+	private Boolean	bIfConditionExecCommands;
 	
 	protected static ConsoleStateAbs instance;
 	public static ConsoleStateAbs i(){
@@ -2590,6 +2596,12 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		if(checkCmdValidity(cc.CMD_ECHO," simply echo something")){
 			bCommandWorkedProperly=cmdEcho();
 		}else
+		if(checkCmdValidity("else","conditinal block in case 'if' fails")){
+			bCommandWorkedProperly=cmdElse();
+		}else
+		if(checkCmdValidity("elseIf","conditional block in case 'if' fails")){
+			bCommandWorkedProperly=cmdElseIf();
+		}else
 		if(checkCmdValidity("execBatchCmdsFromFile ","<strFileName>")){
 			String strFile = paramString(1);
 			if(strFile!=null){
@@ -2656,8 +2668,11 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				bCommandWorkedProperly=true;
 			}
 		}else
-		if(checkCmdValidity("if","<[!]<true|false>> <cmd|alias>")){
+		if(checkCmdValidity("if","<[!]<true|false>> [cmd|alias] if cmd|alias is not present, this will be a multiline block")){
 			bCommandWorkedProperly=cmdIf();
+		}else
+		if(checkCmdValidity(cc.CMD_IF_END,"ends conditional exec block")){
+			bCommandWorkedProperly=cmdIfEnd();
 		}else
 		if(checkCmdValidity("initFileShow ","show contents of init file at dump area")){
 			dumpInfoEntry("Init file data: ");
@@ -3101,7 +3116,10 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	}
 	
 	protected boolean cmdIf() {
-		bLastIfConditionWasValid=false;
+		return cmdIf(false);
+	}
+	protected boolean cmdIf(boolean bSkipNesting) {
+		bIfConditionIsValid=false;
 		
 		String strCondition = paramString(1);
 		
@@ -3121,23 +3139,45 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			return false;
 		}
 		
-		if(bCondition){
-//			String strCmd="";
-//			for(int i=2;i<astrCmdAndParams.size();i++){
-//				strCmd+=astrCmdAndParams.get(i)+" ";
-//			}
-//			addToExecConsoleCommandQueue(strCmd,true);
-			addToExecConsoleCommandQueue(paramStringConcatenateAllFrom(2),true);
-			bLastIfConditionWasValid=true;
+		String strCmds = paramStringConcatenateAllFrom(2);
+		if(strCmds==null)strCmds="";
+		strCmds.trim();
+		if(strCmds.isEmpty() || strCmds.startsWith(cc.getCommentPrefixStr())){
+			if(!bSkipNesting){
+				aIfConditionNestedList.add(bCondition);
+			}
+			
+			bIfConditionExecCommands=bCondition;
+		}else{
+			if(!bSkipNesting){
+				addToExecConsoleCommandQueue(strCmds,true);
+			}
 		}
 		
 		return true;
 	}
 	
 	protected boolean cmdElse(){
-		if(bLastIfConditionWasValid)return true; //true meaning it is a skipper, no problem happenend.
-		
-		//TODO @@@ nested if/else will not work tho...
+		bIfConditionExecCommands=!aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
+		return true;
+	}
+	
+	protected boolean cmdElseIf(){
+		cmdIf(true);
+		return true;
+	}
+	
+	protected boolean cmdIfEnd(){
+		if(aIfConditionNestedList.size()>0){
+			aIfConditionNestedList.remove(aIfConditionNestedList.size()-1);
+			
+			if(aIfConditionNestedList.size()==0){
+				bIfConditionExecCommands=null;
+			}
+		}else{
+			dumpExceptionEntry(new NullPointerException("pointless condition ending..."));
+			return false;
+		}
 		
 		return true;
 	}
@@ -3352,7 +3392,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			
 			if(!bOk)bOk=cmdRawLineCheckAlias();
 			
-			if(!bOk)bOk=cmdRawLineCheckIfElse();
+//			if(!bOk)bOk=cmdRawLineCheckIfElse();
 			
 //			if(!bOk){
 //				if(SPECIAL_CMD_SKIP_CURRENT_COMMAND.equals(strCmdLinePrepared)){
@@ -3365,7 +3405,49 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			 */
 			if(!bOk){
 				strCmdLinePrepared = prepareCmdAndParams(strCmdLineOriginal);
-				bOk = executePreparedCommand();
+				
+				if(bIfConditionExecCommands!=null && !bIfConditionExecCommands){
+					/**
+					 * the if condition resulted in false, therefore commands must be skipped.
+					 */
+					bOk = true;
+					
+					if(cc.CMD_IF_END.equals(paramString(0))){
+						/**
+						 * the commands may be being skipped, so this is required here.
+						 */
+						bOk = cmdIfEnd();
+					}else{
+						dumpInfoEntry("ConditionalSkip: "+strCmdLinePrepared);
+					}
+				}else{
+					bOk = executePreparedCommand();
+				}
+				
+//				boolean bExec = false;
+//				if(bIfConditionExecCommands!=null){
+//					if(bIfConditionExecCommands){
+//						bExec = true;
+//					}else{
+//						/**
+//						 * the if condition resulted in false, therefore commands must be skipped.
+//						 */
+//						bOk = true;
+//						
+//						if(cc.CMD_IF_END.equals(paramString(0))){
+//							/**
+//							 * the commands may be being skipped, so this is required here.
+//							 */
+//							bOk = cmdIfEnd();
+//						}else{
+//							dumpInfoEntry("IfCondition.Skip: "+strCmdLinePrepared);
+//						}
+//					}
+//				}else{
+//					bExec = true;
+//				}
+//				
+//				if(bExec) bOk = executePreparedCommand();
 			}
 		}catch(NumberFormatException e){
 			// keep this one as "warning", as user may simply fix the typed value
@@ -3384,9 +3466,9 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		}
 		return false;
 	}
-	protected boolean cmdRawLineCheckIfElse() {
-		return false;
-	}
+//	protected boolean cmdRawLineCheckIfElse() {
+//		return false;
+//	}
 	/**
 	 * 
 	 * @param fNewHeightPercent null to use the default
@@ -3611,6 +3693,9 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				+"Hst"+iCmdHistoryCurrentIndex+"/"+(astrCmdHistory.size()-1)
 					+","
 				
+				+"If"+aIfConditionNestedList.size()
+					+","
+					
 				/**
 				 * KEEP HERE AS REFERENCE!
 				 * IMPORTANT, DO NOT USE
