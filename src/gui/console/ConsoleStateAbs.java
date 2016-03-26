@@ -2128,7 +2128,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				 * complete for variables ids when retrieving variable value 
 				 */
 				String strRegexVarOpen=Pattern.quote(""+cc.getVariableExpandPrefix()+"{");
-				String strRegex=".*"+strRegexVarOpen+"["+strValidCmdCharsRegex+"]*$";
+				String strRegex=".*"+strRegexVarOpen+"["+strValidCmdCharsRegex+cc.RESTRICTED_TOKEN+"]*$";
 				if(strCompletedCmd.matches(strRegex)){
 					strCmd=strCompletedCmd.trim().substring(1); //removes command prefix
 					astrOptList=getVariablesIdentifiers(true);

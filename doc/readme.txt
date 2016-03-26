@@ -49,6 +49,7 @@ DONE:
 	= ToggleAutoBkpIfDBhashChanges
 	= Setup.cfg.areCchangesMadeIngame.overridenBy.Init.cfg
 	= If true, Exec all lines til Else.ElseIf.IfEnd; If.if. Nested index. Requires nested endings;If false, will skip subsequent commands til else or end.
+	= Alias/var autocomplete, also in the middle of the input field text.  
 
 DOING:
 	... SeparateGUI class from Commands Management
@@ -57,7 +58,6 @@ DOING:
 TODO.FastToImplement:
 	+ While stores subsequent commands on array for repeating til WhileEnd. Nestable too.
 	+ AtSetup:windowGeometry.resolution.position;keybinds.sndVplumes;etc
-	+ Alias/var autocomplete  
 	+ $commandId to retrieve its return value
 	+ When date(day) changes, report on console. On startup report date on console.
 	+ Optional hundredth/tenth of a second at console log.
