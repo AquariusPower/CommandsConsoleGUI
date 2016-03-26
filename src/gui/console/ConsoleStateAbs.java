@@ -278,11 +278,17 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 //	private boolean	bMultiLineIfCondition;
 
 //	private int	iIfConditionNesting;
-	protected ArrayList<Boolean> aIfConditionNestedList = new ArrayList<Boolean>();
+	protected ArrayList<ConditionalNested> aIfConditionNestedList = new ArrayList<ConditionalNested>();
 
 	private Boolean	bIfConditionExecCommands;
-
-	private boolean	bIfEndIsRequired;
+	
+	protected static class ConditionalNested{
+		public ConditionalNested(boolean bCondition){
+			this.bCondition=bCondition;
+		}
+		Boolean bCondition = null;
+		Boolean	bIfEndIsRequired = false;
+	}
 	
 	protected static ConsoleStateAbs instance;
 	public static ConsoleStateAbs i(){
@@ -3146,9 +3152,10 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		strCmds.trim();
 		if(strCmds.isEmpty() || strCmds.startsWith(cc.getCommentPrefixStr())){
 			if(bSkipNesting){
-				aIfConditionNestedList.set(aIfConditionNestedList.size()-1, bCondition);
+				ConditionalNested cn = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
+				cn.bCondition = bCondition;
 			}else{
-				aIfConditionNestedList.add(bCondition);
+				aIfConditionNestedList.add(new ConditionalNested(bCondition));
 			}
 			
 			bIfConditionExecCommands=bCondition;
@@ -3164,21 +3171,24 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	}
 	
 	protected boolean cmdElse(){
-		bIfConditionExecCommands=!aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
-		bIfEndIsRequired = true;
+//		bIfConditionExecCommands=!aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
+		ConditionalNested cn = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
+		bIfConditionExecCommands = !cn.bCondition;
+		cn.bIfEndIsRequired = true;
 		
 		return true;
 	}
 	
 	protected boolean cmdElseIf(){
-		if(bIfEndIsRequired){
+		ConditionalNested cn = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
+		if(cn.bIfEndIsRequired){
 			dumpExceptionEntry(new NullPointerException("command "+cc.CMD_ELSE_IF.toString()
 				+" is missplaced, ignoring"));
 			bIfConditionExecCommands=false; //will also skip this block commands
 			return false;
 		}
 		
-		boolean bConditionSuccessAlready = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
+		boolean bConditionSuccessAlready = cn.bCondition;
 		
 		if(bConditionSuccessAlready){
 			/**
@@ -3198,9 +3208,10 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			
 			if(aIfConditionNestedList.size()==0){
 				bIfConditionExecCommands=null;
-				bIfEndIsRequired = false;
+//				bIfEndIsRequired = false;
 			}else{
-				bIfConditionExecCommands = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
+				ConditionalNested cn = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
+				bIfConditionExecCommands = cn.bCondition;
 			}
 		}else{
 			dumpExceptionEntry(new NullPointerException("pointless condition ending..."));
