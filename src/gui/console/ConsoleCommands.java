@@ -54,6 +54,10 @@ public class ConsoleCommands implements IReflexFillCfg{
 	protected BoolToggler	btgShowMiliseconds=new BoolToggler(this,false,strTogglerCodePrefix);
 	protected BoolToggler	btgFpsLimit=new BoolToggler(this,false,strTogglerCodePrefix);
 	protected BoolToggler	btgConsoleCpuRest=new BoolToggler(this,false,strTogglerCodePrefix,"Console update steps will be skipped if this is enabled.");
+	
+	/**
+	 * used to hold a reference to the identified/typed user command
+	 */
 	protected BoolToggler	btgReferenceMatched;
 	
 	/**
@@ -68,6 +72,7 @@ public class ConsoleCommands implements IReflexFillCfg{
 	public final StringField CMD_ECHO = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_FIX_CURSOR = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_FIX_LINE_WRAP = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_FIX_VISIBLE_ROWS_AMOUNT = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_HELP = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_HISTORY = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_HK_TOGGLE = new StringField(this,strFinalCmdCodePrefix);

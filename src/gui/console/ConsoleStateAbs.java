@@ -1449,9 +1449,13 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		}
 	}
 	
+	/**
+	 * this is to fix the dump entry by disallowing automatic line wrapping
+	 */
 	protected void cmdLineWrapDisableDumpArea(){
 		lineWrapDisableFor(lstbx.getGridPanel());
 	}
+	
 	protected void lineWrapDisableFor(GridPanel gp){
 		for(Spatial spt:gp.getChildren()){
 			if(spt instanceof Button){
@@ -1470,35 +1474,38 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		Integer iForceAmount = iVisibleRowsAdjustRequest;
 		if(iForceAmount>0){
 			iShowRows=iForceAmount;
-			lstbx.setVisibleItems(iShowRows);
+//			lstbx.setVisibleItems(iShowRows);
 //			lstbx.getGridPanel().setVisibleSize(iShowRows,1);
-			return;
-		}
-		
-		if(lstbx.getGridPanel().getChildren().isEmpty())return;
-		
-		Button	btnFixVisibleRowsHelper = null;
-		for(Spatial spt:lstbx.getGridPanel().getChildren()){
-			if(spt instanceof Button){
-				btnFixVisibleRowsHelper = (Button)spt;
-				break;
+		}else{
+			if(lstbx.getGridPanel().getChildren().isEmpty())return;
+			
+			Button	btnFixVisibleRowsHelper = null;
+			for(Spatial spt:lstbx.getGridPanel().getChildren()){
+				if(spt instanceof Button){
+					btnFixVisibleRowsHelper = (Button)spt;
+					break;
+				}
 			}
+			if(btnFixVisibleRowsHelper==null)return;
+			
+			fLstbxEntryHeight = retrieveBitmapTextFor(btnFixVisibleRowsHelper).getLineHeight();
+			if(fLstbxEntryHeight==null)return;
+			
+			fLstbxHeight = lstbx.getSize().y;
+			
+			float fHeightAvailable = fLstbxHeight;
+//				float fHeightAvailable = fLstbxHeight -fInputHeight;
+//				if(ctnrConsole.hasChild(lblStats)){
+//					fHeightAvailable-=fStatsHeight;
+//				}
+			iShowRows = (int) (fHeightAvailable / fLstbxEntryHeight);
 		}
-		if(btnFixVisibleRowsHelper==null)return;
 		
-		fLstbxEntryHeight = retrieveBitmapTextFor(btnFixVisibleRowsHelper).getLineHeight();
-		if(fLstbxEntryHeight==null)return;
-		
-		fLstbxHeight = lstbx.getSize().y;
-		
-		float fHeightAvailable = fLstbxHeight;
-//			float fHeightAvailable = fLstbxHeight -fInputHeight;
-//			if(ctnrConsole.hasChild(lblStats)){
-//				fHeightAvailable-=fStatsHeight;
-//			}
-		iShowRows = (int) (fHeightAvailable / fLstbxEntryHeight);
 		lstbx.setVisibleItems(iShowRows);
-//		lstbx.getGridPanel().setVisibleSize(iShowRows,1);
+		
+		varSet(cc.CMD_FIX_VISIBLE_ROWS_AMOUNT, ""+iShowRows, true);
+		
+	//	lstbx.getGridPanel().setVisibleSize(iShowRows,1);
 		dumpInfoEntry("fLstbxEntryHeight="+fmtFloat(fLstbxEntryHeight)+", "+"iShowRows="+iShowRows);
 		
 		iVisibleRowsAdjustRequest=null;
@@ -2343,6 +2350,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		if(paramBooleanCheckForToggle(1)){
 			Boolean bEnable = paramBoolean(1);
 			btg.set(bEnable==null ? !btg.get() : bEnable); //override
+			varSet(btg, ""+btg.getBoolean(), true);
 			dumpInfoEntry("Toggle, setting "+paramString(0)+" to "+btg.get());
 			return true;
 		}
@@ -2634,7 +2642,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			cmdLineWrapDisableDumpArea();
 			bCommandWorkedProperly = true;
 		}else
-		if(checkCmdValidity("fixVisibleRowsAmount ","[iAmount] in case it is not showing as many rows as it should")){
+		if(checkCmdValidity(cc.CMD_FIX_VISIBLE_ROWS_AMOUNT,"[iAmount] in case it is not showing as many rows as it should")){
 			iVisibleRowsAdjustRequest = paramInt(1);
 			if(iVisibleRowsAdjustRequest==null)iVisibleRowsAdjustRequest=0;
 			bCommandWorkedProperly=true;
@@ -3341,6 +3349,13 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		}
 	}
 	
+	protected boolean varSet(StringField sfId, String strValue, boolean bSave) {
+		return varSet(cc.RESTRICTED_TOKEN+sfId.toString(), strValue, bSave);
+	}
+	protected boolean varSet(BoolToggler btg, String strValue, boolean bSave) {
+		return varSet(cc.RESTRICTED_TOKEN+btg.getCmdId(), strValue, bSave);
+	}
+	
 	/**
 	 * This is able to create restricted variables.
 	 * 
@@ -3540,6 +3555,8 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		
 		fConsoleHeightPerc = fNewHeightPercent;
 		
+		varSet(cc.CMD_CONSOLE_HEIGHT, ""+fConsoleHeightPerc, true);
+		
 		iVisibleRowsAdjustRequest = 0; //dynamic
 	}
 	protected void updateEngineStats() {
@@ -3571,6 +3588,8 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		boolean bOk = styleCheck(strStyleNew);
 		if(bOk){
 			strStyle=strStyleNew;
+			
+			varSet(cc.CMD_CONSOLE_STYLE, strStyle, true);
 			
 			updateWrapAt();
 			

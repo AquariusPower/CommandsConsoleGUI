@@ -31,6 +31,8 @@ import gui.console.ReflexFill.IReflexFillCfg;
 import gui.console.ReflexFill.IReflexFillCfgVariant;
 
 /**
+ * Represents a class field.
+ * Mainly used to define commands user can issue on the console. 
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *

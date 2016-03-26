@@ -11,6 +11,7 @@ Features:
 	= Command history, key up/down. Saved and loaded from file, see /statsShowAll.
 	= Command params can be enclosed into double quotes.
 	= Command hint (Listbox) while it is being typed.
+	= Minimal scripting using console commands: variables, conditional blocks etc.
 	= If a clicked dump entry is a valid command, it will replace the input field text (that will be dumped).
 	= Batch execute initialization console commands. Configurable at file, see /statsShowAll.
 	= Console style can be changed on the fly.
@@ -20,7 +21,8 @@ Features:
 	= Auto scroll after command.
 	___Commands___ (see /help)
 	= Alias to run multiple commands (like a function).
-	= Variables can be set and evaluated to run console commands (minimal scripting).
+	= Variables can be set and evaluated to run console commands.
+	= Most commands will have an identical variable identifier holding its last execution value.
 	= Comment token detection, after it, line is ignored.
 	= Omit the "command being run" info entry by ending a line with '#', good at init file, mainly for /echo commands.
 	= Multi-line conditional command blocks using: if, elseIf, else, ifEnd (can be nested)
