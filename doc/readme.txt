@@ -23,6 +23,7 @@ Features:
 	= Variables can be set and evaluated to run console commands (minimal scripting).
 	= Comment token detection, after it, line is ignored.
 	= Omit the "command being run" info entry by ending a line with '#', good at init file, mainly for /echo commands.
+	= Multi-line conditional command blocks using: if, elseIf, else, ifEnd (can be nested)
 	___Editing___ 
 	= Multi-line copy: Ctrl+b marks CopyFromIndex "begin", Ctrl+c/x marks CopyToIndex "end", Shift+click stores the previous CopyToIndex into CopyFromIndex.
 	= Single line wrap detection when copying.
@@ -45,13 +46,13 @@ DONE:
 	= DB hash last save
 	= ToggleAutoBkpIfDBhashChanges
 	= Setup.cfg.areCchangesMadeIngame.overridenBy.Init.cfg
+	= If true, Exec all lines til Else.ElseIf.IfEnd; If.if. Nested index. Requires nested endings;If false, will skip subsequent commands til else or end.
 
 DOING:
 	... SeparateGUI class from Commands Management
 	... SeparateGUI class from Lemur, so other GUI can use the same abstract class to implement a console GUI
 
 TODO.FastToImplement:
-	+ If true, Exec all lines til Else.ElseIf.IfEnd; If.if. Nested index. Requires nested endings;If false, will skip subsequent commands til else or end.
 	+ While stores subsequent commands on array for repeating til WhileEnd. Nestable too.
 	+ AtSetup:windowGeometry.resolution.position;keybinds.sndVplumes;etc
 	+ Alias/var autocomplete  

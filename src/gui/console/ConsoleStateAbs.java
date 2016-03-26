@@ -2604,10 +2604,10 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		if(checkCmdValidity(cc.CMD_ECHO," simply echo something")){
 			bCommandWorkedProperly=cmdEcho();
 		}else
-		if(checkCmdValidity(cc.CMD_ELSE,"conditinal block in case 'if' fails")){
+		if(checkCmdValidity(cc.CMD_ELSE,"conditinal block")){
 			bCommandWorkedProperly=cmdElse();
 		}else
-		if(checkCmdValidity(cc.CMD_ELSE_IF,"conditional block in case 'if' fails")){
+		if(checkCmdValidity(cc.CMD_ELSE_IF,"<[!]<true|false>> conditional block")){
 			bCommandWorkedProperly=cmdElseIf();
 		}else
 		if(checkCmdValidity("execBatchCmdsFromFile ","<strFileName>")){
@@ -2676,10 +2676,10 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				bCommandWorkedProperly=true;
 			}
 		}else
-		if(checkCmdValidity(cc.CMD_IF,"<[!]<true|false>> [cmd|alias] if cmd|alias is not present, this will be a multiline block")){
+		if(checkCmdValidity(cc.CMD_IF,"<[!]<true|false>> [cmd|alias] if cmd|alias is not present, this will be a multiline block start!")){
 			bCommandWorkedProperly=cmdIf();
 		}else
-		if(checkCmdValidity(cc.CMD_IF_END,"ends conditional exec block")){
+		if(checkCmdValidity(cc.CMD_IF_END,"ends conditional block")){
 			bCommandWorkedProperly=cmdIfEnd();
 		}else
 		if(checkCmdValidity("initFileShow ","show contents of init file at dump area")){
