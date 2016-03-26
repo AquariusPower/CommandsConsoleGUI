@@ -64,6 +64,9 @@ public class StringField implements IReflexFillCfgVariant{
 		this.strValue=strValue;
 	}
 	
+	/**
+	 * returns the string value stored on this field.
+	 */
 	@Override
 	public String toString() {
 		if(strValue==null)initialize();

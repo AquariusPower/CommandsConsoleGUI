@@ -281,6 +281,8 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	protected ArrayList<Boolean> aIfConditionNestedList = new ArrayList<Boolean>();
 
 	private Boolean	bIfConditionExecCommands;
+
+	private boolean	bIfEndIsRequired;
 	
 	protected static ConsoleStateAbs instance;
 	public static ConsoleStateAbs i(){
@@ -2596,10 +2598,10 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		if(checkCmdValidity(cc.CMD_ECHO," simply echo something")){
 			bCommandWorkedProperly=cmdEcho();
 		}else
-		if(checkCmdValidity("else","conditinal block in case 'if' fails")){
+		if(checkCmdValidity(cc.CMD_ELSE,"conditinal block in case 'if' fails")){
 			bCommandWorkedProperly=cmdElse();
 		}else
-		if(checkCmdValidity("elseIf","conditional block in case 'if' fails")){
+		if(checkCmdValidity(cc.CMD_ELSE_IF,"conditional block in case 'if' fails")){
 			bCommandWorkedProperly=cmdElseIf();
 		}else
 		if(checkCmdValidity("execBatchCmdsFromFile ","<strFileName>")){
@@ -2668,7 +2670,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				bCommandWorkedProperly=true;
 			}
 		}else
-		if(checkCmdValidity("if","<[!]<true|false>> [cmd|alias] if cmd|alias is not present, this will be a multiline block")){
+		if(checkCmdValidity(cc.CMD_IF,"<[!]<true|false>> [cmd|alias] if cmd|alias is not present, this will be a multiline block")){
 			bCommandWorkedProperly=cmdIf();
 		}else
 		if(checkCmdValidity(cc.CMD_IF_END,"ends conditional exec block")){
@@ -3143,14 +3145,18 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		if(strCmds==null)strCmds="";
 		strCmds.trim();
 		if(strCmds.isEmpty() || strCmds.startsWith(cc.getCommentPrefixStr())){
-			if(!bSkipNesting){
+			if(bSkipNesting){
+				aIfConditionNestedList.set(aIfConditionNestedList.size()-1, bCondition);
+			}else{
 				aIfConditionNestedList.add(bCondition);
 			}
 			
 			bIfConditionExecCommands=bCondition;
 		}else{
 			if(!bSkipNesting){
-				addToExecConsoleCommandQueue(strCmds,true);
+				if(bCondition){
+					addToExecConsoleCommandQueue(strCmds,true);
+				}
 			}
 		}
 		
@@ -3159,11 +3165,30 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	
 	protected boolean cmdElse(){
 		bIfConditionExecCommands=!aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
+		bIfEndIsRequired = true;
+		
 		return true;
 	}
 	
 	protected boolean cmdElseIf(){
-		cmdIf(true);
+		if(bIfEndIsRequired){
+			dumpExceptionEntry(new NullPointerException("command "+cc.CMD_ELSE_IF.toString()
+				+" is missplaced, ignoring"));
+			bIfConditionExecCommands=false; //will also skip this block commands
+			return false;
+		}
+		
+		boolean bConditionSuccessAlready = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
+		
+		if(bConditionSuccessAlready){
+			/**
+			 * if one of the conditions was successful, will skip all the remaining ones
+			 */
+			bIfConditionExecCommands=false;
+		}else{
+			return cmdIf(true);
+		}
+		
 		return true;
 	}
 	
@@ -3173,6 +3198,9 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			
 			if(aIfConditionNestedList.size()==0){
 				bIfConditionExecCommands=null;
+				bIfEndIsRequired = false;
+			}else{
+				bIfConditionExecCommands = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
 			}
 		}else{
 			dumpExceptionEntry(new NullPointerException("pointless condition ending..."));
@@ -3412,10 +3440,17 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 					 */
 					bOk = true;
 					
+					/**
+					 * The commands are being skipped.
+					 * These are capable of ending the skipping.
+					 */
+					if(cc.CMD_ELSE_IF.equals(paramString(0))){
+						bOk = cmdElseIf();
+					}else
+					if(cc.CMD_ELSE.equals(paramString(0))){
+						bOk = cmdElse();
+					}else
 					if(cc.CMD_IF_END.equals(paramString(0))){
-						/**
-						 * the commands may be being skipped, so this is required here.
-						 */
 						bOk = cmdIfEnd();
 					}else{
 						dumpInfoEntry("ConditionalSkip: "+strCmdLinePrepared);

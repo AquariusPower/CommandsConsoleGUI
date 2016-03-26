@@ -71,9 +71,16 @@ public class ConsoleCommands implements IReflexFillCfg{
 	public final StringField CMD_HELP = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_HISTORY = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_HK_TOGGLE = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_IF_END = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_LINE_WRAP_AT = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_VAR_SET = new StringField(this,strFinalCmdCodePrefix);
+	
+	/**
+	 * conditional user coding
+	 */
+	public final StringField CMD_IF = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_ELSE_IF = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_ELSE = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_IF_END = new StringField(this,strFinalCmdCodePrefix);
 	
 	/**
 	 * this char indicates something that users (non developers) 
