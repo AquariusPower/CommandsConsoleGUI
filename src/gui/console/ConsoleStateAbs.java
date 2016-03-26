@@ -1315,9 +1315,13 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			strCmdFull=strCmdFull.substring(1); //1 cc.getCommandPrefix()Char
 		}
 		
-		String[] astr = strCmdFull.split("[^$"+strValidCmdCharsRegex+"]");
-		if(astr.length>iPart){
-			return astr[iPart];
+//		String[] astr = strCmdFull.split("[^$"+strValidCmdCharsRegex+"]");
+//		if(astr.length>iPart){
+//			return astr[iPart];
+//		}
+		ArrayList<String> astr = convertToCmdParamsList(strCmdFull);
+		if(iPart>=0 && astr.size()>iPart){
+			return astr.get(iPart);
 		}
 		
 		return null;
@@ -1396,7 +1400,11 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		 * do NOT trim() the string, it may be being auto completed and 
 		 * an space being appended to help on typing new parameters.
 		 */
-		tfInput.setText(str.replace("\n", "\\n").replace("\r", ""));
+		tfInput.setText(fixStringToInputField(str));
+	}
+	
+	protected String fixStringToInputField(String str){
+		return str.replace("\n", "\\n").replace("\r", "");
 	}
 	
 	protected void updateDumpAreaSelectedIndex(){
@@ -2078,7 +2086,14 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		autoCompleteInputField(false);
 	}
 	protected void autoCompleteInputField(boolean bMatchContains){
-		final String strCmdPart = getInputText();
+		String strCmdPart = getInputText();
+		String strCmdAfterCarat="";
+		
+		Integer iCaratPositionHK = efHK==null?null:efHK.getInputFieldCaratPosition();
+		if(iCaratPositionHK!=null){
+			strCmdAfterCarat = strCmdPart.substring(iCaratPositionHK);
+			strCmdPart = strCmdPart.substring(0, iCaratPositionHK);
+		}
 		
 		String strCompletedCmd = autoCompleteWork(strCmdPart,bMatchContains);
 		
@@ -2090,33 +2105,65 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			String strParam1 = extractCommandPart(strCmdPart,1);
 			
 			String strCmd=null;
+			String strPartToComplete=null;
 			ArrayList<String> astrOptList = null;
+			boolean bIsVarCompletion=false;
 			if(cc.CMD_CONSOLE_STYLE.equals(strBaseCmd)){
 				strCmd=cc.CMD_CONSOLE_STYLE+" ";
 				astrOptList=astrStyleList;
+				strPartToComplete=strParam1;
 			}else
 			if(cc.CMD_DB.equals(strBaseCmd)){
 				strCmd=cc.CMD_DB+" ";
 				astrOptList=EDataBaseOperations.getValuesAsArrayList();
+				strPartToComplete=strParam1;
+			}else
+			if(cc.CMD_VAR_SET.equals(strBaseCmd)){
+				strCmd=cc.CMD_VAR_SET+" ";
+				astrOptList=getVariablesIdentifiers(false);
+				strPartToComplete=strParam1;
+				bIsVarCompletion=true;
+			}else{
+				/**
+				 * complete for variables ids when retrieving variable value 
+				 */
+				String strRegexVarOpen=Pattern.quote(""+cc.getVariableExpandPrefix()+"{");
+				String strRegex=".*"+strRegexVarOpen+"["+strValidCmdCharsRegex+"]*$";
+				if(strCompletedCmd.matches(strRegex)){
+					strCmd=strCompletedCmd.trim().substring(1); //removes command prefix
+					astrOptList=getVariablesIdentifiers(true);
+					
+					/**
+					 * here the variable is being filtered
+					 */
+					String[] astrToVar = strCompletedCmd.split(".*"+strRegexVarOpen);
+					if(astrToVar.length>1){
+						strPartToComplete=astrToVar[astrToVar.length-1];
+						strCmd=strCmd.substring(0, strCmd.length()-strPartToComplete.length());
+						bIsVarCompletion=true;
+					}
+				}
 			}
 			
 //			if(strParam1!=null){
 			if(astrOptList!=null){
 				strCompletedCmd=""+cc.getCommandPrefix()+strCmd;
 				
-				ArrayList<String> astr = strParam1==null ? astrOptList :
-					autoComplete(strParam1, astrOptList, bMatchContains);
+				ArrayList<String> astr = strPartToComplete==null ? astrOptList :
+					autoComplete(strPartToComplete, astrOptList, bMatchContains);
 				if(astr.size()==1){
 					strCompletedCmd+=astr.get(0);
 				}else{
 					dumpInfoEntry("Param autocomplete:");
+					String strFirst = astr.remove(0);
 					for(String str:astr){
-						if(strParam1!=null && str.equals(astr.get(0)))continue;
+//						if(strPartToComplete!=null && str.equals(astr.get(0)))continue;
+						if(bIsVarCompletion)str=varReportPrepare(str);
 						dumpSubEntry(str);
 					}
 					
-					if(strParam1!=null){
-						strCompletedCmd+=astr.get(0); //best partial param match
+					if(strPartToComplete!=null){
+						strCompletedCmd+=strFirst; //best partial param match
 					}
 				}
 			}
@@ -2124,7 +2171,8 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		}
 		
 		if(strCompletedCmd.trim().isEmpty())strCompletedCmd=""+cc.getCommandPrefix();
-		setInputField(strCompletedCmd);
+		setInputField(strCompletedCmd+strCmdAfterCarat);
+		if(efHK!=null)efHK.setCaratPosition(strCompletedCmd.length());
 		
 		scrollToBottomRequest();
 	}
@@ -2225,14 +2273,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		return astrPossibleMatches;
 	}
 	
-	/**
-	 * Each param can be enclosed within double quotes (")
-	 * @param strFullCmdLine
-	 * @return
-	 */
 	protected String convertToCmdParams(String strFullCmdLine){
-		astrCmdAndParams.clear();
-		
 		/**
 		 * remove comment
 		 */
@@ -2259,8 +2300,22 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			return cc.RESTRICTED_CMD_SKIP_CURRENT_COMMAND.toString();
 		}
 		
+		astrCmdAndParams.clear();
+		astrCmdAndParams.addAll(convertToCmdParamsList(strFullCmdLine));
+		return String.join(" ",astrCmdAndParams);
+	}
+	
+	/**
+	 * Each param can be enclosed within double quotes (")
+	 * @param strFullCmdLine
+	 * @return
+	 */
+	protected ArrayList<String> convertToCmdParamsList(String strFullCmdLine){
+		ArrayList<String> astrCmdParams = new ArrayList<String>();
+//		astrCmdAndParams.clear();
+		
 		/**
-		 * Prepare parameters, that can be enclosed in double quotes.
+		 * Prepare parameters, separated by blanks, that can be enclosed in double quotes.
 		 * Param 0 is the actual command
 		 */
 		Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(strFullCmdLine);
@@ -2270,11 +2325,13 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				if(str.trim().startsWith(""+cc.getCommentPrefix()))break; //ignore comments
 				str=str.trim();
 				str=str.replace("\"", ""); //remove all quotes on the string TODO could be only 1st and last? mmm... too much trouble...
-				astrCmdAndParams.add(str);
+//				astrCmdAndParams.add(str);
+				astrCmdParams.add(str);
 			}
 		}
 		
-		return strFullCmdLine;
+//		return strFullCmdLine;
+		return astrCmdParams;
 	}
 	
 	/**
@@ -2739,13 +2796,25 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			bCommandWorkedProperly=true;
 		}else
 		if(checkCmdValidity("varAdd","<varId> <[-]value>")){
-			bCommandWorkedProperly=cmdVarAdd(paramString(1),paramString(2),false);
+			bCommandWorkedProperly=cmdVarAdd(paramString(1),paramString(2),true,false);
 		}else
-		if(checkCmdValidity(cc.CMD_VAR_SET,"[<varId> <value>] | [-varId] | ["+cc.getFilterToken()+"filter] - can be a number or a string, retrieve it's value with: ${varId}")){
+//		if(checkCmdValidity(cc.CMD_VAR_SET,"[<varId> <value>] | [-varId] | ["+cc.getFilterToken()+"filter] - can be a number or a string, retrieve it's value with: ${varId}")){
+		if(
+			checkCmdValidity(cc.CMD_VAR_SET,
+				"<[<varId> <value>] | [-varId]> "
+					+"Can be boolean(true/false, and after set accepts 1/0), number(integer/floating) or string; "
+					+"-varId will delete it; "
+					+"Retrieve it's value with "+cc.getVariableExpandPrefix()+"{varId}; "
+					+"Restricted variables will have no effect; "
+			)
+		){
 			bCommandWorkedProperly=cmdVarSet();
 		}else
 		if(checkCmdValidity("varSetCmp","<varIdBool> <value> <cmp> <value>")){
 			bCommandWorkedProperly=cmdVarSetCmp();
+		}else
+		if(checkCmdValidity("varShow","[["+cc.RESTRICTED_TOKEN+"]filter] list user or restricted variables.")){
+			bCommandWorkedProperly=cmdVarShow();
 		}else
 		if(checkCmdValidity(TOKEN_CMD_NOT_WORKING_YET+"zDisabledCommand"," just to show how to use it")){
 			// keep this as reference
@@ -3029,47 +3098,60 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		
 		return false;
 	}
+
+	protected boolean cmdVarShow() {
+		String strFilter = paramString(1);
+		if(strFilter==null)strFilter="";
+		strFilter=strFilter.trim();
+		
+		/**
+		 * LIST all, user and restricted
+		 */
+		dumpInfoEntry("Variables list:");
+		boolean bRestrictedOnly=false;
+		if(strFilter.startsWith(""+cc.RESTRICTED_TOKEN)){
+			bRestrictedOnly=true;
+			strFilter=strFilter.substring(1);
+		}
+//		if(strFilter!=null)strFilter=strFilter.substring(1);
+		for(String strVarId : getVariablesIdentifiers(true)){
+			if(isRestricted(strVarId) && !bRestrictedOnly)continue;
+			if(!isRestricted(strVarId) && bRestrictedOnly)continue;
+			
+			if(strVarId.toLowerCase().contains(strFilter.toLowerCase()))varReport(strVarId);
+		}
+		dumpSubEntry(cc.getCommentPrefix()+"UserVarListHashCode="+tmUserVariables.hashCode());
+		
+		return true;
+	}
 	
 	/**
 	 * When creating variables, this method can only create custom user ones.
 	 * @return
 	 */
 	protected boolean cmdVarSet() {
-		boolean bOk=false;
-		String strVarIdOrFilter = paramString(1);
+		String strVarId = paramString(1);
 		String strValue = paramString(2);
-		if(strVarIdOrFilter==null || strVarIdOrFilter.startsWith(""+cc.getFilterToken())){
-			/**
-			 * LIST all, user and restricted
-			 */
-			dumpInfoEntry("Variables list:");
-			if(strVarIdOrFilter!=null)strVarIdOrFilter=strVarIdOrFilter.substring(1);
-			for(String strVarId : getVariablesIdentifiers(true)){
-				if(strVarIdOrFilter!=null && !strVarId.toLowerCase().equals(strVarIdOrFilter.toLowerCase())){
-					continue;
-				}
-				
-				varReport(strVarId);
-			}
-			dumpSubEntry(cc.getCommentPrefix()+"UserVarListHashCode="+tmUserVariables.hashCode());
-			bOk=true;
-		}else
-		if(strVarIdOrFilter!=null && strVarIdOrFilter.trim().startsWith(""+cc.getVarDeleteToken())){
+		
+		if(strVarId==null)return false;
+		
+		boolean bOk = false;
+		if(strVarId.trim().startsWith(""+cc.getVarDeleteToken())){
 			/**
 			 * DELETE/UNSET only user variables
 			 */
-			bOk=tmUserVariables.remove(strVarIdOrFilter.trim().substring(1))!=null;
+			bOk=tmUserVariables.remove(strVarId.trim().substring(1))!=null;
 			if(bOk){
-				dumpInfoEntry("Var '"+strVarIdOrFilter+"' deleted.");
+				dumpInfoEntry("Var '"+strVarId+"' deleted.");
 			}else{
-				dumpWarnEntry("Var '"+strVarIdOrFilter+"' not found.");
+				dumpWarnEntry("Var '"+strVarId+"' not found.");
 			}
 		}else{
 			/**
 			 * SET user or restricted variable
 			 */
-			if(isRestrictedAndDoesNotExist(strVarIdOrFilter))return false;
-			bOk=varSet(strVarIdOrFilter,strValue,true);
+			if(isRestrictedAndDoesNotExist(strVarId))return false;
+			bOk=varSet(strVarId,strValue,true);
 		}
 		
 		return bOk;
@@ -3244,7 +3326,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	 * @param bOverwrite
 	 * @return
 	 */
-	protected boolean cmdVarAdd(String strVarId, String strValueAdd, boolean bOverwrite){
+	protected boolean cmdVarAdd(String strVarId, String strValueAdd, boolean bSave, boolean bOverwrite){
 		if(isRestrictedAndDoesNotExist(strVarId))return false;
 		
 		Object objValueNew = null;
@@ -3293,7 +3375,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		
 //		if(objValueNew==null)return false;
 		
-		varApply(strVarId,objValueNew,true);
+		varApply(strVarId,objValueNew,bSave);
 		return true;
 	}
 	
@@ -3317,6 +3399,14 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		}
 	}
 	
+	protected void varSaveSetupFile(){
+		for(String strVarId : getVariablesIdentifiers(true)){
+			if(isRestricted(strVarId)){
+				fileAppendLine(getVarFile(strVarId),varReportPrepare(strVarId));
+			}
+		}
+	}
+	
 	protected boolean varApply(String strVarId, Object objValue, boolean bSave){
 		getVarHT(strVarId).put(strVarId,objValue);
 		if(bSave)fileAppendLine(getVarFile(strVarId),varReportPrepare(strVarId));
@@ -3337,7 +3427,9 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			+" "
 			+"\""+objValue+"\""
 			+" "
-			+"#"+objValue.getClass().getSimpleName();
+			+"#"+objValue.getClass().getSimpleName()
+			+" "
+			+(isRestricted(strVarId)?"(Restricted)":"(User)");
 	}
 	
 	protected void varReport(String strVarId) {
@@ -3372,7 +3464,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		if(strValue==null)return false; //strValue=""; //just creates the var
 		
 		if(hasVar(strVarId)){
-			return cmdVarAdd(strVarId, strValue, true);
+			return cmdVarAdd(strVarId, strValue, bSave, true);
 		}
 		
 		boolean bOk=false;
@@ -3841,17 +3933,25 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			+" This file will be overwritten by the application!");
 		fileAppendLine(flSetup, cc.getCommentPrefix()
 			+" To set overrides use the user init config file.");
+		fileAppendLine(flSetup, cc.getCommentPrefix()
+			+" For command's values, the commands usage are required, the variable is just a holder of their setup value.");
+		fileAppendLine(flSetup, cc.getCommentPrefix()
+			+" Some values may be read to provide functionalities not directly usable by users.");
 		
 		setupVars(true);
 	}
+	
 	protected void setupVars(boolean bSave){
 		varSet(""+cc.RESTRICTED_TOKEN+ERestrictedVars.UserVariableListHashcode,
 			""+tmUserVariables.hashCode(),
-			bSave);
+			false);
 		
 		varSet(""+cc.RESTRICTED_TOKEN+ERestrictedVars.UserAliasListHashcode,
 			""+aAliasList.hashCode(),
-			bSave);
+			false);
+		
+		if(bSave)varSaveSetupFile();
 	}
+	
 }
 

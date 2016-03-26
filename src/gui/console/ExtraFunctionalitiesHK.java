@@ -229,10 +229,17 @@ public class ExtraFunctionalitiesHK {
 		}
 			
 	}
-
+	
+	public Integer getInputFieldCaratPosition(){
+		if(dmInputFieldHK!=null){ //insert at carat position
+			return dmInputFieldHK.getCarat();
+		}
+		return null;
+	}
+	
 	public String pasteAtCaratPositionHK(String strCurrent, String strPasted) {
 		if(dmInputFieldHK!=null){ //insert at carat position
-			int iCarat = dmInputFieldHK.getCarat();
+			int iCarat = getInputFieldCaratPosition();
 			String strBefore = strCurrent.substring(0,iCarat);
 			String strAfter = strCurrent.substring(iCarat);
 			strCurrent = strBefore + strPasted;
@@ -262,5 +269,10 @@ public class ExtraFunctionalitiesHK {
 	
 	public void test(){
 		tecInputFieldHK.getFont().getCharSet().getCharacter(32).getWidth();
+	}
+
+	public void setCaratPosition(int iPos) {
+		iMoveCaratTo = iPos;
+		positionCaratProperlyHK();
 	}
 }
