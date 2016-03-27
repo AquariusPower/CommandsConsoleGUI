@@ -3502,25 +3502,29 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	
 	protected void varSaveSetupFile(){
 		for(String strVarId : getVariablesIdentifiers(true)){
-			if(isRestricted(strVarId)){
-				String strCommentOut="";
-				String strReadOnlyComment="";
-				try{ERestrictedSetupLoadableVars.valueOf(strVarId.substring(1));}catch(IllegalArgumentException e){
-					/**
-					 * comment non loadable restricted variables, like the ones set by commands
-					 */
-					strCommentOut=cc.getCommentPrefixStr();
-					strReadOnlyComment="(ReadOnly)";
-				}
-				
-				fileAppendLine(getVarFile(strVarId), strCommentOut+varReportPrepare(strVarId)+strReadOnlyComment);
+			if(isRestricted(strVarId))fileAppendVar(strVarId);
+		}
+	}
+	
+	protected void fileAppendVar(String strVarId){
+		String strCommentOut="";
+		String strReadOnlyComment="";
+		if(isRestricted(strVarId)){
+			try{ERestrictedSetupLoadableVars.valueOf(strVarId.substring(1));}catch(IllegalArgumentException e){
+				/**
+				 * comment non loadable restricted variables, like the ones set by commands
+				 */
+				strCommentOut=cc.getCommentPrefixStr();
+				strReadOnlyComment="(ReadOnly)";
 			}
 		}
+		
+		fileAppendLine(getVarFile(strVarId), strCommentOut+varReportPrepare(strVarId)+strReadOnlyComment);
 	}
 	
 	protected boolean varApply(String strVarId, Object objValue, boolean bSave){
 		getVarHT(strVarId).put(strVarId,objValue);
-		if(bSave)fileAppendLine(getVarFile(strVarId),varReportPrepare(strVarId));
+		if(bSave)fileAppendVar(strVarId);
 		
 		if(isRestricted(strVarId) && cc.btgShowDeveloperInfo.b()){
 			varReport(strVarId);
