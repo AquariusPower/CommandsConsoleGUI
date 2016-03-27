@@ -96,7 +96,8 @@ import com.simsilica.lemur.style.BaseStyles;
 import com.simsilica.lemur.style.Styles;
 
 /**
- * A graphical console where developers and users can issue application commands. 
+ * This class connects the console commands class with JMonkeyEngine.
+ * 
  * Project at: https://github.com/AquariusPower/CommandsConsoleGUI
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
@@ -260,35 +261,18 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	protected ArrayList<Alias> aAliasList = new ArrayList<Alias>();
 	protected String	strCmdLineOriginal;
 	protected boolean	bLastAliasCreatedSuccessfuly;
-	
 	protected float	fTPF;
-//	protected int	iFpsCount;
-//	protected long	lNanoPreviousSecond;
-//	protected int	lPreviousSecondFPS;
-//	protected int	iUpdateCount;
 	protected long	lNanoFrameTime;
 	protected long	lNanoFpsLimiterTime;
-
 	protected Boolean	bIfConditionIsValid;
-
 	protected ArrayList<DumpEntry> adeDumpEntryFastQueue = new ArrayList<DumpEntry>();
-
 	protected Button	btnCut;
-
 	protected File	flSetup;
-
-//	protected boolean	bMultiLineIfCondition;
-
-//	protected int	iIfConditionNesting;
 	protected ArrayList<ConditionalNested> aIfConditionNestedList = new ArrayList<ConditionalNested>();
-
 	protected Boolean	bIfConditionExecCommands;
-
-	private String	strPrepareFunctionBlockForId;
-
-	private boolean	bFuncCmdLineRunning;
-
-	private boolean	bFuncCmdLineSkipTilEnd;
+	protected String	strPrepareFunctionBlockForId;
+	protected boolean	bFuncCmdLineRunning;
+	protected boolean	bFuncCmdLineSkipTilEnd;
 	
 	protected static class ConditionalNested{
 		public ConditionalNested(boolean bCondition){
@@ -305,6 +289,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	public ConsoleStateAbs() {
 		if(instance==null)instance=this;
 		cc = new ConsoleCommands();
+		cc.csaTmp=this;
 	}
 	public ConsoleStateAbs(int iToggleConsoleKey) {
 		this();
@@ -329,6 +314,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		if(isInitialized())throw new NullPointerException("already initialized...");
 		
 		sapp = (SimpleApplication)app;
+		cc.sapp = sapp;
 		
 		sapp.getStateManager().attach(fpslState);
 		
@@ -404,20 +390,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			initialize();
 		}
 		
-//		if(isInitialized()){
-			this.bEnabled=bEnabled;
-			
-			if(this.bEnabled){
-				sapp.getGuiNode().attachChild(ctnrConsole);
-				GuiGlobals.getInstance().requestFocus(tfInput);
-			}else{
-				ctnrConsole.removeFromParent();
-				closeHint();
-				GuiGlobals.getInstance().requestFocus(null);
-			}
-			
-			GuiGlobals.getInstance().setCursorEventsEnabled(this.bEnabled);
-//		}
+		this.bEnabled=bEnabled;
 	}
 
 	@Override
@@ -443,7 +416,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		tdStatsRefresh.updateTime();
 		tdDumpQueuedEntry.updateTime();
 		
-		createMonoSpaceFixedFontStyle();
+//		createMonoSpaceFixedFontStyle();
 		
 		v3fApplicationWindowSize = new Vector3f(
 			sapp.getContext().getSettings().getWidth(),
@@ -796,61 +769,6 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			}
 		}
 		GuiGlobals.getInstance().getStyles().setDefault(fntMakeFixedWidth);
-	}
-	
-	protected void createMonoSpaceFixedFontStyle(){
-		if(bConsoleStyleCreated)return;
-		
-		BitmapFont font = sapp.getAssetManager().loadFont("Interface/Fonts/Console.fnt");
-//		BitmapFont font = sapp.getAssetManager().loadFont("Interface/Fonts/Console512x.fnt");
-		//TODO improve the font quality to be more readable, how???
-		
-		Styles styles = GuiGlobals.getInstance().getStyles();
-		
-		ColorRGBA clBg;
-		
-		Attributes attrs;
-		attrs = styles.getSelector(STYLE_CONSOLE); // this also creates the style
-		attrs.set("fontSize", 16);
-		attrs.set("color", ColorRGBA.White.clone());
-		clBg = ColorRGBA.Blue.clone();clBg.b=0.25f;clBg.a=0.75f;
-		attrs.set("background", new QuadBackgroundComponent(clBg));
-		attrs.set("font", font);
-		
-//			attrs = styles.getSelector("grid", STYLE_CONSOLE);
-//			attrs.set("background", new QuadBackgroundComponent(new ColorRGBA(0,1,0,1)));
-		
-		attrs = styles.getSelector(Button.ELEMENT_ID, STYLE_CONSOLE);
-		attrs.set("color", new ColorRGBA(0,1,0.5f,1));
-		clBg = new ColorRGBA(0,0,0.125f,1);
-		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
-		
-		attrs = styles.getSelector(TextField.ELEMENT_ID, STYLE_CONSOLE);
-		attrs.set("color", new ColorRGBA(0.75f,1,1,1));
-		clBg = new ColorRGBA(0.15f, 0.25f, 0, 1);
-		attrs.set(TextField.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
-		
-//		lstbx.getElementId().child(ListBox.SELECTOR_ID);
-		attrs = styles.getSelector(ListBox.ELEMENT_ID, ListBox.SELECTOR_ID, STYLE_CONSOLE);
-//			attrs = styles.getSelector("list", "selector", STYLE_CONSOLE);
-//			attrs.set("color", ColorRGBA.Red.clone());
-		clBg = ColorRGBA.Yellow.clone();clBg.a=0.25f;
-		attrs.set(ListBox.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
-		
-//			attrs.set("background", new QuadBackgroundComponent(new ColorRGBA(0,0,0.25f,1)));
-//
-//			attrs = styles.getSelector("slider", "button", STYLE_CONSOLE);
-//			attrs.set("color", ColorRGBA.Yellow.clone());
-//			attrs.set("background", new QuadBackgroundComponent(new ColorRGBA(0,0,0.25f,1)));
-//			
-//			attrs = styles.getSelector("grid", "button", STYLE_CONSOLE);
-//			attrs.set("color", ColorRGBA.Yellow.clone());
-//			attrs.set("background", new QuadBackgroundComponent(new ColorRGBA(0,0,0.25f,1)));
-		
-//		String strAllChars="W";
-//		fMonofontCharWidth = fontWidth(strAllChars,STYLE_CONSOLE);
-		
-		bConsoleStyleCreated=true;
 	}
 	
 	protected float fontWidth(String strChars){
@@ -1260,43 +1178,9 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		strInputTextPrevious = strInputText;
 	}
 	
-	protected void scrollHintToIndex(int i){
-		int iVisibleCount = lstbxAutoCompleteHint.getVisibleItems();
-		
-		int iVisibleMinIndex = (int)(
-			lstbxAutoCompleteHint.getSlider().getModel().getMaximum()
-			-lstbxAutoCompleteHint.getSlider().getModel().getValue()
-		);
-		
-		int iVisibleMaxIndex = iVisibleMinIndex + iVisibleCount;
-		Integer iScrollMinIndexTo = null;
-		if(i < iVisibleMinIndex){
-			iScrollMinIndexTo = i;
-		}else
-		if(i >= iVisibleMaxIndex){
-			iScrollMinIndexTo = i -iVisibleCount +1;
-		}
-		
-		if(iScrollMinIndexTo!=null){
-			double d = lstbxAutoCompleteHint.getSlider().getModel().getMaximum();
-			d -= iScrollMinIndexTo;
-			if(d<0)d=0;
-			lstbxAutoCompleteHint.getSlider().getModel().setValue(d);
-		}
-	}
+	protected abstract void scrollHintToIndex(int i);
 	
-	protected void closeHint(){
-		/*
-		tfAutoCompleteHint.setText("");
-		tfAutoCompleteHint.removeFromParent();
-		*/
-		vlstrAutoCompleteHint.clear();
-		lstbxAutoCompleteHint.removeFromParent();
-	}
-	
-//	protected void fillAutoCompleteHint(ArrayList<String> astr){
-//		lstbxAutoCompleteHint;
-//	}
+	protected abstract void closeHint();
 	
 	/**
 	 * Validates if the first extracted word is a valid command.
@@ -1788,51 +1672,6 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		dumpEntry(true, true, false, strLineOriginal);
 	}
 	
-	/**
-	 * dump strings will always be logged to file even if disabled.
-	 */
-	public static class DumpEntry{
-		/**
-		 * Beware, better do NOT change these defaults,
-		 * as many usages of DumpEntry may depend on it.
-		 * Maybe extend this class to have other defaults.
-		 */
-		boolean bApplyNewLineRequests = false; //this is a special behavior, disabled by default
-		boolean bDumpToConsole = true;
-		boolean bUseSlowQueue = false;
-		String strLineOriginal = null;
-		
-		public boolean isApplyNewLineRequests() {
-			return bApplyNewLineRequests;
-		}
-		public DumpEntry setApplyNewLineRequests(boolean bApplyNewLineRequests) {
-			this.bApplyNewLineRequests = bApplyNewLineRequests;
-			return this;
-		}
-		public boolean isDump() {
-			return bDumpToConsole;
-		}
-		public DumpEntry setDumpToConsole(boolean bDump) {
-			this.bDumpToConsole = bDump;
-			return this;
-		}
-		public boolean isUseQueue() {
-			return bUseSlowQueue;
-		}
-		public DumpEntry setUseSlowQueue(boolean bUseQueue) {
-			this.bUseSlowQueue = bUseQueue;
-			return this;
-		}
-		public String getLineOriginal() {
-			return strLineOriginal;
-		}
-		public DumpEntry setLineOriginal(String strLineOriginal) {
-			this.strLineOriginal = strLineOriginal;
-			return this;
-		}
-		
-	}
-	
 	protected void dumpEntry(boolean bApplyNewLineRequests, boolean bDump, boolean bUseSlowQueue, String strLineOriginal){
 		DumpEntry de = new DumpEntry()
 			.setApplyNewLineRequests(bApplyNewLineRequests)
@@ -2048,47 +1887,47 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		return strCmdLinePrepared.trim().startsWith(""+cc.getCommentPrefix());
 	}
 	
-	protected boolean checkCmdValidityBoolTogglers(){
-		cc.btgReferenceMatched=null;
-		for(BoolToggler btg : BoolToggler.getBoolTogglerListCopy()){
-			if(checkCmdValidity(btg.getCmdId(), "[bEnable] "+btg.getHelp(), true)){
-				cc.btgReferenceMatched = btg;
-				break;
-			}
-		}
-		return cc.btgReferenceMatched!=null;
-	}
-	protected boolean checkCmdValidity(String strValidCmd){
-		return checkCmdValidity(strValidCmd, null);
-	}
-	protected boolean checkCmdValidity(StringField strfValidCmd, String strComment){
-		return checkCmdValidity(strfValidCmd.toString(), strComment);
-	}
-	protected boolean checkCmdValidity(String strValidCmd, String strComment){
-		return checkCmdValidity(strValidCmd, strComment, false);
-	}
-	protected boolean checkCmdValidity(String strValidCmd, String strComment, boolean bSkipSortCheck){
-		if(strCmdLinePrepared==null){
-			if(strComment!=null){
-				strValidCmd+=cc.commentToAppend(strComment);
-			}
-			
-			addCmdToValidList(strValidCmd,bSkipSortCheck);
-			
-			return false;
-		}
-		
-		if(cc.RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(strCmdLinePrepared))return false;
-		if(isCommentedLine())return false;
-		if(strCmdLinePrepared.trim().isEmpty())return false;
-		
-//		String strCheck = strPreparedCmdLine;
-//		strCheck = strCheck.trim().split(" ")[0];
-		strValidCmd = strValidCmd.trim().split(" ")[0];
-		
-//		return strCheck.equalsIgnoreCase(strValidCmd);
-		return paramString(0).equalsIgnoreCase(strValidCmd);
-	}
+//	protected boolean cc.checkCmdValidityBoolTogglers(){
+//		cc.btgReferenceMatched=null;
+//		for(BoolToggler btg : BoolToggler.getBoolTogglerListCopy()){
+//			if(cc.checkCmdValidity(btg.getCmdId(), "[bEnable] "+btg.getHelp(), true)){
+//				cc.btgReferenceMatched = btg;
+//				break;
+//			}
+//		}
+//		return cc.btgReferenceMatched!=null;
+//	}
+//	protected boolean cc.checkCmdValidity(String strValidCmd){
+//		return cc.checkCmdValidity(strValidCmd, null);
+//	}
+//	protected boolean cc.checkCmdValidity(StringField strfValidCmd, String strComment){
+//		return cc.checkCmdValidity(strfValidCmd.toString(), strComment);
+//	}
+//	protected boolean cc.checkCmdValidity(String strValidCmd, String strComment){
+//		return cc.checkCmdValidity(strValidCmd, strComment, false);
+//	}
+//	protected boolean cc.checkCmdValidity(String strValidCmd, String strComment, boolean bSkipSortCheck){
+//		if(strCmdLinePrepared==null){
+//			if(strComment!=null){
+//				strValidCmd+=cc.commentToAppend(strComment);
+//			}
+//			
+//			addCmdToValidList(strValidCmd,bSkipSortCheck);
+//			
+//			return false;
+//		}
+//		
+//		if(cc.RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(strCmdLinePrepared))return false;
+//		if(isCommentedLine())return false;
+//		if(strCmdLinePrepared.trim().isEmpty())return false;
+//		
+////		String strCheck = strPreparedCmdLine;
+////		strCheck = strCheck.trim().split(" ")[0];
+//		strValidCmd = strValidCmd.trim().split(" ")[0];
+//		
+////		return strCheck.equalsIgnoreCase(strValidCmd);
+//		return paramString(0).equalsIgnoreCase(strValidCmd);
+//	}
 	
 	protected void autoCompleteInputField(){
 		autoCompleteInputField(false);
@@ -2223,7 +2062,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		return cc.getCommandPrefix()+strFirst.split(" ")[0]+strAppendSpace;
 	}
 	
-	private boolean isValidIdentifierCmdVarAliasFuncString(String strCmdPart) {
+	protected boolean isValidIdentifierCmdVarAliasFuncString(String strCmdPart) {
 		if(strCmdPart==null)return false;
 		return strCmdPart.matches("["+strValidCmdCharsRegex+"]*");
 	}
@@ -2635,118 +2474,118 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		/**
 		 * means the command didnt have any problem, didnt fail, requiring a warning message
 		 */
-		boolean bCommandWorkedProperly = false;
+		boolean bCommandWorked = false;
 		
-		if(checkCmdValidityBoolTogglers()){
-			bCommandWorkedProperly=toggle(cc.btgReferenceMatched);
+		if(cc.checkCmdValidityBoolTogglers()){
+			bCommandWorked=toggle(cc.btgReferenceMatched);
 		}else
-		if(checkCmdValidity("alias",getAliasHelp(),true)){
-			bCommandWorkedProperly=cmdAlias();
+		if(cc.checkCmdValidity("alias",getAliasHelp(),true)){
+			bCommandWorked=cmdAlias();
 		}else
-		if(checkCmdValidity("clearCommandsHistory")){
+		if(cc.checkCmdValidity("clearCommandsHistory")){
 			astrCmdHistory.clear();
-			bCommandWorkedProperly=true;
+			bCommandWorked=true;
 		}else
-		if(checkCmdValidity("clearDumpArea")){
+		if(cc.checkCmdValidity("clearDumpArea")){
 			vlstrDumpEntries.clear();
-			bCommandWorkedProperly=true;
+			bCommandWorked=true;
 		}else
-		if(checkCmdValidity(cc.CMD_CLOSE_CONSOLE,"like the bound key to do it")){
+		if(cc.checkCmdValidity(cc.CMD_CLOSE_CONSOLE,"like the bound key to do it")){
 			setEnabled(false);
-			bCommandWorkedProperly=true;
+			bCommandWorked=true;
 		}else
-		if(checkCmdValidity(cc.CMD_CONSOLE_HEIGHT,"[fPercent] of the application window")){
+		if(cc.checkCmdValidity(cc.CMD_CONSOLE_HEIGHT,"[fPercent] of the application window")){
 			Float f = paramFloat(1);
 			modifyConsoleHeight(f);
-			bCommandWorkedProperly=true;
+			bCommandWorked=true;
 		}else
-		if(checkCmdValidity(cc.CMD_CONSOLE_SCROLL_BOTTOM,"")){
+		if(cc.checkCmdValidity(cc.CMD_CONSOLE_SCROLL_BOTTOM,"")){
 			scrollToBottomRequest();
-			bCommandWorkedProperly=true;
+			bCommandWorked=true;
 		}else
-		if(checkCmdValidity(cc.CMD_CONSOLE_STYLE,"[strStyleName] changes the style of the console on the fly, empty for a list")){
+		if(cc.checkCmdValidity(cc.CMD_CONSOLE_STYLE,"[strStyleName] changes the style of the console on the fly, empty for a list")){
 			String strStyle = paramString(1);
 			if(strStyle==null)strStyle="";
-			bCommandWorkedProperly=cmdStyleApply(strStyle);
+			bCommandWorked=cmdStyleApply(strStyle);
 		}else
-		if(checkCmdValidity(cc.CMD_DB,EDataBaseOperations.help())){
-			bCommandWorkedProperly=cmdDb();
+		if(cc.checkCmdValidity(cc.CMD_DB,EDataBaseOperations.help())){
+			bCommandWorked=cmdDb();
 		}else
-//		if(checkCmdValidity("dumpFind","<text> finds, select and scroll to it at dump area")){
+//		if(cc.checkCmdValidity("dumpFind","<text> finds, select and scroll to it at dump area")){
 //			bCommandWorkedProperly=cmdFind();
 //		}else
-//		if(checkCmdValidity("dumpFindNext","<text> finds, select and scroll to it at dump area")){
+//		if(cc.checkCmdValidity("dumpFindNext","<text> finds, select and scroll to it at dump area")){
 //			bCommandWorkedProperly=cmdFind();
 //		}else
-//		if(checkCmdValidity("dumpFindPrevious","<text> finds, select and scroll to it at dump area")){
+//		if(cc.checkCmdValidity("dumpFindPrevious","<text> finds, select and scroll to it at dump area")){
 //			bCommandWorkedProperly=cmdFind();
 //		}else
-		if(checkCmdValidity(cc.CMD_ECHO," simply echo something")){
-			bCommandWorkedProperly=cmdEcho();
+		if(cc.checkCmdValidity(cc.CMD_ECHO," simply echo something")){
+			bCommandWorked=cmdEcho();
 		}else
-		if(checkCmdValidity(cc.CMD_ELSE,"conditinal block")){
-			bCommandWorkedProperly=cmdElse();
+		if(cc.checkCmdValidity(cc.CMD_ELSE,"conditinal block")){
+			bCommandWorked=cmdElse();
 		}else
-		if(checkCmdValidity(cc.CMD_ELSE_IF,"<[!]<true|false>> conditional block")){
-			bCommandWorkedProperly=cmdElseIf();
+		if(cc.checkCmdValidity(cc.CMD_ELSE_IF,"<[!]<true|false>> conditional block")){
+			bCommandWorked=cmdElseIf();
 		}else
-		if(checkCmdValidity("execBatchCmdsFromFile ","<strFileName>")){
+		if(cc.checkCmdValidity("execBatchCmdsFromFile ","<strFileName>")){
 			String strFile = paramString(1);
 			if(strFile!=null){
 				astrExecConsoleCmdsQueue.addAll(fileLoad(strFile));
-				bCommandWorkedProperly=true;
+				bCommandWorked=true;
 			}
 		}else
-		if(checkCmdValidity("exit","the application")){
-			cmdExit();
-			bCommandWorkedProperly=true;
+		if(cc.checkCmdValidity("exit","the application")){
+			cc.cmdExit();
+			bCommandWorked=true;
 		}else
-		if(checkCmdValidity(cc.CMD_FIX_CURSOR ,"in case cursor is invisible")){
+		if(cc.checkCmdValidity(cc.CMD_FIX_CURSOR ,"in case cursor is invisible")){
 			if(efHK==null){
 				dumpWarnEntry("requires command: "+cc.CMD_HK_TOGGLE);
 			}else{
 				dumpInfoEntry("requesting: "+cc.CMD_FIX_CURSOR);
 				efHK.bFixInvisibleTextInputCursorHK=true;
 			}
-			bCommandWorkedProperly = true;
+			bCommandWorked = true;
 		}else
-		if(checkCmdValidity(cc.CMD_FIX_LINE_WRAP ,"in case words are overlapping")){
+		if(cc.checkCmdValidity(cc.CMD_FIX_LINE_WRAP ,"in case words are overlapping")){
 			cmdLineWrapDisableDumpArea();
-			bCommandWorkedProperly = true;
+			bCommandWorked = true;
 		}else
-		if(checkCmdValidity(cc.CMD_FIX_VISIBLE_ROWS_AMOUNT,"[iAmount] in case it is not showing as many rows as it should")){
+		if(cc.checkCmdValidity(cc.CMD_FIX_VISIBLE_ROWS_AMOUNT,"[iAmount] in case it is not showing as many rows as it should")){
 			iVisibleRowsAdjustRequest = paramInt(1);
 			if(iVisibleRowsAdjustRequest==null)iVisibleRowsAdjustRequest=0;
-			bCommandWorkedProperly=true;
+			bCommandWorked=true;
 		}else
-		if(checkCmdValidity(cc.CMD_FUNCTION,"<id> begins a function block")){
-			bCommandWorkedProperly=cmdFunctionBegin();
+		if(cc.checkCmdValidity(cc.CMD_FUNCTION,"<id> begins a function block")){
+			bCommandWorked=cmdFunctionBegin();
 		}else
-		if(checkCmdValidity(cc.CMD_FUNCTION_CALL,"<id> [parameters...] retrieve parameters values with ex.: ${id_1} ${id_2} ...")){
-			bCommandWorkedProperly=cmdFunctionCall();
+		if(cc.checkCmdValidity(cc.CMD_FUNCTION_CALL,"<id> [parameters...] retrieve parameters values with ex.: ${id_1} ${id_2} ...")){
+			bCommandWorked=cmdFunctionCall();
 		}else
-		if(checkCmdValidity(cc.CMD_FUNCTION_END,"ends a function block")){
-			bCommandWorkedProperly=cmdFunctionEnd();
+		if(cc.checkCmdValidity(cc.CMD_FUNCTION_END,"ends a function block")){
+			bCommandWorked=cmdFunctionEnd();
 		}else
-		if(checkCmdValidity("fpsLimit","[iMaxFps]")){
+		if(cc.checkCmdValidity("fpsLimit","[iMaxFps]")){
 			Integer iMaxFps = paramInt(1);
 			if(iMaxFps!=null){
 				fpslState.setMaxFps(iMaxFps);
-				bCommandWorkedProperly=true;
+				bCommandWorked=true;
 			}
 			dumpSubEntry("FpsLimit = "+fpslState.getFpsLimit());
 		}else
-		if(checkCmdValidity(cc.CMD_HELP,"[strFilter] show (filtered) available commands")){
+		if(cc.checkCmdValidity(cc.CMD_HELP,"[strFilter] show (filtered) available commands")){
 			cmdShowHelp(paramString(1));
 			/**
 			 * ALWAYS return TRUE here, to avoid infinite loop when improving some failed command help info!
 			 */
-			bCommandWorkedProperly=true; 
+			bCommandWorked=true; 
 		}else
-		if(checkCmdValidity(cc.CMD_HISTORY,"[strFilter] of issued commands (the filter results in sorted uniques)")){
-			bCommandWorkedProperly=cmdShowHistory();
+		if(cc.checkCmdValidity(cc.CMD_HISTORY,"[strFilter] of issued commands (the filter results in sorted uniques)")){
+			bCommandWorked=cmdShowHistory();
 		}else
-		if(checkCmdValidity(cc.CMD_HK_TOGGLE ,"[bEnable] allow hacks to provide workarounds")){
+		if(cc.checkCmdValidity(cc.CMD_HK_TOGGLE ,"[bEnable] allow hacks to provide workarounds")){
 			if(paramBooleanCheckForToggle(1)){
 				Boolean bEnable = paramBoolean(1);
 				if(efHK==null && (bEnable==null || bEnable)){
@@ -2762,23 +2601,23 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 					}
 				}
 				
-				bCommandWorkedProperly=true;
+				bCommandWorked=true;
 			}
 		}else
-		if(checkCmdValidity(cc.CMD_IF,"<[!]<true|false>> [cmd|alias] if cmd|alias is not present, this will be a multiline block start!")){
-			bCommandWorkedProperly=cmdIf();
+		if(cc.checkCmdValidity(cc.CMD_IF,"<[!]<true|false>> [cmd|alias] if cmd|alias is not present, this will be a multiline block start!")){
+			bCommandWorked=cmdIf();
 		}else
-		if(checkCmdValidity(cc.CMD_IF_END,"ends conditional block")){
-			bCommandWorkedProperly=cmdIfEnd();
+		if(cc.checkCmdValidity(cc.CMD_IF_END,"ends conditional block")){
+			bCommandWorked=cmdIfEnd();
 		}else
-		if(checkCmdValidity("initFileShow ","show contents of init file at dump area")){
+		if(cc.checkCmdValidity("initFileShow ","show contents of init file at dump area")){
 			dumpInfoEntry("Init file data: ");
 			for(String str : fileLoad(flInit)){
 				dumpSubEntry(str);
 			}
-			bCommandWorkedProperly=true;
+			bCommandWorked=true;
 		}else
-		if(checkCmdValidity(cc.CMD_LINE_WRAP_AT,"[iMaxChars] -1 = will trunc big lines, 0 = wrap will be automatic")){
+		if(cc.checkCmdValidity(cc.CMD_LINE_WRAP_AT,"[iMaxChars] -1 = will trunc big lines, 0 = wrap will be automatic")){
 			iConsoleMaxWidthInCharsForLineWrap = paramInt(1);
 			if(iConsoleMaxWidthInCharsForLineWrap!=null){
 				if(iConsoleMaxWidthInCharsForLineWrap==-1){
@@ -2786,45 +2625,56 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				}
 			}
 			updateWrapAt();
-			bCommandWorkedProperly=true;
+			bCommandWorked=true;
 		}else
-		if(checkCmdValidity("quit","the application")){
-			cmdExit();
-			bCommandWorkedProperly=true;
+		if(cc.checkCmdValidity("quit","the application")){
+			cc.cmdExit();
+			bCommandWorked=true;
 		}else
-		if(checkCmdValidity("showBinds","")){
+		if(cc.checkCmdValidity("showBinds","")){
 			dumpInfoEntry("Key bindings: ");
 			dumpSubEntry("Ctrl+B - marks dump area begin selection marker for copy");
 			dumpSubEntry("Ctrl+Del - clear input field");
 			dumpSubEntry("TAB - autocomplete (starting with)");
 			dumpSubEntry("Ctrl+TAB - autocomplete (contains)");
 			dumpSubEntry("Ctrl+/ - toggle input field comment");
-			bCommandWorkedProperly=true;
+			bCommandWorked=true;
 		}else
-		if(checkCmdValidity("showSetup","show restricted variables")){
+		if(cc.checkCmdValidity("showSetup","show restricted variables")){
 			for(String str:fileLoad(flSetup)){
 				dumpSubEntry(str);
 			}
-			bCommandWorkedProperly=true;
+			bCommandWorked=true;
 		}else
-		if(checkCmdValidity("statsFieldToggle","[bEnable] toggle simple stats field visibility")){
-			bCommandWorkedProperly=statsFieldToggle();
+//		if(cc.checkCmdValidity("showDump","<filter> show matching entries from dump log file")){
+//			String strFilter = paramString(1);
+//			if(strFilter!=null){
+//				for(String str:fileLoad(flLastDump)){
+//					if(str.toLowerCase().contains(strFilter)){
+//						dumpEntry(false, true, false, str);
+//					}
+//				}
+//				bCommandWorked=true;
+//			}
+//		}else
+		if(cc.checkCmdValidity("statsFieldToggle","[bEnable] toggle simple stats field visibility")){
+			bCommandWorked=statsFieldToggle();
 		}else
-		if(checkCmdValidity("statsShowAll","show all console stats")){
+		if(cc.checkCmdValidity("statsShowAll","show all console stats")){
 			dumpAllStats();
-			bCommandWorkedProperly=true;
+			bCommandWorked=true;
 		}else
-		if(checkCmdValidity("test","[...] temporary developer tests")){
+		if(cc.checkCmdValidity("test","[...] temporary developer tests")){
 			cmdTest();
 			if(efHK!=null)efHK.test();
-			bCommandWorkedProperly=true;
+			bCommandWorked=true;
 		}else
-		if(checkCmdValidity("varAdd","<varId> <[-]value>")){
-			bCommandWorkedProperly=cmdVarAdd(paramString(1),paramString(2),true,false);
+		if(cc.checkCmdValidity("varAdd","<varId> <[-]value>")){
+			bCommandWorked=cmdVarAdd(paramString(1),paramString(2),true,false);
 		}else
-//		if(checkCmdValidity(cc.CMD_VAR_SET,"[<varId> <value>] | [-varId] | ["+cc.getFilterToken()+"filter] - can be a number or a string, retrieve it's value with: ${varId}")){
+//		if(cc.checkCmdValidity(cc.CMD_VAR_SET,"[<varId> <value>] | [-varId] | ["+cc.getFilterToken()+"filter] - can be a number or a string, retrieve it's value with: ${varId}")){
 		if(
-			checkCmdValidity(cc.CMD_VAR_SET,
+			cc.checkCmdValidity(cc.CMD_VAR_SET,
 				"<[<varId> <value>] | [-varId]> "
 					+"Can be boolean(true/false, and after set accepts 1/0), number(integer/floating) or string; "
 					+"-varId will delete it; "
@@ -2832,15 +2682,15 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 					+"Restricted variables will have no effect; "
 			)
 		){
-			bCommandWorkedProperly=cmdVarSet();
+			bCommandWorked=cmdVarSet();
 		}else
-		if(checkCmdValidity("varSetCmp","<varIdBool> <value> <cmp> <value>")){
-			bCommandWorkedProperly=cmdVarSetCmp();
+		if(cc.checkCmdValidity("varSetCmp","<varIdBool> <value> <cmp> <value>")){
+			bCommandWorked=cmdVarSetCmp();
 		}else
-		if(checkCmdValidity("varShow","[["+cc.RESTRICTED_TOKEN+"]filter] list user or restricted variables.")){
-			bCommandWorkedProperly=cmdVarShow();
+		if(cc.checkCmdValidity("varShow","[["+cc.RESTRICTED_TOKEN+"]filter] list user or restricted variables.")){
+			bCommandWorked=cmdVarShow();
 		}else
-		if(checkCmdValidity(TOKEN_CMD_NOT_WORKING_YET+"zDisabledCommand"," just to show how to use it")){
+		if(cc.checkCmdValidity(TOKEN_CMD_NOT_WORKING_YET+"zDisabledCommand"," just to show how to use it")){
 			// keep this as reference
 		}else{
 //			if(strCmdLinePrepared!=null){
@@ -2850,45 +2700,11 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 //			}
 		}
 		
-		return bCommandWorkedProperly;
+		return bCommandWorked;
 	}
 	
 	protected boolean isStartupCommandsQueueDone(){
 		return bStartupCmdQueueDone;
-	}
-	
-	public static enum EDataBaseOperations{
-		/** saving also will shrink the DB */
-		save,
-		
-		load,
-		
-		show,
-		
-		/** A backup is made of the existing file. */
-		backup,
-		
-		;
-		public static String help(){
-			String str = null;
-			for(EDataBaseOperations e:values()){
-				if(str!=null){
-					str+="|";
-				}else{
-					str="";
-				}
-				str+=e.toString();
-			}
-			return "["+str+"] aliases and variables, plain text file";
-		}
-
-		public static ArrayList<String> getValuesAsArrayList() {
-			ArrayList<String> astr = new ArrayList<String>();
-			for(EDataBaseOperations e:values()){
-				astr.add(e.toString());
-			}
-			return astr;
-		}
 	}
 	
 	protected boolean cmdDb() {
@@ -3237,15 +3053,15 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		return false;
 	}
 	
-	private boolean checkFuncExecEnd() {
+	protected boolean checkFuncExecEnd() {
 		if(strCmdLineOriginal==null)return false;
 		return strCmdLineOriginal.startsWith(cc.RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS.toString());
 	}
-	private boolean checkFuncExecStart() {
+	protected boolean checkFuncExecStart() {
 		if(strCmdLineOriginal==null)return false;
 		return strCmdLineOriginal.startsWith(cc.RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS.toString());
 	}
-	private boolean cmdFunctionCall() {
+	protected boolean cmdFunctionCall() {
 		String strFunctionId = paramString(1);
 		
 		ArrayList<String> astrFuncParams = new ArrayList<String>();
@@ -3859,11 +3675,6 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	
 	protected float widthForDumpEntryField(){
 		return widthForListbox() -lstbx.getSlider().getSize().x -fSafetyMarginGUESSED;
-	}
-	
-	protected void cmdExit(){
-		sapp.stop();
-		System.exit(0);
 	}
 	
 	@Override

@@ -27,17 +27,27 @@
 
 package gui.console;
 
+import com.jme3.app.SimpleApplication;
+
 import gui.console.ReflexFill.IReflexFillCfg;
 import gui.console.ReflexFill.IReflexFillCfgVariant;
 import gui.console.ReflexFill.ReflexFillCfg;
 
 /**
  * All methods starting with "cmd" are directly accessible by user console commands.
+ * Here are all base command related methods.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
 public class ConsoleCommands implements IReflexFillCfg{
+	/**
+	 * TODO temporary variable used only during methods migration
+	 */
+	public ConsoleStateAbs csaTmp = null;
+	
+	protected SimpleApplication	sapp;
+	
 	/**
 	 * togglers
 	 */
@@ -218,5 +228,51 @@ public class ConsoleCommands implements IReflexFillCfg{
 		return ""+chCommandPrefix;
 	}
 	
+	protected void cmdExit(){
+		sapp.stop();
+		System.exit(0);
+	}
+	
+	protected boolean checkCmdValidityBoolTogglers(){
+		btgReferenceMatched=null;
+		for(BoolToggler btg : BoolToggler.getBoolTogglerListCopy()){
+			if(checkCmdValidity(btg.getCmdId(), "[bEnable] "+btg.getHelp(), true)){
+				btgReferenceMatched = btg;
+				break;
+			}
+		}
+		return btgReferenceMatched!=null;
+	}
+	protected boolean checkCmdValidity(String strValidCmd){
+		return checkCmdValidity(strValidCmd, null);
+	}
+	protected boolean checkCmdValidity(StringField strfValidCmd, String strComment){
+		return checkCmdValidity(strfValidCmd.toString(), strComment);
+	}
+	protected boolean checkCmdValidity(String strValidCmd, String strComment){
+		return checkCmdValidity(strValidCmd, strComment, false);
+	}
+	protected boolean checkCmdValidity(String strValidCmd, String strComment, boolean bSkipSortCheck){
+		if(csaTmp.strCmdLinePrepared==null){
+			if(strComment!=null){
+				strValidCmd+=commentToAppend(strComment);
+			}
+			
+			csaTmp.addCmdToValidList(strValidCmd,bSkipSortCheck);
+			
+			return false;
+		}
+		
+		if(RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(csaTmp.strCmdLinePrepared))return false;
+		if(csaTmp.isCommentedLine())return false;
+		if(csaTmp.strCmdLinePrepared.trim().isEmpty())return false;
+		
+//		String strCheck = strPreparedCmdLine;
+//		strCheck = strCheck.trim().split(" ")[0];
+		strValidCmd = strValidCmd.trim().split(" ")[0];
+		
+//		return strCheck.equalsIgnoreCase(strValidCmd);
+		return csaTmp.paramString(0).equalsIgnoreCase(strValidCmd);
+	}
 	
 }

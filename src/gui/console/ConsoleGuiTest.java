@@ -76,7 +76,7 @@ public class ConsoleGuiTest extends SimpleApplication {
 		protected boolean executePreparedCommand() {
 			boolean bOk = false;
 			
-			if(checkCmdValidity(CMD_END_USER_COMMAND_TEST,"[iHowMany] users working")){
+			if(cc.checkCmdValidity(CMD_END_USER_COMMAND_TEST,"[iHowMany] users working")){
 				bOk = endUserCustomMethod(paramInt(1));
 			}else{
 				return super.executePreparedCommand();
