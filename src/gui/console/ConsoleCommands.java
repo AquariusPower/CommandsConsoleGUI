@@ -32,6 +32,7 @@ import gui.console.ReflexFill.IReflexFillCfgVariant;
 import gui.console.ReflexFill.ReflexFillCfg;
 
 /**
+ * All methods starting with "cmd" are directly accessible by user console commands.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *

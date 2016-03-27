@@ -2982,12 +2982,12 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		return false;
 	}
 	
-	protected boolean hasChanged(ERestrictedVars rv){
+	protected boolean hasChanged(ERestrictedSetupLoadableVars rv){
 		String strValue = varGetValueString(""+cc.RESTRICTED_TOKEN+rv);
 		switch(rv){
-			case UserAliasListHashcode:
+			case userAliasListHashcode:
 				return !(""+aAliasList.hashCode()).equals(strValue);
-			case UserVariableListHashcode:
+			case userVariableListHashcode:
 				return !(""+tmUserVariables.hashCode()).equals(strValue);
 		}
 		
@@ -2995,8 +2995,8 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	}
 	
 	protected boolean isDatabaseChanged(){
-		if(hasChanged(ERestrictedVars.UserAliasListHashcode))return true;
-		if(hasChanged(ERestrictedVars.UserVariableListHashcode))return true;
+		if(hasChanged(ERestrictedSetupLoadableVars.userAliasListHashcode))return true;
+		if(hasChanged(ERestrictedSetupLoadableVars.userVariableListHashcode))return true;
 		
 		return false;
 	}
@@ -3503,7 +3503,17 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	protected void varSaveSetupFile(){
 		for(String strVarId : getVariablesIdentifiers(true)){
 			if(isRestricted(strVarId)){
-				fileAppendLine(getVarFile(strVarId),varReportPrepare(strVarId));
+				String strCommentOut="";
+				String strReadOnlyComment="";
+				try{ERestrictedSetupLoadableVars.valueOf(strVarId.substring(1));}catch(IllegalArgumentException e){
+					/**
+					 * comment non loadable restricted variables, like the ones set by commands
+					 */
+					strCommentOut=cc.getCommentPrefixStr();
+					strReadOnlyComment="(ReadOnly)";
+				}
+				
+				fileAppendLine(getVarFile(strVarId), strCommentOut+varReportPrepare(strVarId)+strReadOnlyComment);
 			}
 		}
 	}
@@ -3521,16 +3531,27 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	
 	protected String varReportPrepare(String strVarId) {
 		Object objValue = getVarHT(strVarId).get(strVarId);
-		return cc.getCommandPrefix()
-			+cc.CMD_VAR_SET.toString()
-			+" "
-			+strVarId
-			+" "
-			+"\""+objValue+"\""
-			+" "
-			+"#"+objValue.getClass().getSimpleName()
-			+" "
-			+(isRestricted(strVarId)?"(Restricted)":"(User)");
+		String str="";
+		
+		str+=cc.getCommandPrefix();
+		str+=cc.CMD_VAR_SET.toString();
+		str+=" ";
+		str+=strVarId;
+		str+=" ";
+		if(objValue!=null){
+			str+="\""+objValue+"\"";
+			str+=" ";
+		}
+		str+="#";
+		if(objValue!=null){
+			str+=objValue.getClass().getSimpleName();
+		}else{
+			str+="(ValueNotSet)";
+		}
+		str+=" ";
+		str+=(isRestricted(strVarId)?"(Restricted)":"(User)");
+		
+		return str;
 	}
 	
 	protected void varReport(String strVarId) {
@@ -4038,9 +4059,12 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		return rfcfg;
 	}
 	
-	enum ERestrictedVars{
-		UserVariableListHashcode,
-		UserAliasListHashcode,
+	/**
+	 * These variables can be loaded from the setup file!
+	 */
+	enum ERestrictedSetupLoadableVars{
+		userVariableListHashcode,
+		userAliasListHashcode,
 	}
 	
 	protected void setupRecreateFile(){
@@ -4052,19 +4076,19 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		fileAppendLine(flSetup, cc.getCommentPrefix()
 			+" To set overrides use the user init config file.");
 		fileAppendLine(flSetup, cc.getCommentPrefix()
-			+" For command's values, the commands usage are required, the variable is just a holder of their setup value.");
+			+" For command's values, the commands usage are required, the variable is just an info about their setup value.");
 		fileAppendLine(flSetup, cc.getCommentPrefix()
-			+" Some values may be read to provide functionalities not directly usable by users.");
+			+" Some values will be read tho to provide restricted functionalities not accessible to users.");
 		
 		setupVars(true);
 	}
 	
 	protected void setupVars(boolean bSave){
-		varSet(""+cc.RESTRICTED_TOKEN+ERestrictedVars.UserVariableListHashcode,
+		varSet(""+cc.RESTRICTED_TOKEN+ERestrictedSetupLoadableVars.userVariableListHashcode,
 			""+tmUserVariables.hashCode(),
 			false);
 		
-		varSet(""+cc.RESTRICTED_TOKEN+ERestrictedVars.UserAliasListHashcode,
+		varSet(""+cc.RESTRICTED_TOKEN+ERestrictedSetupLoadableVars.userAliasListHashcode,
 			""+aAliasList.hashCode(),
 			false);
 		
