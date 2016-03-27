@@ -42,6 +42,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -86,12 +87,10 @@ import com.simsilica.lemur.ListBox;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.component.BorderLayout;
-import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.component.TextEntryComponent;
 import com.simsilica.lemur.core.VersionedList;
 import com.simsilica.lemur.event.KeyAction;
 import com.simsilica.lemur.event.KeyActionListener;
-import com.simsilica.lemur.style.Attributes;
 import com.simsilica.lemur.style.BaseStyles;
 import com.simsilica.lemur.style.Styles;
 
@@ -163,7 +162,8 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	protected boolean	bEnabled;
 	protected VersionedList<String>	vlstrDumpEntriesSlowedQueue = new VersionedList<String>();;
 	protected VersionedList<String>	vlstrDumpEntries = new VersionedList<String>();;
-	protected VersionedList<String>	vlstrAutoCompleteHint = new VersionedList<String>();;
+	protected AbstractList<String> vlstrAutoCompleteHint;
+	protected Node lstbxAutoCompleteHint;
 	protected int	iShowRows = 1;
 	protected Integer	iToggleConsoleKey;
 	protected Integer	iVisibleRowsAdjustRequest = 0; //0 means dynamic
@@ -205,6 +205,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	protected float	fConsoleHeightPerc = fConsoleHeightPercDefault;
 	protected ArrayList<String>	astrCmdAndParams = new ArrayList<String>();
 	protected ArrayList<String>	astrExecConsoleCmdsQueue = new ArrayList<String>();
+	protected ArrayList<PreQueueSubList>	astrExecConsoleCmdsPreQueue = new ArrayList<PreQueueSubList>();
 	protected File	flInit;
 	protected File	flDB;
 	protected float	fLstbxHeight;
@@ -242,7 +243,6 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	protected float	fWidestCharForCurrentStyleFont;
 	protected boolean	bKeyShiftIsPressed;
 	protected boolean	bKeyControlIsPressed;
-	protected ListBox<String>	lstbxAutoCompleteHint;
 	protected Vector3f	v3fConsoleSize;
 	protected Vector3f	v3fApplicationWindowSize;
 //	protected String	strPreviousCmdHistoryKey;
@@ -264,15 +264,28 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	protected float	fTPF;
 	protected long	lNanoFrameTime;
 	protected long	lNanoFpsLimiterTime;
-	protected Boolean	bIfConditionIsValid;
+//	protected Boolean	bIfConditionIsValid;
 	protected ArrayList<DumpEntry> adeDumpEntryFastQueue = new ArrayList<DumpEntry>();
 	protected Button	btnCut;
 	protected File	flSetup;
-	protected ArrayList<ConditionalNested> aIfConditionNestedList = new ArrayList<ConditionalNested>();
-	protected Boolean	bIfConditionExecCommands;
+//	protected ArrayList<ConditionalNested> aIfConditionNestedList = new ArrayList<ConditionalNested>();
+//	protected Boolean	bIfConditionExecCommands;
 	protected String	strPrepareFunctionBlockForId;
 	protected boolean	bFuncCmdLineRunning;
 	protected boolean	bFuncCmdLineSkipTilEnd;
+	protected long lLastUniqueId = 0;
+
+//	private boolean	bUsePreQueue = false; 
+	
+	protected static class PreQueueSubList{
+		TimedDelay tdSleep = null;
+		String strUId = ConsoleStateAbs.i().getNextUniqueId();
+		ArrayList<String> astrCmdList = new ArrayList<String>();
+		boolean	bPrepend = false;
+		public String getPreparedCommentUId(){
+			return ConsoleStateAbs.i().cc.commentToAppend("UId=\""+strUId+"\"");
+		}
+	}
 	
 	protected static class ConditionalNested{
 		public ConditionalNested(boolean bCondition){
@@ -336,13 +349,13 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		setupVars(false);
 		flSetup = new File(fileNamePrepareCfg(strFileSetup,false));
 		if(flSetup.exists()){
-			addToExecConsoleCommandQueue(fileLoad(flSetup));
+			addExecConsoleCommandBlockToQueue(fileLoad(flSetup));
 		}
 		
 		// init user cfg
 		flInit = new File(fileNamePrepareCfg(strFileInitConsCmds,false));
 		if(flInit.exists()){
-			addToExecConsoleCommandQueue(fileLoad(flInit));
+			addExecConsoleCommandBlockToQueue(fileLoad(flInit));
 		}else{
 			fileAppendLine(flInit, cc.getCommentPrefix()+" User console commands here will be executed at startup.");
 		}
@@ -351,21 +364,23 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		flDB = new File(fileNamePrepareCfg(strFileDatabase,false));
 		
 		// other inits
-		addToExecConsoleCommandQueue(cc.CMD_FIX_LINE_WRAP);
-		addToExecConsoleCommandQueue(cc.CMD_CONSOLE_SCROLL_BOTTOM);
-		addToExecConsoleCommandQueue(cc.CMD_DB+" "+EDataBaseOperations.load);
-		addToExecConsoleCommandQueue(
+		addExecConsoleCommandToQueue(cc.CMD_FIX_LINE_WRAP);
+		addExecConsoleCommandToQueue(cc.CMD_CONSOLE_SCROLL_BOTTOM);
+		addExecConsoleCommandToQueue(cc.CMD_DB+" "+EDataBaseOperations.load);
+		addExecConsoleCommandToQueue(
 			cc.CMD_DB+" "+EDataBaseOperations.save+" "+cc.getCommentPrefix()+"to shrink it");
 		/**
 		 * KEEP AS LAST queued cmds below!!!
 		 */
 		// must be the last queued command after all init ones!
-		addToExecConsoleCommandQueue(cc.btgShowExecQueuedInfo.getCmdIdAsCommand(true));
+		addExecConsoleCommandToQueue(cc.btgShowExecQueuedInfo.getCmdIdAsCommand(true));
 		// end of initialization
-		addToExecConsoleCommandQueue(cc.RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE);
+		addExecConsoleCommandToQueue(cc.RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE);
+		// TODO temporary workaround, pre-queue cannot be enable from start yet...
+		addExecConsoleCommandToQueue(cc.btgPreQueue.getCmdIdAsCommand(true));
 		if(bInitiallyClosed){
 			// after all, close the console
-			addToExecConsoleCommandQueue(cc.CMD_CLOSE_CONSOLE);
+			addExecConsoleCommandToQueue(cc.CMD_CLOSE_CONSOLE);
 		}
 		
 		astrStyleList.add(BaseStyles.GLASS);
@@ -509,11 +524,6 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		tfInput = new TextField(""+cc.getCommandPrefix(),strStyle);
 		fInputHeight = retrieveBitmapTextFor(tfInput).getLineHeight();
 		ctnrConsole.addChild( tfInput, BorderLayout.Position.South );
-		
-		// auto complete hint
-//		tfAutoCompleteHint = new TextField("No hints yet...",strStyle);
-		lstbxAutoCompleteHint = new ListBox<String>(new VersionedList<String>(),strStyle);
-		lstbxAutoCompleteHint.setModel(vlstrAutoCompleteHint);
 		
 		mapKeys();
 		
@@ -918,9 +928,17 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		}
 		setInputField(str);
 	}
+	
 	protected boolean isHintActive(){
 		return lstbxAutoCompleteHint.getParent()!=null;
 	}
+	
+	protected abstract void clearHintSelection();
+	protected abstract Integer getHintIndex();
+	protected abstract ConsoleStateAbs setHintIndex(Integer i);
+	protected abstract ConsoleStateAbs setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines);
+	protected abstract void scrollHintToIndex(int i);
+	protected abstract void lineWrapDisableForChildrenOf(Node gp);
 	
 	protected boolean navigateHint(int iAdd){
 		if(!isHintActive())return false;
@@ -933,7 +951,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			int iMaxIndex = vlstrAutoCompleteHint.size()-1;
 			if(iMaxIndex<0)return false;
 			
-			Integer iCurrentIndex = lstbxAutoCompleteHint.getSelectionModel().getSelection();
+			Integer iCurrentIndex = getHintIndex();
 			if(iCurrentIndex==null)iCurrentIndex=0;
 			
 			iCurrentIndex+=iAdd;
@@ -941,7 +959,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			if(iCurrentIndex<-1)iCurrentIndex=-1; //will clear the listbox selection
 			if(iCurrentIndex>iMaxIndex)iCurrentIndex=iMaxIndex;
 			
-			lstbxAutoCompleteHint.getSelectionModel().setSelection(iCurrentIndex);
+			setHintIndex(iCurrentIndex);
 			
 			scrollHintToIndex(iCurrentIndex);
 			
@@ -953,7 +971,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	
 	protected String getSelectedHint(){
 		if(!isHintActive())return null;
-		Integer i = lstbxAutoCompleteHint.getSelectionModel().getSelection();
+		Integer i = getHintIndex();
 		if(i==null)return null;
 		return vlstrAutoCompleteHint.get(i);
 	}
@@ -1062,7 +1080,10 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		updateStats();
 		updateScrollToBottom();
 		if(efHK!=null)efHK.updateHK();
-		updateExecConsoleCmdQueue();
+		
+		updateExecCmdPreQueueDispatcher(); //before exec queue 
+		updateExecConsoleCmdQueue(); // after pre queue
+		
 		updateInputFieldFillWithSelectedEntry();
 		updateAutoCompleteHint();
 		updateDumpQueueEntry();
@@ -1072,11 +1093,20 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		GuiGlobals.getInstance().requestFocus(tfInput);
 	}
 	
+	/**
+	 * TODO use base 36 (max alphanum chars amount)
+	 * @return
+	 */
+	protected String getNextUniqueId(){
+		return ""+(++lLastUniqueId);
+	}
+	
 	protected void updateToggles() {
 		if(cc.btgEngineStatsView.checkChangedAndUpdate())updateEngineStats();
 		if(cc.btgEngineStatsFps.checkChangedAndUpdate())updateEngineStats();
 		if(cc.btgFpsLimit.checkChangedAndUpdate())fpslState.setEnabled(cc.btgFpsLimit.b());
 		if(cc.btgConsoleCpuRest.checkChangedAndUpdate())tdLetCpuRest.setActive(cc.btgConsoleCpuRest.b());
+//		if(cc.btgPreQueue.checkChangedAndUpdate())bUsePreQueue=cc.btgPreQueue.b();
 	}
 	protected void resetCmdHistoryCursor(){
 		iCmdHistoryCurrentIndex = astrCmdHistory.size();
@@ -1096,6 +1126,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		strPreviousInputValue=strNewInputValue;
 		iCmdHistoryPreviousIndex=iCmdHistoryCurrentIndex;
 	}
+	
 	protected void updateAutoCompleteHint() {
 		String strInputText = getInputText();
 		if(strInputText.isEmpty())return;
@@ -1137,7 +1168,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			
 			vlstrAutoCompleteHint.clear();
 			vlstrAutoCompleteHint.addAll(astr);
-			lstbxAutoCompleteHint.getSelectionModel().setSelection(-1);
+			clearHintSelection();
 			
 			Node nodeParent = sapp.getGuiNode();
 			if(!nodeParent.hasChild(lstbxAutoCompleteHint)){
@@ -1162,13 +1193,12 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			int iMinLinesGUESSED = 3; //seems to be required because the slider counts as 3 (up arrow, thumb, down arrow)
 			float fMinimumHeightGUESSED = fEntryHeightGUESSED*iMinLinesGUESSED;
 			if(fHintHeight<fMinimumHeightGUESSED)fHintHeight=fMinimumHeightGUESSED;
-			lstbxAutoCompleteHint.setPreferredSize(new Vector3f(
-				widthForListbox(),
-				fHintHeight, //fInputHeight*iCount,
-				0));
-			lstbxAutoCompleteHint.setVisibleItems(iVisibleItems);//astr.size());
+			setHintBoxSize(new Vector3f(widthForListbox(),fHintHeight,0), iVisibleItems);
+//			lstbxAutoCompleteHint.setPreferredSize(new Vector3f(
+//				);
+//			lstbxAutoCompleteHint.setVisibleItems(iVisibleItems);//astr.size());
 			
-			lineWrapDisableFor(lstbxAutoCompleteHint.getGridPanel());
+			lineWrapDisableForChildrenOf(lstbxAutoCompleteHint);
 			
 			scrollHintToIndex(0);
 		}else{
@@ -1178,9 +1208,10 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		strInputTextPrevious = strInputText;
 	}
 	
-	protected abstract void scrollHintToIndex(int i);
-	
-	protected abstract void closeHint();
+	protected void closeHint(){
+		vlstrAutoCompleteHint.clear();
+		lstbxAutoCompleteHint.removeFromParent();
+	}
 	
 	/**
 	 * Validates if the first extracted word is a valid command.
@@ -1353,15 +1384,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	 * this is to fix the dump entry by disallowing automatic line wrapping
 	 */
 	protected void cmdLineWrapDisableDumpArea(){
-		lineWrapDisableFor(lstbx.getGridPanel());
-	}
-	
-	protected void lineWrapDisableFor(GridPanel gp){
-		for(Spatial spt:gp.getChildren()){
-			if(spt instanceof Button){
-				retrieveBitmapTextFor((Button)spt).setLineWrapMode(LineWrapMode.NoWrap);
-			}
-		}
+		lineWrapDisableForChildrenOf(lstbx);
 	}
 	
 	protected void updateVisibleRowsAmount(){
@@ -1413,7 +1436,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		cmdLineWrapDisableDumpArea();
 	}
 	
-	protected BitmapText retrieveBitmapTextFor(Panel pnl){
+	protected BitmapText retrieveBitmapTextFor(Node pnl){
 		for(Spatial c : pnl.getChildren()){
 			if(c instanceof BitmapText){
 				return (BitmapText)c;
@@ -1518,39 +1541,121 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		return bIsCmd;
 	}
 	
-	protected void addToExecConsoleCommandQueue(ArrayList<String> astrCmdList){
-		addToExecConsoleCommandQueue(astrCmdList,false,true);
+	protected void addExecConsoleCommandBlockToQueue(ArrayList<String> astrCmdList){
+		addExecConsoleCommandBlockToQueue(astrCmdList,false,true);
 	}
 	/**
 	 * 
 	 * @param astrCmdList
 	 * @param bPrepend will append if false
 	 */
-	protected void addToExecConsoleCommandQueue(ArrayList<String> astrCmdList, boolean bPrepend, boolean bShowExecIndex){
-		astrCmdList = new ArrayList<String>(astrCmdList);
-		
+	protected void addExecConsoleCommandBlockToQueue(ArrayList<String> astrCmdList, boolean bPrepend, boolean bShowExecIndex){
+		if(cc.btgPreQueue.b()){
+			/**
+			 * TODO still unable to startup with pre-queue enabled...
+			 */
+			addExecConsoleCommandBlockToPreQueue(astrCmdList, bPrepend, bShowExecIndex);
+		}else{
+			ArrayList<String> astrCmdListCopy = new ArrayList<String>(astrCmdList);
+			
+			if(bShowExecIndex){
+				for(int i=0;i<astrCmdListCopy.size();i++){
+					astrCmdListCopy.set(i, astrCmdListCopy.get(i)+cc.commentToAppend("ExecIndex="+i));
+				}
+			}
+			
+			if(bPrepend){
+				Collections.reverse(astrCmdListCopy);
+			}
+			for(String strCmd:astrCmdListCopy){
+				addExecConsoleCommandToQueue(strCmd, bPrepend);
+			}
+		}
+	}
+	protected void addExecConsoleCommandBlockToPreQueue(ArrayList<String> astrCmdList, boolean bPrepend, boolean bShowExecIndex){
+		PreQueueSubList pqe = new PreQueueSubList();
+		pqe.bPrepend=bPrepend;
+		pqe.astrCmdList = new ArrayList<String>(astrCmdList);
+		for(int i=0;i<pqe.astrCmdList.size();i++){
+			pqe.astrCmdList.set(i, pqe.astrCmdList.get(i)+pqe.getPreparedCommentUId());
+		}
 		if(bShowExecIndex){
-			for(int i=0;i<astrCmdList.size();i++){
-				astrCmdList.set(i, 
-				astrCmdList.get(i)+cc.commentToAppend("ExecIndex="+i));
+			for(int i=0;i<pqe.astrCmdList.size();i++){
+				pqe.astrCmdList.set(i, pqe.astrCmdList.get(i)+cc.commentToAppend("ExecIndex="+i)
+				);
 			}
 		}
 		
-		if(bPrepend){
-			Collections.reverse(astrCmdList);
+		astrExecConsoleCmdsPreQueue.add(pqe);
+		dumpDevInfoEntry("AddedCommandBlock"+pqe.getPreparedCommentUId());
+	}
+	
+	protected boolean doesCmdQueueStillHasUId(String strUId){
+		for(String strCmd:astrExecConsoleCmdsQueue){
+			if(strCmd.contains(strUId))return true;
 		}
-		
-		for(String str:astrCmdList){
-			addToExecConsoleCommandQueue(str, bPrepend);
+		return false;
+	}
+	
+	protected void updateExecCmdPreQueueDispatcher(){
+		for(PreQueueSubList pqe:astrExecConsoleCmdsPreQueue.toArray(new PreQueueSubList[0])){
+			if(pqe.tdSleep!=null){
+				if(pqe.tdSleep.isReady()){
+					if(doesCmdQueueStillHasUId(pqe.getPreparedCommentUId())){
+						/**
+						 * will wait all commands of this same pre queue list
+						 * to complete, before continuing, in case the delay was too short.
+						 */
+						continue;
+					}else{
+						pqe.tdSleep=null;
+					}
+				}else{
+					continue;
+				}
+			}
+			
+			if(pqe.astrCmdList.size()==0){
+				astrExecConsoleCmdsPreQueue.remove(pqe);
+			}else{
+				ArrayList<String> astrCmdListFast = new ArrayList<String>();
+				
+				while(pqe.astrCmdList.size()>0){
+					String strCmd = pqe.astrCmdList.remove(0);
+					String strCmdBase = extractCommandPart(strCmd, 0);
+					if(strCmdBase==null)continue;
+					
+					if(cc.CMD_SLEEP.equals(strCmdBase)){
+						String strParam1 = extractCommandPart(strCmd, 1);
+						Float fDelay = Float.parseFloat(strParam1);
+						pqe.tdSleep = new TimedDelay(fDelay);
+						pqe.tdSleep.updateTime();
+						dumpDevInfoEntry(strCmd);
+						break;
+					}else{
+						astrCmdListFast.add(strCmd);
+					}
+				}
+				
+				if(astrCmdListFast.size()>0){
+					if(pqe.bPrepend){
+						Collections.reverse(astrCmdListFast);
+					}
+					for(String str:astrCmdListFast){
+						addExecConsoleCommandToQueue(str, pqe.bPrepend);
+					}
+				}
+				
+			}
 		}
 	}
-	protected void addToExecConsoleCommandQueue(StringField strfFullCmdLine){
-		addToExecConsoleCommandQueue(strfFullCmdLine.toString());
+	protected void addExecConsoleCommandToQueue(StringField sfFullCmdLine){
+		addExecConsoleCommandToQueue(sfFullCmdLine.toString());
 	}
-	protected void addToExecConsoleCommandQueue(String strFullCmdLine){
-		addToExecConsoleCommandQueue(strFullCmdLine,false);
+	protected void addExecConsoleCommandToQueue(String strFullCmdLine){
+		addExecConsoleCommandToQueue(strFullCmdLine,false);
 	}
-	protected void addToExecConsoleCommandQueue(String strFullCmdLine, boolean bPrepend){
+	protected void addExecConsoleCommandToQueue(String strFullCmdLine, boolean bPrepend){
 		strFullCmdLine=strFullCmdLine.trim();
 		
 		if(strFullCmdLine.startsWith(""+cc.getCommentPrefix()))return;
@@ -2146,9 +2251,13 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				/**
 				 * replace by propagating the existing comment to each part that will be executed
 				 */
-				astrMulti.set(i, astrMulti.get(i).trim()+" "+cc.getCommentPrefix()+"SplitCmdLine "+strComment);
+				astrMulti.set(i, astrMulti.get(i).trim()
+					+(strComment.isEmpty()?"":cc.commentToAppend(strComment))
+					+cc.commentToAppend("SplitCmdLine")
+				);
+//				astrMulti.set(i, astrMulti.get(i).trim()+" "+cc.getCommentPrefix()+"SplitCmdLine "+strComment);
 			}
-			addToExecConsoleCommandQueue(astrMulti,true,true);
+			addExecConsoleCommandBlockToQueue(astrMulti,true,true);
 			return cc.RESTRICTED_CMD_SKIP_CURRENT_COMMAND.toString();
 		}
 		
@@ -2456,7 +2565,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				if(!alias.strAliasId.toLowerCase().equals(strAliasId))continue;
 				
 				if(!alias.bBlocked){
-					addToExecConsoleCommandQueue(alias.strCmdLine
+					addExecConsoleCommandToQueue(alias.strCmdLine
 						+cc.commentToAppend("alias="+alias.strAliasId), true);
 					return true;
 				}else{
@@ -2521,18 +2630,19 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 //			bCommandWorkedProperly=cmdFind();
 //		}else
 		if(cc.checkCmdValidity(cc.CMD_ECHO," simply echo something")){
-			bCommandWorked=cmdEcho();
+			bCommandWorked=cc.cmdEcho();
 		}else
 		if(cc.checkCmdValidity(cc.CMD_ELSE,"conditinal block")){
-			bCommandWorked=cmdElse();
+			bCommandWorked=cc.cmdElse();
 		}else
 		if(cc.checkCmdValidity(cc.CMD_ELSE_IF,"<[!]<true|false>> conditional block")){
-			bCommandWorked=cmdElseIf();
+			bCommandWorked=cc.cmdElseIf();
 		}else
 		if(cc.checkCmdValidity("execBatchCmdsFromFile ","<strFileName>")){
 			String strFile = paramString(1);
 			if(strFile!=null){
-				astrExecConsoleCmdsQueue.addAll(fileLoad(strFile));
+				addExecConsoleCommandBlockToQueue(fileLoad(strFile));
+//				astrExecConsoleCmdsQueue.addAll(fileLoad(strFile));
 				bCommandWorked=true;
 			}
 		}else
@@ -2605,10 +2715,10 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			}
 		}else
 		if(cc.checkCmdValidity(cc.CMD_IF,"<[!]<true|false>> [cmd|alias] if cmd|alias is not present, this will be a multiline block start!")){
-			bCommandWorked=cmdIf();
+			bCommandWorked=cc.cmdIf();
 		}else
 		if(cc.checkCmdValidity(cc.CMD_IF_END,"ends conditional block")){
-			bCommandWorked=cmdIfEnd();
+			bCommandWorked=cc.cmdIfEnd();
 		}else
 		if(cc.checkCmdValidity("initFileShow ","show contents of init file at dump area")){
 			dumpInfoEntry("Init file data: ");
@@ -2644,6 +2754,15 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			for(String str:fileLoad(flSetup)){
 				dumpSubEntry(str);
 			}
+			bCommandWorked=true;
+		}else
+		if(cc.checkCmdValidity(cc.CMD_SLEEP,"<fDelay> will wait before executing next command in the command block")){
+			/**
+			 * This is only used on the pre-queue, 
+			 * here it is ignored.
+			 */
+			if(!cc.btgPreQueue.b())dumpWarnEntry(cc.CMD_SLEEP+" only works with pre-queue enabled");
+			dumpWarnEntry(cc.CMD_SLEEP+" only works on command blocks like alias, functions, running a file");
 			bCommandWorked=true;
 		}else
 //		if(cc.checkCmdValidity("showDump","<filter> show matching entries from dump log file")){
@@ -2776,7 +2895,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				 * prepend on the queue is important mainly at the initialization
 				 */
 				dumpInfoEntry("Loading Console Database:");
-				addToExecConsoleCommandQueue(fileLoad(flDB),true,false);
+				addExecConsoleCommandBlockToQueue(fileLoad(flDB),true,false);
 				return true;
 			case backup:
 				return databaseBackup();
@@ -2873,21 +2992,6 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		}
 		
 		return bOk;
-	}
-	protected boolean cmdEcho() {
-		String strToEcho="";
-		String strPart="";
-		int iParam=1;
-		while(strPart!=null){
-			strToEcho+=strPart;
-			strToEcho+=" ";
-			strPart = paramString(iParam++);
-		}
-		strToEcho=strToEcho.trim();
-		
-		dumpEntry(strToEcho);
-		
-		return true;
 	}
 	
 	protected boolean cmdShowHistory() {
@@ -3025,11 +3129,11 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		}else
 		if(strCmp.equals("||")){
 			return varSet(strVarId, ""+
-				(parseBoolean(strValueLeft) || parseBoolean(strValueRight)), true);
+				(Misc.i().parseBoolean(strValueLeft) || Misc.i().parseBoolean(strValueRight)), true);
 		}else
 		if(strCmp.equals("&&")){
 			return varSet(strVarId, ""+
-				(parseBoolean(strValueLeft) && parseBoolean(strValueRight)), true);
+				(Misc.i().parseBoolean(strValueLeft) && Misc.i().parseBoolean(strValueRight)), true);
 		}else
 		if(strCmp.equals(">")){
 			return varSet(strVarId, ""+
@@ -3087,7 +3191,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 					cc.CMD_VAR_SET.toString()+" "+cc.getVarDeleteToken()+strUnsetVar);
 			}
 			astrFuncBlockToExec.add(cc.RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS+" "+strFunctionId);
-			addToExecConsoleCommandQueue(astrFuncBlockToExec, true, true);
+			addExecConsoleCommandBlockToQueue(astrFuncBlockToExec, true, true);
 		}
 		
 		return true;
@@ -3130,111 +3234,13 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		return true;
 	}
 	
-	protected boolean cmdIf() {
-		return cmdIf(false);
-	}
-	protected boolean cmdIf(boolean bSkipNesting) {
-		bIfConditionIsValid=false;
-		
-		String strCondition = paramString(1);
-		
-		boolean bNegate = false;
-		if(strCondition.startsWith("!")){
-			strCondition=strCondition.substring(1);
-			bNegate=true;
-		}
-		
-		Boolean bCondition = null;
-		try{bCondition = parseBoolean(strCondition);}catch(NumberFormatException e){};//accepted exception
-		
-		if(bNegate)bCondition=!bCondition;
-		
-		if(bCondition==null){
-			dumpWarnEntry("Invalid condition: "+strCondition);
-			return false;
-		}
-		
-		String strCmds = paramStringConcatenateAllFrom(2);
-		if(strCmds==null)strCmds="";
-		strCmds.trim();
-		if(strCmds.isEmpty() || strCmds.startsWith(cc.getCommentPrefixStr())){
-			if(bSkipNesting){
-				ConditionalNested cn = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
-				cn.bCondition = bCondition;
-			}else{
-				aIfConditionNestedList.add(new ConditionalNested(bCondition));
-			}
-			
-			bIfConditionExecCommands=bCondition;
-		}else{
-			if(!bSkipNesting){
-				if(bCondition){
-					addToExecConsoleCommandQueue(strCmds,true);
-				}
-			}
-		}
-		
-		return true;
-	}
-	
-	protected boolean cmdElse(){
-//		bIfConditionExecCommands=!aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
-		ConditionalNested cn = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
-		bIfConditionExecCommands = !cn.bCondition;
-		cn.bIfEndIsRequired = true;
-		
-		return true;
-	}
-	
-	protected boolean cmdElseIf(){
-		ConditionalNested cn = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
-		if(cn.bIfEndIsRequired){
-			dumpExceptionEntry(new NullPointerException("command "+cc.CMD_ELSE_IF.toString()
-				+" is missplaced, ignoring"));
-			bIfConditionExecCommands=false; //will also skip this block commands
-			return false;
-		}
-		
-		boolean bConditionSuccessAlready = cn.bCondition;
-		
-		if(bConditionSuccessAlready){
-			/**
-			 * if one of the conditions was successful, will skip all the remaining ones
-			 */
-			bIfConditionExecCommands=false;
-		}else{
-			return cmdIf(true);
-		}
-		
-		return true;
-	}
-	
-	protected boolean cmdIfEnd(){
-		if(aIfConditionNestedList.size()>0){
-			aIfConditionNestedList.remove(aIfConditionNestedList.size()-1);
-			
-			if(aIfConditionNestedList.size()==0){
-				bIfConditionExecCommands=null;
-//				bIfEndIsRequired = false;
-			}else{
-				ConditionalNested cn = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
-				bIfConditionExecCommands = cn.bCondition;
-			}
-		}else{
-			dumpExceptionEntry(new NullPointerException("pointless condition ending..."));
-			return false;
-		}
-		
-		return true;
-	}
-	
-	protected Boolean parseBoolean(String strValue){
-		if(strValue.equalsIgnoreCase("true"))return new Boolean(true);
-		if(strValue.equalsIgnoreCase("1"))return new Boolean(true);
-		if(strValue.equalsIgnoreCase("false"))return new Boolean(false);
-		if(strValue.equalsIgnoreCase("0"))return new Boolean(false);
-		throw new NumberFormatException("invalid boolean value: "+strValue);
-	}
+//	protected Boolean parseBoolean(String strValue){
+//		if(strValue.equalsIgnoreCase("true"))return new Boolean(true);
+//		if(strValue.equalsIgnoreCase("1"))return new Boolean(true);
+//		if(strValue.equalsIgnoreCase("false"))return new Boolean(false);
+//		if(strValue.equalsIgnoreCase("0"))return new Boolean(false);
+//		throw new NumberFormatException("invalid boolean value: "+strValue);
+//	}
 	
 	/**
 	 * In case variable exists will be this method.
@@ -3257,7 +3263,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 //		if(objValueCurrent!=null){
 			if(Boolean.class.isAssignableFrom(objValueCurrent.getClass())){
 				// boolean is always overwrite
-				objValueNew = parseBoolean(strValueAdd);
+				objValueNew = Misc.i().parseBoolean(strValueAdd);
 			}else
 			if(Long.class.isAssignableFrom(objValueCurrent.getClass())){
 				Long lValueCurrent = (Long)objValueCurrent;
@@ -3416,9 +3422,9 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		 * Double would parse a Long.
 		 * Boolean would be accepted by String that accepts everything. 
 		 */
-		if(!bOk)try{bOk=varApply(strVarId, Long  .parseLong  (strValue),bSave);}catch(NumberFormatException e){}// accepted exception!
-		if(!bOk)try{bOk=varApply(strVarId, Double.parseDouble(strValue),bSave);}catch(NumberFormatException e){}// accepted exception!
-		if(!bOk)try{bOk=varApply(strVarId, parseBoolean      (strValue),bSave);}catch(NumberFormatException e){}// accepted exception!
+		if(!bOk)try{bOk=varApply(strVarId, Long  .parseLong     (strValue),bSave);}catch(NumberFormatException e){}// accepted exception!
+		if(!bOk)try{bOk=varApply(strVarId, Double.parseDouble   (strValue),bSave);}catch(NumberFormatException e){}// accepted exception!
+		if(!bOk)try{bOk=varApply(strVarId, Misc.i().parseBoolean(strValue),bSave);}catch(NumberFormatException e){}// accepted exception!
 		if(!bOk)bOk=varApply(strVarId,strValue,bSave);
 		
 		return bOk;
@@ -3514,18 +3520,18 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 					if(!bCmdWorkDone)bCmdWorkDone = functionEndCheck(strCmdLineOriginal); //before feed
 					if(!bCmdWorkDone)bCmdWorkDone = functionFeed(strCmdLineOriginal);
 				}else
-				if(bIfConditionExecCommands!=null && !bIfConditionExecCommands){
+				if(cc.bIfConditionExecCommands!=null && !cc.bIfConditionExecCommands){
 					/**
 					 * These are capable of stopping the skipping.
 					 */
 					if(cc.CMD_ELSE_IF.equals(paramString(0))){
-						if(!bCmdWorkDone)bCmdWorkDone = cmdElseIf();
+						if(!bCmdWorkDone)bCmdWorkDone = cc.cmdElseIf();
 					}else
 					if(cc.CMD_ELSE.equals(paramString(0))){
-						if(!bCmdWorkDone)bCmdWorkDone = cmdElse();
+						if(!bCmdWorkDone)bCmdWorkDone = cc.cmdElse();
 					}else
 					if(cc.CMD_IF_END.equals(paramString(0))){
-						if(!bCmdWorkDone)bCmdWorkDone = cmdIfEnd();
+						if(!bCmdWorkDone)bCmdWorkDone = cc.cmdIfEnd();
 					}else{
 						/**
 						 * The if condition resulted in false, therefore commands must be skipped.
@@ -3804,7 +3810,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				+"Hst"+iCmdHistoryCurrentIndex+"/"+(astrCmdHistory.size()-1)
 					+","
 				
-				+"If"+aIfConditionNestedList.size()
+				+"If"+cc.aIfConditionNestedList.size()
 					+","
 					
 				/**

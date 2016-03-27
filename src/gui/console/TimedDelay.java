@@ -42,9 +42,6 @@ public class TimedDelay{
 	protected Long	lNanoTime;
 	protected float	fDelayLimit;
 	protected Long	lNanoDelayLimit;
-//	private long	lNanoTimePrevious;
-//	private long	lNanoFrameDelay;
-	private long	lNanoThreadSleep;
 	
 	/**
 	 * use this to prevent current time to read from realtime

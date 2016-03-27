@@ -28,12 +28,19 @@
 package gui.console;
 
 import com.jme3.font.BitmapFont;
+import com.jme3.font.LineWrapMode;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
+import com.simsilica.lemur.GridPanel;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.ListBox;
+import com.simsilica.lemur.RangedValueModel;
 import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
+import com.simsilica.lemur.core.VersionedList;
 import com.simsilica.lemur.style.Attributes;
 import com.simsilica.lemur.style.Styles;
 
@@ -46,6 +53,8 @@ import com.simsilica.lemur.style.Styles;
  *
  */
 public class ConsoleGuiLemurState extends ConsoleStateAbs{
+//	protected ListBox<String>	lstbxAutoCompleteHint;
+//	protected VersionedList<String>	vlstrAutoCompleteHint = new VersionedList<String>();
 
 	public ConsoleGuiLemurState(int iOpenConsoleHotKey) {
 		super(iOpenConsoleHotKey);
@@ -110,7 +119,16 @@ public class ConsoleGuiLemurState extends ConsoleStateAbs{
 	protected void initialize() {
 		createMonoSpaceFixedFontStyle();
 		
+		// auto complete hint
+		super.vlstrAutoCompleteHint = new VersionedList<String>();
+		super.lstbxAutoCompleteHint = new ListBox<String>(new VersionedList<String>(),strStyle);
+		getHintBox().setModel(getHintList());
+		
 		super.initialize();
+	}
+	
+	protected VersionedList<String> getHintList(){
+		return (VersionedList<String>)vlstrAutoCompleteHint;
 	}
 	
 	@Override
@@ -130,19 +148,12 @@ public class ConsoleGuiLemurState extends ConsoleStateAbs{
 	}
 	
 	@Override
-	protected void closeHint(){
-		vlstrAutoCompleteHint.clear();
-		lstbxAutoCompleteHint.removeFromParent();
-	}
-	
-	@Override
 	protected void scrollHintToIndex(int i){
-		int iVisibleCount = lstbxAutoCompleteHint.getVisibleItems();
+		int iVisibleCount = getHintBox().getVisibleItems();
 		
-		int iVisibleMinIndex = (int)(
-			lstbxAutoCompleteHint.getSlider().getModel().getMaximum()
-			-lstbxAutoCompleteHint.getSlider().getModel().getValue()
-		);
+		RangedValueModel model = getHintBox().getSlider().getModel();
+		
+		int iVisibleMinIndex = (int)(model.getMaximum() -model.getValue());
 		
 		int iVisibleMaxIndex = iVisibleMinIndex + iVisibleCount;
 		Integer iScrollMinIndexTo = null;
@@ -154,10 +165,52 @@ public class ConsoleGuiLemurState extends ConsoleStateAbs{
 		}
 		
 		if(iScrollMinIndexTo!=null){
-			double d = lstbxAutoCompleteHint.getSlider().getModel().getMaximum();
+			double d = model.getMaximum();
 			d -= iScrollMinIndexTo;
 			if(d<0)d=0;
-			lstbxAutoCompleteHint.getSlider().getModel().setValue(d);
+			model.setValue(d);
 		}
 	}
+	
+	@SuppressWarnings("unchecked")
+	protected ListBox<String> getHintBox() {
+		return (ListBox<String>)super.lstbxAutoCompleteHint;
+	}
+
+	@Override
+	protected void clearHintSelection() {
+		getHintBox().getSelectionModel().setSelection(-1);
+	}
+
+	@Override
+	protected Integer getHintIndex() {
+		return getHintBox().getSelectionModel().getSelection();
+	}
+
+	@Override
+	protected ConsoleGuiLemurState setHintIndex(Integer i) {
+		getHintBox().getSelectionModel().setSelection(i);
+		return this;
+	}
+	
+	@Override
+	protected void lineWrapDisableForChildrenOf(Node node){
+		@SuppressWarnings("unchecked")
+		ListBox<String> lstbx = (ListBox<String>)node;
+		
+		GridPanel gp = lstbx.getGridPanel();
+		for(Spatial spt:gp.getChildren()){
+			if(spt instanceof Button){
+				retrieveBitmapTextFor((Button)spt).setLineWrapMode(LineWrapMode.NoWrap);
+			}
+		}
+	}
+
+	@Override
+	protected ConsoleGuiLemurState setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines) {
+		getHintBox().setPreferredSize(v3fBoxSizeXY);
+		getHintBox().setVisibleItems(iVisibleLines);
+		return this;
+	}
+
 }

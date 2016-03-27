@@ -27,8 +27,11 @@
 
 package gui.console;
 
+import java.util.ArrayList;
+
 import com.jme3.app.SimpleApplication;
 
+import gui.console.ConsoleStateAbs.ConditionalNested;
 import gui.console.ReflexFill.IReflexFillCfg;
 import gui.console.ReflexFill.IReflexFillCfgVariant;
 import gui.console.ReflexFill.ReflexFillCfg;
@@ -58,6 +61,7 @@ public class ConsoleCommands implements IReflexFillCfg{
 	protected BoolToggler	btgShowException = new BoolToggler(this,true,strTogglerCodePrefix);
 	protected BoolToggler	btgEngineStatsView = new BoolToggler(this,false,strTogglerCodePrefix);
 	protected BoolToggler	btgEngineStatsFps = new BoolToggler(this,false,strTogglerCodePrefix);
+	protected BoolToggler	btgPreQueue = new BoolToggler(this,false,strTogglerCodePrefix);
 	// developer vars, keep together!
 	protected BoolToggler	btgShowDeveloperInfo=new BoolToggler(this,true,strTogglerCodePrefix);
 	protected BoolToggler	btgShowDeveloperWarn=new BoolToggler(this,true,strTogglerCodePrefix);
@@ -92,6 +96,7 @@ public class ConsoleCommands implements IReflexFillCfg{
 	public final StringField CMD_HK_TOGGLE = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_LINE_WRAP_AT = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_VAR_SET = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_SLEEP = new StringField(this,strFinalCmdCodePrefix);
 	
 	/**
 	 * conditional user coding
@@ -125,6 +130,16 @@ public class ConsoleCommands implements IReflexFillCfg{
 	protected	Character	chCommentPrefix='#';
 	protected	Character	chCommandPrefix='/';
 	
+	/**
+	 * etc
+	 */
+	protected Boolean	bIfConditionExecCommands;
+	protected ArrayList<ConditionalNested> aIfConditionNestedList = new ArrayList<ConditionalNested>();
+	protected Boolean	bIfConditionIsValid;
+	
+	/**
+	 * instance
+	 */
 	protected static ConsoleCommands instance;
 	public static ConsoleCommands i(){return instance;}
 	public ConsoleCommands(){
@@ -219,6 +234,10 @@ public class ConsoleCommands implements IReflexFillCfg{
 	}
 	
 	public String commentToAppend(String strText){
+		strText=strText.trim();
+		if(strText.startsWith(getCommentPrefixStr())){
+			strText=strText.substring(1);
+		}
 		return " "+getCommentPrefix()+strText;
 	}
 	public String getCommentPrefixStr() {
@@ -275,4 +294,117 @@ public class ConsoleCommands implements IReflexFillCfg{
 		return csaTmp.paramString(0).equalsIgnoreCase(strValidCmd);
 	}
 	
+	protected boolean cmdEcho() {
+		String strToEcho="";
+		String strPart="";
+		int iParam=1;
+		while(strPart!=null){
+			strToEcho+=strPart;
+			strToEcho+=" ";
+			strPart = csaTmp.paramString(iParam++);
+		}
+		strToEcho=strToEcho.trim();
+		
+		csaTmp.dumpEntry(strToEcho);
+		
+		return true;
+	}
+
+	protected boolean cmdIf() {
+		return cmdIf(false);
+	}
+	protected boolean cmdIf(boolean bSkipNesting) {
+		bIfConditionIsValid=false;
+		
+		String strCondition = csaTmp.paramString(1);
+		
+		boolean bNegate = false;
+		if(strCondition.startsWith("!")){
+			strCondition=strCondition.substring(1);
+			bNegate=true;
+		}
+		
+		Boolean bCondition = null;
+		try{bCondition = Misc.i().parseBoolean(strCondition);}catch(NumberFormatException e){};//accepted exception
+		
+		if(bNegate)bCondition=!bCondition;
+		
+		if(bCondition==null){
+			csaTmp.dumpWarnEntry("Invalid condition: "+strCondition);
+			return false;
+		}
+		
+		String strCmds = csaTmp.paramStringConcatenateAllFrom(2);
+		if(strCmds==null)strCmds="";
+		strCmds.trim();
+		if(strCmds.isEmpty() || strCmds.startsWith(getCommentPrefixStr())){
+			if(bSkipNesting){
+				ConditionalNested cn = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
+				cn.bCondition = bCondition;
+			}else{
+				aIfConditionNestedList.add(new ConditionalNested(bCondition));
+			}
+			
+			bIfConditionExecCommands=bCondition;
+		}else{
+			if(!bSkipNesting){
+				if(bCondition){
+					csaTmp.addExecConsoleCommandToQueue(strCmds,true);
+				}
+			}
+		}
+		
+		return true;
+	}
+	
+	protected boolean cmdElse(){
+//		bIfConditionExecCommands=!aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
+		ConditionalNested cn = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
+		bIfConditionExecCommands = !cn.bCondition;
+		cn.bIfEndIsRequired = true;
+		
+		return true;
+	}
+	
+	protected boolean cmdElseIf(){
+		ConditionalNested cn = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
+		if(cn.bIfEndIsRequired){
+			csaTmp.dumpExceptionEntry(new NullPointerException("command "+CMD_ELSE_IF.toString()
+				+" is missplaced, ignoring"));
+			bIfConditionExecCommands=false; //will also skip this block commands
+			return false;
+		}
+		
+		boolean bConditionSuccessAlready = cn.bCondition;
+		
+		if(bConditionSuccessAlready){
+			/**
+			 * if one of the conditions was successful, will skip all the remaining ones
+			 */
+			bIfConditionExecCommands=false;
+		}else{
+			return cmdIf(true);
+		}
+		
+		return true;
+	}
+	
+	protected boolean cmdIfEnd(){
+		if(aIfConditionNestedList.size()>0){
+			aIfConditionNestedList.remove(aIfConditionNestedList.size()-1);
+			
+			if(aIfConditionNestedList.size()==0){
+				bIfConditionExecCommands=null;
+//				bIfEndIsRequired = false;
+			}else{
+				ConditionalNested cn = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
+				bIfConditionExecCommands = cn.bCondition;
+			}
+		}else{
+			csaTmp.dumpExceptionEntry(new NullPointerException("pointless condition ending..."));
+			return false;
+		}
+		
+		return true;
+	}
 }

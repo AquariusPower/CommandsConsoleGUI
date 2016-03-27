@@ -51,12 +51,14 @@ DONE:
 	= Setup.cfg.areCchangesMadeIngame.overridenBy.Init.cfg
 	= If true, Exec all lines til Else.ElseIf.IfEnd; If.if. Nested index. Requires nested endings;If false, will skip subsequent commands til else or end.
 	= Alias/var autocomplete, also in the middle of the input field text.  
+	= PreCommandsQueue: sends commands to queue, but if a /sleep command is found, this dispatching will be delayed. Sleep is only allowed on a list of commands sent to queue.
 
 DOING:
 	... SeparateGUI class from Commands Management
 	... SeparateGUI class from Lemur, so other GUI can use the same abstract class to implement a console GUI
 
 TODO.FastToImplement:
+	+ Scroll by mouse location: over dump area, over hint area or over input field cmd history (input field optional toggle).
 	+ While stores subsequent commands on array for repeating til WhileEnd. Nestable too.
 	+ AtSetup:windowGeometry.resolution.position;keybinds.sndVplumes;etc
 	+ $commandId to retrieve its return value
