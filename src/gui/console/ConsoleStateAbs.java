@@ -255,6 +255,8 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 //	protected Hashtable<String,Object> htRestrictedVariables = new Hashtable<String,Object>();
 	protected TreeMap<String,Object> tmRestrictedVariables =
 		new TreeMap<String, Object>(String.CASE_INSENSITIVE_ORDER);
+	protected TreeMap<String,ArrayList<String>> tmFunctions = 
+			new TreeMap<String, ArrayList<String>>(String.CASE_INSENSITIVE_ORDER);
 	protected ArrayList<Alias> aAliasList = new ArrayList<Alias>();
 	protected String	strCmdLineOriginal;
 	protected boolean	bLastAliasCreatedSuccessfuly;
@@ -275,12 +277,18 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 
 	protected File	flSetup;
 
-//	private boolean	bMultiLineIfCondition;
+//	protected boolean	bMultiLineIfCondition;
 
-//	private int	iIfConditionNesting;
+//	protected int	iIfConditionNesting;
 	protected ArrayList<ConditionalNested> aIfConditionNestedList = new ArrayList<ConditionalNested>();
 
-	private Boolean	bIfConditionExecCommands;
+	protected Boolean	bIfConditionExecCommands;
+
+	private String	strPrepareFunctionBlockForId;
+
+	private boolean	bFuncCmdLineRunning;
+
+	private boolean	bFuncCmdLineSkipTilEnd;
 	
 	protected static class ConditionalNested{
 		public ConditionalNested(boolean bCondition){
@@ -2188,7 +2196,8 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		strCmdPart=strCmdPart.replaceFirst("^"+cc.getCommandPrefix(), "");
 		
 		// do not allow invalid chars
-		if(!strCmdPart.matches("["+strValidCmdCharsRegex+"]*"))
+		if(!isValidIdentifierCmdVarAliasFuncString(strCmdPart))
+//		if(!strCmdPart.matches("["+strValidCmdCharsRegex+"]*"))
 			return strCmdPartOriginal;
 		
 		ArrayList<String> astr = autoComplete(strCmdPart, astrCmdWithCmtValidList, bMatchContains);
@@ -2214,6 +2223,10 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		return cc.getCommandPrefix()+strFirst.split(" ")[0]+strAppendSpace;
 	}
 	
+	private boolean isValidIdentifierCmdVarAliasFuncString(String strCmdPart) {
+		if(strCmdPart==null)return false;
+		return strCmdPart.matches("["+strValidCmdCharsRegex+"]*");
+	}
 	/**
 	 * Matching is case insensitive.
 	 * 
@@ -2464,10 +2477,12 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			
 			// now it is possibly a command
 			
-			strFullCmdLine = strFullCmdLine.substring(1); //1 cc.getCommandPrefix()Char
 			strFullCmdLine = strFullCmdLine.trim();
+			if(strFullCmdLine.startsWith(cc.getCommandPrefixStr())){
+				strFullCmdLine = strFullCmdLine.substring(1); //cmd prefix 1 char
+			}
 			
-			if(strFullCmdLine.endsWith(""+cc.getCommentPrefix())){
+			if(strFullCmdLine.endsWith(cc.getCommentPrefixStr())){
 				strFullCmdLine=strFullCmdLine.substring(0,strFullCmdLine.length()-1); //-1 cc.getCommentPrefix()Char
 			}
 			
@@ -2703,6 +2718,15 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			iVisibleRowsAdjustRequest = paramInt(1);
 			if(iVisibleRowsAdjustRequest==null)iVisibleRowsAdjustRequest=0;
 			bCommandWorkedProperly=true;
+		}else
+		if(checkCmdValidity(cc.CMD_FUNCTION,"<id> begins a function block")){
+			bCommandWorkedProperly=cmdFunctionBegin();
+		}else
+		if(checkCmdValidity(cc.CMD_FUNCTION_CALL,"<id> [parameters...] retrieve parameters values with ex.: ${id_1} ${id_2} ...")){
+			bCommandWorkedProperly=cmdFunctionCall();
+		}else
+		if(checkCmdValidity(cc.CMD_FUNCTION_END,"ends a function block")){
+			bCommandWorkedProperly=cmdFunctionEnd();
 		}else
 		if(checkCmdValidity("fpsLimit","[iMaxFps]")){
 			Integer iMaxFps = paramInt(1);
@@ -2977,7 +3001,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		return false;
 	}
 	
-	private boolean databaseBackup() {
+	protected boolean databaseBackup() {
 		try {
 			File fl = new File(fileNamePrepareCfg(strFileDatabase,true));
 			Files.copy(flDB, fl);
@@ -3211,6 +3235,83 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		}
 		
 		return false;
+	}
+	
+	private boolean checkFuncExecEnd() {
+		if(strCmdLineOriginal==null)return false;
+		return strCmdLineOriginal.startsWith(cc.RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS.toString());
+	}
+	private boolean checkFuncExecStart() {
+		if(strCmdLineOriginal==null)return false;
+		return strCmdLineOriginal.startsWith(cc.RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS.toString());
+	}
+	private boolean cmdFunctionCall() {
+		String strFunctionId = paramString(1);
+		
+		ArrayList<String> astrFuncParams = new ArrayList<String>();
+		int i=2;
+		while(true){
+			String strFuncParam = paramString(i);
+			if(strFuncParam==null)break;
+			String strParamId=strFunctionId+"_"+(i-1);
+			astrFuncParams.add(strParamId);
+			varSet(strParamId, strFuncParam, false);
+			i++;
+		}
+		
+		ArrayList<String> astrFuncBlock = tmFunctions.get(strFunctionId);
+		
+		if(astrFuncBlock!=null && astrFuncBlock.size()>0){
+			dumpInfoEntry("Running function: "+strFunctionId+" "+cc.getCommentPrefix()+"totLines="+astrFuncBlock.size());
+			
+			ArrayList<String> astrFuncBlockToExec = new ArrayList<String>(astrFuncBlock);
+			astrFuncBlockToExec.add(0,cc.RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS+" "+strFunctionId);
+			for(String strUnsetVar:astrFuncParams){
+				astrFuncBlockToExec.add(cc.getCommandPrefix()+
+					cc.CMD_VAR_SET.toString()+" "+cc.getVarDeleteToken()+strUnsetVar);
+			}
+			astrFuncBlockToExec.add(cc.RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS+" "+strFunctionId);
+			addToExecConsoleCommandQueue(astrFuncBlockToExec, true, true);
+		}
+		
+		return true;
+	}
+	protected boolean cmdFunctionBegin() {
+		String strFunctionId = paramString(1);
+		
+		if(!isValidIdentifierCmdVarAliasFuncString(strFunctionId))return false;
+		
+		tmFunctions.put(strFunctionId, new ArrayList<String>());
+		dumpInfoEntry("Function block begin for: "+strFunctionId);
+		
+		strPrepareFunctionBlockForId=strFunctionId;
+		
+		return true;
+	}
+	protected boolean functionFeed(String strCmdLine){
+		ArrayList<String> astr = tmFunctions.get(strPrepareFunctionBlockForId);
+		astr.add(strCmdLine);
+		dumpDevInfoEntry("Function line added: "+strCmdLine+" "+cc.getCommentPrefix()+"tot="+astr.size());
+		return true;
+	}
+	protected boolean functionEndCheck(String strCmdLine) {
+		String strCmdCheck=""+cc.getCommandPrefix()+cc.CMD_FUNCTION_END.toString();
+		strCmdCheck=strCmdCheck.toLowerCase();
+		if(strCmdCheck.equals(strCmdLine.trim().toLowerCase())){
+			return cmdFunctionEnd();
+		}
+		return false;
+	}
+	protected boolean cmdFunctionEnd() {
+		if(strPrepareFunctionBlockForId==null){
+			dumpExceptionEntry(new NullPointerException("no function being prepared..."));
+			return false;
+		}
+		
+		dumpInfoEntry("Function block ends for: "+strPrepareFunctionBlockForId);
+		strPrepareFunctionBlockForId=null;
+		
+		return true;
 	}
 	
 	protected boolean cmdIf() {
@@ -3532,11 +3633,11 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	protected boolean executeCommand(final String strFullCmdLineOriginal){
 		strCmdLineOriginal = strFullCmdLineOriginal;
 		
-		boolean bOk = false;
+		boolean bCmdWorkDone = false;
 		try{
-			if(!bOk)bOk=cmdRawLineCheckEndOfStartupCmdQueue();
+			if(!bCmdWorkDone)bCmdWorkDone=cmdRawLineCheckEndOfStartupCmdQueue();
 			
-			if(!bOk)bOk=cmdRawLineCheckAlias();
+			if(!bCmdWorkDone)bCmdWorkDone=cmdRawLineCheckAlias();
 			
 //			if(!bOk)bOk=cmdRawLineCheckIfElse();
 			
@@ -3546,71 +3647,88 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 //				}
 //			}
 			
+			
+			
 			/**
 			 * we will have a prepared line after below
 			 */
-			if(!bOk){
-				strCmdLinePrepared = prepareCmdAndParams(strCmdLineOriginal);
-				
+			strCmdLinePrepared = prepareCmdAndParams(strCmdLineOriginal);
+			
+			if(!bCmdWorkDone){
+				if(bFuncCmdLineRunning){
+					if(checkFuncExecEnd()){
+						bFuncCmdLineRunning=false;
+						bFuncCmdLineSkipTilEnd=false;
+						bCmdWorkDone=true;
+					}
+				}
+			}
+			
+			if(!bCmdWorkDone){
+				if(checkFuncExecStart()){
+					bFuncCmdLineRunning=true;
+					bCmdWorkDone=true;
+				}else
+				if(strPrepareFunctionBlockForId!=null){
+					if(!bCmdWorkDone)bCmdWorkDone = functionEndCheck(strCmdLineOriginal); //before feed
+					if(!bCmdWorkDone)bCmdWorkDone = functionFeed(strCmdLineOriginal);
+				}else
 				if(bIfConditionExecCommands!=null && !bIfConditionExecCommands){
 					/**
-					 * the if condition resulted in false, therefore commands must be skipped.
-					 */
-					bOk = true;
-					
-					/**
-					 * The commands are being skipped.
-					 * These are capable of ending the skipping.
+					 * These are capable of stopping the skipping.
 					 */
 					if(cc.CMD_ELSE_IF.equals(paramString(0))){
-						bOk = cmdElseIf();
+						if(!bCmdWorkDone)bCmdWorkDone = cmdElseIf();
 					}else
 					if(cc.CMD_ELSE.equals(paramString(0))){
-						bOk = cmdElse();
+						if(!bCmdWorkDone)bCmdWorkDone = cmdElse();
 					}else
 					if(cc.CMD_IF_END.equals(paramString(0))){
-						bOk = cmdIfEnd();
+						if(!bCmdWorkDone)bCmdWorkDone = cmdIfEnd();
 					}else{
+						/**
+						 * The if condition resulted in false, therefore commands must be skipped.
+						 */
 						dumpInfoEntry("ConditionalSkip: "+strCmdLinePrepared);
+						if(!bCmdWorkDone)bCmdWorkDone = true;
 					}
 				}else{
-					bOk = executePreparedCommand();
+					if(bFuncCmdLineRunning && bFuncCmdLineSkipTilEnd){
+						dumpWarnEntry("SkippingRemainingFunctionCmds: "+strCmdLinePrepared);
+						bCmdWorkDone = true; //this just means that the skip worked
+					}
+					
+					if(!bCmdWorkDone){
+						/**
+						 * normal commands execution
+						 */
+						bCmdWorkDone = executePreparedCommand();
+						
+						if(bFuncCmdLineRunning && !bCmdWorkDone){
+							// a command may fail inside a function, only that first one will generate error message 
+							bFuncCmdLineSkipTilEnd=true;
+						}
+					}
 				}
 				
-//				boolean bExec = false;
-//				if(bIfConditionExecCommands!=null){
-//					if(bIfConditionExecCommands){
-//						bExec = true;
-//					}else{
-//						/**
-//						 * the if condition resulted in false, therefore commands must be skipped.
-//						 */
-//						bOk = true;
-//						
-//						if(cc.CMD_IF_END.equals(paramString(0))){
-//							/**
-//							 * the commands may be being skipped, so this is required here.
-//							 */
-//							bOk = cmdIfEnd();
-//						}else{
-//							dumpInfoEntry("IfCondition.Skip: "+strCmdLinePrepared);
-//						}
-//					}
-//				}else{
-//					bExec = true;
-//				}
-//				
-//				if(bExec) bOk = executePreparedCommand();
 			}
 		}catch(NumberFormatException e){
 			// keep this one as "warning", as user may simply fix the typed value
 			dumpWarnEntry("NumberFormatException: "+e.getMessage());
 			e.printStackTrace();
-			bOk=false;
+			bCmdWorkDone=false;
 		}
 		
-		return bOk;
+		return bCmdWorkDone;
 	}
+	
+//	protected boolean isFunctionExecLine() {
+//		if(cc.RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS.equals(strCmdLineOriginal)){
+//			bStartupCmdQueueDone=true;
+//			return true;
+//		}
+//		return false;
+//	}
 	
 	protected boolean cmdRawLineCheckEndOfStartupCmdQueue() {
 		if(cc.RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE.equals(strCmdLineOriginal)){

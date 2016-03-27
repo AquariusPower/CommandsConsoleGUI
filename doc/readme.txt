@@ -20,12 +20,13 @@ Features:
 	= Navigate dump area, key pgup/pgdown or mouse scroll. Dump is saved to a file, see /statsShowAll.
 	= Auto scroll after command.
 	___Commands___ (see /help)
-	= Alias to run multiple commands (like a function).
+	= Alias to run multiple commands.
 	= Variables can be set and evaluated to run console commands.
 	= Most commands will have an identical variable identifier holding its last execution value.
 	= Comment token detection, after it, line is ignored.
 	= Omit the "command being run" info entry by ending a line with '#', good at init file, mainly for /echo commands.
 	= Multi-line conditional command blocks using: if, elseIf, else, ifEnd (can be nested)
+	= Console functions can be created and run with parameters.
 	___Editing___ 
 	= Multi-line copy: Ctrl+b marks CopyFromIndex "begin", Ctrl+c/x marks CopyToIndex "end", Shift+click stores the previous CopyToIndex into CopyFromIndex.
 	= Single line wrap detection when copying.
@@ -72,6 +73,7 @@ TODO.TimeConsuming:
 	+ navigate thru words with ctrl+left/right
 	+ BitmapFontBkgColor.shiftRightLeftSelect.inputField
 	+ ListboxEntry(btn)FontColorWarnExceptionSelectHK
+	+ Separate scripting commands in another class, so they can be fully disabled by not instancing it.
 
 TODO.OneDay:
 	+ FontCharWidthTable.SumToWrap

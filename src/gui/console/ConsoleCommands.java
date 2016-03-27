@@ -73,6 +73,9 @@ public class ConsoleCommands implements IReflexFillCfg{
 	public final StringField CMD_FIX_CURSOR = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_FIX_LINE_WRAP = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_FIX_VISIBLE_ROWS_AMOUNT = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_FUNCTION = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_FUNCTION_CALL = new StringField(this,strFinalCmdCodePrefix);
+	public final StringField CMD_FUNCTION_END = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_HELP = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_HISTORY = new StringField(this,strFinalCmdCodePrefix);
 	public final StringField CMD_HK_TOGGLE = new StringField(this,strFinalCmdCodePrefix);
@@ -95,6 +98,8 @@ public class ConsoleCommands implements IReflexFillCfg{
 	public final String strFinalFieldRestrictedCmdCodePrefix="RESTRICTED_CMD_";
 	public final StringField	RESTRICTED_CMD_SKIP_CURRENT_COMMAND	= new StringField(this,strFinalFieldRestrictedCmdCodePrefix);
 	public final StringField	RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE	= new StringField(this,strFinalFieldRestrictedCmdCodePrefix);
+	public final StringField	RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS	= new StringField(this,strFinalFieldRestrictedCmdCodePrefix);
+	public final StringField	RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS	= new StringField(this,strFinalFieldRestrictedCmdCodePrefix);
 	
 	/**
 	 * more tokens
@@ -128,6 +133,10 @@ public class ConsoleCommands implements IReflexFillCfg{
 		if(rfcv.getClass().isAssignableFrom(StringField.class)){
 			if(strFinalCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
+			}else
+			if(strFinalFieldRestrictedCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
+				rfcfg = new ReflexFillCfg();
+				rfcfg.strCommandPrefix=""+RESTRICTED_TOKEN;
 			}
 		}
 		
@@ -203,6 +212,9 @@ public class ConsoleCommands implements IReflexFillCfg{
 	}
 	public String getCommentPrefixStr() {
 		return ""+chCommentPrefix;
+	}
+	public String getCommandPrefixStr() {
+		return ""+chCommandPrefix;
 	}
 	
 	
