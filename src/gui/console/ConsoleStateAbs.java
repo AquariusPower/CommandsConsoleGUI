@@ -1630,6 +1630,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 					
 					if(cc.CMD_SLEEP.equals(strCmdBase)){
 						String strParam1 = extractCommandPart(strCmd, 1);
+						strParam1=applyVariablesValues(strParam1);
 						Float fDelay = Float.parseFloat(strParam1);
 						pqe.tdSleep = new TimedDelay(fDelay);
 						pqe.tdSleep.updateTime();
@@ -2350,14 +2351,26 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		return astr;
 	}
 	
+	/**
+	 * this method must be used just before a command is going to be executed,
+	 * so variables have time to be updated by other commands etc.
+	 * @param strParam
+	 * @return
+	 */
 	protected String applyVariablesValues(String strParam){
+		// fast skip
+		if(!strParam.contains(cc.getVariableExpandPrefix()+"{"))return strParam;
+		
 		for(String strVarId : getVariablesIdentifiers(true)){
 			String strToReplace=cc.getVariableExpandPrefix()+"{"+strVarId+"}";
 			if(strParam.toLowerCase().contains(strToReplace.toLowerCase())){
 //				strParam=strParam.replace(strToReplace, ""+getVarHT(strVarId).get(strVarId));
 				strParam=strParam.replaceAll(
 					"(?i)"+Pattern.quote(strToReplace), 
-					""+getVarHT(strVarId).get(strVarId));
+					""+getVarValue(strVarId));
+				
+				// nothing remaining to be done
+				if(!strParam.contains(cc.getVariableExpandPrefix()+"{"))break;
 			}
 		}
 		return strParam;
@@ -2520,7 +2533,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	}
 	
 	protected boolean hasVar(String strVarId){
-		return getVarHT(strVarId).get(strVarId)!=null;
+		return selectVarSource(strVarId).get(strVarId)!=null;
 	}
 	
 	protected boolean cmdRawLineCheckAlias(){
@@ -3107,7 +3120,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	protected boolean isRestrictedAndDoesNotExist(String strVar){
 		if(isRestricted(strVar)){
 			// user can only set existing restricted vars
-			if(!getVarHT(strVar).containsKey(strVar)){
+			if(!selectVarSource(strVar).containsKey(strVar)){
 				dumpWarnEntry("Restricted var does not exist: "+strVar);
 				return true;
 			}
@@ -3256,7 +3269,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		if(isRestrictedAndDoesNotExist(strVarId))return false;
 		
 		Object objValueNew = null;
-		Object objValueCurrent = getVarHT(strVarId).get(strVarId);
+		Object objValueCurrent = selectVarSource(strVarId).get(strVarId);
 		
 		if(objValueCurrent==null){
 			dumpExceptionEntry(new NullPointerException("value is null for var "+strVarId));
@@ -3309,7 +3322,13 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		return strId.startsWith(""+cc.RESTRICTED_TOKEN);
 	}
 	
-	protected TreeMap<String, Object> getVarHT(String strVarId){
+	protected Object getVarValue(String strVarId){
+		return selectVarSource(strVarId).get(strVarId);
+	}
+	protected void setVarValue(String strVarId, Object objValue){
+		selectVarSource(strVarId).put(strVarId,objValue);
+	}
+	protected TreeMap<String, Object> selectVarSource(String strVarId){
 		if(isRestricted(strVarId)){
 			return tmRestrictedVariables;
 		}else{
@@ -3348,7 +3367,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	}
 	
 	protected boolean varApply(String strVarId, Object objValue, boolean bSave){
-		getVarHT(strVarId).put(strVarId,objValue);
+		selectVarSource(strVarId).put(strVarId,objValue);
 		if(bSave)fileAppendVar(strVarId);
 		
 		if(isRestricted(strVarId) && cc.btgShowDeveloperInfo.b()){
@@ -3359,7 +3378,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	}
 	
 	protected String varReportPrepare(String strVarId) {
-		Object objValue = getVarHT(strVarId).get(strVarId);
+		Object objValue = selectVarSource(strVarId).get(strVarId);
 		String str="";
 		
 		str+=cc.getCommandPrefix();
@@ -3384,7 +3403,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	}
 	
 	protected void varReport(String strVarId) {
-		Object objValue=getVarHT(strVarId).get(strVarId);
+		Object objValue=selectVarSource(strVarId).get(strVarId);
 		if(objValue!=null){
 			dumpSubEntry(varReportPrepare(strVarId));
 		}else{
@@ -3439,7 +3458,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	 * @return "null" if not set
 	 */
 	protected String varGetValueString(String strVarId){
-		Object obj = getVarHT(strVarId).get(strVarId);
+		Object obj = selectVarSource(strVarId).get(strVarId);
 		if(obj==null)return "null";
 		return ""+obj;
 	}
