@@ -299,15 +299,18 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	public static ConsoleStateAbs i(){
 		return instance;
 	}
-	public ConsoleStateAbs() {
+	public ConsoleStateAbs(ConsoleCommands cc) {
 		if(instance==null)instance=this;
-		cc = new ConsoleCommands();
-		cc.csaTmp=this;
+		this.cc = cc==null?new ConsoleCommands():cc;
+		this.cc.csaTmp=this;
 	}
-	public ConsoleStateAbs(int iToggleConsoleKey) {
-		this();
+	public ConsoleStateAbs(int iToggleConsoleKey, ConsoleCommands cc) {
+		this(cc);
 		this.bEnabled=true; //just to let it be initialized at startup by state manager
 		this.iToggleConsoleKey=iToggleConsoleKey;
+	}
+	public ConsoleStateAbs(int iToggleConsoleKey) {
+		this(iToggleConsoleKey,null);
 	}
 	
 	protected String fileNamePrepare(String strFileBaseName, String strFileType, boolean bAddDateTime){

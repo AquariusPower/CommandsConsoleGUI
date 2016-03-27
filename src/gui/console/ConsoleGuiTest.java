@@ -64,7 +64,7 @@ public class ConsoleGuiTest extends SimpleApplication {
 		private StringField testCommandAutoFillPrefixLessVariantDefaulted3 = new StringField(this,null);
 		
 		public ConsoleGuiCustomState() {
-			super(KeyInput.KEY_F10);
+			super(KeyInput.KEY_F10, null);
 			
 			/**
 			 *  This allows test3 at endUserCustomMethod() to work.

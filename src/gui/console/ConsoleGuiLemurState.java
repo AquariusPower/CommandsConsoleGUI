@@ -56,8 +56,8 @@ public class ConsoleGuiLemurState extends ConsoleStateAbs{
 //	protected ListBox<String>	lstbxAutoCompleteHint;
 //	protected VersionedList<String>	vlstrAutoCompleteHint = new VersionedList<String>();
 
-	public ConsoleGuiLemurState(int iOpenConsoleHotKey) {
-		super(iOpenConsoleHotKey);
+	public ConsoleGuiLemurState(int iOpenConsoleHotKey, ConsoleCommands cc) {
+		super(iOpenConsoleHotKey, cc);
 	}
 	
 	protected void createMonoSpaceFixedFontStyle(){
