@@ -61,14 +61,18 @@ public class ConsoleCommands implements IReflexFillCfg{
 	protected BoolToggler	btgShowException = new BoolToggler(this,true,strTogglerCodePrefix);
 	protected BoolToggler	btgEngineStatsView = new BoolToggler(this,false,strTogglerCodePrefix);
 	protected BoolToggler	btgEngineStatsFps = new BoolToggler(this,false,strTogglerCodePrefix);
-//	protected BoolToggler	btgPreQueue = new BoolToggler(this,false,strTogglerCodePrefix);
-	// developer vars, keep together!
-	protected BoolToggler	btgShowDeveloperInfo=new BoolToggler(this,true,strTogglerCodePrefix);
-	protected BoolToggler	btgShowDeveloperWarn=new BoolToggler(this,true,strTogglerCodePrefix);
-	protected BoolToggler	btgShowExecQueuedInfo=new BoolToggler(this,false,strTogglerCodePrefix);
 	protected BoolToggler	btgShowMiliseconds=new BoolToggler(this,false,strTogglerCodePrefix);
 	protected BoolToggler	btgFpsLimit=new BoolToggler(this,false,strTogglerCodePrefix);
 	protected BoolToggler	btgConsoleCpuRest=new BoolToggler(this,false,strTogglerCodePrefix,"Console update steps will be skipped if this is enabled.");
+	
+	/**
+	 * Developer vars, keep together!
+	 * Initialy true, the default init will disable them.
+	 */
+	protected BoolToggler	btgShowDebugEntries=new BoolToggler(this,true,strTogglerCodePrefix);
+	protected BoolToggler	btgShowDeveloperInfo=new BoolToggler(this,true,strTogglerCodePrefix);
+	protected BoolToggler	btgShowDeveloperWarn=new BoolToggler(this,true,strTogglerCodePrefix);
+	protected BoolToggler	btgShowExecQueuedInfo=new BoolToggler(this,true,strTogglerCodePrefix);
 	
 	/**
 	 * used to hold a reference to the identified/typed user command

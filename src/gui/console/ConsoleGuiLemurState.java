@@ -41,6 +41,7 @@ import com.simsilica.lemur.RangedValueModel;
 import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.core.VersionedList;
+import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.style.Attributes;
 import com.simsilica.lemur.style.Styles;
 

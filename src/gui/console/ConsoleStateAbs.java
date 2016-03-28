@@ -27,7 +27,6 @@
 
 package gui.console;
 
-import groovyjarjarcommonscli.ParseException;
 import gui.console.ReflexFill.IReflexFillCfgVariant;
 import gui.console.ReflexFill.ReflexFillCfg;
 
@@ -47,7 +46,6 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
@@ -89,6 +87,11 @@ import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.TextEntryComponent;
 import com.simsilica.lemur.core.VersionedList;
+import com.simsilica.lemur.event.AbstractCursorEvent;
+import com.simsilica.lemur.event.CursorButtonEvent;
+import com.simsilica.lemur.event.CursorEventControl;
+import com.simsilica.lemur.event.CursorMotionEvent;
+import com.simsilica.lemur.event.DefaultCursorListener;
 import com.simsilica.lemur.event.KeyAction;
 import com.simsilica.lemur.event.KeyActionListener;
 import com.simsilica.lemur.style.BaseStyles;
@@ -155,7 +158,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	 * other vars!
 	 */
 	protected Container	ctnrConsole;
-	protected ListBox<String>	lstbx;
+	protected ListBox<String>	lstbxDumpArea;
 	protected TextField	tfInput;
 //	protected TextField tfAutoCompleteHint;
 	protected SimpleApplication	sapp;
@@ -275,6 +278,10 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	protected boolean	bFuncCmdLineSkipTilEnd;
 	protected long lLastUniqueId = 0;
 
+	private ConsoleMouseListener consoleCursorListener = new ConsoleMouseListener();
+
+	public Spatial	sptScrollTarget;
+
 //	private boolean	bUsePreQueue = false; 
 	
 	protected static class PreQueueCmdsBlockSubList{
@@ -359,6 +366,12 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			addCmdListOneByOneToQueue(fileLoad(flSetup), false, false);
 		}
 		
+		// before user init file
+		addExecConsoleCommandToQueue(cc.btgShowExecQueuedInfo.getCmdIdAsCommand(false));
+		addExecConsoleCommandToQueue(cc.btgShowDebugEntries.getCmdIdAsCommand(false));
+		addExecConsoleCommandToQueue(cc.btgShowDeveloperWarn.getCmdIdAsCommand(false));
+		addExecConsoleCommandToQueue(cc.btgShowDeveloperInfo.getCmdIdAsCommand(false));
+		
 		// init user cfg
 		flInit = new File(fileNamePrepareCfg(strFileInitConsCmds,false));
 		if(flInit.exists()){
@@ -380,7 +393,6 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		 * KEEP AS LAST queued cmds below!!!
 		 */
 		// must be the last queued command after all init ones!
-		addExecConsoleCommandToQueue(cc.btgShowExecQueuedInfo.getCmdIdAsCommand(true));
 		// end of initialization
 		addExecConsoleCommandToQueue(cc.RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE);
 //		addExecConsoleCommandToQueue(cc.btgPreQueue.getCmdIdAsCommand(true)); //		 TODO temporary workaround, pre-queue cannot be enable from start yet...
@@ -432,6 +444,9 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	 */
 	protected void initialize(){
 		if(sapp==null)throw new NullPointerException("base initialization required");
+		
+		CursorEventControl.addListenersToSpatial(lstbxAutoCompleteHint, consoleCursorListener);
+		lstbxAutoCompleteHint.setName("Hints");
 		
 //		tdLetCpuRest.updateTime();
 		tdStatsRefresh.updateTime();
@@ -505,9 +520,11 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		/**
 		 * CENTER ELEMENT (dump entries area) ===========================================
 		 */
-		lstbx = new ListBox<String>(new VersionedList<String>(),strStyle);
+		lstbxDumpArea = new ListBox<String>(new VersionedList<String>(),strStyle);
+		lstbxDumpArea.setName("DumpArea");
+    CursorEventControl.addListenersToSpatial(lstbxDumpArea, consoleCursorListener);
 		Vector3f v3fLstbxSize = v3fConsoleSize.clone();
-		lstbx.setSize(v3fLstbxSize); // no need to update fLstbxHeight, will be automatic
+		lstbxDumpArea.setSize(v3fLstbxSize); // no need to update fLstbxHeight, will be automatic
 		//TODO not working? lstbx.getSelectionModel().setSelectionMode(SelectionMode.Multi);
 		
 		/**
@@ -516,10 +533,10 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		 */
 		if(vlstrDumpEntries.isEmpty())vlstrDumpEntries.add(""+cc.getCommentPrefix()+" Initializing console.");
 		
-		lstbx.setModel(vlstrDumpEntries);
-		lstbx.setVisibleItems(iShowRows);
+		lstbxDumpArea.setModel(vlstrDumpEntries);
+		lstbxDumpArea.setVisibleItems(iShowRows);
 //		lstbx.getGridPanel().setVisibleSize(iShowRows,1);
-		ctnrConsole.addChild(lstbx, BorderLayout.Position.Center);
+		ctnrConsole.addChild(lstbxDumpArea, BorderLayout.Position.Center);
 		
 //		gpListboxDumpArea = lstbx.getGridPanel();
 		
@@ -528,6 +545,8 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		 */
 		// input
 		tfInput = new TextField(""+cc.getCommandPrefix(),strStyle);
+		tfInput.setName("UserInput");
+    CursorEventControl.addListenersToSpatial(tfInput, consoleCursorListener);
 		fInputHeight = retrieveBitmapTextFor(tfInput).getLineHeight();
 		ctnrConsole.addChild( tfInput, BorderLayout.Position.South );
 		
@@ -547,6 +566,59 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		 * =======================================================================
 		 */
 		bInitialized=true;
+	}
+	
+	class ConsoleMouseListener extends DefaultCursorListener {
+		protected String debugPart(Panel pnl){
+			return pnl.getName()+","
+					+pnl.getElementId()+","
+					+pnl.getClass().getSimpleName()
+					+";";
+		}
+		
+		public void debugReport(CursorMotionEvent eventM, CursorButtonEvent eventB, Spatial target,	Spatial capture){
+			if(!cc.btgShowDebugEntries.b())return;
+			
+			Panel pnlTgt = (Panel)target;
+			Panel pnlCap = (Panel)capture;
+			
+			String strTgt	=	"";if(pnlTgt!=null)strTgt	="Tgt:"+debugPart(pnlTgt);
+			String strCap	=	"";if(pnlCap!=null)strCap	="Cap:"+debugPart(pnlCap);
+			String strB		=	"";if(eventB!=null)strB		="B:"+eventB.getButtonIndex()+";";
+			String strM		=	"";if(eventM!=null)strM		="M:"+eventM.getX()+","+eventM.getY()+";";
+			dumpDebugEntry(strTgt+strCap+strB+strM);
+		}
+		
+		/**
+		 * TODO TellLemurDev: When cursor enters, many times this method is not called?
+		 * Use cursor moved too.
+		 */
+		@Override
+		public void cursorEntered(CursorMotionEvent event, Spatial target,	Spatial capture) {
+			super.cursorEntered(event, target, capture);
+			if(sptScrollTarget!=target){
+				debugReport(event, null, target, capture);
+			}
+			sptScrollTarget = target;
+		}
+		
+		/**
+		 * TODO TellLemurDev: This works too much, even when cursor is stopped it is called?
+		 */
+		@Override
+		public void cursorMoved(CursorMotionEvent event, Spatial target, Spatial capture) {
+			super.cursorMoved(event, target, capture);
+			if(sptScrollTarget!=target){
+				debugReport(event, null, target, capture);
+			}
+			sptScrollTarget = target;
+		}
+		
+		@Override
+		public void cursorButtonEvent(CursorButtonEvent event, Spatial target,	Spatial capture) {
+			super.cursorButtonEvent(event, target, capture);
+			debugReport(null, event, target, capture);
+		}
 	}
 	
 	protected void showClipboard(){
@@ -678,7 +750,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			if(!bJustCollectText){
 				putStringToClipboard(strTextToCopy);
 				
-				lstbx.getSelectionModel().setSelection(-1); //clear selection
+				lstbxDumpArea.getSelectionModel().setSelection(-1); //clear selection
 			}
 		}
 		
@@ -851,7 +923,11 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 						if(bControl)editCopyOrCut(false,false,false);
 						break;
 					case KeyInput.KEY_V: 
-						if(bControl)editPaste();
+						if(bKeyShiftIsPressed){
+							if(bControl)showClipboard();
+						}else{
+							if(bControl)editPaste();
+						}
 						break;
 					case KeyInput.KEY_X: 
 						if(bControl)editCopyOrCut(false,true,false);
@@ -888,42 +964,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		KeyActionListener actCmdHistoryEntrySelectAction = new KeyActionListener() {
 			@Override
 			public void keyAction(TextEntryComponent source, KeyAction key) {
-//				if(iCmdHistoryCurrentIndex==null){
-//					iCmdHistoryCurrentIndex=astrCmdHistory.size();
-//				}
-				
-				if(iCmdHistoryCurrentIndex<0)iCmdHistoryCurrentIndex=0; //cant underflow
-				if(iCmdHistoryCurrentIndex>astrCmdHistory.size())resetCmdHistoryCursor(); //iCmdHistoryCurrentIndex=astrCmdHistory.size(); //can overflow by 1
-				
-				switch(key.getKeyCode()){
-					case KeyInput.KEY_UP	:
-						if(!navigateHint(-1)){
-							iCmdHistoryCurrentIndex--;
-							/**
-							 * to not lose last possibly typed (but not issued) cmd
-							 */
-							if(iCmdHistoryCurrentIndex==(astrCmdHistory.size()-1)){ //requested last entry
-//								strNotSubmitedCmd = getInputText();
-								strNotSubmitedCmd = dumpAndClearInputField();
-//								checkInputEmptyDumpIfNot(true);
-							}
-							fillInputFieldWithHistoryDataAtIndex(iCmdHistoryCurrentIndex);
-						}
-						
-						break;
-					case KeyInput.KEY_DOWN:
-						if(!navigateHint(+1)){
-							iCmdHistoryCurrentIndex++;
-							if(iCmdHistoryCurrentIndex>=astrCmdHistory.size()){
-								if(strNotSubmitedCmd!=null){
-									setInputField(strNotSubmitedCmd);
-								}
-							}
-							fillInputFieldWithHistoryDataAtIndex(iCmdHistoryCurrentIndex);
-						}
-						
-						break;
-				}
+				navigateCmdHistOrHintBox(source,key);
 			}
 		};
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_UP), actCmdHistoryEntrySelectAction);
@@ -958,6 +999,64 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_PGDN), actDumpNavigate);
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_HOME, KeyAction.CONTROL_DOWN), actDumpNavigate);
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_END, KeyAction.CONTROL_DOWN), actDumpNavigate);
+	}
+	
+	enum ENav{
+		Up,
+		Down,
+	}
+	
+	protected void navigateCmdHistOrHintBox(TextEntryComponent source, KeyAction key) {
+		ENav enav = null;
+		switch(key.getKeyCode()){
+			case KeyInput.KEY_UP	:
+				enav=ENav.Up;
+				break;
+			case KeyInput.KEY_DOWN:
+				enav=ENav.Down;
+				break;
+		}		
+		
+		navigateCmdHistOrHintBox(source, enav);
+	}
+	protected void navigateCmdHistOrHintBox(Object objSource, ENav enav) {
+		if(iCmdHistoryCurrentIndex<0)iCmdHistoryCurrentIndex=0; //cant underflow
+		if(iCmdHistoryCurrentIndex>astrCmdHistory.size())resetCmdHistoryCursor(); //iCmdHistoryCurrentIndex=astrCmdHistory.size(); //can overflow by 1
+		
+		if(objSource!=tfInput && objSource!=lstbxAutoCompleteHint)objSource=null;
+		
+		boolean bOk=false;
+		switch(enav){
+			case Up:
+				if(objSource==null || objSource==lstbxAutoCompleteHint)bOk=navigateHint(-1);
+				
+				if((objSource==null && !bOk) || objSource==tfInput){
+					iCmdHistoryCurrentIndex--;
+					/**
+					 * to not lose last possibly typed (but not issued) cmd
+					 */
+					if(iCmdHistoryCurrentIndex==(astrCmdHistory.size()-1)){ //requested last entry
+						strNotSubmitedCmd = dumpAndClearInputField();
+					}
+					fillInputFieldWithHistoryDataAtIndex(iCmdHistoryCurrentIndex);
+				}
+				
+				break;
+			case Down:
+				if(objSource==null || objSource==lstbxAutoCompleteHint)bOk=navigateHint(+1);
+				
+				if((objSource==null && !bOk) || objSource==tfInput){
+					iCmdHistoryCurrentIndex++;
+					if(iCmdHistoryCurrentIndex>=astrCmdHistory.size()){
+						if(strNotSubmitedCmd!=null){
+							setInputField(strNotSubmitedCmd);
+						}
+					}
+					fillInputFieldWithHistoryDataAtIndex(iCmdHistoryCurrentIndex);
+				}
+				
+				break;
+		}
 	}
 	
 	protected void toggleLineCommentOrCommand() {
@@ -1077,19 +1176,31 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			@Override
 			public void onAnalog(String name, float value, float tpf) {
 	      if (isEnabled()) {
-	      	double dScrollCurrentFlindex = getScrollDumpAreaFlindex();
-	      	double dScrollBy = iShowRows/5; //20% of the visible rows
-	      	if(dMouseMaxScrollBy!=null){
-		      	if(dScrollBy > dMouseMaxScrollBy)dScrollBy = dMouseMaxScrollBy;
-	      	}
-	      	if(dScrollBy < 1)dScrollBy = 1;
+	      	boolean bUp = INPUT_MAPPING_CONSOLE_SCROLL_UP.equals(name);
 	      	
-					if(INPUT_MAPPING_CONSOLE_SCROLL_UP.equals(name)){
-						scrollDumpArea(dScrollCurrentFlindex - dScrollBy);
-					}else
-					if(INPUT_MAPPING_CONSOLE_SCROLL_DOWN.equals(name)){
-						scrollDumpArea(dScrollCurrentFlindex + dScrollBy);
-					}
+	      	if(sptScrollTarget==null)return;
+	      	
+	      	if(sptScrollTarget.equals(lstbxDumpArea)){
+		      	double dScrollCurrentFlindex = getScrollDumpAreaFlindex();
+		      	double dScrollBy = iShowRows/5; //20% of the visible rows
+		      	if(dMouseMaxScrollBy!=null){
+			      	if(dScrollBy > dMouseMaxScrollBy)dScrollBy = dMouseMaxScrollBy;
+		      	}
+		      	if(dScrollBy < 1)dScrollBy = 1;
+		      	
+						if(bUp){
+							scrollDumpArea(dScrollCurrentFlindex - dScrollBy);
+						}else{
+//						if(INPUT_MAPPING_CONSOLE_SCROLL_DOWN.equals(name)){
+							scrollDumpArea(dScrollCurrentFlindex + dScrollBy);
+						}
+	      	}else
+	      	if(sptScrollTarget.equals(tfInput)){
+	      		navigateCmdHistOrHintBox(tfInput, bUp?ENav.Up:ENav.Down);
+	      	}else
+	      	if(sptScrollTarget.equals(lstbxAutoCompleteHint)){
+	      		navigateCmdHistOrHintBox(lstbxAutoCompleteHint, bUp?ENav.Up:ENav.Down);
+	      	}
 	      }
 			}
 		};
@@ -1410,7 +1521,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	}
 	
 	protected void updateDumpAreaSelectedIndex(){
-		Integer i = lstbx.getSelectionModel().getSelection();
+		Integer i = lstbxDumpArea.getSelectionModel().getSelection();
 		iSelectionIndex = i==null ? -1 : i;
 	}
 	
@@ -1463,11 +1574,11 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	 * this is to fix the dump entry by disallowing automatic line wrapping
 	 */
 	protected void cmdLineWrapDisableDumpArea(){
-		lineWrapDisableForChildrenOf(lstbx);
+		lineWrapDisableForChildrenOf(lstbxDumpArea);
 	}
 	
 	protected void updateVisibleRowsAmount(){
-		if(fLstbxHeight != lstbx.getSize().y){
+		if(fLstbxHeight != lstbxDumpArea.getSize().y){
 			iVisibleRowsAdjustRequest = 0; //dynamic
 		}
 		
@@ -1479,10 +1590,10 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 //			lstbx.setVisibleItems(iShowRows);
 //			lstbx.getGridPanel().setVisibleSize(iShowRows,1);
 		}else{
-			if(lstbx.getGridPanel().getChildren().isEmpty())return;
+			if(lstbxDumpArea.getGridPanel().getChildren().isEmpty())return;
 			
 			Button	btnFixVisibleRowsHelper = null;
-			for(Spatial spt:lstbx.getGridPanel().getChildren()){
+			for(Spatial spt:lstbxDumpArea.getGridPanel().getChildren()){
 				if(spt instanceof Button){
 					btnFixVisibleRowsHelper = (Button)spt;
 					break;
@@ -1493,7 +1604,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			fLstbxEntryHeight = retrieveBitmapTextFor(btnFixVisibleRowsHelper).getLineHeight();
 			if(fLstbxEntryHeight==null)return;
 			
-			fLstbxHeight = lstbx.getSize().y;
+			fLstbxHeight = lstbxDumpArea.getSize().y;
 			
 			float fHeightAvailable = fLstbxHeight;
 //				float fHeightAvailable = fLstbxHeight -fInputHeight;
@@ -1503,7 +1614,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			iShowRows = (int) (fHeightAvailable / fLstbxEntryHeight);
 		}
 		
-		lstbx.setVisibleItems(iShowRows);
+		lstbxDumpArea.setVisibleItems(iShowRows);
 		
 		varSet(cc.CMD_FIX_VISIBLE_ROWS_AMOUNT, ""+iShowRows, true);
 		
@@ -1829,7 +1940,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		 * like a cooldown time to make sure the slider accepted the command.
 		 */
 		if(tdScrollToBottomRequestAndSuspend.isReady()){
-			if(Double.compare(lstbx.getSlider().getModel().getPercent(), 0.0)==0){
+			if(Double.compare(lstbxDumpArea.getSlider().getModel().getPercent(), 0.0)==0){
 				scrollToBottomRequestSuspend();
 				return;
 			}
@@ -1848,13 +1959,13 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		/**
 		 * the index is actually inverted
 		 */
-		double dMax = lstbx.getSlider().getModel().getMaximum();
+		double dMax = lstbxDumpArea.getSlider().getModel().getMaximum();
 		if(dIndex==-1)dIndex=dMax;
 		dIndex = dMax-dIndex;
 		double dPerc = dIndex/dMax;
 		
-		lstbx.getSlider().getModel().setPercent(dPerc);
-		lstbx.getSlider().getModel().setValue(dIndex);
+		lstbxDumpArea.getSlider().getModel().setPercent(dPerc);
+		lstbxDumpArea.getSlider().getModel().setValue(dIndex);
 	}
 	
 	/**
@@ -1862,8 +1973,8 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	 * @return a "floating point index" (Dlindex)
 	 */
 	public double getScrollDumpAreaFlindex(){
-		return lstbx.getSlider().getModel().getMaximum()
-				-lstbx.getSlider().getModel().getValue();
+		return lstbxDumpArea.getSlider().getModel().getMaximum()
+				-lstbxDumpArea.getSlider().getModel().getValue();
 	}
 	
 	protected String getDateTimeForFilename(){
@@ -2039,6 +2150,13 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	protected void dumpDevWarnEntry(String str){
 		dumpEntry(false, cc.btgShowDeveloperWarn.get(), false, 
 			getSimpleTime()+strDevWarnEntryPrefix+str);
+	}
+	
+	protected void dumpDebugEntry(String str){
+		dumpEntry(new DumpEntry()
+			.setDumpToConsole(cc.btgShowDebugEntries.get())
+			.setLineOriginal("[DBG]"+str)
+		);
 	}
 	
 	protected void dumpDevInfoEntry(String str){
@@ -2898,6 +3016,10 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		}else
 		if(cc.checkCmdValidity("showBinds","")){
 			dumpInfoEntry("Key bindings: ");
+			dumpSubEntry("Ctrl+C - copy");
+			dumpSubEntry("Ctrl+X - cut");
+			dumpSubEntry("Ctrl+V - paste");
+			dumpSubEntry("Shift+Ctrl+V - show clipboard");
 			dumpSubEntry("Ctrl+B - marks dump area begin selection marker for copy");
 			dumpSubEntry("Ctrl+Del - clear input field");
 			dumpSubEntry("TAB - autocomplete (starting with)");
@@ -2931,6 +3053,26 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 //				bCommandWorked=true;
 //			}
 //		}else
+		if(cc.checkCmdValidity("statsEnable","[idToEnable [bEnable]] empty for a list. bEnable empty to toggle.")){
+			bCommandWorked=true;
+			String strId=paramString(1);
+			Boolean bValue=paramBoolean(2);
+			if(strId!=null){
+				EStats e=null;
+				try{e=EStats.valueOf(strId);}catch(IllegalArgumentException ex){
+					bCommandWorked=false;
+					dumpWarnEntry("Invalid option: "+strId+" "+bValue);
+				}
+				
+				if(e!=null){
+					e.b=bValue!=null?bValue:!e.b;
+				}
+			}else{
+				for(EStats e:EStats.values()){
+					dumpSubEntry(e.toString()+" "+e.b);
+				}
+			}
+		}else
 		if(cc.checkCmdValidity("statsFieldToggle","[bEnable] toggle simple stats field visibility")){
 			bCommandWorked=statsFieldToggle();
 		}else
@@ -3872,11 +4014,11 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	}
 	
 	protected float widthForListbox(){
-		return lstbx.getSize().x;
+		return lstbxDumpArea.getSize().x;
 	}
 	
 	protected float widthForDumpEntryField(){
-		return widthForListbox() -lstbx.getSlider().getSize().x -fSafetyMarginGUESSED;
+		return widthForListbox() -lstbxDumpArea.getSlider().getSize().x -fSafetyMarginGUESSED;
 	}
 	
 	@Override
@@ -3933,9 +4075,9 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		dumpEntry(true, cc.btgShowDeveloperInfo.get(), false,	
 			getSimpleTime()+strDevInfoEntryPrefix+"Console stats (Dev):"+"\n"
 				+"Console Height = "+fmtFloat(ctnrConsole.getSize().y)+"\n"
-				+"Visible Rows = "+lstbx.getGridPanel().getVisibleRows()+"\n"
+				+"Visible Rows = "+lstbxDumpArea.getGridPanel().getVisibleRows()+"\n"
 				+"Line Wrap At = "+iConsoleMaxWidthInCharsForLineWrap+"\n"
-				+"ListBox Height = "+fmtFloat(lstbx.getSize().y)+"\n"
+				+"ListBox Height = "+fmtFloat(lstbxDumpArea.getSize().y)+"\n"
 				+"ListBox Entry Height = "+fmtFloat(fLstbxEntryHeight)+"\n"
 				
 				+"Stats Text Field Height = "+fmtFloat(fStatsHeight)+"\n"
@@ -3991,50 +4133,89 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			.setContents(ss, ss);
 	}
 	
+	enum EStats{
+		CommandsHistory,
+		ConsoleSliderControl,
+		CopyFromTo,
+		FunctionCreation(true),
+		IfConditionalBlock(true),
+		MousePosition,
+		TimePerFrame,
+		;
+		
+		boolean b;
+		
+		EStats(){}
+		EStats(boolean b){this.b=b;}
+	}
+	
 	protected String prepareStatsFieldText(){
 		if(!tdStatsRefresh.isReady(true))return strStatsLast;
 		
 		// this value is the top entry index
-		int iMaxSliderIndex=vlstrDumpEntries.size()-lstbx.getGridPanel().getVisibleRows();
+		int iMaxSliderIndex=vlstrDumpEntries.size()-lstbxDumpArea.getGridPanel().getVisibleRows();
 		
-		strStatsLast = ""
-				// user important
-				+"Cp"+iCopyFrom
-					+">"+iCopyTo //getDumpAreaSelectedIndex()
-					+";"
-				
-				+"Hs"+iCmdHistoryCurrentIndex+"/"+(astrCmdHistory.size()-1)
-					+";"
-				
-				+"If"+cc.aIfConditionNestedList.size()
-					+";"
+		strStatsLast = "";
+		
+		if(EStats.CopyFromTo.b){
+			strStatsLast+=
+					// user important
+					"Cp"+iCopyFrom
+						+">"+iCopyTo //getDumpAreaSelectedIndex()
+						+";";
+		}
+						
+		if(EStats.CommandsHistory.b){
+			strStatsLast+=
+					"Hs"+iCmdHistoryCurrentIndex+"/"+(astrCmdHistory.size()-1)
+						+";";
+		}
 					
-				/**
-				 * KEEP HERE AS REFERENCE!
-				 * IMPORTANT, DO NOT USE
-				 * clipboard reading is too heavy...
-				+"Cpbd='"+retrieveClipboardString()+"', "
-				 */
+		if(EStats.IfConditionalBlock.b && cc.aIfConditionNestedList.size()>0){
+			strStatsLast+=
+					"If"+cc.aIfConditionNestedList.size()
+						+";";
+		}
 					
-				// less important (mainly for debug)
-				+"Sl"
-					+fmtFloat(getScrollDumpAreaFlindex(),0)+"/"+iMaxSliderIndex+"+"+lstbx.getGridPanel().getVisibleRows()
-					+"("+fmtFloat(100.0f -lstbx.getSlider().getModel().getPercent()*100f,0)+"%)"
-					+";"
-				
-				+"Tpf"+(fpslState.isEnabled() ? (int)(fTPF*1000.0f) : fmtFloat(fTPF,6)+"s")
-					+(fpslState.isEnabled()?
-						"="+fpslState.getFrameDelayByCpuUsageMilis()+"+"+fpslState.getThreadSleepTimeMilis()+"ms"
-						:"")
-					+";"
+		if(EStats.FunctionCreation.b && strPrepareFunctionBlockForId!=null){
+			strStatsLast+=
+					"F="+strPrepareFunctionBlockForId
+						+";";
+		}
+			
+					/**
+					 * KEEP HERE AS REFERENCE!
+					 * IMPORTANT, DO NOT USE
+					 * clipboard reading is too heavy...
+					+"Cpbd='"+retrieveClipboardString()+"', "
+					 */
+						
+					// less important (mainly for debug)
+		if(EStats.ConsoleSliderControl.b){
+			strStatsLast+=
+					"Sl"
+						+fmtFloat(getScrollDumpAreaFlindex(),0)+"/"+iMaxSliderIndex+"+"+lstbxDumpArea.getGridPanel().getVisibleRows()
+						+"("+fmtFloat(100.0f -lstbxDumpArea.getSlider().getModel().getPercent()*100f,0)+"%)"
+						+";";
+		}
 					
-				+"xy"
-					+(int)sapp.getInputManager().getCursorPosition().x
-					+","
-					+(int)sapp.getInputManager().getCursorPosition().y
-					+";"
-					
-		;
+		if(EStats.TimePerFrame.b){
+			strStatsLast+=
+					"Tpf"+(fpslState.isEnabled() ? (int)(fTPF*1000.0f) : fmtFloat(fTPF,6)+"s")
+						+(fpslState.isEnabled()?
+							"="+fpslState.getFrameDelayByCpuUsageMilis()+"+"+fpslState.getThreadSleepTimeMilis()+"ms"
+							:"")
+						+";";
+		}
+						
+		if(EStats.MousePosition.b){
+			strStatsLast+=
+					"xy"
+						+(int)sapp.getInputManager().getCursorPosition().x
+						+","
+						+(int)sapp.getInputManager().getCursorPosition().y
+						+";";
+		}
 		
 		return strStatsLast;
 	}
