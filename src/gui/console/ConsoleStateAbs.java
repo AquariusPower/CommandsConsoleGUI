@@ -27,6 +27,7 @@
 
 package gui.console;
 
+import groovyjarjarcommonscli.ParseException;
 import gui.console.ReflexFill.IReflexFillCfgVariant;
 import gui.console.ReflexFill.ReflexFillCfg;
 
@@ -46,6 +47,7 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
@@ -63,7 +65,6 @@ import com.jme3.font.BitmapCharacter;
 import com.jme3.font.BitmapCharacterSet;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
-import com.jme3.font.LineWrapMode;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
@@ -79,7 +80,6 @@ import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
-import com.simsilica.lemur.GridPanel;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.HAlignment;
 import com.simsilica.lemur.Label;
@@ -205,7 +205,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	protected float	fConsoleHeightPerc = fConsoleHeightPercDefault;
 	protected ArrayList<String>	astrCmdAndParams = new ArrayList<String>();
 	protected ArrayList<String>	astrExecConsoleCmdsQueue = new ArrayList<String>();
-	protected ArrayList<PreQueueSubList>	astrExecConsoleCmdsPreQueue = new ArrayList<PreQueueSubList>();
+	protected ArrayList<PreQueueCmdsBlockSubList>	astrExecConsoleCmdsPreQueue = new ArrayList<PreQueueCmdsBlockSubList>();
 	protected File	flInit;
 	protected File	flDB;
 	protected float	fLstbxHeight;
@@ -277,13 +277,17 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 
 //	private boolean	bUsePreQueue = false; 
 	
-	protected static class PreQueueSubList{
+	protected static class PreQueueCmdsBlockSubList{
 		TimedDelay tdSleep = null;
 		String strUId = ConsoleStateAbs.i().getNextUniqueId();
 		ArrayList<String> astrCmdList = new ArrayList<String>();
 		boolean	bPrepend = false;
-		public String getPreparedCommentUId(){
-			return ConsoleStateAbs.i().cc.commentToAppend("UId=\""+strUId+"\"");
+		boolean bForceFailBlockExecution = false;
+		boolean	bInfoSleepBegin = false;
+		String	strBlockInfo;
+		
+		public String getUniqueInfo(){
+			return ConsoleStateAbs.i().cc.commentToAppend("UId=\""+strUId+"\","+strBlockInfo);
 		}
 	}
 	
@@ -352,13 +356,13 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		setupVars(false);
 		flSetup = new File(fileNamePrepareCfg(strFileSetup,false));
 		if(flSetup.exists()){
-			addExecConsoleCommandBlockToQueue(fileLoad(flSetup));
+			addCmdListOneByOneToQueue(fileLoad(flSetup), false, false);
 		}
 		
 		// init user cfg
 		flInit = new File(fileNamePrepareCfg(strFileInitConsCmds,false));
 		if(flInit.exists()){
-			addExecConsoleCommandBlockToQueue(fileLoad(flInit));
+			addCmdListOneByOneToQueue(fileLoad(flInit), false, false);
 		}else{
 			fileAppendLine(flInit, cc.getCommentPrefix()+" User console commands here will be executed at startup.");
 		}
@@ -379,8 +383,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		addExecConsoleCommandToQueue(cc.btgShowExecQueuedInfo.getCmdIdAsCommand(true));
 		// end of initialization
 		addExecConsoleCommandToQueue(cc.RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE);
-		// TODO temporary workaround, pre-queue cannot be enable from start yet...
-		addExecConsoleCommandToQueue(cc.btgPreQueue.getCmdIdAsCommand(true));
+//		addExecConsoleCommandToQueue(cc.btgPreQueue.getCmdIdAsCommand(true)); //		 TODO temporary workaround, pre-queue cannot be enable from start yet...
 		if(bInitiallyClosed){
 			// after all, close the console
 			addExecConsoleCommandToQueue(cc.CMD_CLOSE_CONSOLE);
@@ -546,32 +549,39 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		bInitialized=true;
 	}
 	
+	protected void showClipboard(){
+		showClipboard(true);
+	}
+	protected void showClipboard(boolean bShowNL){
+		String strClipboard=retrieveClipboardString();
+	//	dumpInfoEntry("Clipboard contents, size="+strClipboard.length()+" ( each line enclosed with \\"+strLineEncloseChar+" ):");
+		dumpInfoEntry("Clipboard contents, size="+strClipboard.length()+":");
+		String[] astr = strClipboard.split("\n");
+	//	for(String str:astr)dumpEntry(strLineEncloseChar+str+strLineEncloseChar);
+	//	dumpEntry(""); // this empty line for clipboard content display is i
+		dumpEntry(">>> Clipboard BEGIN");
+		for(int i=0;i<astr.length;i++){
+			String str=astr[i];
+			if(bShowNL && i<(astr.length-1))str+="\\n";
+			dumpEntry(false,true,false,str);
+		}
+		dumpEntry("<<< Clipboard END");
+		if(bAddEmptyLineAfterCommand)dumpEntry("");
+	//	dumpEntry("");
+		scrollToBottomRequest();
+	}
+	
 	protected class ButtonClick implements Command<Button>{
 		@Override
 		public void execute(Button source) {
 			if(source.equals(btnClipboardShow)){
-				String strClipboard=retrieveClipboardString();
-//				dumpInfoEntry("Clipboard contents, size="+strClipboard.length()+" ( each line enclosed with \\"+strLineEncloseChar+" ):");
-				dumpInfoEntry("Clipboard contents, size="+strClipboard.length()+":");
-				String[] astr = strClipboard.split("\n");
-//				for(String str:astr)dumpEntry(strLineEncloseChar+str+strLineEncloseChar);
-//				dumpEntry(""); // this empty line for clipboard content display is i
-				dumpEntry(">>> Clipboard BEGIN");
-				for(int i=0;i<astr.length;i++){
-					String str=astr[i];
-					if(i<(astr.length-1))str+="\\n";
-					dumpEntry(false,true,false,str);
-				}
-				dumpEntry("<<< Clipboard END");
-				if(bAddEmptyLineAfterCommand)dumpEntry("");
-//				dumpEntry("");
-				scrollToBottomRequest();
+				showClipboard();
 			}else
 			if(source.equals(btnCopy)){
-				editCopyOrCut(false,false);
+				editCopyOrCut(false,false,false);
 			}else
 			if(source.equals(btnCut)){
-				editCopyOrCut(false,true);
+				editCopyOrCut(false,true,false);
 			}else
 			if(source.equals(btnPaste)){
 				editPaste();
@@ -579,12 +589,30 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		}
 	}
 	
-	protected String editCopyOrCut(boolean bJustCollectText, boolean bCut) {
+	protected boolean cmdEditCopyOrCut(boolean bCut) {
+		String strParam1 = paramString(1);
+		boolean bUseCommandDelimiterInsteadOfNewLine=false;
+		if(strParam1!=null){
+			switch(strParam1){
+				case "-d":bUseCommandDelimiterInsteadOfNewLine=true;break;
+			}
+		}
+		String str = editCopyOrCut(false, bCut, bUseCommandDelimiterInsteadOfNewLine);
+		return true;
+	}
+	
+	protected String editCopyOrCut(boolean bJustCollectText, boolean bCut, boolean bUseCommandDelimiterInsteadOfNewLine) {
 //		Integer iCopyTo = getDumpAreaSelectedIndex();
 		String strTextToCopy = null;
 		
 		int iCopyToWork = iCopyTo;
 		int iCopyFromWork = iCopyFrom;
+		
+//		String strNL="\n";
+//		if(bUseCommandDelimiterInsteadOfNewLine){
+////			str=str.replace("\n", cc.getCommandDelimiterStr());
+//			strNL=cc.getCommandDelimiterStr();
+//		}
 		
 		if(iCopyToWork>=0){
 			
@@ -643,6 +671,10 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				}
 			}
 			
+			if(bUseCommandDelimiterInsteadOfNewLine){
+				strTextToCopy=convertNewLineToCmdDelimiter(strTextToCopy);
+			}
+			
 			if(!bJustCollectText){
 				putStringToClipboard(strTextToCopy);
 				
@@ -657,7 +689,13 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		
 		return strTextToCopy;
 	}
-
+	
+	protected String convertNewLineToCmdDelimiter(String str){
+		return str
+			.replace(cc.getCommandDelimiterStr()+"\n", cc.getCommandDelimiterStr())
+			.replace("\n", cc.getCommandDelimiterStr());
+	}
+	
 	protected void editPaste() {
 		String strPasted = retrieveClipboardString(true);
 		if(strPasted.endsWith("\\n"))strPasted=strPasted.substring(0, strPasted.length()-2);
@@ -810,13 +848,13 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 						if(bControl)iCopyFrom = getDumpAreaSelectedIndex();
 						break;
 					case KeyInput.KEY_C: 
-						if(bControl)editCopyOrCut(false,false);
+						if(bControl)editCopyOrCut(false,false,false);
 						break;
 					case KeyInput.KEY_V: 
 						if(bControl)editPaste();
 						break;
 					case KeyInput.KEY_X: 
-						if(bControl)editCopyOrCut(false,true);
+						if(bControl)editCopyOrCut(false,true,false);
 						break;
 					case KeyInput.KEY_NUMPADENTER:
 					case KeyInput.KEY_RETURN:
@@ -1084,7 +1122,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		updateScrollToBottom();
 		if(efHK!=null)efHK.updateHK();
 		
-		updateExecCmdPreQueueDispatcher(); //before exec queue 
+		updateExecPreQueuedCmdsBlockDispatcher(); //before exec queue 
 		updateExecConsoleCmdQueue(); // after pre queue
 		
 		updateInputFieldFillWithSelectedEntry();
@@ -1304,15 +1342,16 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			if(iSelectionIndexPreviousForFill!=getDumpAreaSelectedIndex()){ //to let user type things...
 				updateCopyFrom();
 				
-				String strCmdChk = editCopyOrCut(true,false); //vlstrDumpEntries.get(getDumpAreaSelectedIndex()).trim();
+				String strCmdChk = editCopyOrCut(true,false,true); //vlstrDumpEntries.get(getDumpAreaSelectedIndex()).trim();
 				strCmdChk=strCmdChk.trim();
 				if(validateBaseCommand(strCmdChk)){
 					if(!strCmdChk.startsWith(""+cc.getCommandPrefix()))strCmdChk=cc.getCommandPrefix()+strCmdChk;
 					dumpAndClearInputField();
-					int iCommentBegin = strCmdChk.indexOf(cc.getCommentPrefix());
-					if(iCommentBegin>=0)strCmdChk=strCmdChk.substring(0,iCommentBegin);
-					if(strCmdChk.endsWith("\\n"))strCmdChk=strCmdChk.substring(0,strCmdChk.length()-2);
-					if(strCmdChk.endsWith("\n" ))strCmdChk=strCmdChk.substring(0,strCmdChk.length()-1);
+//					int iCommentBegin = strCmdChk.indexOf(cc.getCommentPrefix());
+//					if(iCommentBegin>=0)strCmdChk=strCmdChk.substring(0,iCommentBegin);
+//					strCmdChk=clearCommentsFromMultiline(strCmdChk);
+//					if(strCmdChk.endsWith("\\n"))strCmdChk=strCmdChk.substring(0,strCmdChk.length()-2);
+//					if(strCmdChk.endsWith("\n" ))strCmdChk=strCmdChk.substring(0,strCmdChk.length()-1);
 					setInputField(strCmdChk);
 				}
 				
@@ -1329,8 +1368,45 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		tfInput.setText(fixStringToInputField(str));
 	}
 	
+	protected String clearCommentsFromMultiline(String str){
+		/**
+		 * this will remove any in-between comments
+		 */
+//		str=str.replace("\\n", "\n");
+		String strCommentRegion=Pattern.quote(cc.getCommentPrefixStr())+"[^\n]*\n";
+		String strJoinToken="\n";
+		if(str.matches(".*"+strCommentRegion+".*")){
+			str=String.join(strJoinToken, str.split(strCommentRegion));
+		}
+		
+		strCommentRegion=Pattern.quote(cc.getCommentPrefixStr())+"[^"+cc.getCommandDelimiterStr()+"]*"+cc.getCommandDelimiterStr();
+		strJoinToken=cc.getCommandDelimiterStr();
+		if(str.matches(".*"+strCommentRegion+".*")){
+			str=String.join(strJoinToken, str.split(strCommentRegion));
+		}
+		
+		return str;
+	}
+	
 	protected String fixStringToInputField(String str){
-		return str.replace("\n", "\\n").replace("\r", "");
+		str=clearCommentsFromMultiline(str);
+		
+		/**
+		 * removes ending NL
+		 */
+		if(str.endsWith("\\n"))str=str.substring(0,str.length()-2);
+		if(str.endsWith("\n" ))str=str.substring(0,str.length()-1);
+		
+		/**
+		 * Lines ending with command delimiter, do not require newline.
+		 */
+		return convertNewLineToCmdDelimiter(str)
+			/**
+			 * convert special chars to escaped ones
+			 */
+			.replace("\n", "\\n")
+			.replace("\t", "\\t") //			.replace("\t", strReplaceTAB)
+			.replace("\r", "");
 	}
 	
 	protected void updateDumpAreaSelectedIndex(){
@@ -1544,43 +1620,49 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		return bIsCmd;
 	}
 	
-	protected void addExecConsoleCommandBlockToQueue(ArrayList<String> astrCmdList){
-		addExecConsoleCommandBlockToQueue(astrCmdList,false,true);
-	}
-	/**
-	 * 
-	 * @param astrCmdList
-	 * @param bPrepend will append if false
-	 */
-	protected void addExecConsoleCommandBlockToQueue(ArrayList<String> astrCmdList, boolean bPrepend, boolean bShowExecIndex){
-		if(cc.btgPreQueue.b()){
-			/**
-			 * TODO still unable to startup with pre-queue enabled...
-			 */
-			addExecConsoleCommandBlockToPreQueue(astrCmdList, bPrepend, bShowExecIndex);
-		}else{
-			ArrayList<String> astrCmdListCopy = new ArrayList<String>(astrCmdList);
-			
-			if(bShowExecIndex){
-				for(int i=0;i<astrCmdListCopy.size();i++){
-					astrCmdListCopy.set(i, astrCmdListCopy.get(i)+cc.commentToAppend("ExecIndex="+i));
-				}
-			}
-			
-			if(bPrepend){
-				Collections.reverse(astrCmdListCopy);
-			}
-			for(String strCmd:astrCmdListCopy){
-				addExecConsoleCommandToQueue(strCmd, bPrepend);
+//	protected void addCmdsBlockToQueue(ArrayList<String> astrCmdList){
+//		addCmdsBlockToQueue(astrCmdList,false,true);
+//	}
+//	/**
+//	 * 
+//	 * @param astrCmdList
+//	 * @param bPrepend will append if false
+//	 */
+//	protected void addCmdsBlockToQueue(ArrayList<String> astrCmdList, boolean bPrepend, boolean bShowExecIndex){
+//		if(cc.btgPreQueue.b()){
+//			/**
+//			 * TODO still unable to startup with pre-queue enabled...
+//			 */
+//			addCmdsBlockToPreQueue(astrCmdList, bPrepend, bShowExecIndex);
+//		}else{
+//			addCmdListOneByOneToQueue(astrCmdList, bPrepend, bShowExecIndex);
+//		}
+//	}
+	
+	protected void addCmdListOneByOneToQueue(ArrayList<String> astrCmdList, boolean bPrepend, boolean bShowExecIndex){
+		ArrayList<String> astrCmdListCopy = new ArrayList<String>(astrCmdList);
+		
+		if(bShowExecIndex){
+			for(int i=0;i<astrCmdListCopy.size();i++){
+				astrCmdListCopy.set(i, astrCmdListCopy.get(i)+cc.commentToAppend("ExecIndex="+i));
 			}
 		}
+		
+		if(bPrepend){
+			Collections.reverse(astrCmdListCopy);
+		}
+		for(String strCmd:astrCmdListCopy){
+			addCmdToQueue(strCmd, bPrepend);
+		}
 	}
-	protected void addExecConsoleCommandBlockToPreQueue(ArrayList<String> astrCmdList, boolean bPrepend, boolean bShowExecIndex){
-		PreQueueSubList pqe = new PreQueueSubList();
+	
+	protected void addCmdsBlockToPreQueue(ArrayList<String> astrCmdList, boolean bPrepend, boolean bShowExecIndex, String strBlockInfo){
+		PreQueueCmdsBlockSubList pqe = new PreQueueCmdsBlockSubList();
+		pqe.strBlockInfo=strBlockInfo;
 		pqe.bPrepend=bPrepend;
 		pqe.astrCmdList = new ArrayList<String>(astrCmdList);
 		for(int i=0;i<pqe.astrCmdList.size();i++){
-			pqe.astrCmdList.set(i, pqe.astrCmdList.get(i)+pqe.getPreparedCommentUId());
+			pqe.astrCmdList.set(i, pqe.astrCmdList.get(i)+pqe.getUniqueInfo());
 		}
 		if(bShowExecIndex){
 			for(int i=0;i<pqe.astrCmdList.size();i++){
@@ -1590,7 +1672,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		}
 		
 		astrExecConsoleCmdsPreQueue.add(pqe);
-		dumpDevInfoEntry("AddedCommandBlock"+pqe.getPreparedCommentUId());
+		dumpDevInfoEntry("AddedCommandBlock"+pqe.getUniqueInfo());
 	}
 	
 	protected boolean doesCmdQueueStillHasUId(String strUId){
@@ -1600,11 +1682,11 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		return false;
 	}
 	
-	protected void updateExecCmdPreQueueDispatcher(){
-		for(PreQueueSubList pqe:astrExecConsoleCmdsPreQueue.toArray(new PreQueueSubList[0])){
+	protected void updateExecPreQueuedCmdsBlockDispatcher(){
+		for(PreQueueCmdsBlockSubList pqe:astrExecConsoleCmdsPreQueue.toArray(new PreQueueCmdsBlockSubList[0])){
 			if(pqe.tdSleep!=null){
 				if(pqe.tdSleep.isReady()){
-					if(doesCmdQueueStillHasUId(pqe.getPreparedCommentUId())){
+					if(doesCmdQueueStillHasUId(pqe.getUniqueInfo())){
 						/**
 						 * will wait all commands of this same pre queue list
 						 * to complete, before continuing, in case the delay was too short.
@@ -1614,11 +1696,18 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 						pqe.tdSleep=null;
 					}
 				}else{
+					if(!pqe.bInfoSleepBegin){
+						dumpDevInfoEntry("Sleeping for "
+							+fmtFloat(pqe.tdSleep.getDelayLimit())+"s: "
+							+pqe.getUniqueInfo()
+							+cc.commentToAppend(pqe.getUniqueInfo()));
+						pqe.bInfoSleepBegin =true;
+					}
 					continue;
 				}
 			}
 			
-			if(pqe.astrCmdList.size()==0){
+			if(pqe.astrCmdList.size()==0 || pqe.bForceFailBlockExecution){
 				astrExecConsoleCmdsPreQueue.remove(pqe);
 			}else{
 				ArrayList<String> astrCmdListFast = new ArrayList<String>();
@@ -1631,23 +1720,31 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 					if(cc.CMD_SLEEP.equals(strCmdBase)){
 						String strParam1 = extractCommandPart(strCmd, 1);
 						strParam1=applyVariablesValues(strParam1);
-						Float fDelay = Float.parseFloat(strParam1);
+						Float fDelay=null;
+						try{fDelay = Float.parseFloat(strParam1);}catch(NumberFormatException ex){
+							dumpExceptionEntry(ex);
+							pqe.bForceFailBlockExecution=true;
+							break;
+						}
 						pqe.tdSleep = new TimedDelay(fDelay);
 						pqe.tdSleep.updateTime();
-						dumpDevInfoEntry(strCmd);
+//						dumpDevInfoEntry(strCmd);
 						break;
 					}else{
 						astrCmdListFast.add(strCmd);
 					}
 				}
 				
+				if(pqe.bForceFailBlockExecution)continue;
+				
 				if(astrCmdListFast.size()>0){
-					if(pqe.bPrepend){
-						Collections.reverse(astrCmdListFast);
-					}
-					for(String str:astrCmdListFast){
-						addExecConsoleCommandToQueue(str, pqe.bPrepend);
-					}
+//					if(pqe.bPrepend){
+//						Collections.reverse(astrCmdListFast);
+//					}
+//					for(String str:astrCmdListFast){
+//						addCmdToQueue(str, pqe.bPrepend);
+//					}
+					addCmdListOneByOneToQueue(astrCmdListFast, pqe.bPrepend, false);
 				}
 				
 			}
@@ -1657,9 +1754,9 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		addExecConsoleCommandToQueue(sfFullCmdLine.toString());
 	}
 	protected void addExecConsoleCommandToQueue(String strFullCmdLine){
-		addExecConsoleCommandToQueue(strFullCmdLine,false);
+		addCmdToQueue(strFullCmdLine,false);
 	}
-	protected void addExecConsoleCommandToQueue(String strFullCmdLine, boolean bPrepend){
+	protected void addCmdToQueue(String strFullCmdLine, boolean bPrepend){
 		strFullCmdLine=strFullCmdLine.trim();
 		
 		if(strFullCmdLine.startsWith(""+cc.getCommentPrefix()))return;
@@ -1686,11 +1783,11 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			String str=astrExecConsoleCmdsQueue.remove(0);
 			if(!str.trim().endsWith(""+cc.getCommentPrefix())){
 				if(cc.btgShowExecQueuedInfo.get()){ // prevent messing user init cfg console log
-					dumpInfoEntry("ExecQueued: "+str);
+					dumpInfoEntry("QueueExec: "+str);
 				}
 			}
 			if(!executeCommand(str)){
-				dumpWarnEntry("ExecQueuedFail: "+str);
+				dumpWarnEntry("QueueExecFail: "+str);
 			}
 		}
 	}
@@ -2234,7 +2331,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		return astrPossibleMatches;
 	}
 	
-	protected String convertToCmdParams(String strFullCmdLine){
+	protected String convertLineToCmdAndParams(String strFullCmdLine){
 		/**
 		 * remove comment
 		 */
@@ -2261,7 +2358,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				);
 //				astrMulti.set(i, astrMulti.get(i).trim()+" "+cc.getCommentPrefix()+"SplitCmdLine "+strComment);
 			}
-			addExecConsoleCommandBlockToQueue(astrMulti,true,true);
+			addCmdListOneByOneToQueue(astrMulti,true,true);
 			return cc.RESTRICTED_CMD_SKIP_CURRENT_COMMAND.toString();
 		}
 		
@@ -2450,7 +2547,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				strFullCmdLine=strFullCmdLine.substring(0,strFullCmdLine.length()-1); //-1 cc.getCommentPrefix()Char
 			}
 			
-			return convertToCmdParams(strFullCmdLine);
+			return convertLineToCmdAndParams(strFullCmdLine);
 		}
 		
 		return null;
@@ -2581,7 +2678,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				if(!alias.strAliasId.toLowerCase().equals(strAliasId))continue;
 				
 				if(!alias.bBlocked){
-					addExecConsoleCommandToQueue(alias.strCmdLine
+					addCmdToQueue(alias.strCmdLine
 						+cc.commentToAppend("alias="+alias.strAliasId), true);
 					return true;
 				}else{
@@ -2648,6 +2745,23 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		if(cc.checkCmdValidity(cc.CMD_ECHO," simply echo something")){
 			bCommandWorked=cc.cmdEcho();
 		}else
+		if(cc.checkCmdValidity("editShowClipboad","--noNL")){
+			String strParam1 = paramString(1);
+			boolean bShowNL=true;
+			if(strParam1!=null){
+				if(strParam1.equals("--noNL")){
+					bShowNL=false;
+				}
+			}
+			showClipboard(bShowNL);
+			bCommandWorked=true;
+		}else
+		if(cc.checkCmdValidity("editCopy","-d end lines with command delimiter instead of NL;")){
+			bCommandWorked=cmdEditCopyOrCut(false);
+		}else
+		if(cc.checkCmdValidity("editCut","like copy, but cut :)")){
+			bCommandWorked=cmdEditCopyOrCut(true);
+		}else
 		if(cc.checkCmdValidity(cc.CMD_ELSE,"conditinal block")){
 			bCommandWorked=cc.cmdElse();
 		}else
@@ -2657,7 +2771,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		if(cc.checkCmdValidity("execBatchCmdsFromFile ","<strFileName>")){
 			String strFile = paramString(1);
 			if(strFile!=null){
-				addExecConsoleCommandBlockToQueue(fileLoad(strFile));
+				addCmdListOneByOneToQueue(fileLoad(strFile),false,false);
 //				astrExecConsoleCmdsQueue.addAll(fileLoad(strFile));
 				bCommandWorked=true;
 			}
@@ -2692,6 +2806,31 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		}else
 		if(cc.checkCmdValidity(cc.CMD_FUNCTION_END,"ends a function block")){
 			bCommandWorked=cmdFunctionEnd();
+		}else
+		if(cc.checkCmdValidity("functionList","[filter]")){
+			String strFilter = paramString(1);
+			ArrayList<String> astr = Lists.newArrayList(tmFunctions.keySet().iterator());
+			for(String str:astr){
+				if(strFilter!=null && !str.toLowerCase().contains(strFilter.toLowerCase()))continue;
+				dumpSubEntry(str);
+			}
+			bCommandWorked=true;
+		}else
+		if(cc.checkCmdValidity("functionShow","<functionId>")){
+			String strFuncId = paramString(1);
+			if(strFuncId!=null){
+				ArrayList<String> astr = tmFunctions.get(strFuncId);
+				if(astr!=null){
+					dumpSubEntry(cc.getCommandPrefixStr()+cc.CMD_FUNCTION+" "+strFuncId+cc.getCommandDelimiter());
+					for(String str:astr){
+						str=strSubEntryPrefix+strSubEntryPrefix+str+cc.getCommandDelimiter();
+//						dumpSubEntry("\t"+str+cc.getCommandDelimiter());
+						dumpEntry(false, true, false, str);
+					}
+					dumpSubEntry(cc.getCommandPrefixStr()+cc.CMD_FUNCTION_END+cc.getCommandDelimiter());
+					bCommandWorked=true;
+				}
+			}
 		}else
 		if(cc.checkCmdValidity("fpsLimit","[iMaxFps]")){
 			Integer iMaxFps = paramInt(1);
@@ -2777,8 +2916,8 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			 * This is only used on the pre-queue, 
 			 * here it is ignored.
 			 */
-			if(!cc.btgPreQueue.b())dumpWarnEntry(cc.CMD_SLEEP+" only works with pre-queue enabled");
-			dumpWarnEntry(cc.CMD_SLEEP+" only works on command blocks like alias, functions, running a file");
+//			if(!cc.btgPreQueue.b())dumpWarnEntry(cc.CMD_SLEEP+" only works with pre-queue enabled");
+			dumpWarnEntry(cc.CMD_SLEEP+" only works on command blocks like functions");
 			bCommandWorked=true;
 		}else
 //		if(cc.checkCmdValidity("showDump","<filter> show matching entries from dump log file")){
@@ -2911,7 +3050,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				 * prepend on the queue is important mainly at the initialization
 				 */
 				dumpInfoEntry("Loading Console Database:");
-				addExecConsoleCommandBlockToQueue(fileLoad(flDB),true,false);
+				addCmdListOneByOneToQueue(fileLoad(flDB),true,false);
 				return true;
 			case backup:
 				return databaseBackup();
@@ -3085,6 +3224,19 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		return true;
 	}
 	
+	protected boolean varDelete(String strVarId){
+		/**
+		 * DELETE/UNSET only user variables
+		 */
+		boolean bCmdWorkDone=tmUserVariables.remove(strVarId)!=null;
+		if(bCmdWorkDone){
+			dumpInfoEntry("Var '"+strVarId+"' deleted.");
+		}else{
+			dumpWarnEntry("Var '"+strVarId+"' not found.");
+		}
+		return bCmdWorkDone;
+	}
+	
 	/**
 	 * When creating variables, this method can only create custom user ones.
 	 * @return
@@ -3095,26 +3247,18 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		
 		if(strVarId==null)return false;
 		
-		boolean bOk = false;
-		if(strVarId.trim().startsWith(""+cc.getVarDeleteToken())){
-			/**
-			 * DELETE/UNSET only user variables
-			 */
-			bOk=tmUserVariables.remove(strVarId.trim().substring(1))!=null;
-			if(bOk){
-				dumpInfoEntry("Var '"+strVarId+"' deleted.");
-			}else{
-				dumpWarnEntry("Var '"+strVarId+"' not found.");
-			}
+		boolean bCmdWorkDone = false;
+		if(strVarId.trim().startsWith(cc.getVarDeleteTokenStr())){
+			bCmdWorkDone=varDelete(strVarId.trim().substring(1));
 		}else{
 			/**
 			 * SET user or restricted variable
 			 */
 			if(isRestrictedAndDoesNotExist(strVarId))return false;
-			bOk=varSet(strVarId,strValue,true);
+			bCmdWorkDone=varSet(strVarId,strValue,true);
 		}
 		
-		return bOk;
+		return bCmdWorkDone;
 	}
 	
 	protected boolean isRestrictedAndDoesNotExist(String strVar){
@@ -3184,30 +3328,57 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	protected boolean cmdFunctionCall() {
 		String strFunctionId = paramString(1);
 		
-		ArrayList<String> astrFuncParams = new ArrayList<String>();
-		int i=2;
-		while(true){
-			String strFuncParam = paramString(i);
-			if(strFuncParam==null)break;
-			String strParamId=strFunctionId+"_"+(i-1);
-			astrFuncParams.add(strParamId);
-			varSet(strParamId, strFuncParam, false);
-			i++;
-		}
-		
+		/**
+		 * put cmds block at queue
+		 */
 		ArrayList<String> astrFuncBlock = tmFunctions.get(strFunctionId);
-		
+		astrFuncBlock.removeAll(Collections.singleton(null));
 		if(astrFuncBlock!=null && astrFuncBlock.size()>0){
 			dumpInfoEntry("Running function: "+strFunctionId+" "+cc.getCommentPrefix()+"totLines="+astrFuncBlock.size());
 			
+			/**
+			 * params var ids
+			 */
+			ArrayList<String> astrFuncParams = new ArrayList<String>();
+			int i=2;
+			while(true){
+				String strParamValue = paramString(i);
+				if(strParamValue==null)break;
+				String strParamId=strFunctionId+"_"+(i-1);
+				astrFuncParams.add(strParamId);
+				if(hasVar(strParamId)){
+					dumpWarnEntry("RmConflictingVar: "+varReportPrepare(strParamId));
+					varDelete(strParamId);
+				}
+				varSet(strParamId, strParamValue, false);
+				i++;
+			}
+			
 			ArrayList<String> astrFuncBlockToExec = new ArrayList<String>(astrFuncBlock);
+			/**
+			 * prepend section (is inverted order)
+			 */
+//			for(String strUnsetVar:astrFuncParams){
+//				if(hasVar(strUnsetVar)){
+//					/**
+//					 * Tries to inform user about the inconsistency.
+//					 */
+//					dumpWarnEntry("Conflicting func param var will be removed: "+strUnsetVar);
+//				}
+//				astrFuncBlockToExec.add(0,cc.getCommandPrefix()+
+//						cc.CMD_VAR_SET.toString()+" "+cc.getVarDeleteToken()+strUnsetVar);
+//			}
 			astrFuncBlockToExec.add(0,cc.RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS+" "+strFunctionId);
+			
+			/**
+			 * append section
+			 */
 			for(String strUnsetVar:astrFuncParams){
 				astrFuncBlockToExec.add(cc.getCommandPrefix()+
 					cc.CMD_VAR_SET.toString()+" "+cc.getVarDeleteToken()+strUnsetVar);
 			}
 			astrFuncBlockToExec.add(cc.RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS+" "+strFunctionId);
-			addExecConsoleCommandBlockToQueue(astrFuncBlockToExec, true, true);
+			addCmdsBlockToPreQueue(astrFuncBlockToExec, true, true, "Func:"+strFunctionId);
 		}
 		
 		return true;
@@ -3218,7 +3389,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		if(!isValidIdentifierCmdVarAliasFuncString(strFunctionId))return false;
 		
 		tmFunctions.put(strFunctionId, new ArrayList<String>());
-		dumpInfoEntry("Function block begin for: "+strFunctionId);
+		dumpInfoEntry("Function creation begins for: "+strFunctionId);
 		
 		strPrepareFunctionBlockForId=strFunctionId;
 		
@@ -3231,11 +3402,14 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		return true;
 	}
 	protected boolean functionEndCheck(String strCmdLine) {
-		String strCmdCheck=""+cc.getCommandPrefix()+cc.CMD_FUNCTION_END.toString();
-		strCmdCheck=strCmdCheck.toLowerCase();
-		if(strCmdCheck.equals(strCmdLine.trim().toLowerCase())){
+		if(cc.CMD_FUNCTION_END.equals(extractCommandPart(strCmdLine,0))){
 			return cmdFunctionEnd();
 		}
+//		String strCmdCheck=""+cc.getCommandPrefix()+cc.CMD_FUNCTION_END.toString();
+//		strCmdCheck=strCmdCheck.toLowerCase();
+//		if(strCmdCheck.equals(strCmdLine.trim().toLowerCase())){
+//			return cmdFunctionEnd();
+//		}
 		return false;
 	}
 	protected boolean cmdFunctionEnd() {
@@ -3244,7 +3418,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			return false;
 		}
 		
-		dumpInfoEntry("Function block ends for: "+strPrepareFunctionBlockForId);
+		dumpInfoEntry("Function creation ends for: "+strPrepareFunctionBlockForId);
 		strPrepareFunctionBlockForId=null;
 		
 		return true;
@@ -3419,7 +3593,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	}
 	
 	/**
-	 * This is able to create restricted variables.
+	 * This is able to create restricted variables too.
 	 * 
 	 * @param strVarId
 	 * @param strValue
@@ -3825,15 +3999,15 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		
 		strStatsLast = ""
 				// user important
-				+"CpFrom"+iCopyFrom
-					+"to"+iCopyTo //getDumpAreaSelectedIndex()
-					+","
+				+"Cp"+iCopyFrom
+					+">"+iCopyTo //getDumpAreaSelectedIndex()
+					+";"
 				
-				+"Hst"+iCmdHistoryCurrentIndex+"/"+(astrCmdHistory.size()-1)
-					+","
+				+"Hs"+iCmdHistoryCurrentIndex+"/"+(astrCmdHistory.size()-1)
+					+";"
 				
 				+"If"+cc.aIfConditionNestedList.size()
-					+","
+					+";"
 					
 				/**
 				 * KEEP HERE AS REFERENCE!
@@ -3843,16 +4017,22 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 				 */
 					
 				// less important (mainly for debug)
-				+"Slider"
+				+"Sl"
 					+fmtFloat(getScrollDumpAreaFlindex(),0)+"/"+iMaxSliderIndex+"+"+lstbx.getGridPanel().getVisibleRows()
 					+"("+fmtFloat(100.0f -lstbx.getSlider().getModel().getPercent()*100f,0)+"%)"
-					+","
+					+";"
 				
 				+"Tpf"+(fpslState.isEnabled() ? (int)(fTPF*1000.0f) : fmtFloat(fTPF,6)+"s")
 					+(fpslState.isEnabled()?
 						"="+fpslState.getFrameDelayByCpuUsageMilis()+"+"+fpslState.getThreadSleepTimeMilis()+"ms"
 						:"")
+					+";"
+					
+				+"xy"
+					+(int)sapp.getInputManager().getCursorPosition().x
 					+","
+					+(int)sapp.getInputManager().getCursorPosition().y
+					+";"
 					
 		;
 		

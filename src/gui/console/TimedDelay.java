@@ -41,7 +41,7 @@ public class TimedDelay{
 	
 	protected Long	lNanoTime;
 	protected float	fDelayLimit;
-	protected Long	lNanoDelayLimit;
+	protected long	lNanoDelayLimit;
 	
 	/**
 	 * use this to prevent current time to read from realtime
@@ -78,6 +78,12 @@ public class TimedDelay{
 			if(bReady)updateTime();
 		}
 		return bReady;
+	}
+	public long getNanoDelayLimit(){
+		return lNanoDelayLimit;
+	}
+	public float getDelayLimit(){
+		return fDelayLimit;
 	}
 	public void reset() {
 		lNanoTime=null;

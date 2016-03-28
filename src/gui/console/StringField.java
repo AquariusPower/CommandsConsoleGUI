@@ -43,6 +43,15 @@ public class StringField implements IReflexFillCfgVariant{
 	protected IReflexFillCfg rfcfgOwner;
 //	protected int	iReflexFillCfgVariant;
 	protected String	strReflexFillCfgCodePrefixVariant;
+	protected static boolean bIgnoreCaseOnComparison = true;
+	
+	/**
+	 * default is true, useful for easy lowercase user typed commands comparison
+	 * @param b
+	 */
+	public static void setIgnoreCaseComparison(boolean b){
+		bIgnoreCaseOnComparison=b;
+	}
 	
 //	public StringField(IReflexFillCfg rfcfgOwner){
 //		this(rfcfgOwner,0);
@@ -93,7 +102,11 @@ public class StringField implements IReflexFillCfgVariant{
 	public boolean equals(Object obj) {
 //		if(strValue==null)throw new NullPointerException(errorMessage());
 		if(strValue==null)initialize();
-		return this.strValue.equals(obj);
+		if(bIgnoreCaseOnComparison){
+			return this.strValue.equalsIgnoreCase(""+obj);
+		}else{
+			return this.strValue.equals(obj);
+		}
 	}
 	
 	@Override

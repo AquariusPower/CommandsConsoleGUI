@@ -61,7 +61,7 @@ public class ConsoleCommands implements IReflexFillCfg{
 	protected BoolToggler	btgShowException = new BoolToggler(this,true,strTogglerCodePrefix);
 	protected BoolToggler	btgEngineStatsView = new BoolToggler(this,false,strTogglerCodePrefix);
 	protected BoolToggler	btgEngineStatsFps = new BoolToggler(this,false,strTogglerCodePrefix);
-	protected BoolToggler	btgPreQueue = new BoolToggler(this,false,strTogglerCodePrefix);
+//	protected BoolToggler	btgPreQueue = new BoolToggler(this,false,strTogglerCodePrefix);
 	// developer vars, keep together!
 	protected BoolToggler	btgShowDeveloperInfo=new BoolToggler(this,true,strTogglerCodePrefix);
 	protected BoolToggler	btgShowDeveloperWarn=new BoolToggler(this,true,strTogglerCodePrefix);
@@ -172,6 +172,9 @@ public class ConsoleCommands implements IReflexFillCfg{
 	public Character getCommandDelimiter() {
 		return chCommandDelimiter;
 	}
+	public String getCommandDelimiterStr() {
+		return ""+chCommandDelimiter;
+	}
 	public ConsoleCommands setCommandDelimiter(Character chCommandDelimiter) {
 		this.chCommandDelimiter = chCommandDelimiter;
 		return this;
@@ -213,6 +216,9 @@ public class ConsoleCommands implements IReflexFillCfg{
 	}
 	public Character getVarDeleteToken() {
 		return chVarDeleteToken;
+	}
+	public String getVarDeleteTokenStr() {
+		return ""+chVarDeleteToken;
 	}
 	public ConsoleCommands setVarDeleteToken(Character chVarDeleteToken) {
 		this.chVarDeleteToken = chVarDeleteToken;
@@ -349,7 +355,7 @@ public class ConsoleCommands implements IReflexFillCfg{
 		}else{
 			if(!bSkipNesting){
 				if(bCondition){
-					csaTmp.addExecConsoleCommandToQueue(strCmds,true);
+					csaTmp.addCmdToQueue(strCmds,true);
 				}
 			}
 		}

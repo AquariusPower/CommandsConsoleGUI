@@ -213,11 +213,11 @@ public class ExtraFunctionalitiesHK {
 			if(color.a>1)color.a=1;
 			geomCursorHK.getMaterial().setColor("Color", color);
 			
-			if(lDelay > tdTextCursorBlinkHK.lNanoDelayLimit){
+			if(lDelay > tdTextCursorBlinkHK.getNanoDelayLimit()){
 				tdTextCursorBlinkHK.updateTime();
 			}
 		}else{
-			if(lDelay > tdTextCursorBlinkHK.lNanoDelayLimit){
+			if(lDelay > tdTextCursorBlinkHK.getNanoDelayLimit()){
 				if(geomCursorHK.getCullHint().compareTo(CullHint.Never)==0){
 					geomCursorHK.setCullHint(CullHint.Always);
 				}else{
