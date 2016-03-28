@@ -589,34 +589,38 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			dumpDebugEntry(strTgt+strCap+strB+strM);
 		}
 		
-		/**
-		 * TODO TellLemurDev: When cursor enters, many times this method is not called?
-		 * Use cursor moved too.
-		 */
+		protected void cursorMoveEvent(CursorMotionEvent event, Spatial target,	Spatial capture) {
+			if(sptScrollTarget!=target){
+				debugReport(event, null, target, capture);
+			}
+			
+			sptScrollTarget = target;
+		}
+		
 		@Override
 		public void cursorEntered(CursorMotionEvent event, Spatial target,	Spatial capture) {
 			super.cursorEntered(event, target, capture);
-			if(sptScrollTarget!=target){
-				debugReport(event, null, target, capture);
-			}
-			sptScrollTarget = target;
+			cursorMoveEvent(event, target, capture);
 		}
 		
-		/**
-		 * TODO TellLemurDev: This works too much, even when cursor is stopped it is called?
-		 */
 		@Override
 		public void cursorMoved(CursorMotionEvent event, Spatial target, Spatial capture) {
 			super.cursorMoved(event, target, capture);
-			if(sptScrollTarget!=target){
-				debugReport(event, null, target, capture);
-			}
-			sptScrollTarget = target;
+			cursorMoveEvent(event, target, capture);
 		}
 		
 		@Override
-		public void cursorButtonEvent(CursorButtonEvent event, Spatial target,	Spatial capture) {
-			super.cursorButtonEvent(event, target, capture);
+		protected void click(CursorButtonEvent event, Spatial target,	Spatial capture) {
+			super.click(event, target, capture);
+			
+			if(!event.isPressed()){ //on release
+				if(event.getButtonIndex()==0){ //main button
+					if(target==lstbxAutoCompleteHint){
+						checkAndApplyHintAtInputField();
+					}
+				}
+			}
+			
 			debugReport(null, event, target, capture);
 		}
 	}
@@ -1641,6 +1645,12 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	 * @return false if was a comment, empty or invalid
 	 */
 	public boolean actionSubmit(final String strCmd){
+		if(checkAndApplyHintAtInputField())return true;
+		
+		return actionSubmitCommand(strCmd);
+	}
+	
+	protected boolean checkAndApplyHintAtInputField(){
 		/**
 		 * if hint area is active and has a selected entry, 
 		 * it will override default command submit.
@@ -1656,7 +1666,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 			}
 		}
 		
-		return actionSubmitCommand(strCmd);
+		return false;
 	}
 	
 	protected void clearInputTextField() {
