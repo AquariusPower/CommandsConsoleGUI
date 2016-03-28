@@ -49,7 +49,7 @@ import com.simsilica.lemur.focus.FocusManagerState;
  *
  */
 public class ExtraFunctionalitiesHK {
-	protected ConsoleStateAbs	cgs;
+	protected ConsoleGuiStateAbs	cgs;
 	
 	/**
 	 * keep "initialized" vars together!
@@ -74,7 +74,7 @@ public class ExtraFunctionalitiesHK {
 	private String	strPrefixHK = "(HK) ";
 	
 
-	public ExtraFunctionalitiesHK(ConsoleStateAbs cgs){
+	public ExtraFunctionalitiesHK(ConsoleGuiStateAbs cgs){
 		this.cgs=cgs;
 	}
 	

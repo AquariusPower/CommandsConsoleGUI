@@ -191,7 +191,7 @@ public class ReflexFill {
 		return bUseDefaultCfgIfMissing;
 	}
 
-	public static void setbUseDefaultCfgIfMissing(boolean bUseDefaultCfgIfMissing) {
+	public static void setUseDefaultCfgIfMissing(boolean bUseDefaultCfgIfMissing) {
 		ReflexFill.bUseDefaultCfgIfMissing = bUseDefaultCfgIfMissing;
 	}
 	

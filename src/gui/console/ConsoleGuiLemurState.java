@@ -41,19 +41,16 @@ import com.simsilica.lemur.RangedValueModel;
 import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.core.VersionedList;
-import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.style.Attributes;
 import com.simsilica.lemur.style.Styles;
 
 /**
- * A graphical console where developers and users can issue application commands.
- *  
- * Here is the specific code that links the console state with Lemur GUI.
+ * Here is the specific code that links the JME console state with Lemur GUI.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleGuiLemurState extends ConsoleStateAbs{
+public class ConsoleGuiLemurState extends ConsoleGuiStateAbs{
 //	protected ListBox<String>	lstbxAutoCompleteHint;
 //	protected VersionedList<String>	vlstrAutoCompleteHint = new VersionedList<String>();
 

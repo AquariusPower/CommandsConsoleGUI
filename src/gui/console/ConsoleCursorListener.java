@@ -39,9 +39,9 @@ import com.simsilica.lemur.event.DefaultCursorListener;
  *
  */
 public class ConsoleCursorListener extends DefaultCursorListener {
-	ConsoleStateAbs csa;
+	ConsoleGuiStateAbs csa;
 	
-	public ConsoleCursorListener(ConsoleStateAbs csa) {
+	public ConsoleCursorListener(ConsoleGuiStateAbs csa) {
 		this.csa=csa;
 	}
 

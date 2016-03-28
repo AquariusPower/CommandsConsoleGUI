@@ -56,10 +56,11 @@ DONE:
 	= Console is properly initially hidden now (cullhint)
 
 DOING:
-	... SeparateGUI class from Commands Management
-	... SeparateGUI class from Lemur, so other GUI can use the same abstract class to implement a console GUI
+	... SeparateGUI class from Commands Management, independent from Lemur and JME, so can be used even on a text console or 2D application etc.
+	... SeparateGUI class from Lemur, so other GUI can use the same abstract class to implement a console GUI.
 
 TODO.FastToImplement:
+	+ /bind [--list]|[<key> <cmd>]; simplify key to accept lowercase and be as shortest as possible
 	+ /sleep 2.5 [cmd]; allow /sleep to exec a single command too, after the delay; this way it will not prevent next commands from being executed, and can be used outside of cmds block
 	+ /while stores subsequent commands on array for repeating til WhileEnd. Nestable too.
 	+ AtSetup:windowGeometry.resolution.position;keybinds.sndVplumes;etc

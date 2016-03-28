@@ -99,14 +99,16 @@ import com.simsilica.lemur.style.BaseStyles;
 import com.simsilica.lemur.style.Styles;
 
 /**
+ * A graphical console where developers and users can issue application commands.
  * This class connects the console commands class with JMonkeyEngine.
+ * It must contain the base for the GUI to work.
  * 
  * Project at: https://github.com/AquariusPower/CommandsConsoleGUI
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFillCfg{
+public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflexFillCfg{
 	protected FpsLimiter fpslState = new FpsLimiter();
 	
 //	public final String strInputIMCPREFIX = "CONSOLEGUISTATE_";
@@ -291,14 +293,14 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	 */
 	protected abstract void clearHintSelection();
 	protected abstract Integer getHintIndex();
-	protected abstract ConsoleStateAbs setHintIndex(Integer i);
-	protected abstract ConsoleStateAbs setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines);
+	protected abstract ConsoleGuiStateAbs setHintIndex(Integer i);
+	protected abstract ConsoleGuiStateAbs setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines);
 	protected abstract void scrollHintToIndex(int i);
 	protected abstract void lineWrapDisableForChildrenOf(Node gp);
 	
 	protected static class PreQueueCmdsBlockSubList{
 		TimedDelay tdSleep = null;
-		String strUId = ConsoleStateAbs.i().getNextUniqueId();
+		String strUId = ConsoleGuiStateAbs.i().getNextUniqueId();
 		ArrayList<String> astrCmdList = new ArrayList<String>();
 		boolean	bPrepend = false;
 		boolean bForceFailBlockExecution = false;
@@ -306,7 +308,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		String	strBlockInfo;
 		
 		public String getUniqueInfo(){
-			return ConsoleStateAbs.i().cc.commentToAppend("UId=\""+strUId+"\","+strBlockInfo);
+			return ConsoleGuiStateAbs.i().cc.commentToAppend("UId=\""+strUId+"\","+strBlockInfo);
 		}
 	}
 	
@@ -318,21 +320,21 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		Boolean	bIfEndIsRequired = false;
 	}
 	
-	protected static ConsoleStateAbs instance;
-	public static ConsoleStateAbs i(){
+	protected static ConsoleGuiStateAbs instance;
+	public static ConsoleGuiStateAbs i(){
 		return instance;
 	}
-	public ConsoleStateAbs(ConsoleCommands cc) {
+	public ConsoleGuiStateAbs(ConsoleCommands cc) {
 		if(instance==null)instance=this;
 		this.cc = cc==null?new ConsoleCommands():cc;
 		this.cc.csaTmp=this;
 	}
-	public ConsoleStateAbs(int iToggleConsoleKey, ConsoleCommands cc) {
+	public ConsoleGuiStateAbs(int iToggleConsoleKey, ConsoleCommands cc) {
 		this(cc);
 		this.bEnabled=true; //just to let it be initialized at startup by state manager
 		this.iToggleConsoleKey=iToggleConsoleKey;
 	}
-	public ConsoleStateAbs(int iToggleConsoleKey) {
+	public ConsoleGuiStateAbs(int iToggleConsoleKey) {
 		this(iToggleConsoleKey,null);
 	}
 	
@@ -2784,316 +2786,316 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		return bLastAliasCreatedSuccessfuly;
 	}
 	
-	protected boolean executePreparedCommand(){
-		if(cc.RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(strCmdLinePrepared))return true;
-		
-		/**
-		 * means the command didnt have any problem, didnt fail, requiring a warning message
-		 */
-		boolean bCommandWorked = false;
-		
-		if(cc.checkCmdValidityBoolTogglers()){
-			bCommandWorked=toggle(cc.btgReferenceMatched);
-		}else
-		if(cc.checkCmdValidity("alias",getAliasHelp(),true)){
-			bCommandWorked=cmdAlias();
-		}else
-		if(cc.checkCmdValidity("clearCommandsHistory")){
-			astrCmdHistory.clear();
-			bCommandWorked=true;
-		}else
-		if(cc.checkCmdValidity("clearDumpArea")){
-			vlstrDumpEntries.clear();
-			bCommandWorked=true;
-		}else
-		if(cc.checkCmdValidity(cc.CMD_CLOSE_CONSOLE,"like the bound key to do it")){
-			setEnabled(false);
-			bCommandWorked=true;
-		}else
-		if(cc.checkCmdValidity(cc.CMD_CONSOLE_HEIGHT,"[fPercent] of the application window")){
-			Float f = paramFloat(1);
-			modifyConsoleHeight(f);
-			bCommandWorked=true;
-		}else
-		if(cc.checkCmdValidity(cc.CMD_CONSOLE_SCROLL_BOTTOM,"")){
-			scrollToBottomRequest();
-			bCommandWorked=true;
-		}else
-		if(cc.checkCmdValidity(cc.CMD_CONSOLE_STYLE,"[strStyleName] changes the style of the console on the fly, empty for a list")){
-			String strStyle = paramString(1);
-			if(strStyle==null)strStyle="";
-			bCommandWorked=cmdStyleApply(strStyle);
-		}else
-		if(cc.checkCmdValidity(cc.CMD_DB,EDataBaseOperations.help())){
-			bCommandWorked=cmdDb();
-		}else
-//		if(cc.checkCmdValidity("dumpFind","<text> finds, select and scroll to it at dump area")){
-//			bCommandWorkedProperly=cmdFind();
+//	protected boolean executePreparedCommand(){
+//		if(cc.RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(strCmdLinePrepared))return true;
+//		
+//		/**
+//		 * means the command didnt have any problem, didnt fail, requiring a warning message
+//		 */
+//		boolean bCommandWorked = false;
+//		
+//		if(cc.checkCmdValidityBoolTogglers()){
+//			bCommandWorked=toggle(cc.btgReferenceMatched);
 //		}else
-//		if(cc.checkCmdValidity("dumpFindNext","<text> finds, select and scroll to it at dump area")){
-//			bCommandWorkedProperly=cmdFind();
+//		if(cc.checkCmdValidity("alias",getAliasHelp(),true)){
+//			bCommandWorked=cmdAlias();
 //		}else
-//		if(cc.checkCmdValidity("dumpFindPrevious","<text> finds, select and scroll to it at dump area")){
-//			bCommandWorkedProperly=cmdFind();
+//		if(cc.checkCmdValidity("clearCommandsHistory")){
+//			astrCmdHistory.clear();
+//			bCommandWorked=true;
 //		}else
-		if(cc.checkCmdValidity(cc.CMD_ECHO," simply echo something")){
-			bCommandWorked=cc.cmdEcho();
-		}else
-		if(cc.checkCmdValidity("editShowClipboad","--noNL")){
-			String strParam1 = paramString(1);
-			boolean bShowNL=true;
-			if(strParam1!=null){
-				if(strParam1.equals("--noNL")){
-					bShowNL=false;
-				}
-			}
-			showClipboard(bShowNL);
-			bCommandWorked=true;
-		}else
-		if(cc.checkCmdValidity("editCopy","-d end lines with command delimiter instead of NL;")){
-			bCommandWorked=cmdEditCopyOrCut(false);
-		}else
-		if(cc.checkCmdValidity("editCut","like copy, but cut :)")){
-			bCommandWorked=cmdEditCopyOrCut(true);
-		}else
-		if(cc.checkCmdValidity(cc.CMD_ELSE,"conditinal block")){
-			bCommandWorked=cc.cmdElse();
-		}else
-		if(cc.checkCmdValidity(cc.CMD_ELSE_IF,"<[!]<true|false>> conditional block")){
-			bCommandWorked=cc.cmdElseIf();
-		}else
-		if(cc.checkCmdValidity("execBatchCmdsFromFile ","<strFileName>")){
-			String strFile = paramString(1);
-			if(strFile!=null){
-				addCmdListOneByOneToQueue(fileLoad(strFile),false,false);
-//				astrExecConsoleCmdsQueue.addAll(fileLoad(strFile));
-				bCommandWorked=true;
-			}
-		}else
-		if(cc.checkCmdValidity("exit","the application")){
-			cc.cmdExit();
-			bCommandWorked=true;
-		}else
-		if(cc.checkCmdValidity(cc.CMD_FIX_CURSOR ,"in case cursor is invisible")){
-			if(efHK==null){
-				dumpWarnEntry("requires command: "+cc.CMD_HK_TOGGLE);
-			}else{
-				dumpInfoEntry("requesting: "+cc.CMD_FIX_CURSOR);
-				efHK.bFixInvisibleTextInputCursorHK=true;
-			}
-			bCommandWorked = true;
-		}else
-		if(cc.checkCmdValidity(cc.CMD_FIX_LINE_WRAP ,"in case words are overlapping")){
-			cmdLineWrapDisableDumpArea();
-			bCommandWorked = true;
-		}else
-		if(cc.checkCmdValidity(cc.CMD_FIX_VISIBLE_ROWS_AMOUNT,"[iAmount] in case it is not showing as many rows as it should")){
-			iVisibleRowsAdjustRequest = paramInt(1);
-			if(iVisibleRowsAdjustRequest==null)iVisibleRowsAdjustRequest=0;
-			bCommandWorked=true;
-		}else
-		if(cc.checkCmdValidity(cc.CMD_FUNCTION,"<id> begins a function block")){
-			bCommandWorked=cmdFunctionBegin();
-		}else
-		if(cc.checkCmdValidity(cc.CMD_FUNCTION_CALL,"<id> [parameters...] retrieve parameters values with ex.: ${id_1} ${id_2} ...")){
-			bCommandWorked=cmdFunctionCall();
-		}else
-		if(cc.checkCmdValidity(cc.CMD_FUNCTION_END,"ends a function block")){
-			bCommandWorked=cmdFunctionEnd();
-		}else
-		if(cc.checkCmdValidity("functionList","[filter]")){
-			String strFilter = paramString(1);
-			ArrayList<String> astr = Lists.newArrayList(tmFunctions.keySet().iterator());
-			for(String str:astr){
-				if(strFilter!=null && !str.toLowerCase().contains(strFilter.toLowerCase()))continue;
-				dumpSubEntry(str);
-			}
-			bCommandWorked=true;
-		}else
-		if(cc.checkCmdValidity("functionShow","<functionId>")){
-			String strFuncId = paramString(1);
-			if(strFuncId!=null){
-				ArrayList<String> astr = tmFunctions.get(strFuncId);
-				if(astr!=null){
-					dumpSubEntry(cc.getCommandPrefixStr()+cc.CMD_FUNCTION+" "+strFuncId+cc.getCommandDelimiter());
-					for(String str:astr){
-						str=strSubEntryPrefix+strSubEntryPrefix+str+cc.getCommandDelimiter();
-//						dumpSubEntry("\t"+str+cc.getCommandDelimiter());
-						dumpEntry(false, true, false, str);
-					}
-					dumpSubEntry(cc.getCommandPrefixStr()+cc.CMD_FUNCTION_END+cc.getCommandDelimiter());
-					bCommandWorked=true;
-				}
-			}
-		}else
-		if(cc.checkCmdValidity("fpsLimit","[iMaxFps]")){
-			Integer iMaxFps = paramInt(1);
-			if(iMaxFps!=null){
-				fpslState.setMaxFps(iMaxFps);
-				bCommandWorked=true;
-			}
-			dumpSubEntry("FpsLimit = "+fpslState.getFpsLimit());
-		}else
-		if(cc.checkCmdValidity(cc.CMD_HELP,"[strFilter] show (filtered) available commands")){
-			cmdShowHelp(paramString(1));
-			/**
-			 * ALWAYS return TRUE here, to avoid infinite loop when improving some failed command help info!
-			 */
-			bCommandWorked=true; 
-		}else
-		if(cc.checkCmdValidity(cc.CMD_HISTORY,"[strFilter] of issued commands (the filter results in sorted uniques)")){
-			bCommandWorked=cmdShowHistory();
-		}else
-		if(cc.checkCmdValidity(cc.CMD_HK_TOGGLE ,"[bEnable] allow hacks to provide workarounds")){
-			if(paramBooleanCheckForToggle(1)){
-				Boolean bEnable = paramBoolean(1);
-				if(efHK==null && (bEnable==null || bEnable)){
-					efHK=new ExtraFunctionalitiesHK(this);
-				}
-				
-				if(efHK!=null){
-					efHK.bAllowHK = bEnable==null ? !efHK.bAllowHK : bEnable; //override
-					if(efHK.bAllowHK){
-						dumpWarnEntry("Hacks enabled!");
-					}else{
-						dumpWarnEntry("Hacks may not be completely disabled/cleaned!");
-					}
-				}
-				
-				bCommandWorked=true;
-			}
-		}else
-		if(cc.checkCmdValidity(cc.CMD_IF,"<[!]<true|false>> [cmd|alias] if cmd|alias is not present, this will be a multiline block start!")){
-			bCommandWorked=cc.cmdIf();
-		}else
-		if(cc.checkCmdValidity(cc.CMD_IF_END,"ends conditional block")){
-			bCommandWorked=cc.cmdIfEnd();
-		}else
-		if(cc.checkCmdValidity("initFileShow ","show contents of init file at dump area")){
-			dumpInfoEntry("Init file data: ");
-			for(String str : fileLoad(flInit)){
-				dumpSubEntry(str);
-			}
-			bCommandWorked=true;
-		}else
-		if(cc.checkCmdValidity(cc.CMD_LINE_WRAP_AT,"[iMaxChars] -1 = will trunc big lines, 0 = wrap will be automatic")){
-			iConsoleMaxWidthInCharsForLineWrap = paramInt(1);
-			if(iConsoleMaxWidthInCharsForLineWrap!=null){
-				if(iConsoleMaxWidthInCharsForLineWrap==-1){
-					iConsoleMaxWidthInCharsForLineWrap=null;
-				}
-			}
-			updateWrapAt();
-			bCommandWorked=true;
-		}else
-		if(cc.checkCmdValidity("quit","the application")){
-			cc.cmdExit();
-			bCommandWorked=true;
-		}else
-		if(cc.checkCmdValidity("showBinds","")){
-			dumpInfoEntry("Key bindings: ");
-			dumpSubEntry("Ctrl+C - copy");
-			dumpSubEntry("Ctrl+X - cut");
-			dumpSubEntry("Ctrl+V - paste");
-			dumpSubEntry("Shift+Ctrl+V - show clipboard");
-			dumpSubEntry("Ctrl+B - marks dump area begin selection marker for copy");
-			dumpSubEntry("Ctrl+Del - clear input field");
-			dumpSubEntry("TAB - autocomplete (starting with)");
-			dumpSubEntry("Ctrl+TAB - autocomplete (contains)");
-			dumpSubEntry("Ctrl+/ - toggle input field comment");
-			bCommandWorked=true;
-		}else
-		if(cc.checkCmdValidity("showSetup","show restricted variables")){
-			for(String str:fileLoad(flSetup)){
-				dumpSubEntry(str);
-			}
-			bCommandWorked=true;
-		}else
-		if(cc.checkCmdValidity(cc.CMD_SLEEP,"<fDelay> will wait before executing next command in the command block")){
-			/**
-			 * This is only used on the pre-queue, 
-			 * here it is ignored.
-			 */
-//			if(!cc.btgPreQueue.b())dumpWarnEntry(cc.CMD_SLEEP+" only works with pre-queue enabled");
-			dumpWarnEntry(cc.CMD_SLEEP+" only works on command blocks like functions");
-			bCommandWorked=true;
-		}else
-//		if(cc.checkCmdValidity("showDump","<filter> show matching entries from dump log file")){
-//			String strFilter = paramString(1);
-//			if(strFilter!=null){
-//				for(String str:fileLoad(flLastDump)){
-//					if(str.toLowerCase().contains(strFilter)){
-//						dumpEntry(false, true, false, str);
-//					}
+//		if(cc.checkCmdValidity("clearDumpArea")){
+//			vlstrDumpEntries.clear();
+//			bCommandWorked=true;
+//		}else
+//		if(cc.checkCmdValidity(cc.CMD_CLOSE_CONSOLE,"like the bound key to do it")){
+//			setEnabled(false);
+//			bCommandWorked=true;
+//		}else
+//		if(cc.checkCmdValidity(cc.CMD_CONSOLE_HEIGHT,"[fPercent] of the application window")){
+//			Float f = paramFloat(1);
+//			modifyConsoleHeight(f);
+//			bCommandWorked=true;
+//		}else
+//		if(cc.checkCmdValidity(cc.CMD_CONSOLE_SCROLL_BOTTOM,"")){
+//			scrollToBottomRequest();
+//			bCommandWorked=true;
+//		}else
+//		if(cc.checkCmdValidity(cc.CMD_CONSOLE_STYLE,"[strStyleName] changes the style of the console on the fly, empty for a list")){
+//			String strStyle = paramString(1);
+//			if(strStyle==null)strStyle="";
+//			bCommandWorked=cmdStyleApply(strStyle);
+//		}else
+//		if(cc.checkCmdValidity(cc.CMD_DB,EDataBaseOperations.help())){
+//			bCommandWorked=cmdDb();
+//		}else
+////		if(cc.checkCmdValidity("dumpFind","<text> finds, select and scroll to it at dump area")){
+////			bCommandWorkedProperly=cmdFind();
+////		}else
+////		if(cc.checkCmdValidity("dumpFindNext","<text> finds, select and scroll to it at dump area")){
+////			bCommandWorkedProperly=cmdFind();
+////		}else
+////		if(cc.checkCmdValidity("dumpFindPrevious","<text> finds, select and scroll to it at dump area")){
+////			bCommandWorkedProperly=cmdFind();
+////		}else
+//		if(cc.checkCmdValidity(cc.CMD_ECHO," simply echo something")){
+//			bCommandWorked=cc.cmdEcho();
+//		}else
+//		if(cc.checkCmdValidity("editShowClipboad","--noNL")){
+//			String strParam1 = paramString(1);
+//			boolean bShowNL=true;
+//			if(strParam1!=null){
+//				if(strParam1.equals("--noNL")){
+//					bShowNL=false;
 //				}
+//			}
+//			showClipboard(bShowNL);
+//			bCommandWorked=true;
+//		}else
+//		if(cc.checkCmdValidity("editCopy","-d end lines with command delimiter instead of NL;")){
+//			bCommandWorked=cmdEditCopyOrCut(false);
+//		}else
+//		if(cc.checkCmdValidity("editCut","like copy, but cut :)")){
+//			bCommandWorked=cmdEditCopyOrCut(true);
+//		}else
+//		if(cc.checkCmdValidity(cc.CMD_ELSE,"conditinal block")){
+//			bCommandWorked=cc.cmdElse();
+//		}else
+//		if(cc.checkCmdValidity(cc.CMD_ELSE_IF,"<[!]<true|false>> conditional block")){
+//			bCommandWorked=cc.cmdElseIf();
+//		}else
+//		if(cc.checkCmdValidity("execBatchCmdsFromFile ","<strFileName>")){
+//			String strFile = paramString(1);
+//			if(strFile!=null){
+//				addCmdListOneByOneToQueue(fileLoad(strFile),false,false);
+////				astrExecConsoleCmdsQueue.addAll(fileLoad(strFile));
 //				bCommandWorked=true;
 //			}
 //		}else
-		if(cc.checkCmdValidity("statsEnable","[idToEnable [bEnable]] empty for a list. bEnable empty to toggle.")){
-			bCommandWorked=true;
-			String strId=paramString(1);
-			Boolean bValue=paramBoolean(2);
-			if(strId!=null){
-				EStats e=null;
-				try{e=EStats.valueOf(strId);}catch(IllegalArgumentException ex){
-					bCommandWorked=false;
-					dumpWarnEntry("Invalid option: "+strId+" "+bValue);
-				}
-				
-				if(e!=null){
-					e.b=bValue!=null?bValue:!e.b;
-				}
-			}else{
-				for(EStats e:EStats.values()){
-					dumpSubEntry(e.toString()+" "+e.b);
-				}
-			}
-		}else
-		if(cc.checkCmdValidity("statsFieldToggle","[bEnable] toggle simple stats field visibility")){
-			bCommandWorked=statsFieldToggle();
-		}else
-		if(cc.checkCmdValidity("statsShowAll","show all console stats")){
-			dumpAllStats();
-			bCommandWorked=true;
-		}else
-		if(cc.checkCmdValidity("test","[...] temporary developer tests")){
-			cmdTest();
-			if(efHK!=null)efHK.test();
-			bCommandWorked=true;
-		}else
-		if(cc.checkCmdValidity("varAdd","<varId> <[-]value>")){
-			bCommandWorked=cmdVarAdd(paramString(1),paramString(2),true,false);
-		}else
-//		if(cc.checkCmdValidity(cc.CMD_VAR_SET,"[<varId> <value>] | [-varId] | ["+cc.getFilterToken()+"filter] - can be a number or a string, retrieve it's value with: ${varId}")){
-		if(
-			cc.checkCmdValidity(cc.CMD_VAR_SET,
-				"<[<varId> <value>] | [-varId]> "
-					+"Can be boolean(true/false, and after set accepts 1/0), number(integer/floating) or string; "
-					+"-varId will delete it; "
-					+"Retrieve it's value with "+cc.getVariableExpandPrefix()+"{varId}; "
-					+"Restricted variables will have no effect; "
-			)
-		){
-			bCommandWorked=cmdVarSet();
-		}else
-		if(cc.checkCmdValidity("varSetCmp","<varIdBool> <value> <cmp> <value>")){
-			bCommandWorked=cmdVarSetCmp();
-		}else
-		if(cc.checkCmdValidity("varShow","[["+cc.RESTRICTED_TOKEN+"]filter] list user or restricted variables.")){
-			bCommandWorked=cmdVarShow();
-		}else
-		if(cc.checkCmdValidity(TOKEN_CMD_NOT_WORKING_YET+"zDisabledCommand"," just to show how to use it")){
-			// keep this as reference
-		}else{
-//			if(strCmdLinePrepared!=null){
-//				if(SPECIAL_CMD_MULTI_COMMAND_LINE_OK.equals(strCmdLinePrepared)){
-//					bOk=true;
+//		if(cc.checkCmdValidity("exit","the application")){
+//			cc.cmdExit();
+//			bCommandWorked=true;
+//		}else
+//		if(cc.checkCmdValidity(cc.CMD_FIX_CURSOR ,"in case cursor is invisible")){
+//			if(efHK==null){
+//				dumpWarnEntry("requires command: "+cc.CMD_HK_TOGGLE);
+//			}else{
+//				dumpInfoEntry("requesting: "+cc.CMD_FIX_CURSOR);
+//				efHK.bFixInvisibleTextInputCursorHK=true;
+//			}
+//			bCommandWorked = true;
+//		}else
+//		if(cc.checkCmdValidity(cc.CMD_FIX_LINE_WRAP ,"in case words are overlapping")){
+//			cmdLineWrapDisableDumpArea();
+//			bCommandWorked = true;
+//		}else
+//		if(cc.checkCmdValidity(cc.CMD_FIX_VISIBLE_ROWS_AMOUNT,"[iAmount] in case it is not showing as many rows as it should")){
+//			iVisibleRowsAdjustRequest = paramInt(1);
+//			if(iVisibleRowsAdjustRequest==null)iVisibleRowsAdjustRequest=0;
+//			bCommandWorked=true;
+//		}else
+//		if(cc.checkCmdValidity(cc.CMD_FUNCTION,"<id> begins a function block")){
+//			bCommandWorked=cmdFunctionBegin();
+//		}else
+//		if(cc.checkCmdValidity(cc.CMD_FUNCTION_CALL,"<id> [parameters...] retrieve parameters values with ex.: ${id_1} ${id_2} ...")){
+//			bCommandWorked=cmdFunctionCall();
+//		}else
+//		if(cc.checkCmdValidity(cc.CMD_FUNCTION_END,"ends a function block")){
+//			bCommandWorked=cmdFunctionEnd();
+//		}else
+//		if(cc.checkCmdValidity("functionList","[filter]")){
+//			String strFilter = paramString(1);
+//			ArrayList<String> astr = Lists.newArrayList(tmFunctions.keySet().iterator());
+//			for(String str:astr){
+//				if(strFilter!=null && !str.toLowerCase().contains(strFilter.toLowerCase()))continue;
+//				dumpSubEntry(str);
+//			}
+//			bCommandWorked=true;
+//		}else
+//		if(cc.checkCmdValidity("functionShow","<functionId>")){
+//			String strFuncId = paramString(1);
+//			if(strFuncId!=null){
+//				ArrayList<String> astr = tmFunctions.get(strFuncId);
+//				if(astr!=null){
+//					dumpSubEntry(cc.getCommandPrefixStr()+cc.CMD_FUNCTION+" "+strFuncId+cc.getCommandDelimiter());
+//					for(String str:astr){
+//						str=strSubEntryPrefix+strSubEntryPrefix+str+cc.getCommandDelimiter();
+////						dumpSubEntry("\t"+str+cc.getCommandDelimiter());
+//						dumpEntry(false, true, false, str);
+//					}
+//					dumpSubEntry(cc.getCommandPrefixStr()+cc.CMD_FUNCTION_END+cc.getCommandDelimiter());
+//					bCommandWorked=true;
 //				}
 //			}
-		}
-		
-		return bCommandWorked;
-	}
+//		}else
+//		if(cc.checkCmdValidity("fpsLimit","[iMaxFps]")){
+//			Integer iMaxFps = paramInt(1);
+//			if(iMaxFps!=null){
+//				fpslState.setMaxFps(iMaxFps);
+//				bCommandWorked=true;
+//			}
+//			dumpSubEntry("FpsLimit = "+fpslState.getFpsLimit());
+//		}else
+//		if(cc.checkCmdValidity(cc.CMD_HELP,"[strFilter] show (filtered) available commands")){
+//			cmdShowHelp(paramString(1));
+//			/**
+//			 * ALWAYS return TRUE here, to avoid infinite loop when improving some failed command help info!
+//			 */
+//			bCommandWorked=true; 
+//		}else
+//		if(cc.checkCmdValidity(cc.CMD_HISTORY,"[strFilter] of issued commands (the filter results in sorted uniques)")){
+//			bCommandWorked=cmdShowHistory();
+//		}else
+//		if(cc.checkCmdValidity(cc.CMD_HK_TOGGLE ,"[bEnable] allow hacks to provide workarounds")){
+//			if(paramBooleanCheckForToggle(1)){
+//				Boolean bEnable = paramBoolean(1);
+//				if(efHK==null && (bEnable==null || bEnable)){
+//					efHK=new ExtraFunctionalitiesHK(this);
+//				}
+//				
+//				if(efHK!=null){
+//					efHK.bAllowHK = bEnable==null ? !efHK.bAllowHK : bEnable; //override
+//					if(efHK.bAllowHK){
+//						dumpWarnEntry("Hacks enabled!");
+//					}else{
+//						dumpWarnEntry("Hacks may not be completely disabled/cleaned!");
+//					}
+//				}
+//				
+//				bCommandWorked=true;
+//			}
+//		}else
+//		if(cc.checkCmdValidity(cc.CMD_IF,"<[!]<true|false>> [cmd|alias] if cmd|alias is not present, this will be a multiline block start!")){
+//			bCommandWorked=cc.cmdIf();
+//		}else
+//		if(cc.checkCmdValidity(cc.CMD_IF_END,"ends conditional block")){
+//			bCommandWorked=cc.cmdIfEnd();
+//		}else
+//		if(cc.checkCmdValidity("initFileShow ","show contents of init file at dump area")){
+//			dumpInfoEntry("Init file data: ");
+//			for(String str : fileLoad(flInit)){
+//				dumpSubEntry(str);
+//			}
+//			bCommandWorked=true;
+//		}else
+//		if(cc.checkCmdValidity(cc.CMD_LINE_WRAP_AT,"[iMaxChars] -1 = will trunc big lines, 0 = wrap will be automatic")){
+//			iConsoleMaxWidthInCharsForLineWrap = paramInt(1);
+//			if(iConsoleMaxWidthInCharsForLineWrap!=null){
+//				if(iConsoleMaxWidthInCharsForLineWrap==-1){
+//					iConsoleMaxWidthInCharsForLineWrap=null;
+//				}
+//			}
+//			updateWrapAt();
+//			bCommandWorked=true;
+//		}else
+//		if(cc.checkCmdValidity("quit","the application")){
+//			cc.cmdExit();
+//			bCommandWorked=true;
+//		}else
+//		if(cc.checkCmdValidity("showBinds","")){
+//			dumpInfoEntry("Key bindings: ");
+//			dumpSubEntry("Ctrl+C - copy");
+//			dumpSubEntry("Ctrl+X - cut");
+//			dumpSubEntry("Ctrl+V - paste");
+//			dumpSubEntry("Shift+Ctrl+V - show clipboard");
+//			dumpSubEntry("Ctrl+B - marks dump area begin selection marker for copy");
+//			dumpSubEntry("Ctrl+Del - clear input field");
+//			dumpSubEntry("TAB - autocomplete (starting with)");
+//			dumpSubEntry("Ctrl+TAB - autocomplete (contains)");
+//			dumpSubEntry("Ctrl+/ - toggle input field comment");
+//			bCommandWorked=true;
+//		}else
+//		if(cc.checkCmdValidity("showSetup","show restricted variables")){
+//			for(String str:fileLoad(flSetup)){
+//				dumpSubEntry(str);
+//			}
+//			bCommandWorked=true;
+//		}else
+//		if(cc.checkCmdValidity(cc.CMD_SLEEP,"<fDelay> will wait before executing next command in the command block")){
+//			/**
+//			 * This is only used on the pre-queue, 
+//			 * here it is ignored.
+//			 */
+////			if(!cc.btgPreQueue.b())dumpWarnEntry(cc.CMD_SLEEP+" only works with pre-queue enabled");
+//			dumpWarnEntry(cc.CMD_SLEEP+" only works on command blocks like functions");
+//			bCommandWorked=true;
+//		}else
+////		if(cc.checkCmdValidity("showDump","<filter> show matching entries from dump log file")){
+////			String strFilter = paramString(1);
+////			if(strFilter!=null){
+////				for(String str:fileLoad(flLastDump)){
+////					if(str.toLowerCase().contains(strFilter)){
+////						dumpEntry(false, true, false, str);
+////					}
+////				}
+////				bCommandWorked=true;
+////			}
+////		}else
+//		if(cc.checkCmdValidity("statsEnable","[idToEnable [bEnable]] empty for a list. bEnable empty to toggle.")){
+//			bCommandWorked=true;
+//			String strId=paramString(1);
+//			Boolean bValue=paramBoolean(2);
+//			if(strId!=null){
+//				EStats e=null;
+//				try{e=EStats.valueOf(strId);}catch(IllegalArgumentException ex){
+//					bCommandWorked=false;
+//					dumpWarnEntry("Invalid option: "+strId+" "+bValue);
+//				}
+//				
+//				if(e!=null){
+//					e.b=bValue!=null?bValue:!e.b;
+//				}
+//			}else{
+//				for(EStats e:EStats.values()){
+//					dumpSubEntry(e.toString()+" "+e.b);
+//				}
+//			}
+//		}else
+//		if(cc.checkCmdValidity("statsFieldToggle","[bEnable] toggle simple stats field visibility")){
+//			bCommandWorked=statsFieldToggle();
+//		}else
+//		if(cc.checkCmdValidity("statsShowAll","show all console stats")){
+//			dumpAllStats();
+//			bCommandWorked=true;
+//		}else
+//		if(cc.checkCmdValidity("test","[...] temporary developer tests")){
+//			cmdTest();
+//			if(efHK!=null)efHK.test();
+//			bCommandWorked=true;
+//		}else
+//		if(cc.checkCmdValidity("varAdd","<varId> <[-]value>")){
+//			bCommandWorked=cmdVarAdd(paramString(1),paramString(2),true,false);
+//		}else
+////		if(cc.checkCmdValidity(cc.CMD_VAR_SET,"[<varId> <value>] | [-varId] | ["+cc.getFilterToken()+"filter] - can be a number or a string, retrieve it's value with: ${varId}")){
+//		if(
+//			cc.checkCmdValidity(cc.CMD_VAR_SET,
+//				"<[<varId> <value>] | [-varId]> "
+//					+"Can be boolean(true/false, and after set accepts 1/0), number(integer/floating) or string; "
+//					+"-varId will delete it; "
+//					+"Retrieve it's value with "+cc.getVariableExpandPrefix()+"{varId}; "
+//					+"Restricted variables will have no effect; "
+//			)
+//		){
+//			bCommandWorked=cmdVarSet();
+//		}else
+//		if(cc.checkCmdValidity("varSetCmp","<varIdBool> <value> <cmp> <value>")){
+//			bCommandWorked=cmdVarSetCmp();
+//		}else
+//		if(cc.checkCmdValidity("varShow","[["+cc.RESTRICTED_TOKEN+"]filter] list user or restricted variables.")){
+//			bCommandWorked=cmdVarShow();
+//		}else
+//		if(cc.checkCmdValidity(TOKEN_CMD_NOT_WORKING_YET+"zDisabledCommand"," just to show how to use it")){
+//			// keep this as reference
+//		}else{
+////			if(strCmdLinePrepared!=null){
+////				if(SPECIAL_CMD_MULTI_COMMAND_LINE_OK.equals(strCmdLinePrepared)){
+////					bOk=true;
+////				}
+////			}
+//		}
+//		
+//		return bCommandWorked;
+//	}
 	
 	protected boolean isStartupCommandsQueueDone(){
 		return bStartupCmdQueueDone;
@@ -3863,7 +3865,7 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 						/**
 						 * normal commands execution
 						 */
-						bCmdWorkDone = executePreparedCommand();
+						bCmdWorkDone = cc.executePreparedCommand();
 						
 						if(bFuncCmdLineRunning && !bCmdWorkDone){
 							// a command may fail inside a function, only that first one will generate error message 

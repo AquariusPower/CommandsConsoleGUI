@@ -40,44 +40,42 @@ import com.jme3.system.AppSettings;
  *
  */
 public class ConsoleGuiTest extends SimpleApplication {
-	protected ConsoleGuiCustomState	cgsCustomizedState;	
+	protected ConsoleCustomCommands	cgsCustomizedState;	
 	protected boolean bHideSettings=true; 
 	
 	public boolean endUserCustomMethod(Integer i){
-		cgsCustomizedState.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
-		cgsCustomizedState.dumpSubEntry("CommandTest1: "+cgsCustomizedState.sfTestCommandAutoFillVariant1);
-		cgsCustomizedState.dumpSubEntry("CommandTest2: "+cgsCustomizedState.testCommandAutoFillPrefixLessVariant2);
+		cgsCustomizedState.csaTmp.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
+		cgsCustomizedState.csaTmp.dumpSubEntry("CommandTest1: "+cgsCustomizedState.sfTestCommandAutoFillVariant1);
+		cgsCustomizedState.csaTmp.dumpSubEntry("CommandTest2: "+cgsCustomizedState.testCommandAutoFillPrefixLessVariant2);
 		if(ReflexFill.isbUseDefaultCfgIfMissing()){
-			cgsCustomizedState.dumpSubEntry("CommandTest3: "+cgsCustomizedState.testCommandAutoFillPrefixLessVariantDefaulted3);
+			cgsCustomizedState.csaTmp.dumpSubEntry("CommandTest3: "+cgsCustomizedState.testCommandAutoFillPrefixLessVariantDefaulted3);
 		}
 		return true;
 	}
 	
-	class ConsoleGuiCustomState extends ConsoleGuiLemurState{
+	class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleCommands to prevent scripts usage
 //		private final String strFinalFieldCodePrefix="CMD_";
 		private final String strFieldCodePrefix="sf";
 		private final String strFieldCodePrefixLess = "VariantAsPrefixLess";
 		
-		public final StringField CMD_END_USER_COMMAND_TEST = new StringField(this,cc.strFinalCmdCodePrefix);
+		public final StringField CMD_END_USER_COMMAND_TEST = new StringField(this,strFinalCmdCodePrefix);
 		private StringField sfTestCommandAutoFillVariant1 = new StringField(this,strFieldCodePrefix);
 		private StringField testCommandAutoFillPrefixLessVariant2 = new StringField(this,strFieldCodePrefixLess);
 		private StringField testCommandAutoFillPrefixLessVariantDefaulted3 = new StringField(this,null);
 		
-		public ConsoleGuiCustomState() {
-			super(KeyInput.KEY_F10, null);
-			
+		public ConsoleCustomCommands() {
 			/**
 			 *  This allows test3 at endUserCustomMethod() to work.
 			 */
-			ReflexFill.setbUseDefaultCfgIfMissing(true);
+			ReflexFill.setUseDefaultCfgIfMissing(true);
 		}
 		
 		@Override
 		protected boolean executePreparedCommand() {
 			boolean bOk = false;
 			
-			if(cc.checkCmdValidity(CMD_END_USER_COMMAND_TEST,"[iHowMany] users working")){
-				bOk = endUserCustomMethod(paramInt(1));
+			if(checkCmdValidity(CMD_END_USER_COMMAND_TEST,"[iHowMany] users working")){
+				bOk = endUserCustomMethod(csaTmp.paramInt(1));
 			}else{
 				return super.executePreparedCommand();
 			}
@@ -108,7 +106,7 @@ public class ConsoleGuiTest extends SimpleApplication {
 			 * just call it!
 			 * Remember to set the same variant!
 			 */
-//			if(rfcfg==null)rfcfg = cc.getReflexFillCfg(rfcv);
+//			if(rfcfg==null)rfcfg = getReflexFillCfg(rfcv);
 			if(rfcfg==null)rfcfg = super.getReflexFillCfg(rfcv);
 			
 			return rfcfg;
@@ -117,8 +115,10 @@ public class ConsoleGuiTest extends SimpleApplication {
 	
 	@Override
 	public void simpleInitApp() {
-		cgsCustomizedState = new ConsoleGuiCustomState();
-		getStateManager().attach(cgsCustomizedState);
+		cgsCustomizedState = new ConsoleCustomCommands();
+		ConsoleGuiLemurState cs = new ConsoleGuiLemurState(KeyInput.KEY_F10, cgsCustomizedState);
+		cgsCustomizedState.csaTmp = cs;
+		getStateManager().attach(cs);
 	}
 	
 	@Override
