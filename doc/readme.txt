@@ -53,6 +53,7 @@ DONE:
 	= Alias/var autocomplete, also in the middle of the input field text.  
 	= PreCommandsQueue: sends commands to queue, but if a /sleep command is found, this dispatching will be delayed. Sleep is only allowed on a list of commands sent to queue.
 	= Scroll by mouse location: over dump area, over hint area or over input field cmd history (input field optional toggle).
+	= Console is properly initially hidden now (cullhint)
 
 DOING:
 	... SeparateGUI class from Commands Management

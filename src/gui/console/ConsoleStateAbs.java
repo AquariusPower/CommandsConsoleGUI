@@ -75,6 +75,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.Spatial.CullHint;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
@@ -278,11 +279,22 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	protected boolean	bFuncCmdLineSkipTilEnd;
 	protected long lLastUniqueId = 0;
 
-	private ConsoleMouseListener consoleCursorListener = new ConsoleMouseListener();
+	private ConsoleCursorListener consoleCursorListener = new ConsoleCursorListener(this);
 
 	public Spatial	sptScrollTarget;
 
 //	private boolean	bUsePreQueue = false; 
+	
+	/**
+	 * USER MUST IMPLEMENT THESE METHODS,
+	 * keep them together for easy review
+	 */
+	protected abstract void clearHintSelection();
+	protected abstract Integer getHintIndex();
+	protected abstract ConsoleStateAbs setHintIndex(Integer i);
+	protected abstract ConsoleStateAbs setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines);
+	protected abstract void scrollHintToIndex(int i);
+	protected abstract void lineWrapDisableForChildrenOf(Node gp);
 	
 	protected static class PreQueueCmdsBlockSubList{
 		TimedDelay tdSleep = null;
@@ -439,6 +451,16 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 	public void stateDetached(AppStateManager stateManager) {
 	}
 	
+	protected void setVisible(boolean b){
+		if(b){
+			ctnrConsole.setCullHint(CullHint.Inherit); //TODO use bkp with: Never ?
+			lstbxAutoCompleteHint.setCullHint(CullHint.Inherit); //TODO use bkp with: Dynamic ?
+		}else{
+			ctnrConsole.setCullHint(CullHint.Always); 
+			lstbxAutoCompleteHint.setCullHint(CullHint.Always);
+		}
+	}
+	
 	/**
 	 * this can be used after a cleanup() too
 	 */
@@ -560,69 +582,14 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 //		dumpAllStats();
 //		dumpInfoEntry("Hit F10 to toggle console.");
 		
+		setVisible(false);
+		
 		/**
 		 * =======================================================================
 		 * =========================== LAST THING ================================
 		 * =======================================================================
 		 */
 		bInitialized=true;
-	}
-	
-	class ConsoleMouseListener extends DefaultCursorListener {
-		protected String debugPart(Panel pnl){
-			return pnl.getName()+","
-					+pnl.getElementId()+","
-					+pnl.getClass().getSimpleName()
-					+";";
-		}
-		
-		public void debugReport(CursorMotionEvent eventM, CursorButtonEvent eventB, Spatial target,	Spatial capture){
-			if(!cc.btgShowDebugEntries.b())return;
-			
-			Panel pnlTgt = (Panel)target;
-			Panel pnlCap = (Panel)capture;
-			
-			String strTgt	=	"";if(pnlTgt!=null)strTgt	="Tgt:"+debugPart(pnlTgt);
-			String strCap	=	"";if(pnlCap!=null)strCap	="Cap:"+debugPart(pnlCap);
-			String strB		=	"";if(eventB!=null)strB		="B:"+eventB.getButtonIndex()+";";
-			String strM		=	"";if(eventM!=null)strM		="M:"+eventM.getX()+","+eventM.getY()+";";
-			dumpDebugEntry(strTgt+strCap+strB+strM);
-		}
-		
-		protected void cursorMoveEvent(CursorMotionEvent event, Spatial target,	Spatial capture) {
-			if(sptScrollTarget!=target){
-				debugReport(event, null, target, capture);
-			}
-			
-			sptScrollTarget = target;
-		}
-		
-		@Override
-		public void cursorEntered(CursorMotionEvent event, Spatial target,	Spatial capture) {
-			super.cursorEntered(event, target, capture);
-			cursorMoveEvent(event, target, capture);
-		}
-		
-		@Override
-		public void cursorMoved(CursorMotionEvent event, Spatial target, Spatial capture) {
-			super.cursorMoved(event, target, capture);
-			cursorMoveEvent(event, target, capture);
-		}
-		
-		@Override
-		protected void click(CursorButtonEvent event, Spatial target,	Spatial capture) {
-			super.click(event, target, capture);
-			
-			if(!event.isPressed()){ //on release
-				if(event.getButtonIndex()==0){ //main button
-					if(target==lstbxAutoCompleteHint){
-						checkAndApplyHintAtInputField();
-					}
-				}
-			}
-			
-			debugReport(null, event, target, capture);
-		}
 	}
 	
 	protected void showClipboard(){
@@ -916,8 +883,8 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 //				boolean bShift = key.hasModifier(0x01);
 //				boolean bAlt = key.hasModifier(0x001);
 //				case KeyInput.KEY_INSERT: //shift+ins paste
-					//TODO case KeyInput.KEY_INSERT: //ctrl+ins copy
-					//TODO case KeyInput.KEY_DELETE: //shift+del cut
+					//TODO ? case KeyInput.KEY_INSERT: //ctrl+ins copy
+					//TODO ? case KeyInput.KEY_DELETE: //shift+del cut
 				
 				switch(key.getKeyCode()){
 					case KeyInput.KEY_B: 
@@ -1077,13 +1044,6 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 		return lstbxAutoCompleteHint.getParent()!=null;
 	}
 	
-	protected abstract void clearHintSelection();
-	protected abstract Integer getHintIndex();
-	protected abstract ConsoleStateAbs setHintIndex(Integer i);
-	protected abstract ConsoleStateAbs setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines);
-	protected abstract void scrollHintToIndex(int i);
-	protected abstract void lineWrapDisableForChildrenOf(Node gp);
-	
 	protected boolean navigateHint(int iAdd){
 		if(!isHintActive())return false;
 		
@@ -1137,6 +1097,12 @@ public abstract class ConsoleStateAbs implements AppState, ReflexFill.IReflexFil
 //								initialize();
 //							}
 							setEnabled(!isEnabled());
+							
+							/**
+							 * as it is initially invisible, from the 1st time user opens the console on, 
+							 * it must be visible.
+							 */
+							setVisible(true);
 						}
 					}
 				};
