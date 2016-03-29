@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package gui.console;
+package misc;
 
 /**
  * Use this class to avoid running code on every loop.

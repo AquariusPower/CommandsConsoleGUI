@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package gui.console;
+package console.gui;
 
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Panel;
@@ -62,7 +62,7 @@ public class ConsoleCursorListener extends DefaultCursorListener {
 		String strCap	=	"";if(pnlCap!=null)strCap	="Cap:"+debugPart(pnlCap);
 		String strB		=	"";if(eventB!=null)strB		="B:"+eventB.getButtonIndex()+";";
 		String strM		=	"";if(eventM!=null)strM		="M:"+eventM.getX()+","+eventM.getY()+";";
-		csa.dumpDebugEntry(strTgt+strCap+strB+strM);
+		csa.cc.dumpDebugEntry(strTgt+strCap+strB+strM);
 	}
 	
 	protected void cursorMoveEvent(CursorMotionEvent event, Spatial target,	Spatial capture) {

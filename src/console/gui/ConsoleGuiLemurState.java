@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package gui.console;
+package console.gui;
 
 import com.jme3.font.BitmapFont;
 import com.jme3.font.LineWrapMode;
@@ -44,6 +44,8 @@ import com.simsilica.lemur.core.VersionedList;
 import com.simsilica.lemur.style.Attributes;
 import com.simsilica.lemur.style.Styles;
 
+import console.ConsoleCommands;
+
 /**
  * Here is the specific code that links the JME console state with Lemur GUI.
  * 
@@ -51,14 +53,14 @@ import com.simsilica.lemur.style.Styles;
  *
  */
 public class ConsoleGuiLemurState extends ConsoleGuiStateAbs{
-//	protected ListBox<String>	lstbxAutoCompleteHint;
-//	protected VersionedList<String>	vlstrAutoCompleteHint = new VersionedList<String>();
+//	public ListBox<String>	lstbxAutoCompleteHint;
+//	public VersionedList<String>	vlstrAutoCompleteHint = new VersionedList<String>();
 
 	public ConsoleGuiLemurState(int iOpenConsoleHotKey, ConsoleCommands cc) {
 		super(iOpenConsoleHotKey, cc);
 	}
 	
-	protected void createMonoSpaceFixedFontStyle(){
+	public void createMonoSpaceFixedFontStyle(){
 		if(bConsoleStyleCreated)return;
 		
 		BitmapFont font = sapp.getAssetManager().loadFont("Interface/Fonts/Console.fnt");
@@ -114,7 +116,7 @@ public class ConsoleGuiLemurState extends ConsoleGuiStateAbs{
 	}
 	
 	@Override
-	protected void initialize() {
+	public void initialize() {
 		createMonoSpaceFixedFontStyle();
 		
 		// auto complete hint
@@ -125,7 +127,7 @@ public class ConsoleGuiLemurState extends ConsoleGuiStateAbs{
 		super.initialize();
 	}
 	
-	protected VersionedList<String> getHintList(){
+	public VersionedList<String> getHintList(){
 		return (VersionedList<String>)vlstrAutoCompleteHint;
 	}
 	
@@ -146,7 +148,7 @@ public class ConsoleGuiLemurState extends ConsoleGuiStateAbs{
 	}
 	
 	@Override
-	protected void scrollHintToIndex(int i){
+	public void scrollHintToIndex(int i){
 		int iVisibleCount = getHintBox().getVisibleItems();
 		
 		RangedValueModel model = getHintBox().getSlider().getModel();
@@ -171,28 +173,28 @@ public class ConsoleGuiLemurState extends ConsoleGuiStateAbs{
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected ListBox<String> getHintBox() {
+	public ListBox<String> getHintBox() {
 		return (ListBox<String>)super.lstbxAutoCompleteHint;
 	}
 
 	@Override
-	protected void clearHintSelection() {
+	public void clearHintSelection() {
 		getHintBox().getSelectionModel().setSelection(-1);
 	}
 
 	@Override
-	protected Integer getHintIndex() {
+	public Integer getHintIndex() {
 		return getHintBox().getSelectionModel().getSelection();
 	}
 
 	@Override
-	protected ConsoleGuiLemurState setHintIndex(Integer i) {
+	public ConsoleGuiLemurState setHintIndex(Integer i) {
 		getHintBox().getSelectionModel().setSelection(i);
 		return this;
 	}
 	
 	@Override
-	protected void lineWrapDisableForChildrenOf(Node node){
+	public void lineWrapDisableForChildrenOf(Node node){
 		@SuppressWarnings("unchecked")
 		ListBox<String> lstbx = (ListBox<String>)node;
 		
@@ -205,7 +207,7 @@ public class ConsoleGuiLemurState extends ConsoleGuiStateAbs{
 	}
 
 	@Override
-	protected ConsoleGuiLemurState setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines) {
+	public ConsoleGuiLemurState setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines) {
 		getHintBox().setPreferredSize(v3fBoxSizeXY);
 		getHintBox().setVisibleItems(iVisibleLines);
 		return this;

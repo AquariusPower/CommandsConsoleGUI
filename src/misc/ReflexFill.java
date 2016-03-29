@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package gui.console;
+package misc;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -54,15 +54,15 @@ public class ReflexFill {
 		/**
 		 * to validate and also be removed from the identifier string
 		 */
-		String	strCodingStyleFieldNamePrefix=null;
+		public String	strCodingStyleFieldNamePrefix=null;
 //		String	strCodingStyleFieldNamePrefix=null;
 //		String	strCodingStyleFinalFieldNamePrefix=null;
 		
-		String	strCommandPrefix="";
+		public String	strCommandPrefix="";
 		
-		String	strCommandSuffix="";
+		public String	strCommandSuffix="";
 		
-		boolean bFirstLetterUpperCase = false;
+		public boolean bFirstLetterUpperCase = false;
 	}
 	
 	private static ReflexFill instance = new ReflexFill();

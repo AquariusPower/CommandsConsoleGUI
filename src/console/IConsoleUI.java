@@ -25,58 +25,46 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package gui.console;
+package console;
+
+import java.util.AbstractList;
+import java.util.ArrayList;
+
+import com.jme3.math.Vector3f;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class Alias{
-	String strAliasId;
-	String strCmdLine; // may contain ending comment too
-	boolean	bBlocked;
-	
-	@Override
-	public String toString() {
-		return ConsoleCommands.i().getCommandPrefix()+"alias "
-			+(bBlocked?ConsoleCommands.i().getAliasBlockedToken():"")
-			+strAliasId+" "+strCmdLine;
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Alias other = (Alias) obj;
-		if (bBlocked != other.bBlocked)
-			return false;
-		if (strAliasId == null) {
-			if (other.strAliasId != null)
-				return false;
-		} else if (!strAliasId.equals(other.strAliasId))
-			return false;
-		if (strCmdLine == null) {
-			if (other.strCmdLine != null)
-				return false;
-		} else if (!strCmdLine.equals(other.strCmdLine))
-			return false;
-		return true;
-	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (bBlocked ? 1231 : 1237);
-		result = prime * result
-				+ ((strAliasId == null) ? 0 : strAliasId.hashCode());
-		result = prime * result
-				+ ((strCmdLine == null) ? 0 : strCmdLine.hashCode());
-		return result;
-	}
+public interface IConsoleUI {
+	public abstract void dumpAllStats();
+
+//	public abstract void setConsoleMaxWidthInCharsForLineWrap(Integer paramInt);
+
+//	public abstract Integer getConsoleMaxWidthInCharsForLineWrap();
+
+	public abstract AbstractList<String> getDumpEntriesSlowedQueue();
+
+	public abstract AbstractList<String> getDumpEntries();
+
+	public abstract AbstractList<String> getAutoCompleteHint();
+
+	public abstract String getInputText();
+
+	public abstract void setInputField(String str);
+
+	public abstract void scrollToBottomRequest();
+
+	public abstract String getDumpAreaSliderStatInfo();
+
+//	public abstract int getCmdHistoryCurrentIndex();
+
+	public abstract int getLineWrapAt();
+
+	public abstract ArrayList<String> wrapThisLineProperly(String strLine);
+
+	public abstract void clearDumpAreaSelection();
+
+	public abstract void clearInputTextField();
 }

@@ -25,10 +25,10 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package gui.console;
+package misc;
 
-import gui.console.ReflexFill.IReflexFillCfg;
-import gui.console.ReflexFill.IReflexFillCfgVariant;
+import misc.ReflexFill.IReflexFillCfg;
+import misc.ReflexFill.IReflexFillCfgVariant;
 
 /**
  * Represents a class field.

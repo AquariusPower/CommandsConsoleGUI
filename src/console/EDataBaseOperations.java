@@ -25,52 +25,45 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package gui.console;
+package console;
+
+import java.util.ArrayList;
 
 /**
- * dump strings will always be logged to file even if disabled.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
- * 
+ *
  */
-public class DumpEntry{
-	/**
-	 * Beware, better do NOT change these defaults,
-	 * as many usages of DumpEntry may depend on it.
-	 * Maybe extend this class to have other defaults.
-	 */
-	boolean bApplyNewLineRequests = false; //this is a special behavior, disabled by default
-	boolean bDumpToConsole = true;
-	boolean bUseSlowQueue = false;
-	String strLineOriginal = null;
+public enum EDataBaseOperations{
+	/** saving also will shrink the DB */
+	save,
 	
-	public boolean isApplyNewLineRequests() {
-		return bApplyNewLineRequests;
-	}
-	public DumpEntry setApplyNewLineRequests(boolean bApplyNewLineRequests) {
-		this.bApplyNewLineRequests = bApplyNewLineRequests;
-		return this;
-	}
-	public boolean isDump() {
-		return bDumpToConsole;
-	}
-	public DumpEntry setDumpToConsole(boolean bDump) {
-		this.bDumpToConsole = bDump;
-		return this;
-	}
-	public boolean isUseQueue() {
-		return bUseSlowQueue;
-	}
-	public DumpEntry setUseSlowQueue(boolean bUseQueue) {
-		this.bUseSlowQueue = bUseQueue;
-		return this;
-	}
-	public String getLineOriginal() {
-		return strLineOriginal;
-	}
-	public DumpEntry setLineOriginal(String strLineOriginal) {
-		this.strLineOriginal = strLineOriginal;
-		return this;
-	}
+	load,
 	
+	show,
+	
+	/** A backup is made of the existing file. */
+	backup,
+	
+	;
+	public static String help(){
+		String str = null;
+		for(EDataBaseOperations e:values()){
+			if(str!=null){
+				str+="|";
+			}else{
+				str="";
+			}
+			str+=e.toString();
+		}
+		return "["+str+"] aliases and variables, plain text file";
+	}
+
+	public static ArrayList<String> getValuesAsArrayList() {
+		ArrayList<String> astr = new ArrayList<String>();
+		for(EDataBaseOperations e:values()){
+			astr.add(e.toString());
+		}
+		return astr;
+	}
 }

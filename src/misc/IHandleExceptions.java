@@ -25,22 +25,13 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package gui.console;
+package misc;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class Misc {
-	private static Misc instance = new Misc();
-	public static Misc i(){return instance;}
-	
-	protected Boolean parseBoolean(String strValue){
-		if(strValue.equalsIgnoreCase("true"))return new Boolean(true);
-		if(strValue.equalsIgnoreCase("1"))return new Boolean(true);
-		if(strValue.equalsIgnoreCase("false"))return new Boolean(false);
-		if(strValue.equalsIgnoreCase("0"))return new Boolean(false);
-		throw new NumberFormatException("invalid boolean value: "+strValue);
-	}
+public interface IHandleExceptions {
+	public abstract void handleException(Exception e);
 }

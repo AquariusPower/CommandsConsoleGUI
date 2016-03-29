@@ -25,11 +25,13 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package gui.console;
+package console.gui;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import misc.TimedDelay;
 
 import com.jme3.material.MatParam;
 import com.jme3.math.ColorRGBA;
@@ -48,33 +50,33 @@ import com.simsilica.lemur.focus.FocusManagerState;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ExtraFunctionalitiesHK {
-	protected ConsoleGuiStateAbs	cgs;
+public class LemurGuiExtraFunctionalitiesHK {
+	public ConsoleGuiStateAbs	cgs;
 	
 	/**
 	 * keep "initialized" vars together!
 	 */
-	protected boolean	bInitializedFixInvisibleCursorHK;
-	protected boolean	bInitializedBlinkingCursorHK;
+	public boolean	bInitializedFixInvisibleCursorHK;
+	public boolean	bInitializedBlinkingCursorHK;
 	
 	/**
 	 * other vars
 	 */
-	protected TextEntryComponent	tecInputFieldHK;
-	protected Geometry	geomCursorHK;
-	protected FocusManagerState	focusStateHK;
-	protected boolean bAllowHK = false;
-	protected boolean bBlinkingTextCursorHK = true;
-	protected TimedDelay tdTextCursorBlinkHK = new TimedDelay(1f);
-	protected DocumentModel	dmInputFieldHK;
-	protected boolean	bFixInvisibleTextInputCursorHK = false;
+	public TextEntryComponent	tecInputFieldHK;
+	public Geometry	geomCursorHK;
+	public FocusManagerState	focusStateHK;
+	public boolean bAllowHK = false;
+	public boolean bBlinkingTextCursorHK = true;
+	public TimedDelay tdTextCursorBlinkHK = new TimedDelay(1f);
+	public DocumentModel	dmInputFieldHK;
+	public boolean	bFixInvisibleTextInputCursorHK = false;
 
 	private int	iMoveCaratTo;
 
 	private String	strPrefixHK = "(HK) ";
 	
 
-	public ExtraFunctionalitiesHK(ConsoleGuiStateAbs cgs){
+	public LemurGuiExtraFunctionalitiesHK(ConsoleGuiStateAbs cgs){
 		this.cgs=cgs;
 	}
 	
@@ -82,7 +84,7 @@ public class ExtraFunctionalitiesHK {
 	 * a proper fix suggestion is appreciated!
 	 * @return
 	 */
-	protected boolean fixInvisibleTextInputCursorHK(){
+	public boolean fixInvisibleTextInputCursorHK(){
 		if(!bAllowHK)return false;			// too much spam...	dumpWarnEntry("this fix requires HK enabled");
 		
 		prepareInputFieldHK();
@@ -90,9 +92,9 @@ public class ExtraFunctionalitiesHK {
 		
 		boolean bOk=true;
 		if(tecInputFieldHK!=null){
-			cgs.dumpInfoEntry(strPrefixHK+"cursor fix applied.");
+			cgs.cc.dumpInfoEntry(strPrefixHK+"cursor fix applied.");
 		}else{
-			cgs.dumpWarnEntry(strPrefixHK+"cursor fix failed...");
+			cgs.cc.dumpWarnEntry(strPrefixHK+"cursor fix failed...");
 			bOk=false;
 		}
 		
@@ -104,7 +106,7 @@ public class ExtraFunctionalitiesHK {
 		return bOk;
 	}
 	
-	protected void updateFixInvisibleCursorHK() {
+	public void updateFixInvisibleCursorHK() {
 		if(!bAllowHK)return;
 		
 		if(!bFixInvisibleTextInputCursorHK)return;
@@ -126,7 +128,7 @@ public class ExtraFunctionalitiesHK {
 	 * @param strFieldName will break if changed..
 	 * @return field value
 	 */
-	protected Object reflexFieldHK(Class<?> clazzOfObjectFrom, Object objFrom, String strFieldName){
+	public Object reflexFieldHK(Class<?> clazzOfObjectFrom, Object objFrom, String strFieldName){
 		if(!bAllowHK)return null;
 		
 		Object objFieldValue = null;
@@ -136,12 +138,12 @@ public class ExtraFunctionalitiesHK {
 			objFieldValue = field.get(objFrom);
 			field.setAccessible(false);
 		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
-			cgs.dumpExceptionEntry(e);
+			cgs.cc.dumpExceptionEntry(e);
 		}
 		
 		return objFieldValue;
 	}
-	protected Object reflexFieldHK(Object objFrom, String strFieldName){
+	public Object reflexFieldHK(Object objFrom, String strFieldName){
 		if(!bAllowHK)return null;
 		
 		return reflexFieldHK(objFrom.getClass(), objFrom, strFieldName);
@@ -155,7 +157,7 @@ public class ExtraFunctionalitiesHK {
 	 * @param strMethodName
 	 * @param aobjParams
 	 */
-	protected Object reflexMethodCallHK(Object objInvoker, String strMethodName, Object... aobjParams) {
+	public Object reflexMethodCallHK(Object objInvoker, String strMethodName, Object... aobjParams) {
 		if(!bAllowHK)return null;
 		
 		Object objReturn = null;
@@ -166,18 +168,18 @@ public class ExtraFunctionalitiesHK {
 			objReturn = m.invoke(objInvoker);
 			if(!bWasAccessible)m.setAccessible(false);
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			cgs.dumpExceptionEntry(e);
+			cgs.cc.dumpExceptionEntry(e);
 		}
 		return objReturn;
 	}
 	
-	protected void prepareInputFieldHK(){
+	public void prepareInputFieldHK(){
 		if(!bAllowHK)return;
 		tecInputFieldHK = ((TextEntryComponent)reflexFieldHK(cgs.tfInput, "text"));
 		dmInputFieldHK = ((DocumentModel)reflexFieldHK(tecInputFieldHK, "model"));
 	}
 	
-	protected void prepareForBlinkingCursorHK(){
+	public void prepareForBlinkingCursorHK(){
 		if(!bAllowHK)return;
 		
 		prepareInputFieldHK();
@@ -186,19 +188,19 @@ public class ExtraFunctionalitiesHK {
 		tdTextCursorBlinkHK.updateTime();
 		
 		if(geomCursorHK!=null && focusStateHK!=null){
-			cgs.dumpInfoEntry(strPrefixHK+"Text cursor can blink now!");
+			cgs.cc.dumpInfoEntry(strPrefixHK+"Text cursor can blink now!");
 		}else{
-			cgs.dumpWarnEntry(strPrefixHK+"Unable to let Text cursor blink :(");
+			cgs.cc.dumpWarnEntry(strPrefixHK+"Unable to let Text cursor blink :(");
 		}
 		
 		bInitializedBlinkingCursorHK=true;
 	}
-	protected void updateBlinkInputFieldTextCursorHK() {
+	public void updateBlinkInputFieldTextCursorHK() {
 		if(!bAllowHK)return;
 		
 		if(!bBlinkingTextCursorHK)return;
 		if(!bInitializedBlinkingCursorHK)prepareForBlinkingCursorHK();
-		if(!focusStateHK.getFocus().equals(cgs.tfInput))return;
+		if(!cgs.tfInput.equals(focusStateHK.getFocus()))return;
 		
 		long lDelay = tdTextCursorBlinkHK.getCurrentDelay();
 		

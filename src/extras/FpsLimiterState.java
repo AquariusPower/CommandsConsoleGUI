@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package gui.console;
+package extras;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AppState;
@@ -38,7 +38,7 @@ import com.jme3.renderer.RenderManager;
  * @author AquariusPower <https://github.com/AquariusPower>
  * 
  */
-public class FpsLimiter implements AppState{
+public class FpsLimiterState implements AppState{
 	public static final long lNanoOneSecond = 1000000000L; // 1s in nano time
 	public static final float fNanoToSeconds = 1f/lNanoOneSecond; //multiply nano by it to get in seconds
 	
@@ -51,15 +51,15 @@ public class FpsLimiter implements AppState{
 	private int	iMaxFPS;
 	private boolean	bEnabled;
 	
-	public FpsLimiter(){
+	public FpsLimiterState(){
 		setMaxFps(60);
 	}
-	public FpsLimiter(int iMaxFPS){
+	public FpsLimiterState(int iMaxFPS){
 		this();
 		setMaxFps(iMaxFPS);
 	}
 	
-	public FpsLimiter setMaxFps(int iMaxFPS){
+	public FpsLimiterState setMaxFps(int iMaxFPS){
 		this.iMaxFPS=iMaxFPS;
 		if(this.iMaxFPS<1)this.iMaxFPS=1;
 		lNanoDelayLimit = (long) ((1.0f/this.iMaxFPS)*lNanoOneSecond);

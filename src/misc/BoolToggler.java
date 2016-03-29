@@ -25,12 +25,12 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package gui.console;
-
-import gui.console.ReflexFill.IReflexFillCfg;
-import gui.console.ReflexFill.IReflexFillCfgVariant;
+package misc;
 
 import java.util.ArrayList;
+
+import misc.ReflexFill.IReflexFillCfg;
+import misc.ReflexFill.IReflexFillCfgVariant;
 
 /**
  * This class can provide automatic boolean console options toggle.

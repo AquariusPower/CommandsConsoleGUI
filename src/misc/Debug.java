@@ -25,19 +25,61 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package gui.console;
+package misc;
+
+import console.ConsoleCommands;
+import console.IConsoleCommand;
 
 /**
- *	This class holds all commands that allows users to create
- *	scripts that will run in the console.
- *	
- *	For single player games seems ok.
- *	For multiplayer, me be interesting to disable it, just use {@link #ConsoleCommands()}
- *	or restrict what commands will be allowed inside the scripting ones.
- *
+ * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleScriptCommands extends ConsoleCommands{
-	//TODO migrate code to here
+public class Debug implements IConsoleCommand{
+	/**
+	 * when enabled, these keys are used to perform debug tests
+	 */
+	public static enum EKey{
+		StatsText,
+		;
+		boolean b;
+	}
+	
+	private static Debug instance = new Debug();
+	public static Debug i(){return instance;}
+
+	private ConsoleCommands	cc;
+	
+	public void setConsoleCommand(ConsoleCommands cc){
+		this.cc=cc;
+	}
+	
+	public boolean isKeyEnabled(EKey ek){
+		return ek.b;
+	}
+
+	@Override
+	public boolean executePreparedCommand() {
+		boolean bCmdExecEndNicely=false;
+		
+		if(cc.checkCmdValidity("debug","[optionToToggle] empty for a list")){
+			String str = cc.paramString(1);
+			if(str==null){
+				for(EKey ek:EKey.values()){
+					cc.dumpSubEntry(""+ek+" "+ek.b);
+				}
+			}else{
+				try{
+					EKey ek = EKey.valueOf(str);
+					ek.b=!ek.b;
+					bCmdExecEndNicely=true;
+				}catch(IllegalArgumentException ex){
+					cc.dumpExceptionEntry(ex);
+				}
+			}
+		}else
+		{}
+		
+		return bCmdExecEndNicely;
+	}
 }

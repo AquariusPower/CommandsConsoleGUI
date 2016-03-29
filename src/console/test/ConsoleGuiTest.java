@@ -25,14 +25,23 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package gui.console;
+package console.test;
 
-import gui.console.ReflexFill.IReflexFillCfgVariant;
-import gui.console.ReflexFill.ReflexFillCfg;
+import misc.Debug;
+import misc.Misc;
+import misc.ReflexFill;
+import misc.ReflexFill.IReflexFillCfgVariant;
+import misc.ReflexFill.ReflexFillCfg;
+import misc.StringField;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
 import com.jme3.system.AppSettings;
+
+import console.ConsoleScriptCommands;
+import console.IConsoleUI;
+import console.gui.ConsoleGuiLemurState;
+import extras.FpsLimiterState;
 
 /**
  * 
@@ -44,16 +53,18 @@ public class ConsoleGuiTest extends SimpleApplication {
 	protected boolean bHideSettings=true; 
 	
 	public boolean endUserCustomMethod(Integer i){
-		cgsCustomizedState.csaTmp.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
-		cgsCustomizedState.csaTmp.dumpSubEntry("CommandTest1: "+cgsCustomizedState.sfTestCommandAutoFillVariant1);
-		cgsCustomizedState.csaTmp.dumpSubEntry("CommandTest2: "+cgsCustomizedState.testCommandAutoFillPrefixLessVariant2);
+		cgsCustomizedState.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
+		cgsCustomizedState.dumpSubEntry("CommandTest1: "+cgsCustomizedState.sfTestCommandAutoFillVariant1);
+		cgsCustomizedState.dumpSubEntry("CommandTest2: "+cgsCustomizedState.testCommandAutoFillPrefixLessVariant2);
 		if(ReflexFill.isbUseDefaultCfgIfMissing()){
-			cgsCustomizedState.csaTmp.dumpSubEntry("CommandTest3: "+cgsCustomizedState.testCommandAutoFillPrefixLessVariantDefaulted3);
+			cgsCustomizedState.dumpSubEntry("CommandTest3: "+cgsCustomizedState.testCommandAutoFillPrefixLessVariantDefaulted3);
 		}
 		return true;
 	}
 	
 	class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleCommands to prevent scripts usage
+		public FpsLimiterState fpslState = new FpsLimiterState();
+		
 //		private final String strFinalFieldCodePrefix="CMD_";
 		private final String strFieldCodePrefix="sf";
 		private final String strFieldCodePrefixLess = "VariantAsPrefixLess";
@@ -63,7 +74,11 @@ public class ConsoleGuiTest extends SimpleApplication {
 		private StringField testCommandAutoFillPrefixLessVariant2 = new StringField(this,strFieldCodePrefixLess);
 		private StringField testCommandAutoFillPrefixLessVariantDefaulted3 = new StringField(this,null);
 		
-		public ConsoleCustomCommands() {
+		public ConsoleCustomCommands(IConsoleUI icg) {
+			super(icg);
+			
+			getStateManager().attach(fpslState);
+			
 			/**
 			 *  This allows test3 at endUserCustomMethod() to work.
 			 */
@@ -71,16 +86,47 @@ public class ConsoleGuiTest extends SimpleApplication {
 		}
 		
 		@Override
-		protected boolean executePreparedCommand() {
-			boolean bOk = false;
+		public boolean executePreparedCommand() {
+			boolean bCommandWorked = false;
 			
 			if(checkCmdValidity(CMD_END_USER_COMMAND_TEST,"[iHowMany] users working")){
-				bOk = endUserCustomMethod(csaTmp.paramInt(1));
-			}else{
+				bCommandWorked = endUserCustomMethod(paramInt(1));
+			}else
+			if(checkCmdValidity("fpsLimit","[iMaxFps]")){
+				Integer iMaxFps = paramInt(1);
+				if(iMaxFps!=null){
+					fpslState.setMaxFps(iMaxFps);
+					bCommandWorked=true;
+				}
+				dumpSubEntry("FpsLimit = "+fpslState.getFpsLimit());
+			}else
+			{
 				return super.executePreparedCommand();
 			}
 			
-			return bOk;
+			return bCommandWorked;
+		}
+		
+		@Override
+		public void updateToggles() {
+			if(btgFpsLimit.checkChangedAndUpdate())fpslState.setEnabled(btgFpsLimit.b());
+			super.updateToggles();
+		}
+		
+		@Override
+		public String prepareStatsFieldText() {
+			String strStatsLast = super.prepareStatsFieldText();
+			
+			if(EStats.TimePerFrame.b){
+				strStatsLast+=
+						"Tpf"+(fpslState.isEnabled() ? (int)(fTPF*1000.0f) : Misc.i().fmtFloat(fTPF,6)+"s")
+							+(fpslState.isEnabled()?
+								"="+fpslState.getFrameDelayByCpuUsageMilis()+"+"+fpslState.getThreadSleepTimeMilis()+"ms"
+								:"")
+							+";";
+			}
+			
+			return strStatsLast; 
 		}
 		
 		@Override
@@ -111,13 +157,18 @@ public class ConsoleGuiTest extends SimpleApplication {
 			
 			return rfcfg;
 		}
+
 	}
 	
 	@Override
 	public void simpleInitApp() {
-		cgsCustomizedState = new ConsoleCustomCommands();
+		cgsCustomizedState = new ConsoleCustomCommands(null);
 		ConsoleGuiLemurState cs = new ConsoleGuiLemurState(KeyInput.KEY_F10, cgsCustomizedState);
+		cgsCustomizedState.addConsoleCommandListener(cs);
+		cgsCustomizedState.setConsoleUI(cs);
+		
 		cgsCustomizedState.csaTmp = cs;
+		
 		getStateManager().attach(cs);
 	}
 	
