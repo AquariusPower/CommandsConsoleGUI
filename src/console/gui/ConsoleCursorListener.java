@@ -62,7 +62,7 @@ public class ConsoleCursorListener extends DefaultCursorListener {
 		String strCap	=	"";if(pnlCap!=null)strCap	="Cap:"+debugPart(pnlCap);
 		String strB		=	"";if(eventB!=null)strB		="B:"+eventB.getButtonIndex()+";";
 		String strM		=	"";if(eventM!=null)strM		="M:"+eventM.getX()+","+eventM.getY()+";";
-		csa.cc.dumpDebugEntry(strTgt+strCap+strB+strM);
+		csa.cc.dumpDebugEntry("FOCUS@"+strTgt+strCap+strB+strM);
 	}
 	
 	protected void cursorMoveEvent(CursorMotionEvent event, Spatial target,	Spatial capture) {

@@ -62,7 +62,7 @@ public interface IConsoleUI {
 
 	public abstract int getLineWrapAt();
 
-	public abstract ArrayList<String> wrapThisLineProperly(String strLine);
+	public abstract ArrayList<String> wrapLineDynamically(DumpEntry de);
 
 	public abstract void clearDumpAreaSelection();
 

@@ -43,6 +43,7 @@ public class DumpEntry{
 	boolean bDumpToConsole = true;
 	boolean bUseSlowQueue = false;
 	String strLineOriginal = null;
+	private String strLineBaking = null;
 	
 	public boolean isApplyNewLineRequests() {
 		return bApplyNewLineRequests;
@@ -71,6 +72,12 @@ public class DumpEntry{
 	public DumpEntry setLineOriginal(String strLineOriginal) {
 		this.strLineOriginal = strLineOriginal;
 		return this;
+	}
+	public String getLineBaking() {
+		return strLineBaking;
+	}
+	public void setLineBaking(String strLineBaking) {
+		this.strLineBaking = strLineBaking;
 	}
 	
 }

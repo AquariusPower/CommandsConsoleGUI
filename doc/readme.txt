@@ -22,7 +22,7 @@ Features:
 	___Commands___ (see /help)
 	= Alias to run multiple commands.
 	= Variables can be set and evaluated to run console commands.
-	= Most commands will have an identical variable identifier holding its last execution value.
+	= Most commands will have an identical variable identifier holding its setup value. Usage ex.: /echo ${&consoleHeight}
 	= Comment token detection, after it, line is ignored.
 	= Omit the "command being run" info entry by ending a line with '#', good at init file, mainly for /echo commands.
 	= Multi-line conditional command blocks using: if, elseIf, else, ifEnd (can be nested)
@@ -54,27 +54,29 @@ DONE:
 	= PreCommandsQueue: sends commands to queue, but if a /sleep command is found, this dispatching will be delayed. Sleep is only allowed on a list of commands sent to queue.
 	= Scroll by mouse location: over dump area, over hint area or over input field cmd history (input field optional toggle).
 	= Console is properly initially hidden now (cullhint)
+	= /sleep 2.5 [cmd]; allow /sleep to exec commands too, after the delay; this way it will not prevent next commands from being executed, and can be used outside of cmds block
+	= auto-scroll toggle button/option.
+	= toggle run console commands in background (with console closed)
+	= commands setup value can be retrieved like: ${&consoleHeight}
 
 DOING:
 	... SeparateGUI class from Commands Management, independent from Lemur and JME, so can be used even on a text console or 2D application etc.
 	... SeparateGUI class from Lemur, so other GUI can use the same abstract class to implement a console GUI.
 
 TODO.FastToImplement:
+	+ Auto complete with aliases if line begins with alias token.
 	+ /bind [--list]|[<key> <cmd>]; simplify key to accept lowercase and be as shortest as possible
-	+ /sleep 2.5 [cmd]; allow /sleep to exec a single command too, after the delay; this way it will not prevent next commands from being executed, and can be used outside of cmds block
 	+ /while stores subsequent commands on array for repeating til WhileEnd. Nestable too.
 	+ AtSetup:windowGeometry.resolution.position;keybinds.sndVplumes;etc
-	+ $commandId to retrieve its return value
 	+ When date(day) changes, report on console. On startup report date on console.
 	+ Optional hundredth/tenth of a second at console log.
 	+ optionally keep all dump logs by moving files to name datetimed ones;bKeepAllLogs.transportFlDtTimeToName
+	+ stats displayed in buttons, click each to expand/shrink.
 	
 TODO.TimeConsuming:
 	.Important
 	+ HK - ReflexByFieldType.singleMatchIsSafe.insteadOfSolelyByFieldName.MayBeThrowTheOptionsInConsoleForUserToSet
 	.Good
-	+ Auto complete with aliases if line begins with alias token.
-	+ Set nCount .75;Set nStep .25;Alias 3.5 loopCheck if $nCount<10 then add nCount $nStep;$loopCheck else echo "ended"
 	+ navigate thru words with ctrl+left/right
 	+ BitmapFontBkgColor.shiftRightLeftSelect.inputField
 	+ ListboxEntry(btn)FontColorWarnExceptionSelectHK

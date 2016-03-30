@@ -28,6 +28,8 @@
 package misc;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * 
@@ -93,6 +95,8 @@ public class AutoComplete {
 		
 		// prepend partial better match, or simply unmodified part
 		astrPossibleMatches.add(0,strPart);
+		
+		Collections.sort(astrPossibleMatches);
 		
 		return astrPossibleMatches;
 	}

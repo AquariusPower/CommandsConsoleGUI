@@ -83,6 +83,7 @@ import com.simsilica.lemur.style.Styles;
 
 import console.ConsoleCommands;
 import console.ConsoleScriptCommands;
+import console.DumpEntry;
 import console.EDataBaseOperations;
 import console.IConsoleCommand;
 import console.IConsoleUI;
@@ -175,7 +176,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 //	public String	strDevWarnEntryPrefix="?DevWarn: ";
 //	public String	strDevInfoEntryPrefix=". DevInfo: ";
 //	public String	strSubEntryPrefix="\t";
-	public boolean	bInitiallyClosed = true;
+	public boolean	bInitiallyClosedOnce = true;
 //	public ArrayList<String> astrCmdHistory = new ArrayList<String>();
 //	public ArrayList<String> astrCmdWithCmtValidList = new ArrayList<String>();
 //	public ArrayList<String> astrBaseCmdValidList = new ArrayList<String>();
@@ -401,7 +402,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		// end of initialization
 		cc.addExecConsoleCommandToQueue(cc.RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE);
 //		addExecConsoleCommandToQueue(cc.btgPreQueue.getCmdIdAsCommand(true)); //		 TODO temporary workaround, pre-queue cannot be enable from start yet...
-		if(bInitiallyClosed){
+		if(bInitiallyClosedOnce){
 			// after all, close the console
 			cc.addExecConsoleCommandToQueue(CMD_CLOSE_CONSOLE);
 		}
@@ -415,6 +416,10 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		
 		// instantiations initializer
 		initialize();
+		
+		bInitiallyClosedOnce=false; // to not interfere on reinitializing after a cleanup
+		
+		sapp.getStateManager().attach(new ConsoleCommandsBackgroundState(this, cc));
 	}
 	
 	@Override
@@ -500,6 +505,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		// console stats
 		lblStats = new Label("Console stats.",strStyle);
 		lblStats.setColor(new ColorRGBA(1,1,0.5f,1));
+		lblStats.setPreferredSize(new Vector3f(v3fConsoleSize.x*0.75f,1,0));
 		fStatsHeight = retrieveBitmapTextFor(lblStats).getLineHeight();
 		ctnrStatsAndControls.addChild(lblStats,0,0);
 		
@@ -508,30 +514,19 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		int iButtonIndex=0;
 		btnClipboardShow = new Button("ShwClpbrd",strStyle);
 		abu.add(btnClipboardShow);
-//		btnClipboardShow.setTextHAlignment(HAlignment.Center);
-////		btnClipboardShow.setPreferredSize(new Vector3f(100,20,0));
-//		btnClipboardShow.addClickCommands(new ButtonClick());
-//		ctnrStatsAndControls.addChild(btnClipboardShow,0,++iButtonIndex);
 		
 		btnCopy = new Button("Copy",strStyle);
 		abu.add(btnCopy);
-//		btnCopy.addClickCommands(new ButtonClick());
-//		ctnrStatsAndControls.addChild(btnCopy,0,++iButtonIndex);
 		
 		btnPaste = new Button("Paste",strStyle);
 		abu.add(btnPaste);
-//		btnPaste.addClickCommands(new ButtonClick());
-//		ctnrStatsAndControls.addChild(btnPaste,0,++iButtonIndex);
 		
 		btnCut = new Button("Cut",strStyle);
 		abu.add(btnCut);
-//		btnCut.addClickCommands(new ButtonClick());
-//		ctnrStatsAndControls.addChild(btnCut,0,++iButtonIndex);
 		
 		for(Button btn:abu){
 			btn.setTextHAlignment(HAlignment.Center);
-//			btn.setPreferredSize(new Vector3f(50,50,0));
-			//btnClipboardShow.setPreferredSize(new Vector3f(100,20,0));
+			//BUG buttons do not obbey this: btn.setPreferredSize(new Vector3f(50,1,0));
 			btn.addClickCommands(new ButtonClick());
 			ctnrStatsAndControls.addChild(btn,0,++iButtonIndex);
 		}
@@ -581,7 +576,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 //		dumpAllStats();
 //		dumpInfoEntry("Hit F10 to toggle console.");
 		
-		if(bInitiallyClosed){
+		if(bInitiallyClosedOnce){
 			setVisible(false);
 		}
 		
@@ -999,9 +994,22 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		setInputField(cc.astrCmdHistory.get(iIndex));
 	}
 	
+//	class ThreadBackgrounCommands implements Runnable{
+//		@Override
+//		public void run() {
+//			TimedDelay td = new TimedDelay(1000.0f/60f)
+//			while(true){
+//				if(!cc.btgExecCommandsInBackground.b())return;
+//				
+//			}
+//		}
+//	}
+	
 	@Override
-	public void update(float tpf) {
-		if(!isEnabled())return;
+	synchronized public void update(float tpf) {
+		/**
+		 *	Will update only if enabled... //if(!isEnabled())return;
+		 */
 		
 		cc.update(tpf);
 		
@@ -1413,6 +1421,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	
 	@Override
 	public void scrollToBottomRequest(){
+		if(!cc.btgAutoScroll.b())return;
+		
 		tdScrollToBottomRequestAndSuspend.updateTime();
 		tdScrollToBottomRetry.updateTime();
 	}
@@ -1683,17 +1693,6 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		return astrStyleList.contains(strStyle);
 	}
 	
-	public void updateWrapAt(){
-		if(cc.iConsoleMaxWidthInCharsForLineWrap!=null){
-			fWidestCharForCurrentStyleFont = fontWidth("W"); //W seems to be the widest in most/all chars sets
-			
-			if(cc.iConsoleMaxWidthInCharsForLineWrap>0){
-				cc.iConsoleMaxWidthInCharsForLineWrap = (int) //like trunc
-					((widthForDumpEntryField()/fWidestCharForCurrentStyleFont)-iSkipCharsSafetyGUESSED);
-			}
-		}
-	}
-	
 	public boolean cmdStyleApply(String strStyleNew) {
 		boolean bOk = styleCheck(strStyleNew);
 		if(bOk){
@@ -1701,20 +1700,26 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 			
 			cc.varSet(CMD_CONSOLE_STYLE, strStyle, true);
 			
-			updateWrapAt();
+			updateFontStuff();
 			
 			sapp.enqueue(new Callable<Void>() {
 				@Override
 				public Void call() throws Exception {
-					boolean bWasEnabled=isEnabled();
+					final boolean bWasEnabled=isEnabled();
 					setEnabled(false);
 					cleanup();
 					
-					if(bWasEnabled){
-						setEnabled(true);
-					}
-					modifyConsoleHeight(fConsoleHeightPerc);
-					scrollToBottomRequest();
+//					sapp.enqueue(new Callable<Void>() {
+//						@Override
+//						public Void call() throws Exception {
+							if(bWasEnabled){
+								setEnabled(true);
+							}
+							modifyConsoleHeight(fConsoleHeightPerc);
+							scrollToBottomRequest();
+//							return null;
+//						}
+//					});
 //					addToExecConsoleCommandQueue(cc.CMD_MODIFY_CONSOLE_HEIGHT+" "+fConsoleHeightPerc);
 //					addToExecConsoleCommandQueue(cc.CMD_SCROLL_BOTTOM);
 					return null;
@@ -1733,7 +1738,9 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	}
 	
 	public float widthForDumpEntryField(){
+		//TODO does slider and the safety margin are necessary? slider is inside list box right?
 		return widthForListbox() -lstbxDumpArea.getSlider().getSize().x -fSafetyMarginGUESSED;
+//		return widthForListbox();
 	}
 	
 	@Override
@@ -1772,12 +1779,12 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
     bInitialized=false;
 	}
 	
-	public boolean isInitiallyClosed() {
-		return bInitiallyClosed;
-	}
-	public void setCfgInitiallyClosed(boolean bInitiallyClosed) {
-		this.bInitiallyClosed = bInitiallyClosed;
-	}
+//	public boolean isInitiallyClosed() {
+//		return bInitiallyClosedOnce;
+//	}
+//	public void setCfgInitiallyClosed(boolean bInitiallyClosed) {
+//		this.bInitiallyClosedOnce = bInitiallyClosed;
+//	}
 	
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
@@ -2004,8 +2011,14 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	
 	/**
 	 * BugFix: because the related crash should/could be prevented/preventable.
+	 * 
+	 * Buttons get smashed, shrinking to less than 0, they seem to not accept preferred size constraint.
+	 * 
+	 * By fixating the size of the label, this crash preventer is not that necesary anymore.
 	 */
 	public void bugfixStatsLabelTextSize(){
+		boolean bEnableThisCrashPreventer=false;if(!bEnableThisCrashPreventer)return;
+		
 		boolean bFailed=false;
 		while(true){
 			String str=lblStats.getText();
@@ -2164,30 +2177,72 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	
 	@Override
 	public int getLineWrapAt() {
-		if(STYLE_CONSOLE.equals(strStyle)){ //TODO is faster?
-			return (int) (widthForDumpEntryField() / fWidestCharForCurrentStyleFont ); //'W' but any char will do for monospaced font
+		boolean bUseFixedWrapColumn = cc.btgUseFixedLineWrapModeForAllFonts.b();
+		
+		/**
+		 * Mono spaced fonts can always have a fixed linewrap column!
+		 */
+		if(!bUseFixedWrapColumn)bUseFixedWrapColumn=STYLE_CONSOLE.equals(strStyle);
+		
+		if(bUseFixedWrapColumn){
+			return (int)
+				(widthForDumpEntryField() / fWidestCharForCurrentStyleFont)
+				-iSkipCharsSafetyGUESSED;
 		}
-		return 0;
+		
+		return 0; //wrap will be dynamic
 	}
 	
-	@Override
-	public ArrayList<String> wrapThisLineProperly(String strLine) {
-		ArrayList<String> astr = new ArrayList<String>();
+	public void updateFontStuff(){
+//		if(true)return; //dummified
+//	if(cc.iConsoleMaxWidthInCharsForLineWrap!=null){
 		
-		String strAfter = "";
-		float fMaxWidth = widthForDumpEntryField() - iDotsMarginSafetyGUESSED;
-		while(strLine.length()>0){
-			while(fontWidth(strLine, strStyle, false) > fMaxWidth){
-				int iLimit = strLine.length()-iJumpBackGUESSED;
-				strAfter = strLine.substring(iLimit) + strAfter;
-				strLine = strLine.substring(0, iLimit);
+		/**
+		 * W seems to be the widest in most/all chars sets
+		 * so, when using a fixed wrap column, this is the safest char width reference!
+		 */
+		fWidestCharForCurrentStyleFont = fontWidth("W");
+		
+//		if(cc.iConsoleMaxWidthInCharsForLineWrap>0){
+//			cc.iConsoleMaxWidthInCharsForLineWrap = (int) //like trunc
+//				((widthForDumpEntryField()/fWidestCharForCurrentStyleFont)
+//				-iSkipCharsSafetyGUESSED);
+//		}
+//	}
+	}
+	
+	/**
+	 * Auto wrap.
+	 *  
+	 * This is MUCH slower than using a mono spaced font and having a fixed linewrap column...
+	 */
+	@Override
+	public ArrayList<String> wrapLineDynamically(DumpEntry de) {
+		ArrayList<String> astrToDump = new ArrayList<String>();
+		
+		String[] astr = de.getLineBaking().split("\n");
+		
+		for(String strLine:astr){
+			/**
+			 * Dynamically adjust each line length based on the pixels size it will have
+			 * after rendered.
+			 * It removes characters from the end until the line fits on the limits.
+			 */
+			String strAfter = "";
+			float fMaxWidth = widthForDumpEntryField() - iDotsMarginSafetyGUESSED;
+			while(strLine.length()>0){
+				while(fontWidth(strLine, strStyle, false) > fMaxWidth){
+					int iLimit = strLine.length()-iJumpBackGUESSED;
+					strAfter = strLine.substring(iLimit) + strAfter;
+					strLine = strLine.substring(0, iLimit);
+				}
+				astrToDump.add(strLine);
+				strLine = strAfter;
+				strAfter="";
 			}
-			astr.add(strLine);
-			strLine = strAfter;
-			strAfter="";
 		}
 		
-		return astr;
+		return astrToDump;
 	}
 	
 	@Override

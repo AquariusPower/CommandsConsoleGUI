@@ -74,10 +74,14 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 	public final String	TOKEN_CMD_NOT_WORKING_YET = "[NOTWORKINGYET]";
 	
 	/**
-	 * togglers
+	 * Togglers:
+	 * 
+	 * Adding a toggler field on any class, 
+	 * will automatically create the related console command!
 	 */
 	public static final String strTogglerCodePrefix="btg";
-	public BoolToggler	btgDbAutoBkp = new BoolToggler(this,false,strTogglerCodePrefix, "whenever a save happens, if the DB was modified, a backup will be created of the old file");
+	public BoolToggler	btgDbAutoBkp = new BoolToggler(this,false,strTogglerCodePrefix, 
+		"whenever a save happens, if the DB was modified, a backup will be created of the old file");
 	public BoolToggler	btgShowWarn = new BoolToggler(this,true,strTogglerCodePrefix);
 	public BoolToggler	btgShowInfo = new BoolToggler(this,true,strTogglerCodePrefix);
 	public BoolToggler	btgShowException = new BoolToggler(this,true,strTogglerCodePrefix);
@@ -85,15 +89,15 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 	public BoolToggler	btgEngineStatsFps = new BoolToggler(this,false,strTogglerCodePrefix);
 	public BoolToggler	btgShowMiliseconds=new BoolToggler(this,false,strTogglerCodePrefix);
 	public BoolToggler	btgFpsLimit=new BoolToggler(this,false,strTogglerCodePrefix);
-	public BoolToggler	btgConsoleCpuRest=new BoolToggler(this,false,strTogglerCodePrefix,"Console update steps will be skipped if this is enabled.");
-	
-	/**
-	 * keep delayers together!
-	 */
-	public TimedDelay tdLetCpuRest = new TimedDelay(0.1f);
-	public TimedDelay tdStatsRefresh = new TimedDelay(0.5f);
-	public TimedDelay tdDumpQueuedEntry = new TimedDelay(1f/5f); // per second
-	public TimedDelay tdSpareGpuFan = new TimedDelay(1.0f/60f); // like 60 FPS
+	public BoolToggler	btgConsoleCpuRest=new BoolToggler(this,false,strTogglerCodePrefix,
+		"Console update steps will be skipped if this is enabled.");
+	public BoolToggler	btgAutoScroll=new BoolToggler(this,true,strTogglerCodePrefix);
+	public BoolToggler	btgExecCommandsInBackground=new BoolToggler(this,false,strTogglerCodePrefix,
+		"Will continue running console commands even if console is closed.");
+	public BoolToggler	btgUseFixedLineWrapModeForAllFonts=new BoolToggler(this,false,strTogglerCodePrefix,
+		"If enabled, this will use a fixed line wrap column even for non mono spaced fonts, "
+		+"based on the width of the 'W' character. Otherwise it will dynamically guess the best "
+		+"fitting string size.");
 	
 	/**
 	 * Developer vars, keep together!
@@ -103,6 +107,14 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 	public BoolToggler	btgShowDeveloperInfo=new BoolToggler(this,true,strTogglerCodePrefix);
 	public BoolToggler	btgShowDeveloperWarn=new BoolToggler(this,true,strTogglerCodePrefix);
 	public BoolToggler	btgShowExecQueuedInfo=new BoolToggler(this,true,strTogglerCodePrefix);
+	
+	/**
+	 * keep delayers together!
+	 */
+	public TimedDelay tdLetCpuRest = new TimedDelay(0.1f);
+	public TimedDelay tdStatsRefresh = new TimedDelay(0.5f);
+	public TimedDelay tdDumpQueuedEntry = new TimedDelay(1f/5f); // per second
+	public TimedDelay tdSpareGpuFan = new TimedDelay(1.0f/60f); // like 60 FPS
 	
 	/**
 	 * used to hold a reference to the identified/typed user command
@@ -157,7 +169,10 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 	 * etc
 	 */
 	public String	strTypeCmd="Cmd";
-	public Integer iConsoleMaxWidthInCharsForLineWrap = 0;
+	
+	/** 0 is auto wrap, -1 will trunc big lines */
+	public int iConsoleMaxWidthInCharsForLineWrap = 0;
+	
 	public boolean	bAddEmptyLineAfterCommand = true;
 	public IConsoleUI	icui;
 	public boolean bStartupCmdQueueDone = false; 
@@ -417,21 +432,21 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 		/**
 		 * means the command didnt have any problem, didnt fail, requiring a warning message
 		 */
-		boolean bCommandWorked = false;
+		boolean bCmdEndedGracefully = false;
 		
 		if(checkCmdValidityBoolTogglers()){
-			bCommandWorked=toggle(btgReferenceMatched);
+			bCmdEndedGracefully=toggle(btgReferenceMatched);
 		}else
 		if(checkCmdValidity("alias",getAliasHelp(),true)){
-			bCommandWorked=cmdAlias();
+			bCmdEndedGracefully=cmdAlias();
 		}else
 		if(checkCmdValidity("clearCommandsHistory")){
 			astrCmdHistory.clear();
-			bCommandWorked=true;
+			bCmdEndedGracefully=true;
 		}else
 		if(checkCmdValidity("clearDumpArea")){
 			icui.getDumpEntries().clear();
-			bCommandWorked=true;
+			bCmdEndedGracefully=true;
 		}else
 //		if(checkCmdValidity(CMD_CLOSE_CONSOLE,"like the bound key to do it")){
 //			csaTmp.setEnabled(false);
@@ -452,7 +467,7 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 //			bCommandWorked=csaTmp.cmdStyleApply(strStyle);
 //		}else
 		if(checkCmdValidity(CMD_DB,EDataBaseOperations.help())){
-			bCommandWorked=cmdDb();
+			bCmdEndedGracefully=cmdDb();
 		}else
 //		if(checkCmdValidity("dumpFind","<text> finds, select and scroll to it at dump area")){
 //			bCommandWorkedProperly=cmdFind();
@@ -464,7 +479,7 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 //			bCommandWorkedProperly=cmdFind();
 //		}else
 		if(checkCmdValidity(CMD_ECHO," simply echo something")){
-			bCommandWorked=cmdEcho();
+			bCmdEndedGracefully=cmdEcho();
 		}else
 		if(checkCmdValidity("editShowClipboad","--noNL")){
 			String strParam1 = paramString(1);
@@ -475,13 +490,13 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 				}
 			}
 			showClipboard(bShowNL);
-			bCommandWorked=true;
+			bCmdEndedGracefully=true;
 		}else
 		if(checkCmdValidity("editCopy","-d end lines with command delimiter instead of NL;")){
-			bCommandWorked=csaTmp.cmdEditCopyOrCut(false);
+			bCmdEndedGracefully=csaTmp.cmdEditCopyOrCut(false);
 		}else
 		if(checkCmdValidity("editCut","like copy, but cut :)")){
-			bCommandWorked=csaTmp.cmdEditCopyOrCut(true);
+			bCmdEndedGracefully=csaTmp.cmdEditCopyOrCut(true);
 		}else
 //		if(checkCmdValidity(CMD_ELSE,"conditinal block")){
 //			bCommandWorked=cmdElse();
@@ -494,12 +509,41 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 			if(strFile!=null){
 				addCmdListOneByOneToQueue(Misc.i().fileLoad(strFile),false,false);
 //				astrExecConsoleCmdsQueue.addAll(Misc.i().fileLoad(strFile));
-				bCommandWorked=true;
+				bCmdEndedGracefully=true;
 			}
 		}else
 		if(checkCmdValidity("exit","the application")){
 			cmdExit();
-			bCommandWorked=true;
+			bCmdEndedGracefully=true;
+		}else
+		if(checkCmdValidity("fileShowData ","<ini|setup|CompleteFileName> show contents of file at dump area")){
+			String strOpt = paramString(1);
+			
+			if(strOpt!=null){
+				File fl = null;
+				switch(strOpt){
+					case "ini":
+						dumpInfoEntry("Init file data: ");
+						fl = flInit;
+						break;
+					case "setup":
+						dumpInfoEntry("Setup file data: ");
+						fl = flSetup;
+						break;
+					default:
+						fl = new File(strOpt);
+				}
+				
+				if(fl.exists()){
+					for(String str : Misc.i().fileLoad(fl)){
+						dumpSubEntry(str);
+					}
+				}else{
+					dumpWarnEntry("File does not exist: "+fl.getAbsolutePath());
+				}
+			}
+			
+			bCmdEndedGracefully=true;
 		}else
 		if(checkCmdValidity(CMD_FIX_CURSOR ,"in case cursor is invisible")){
 			if(csaTmp.efHK==null){
@@ -508,68 +552,26 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 				dumpInfoEntry("requesting: "+CMD_FIX_CURSOR);
 				csaTmp.efHK.bFixInvisibleTextInputCursorHK=true;
 			}
-			bCommandWorked = true;
+			bCmdEndedGracefully = true;
 		}else
 		if(checkCmdValidity(CMD_FIX_LINE_WRAP ,"in case words are overlapping")){
 			csaTmp.cmdLineWrapDisableDumpArea();
-			bCommandWorked = true;
+			bCmdEndedGracefully = true;
 		}else
 		if(checkCmdValidity(CMD_FIX_VISIBLE_ROWS_AMOUNT,"[iAmount] in case it is not showing as many rows as it should")){
 			csaTmp.iVisibleRowsAdjustRequest = paramInt(1);
 			if(csaTmp.iVisibleRowsAdjustRequest==null)csaTmp.iVisibleRowsAdjustRequest=0;
-			bCommandWorked=true;
+			bCmdEndedGracefully=true;
 		}else
-//		if(checkCmdValidity(CMD_FUNCTION,"<id> begins a function block")){
-//			bCommandWorked=csaTmp.cmdFunctionBegin();
-//		}else
-//		if(checkCmdValidity(CMD_FUNCTION_CALL,"<id> [parameters...] retrieve parameters values with ex.: ${id_1} ${id_2} ...")){
-//			bCommandWorked=csaTmp.cmdFunctionCall();
-//		}else
-//		if(checkCmdValidity(CMD_FUNCTION_END,"ends a function block")){
-//			bCommandWorked=csaTmp.cmdFunctionEnd();
-//		}else
-//		if(checkCmdValidity("functionList","[filter]")){
-//			String strFilter = paramString(1);
-//			ArrayList<String> astr = Lists.newArrayList(csaTmp.tmFunctions.keySet().iterator());
-//			for(String str:astr){
-//				if(strFilter!=null && !str.toLowerCase().contains(strFilter.toLowerCase()))continue;
-//				dumpSubEntry(str);
-//			}
-//			bCommandWorked=true;
-//		}else
-//		if(checkCmdValidity("functionShow","<functionId>")){
-//			String strFuncId = paramString(1);
-//			if(strFuncId!=null){
-//				ArrayList<String> astr = csaTmp.tmFunctions.get(strFuncId);
-//				if(astr!=null){
-//					dumpSubEntry(getCommandPrefixStr()+CMD_FUNCTION+" "+strFuncId+getCommandDelimiter());
-//					for(String str:astr){
-//						str=csaTmp.strSubEntryPrefix+csaTmp.strSubEntryPrefix+str+getCommandDelimiter();
-////						dumpSubEntry("\t"+str+getCommandDelimiter());
-//						dumpEntry(false, true, false, str);
-//					}
-//					dumpSubEntry(getCommandPrefixStr()+CMD_FUNCTION_END+getCommandDelimiter());
-//					bCommandWorked=true;
-//				}
-//			}
-//		}else
-//		if(checkCmdValidity("fpsLimit","[iMaxFps]")){
-//			Integer iMaxFps = paramInt(1);
-//			if(iMaxFps!=null){
-//				csaTmp.fpslState.setMaxFps(iMaxFps);
-//				bCommandWorked=true;
-//			}
-//			dumpSubEntry("FpsLimit = "+csaTmp.fpslState.getFpsLimit());
-//		}else
 		if(checkCmdValidity(CMD_HELP,"[strFilter] show (filtered) available commands")){
 			cmdShowHelp(paramString(1));
 			/**
 			 * ALWAYS return TRUE here, to avoid infinite loop when improving some failed command help info!
 			 */
-			bCommandWorked=true; 
+			bCmdEndedGracefully=true; 
 		}else
 		if(checkCmdValidity(CMD_HISTORY,"[strFilter] of issued commands (the filter results in sorted uniques)")){
-			bCommandWorked=cmdShowHistory();
+			bCmdEndedGracefully=cmdShowHistory();
 		}else
 		if(checkCmdValidity(CMD_HK_TOGGLE ,"[bEnable] allow hacks to provide workarounds")){
 			if(paramBooleanCheckForToggle(1)){
@@ -587,40 +589,29 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 					}
 				}
 				
-				bCommandWorked=true;
+				bCmdEndedGracefully=true;
 			}
 		}else
-//		if(checkCmdValidity(CMD_IF,"<[!]<true|false>> [cmd|alias] if cmd|alias is not present, this will be a multiline block start!")){
-//			bCommandWorked=cmdIf();
-//		}else
-//		if(checkCmdValidity(CMD_IF_END,"ends conditional block")){
-//			bCommandWorked=cmdIfEnd();
-//		}else
-		if(checkCmdValidity("initFileShow ","show contents of init file at dump area")){
-			dumpInfoEntry("Init file data: ");
-			for(String str : Misc.i().fileLoad(flInit)){
-				dumpSubEntry(str);
-			}
-			bCommandWorked=true;
-		}else
-		if(checkCmdValidity(CMD_LINE_WRAP_AT,"[iMaxChars] -1 = will trunc big lines, 0 = wrap will be automatic")){
+//		if(checkCmdValidity(CMD_LINE_WRAP_AT,"[iMaxChars] -1 = will trunc big lines, 0 = wrap will be automatic")){
+		if(checkCmdValidity(CMD_LINE_WRAP_AT,"[iMaxChars] 0 = wrap will be automatic")){
 			Integer i = paramInt(1);
-			if(i!=null){ // a value was supplied
-				if(i==-1){
-					/**
-					 * prefered using null instead of -1 that is for the user type a valid integer
-					 */
-					iConsoleMaxWidthInCharsForLineWrap=null;
-				}else{
-					iConsoleMaxWidthInCharsForLineWrap=i;
-				}
+			if(i!=null && i>=0){ // a value was supplied
+				iConsoleMaxWidthInCharsForLineWrap = i;
+//				if(i==-1){
+//					/**
+//					 * prefered using null instead of -1 that is for the user type a valid integer
+//					 */
+//					iConsoleMaxWidthInCharsForLineWrap=null;
+//				}else{
+//					iConsoleMaxWidthInCharsForLineWrap=i;
+//				}
 			}
-			csaTmp.updateWrapAt();
-			bCommandWorked=true;
+//			csaTmp.updateFontStuff();
+			bCmdEndedGracefully=true;
 		}else
 		if(checkCmdValidity("quit","the application")){
 			cmdExit();
-			bCommandWorked=true;
+			bCmdEndedGracefully=true;
 		}else
 		if(checkCmdValidity("showBinds","")){
 			dumpInfoEntry("Key bindings: ");
@@ -628,27 +619,39 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 			dumpSubEntry("Ctrl+X - cut");
 			dumpSubEntry("Ctrl+V - paste");
 			dumpSubEntry("Shift+Ctrl+V - show clipboard");
-			dumpSubEntry("Ctrl+B - marks dump area begin selection marker for copy");
+			dumpSubEntry("Shift+Click - marks dump area CopyTo selection marker for copy/cut");
 			dumpSubEntry("Ctrl+Del - clear input field");
 			dumpSubEntry("TAB - autocomplete (starting with)");
 			dumpSubEntry("Ctrl+TAB - autocomplete (contains)");
 			dumpSubEntry("Ctrl+/ - toggle input field comment");
-			bCommandWorked=true;
+			bCmdEndedGracefully=true;
 		}else
 		if(checkCmdValidity("showSetup","show restricted variables")){
 			for(String str:Misc.i().fileLoad(flSetup)){
 				dumpSubEntry(str);
 			}
-			bCommandWorked=true;
+			bCmdEndedGracefully=true;
 		}else
-		if(checkCmdValidity(CMD_SLEEP,"<fDelay> will wait before executing next command in the command block")){
-			/**
-			 * This is only used on the pre-queue, 
-			 * here it is ignored.
-			 */
-//			if(!btgPreQueue.b())dumpWarnEntry(CMD_SLEEP+" only works with pre-queue enabled");
-			dumpWarnEntry(CMD_SLEEP+" only works on command blocks like functions");
-			bCommandWorked=true;
+		if(checkCmdValidity(CMD_SLEEP,"<fDelay> [singleCmd] will wait before executing next command in the command block; alternatively will wait before executing command in-line, but then it will not sleep the block it is in!")){
+			Float fSleep = paramFloat(1);
+			String strCmds = paramStringConcatenateAllFrom(2);
+			
+			if(strCmds!=null){
+				/**
+				 * creates mini block
+				 */
+				ArrayList<String> astrCmdList = new ArrayList<String>();
+				astrCmdList.add(CMD_SLEEP+" "+fSleep);
+				astrCmdList.add(strCmds);
+				addCmdsBlockToPreQueue(astrCmdList, false, false, "in-line sleep commands");
+			}else{
+				/**
+				 * This mode is only used on the pre-queue, 
+				 * here it is ignored.
+				 */
+				dumpWarnEntry(CMD_SLEEP+" without cmd, only works on command blocks like functions");
+			}
+			bCmdEndedGracefully=true;
 		}else
 //		if(checkCmdValidity("showDump","<filter> show matching entries from dump log file")){
 //			String strFilter = paramString(1);
@@ -662,13 +665,13 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 //			}
 //		}else
 		if(checkCmdValidity("statsEnable","[idToEnable [bEnable]] empty for a list. bEnable empty to toggle.")){
-			bCommandWorked=true;
+			bCmdEndedGracefully=true;
 			String strId=paramString(1);
 			Boolean bValue=paramBoolean(2);
 			if(strId!=null){
 				EStats e=null;
 				try{e=EStats.valueOf(strId);}catch(IllegalArgumentException ex){
-					bCommandWorked=false;
+					bCmdEndedGracefully=false;
 					dumpWarnEntry("Invalid option: "+strId+" "+bValue);
 				}
 				
@@ -682,19 +685,19 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 			}
 		}else
 		if(checkCmdValidity("statsFieldToggle","[bEnable] toggle simple stats field visibility")){
-			bCommandWorked=csaTmp.statsFieldToggle();
+			bCmdEndedGracefully=csaTmp.statsFieldToggle();
 		}else
 		if(checkCmdValidity("statsShowAll","show all console stats")){
 			dumpAllStats();
-			bCommandWorked=true;
+			bCmdEndedGracefully=true;
 		}else
 		if(checkCmdValidity("test","[...] temporary developer tests")){
 			cmdTest();
 			if(csaTmp.efHK!=null)csaTmp.efHK.test();
-			bCommandWorked=true;
+			bCmdEndedGracefully=true;
 		}else
 		if(checkCmdValidity("varAdd","<varId> <[-]value>")){
-			bCommandWorked=cmdVarAdd(paramString(1),paramString(2),true,false);
+			bCmdEndedGracefully=cmdVarAdd(paramString(1),paramString(2),true,false);
 		}else
 //		if(checkCmdValidity(CMD_VAR_SET,"[<varId> <value>] | [-varId] | ["+getFilterToken()+"filter] - can be a number or a string, retrieve it's value with: ${varId}")){
 		if(
@@ -706,21 +709,21 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 					+"Restricted variables will have no effect; "
 			)
 		){
-			bCommandWorked=cmdVarSet();
+			bCmdEndedGracefully=cmdVarSet();
 		}else
 		if(checkCmdValidity("varSetCmp","<varIdBool> <value> <cmp> <value>")){
-			bCommandWorked=cmdVarSetCmp();
+			bCmdEndedGracefully=cmdVarSetCmp();
 		}else
 		if(checkCmdValidity("varShow","[["+RESTRICTED_TOKEN+"]filter] list user or restricted variables.")){
-			bCommandWorked=cmdVarShow();
+			bCmdEndedGracefully=cmdVarShow();
 		}else
 		if(checkCmdValidity(TOKEN_CMD_NOT_WORKING_YET+"zDisabledCommand"," just to show how to use it")){
 			// keep this as reference
 		}else
 		{
 			for(IConsoleCommand icc:aConsoleCommandListenerList){
-				bCommandWorked = icc.executePreparedCommand();
-				if(bCommandWorked)break;
+				bCmdEndedGracefully = icc.executePreparedCommand();
+				if(bCmdEndedGracefully)break;
 			}
 //			if(strCmdLinePrepared!=null){
 //				if(SPECIAL_CMD_MULTI_COMMAND_LINE_OK.equals(strCmdLinePrepared)){
@@ -729,7 +732,7 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 //			}
 		}
 		
-		return bCommandWorked;
+		return bCmdEndedGracefully;
 	}
 	
 	public boolean cmdRawLineCheckAlias(){
@@ -764,6 +767,8 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 				
 				bLastAliasCreatedSuccessfuly = true;
 			}
+			
+			return bLastAliasCreatedSuccessfuly;
 		}else
 		if(strCmdLine.startsWith(strExecAliasPrefix)){
 			/**
@@ -773,9 +778,8 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 				.split(" ")[0]
 				.substring(strExecAliasPrefix.length())
 				.toLowerCase();
-			for(Alias alias:aAliasList){
-				if(!alias.strAliasId.toLowerCase().equals(strAliasId))continue;
-				
+			Alias alias = getAlias(strAliasId);
+			if(alias!=null){
 				if(!alias.bBlocked){
 					addCmdToQueue(alias.strCmdLine
 						+commentToAppend("alias="+alias.strAliasId), true);
@@ -783,10 +787,25 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 				}else{
 					dumpWarnEntry(alias.toString());
 				}
+			}else{
+				dumpWarnEntry("Alias not found: "+strAliasId);
 			}
+			
+//			for(Alias alias:aAliasList){
+//				if(!alias.strAliasId.toLowerCase().equals(strAliasId))continue;
+//				
+//				if(!alias.bBlocked){
+//					addCmdToQueue(alias.strCmdLine
+//						+commentToAppend("alias="+alias.strAliasId), true);
+//					return true;
+//				}else{
+//					dumpWarnEntry(alias.toString());
+//				}
+//			}
 		}
 			
-		return bLastAliasCreatedSuccessfuly;
+//		return bLastAliasCreatedSuccessfuly;
+		return false;
 	}
 
 	/**
@@ -805,26 +824,33 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 		
 		if(!de.bDumpToConsole)return;
 		
-		if(iConsoleMaxWidthInCharsForLineWrap==null){
-			applyDumpEntryOrPutToSlowQueue(de.bUseSlowQueue, de.strLineOriginal);
-			return;
-		}
-		
-		ArrayList<String> astr = new ArrayList<String>();
+		ArrayList<String> astrDumpLineList = new ArrayList<String>();
 		if(de.strLineOriginal.isEmpty()){
-			astr.add(de.strLineOriginal);
+			astrDumpLineList.add(de.strLineOriginal);
 		}else{
-			String strLine = de.strLineOriginal.replace("\t", strReplaceTAB);
-			strLine=strLine.replace("\r", ""); //removes carriage return
+			de.setLineBaking(de.strLineOriginal.replace("\t", strReplaceTAB));
+			de.setLineBaking(de.getLineBaking().replace("\r", "")); //removes carriage return
 			
 			if(de.bApplyNewLineRequests){
-				strLine=strLine.replace("\\n","\n"); //converts newline request into newline char
+				de.setLineBaking(de.getLineBaking().replace("\\n","\n")); //converts newline request into newline char
 			}else{
-				strLine=strLine.replace("\n","\\n"); //disables any newline char without losing it
+				de.setLineBaking(de.getLineBaking().replace("\n","\\n")); //disables any newline char without losing it
 			}
 			
+//			/**
+//			 * will put the line as it is,
+//			 * the UI will handle the line being truncated.
+//			 */
+//			if(!de.bApplyNewLineRequests){
+//				if(iConsoleMaxWidthInCharsForLineWrap<0){
+//					applyDumpEntryOrPutToSlowQueue(de.bUseSlowQueue, de.strLineOriginal);
+//					return;
+//				}
+//			}
+			
 			int iWrapAt = iConsoleMaxWidthInCharsForLineWrap;
-			if(iConsoleMaxWidthInCharsForLineWrap==null){
+//			if(iConsoleMaxWidthInCharsForLineWrap==null){
+			if(iConsoleMaxWidthInCharsForLineWrap==0){
 				iWrapAt = icui.getLineWrapAt();
 //				if(STYLE_CONSOLE.equals(strStyle)){ //TODO is faster?
 //					iWrapAt = (int) (widthForDumpEntryField() / fWidestCharForCurrentStyleFont ); //'W' but any char will do for monospaced font
@@ -833,10 +859,13 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 			
 			//TODO use \n to create a new line properly
 			if(iWrapAt>0){ //fixed chars wrap
+				/**
+				 * fills each line till the wrap column or \n
+				 */
 				String strLineToDump="";
 				boolean bDumpAdd=false;
-				for (int i=0;i<strLine.length();i++){
-					char ch = strLine.charAt(i);
+				for (int i=0;i<de.getLineBaking().length();i++){
+					char ch = de.getLineBaking().charAt(i);
 					strLineToDump+=ch;
 					if(ch=='\n'){
 						bDumpAdd=true;
@@ -844,48 +873,28 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 					if(strLineToDump.length()==iWrapAt){
 						bDumpAdd=true;
 					}else
-					if(i==(strLine.length()-1)){
+					if(i==(de.getLineBaking().length()-1)){
 						bDumpAdd=true;
 					}
 					
 					if(bDumpAdd){
-						astr.add(strLineToDump);
+						astrDumpLineList.add(strLineToDump);
 						strLineToDump="";
 						bDumpAdd=false;
 					}
 				}
 				
-//						for (int i=0;i<strLine.length();i+=iWrapAt){
-//							String strLineToDump = strLine.substring(
-//									i, 
-//									Math.min(strLine.length(),i+iWrapAt)
-//								);
-//							astr.add(strLineToDump);
-//						}
-			}else{ // auto wrap, TODO is this slow?
-				astr.addAll(icui.wrapThisLineProperly(strLine));
-				
-//				String strAfter = "";
-//				float fMaxWidth = widthForDumpEntryField() - iDotsMarginSafetyGUESSED;
-//				while(strLine.length()>0){
-//					while(fontWidth(strLine, strStyle, false) > fMaxWidth){
-//						int iLimit = strLine.length()-iJumpBackGUESSED;
-//						strAfter = strLine.substring(iLimit) + strAfter;
-//						strLine = strLine.substring(0, iLimit);
-//					}
-//					astr.add(strLine);
-//					strLine = strAfter;
-//					strAfter="";
-//				}
+			}else{ 
+				astrDumpLineList.addAll(icui.wrapLineDynamically(de));
 			}
 		}
 		
 		/**
 		 * ADD LINE WRAP INDICATOR
 		 */
-		for(int i=0;i<astr.size();i++){
-			String strPart = astr.get(i);
-			if(i<(astr.size()-1)){
+		for(int i=0;i<astrDumpLineList.size();i++){
+			String strPart = astrDumpLineList.get(i);
+			if(i<(astrDumpLineList.size()-1)){
 				if(strPart.endsWith("\n")){
 					strPart=strPart.substring(0, strPart.length()-1)+"\\n"; // new line indicator
 				}else{
@@ -1217,6 +1226,7 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 	
 	public String getAliasHelp() {
 		return "[<identifier> <commands>] | [<+|->identifier] | ["+getFilterToken()+"filter]\n"
+			+"\t\tCreates an alias to run a in-line commands block (each separated by '"+getCommandDelimiter()+"')\n"
 			+"\t\tWithout params, will list all aliases\n"
 			+"\t\t"+getFilterToken()+"filter - will filter (contains) the alias list\n"
 			+"\t\t-identifier - will block that alias execution\n"
@@ -1784,11 +1794,11 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 	public boolean executeCommand(final String strFullCmdLineOriginal){
 		strCmdLineOriginal = strFullCmdLineOriginal;
 		
-		boolean bCmdWorkDone = false;
+		boolean bCmdFoundAndApplied = false;
 		try{
-			if(!bCmdWorkDone)bCmdWorkDone=cmdRawLineCheckEndOfStartupCmdQueue();
+			if(!bCmdFoundAndApplied)bCmdFoundAndApplied=cmdRawLineCheckEndOfStartupCmdQueue();
 			
-			if(!bCmdWorkDone)bCmdWorkDone=cmdRawLineCheckAlias();
+			if(!bCmdFoundAndApplied)bCmdFoundAndApplied=cmdRawLineCheckAlias();
 			
 //			if(!bOk)bOk=cmdRawLineCheckIfElse();
 			
@@ -1799,13 +1809,14 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 //			}
 			
 			
+			if(!bCmdFoundAndApplied){
+				/**
+				 * we will have a prepared line after below
+				 */
+				strCmdLinePrepared = prepareCmdAndParams(strCmdLineOriginal);
+			}
 			
-			/**
-			 * we will have a prepared line after below
-			 */
-			strCmdLinePrepared = prepareCmdAndParams(strCmdLineOriginal);
-			
-			if(!bCmdWorkDone)bCmdWorkDone=stillExecutingCommand();
+			if(!bCmdFoundAndApplied)bCmdFoundAndApplied=stillExecutingCommand();
 			
 //			if(!bCmdWorkDone){
 //				if(bFuncCmdLineRunning){
@@ -1872,10 +1883,10 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 			// keep this one as "warning", as user may simply fix the typed value
 			dumpWarnEntry("NumberFormatException: "+e.getMessage());
 			e.printStackTrace();
-			bCmdWorkDone=false;
+			bCmdFoundAndApplied=false;
 		}
 		
-		return bCmdWorkDone;
+		return bCmdFoundAndApplied;
 	}
 	
 	public void dumpEntry(String strLineOriginal){
@@ -2013,6 +2024,7 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 //					for(String str:astrCmdListFast){
 //						addCmdToQueue(str, pqe.bPrepend);
 //					}
+					astrCmdListFast.add(csaTmp.CMD_CONSOLE_SCROLL_BOTTOM.toString());
 					addCmdListOneByOneToQueue(astrCmdListFast, pqe.bPrepend, false);
 				}
 				
@@ -2295,27 +2307,34 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 		
 	}
 	
+	enum ETest{
+		fps,
+		allchars,
+		stats,
+	}
 	public void cmdTest(){
 		dumpInfoEntry("testing...");
 		String strOption = paramString(1);
 		
-		if(strOption.equalsIgnoreCase("fps")){
+		if(strOption==null){
+			dumpSubEntry(Arrays.toString(ETest.values()));
+			return;
+		}
+		
+		ETest et = ETest.valueOf(strOption.toLowerCase());
+		switch(et){
+			case fps:
 //			sapp.setSettings(settings);
-		}else
-		if(strOption.equalsIgnoreCase("allchars")){
-			for(char ch=0;ch<256;ch++){
-				dumpSubEntry(""+(int)ch+"='"+Character.toString(ch)+"'");
-			}
-		}else
-		if(strOption.equalsIgnoreCase("stats")){
-			strTest=paramString(2);
-			dumpDevInfoEntry("lblTxtSize="+csaTmp.lblStats.getText().length());
-		}else
-		{
-//		dumpSubEntry("["+(char)Integer.parseInt(strParam1, 16)+"]");
-//		if(getDumpAreaSelectedIndex()>=0){
-//			dumpSubEntry("Selection:"+getDumpAreaSelectedIndex()+": '"+icg.getDumpEntries().get(getDumpAreaSelectedIndex())+"'");
-//		}
+				break;
+			case allchars:
+				for(char ch=0;ch<256;ch++){
+					dumpSubEntry(""+(int)ch+"='"+Character.toString(ch)+"'");
+				}
+				break;
+			case stats:
+				strTest=paramString(2);
+				dumpDevInfoEntry("lblTxtSize="+csaTmp.lblStats.getText().length());
+				break;
 		}
 		
 	}	

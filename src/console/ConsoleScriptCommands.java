@@ -85,6 +85,8 @@ public class ConsoleScriptCommands extends ConsoleCommands{
 		 * put cmds block at queue
 		 */
 		ArrayList<String> astrFuncBlock = tmFunctions.get(strFunctionId);
+		if(astrFuncBlock==null)return false;
+		
 		astrFuncBlock.removeAll(Collections.singleton(null));
 		if(astrFuncBlock!=null && astrFuncBlock.size()>0){
 			dumpInfoEntry("Running function: "+strFunctionId+" "+getCommentPrefix()+"totLines="+astrFuncBlock.size());
