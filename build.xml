@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<!-- Configuration of the Ant build system to generate a Jar file --> 
+<project name="CommandsConsoleGUI" default="ConsoleCommandsUI">
+  <target name="ConsoleCommandsUI" description="Create Jar file">
+    <jar jarfile="ConsoleCommandsUI.jar" basedir="./bin/" includes="**/*.class" />
+    <jar jarfile="ConsoleCommandsUI-sources.jar" basedir="./src/" includes="**/*.java" />
+  </target>
+</project>

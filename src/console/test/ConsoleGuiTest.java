@@ -77,12 +77,6 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 	public void simpleInitApp() {
 		cgsCustomizedState = new ConsoleCustomCommands(this);
 		cgsCustomizedState.addConsoleCommandListener(this);
-//		ConsoleGuiLemurState cs = new ConsoleGuiLemurState(KeyInput.KEY_F10, cgsCustomizedState);
-//		cgsCustomizedState.addConsoleCommandListener(cs);
-//		cgsCustomizedState.setConsoleUI(cs);
-//		cgsCustomizedState.csaTmp = cs;
-		
-//		getStateManager().attach(cs);
 	}
 	
 	@Override

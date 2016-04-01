@@ -41,7 +41,7 @@ import extras.FpsLimiterState;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleCommands to prevent scripts usage
+public class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleCommands to prevent scripts usage
 	public FpsLimiterState fpslState = new FpsLimiterState();
 	
 	public ConsoleCustomCommands(ConsoleGuiTest sapp){
