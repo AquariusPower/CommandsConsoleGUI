@@ -995,26 +995,43 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public void addCmdToValidList(String strNew, boolean bSkipSortCheck){
-		if(!astrCmdWithCmtValidList.contains(strNew)){
-			if(!strNew.startsWith(TOKEN_CMD_NOT_WORKING_YET)){
+		String strConflict=null;
+		
+//		if(!astrCmdWithCmtValidList.contains(strNew)){
+		if(!strNew.startsWith(TOKEN_CMD_NOT_WORKING_YET)){
+			String strBaseCmdNew = extractCommandPart(strNew,0);
+			
+			/**
+			 * conflict check
+			 */
+			for(String strBase:astrBaseCmdValidList){
+				if(strBase.equalsIgnoreCase(strBaseCmdNew)){
+					strConflict=strBaseCmdNew;
+					break;
+				}
+			}
+			
+			if(strConflict==null){
+				astrBaseCmdValidList.add(strBaseCmdNew);
 				astrCmdWithCmtValidList.add(strNew);
-//				astrBaseCmdValidList.add(str.split("[^"+strValidCmdCharsRegex +"]")[0]);
-				String strBaseCmdNew = extractCommandPart(strNew,0);
+				
+				/**
+				 * coded sorting check (unnecessary actually), just useful for developers
+				 * be more organized. 
+				 */
 				if(!bSkipSortCheck && astrBaseCmdValidList.size()>0){
 					String strLast = astrBaseCmdValidList.get(astrBaseCmdValidList.size()-1);
 					if(strLast.compareToIgnoreCase(strBaseCmdNew)>0){
-//						if(
-//								strLast.startsWith(BoolToggler.getPrefix())
-//								&&
-//								strLast.endsWith(BoolToggler.getSuffix())
-//						){
-//						}else{
-							dumpDevWarnEntry("sorting required, last '"+strLast+"' new '"+strBaseCmdNew+"'");
-//						}
+						dumpDevWarnEntry("sorting required, last '"+strLast+"' new '"+strBaseCmdNew+"'");
 					}
 				}
-				astrBaseCmdValidList.add(strBaseCmdNew);
 			}
+		}
+//		}
+		
+		if(strConflict!=null){
+			dumpExceptionEntry(
+					new NullPointerException("Conflicting commands identifiers for: "+strConflict));
 		}
 	}
 	
