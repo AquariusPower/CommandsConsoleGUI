@@ -85,7 +85,7 @@ import console.ConsoleCommands;
 import console.ConsoleScriptCommands;
 import console.DumpEntry;
 import console.EDataBaseOperations;
-import console.IConsoleCommand;
+import console.IConsoleCommandListener;
 import console.IConsoleUI;
 
 /**
@@ -98,7 +98,7 @@ import console.IConsoleUI;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflexFillCfg, IConsoleCommand, IConsoleUI{
+public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflexFillCfg, IConsoleCommandListener, IConsoleUI{
 //	public FpsLimiterState fpslState = new FpsLimiterState();
 	
 //	public final String strInputIMCPREFIX = "CONSOLEGUISTATE_";
@@ -316,7 +316,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	}
 	public ConsoleGuiStateAbs(ConsoleCommands cc) {
 		if(instance==null)instance=this;
-		this.cc = cc==null ? new ConsoleScriptCommands(this) : cc;
+		this.cc = cc==null ? new ConsoleScriptCommands() : cc;
+		cc.addConsoleCommandListener(this);
 		this.cc.csaTmp=this;
 	}
 	public ConsoleGuiStateAbs(int iToggleConsoleKey, ConsoleCommands cc) {
@@ -352,7 +353,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		GuiGlobals.initialize(sapp);
 		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
 		
-		cc.initialize(sapp);
+		cc.initialize(this,sapp);
 		
 //		// init dump file, MUST BE THE FIRST!
 //		flLastDump = new File(fileNamePrepareLog(strFileLastDump,false));

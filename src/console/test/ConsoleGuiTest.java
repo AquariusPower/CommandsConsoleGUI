@@ -30,6 +30,7 @@ package console.test;
 import misc.Debug;
 import misc.Misc;
 import misc.ReflexFill;
+import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
 import misc.ReflexFill.ReflexFillCfg;
 import misc.StringField;
@@ -39,8 +40,9 @@ import com.jme3.input.KeyInput;
 import com.jme3.system.AppSettings;
 
 import console.ConsoleScriptCommands;
+import console.IConsoleCommandListener;
 import console.IConsoleUI;
-import console.gui.ConsoleGuiLemurState;
+import console.gui.ConsoleGUILemurState;
 import extras.FpsLimiterState;
 
 /**
@@ -48,128 +50,39 @@ import extras.FpsLimiterState;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleGuiTest extends SimpleApplication {
+public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommandListener, IReflexFillCfg{
 	protected ConsoleCustomCommands	cgsCustomizedState;	
 	protected boolean bHideSettings=true; 
 	
+	//private final String strFinalFieldCodePrefix="CMD_";
+	private final String strFieldCodePrefix="sf";
+	private final String strFieldCodePrefixLess = "VariantAsPrefixLess";
+	
+	public final StringField CMD_END_USER_COMMAND_TEST = new StringField(this,cgsCustomizedState.strFinalCmdCodePrefix);
+	private StringField sfTestCommandAutoFillVariant1 = new StringField(this,strFieldCodePrefix);
+	private StringField testCommandAutoFillPrefixLessVariant2 = new StringField(this,strFieldCodePrefixLess);
+	private StringField testCommandAutoFillPrefixLessVariantDefaulted3 = new StringField(this,null);
+	
 	public boolean endUserCustomMethod(Integer i){
 		cgsCustomizedState.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
-		cgsCustomizedState.dumpSubEntry("CommandTest1: "+cgsCustomizedState.sfTestCommandAutoFillVariant1);
-		cgsCustomizedState.dumpSubEntry("CommandTest2: "+cgsCustomizedState.testCommandAutoFillPrefixLessVariant2);
+		cgsCustomizedState.dumpSubEntry("CommandTest1: "+sfTestCommandAutoFillVariant1);
+		cgsCustomizedState.dumpSubEntry("CommandTest2: "+testCommandAutoFillPrefixLessVariant2);
 		if(ReflexFill.isbUseDefaultCfgIfMissing()){
-			cgsCustomizedState.dumpSubEntry("CommandTest3: "+cgsCustomizedState.testCommandAutoFillPrefixLessVariantDefaulted3);
+			cgsCustomizedState.dumpSubEntry("CommandTest3: "+testCommandAutoFillPrefixLessVariantDefaulted3);
 		}
 		return true;
 	}
 	
-	class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleCommands to prevent scripts usage
-		public FpsLimiterState fpslState = new FpsLimiterState();
-		
-//		private final String strFinalFieldCodePrefix="CMD_";
-		private final String strFieldCodePrefix="sf";
-		private final String strFieldCodePrefixLess = "VariantAsPrefixLess";
-		
-		public final StringField CMD_END_USER_COMMAND_TEST = new StringField(this,strFinalCmdCodePrefix);
-		private StringField sfTestCommandAutoFillVariant1 = new StringField(this,strFieldCodePrefix);
-		private StringField testCommandAutoFillPrefixLessVariant2 = new StringField(this,strFieldCodePrefixLess);
-		private StringField testCommandAutoFillPrefixLessVariantDefaulted3 = new StringField(this,null);
-		
-		public ConsoleCustomCommands(IConsoleUI icg) {
-			super(icg);
-			
-			getStateManager().attach(fpslState);
-			
-			/**
-			 *  This allows test3 at endUserCustomMethod() to work.
-			 */
-			ReflexFill.setUseDefaultCfgIfMissing(true);
-		}
-		
-		@Override
-		public boolean executePreparedCommand() {
-			boolean bCommandWorked = false;
-			
-			if(checkCmdValidity(CMD_END_USER_COMMAND_TEST,"[iHowMany] users working")){
-				bCommandWorked = endUserCustomMethod(paramInt(1));
-			}else
-			if(checkCmdValidity("fpsLimit","[iMaxFps]")){
-				Integer iMaxFps = paramInt(1);
-				if(iMaxFps!=null){
-					fpslState.setMaxFps(iMaxFps);
-					bCommandWorked=true;
-				}
-				dumpSubEntry("FpsLimit = "+fpslState.getFpsLimit());
-			}else
-			{
-				return super.executePreparedCommand();
-			}
-			
-			return bCommandWorked;
-		}
-		
-		@Override
-		public void updateToggles() {
-			if(btgFpsLimit.checkChangedAndUpdate())fpslState.setEnabled(btgFpsLimit.b());
-			super.updateToggles();
-		}
-		
-		@Override
-		public String prepareStatsFieldText() {
-			String strStatsLast = super.prepareStatsFieldText();
-			
-			if(EStats.TimePerFrame.b){
-				strStatsLast+=
-						"Tpf"+(fpslState.isEnabled() ? (int)(fTPF*1000.0f) : Misc.i().fmtFloat(fTPF,6)+"s")
-							+(fpslState.isEnabled()?
-								"="+fpslState.getFrameDelayByCpuUsageMilis()+"+"+fpslState.getThreadSleepTimeMilis()+"ms"
-								:"")
-							+";";
-			}
-			
-			return strStatsLast; 
-		}
-		
-		@Override
-		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
-			ReflexFillCfg rfcfg = null;
-			
-			if(rfcv.getClass().isAssignableFrom(StringField.class)){
-				if(strFieldCodePrefix.equals(rfcv.getCodePrefixVariant())){
-					rfcfg = new ReflexFillCfg();
-					rfcfg.strCommandPrefix = "Niceprefix";
-					rfcfg.strCommandSuffix = "Nicesuffix";
-					rfcfg.bFirstLetterUpperCase = true;
-				}else
-				if(strFieldCodePrefixLess.equals(rfcv.getCodePrefixVariant())){
-					rfcfg = new ReflexFillCfg();
-					rfcfg.strCodingStyleFieldNamePrefix=null;
-					rfcfg.bFirstLetterUpperCase = true;
-				}
-			}
-			
-			/**
-			 * If you are coding in the same style of another class,
-			 * just call it!
-			 * Remember to set the same variant!
-			 */
-//			if(rfcfg==null)rfcfg = getReflexFillCfg(rfcv);
-			if(rfcfg==null)rfcfg = super.getReflexFillCfg(rfcv);
-			
-			return rfcfg;
-		}
-
-	}
-	
 	@Override
 	public void simpleInitApp() {
-		cgsCustomizedState = new ConsoleCustomCommands(null);
-		ConsoleGuiLemurState cs = new ConsoleGuiLemurState(KeyInput.KEY_F10, cgsCustomizedState);
-		cgsCustomizedState.addConsoleCommandListener(cs);
-		cgsCustomizedState.setConsoleUI(cs);
+		cgsCustomizedState = new ConsoleCustomCommands(this);
+		cgsCustomizedState.addConsoleCommandListener(this);
+//		ConsoleGuiLemurState cs = new ConsoleGuiLemurState(KeyInput.KEY_F10, cgsCustomizedState);
+//		cgsCustomizedState.addConsoleCommandListener(cs);
+//		cgsCustomizedState.setConsoleUI(cs);
+//		cgsCustomizedState.csaTmp = cs;
 		
-		cgsCustomizedState.csaTmp = cs;
-		
-		getStateManager().attach(cs);
+//		getStateManager().attach(cs);
 	}
 	
 	@Override
@@ -190,5 +103,53 @@ public class ConsoleGuiTest extends SimpleApplication {
 		}
 		main.start();
 	}
+
+	@Override
+	public boolean executePreparedCommand() {
+		boolean bCommandWorked = false;
+		
+		if(cgsCustomizedState.checkCmdValidity(CMD_END_USER_COMMAND_TEST,"[iHowMany] users working")){
+			bCommandWorked = endUserCustomMethod(cgsCustomizedState.paramInt(1));
+//		}else
+//		if(cgsCustomizedState.checkCmdValidity("fpsLimit","[iMaxFps]")){
+//			Integer iMaxFps = cgsCustomizedState.paramInt(1);
+//			if(iMaxFps!=null){
+//				cgsCustomizedState.fpslState.setMaxFps(iMaxFps);
+//				bCommandWorked=true;
+//			}
+//			cgsCustomizedState.dumpSubEntry("FpsLimit = "+cgsCustomizedState.fpslState.getFpsLimit());
+		}else
+		{}
+			
+		return bCommandWorked;
+	}
 	
+	@Override
+	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+		ReflexFillCfg rfcfg = null;
+		
+		if(rfcv.getClass().isAssignableFrom(StringField.class)){
+			if(strFieldCodePrefix.equals(rfcv.getCodePrefixVariant())){
+				rfcfg = new ReflexFillCfg();
+				rfcfg.strCommandPrefix = "Niceprefix";
+				rfcfg.strCommandSuffix = "Nicesuffix";
+				rfcfg.bFirstLetterUpperCase = true;
+			}else
+			if(strFieldCodePrefixLess.equals(rfcv.getCodePrefixVariant())){
+				rfcfg = new ReflexFillCfg();
+				rfcfg.strCodingStyleFieldNamePrefix=null;
+				rfcfg.bFirstLetterUpperCase = true;
+			}
+		}
+		
+		/**
+		 * If you are coding in the same style of another class,
+		 * just call it!
+		 * Remember to set the same variant!
+		 */
+//		if(rfcfg==null)rfcfg = getReflexFillCfg(rfcv);
+		if(rfcfg==null)rfcfg = cgsCustomizedState.getReflexFillCfg(rfcv);
+		
+		return rfcfg;
+	}
 }	

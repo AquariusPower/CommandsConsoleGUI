@@ -32,6 +32,13 @@ package console;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public interface IConsoleCommand{
+public interface IConsoleCommandListener{
+	
+	/**
+	 * Any class can implement commands, you just need to add them with:
+	 * {@link ConsoleCommands#addConsoleCommandListener(IConsoleCommandListener)}
+	 * 
+	 * @return
+	 */
 	public abstract boolean executePreparedCommand();
 }

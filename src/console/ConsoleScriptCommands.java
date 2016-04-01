@@ -67,9 +67,9 @@ public class ConsoleScriptCommands extends ConsoleCommands{
 	public TreeMap<String,ArrayList<String>> tmFunctions = 
 		new TreeMap<String, ArrayList<String>>(String.CASE_INSENSITIVE_ORDER);
 	
-	public ConsoleScriptCommands(IConsoleUI icg) {
-		super(icg);
-	}
+//	public ConsoleScriptCommands(IConsoleUI icg) {
+//		super(icg);
+//	}
 	public boolean checkFuncExecEnd() {
 		if(strCmdLineOriginal==null)return false;
 		return strCmdLineOriginal.startsWith(RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS.toString());
@@ -180,8 +180,8 @@ public class ConsoleScriptCommands extends ConsoleCommands{
 	}
 	
 	@Override
-	public boolean executePreparedCommand() {
-		boolean bCommandWorked = super.executePreparedCommand();
+	public boolean executePreparedCommandRoot() {
+		boolean bCommandWorked = super.executePreparedCommandRoot();
 		
 		if(!bCommandWorked){
 			if(checkCmdValidity(CMD_FUNCTION,"<id> begins a function block")){

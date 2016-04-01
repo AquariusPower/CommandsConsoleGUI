@@ -50,7 +50,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.jme3.app.SimpleApplication;
 
-import console.gui.ConsoleGuiLemurState;
+import console.gui.ConsoleGUILemurState;
 import console.gui.ConsoleGuiStateAbs;
 import console.gui.ConsoleGuiStateAbs.PreQueueCmdsBlockSubList;
 import console.gui.LemurGuiExtraFunctionalitiesHK;
@@ -62,7 +62,7 @@ import console.gui.LemurGuiExtraFunctionalitiesHK;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandleExceptions{
+public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	/**
 	 * TODO temporary variable used only during methods migration, commands class must not depend/know about state class.
 	 */
@@ -235,12 +235,13 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 //		instance=this;
 //	}
 	
-	public ConsoleCommands(IConsoleUI icg) {
+	public ConsoleCommands(){ //IConsoleUI icg) {
 //		this();
-		this.icui=icg;
+//		this.icui=icg;
 		
-		addConsoleCommandListener(Debug.i());
-		Debug.i().setConsoleCommand(this);
+		new Debug(this);
+//		addConsoleCommandListener(Debug.i());
+//		Debug.i().setConsoleCommand(this);
 	}
 	
 	@Override
@@ -413,20 +414,26 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 		return true;
 	}
 
-	ArrayList<IConsoleCommand> aConsoleCommandListenerList = new ArrayList<IConsoleCommand>();
+	ArrayList<IConsoleCommandListener> aConsoleCommandListenerList = new ArrayList<IConsoleCommandListener>();
 
 	public String	strTest = "";
 
+	private boolean	bInitialized;
+	
+	private void assertInitialized(){
+		if(bInitialized)return;
+		throw new NullPointerException(ConsoleCommands.class.getName()+" was not initialized!");
+	}
+	
 	/**
 	 * Any class can attach it's command interpreter.
 	 * @param icc
 	 */
-	public void addConsoleCommandListener(IConsoleCommand icc){
+	public void addConsoleCommandListener(IConsoleCommandListener icc){
 		aConsoleCommandListenerList.add(icc);
 	}
 	
-	@Override
-	public boolean executePreparedCommand(){
+	public boolean executePreparedCommandRoot(){
 		if(RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(strCmdLinePrepared))return true;
 		
 		/**
@@ -721,7 +728,7 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 			// keep this as reference
 		}else
 		{
-			for(IConsoleCommand icc:aConsoleCommandListenerList){
+			for(IConsoleCommandListener icc:aConsoleCommandListenerList){
 				bCmdEndedGracefully = icc.executePreparedCommand();
 				if(bCmdEndedGracefully)break;
 			}
@@ -1783,7 +1790,7 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 	}
 	
 	public boolean stillExecutingCommand(){
-		return executePreparedCommand();
+		return executePreparedCommandRoot();
 	}
 	
 	/**
@@ -1792,6 +1799,8 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 	 * @return false if command execution failed
 	 */
 	public boolean executeCommand(final String strFullCmdLineOriginal){
+		assertInitialized();
+		
 		strCmdLineOriginal = strFullCmdLineOriginal;
 		
 		boolean bCmdFoundAndApplied = false;
@@ -2264,7 +2273,8 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 		Misc.i().fileAppendLine(flCmdHist,strCmd);
 	}
 
-	public void initialize(SimpleApplication sapp){
+	public void initialize(IConsoleUI icui, SimpleApplication sapp){
+		this.icui=icui;
 		this.sapp=sapp;
 		
 		tdStatsRefresh.updateTime();
@@ -2277,9 +2287,6 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 		// init cmd history
 		flCmdHist = new File(fileNamePrepareLog(strFileCmdHistory,false));
 		cmdHistLoad();
-		
-		// init valid cmd list
-		executeCommand(null); //to populate the array with available commands
 		
 		// restricted vars setup
 		setupVars(false);
@@ -2305,6 +2312,9 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 		// init DB
 		flDB = new File(fileNamePrepareCfg(strFileDatabase,false));
 		
+		bInitialized=true;
+		// init valid cmd list
+		executeCommand(null); //to populate the array with available commands
 	}
 	
 	enum ETest{
@@ -2560,7 +2570,7 @@ public class ConsoleCommands implements IReflexFillCfg, IConsoleCommand, IHandle
 		return bIsCmd;
 	}
 
-	public void setConsoleUI(IConsoleUI icui) {
-		this.icui=icui;
-	}
+//	public void setConsoleUI(IConsoleUI icui) {
+//		this.icui=icui;
+//	}
 }

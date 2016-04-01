@@ -28,14 +28,16 @@
 package misc;
 
 import console.ConsoleCommands;
-import console.IConsoleCommand;
+import console.IConsoleCommandListener;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class Debug implements IConsoleCommand{
+public class Debug implements IConsoleCommandListener{
+	private ConsoleCommands	cc;
+	
 	/**
 	 * when enabled, these keys are used to perform debug tests
 	 */
@@ -45,15 +47,22 @@ public class Debug implements IConsoleCommand{
 		boolean b;
 	}
 	
-	private static Debug instance = new Debug();
+	private static Debug instance;
 	public static Debug i(){return instance;}
-
-	private ConsoleCommands	cc;
+//	public static void init(Debug dbg){
+//		Debug.instance=dbg;
+//	}
 	
-	public void setConsoleCommand(ConsoleCommands cc){
+	public Debug(ConsoleCommands cc){
+		if(Debug.instance==null)Debug.instance=this;
 		this.cc=cc;
+		cc.addConsoleCommandListener(this);
 	}
 	
+//	public void setConsoleCommand(ConsoleCommands cc){
+//		this.cc=cc;
+//	}
+//	
 	public boolean isKeyEnabled(EKey ek){
 		return ek.b;
 	}

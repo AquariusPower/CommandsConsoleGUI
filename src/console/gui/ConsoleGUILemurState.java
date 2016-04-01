@@ -52,11 +52,11 @@ import console.ConsoleCommands;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleGuiLemurState extends ConsoleGuiStateAbs{
+public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 //	public ListBox<String>	lstbxAutoCompleteHint;
 //	public VersionedList<String>	vlstrAutoCompleteHint = new VersionedList<String>();
 
-	public ConsoleGuiLemurState(int iOpenConsoleHotKey, ConsoleCommands cc) {
+	public ConsoleGUILemurState(int iOpenConsoleHotKey, ConsoleCommands cc) {
 		super(iOpenConsoleHotKey, cc);
 	}
 	
@@ -188,7 +188,7 @@ public class ConsoleGuiLemurState extends ConsoleGuiStateAbs{
 	}
 
 	@Override
-	public ConsoleGuiLemurState setHintIndex(Integer i) {
+	public ConsoleGUILemurState setHintIndex(Integer i) {
 		getHintBox().getSelectionModel().setSelection(i);
 		return this;
 	}
@@ -207,7 +207,7 @@ public class ConsoleGuiLemurState extends ConsoleGuiStateAbs{
 	}
 
 	@Override
-	public ConsoleGuiLemurState setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines) {
+	public ConsoleGUILemurState setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines) {
 		getHintBox().setPreferredSize(v3fBoxSizeXY);
 		getHintBox().setVisibleItems(iVisibleLines);
 		return this;
