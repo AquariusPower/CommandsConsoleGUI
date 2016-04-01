@@ -240,6 +240,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //		this.icui=icg;
 		
 		new Debug(this);
+		Misc.i().setExceptionHandler(this);
 //		addConsoleCommandListener(Debug.i());
 //		Debug.i().setConsoleCommand(this);
 	}
