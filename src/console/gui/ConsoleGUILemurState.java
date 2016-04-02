@@ -137,12 +137,14 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		
 		if(this.bEnabled){
 			sapp.getGuiNode().attachChild(ctnrConsole);
-			GuiGlobals.getInstance().requestFocus(tfInput);
+//			GuiGlobals.getInstance().requestFocus(tfInput);
 		}else{
 			ctnrConsole.removeFromParent();
 			closeHint();
-			GuiGlobals.getInstance().requestFocus(null);
+//			GuiGlobals.getInstance().requestFocus(null);
 		}
+		
+		updateInputFocus();
 		
 		GuiGlobals.getInstance().setCursorEventsEnabled(this.bEnabled);
 	}

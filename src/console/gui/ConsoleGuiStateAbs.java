@@ -569,8 +569,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		
 		mapKeys();
 		
-		// focus
-		GuiGlobals.getInstance().requestFocus(tfInput);
+//		// focus
+//		GuiGlobals.getInstance().requestFocus(tfInput);
 		
 		// help (last thing)
 //		dumpInfoEntry("ListBox height = "+fLstbxHeight);
@@ -1008,6 +1008,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	
 	@Override
 	synchronized public void update(float tpf) {
+		if(!isEnabled())return; //update may actually happen after being disabled...
+		
 		/**
 		 *	Will update only if enabled... //if(!isEnabled())return;
 		 */
@@ -1023,7 +1025,11 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		updateScrollToBottom();
 		if(efHK!=null)efHK.updateHK();
 		
-		GuiGlobals.getInstance().requestFocus(tfInput);
+		updateInputFocus();
+	}
+	
+	public void updateInputFocus(){
+		GuiGlobals.getInstance().requestFocus(isEnabled() ? tfInput : null);
 	}
 	
 //	/**
