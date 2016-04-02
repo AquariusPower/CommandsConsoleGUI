@@ -102,7 +102,7 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 	public boolean executePreparedCommand() {
 		boolean bCommandWorked = false;
 		
-		if(cgsCustomizedState.checkCmdValidity(CMD_END_USER_COMMAND_TEST,"[iHowMany] users working")){
+		if(cgsCustomizedState.checkCmdValidity(this,CMD_END_USER_COMMAND_TEST,"[iHowMany] users working")){
 			bCommandWorked = endUserCustomMethod(cgsCustomizedState.paramInt(1));
 //		}else
 //		if(cgsCustomizedState.checkCmdValidity("fpsLimit","[iMaxFps]")){

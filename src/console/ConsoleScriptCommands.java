@@ -184,16 +184,16 @@ public class ConsoleScriptCommands extends ConsoleCommands{
 		boolean bCommandWorked = super.executePreparedCommandRoot();
 		
 		if(!bCommandWorked){
-			if(checkCmdValidity(CMD_FUNCTION,"<id> begins a function block")){
+			if(checkCmdValidity(null,CMD_FUNCTION,"<id> begins a function block")){
 				bCommandWorked=cmdFunctionBegin();
 			}else
-			if(checkCmdValidity(CMD_FUNCTION_CALL,"<id> [parameters...] retrieve parameters values with ex.: ${id_1} ${id_2} ...")){
+			if(checkCmdValidity(null,CMD_FUNCTION_CALL,"<id> [parameters...] retrieve parameters values with ex.: ${id_1} ${id_2} ...")){
 				bCommandWorked=cmdFunctionCall();
 			}else
-			if(checkCmdValidity(CMD_FUNCTION_END,"ends a function block")){
+			if(checkCmdValidity(null,CMD_FUNCTION_END,"ends a function block")){
 				bCommandWorked=cmdFunctionEnd();
 			}else
-			if(checkCmdValidity("functionList","[filter]")){
+			if(checkCmdValidity(null,"functionList","[filter]")){
 				String strFilter = paramString(1);
 				ArrayList<String> astr = Lists.newArrayList(tmFunctions.keySet().iterator());
 				for(String str:astr){
@@ -202,7 +202,7 @@ public class ConsoleScriptCommands extends ConsoleCommands{
 				}
 				bCommandWorked=true;
 			}else
-			if(checkCmdValidity("functionShow","<functionId>")){
+			if(checkCmdValidity(null,"functionShow","<functionId>")){
 				String strFuncId = paramString(1);
 				if(strFuncId!=null){
 					ArrayList<String> astr = tmFunctions.get(strFuncId);
@@ -218,16 +218,16 @@ public class ConsoleScriptCommands extends ConsoleCommands{
 					}
 				}
 			}else
-			if(checkCmdValidity(CMD_ELSE,"conditinal block")){
+			if(checkCmdValidity(null,CMD_ELSE,"conditinal block")){
 				bCommandWorked=cmdElse();
 			}else
-			if(checkCmdValidity(CMD_ELSE_IF,"<[!]<true|false>> conditional block")){
+			if(checkCmdValidity(null,CMD_ELSE_IF,"<[!]<true|false>> conditional block")){
 				bCommandWorked=cmdElseIf();
 			}else
-			if(checkCmdValidity(CMD_IF,"<[!]<true|false>> [cmd|alias] if cmd|alias is not present, this will be a multiline block start!")){
+			if(checkCmdValidity(null,CMD_IF,"<[!]<true|false>> [cmd|alias] if cmd|alias is not present, this will be a multiline block start!")){
 				bCommandWorked=cmdIf();
 			}else
-			if(checkCmdValidity(CMD_IF_END,"ends conditional block")){
+			if(checkCmdValidity(null,CMD_IF_END,"ends conditional block")){
 				bCommandWorked=cmdIfEnd();
 			}else
 			{}

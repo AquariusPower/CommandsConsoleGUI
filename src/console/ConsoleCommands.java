@@ -222,9 +222,10 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	public Boolean	bIfConditionIsValid;
 	public String	strCmdLineOriginal;
 	public ArrayList<String> astrCmdHistory = new ArrayList<String>();
-	public ArrayList<String> astrCmdWithCmtValidList = new ArrayList<String>();
-	public ArrayList<String> astrBaseCmdValidList = new ArrayList<String>();
+//	public ArrayList<String> astrCmdWithCmtValidList = new ArrayList<String>();
+//	public ArrayList<String> astrBaseCmdValidList = new ArrayList<String>();
 	public ArrayList<Alias> aAliasList = new ArrayList<Alias>();
+	public ArrayList<Command> acmdList = new ArrayList<Command>();
 	
 //	/**
 //	 * instance
@@ -360,29 +361,29 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	public boolean checkCmdValidityBoolTogglers(){
 		btgReferenceMatched=null;
 		for(BoolToggler btg : BoolToggler.getBoolTogglerListCopy()){
-			if(checkCmdValidity(btg.getCmdId(), "[bEnable] "+btg.getHelp(), true)){
+			if(checkCmdValidity(null, btg.getCmdId(), "[bEnable] "+btg.getHelp(), true)){
 				btgReferenceMatched = btg;
 				break;
 			}
 		}
 		return btgReferenceMatched!=null;
 	}
-	public boolean checkCmdValidity(String strValidCmd){
-		return checkCmdValidity(strValidCmd, null);
+	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strValidCmd){
+		return checkCmdValidity(iccl, strValidCmd, null);
 	}
-	public boolean checkCmdValidity(StringField strfValidCmd, String strComment){
-		return checkCmdValidity(strfValidCmd.toString(), strComment);
+	public boolean checkCmdValidity(IConsoleCommandListener iccl, StringField strfValidCmd, String strComment){
+		return checkCmdValidity(iccl, strfValidCmd.toString(), strComment);
 	}
-	public boolean checkCmdValidity(String strValidCmd, String strComment){
-		return checkCmdValidity(strValidCmd, strComment, false);
+	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strValidCmd, String strComment){
+		return checkCmdValidity(iccl, strValidCmd, strComment, false);
 	}
-	public boolean checkCmdValidity(String strValidCmd, String strComment, boolean bSkipSortCheck){
+	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strValidCmd, String strComment, boolean bSkipSortCheck){
 		if(strCmdLinePrepared==null){
 			if(strComment!=null){
 				strValidCmd+=commentToAppend(strComment);
 			}
 			
-			addCmdToValidList(strValidCmd,bSkipSortCheck);
+			addCmdToValidList(iccl,strValidCmd,bSkipSortCheck);
 			
 			return false;
 		}
@@ -420,6 +421,9 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	public String	strTest = "";
 
 	private boolean	bInitialized;
+
+	private ArrayList<String>	astrBaseCmdCacheList = new ArrayList<String>();
+	private ArrayList<String>	astrBaseCmdCmtCacheList = new ArrayList<String>();
 	
 	private void assertInitialized(){
 		if(bInitialized)return;
@@ -445,51 +449,24 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		if(checkCmdValidityBoolTogglers()){
 			bCmdEndedGracefully=toggle(btgReferenceMatched);
 		}else
-		if(checkCmdValidity("alias",getAliasHelp(),true)){
+		if(checkCmdValidity(null, "alias",getAliasHelp(),true)){
 			bCmdEndedGracefully=cmdAlias();
 		}else
-		if(checkCmdValidity("clearCommandsHistory")){
+		if(checkCmdValidity(null,"clearCommandsHistory")){
 			astrCmdHistory.clear();
 			bCmdEndedGracefully=true;
 		}else
-		if(checkCmdValidity("clearDumpArea")){
+		if(checkCmdValidity(null,"clearDumpArea")){
 			icui.getDumpEntries().clear();
 			bCmdEndedGracefully=true;
 		}else
-//		if(checkCmdValidity(CMD_CLOSE_CONSOLE,"like the bound key to do it")){
-//			csaTmp.setEnabled(false);
-//			bCommandWorked=true;
-//		}else
-//		if(checkCmdValidity(CMD_CONSOLE_HEIGHT,"[fPercent] of the application window")){
-//			Float f = paramFloat(1);
-//			csaTmp.modifyConsoleHeight(f);
-//			bCommandWorked=true;
-//		}else
-//		if(checkCmdValidity(CMD_CONSOLE_SCROLL_BOTTOM,"")){
-//			csaTmp.scrollToBottomRequest();
-//			bCommandWorked=true;
-//		}else
-//		if(checkCmdValidity(CMD_CONSOLE_STYLE,"[strStyleName] changes the style of the console on the fly, empty for a list")){
-//			String strStyle = paramString(1);
-//			if(strStyle==null)strStyle="";
-//			bCommandWorked=csaTmp.cmdStyleApply(strStyle);
-//		}else
-		if(checkCmdValidity(CMD_DB,EDataBaseOperations.help())){
+		if(checkCmdValidity(null,CMD_DB,EDataBaseOperations.help())){
 			bCmdEndedGracefully=cmdDb();
 		}else
-//		if(checkCmdValidity("dumpFind","<text> finds, select and scroll to it at dump area")){
-//			bCommandWorkedProperly=cmdFind();
-//		}else
-//		if(checkCmdValidity("dumpFindNext","<text> finds, select and scroll to it at dump area")){
-//			bCommandWorkedProperly=cmdFind();
-//		}else
-//		if(checkCmdValidity("dumpFindPrevious","<text> finds, select and scroll to it at dump area")){
-//			bCommandWorkedProperly=cmdFind();
-//		}else
-		if(checkCmdValidity(CMD_ECHO," simply echo something")){
+		if(checkCmdValidity(null,CMD_ECHO," simply echo something")){
 			bCmdEndedGracefully=cmdEcho();
 		}else
-		if(checkCmdValidity("editShowClipboad","--noNL")){
+		if(checkCmdValidity(null,"editShowClipboad","--noNL")){
 			String strParam1 = paramString(1);
 			boolean bShowNL=true;
 			if(strParam1!=null){
@@ -500,19 +477,13 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			showClipboard(bShowNL);
 			bCmdEndedGracefully=true;
 		}else
-		if(checkCmdValidity("editCopy","-d end lines with command delimiter instead of NL;")){
+		if(checkCmdValidity(null,"editCopy","-d end lines with command delimiter instead of NL;")){
 			bCmdEndedGracefully=csaTmp.cmdEditCopyOrCut(false);
 		}else
-		if(checkCmdValidity("editCut","like copy, but cut :)")){
+		if(checkCmdValidity(null,"editCut","like copy, but cut :)")){
 			bCmdEndedGracefully=csaTmp.cmdEditCopyOrCut(true);
 		}else
-//		if(checkCmdValidity(CMD_ELSE,"conditinal block")){
-//			bCommandWorked=cmdElse();
-//		}else
-//		if(checkCmdValidity(CMD_ELSE_IF,"<[!]<true|false>> conditional block")){
-//			bCommandWorked=cmdElseIf();
-//		}else
-		if(checkCmdValidity("execBatchCmdsFromFile ","<strFileName>")){
+		if(checkCmdValidity(null,"execBatchCmdsFromFile ","<strFileName>")){
 			String strFile = paramString(1);
 			if(strFile!=null){
 				addCmdListOneByOneToQueue(Misc.i().fileLoad(strFile),false,false);
@@ -520,11 +491,11 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				bCmdEndedGracefully=true;
 			}
 		}else
-		if(checkCmdValidity("exit","the application")){
+		if(checkCmdValidity(null,"exit","the application")){
 			cmdExit();
 			bCmdEndedGracefully=true;
 		}else
-		if(checkCmdValidity("fileShowData ","<ini|setup|CompleteFileName> show contents of file at dump area")){
+		if(checkCmdValidity(null,"fileShowData ","<ini|setup|CompleteFileName> show contents of file at dump area")){
 			String strOpt = paramString(1);
 			
 			if(strOpt!=null){
@@ -553,7 +524,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			
 			bCmdEndedGracefully=true;
 		}else
-		if(checkCmdValidity(CMD_FIX_CURSOR ,"in case cursor is invisible")){
+		if(checkCmdValidity(null,CMD_FIX_CURSOR ,"in case cursor is invisible")){
 			if(csaTmp.efHK==null){
 				dumpWarnEntry("requires command: "+CMD_HK_TOGGLE);
 			}else{
@@ -562,26 +533,26 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			}
 			bCmdEndedGracefully = true;
 		}else
-		if(checkCmdValidity(CMD_FIX_LINE_WRAP ,"in case words are overlapping")){
+		if(checkCmdValidity(null,CMD_FIX_LINE_WRAP ,"in case words are overlapping")){
 			csaTmp.cmdLineWrapDisableDumpArea();
 			bCmdEndedGracefully = true;
 		}else
-		if(checkCmdValidity(CMD_FIX_VISIBLE_ROWS_AMOUNT,"[iAmount] in case it is not showing as many rows as it should")){
+		if(checkCmdValidity(null,CMD_FIX_VISIBLE_ROWS_AMOUNT,"[iAmount] in case it is not showing as many rows as it should")){
 			csaTmp.iVisibleRowsAdjustRequest = paramInt(1);
 			if(csaTmp.iVisibleRowsAdjustRequest==null)csaTmp.iVisibleRowsAdjustRequest=0;
 			bCmdEndedGracefully=true;
 		}else
-		if(checkCmdValidity(CMD_HELP,"[strFilter] show (filtered) available commands")){
+		if(checkCmdValidity(null,CMD_HELP,"[strFilter] show (filtered) available commands")){
 			cmdShowHelp(paramString(1));
 			/**
 			 * ALWAYS return TRUE here, to avoid infinite loop when improving some failed command help info!
 			 */
 			bCmdEndedGracefully=true; 
 		}else
-		if(checkCmdValidity(CMD_HISTORY,"[strFilter] of issued commands (the filter results in sorted uniques)")){
+		if(checkCmdValidity(null,CMD_HISTORY,"[strFilter] of issued commands (the filter results in sorted uniques)")){
 			bCmdEndedGracefully=cmdShowHistory();
 		}else
-		if(checkCmdValidity(CMD_HK_TOGGLE ,"[bEnable] allow hacks to provide workarounds")){
+		if(checkCmdValidity(null,CMD_HK_TOGGLE ,"[bEnable] allow hacks to provide workarounds")){
 			if(paramBooleanCheckForToggle(1)){
 				Boolean bEnable = paramBoolean(1);
 				if(csaTmp.efHK==null && (bEnable==null || bEnable)){
@@ -600,8 +571,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				bCmdEndedGracefully=true;
 			}
 		}else
-//		if(checkCmdValidity(CMD_LINE_WRAP_AT,"[iMaxChars] -1 = will trunc big lines, 0 = wrap will be automatic")){
-		if(checkCmdValidity(CMD_LINE_WRAP_AT,"[iMaxChars] 0 = wrap will be automatic")){
+		if(checkCmdValidity(null,CMD_LINE_WRAP_AT,"[iMaxChars] 0 = wrap will be automatic")){
 			Integer i = paramInt(1);
 			if(i!=null && i>=0){ // a value was supplied
 				iConsoleMaxWidthInCharsForLineWrap = i;
@@ -617,11 +587,11 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //			csaTmp.updateFontStuff();
 			bCmdEndedGracefully=true;
 		}else
-		if(checkCmdValidity("quit","the application")){
+		if(checkCmdValidity(null,"quit","the application")){
 			cmdExit();
 			bCmdEndedGracefully=true;
 		}else
-		if(checkCmdValidity("showBinds","")){
+		if(checkCmdValidity(null,"showBinds","")){
 			dumpInfoEntry("Key bindings: ");
 			dumpSubEntry("Ctrl+C - copy");
 			dumpSubEntry("Ctrl+X - cut");
@@ -634,13 +604,13 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			dumpSubEntry("Ctrl+/ - toggle input field comment");
 			bCmdEndedGracefully=true;
 		}else
-		if(checkCmdValidity("showSetup","show restricted variables")){
+		if(checkCmdValidity(null,"showSetup","show restricted variables")){
 			for(String str:Misc.i().fileLoad(flSetup)){
 				dumpSubEntry(str);
 			}
 			bCmdEndedGracefully=true;
 		}else
-		if(checkCmdValidity(CMD_SLEEP,"<fDelay> [singleCmd] will wait before executing next command in the command block; alternatively will wait before executing command in-line, but then it will not sleep the block it is in!")){
+		if(checkCmdValidity(null,CMD_SLEEP,"<fDelay> [singleCmd] will wait before executing next command in the command block; alternatively will wait before executing command in-line, but then it will not sleep the block it is in!")){
 			Float fSleep = paramFloat(1);
 			String strCmds = paramStringConcatenateAllFrom(2);
 			
@@ -661,18 +631,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			}
 			bCmdEndedGracefully=true;
 		}else
-//		if(checkCmdValidity("showDump","<filter> show matching entries from dump log file")){
-//			String strFilter = paramString(1);
-//			if(strFilter!=null){
-//				for(String str:Misc.i().fileLoad(flLastDump)){
-//					if(str.toLowerCase().contains(strFilter)){
-//						dumpEntry(false, true, false, str);
-//					}
-//				}
-//				bCommandWorked=true;
-//			}
-//		}else
-		if(checkCmdValidity("statsEnable","[idToEnable [bEnable]] empty for a list. bEnable empty to toggle.")){
+		if(checkCmdValidity(null,"statsEnable","[idToEnable [bEnable]] empty for a list. bEnable empty to toggle.")){
 			bCmdEndedGracefully=true;
 			String strId=paramString(1);
 			Boolean bValue=paramBoolean(2);
@@ -692,24 +651,23 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				}
 			}
 		}else
-		if(checkCmdValidity("statsFieldToggle","[bEnable] toggle simple stats field visibility")){
+		if(checkCmdValidity(null,"statsFieldToggle","[bEnable] toggle simple stats field visibility")){
 			bCmdEndedGracefully=csaTmp.statsFieldToggle();
 		}else
-		if(checkCmdValidity("statsShowAll","show all console stats")){
+		if(checkCmdValidity(null,"statsShowAll","show all console stats")){
 			dumpAllStats();
 			bCmdEndedGracefully=true;
 		}else
-		if(checkCmdValidity("test","[...] temporary developer tests")){
+		if(checkCmdValidity(null,"test","[...] temporary developer tests")){
 			cmdTest();
 			if(csaTmp.efHK!=null)csaTmp.efHK.test();
 			bCmdEndedGracefully=true;
 		}else
-		if(checkCmdValidity("varAdd","<varId> <[-]value>")){
+		if(checkCmdValidity(null,"varAdd","<varId> <[-]value>")){
 			bCmdEndedGracefully=cmdVarAdd(paramString(1),paramString(2),true,false);
 		}else
-//		if(checkCmdValidity(CMD_VAR_SET,"[<varId> <value>] | [-varId] | ["+getFilterToken()+"filter] - can be a number or a string, retrieve it's value with: ${varId}")){
 		if(
-			checkCmdValidity(CMD_VAR_SET,
+				checkCmdValidity(null,CMD_VAR_SET,
 				"<[<varId> <value>] | [-varId]> "
 					+"Can be boolean(true/false, and after set accepts 1/0), number(integer/floating) or string; "
 					+"-varId will delete it; "
@@ -719,13 +677,13 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		){
 			bCmdEndedGracefully=cmdVarSet();
 		}else
-		if(checkCmdValidity("varSetCmp","<varIdBool> <value> <cmp> <value>")){
+		if(checkCmdValidity(null,"varSetCmp","<varIdBool> <value> <cmp> <value>")){
 			bCmdEndedGracefully=cmdVarSetCmp();
 		}else
-		if(checkCmdValidity("varShow","[["+RESTRICTED_TOKEN+"]filter] list user or restricted variables.")){
+		if(checkCmdValidity(null,"varShow","[["+RESTRICTED_TOKEN+"]filter] list user or restricted variables.")){
 			bCmdEndedGracefully=cmdVarShow();
 		}else
-		if(checkCmdValidity(TOKEN_CMD_NOT_WORKING_YET+"zDisabledCommand"," just to show how to use it")){
+		if(checkCmdValidity(null,TOKEN_CMD_NOT_WORKING_YET+"zDisabledCommand"," just to show how to use it")){
 			// keep this as reference
 		}else
 		{
@@ -994,33 +952,40 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		dumpEntry(strSubEntryPrefix+str);
 	}
 	
-	public void addCmdToValidList(String strNew, boolean bSkipSortCheck){
+	public void addCmdToValidList(IConsoleCommandListener iccl, String strNew, boolean bSkipSortCheck){
 		String strConflict=null;
 		
 //		if(!astrCmdWithCmtValidList.contains(strNew)){
 		if(!strNew.startsWith(TOKEN_CMD_NOT_WORKING_YET)){
-			String strBaseCmdNew = extractCommandPart(strNew,0);
+//			String strBaseCmdNew = extractCommandPart(strNew,0);
+			String strBaseCmdNew = strNew.split(" ")[0];
+			String strComment = "";
+			if(strNew.length()>strBaseCmdNew.length()){
+				strComment= strNew.substring(strBaseCmdNew.length());
+			}
 			
 			/**
 			 * conflict check
 			 */
-			for(String strBase:astrBaseCmdValidList){
-				if(strBase.equalsIgnoreCase(strBaseCmdNew)){
+			for(Command cmd:acmdList){
+//			for(String strBase:astrBaseCmdValidList){
+				if(cmd.getBaseCmd().equalsIgnoreCase(strBaseCmdNew)){
 					strConflict=strBaseCmdNew;
 					break;
 				}
 			}
 			
 			if(strConflict==null){
-				astrBaseCmdValidList.add(strBaseCmdNew);
-				astrCmdWithCmtValidList.add(strNew);
+				acmdList.add(new Command(iccl, strBaseCmdNew, strComment));
+//				astrBaseCmdValidList.add(strBaseCmdNew);
+//				astrCmdWithCmtValidList.add(strNew);
 				
 				/**
 				 * coded sorting check (unnecessary actually), just useful for developers
 				 * be more organized. 
 				 */
-				if(!bSkipSortCheck && astrBaseCmdValidList.size()>0){
-					String strLast = astrBaseCmdValidList.get(astrBaseCmdValidList.size()-1);
+				if(!bSkipSortCheck && acmdList.size()>0){
+					String strLast = acmdList.get(acmdList.size()-1).getBaseCmd();
 					if(strLast.compareToIgnoreCase(strBaseCmdNew)>0){
 						dumpDevWarnEntry("sorting required, last '"+strLast+"' new '"+strBaseCmdNew+"'");
 					}
@@ -1800,11 +1765,34 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			dumpInfoEntry("Help for '"+strFilter+"':");
 		}
 		
-		Collections.sort(astrCmdWithCmtValidList,String.CASE_INSENSITIVE_ORDER);
-		for(String str:astrCmdWithCmtValidList){
-			if(strFilter!=null && !str.toLowerCase().contains(strFilter.toLowerCase()))continue;
-			dumpSubEntry(getCommandPrefix()+str);
+		Collections.sort(acmdList, Command.comparator());
+		for(Command cmd:acmdList){
+//			if(strFilter!=null && !cmd.getBaseCmd().toLowerCase().contains(strFilter.toLowerCase()))continue;
+			if(strFilter!=null && !cmd.asHelp().toLowerCase().contains(strFilter.toLowerCase()))continue;
+			dumpSubEntry(getCommandPrefix()+cmd.asHelp());
 		}
+	}
+	
+	public ArrayList<String> getBaseCommandsWithComment() {
+		if(astrBaseCmdCmtCacheList.size()!=acmdList.size()){
+			astrBaseCmdCmtCacheList.clear();
+			for(Command cmd:acmdList){
+				astrBaseCmdCmtCacheList.add(cmd.getBaseCmd()+" "+cmd.getComment());
+				Collections.sort(astrBaseCmdCmtCacheList);
+			}
+		}
+		return astrBaseCmdCmtCacheList;
+	}
+	
+	public ArrayList<String> getBaseCommands(){
+		if(astrBaseCmdCacheList.size()!=acmdList.size()){
+			astrBaseCmdCacheList.clear();
+			for(Command cmd:acmdList){
+				astrBaseCmdCacheList.add(cmd.getBaseCmd());
+				Collections.sort(astrBaseCmdCacheList);
+			}
+		}
+		return astrBaseCmdCacheList;
 	}
 	
 	public boolean stillExecutingCommand(){
@@ -1827,15 +1815,6 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			
 			if(!bCmdFoundAndApplied)bCmdFoundAndApplied=cmdRawLineCheckAlias();
 			
-//			if(!bOk)bOk=cmdRawLineCheckIfElse();
-			
-//			if(!bOk){
-//				if(SPECIAL_CMD_SKIP_CURRENT_COMMAND.equals(strCmdLinePrepared)){
-//					bOk=true;
-//				}
-//			}
-			
-			
 			if(!bCmdFoundAndApplied){
 				/**
 				 * we will have a prepared line after below
@@ -1845,67 +1824,6 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			
 			if(!bCmdFoundAndApplied)bCmdFoundAndApplied=stillExecutingCommand();
 			
-//			if(!bCmdWorkDone){
-//				if(bFuncCmdLineRunning){
-//					if(checkFuncExecEnd()){
-//						bFuncCmdLineRunning=false;
-//						bFuncCmdLineSkipTilEnd=false;
-//						bCmdWorkDone=true;
-//					}
-//				}
-//			}
-//			
-//			if(!bCmdWorkDone){
-//				if(checkFuncExecStart()){
-//					bFuncCmdLineRunning=true;
-//					bCmdWorkDone=true;
-//				}else
-//				if(strPrepareFunctionBlockForId!=null){
-//					if(!bCmdWorkDone)bCmdWorkDone = functionEndCheck(strCmdLineOriginal); //before feed
-//					if(!bCmdWorkDone)bCmdWorkDone = functionFeed(strCmdLineOriginal);
-//				}else
-//				if(bIfConditionExecCommands!=null && !bIfConditionExecCommands){
-//					/**
-//					 * These are capable of stopping the skipping.
-//					 */
-//					if(CMD_ELSE_IF.equals(paramString(0))){
-//						if(!bCmdWorkDone)bCmdWorkDone = cmdElseIf();
-//					}else
-//					if(CMD_ELSE.equals(paramString(0))){
-//						if(!bCmdWorkDone)bCmdWorkDone = cmdElse();
-//					}else
-//					if(CMD_IF_END.equals(paramString(0))){
-//						if(!bCmdWorkDone)bCmdWorkDone = cmdIfEnd();
-//					}else{
-//						/**
-//						 * The if condition resulted in false, therefore commands must be skipped.
-//						 */
-//						dumpInfoEntry("ConditionalSkip: "+strCmdLinePrepared);
-//						if(!bCmdWorkDone)bCmdWorkDone = true;
-//					}
-//				}
-//			}
-//			
-//			if(!bCmdWorkDone){
-//				if(bFuncCmdLineRunning && bFuncCmdLineSkipTilEnd){
-//					dumpWarnEntry("SkippingRemainingFunctionCmds: "+strCmdLinePrepared);
-//					bCmdWorkDone = true; //this just means that the skip worked
-//				}
-//			}
-//			
-//			if(!bCmdWorkDone){
-//				/**
-//				 * normal commands execution
-//				 */
-//				bCmdWorkDone = executePreparedCommand();
-//			}
-//			
-//			if(!bCmdWorkDone){
-//				if(bFuncCmdLineRunning){
-//					// a command may fail inside a function, only that first one will generate error message 
-//					bFuncCmdLineSkipTilEnd=true;
-//				}
-//			}
 		}catch(NumberFormatException e){
 			// keep this one as "warning", as user may simply fix the typed value
 			dumpWarnEntry("NumberFormatException: "+e.getMessage());
@@ -2206,7 +2124,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //		if(strCmdFullChk.startsWith(strCommandPrefixChar)){
 //			strCmdFullChk=strCmdFullChk.substring(strCommandPrefixChar.length());
 //		}
-		return astrBaseCmdValidList.contains(strCmdFullChk);
+		return getBaseCommands().contains(strCmdFullChk);
 	}
 	
 	public static enum EStats{

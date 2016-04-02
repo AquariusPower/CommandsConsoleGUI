@@ -25,70 +25,63 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package misc;
+package console;
 
-import console.ConsoleCommands;
-import console.IConsoleCommandListener;
+import java.util.Comparator;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class Debug implements IConsoleCommandListener{
-	private ConsoleCommands	cc;
+public class Command {
+	String strBaseCmd;
+	String strComment;
+	IConsoleCommandListener icclOwner;
 	
-	/**
-	 * when enabled, these keys are used to perform debug tests
-	 */
-	public static enum EKey{
-		StatsText,
-		;
-		boolean b;
+	
+	
+	public String getBaseCmd() {
+		return strBaseCmd;
+	}
+	public void setBaseCmd(String strBaseCmd) {
+		this.strBaseCmd = strBaseCmd;
+	}
+	public String getComment() {
+		return strComment;
+	}
+	public void setComment(String strComment) {
+		this.strComment = strComment;
+	}
+	public IConsoleCommandListener getOwner() {
+		return icclOwner;
+	}
+	public void setOwner(IConsoleCommandListener icclOwner) {
+		this.icclOwner = icclOwner;
 	}
 	
-	private static Debug instance;
-	public static Debug i(){return instance;}
-//	public static void init(Debug dbg){
-//		Debug.instance=dbg;
-//	}
-	
-	public Debug(ConsoleCommands cc){
-		if(Debug.instance==null)Debug.instance=this;
-		this.cc=cc;
-		cc.addConsoleCommandListener(this);
+	public Command(IConsoleCommandListener icclOwner, String strBaseCmd, String strComment) {
+		super();
+		this.icclOwner = icclOwner;
+		this.strBaseCmd = strBaseCmd;
+		this.strComment = strComment;
 	}
 	
-//	public void setConsoleCommand(ConsoleCommands cc){
-//		this.cc=cc;
-//	}
-//	
-	public boolean isKeyEnabled(EKey ek){
-		return ek.b;
+	public static CommandComparator comparator(){
+		return cmp;
 	}
-
-	@Override
-	public boolean executePreparedCommand() {
-		boolean bCmdExecEndNicely=false;
-		
-		if(cc.checkCmdValidity(this,"debug","[optionToToggle] empty for a list")){
-			String str = cc.paramString(1);
-			if(str==null){
-				for(EKey ek:EKey.values()){
-					cc.dumpSubEntry(""+ek+" "+ek.b);
-				}
-			}else{
-				try{
-					EKey ek = EKey.valueOf(str);
-					ek.b=!ek.b;
-					bCmdExecEndNicely=true;
-				}catch(IllegalArgumentException ex){
-					cc.dumpExceptionEntry(ex);
-				}
-			}
-		}else
-		{}
-		
-		return bCmdExecEndNicely;
+	
+	private static CommandComparator cmp = new CommandComparator();
+	private static class CommandComparator implements Comparator<Command>{
+		@Override
+		public int compare(Command c1, Command c2){
+			return c1.strBaseCmd.compareToIgnoreCase(c2.strBaseCmd);
+		}
 	}
+	public String asHelp() {
+		return strBaseCmd+" "
+			+strComment+" "
+			+"("+(icclOwner!=null ? icclOwner.getClass().getSimpleName() : "Root")+")";
+	}
+	
 }

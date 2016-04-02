@@ -1606,7 +1606,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 //		if(!strCmdPart.matches("["+strValidCmdCharsRegex+"]*"))
 			return strCmdPartOriginal;
 		
-		ArrayList<String> astr = AutoComplete.i().autoComplete(strCmdPart, cc.astrCmdWithCmtValidList, bMatchContains);
+		ArrayList<String> astr = AutoComplete.i().autoComplete(strCmdPart, cc.getBaseCommands(), bMatchContains);
 		String strFirst=astr.get(0); //the actual stored command may come with comments appended
 		String strAppendSpace = "";
 		if(astr.size()==1 && cc.validateBaseCommand(strFirst)){
@@ -1829,20 +1829,20 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	public boolean executePreparedCommand(){
 		boolean bCommandWorked = false;
 		
-		if(cc.checkCmdValidity(CMD_CLOSE_CONSOLE,"like the bound key to do it")){
+		if(cc.checkCmdValidity(this,CMD_CLOSE_CONSOLE,"like the bound key to do it")){
 			setEnabled(false);
 			bCommandWorked=true;
 		}else
-		if(cc.checkCmdValidity(CMD_CONSOLE_HEIGHT,"[fPercent] of the application window")){
+		if(cc.checkCmdValidity(this,CMD_CONSOLE_HEIGHT,"[fPercent] of the application window")){
 			Float f = cc.paramFloat(1);
 			modifyConsoleHeight(f);
 			bCommandWorked=true;
 		}else
-		if(cc.checkCmdValidity(CMD_CONSOLE_SCROLL_BOTTOM,"")){
+		if(cc.checkCmdValidity(this,CMD_CONSOLE_SCROLL_BOTTOM,"")){
 			scrollToBottomRequest();
 			bCommandWorked=true;
 		}else
-		if(cc.checkCmdValidity(CMD_CONSOLE_STYLE,"[strStyleName] changes the style of the console on the fly, empty for a list")){
+		if(cc.checkCmdValidity(this,CMD_CONSOLE_STYLE,"[strStyleName] changes the style of the console on the fly, empty for a list")){
 			String strStyle = cc.paramString(1);
 			if(strStyle==null)strStyle="";
 			bCommandWorked=cmdStyleApply(strStyle);
@@ -2100,7 +2100,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		}
 		
 		ArrayList<String> astr = AutoComplete.i().autoComplete(
-			strInputText, cc.astrCmdWithCmtValidList, bKeyControlIsPressed);
+			strInputText, cc.getBaseCommandsWithComment(), bKeyControlIsPressed);
 		
 		boolean bShowHint = false;
 		

@@ -69,7 +69,7 @@ public class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleC
 //		if(checkCmdValidity(CMD_END_USER_COMMAND_TEST,"[iHowMany] users working")){
 //			bCommandWorked = sapp.endUserCustomMethod(paramInt(1));
 //		}else
-		if(checkCmdValidity("fpsLimit","[iMaxFps]")){
+		if(checkCmdValidity(null,"fpsLimit","[iMaxFps]")){
 			Integer iMaxFps = paramInt(1);
 			if(iMaxFps!=null){
 				fpslState.setMaxFps(iMaxFps);
