@@ -1426,7 +1426,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			return RESTRICTED_CMD_SKIP_CURRENT_COMMAND.toString();
 		}
 		
-		astrCmdAndParams.clear();
+		astrCmdAndParams.clear(); //make sure it is emptied
 		astrCmdAndParams.addAll(convertToCmdParamsList(strFullCmdLine));
 		return String.join(" ",astrCmdAndParams);
 	}
@@ -1814,24 +1814,28 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		
 		strCmdLineOriginal = strFullCmdLineOriginal;
 		
-		boolean bCmdFoundAndApplied = false;
+		/**
+		 * command found, executed and ended gracefully?
+		 */
+		boolean bCmdFoundExecEndGrace = false;
+		
 		try{
-			if(!bCmdFoundAndApplied)bCmdFoundAndApplied=cmdRawLineCheckEndOfStartupCmdQueue();
+			if(!bCmdFoundExecEndGrace)bCmdFoundExecEndGrace=cmdRawLineCheckEndOfStartupCmdQueue();
 			
-			if(!bCmdFoundAndApplied)bCmdFoundAndApplied=cmdRawLineCheckAlias();
+			if(!bCmdFoundExecEndGrace)bCmdFoundExecEndGrace=cmdRawLineCheckAlias();
 			
-			if(!bCmdFoundAndApplied){
+			if(!bCmdFoundExecEndGrace){
 				/**
 				 * we will have a prepared line after below
 				 */
 				strCmdLinePrepared = prepareCmdAndParams(strCmdLineOriginal);
 			}
 			
-			if(!bCmdFoundAndApplied)bCmdFoundAndApplied=stillExecutingCommand();
+			if(!bCmdFoundExecEndGrace)bCmdFoundExecEndGrace=stillExecutingCommand();
 			
 		}catch(Exception e){
 			dumpExceptionEntry(e);
-			bCmdFoundAndApplied=false;
+			bCmdFoundExecEndGrace=false;
 		}
 		
 //		catch(NumberFormatException e){
@@ -1841,9 +1845,19 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //			bCmdFoundAndApplied=false;
 //		}
 		
-		return bCmdFoundAndApplied;
+		/**
+		 * clear prepared line to mark end of command execution attempt
+		 */
+		clearPreparedCommandLine();
+		
+		return bCmdFoundExecEndGrace;
 	}
 	
+	protected void clearPreparedCommandLine() {
+		strCmdLinePrepared = null;
+		astrCmdAndParams.clear();
+	}
+
 	public void dumpEntry(String strLineOriginal){
 		dumpEntry(true, true, false, strLineOriginal);
 	}
@@ -2263,6 +2277,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		flDB = new File(fileNamePrepareCfg(strFileDatabase,false));
 		
 		bInitialized=true;
+		
 		// init valid cmd list
 		executeCommand(null); //to populate the array with available commands
 	}
