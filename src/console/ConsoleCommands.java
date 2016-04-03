@@ -966,7 +966,18 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			for(Command cmd:acmdList){
 //			for(String strBase:astrBaseCmdValidList){
 				if(cmd.getBaseCmd().equalsIgnoreCase(strBaseCmdNew)){
-					strConflict=strBaseCmdNew;
+					strConflict="";
+					
+					String strOwner = "Root";
+					if(cmd.getOwner()!=null)strOwner = cmd.getOwner().getClass().getSimpleName();
+					strConflict+="("+strOwner+":"+cmd.getBaseCmd()+")";
+					
+					strConflict+=" x ";
+					
+					strOwner = "Root";
+					if(iccl!=null)strOwner = iccl.getClass().getSimpleName();
+					strConflict+="("+strOwner+":"+strBaseCmdNew+")";
+					
 					break;
 				}
 			}
@@ -992,7 +1003,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		
 		if(strConflict!=null){
 			dumpExceptionEntry(
-					new NullPointerException("Conflicting commands identifiers for: "+strConflict));
+					new NullPointerException("ConflictCmdId: "+strConflict));
 		}
 	}
 	

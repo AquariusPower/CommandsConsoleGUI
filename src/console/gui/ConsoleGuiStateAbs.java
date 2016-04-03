@@ -78,6 +78,7 @@ import com.simsilica.lemur.core.VersionedList;
 import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.event.KeyAction;
 import com.simsilica.lemur.event.KeyActionListener;
+import com.simsilica.lemur.focus.FocusManagerState;
 import com.simsilica.lemur.style.BaseStyles;
 import com.simsilica.lemur.style.Styles;
 
@@ -285,6 +286,10 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	protected Spatial	sptScrollTarget;
 	private Integer	iStatsTextSafeLength = null;
 	private boolean	bExceptionOnce = true;
+	private boolean	bKeepInitiallyInvisibleUntilFirstClosed = false;
+	private FocusManagerState	focusState;
+	private Spatial	sptPreviousFocus;
+	private boolean	bRestorePreviousFocus;
 
 //	private boolean	bUsePreQueue = false; 
 	
@@ -398,6 +403,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 //		addExecConsoleCommandToQueue(cc.btgPreQueue.getCmdIdAsCommand(true)); //		 TODO temporary workaround, pre-queue cannot be enable from start yet...
 		if(bInitiallyClosedOnce){
 			// after all, close the console
+			bKeepInitiallyInvisibleUntilFirstClosed=true;
 			cc.addCmdToQueue(CMD_CLOSE_CONSOLE);
 		}
 		
@@ -476,7 +482,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		// main container
 		ctnrConsole = new Container(new BorderLayout(), strStyle);
 		ctnrConsole.setName("ConsoleContainer");
-		int iMargin=10;
+		int iMargin=2;
 		v3fConsoleSize = new Vector3f(
 			v3fApplicationWindowSize.x -(iMargin*2),
 			(v3fApplicationWindowSize.y * fConsoleHeightPerc) -iMargin,
@@ -789,6 +795,9 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 					case KeyInput.KEY_C: 
 						if(bControl)cc.editCopyOrCut(false,false,false);
 						break;
+					case KeyInput.KEY_ESCAPE: 
+						setEnabled(false);
+						break;
 					case KeyInput.KEY_V: 
 						if(bKeyShiftIsPressed){
 							if(bControl)cc.showClipboard();
@@ -826,6 +835,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_X,KeyAction.CONTROL_DOWN), actSimpleActions);
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_DELETE,KeyAction.CONTROL_DOWN), actSimpleActions);
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_SLASH,KeyAction.CONTROL_DOWN), actSimpleActions);
+		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_ESCAPE), actSimpleActions);
 		
 		// cmd history select action
 		KeyActionListener actCmdHistoryEntrySelectAction = new KeyActionListener() {
@@ -1001,7 +1011,13 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	
 	@Override
 	synchronized public void update(float tpf) {
-		if(!isEnabled())return; //update may actually happen after being disabled...
+		if(bKeepInitiallyInvisibleUntilFirstClosed){
+			setVisible(false);
+		}else{
+			setVisible(isEnabled());
+		}
+		
+		if(!isEnabled())return; //one update may actually happen after being disabled...
 		
 		/**
 		 *	Will update only if enabled... //if(!isEnabled())return;
@@ -1018,11 +1034,51 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		updateScrollToBottom();
 		if(efHK!=null)efHK.updateHK();
 		
-		updateInputFocus();
+		updateOverrideInputFocus();
 	}
 	
-	protected void updateInputFocus(){
-		GuiGlobals.getInstance().requestFocus(isEnabled() ? tfInput : null);
+	public FocusManagerState getFocusManagerState(){
+		if(focusState==null)focusState = sapp.getStateManager().getState(FocusManagerState.class);
+		return focusState;
+	}
+	
+	protected void updateOverrideInputFocus(){
+		Spatial sptWithFocus = getFocusManagerState().getFocus();
+		
+		if(isEnabled()){
+			if(tfInput!=sptWithFocus){
+				if(sptPreviousFocus==null){
+					sptPreviousFocus = sptWithFocus;
+					bRestorePreviousFocus=true;
+				}
+				
+				GuiGlobals.getInstance().requestFocus(tfInput);
+			}
+		}else{
+			/**
+			 * this shall happen only once on console closing...
+			 */
+			if(bRestorePreviousFocus){
+				if(sptPreviousFocus!=null){
+					if(
+							!sptPreviousFocus.hasAncestor(sapp.getGuiNode())
+							&&
+							!sptPreviousFocus.hasAncestor(sapp.getRootNode()) //TODO can it be at root node?
+					){
+						/**
+						 * if it is not in one of the rendering nodes,
+						 * simply removes the focus, to give it back to 
+						 * other parts of the application.
+						 */
+						sptPreviousFocus = null;
+					}
+				}
+				
+				GuiGlobals.getInstance().requestFocus(sptPreviousFocus);
+				sptPreviousFocus = null;
+				bRestorePreviousFocus=false;
+			}
+		}
 	}
 	
 //	/**
@@ -1842,6 +1898,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		
 		if(cc.checkCmdValidity(this,CMD_CLOSE_CONSOLE,"like the bound key to do it")){
 			setEnabled(false);
+			bKeepInitiallyInvisibleUntilFirstClosed =false;
 			bCommandWorked=true;
 		}else
 		if(cc.checkCmdValidity(this,CMD_CONSOLE_HEIGHT,"[fPercent] of the application window")){

@@ -75,7 +75,7 @@ public class LemurGuiExtraFunctionalitiesHK implements IConsoleCommandListener, 
 	 */
 	public TextEntryComponent	tecInputFieldHK;
 	public Geometry	geomCursorHK;
-	public FocusManagerState	focusStateHK;
+//	public FocusManagerState	focusStateHK;
 	public boolean bAllowHK = false;
 	public boolean bBlinkingTextCursorHK = true;
 	public TimedDelay tdTextCursorBlinkHK = new TimedDelay(1f);
@@ -198,10 +198,10 @@ public class LemurGuiExtraFunctionalitiesHK implements IConsoleCommandListener, 
 		
 		prepareInputFieldHK();
 		geomCursorHK = ((Geometry)reflexFieldHK(tecInputFieldHK, "cursor"));
-		focusStateHK = ((FocusManagerState)reflexFieldHK(GuiGlobals.getInstance(), "focusState"));
+//		focusStateHK = ((FocusManagerState)reflexFieldHK(GuiGlobals.getInstance(), "focusState"));
 		tdTextCursorBlinkHK.updateTime();
 		
-		if(geomCursorHK!=null && focusStateHK!=null){
+		if(geomCursorHK!=null){// && focusStateHK!=null){
 			cgs.cc.dumpInfoEntry(strPrefixHK+"Text cursor can blink now!");
 		}else{
 			cgs.cc.dumpWarnEntry(strPrefixHK+"Unable to let Text cursor blink :(");
@@ -214,7 +214,7 @@ public class LemurGuiExtraFunctionalitiesHK implements IConsoleCommandListener, 
 		
 		if(!bBlinkingTextCursorHK)return;
 		if(!bInitializedBlinkingCursorHK)prepareForBlinkingCursorHK();
-		if(!cgs.tfInput.equals(focusStateHK.getFocus()))return;
+		if(!cgs.tfInput.equals(cgs.getFocusManagerState().getFocus()))return; //focusStateHK.getFocus()))return;
 		
 		long lDelay = tdTextCursorBlinkHK.getCurrentDelay();
 		

@@ -49,6 +49,8 @@ import console.ConsoleCommands;
 /**
  * Here is the specific code that links the JME console state with Lemur GUI.
  * 
+ * TODO complete specific code migration from ConsoleGuiStateAbs
+ * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
@@ -144,7 +146,7 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 //			GuiGlobals.getInstance().requestFocus(null);
 		}
 		
-		updateInputFocus();
+		updateOverrideInputFocus();
 		
 		GuiGlobals.getInstance().setCursorEventsEnabled(this.bEnabled);
 	}
