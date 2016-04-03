@@ -595,6 +595,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			dumpSubEntry("TAB - autocomplete (starting with)");
 			dumpSubEntry("Ctrl+TAB - autocomplete (contains)");
 			dumpSubEntry("Ctrl+/ - toggle input field comment");
+			dumpSubEntry("HintListFill: Ctrl (contains mode) or Ctrl+Shift (overrides existing hint list)");
 			bCmdEndedGracefully=true;
 		}else
 		if(checkCmdValidity(null,"showSetup","show restricted variables")){
@@ -1828,12 +1829,17 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			
 			if(!bCmdFoundAndApplied)bCmdFoundAndApplied=stillExecutingCommand();
 			
-		}catch(NumberFormatException e){
-			// keep this one as "warning", as user may simply fix the typed value
-			dumpWarnEntry("NumberFormatException: "+e.getMessage());
-			e.printStackTrace();
+		}catch(Exception e){
+			dumpExceptionEntry(e);
 			bCmdFoundAndApplied=false;
 		}
+		
+//		catch(NumberFormatException e){
+//			// keep this one as "warning", as user may simply fix the typed value
+//			dumpWarnEntry("NumberFormatException: "+e.getMessage());
+//			e.printStackTrace();
+//			bCmdFoundAndApplied=false;
+//		}
 		
 		return bCmdFoundAndApplied;
 	}

@@ -2101,11 +2101,15 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		if(strInputText.isEmpty())return;
 		strInputText=cc.extractCommandPart(strInputText,0);
 		if(strInputText==null)return; //something invalid was typed...
+		if(bKeyControlIsPressed && bKeyShiftIsPressed){
+			/**
+			 * user asked for 'contains' override even if there are hints already.
+			 */
+		}else
 		if(lstbxAutoCompleteHint.getParent()==null && bKeyControlIsPressed){
 			/**
-			 * in this case, there is no hint,
-			 * and match mode: "contains" was requested by user,
-			 * so fill it with something!
+			 * in this case, the hint list is empty,
+			 * and match mode: "contains" was requested by user.
 			 */
 		}else{
 			if(strInputTextPrevious.equals(strInputText))return;
