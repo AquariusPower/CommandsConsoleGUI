@@ -28,6 +28,8 @@
 package misc;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 /**
@@ -36,6 +38,8 @@ import java.lang.reflect.Modifier;
  *
  */
 public class ReflexFill {
+	private static IHandleExceptions	ihe;
+	
 	private static boolean bUseDefaultCfgIfMissing=false;
 	
 	public static interface IReflexFillCfg{
@@ -322,4 +326,62 @@ public class ReflexFill {
 		ReflexFill.bUseDefaultCfgIfMissing = bUseDefaultCfgIfMissing;
 	}
 	
+	public static void setExceptionHandler(IHandleExceptions ihe){
+		ReflexFill.ihe=ihe;
+	}
+	
+	/**
+	 * We shouldnt access private fields/methods as things may break.
+	 * Any code depending on this must ALWAYS be optional!
+	 * 
+	 * @param clazzOfObjectFrom what superclass of the object from is to be used?
+	 * @param objFrom
+	 * @param strFieldName will break if changed..
+	 * @return field value
+	 */
+	public static Object reflexFieldHK(Class<?> clazzOfObjectFrom, Object objFrom, String strFieldName){
+		Object objFieldValue = null;
+		try{
+			Field field = clazzOfObjectFrom.getDeclaredField(strFieldName);
+			field.setAccessible(true);
+			objFieldValue = field.get(objFrom);
+			field.setAccessible(false);
+		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+			ihe.handleException(e);
+//			instance.cgs.cc.dumpExceptionEntry(e);
+		}
+		
+		return objFieldValue;
+	}
+	public static Object reflexFieldHK(Object objFrom, String strFieldName){
+//		if(!bAllowHK)return null;
+		
+		return reflexFieldHK(objFrom.getClass(), objFrom, strFieldName);
+	}
+	
+	/**
+	 * We shouldnt access private fields/methods as things may break.
+	 * Any code depending on this must ALWAYS be optional!
+	 * 
+	 * @param objInvoker
+	 * @param strMethodName
+	 * @param aobjParams
+	 */
+	public static Object reflexMethodCallHK(Object objInvoker, String strMethodName, Object... aobjParams) {
+//		if(!bAllowHK)return null;
+		
+		Object objReturn = null;
+		try {
+			Method m = objInvoker.getClass().getDeclaredMethod(strMethodName);
+			boolean bWasAccessible=m.isAccessible();
+			if(!bWasAccessible)m.setAccessible(true);
+			objReturn = m.invoke(objInvoker);
+			if(!bWasAccessible)m.setAccessible(false);
+		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			ihe.handleException(e);
+//			cgs.cc.dumpExceptionEntry(e);
+		}
+		return objReturn;
+	}
+
 }

@@ -27,6 +27,7 @@
 
 package console.gui;
 
+import com.jme3.app.Application;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.LineWrapMode;
 import com.jme3.math.ColorRGBA;
@@ -58,9 +59,17 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 //	public ListBox<String>	lstbxAutoCompleteHint;
 //	public VersionedList<String>	vlstrAutoCompleteHint = new VersionedList<String>();
 
-	public ConsoleGUILemurState(int iOpenConsoleHotKey, ConsoleCommands cc) {
+	public ConsoleGUILemurState(int iOpenConsoleHotKey, ConsoleCommands cc, Application app) {
 		super(iOpenConsoleHotKey, cc);
+		app.getStateManager().attach(LemurGuiMisc.i());
+		LemurGuiMisc.i().setConsoleCommands(cc);
 	}
+	
+//	@Override
+//	public void initialize(AppStateManager stateManager, Application app) {
+//		super.initialize(stateManager, app);
+//		app.getStateManager().attach(LemurGuiMisc.i());
+//	}
 	
 	public void createMonoSpaceFixedFontStyle(){
 		if(bConsoleStyleCreated)return;

@@ -57,9 +57,11 @@ import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.Trigger;
+import com.jme3.material.MatParam;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
@@ -133,6 +135,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	protected TimedDelay tdStatsRefresh = new TimedDelay(0.5f);
 	protected TimedDelay tdScrollToBottomRequestAndSuspend = new TimedDelay(0.5f);
 	protected TimedDelay tdScrollToBottomRetry = new TimedDelay(0.1f);
+
 //	protected TimedDelay tdLetCpuRest = new TimedDelay(0.1f);
 //	protected TimedDelay tdStatsRefresh = new TimedDelay(0.5f);
 //	protected TimedDelay tdDumpQueuedEntry = new TimedDelay(1f/5f); // per second
@@ -149,12 +152,12 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	protected int	iSkipCharsSafetyGUESSED = 1;
 	protected float	fSafetyMarginGUESSED = 20f;
 	
-	/**
-	 * some day this one may not be required
-	 */
-	protected LemurGuiExtraFunctionalitiesHK efHK = null;
-	public LemurGuiExtraFunctionalitiesHK getLemurHK(){return efHK;}
-	public void initLemurHK(){efHK=new LemurGuiExtraFunctionalitiesHK(this);};
+//	/**
+//	 * some day this one may not be required
+//	 */
+//	protected LemurGuiExtraFunctionalitiesHK efHK = null;
+//	public LemurGuiExtraFunctionalitiesHK getLemurHK(){return efHK;}
+//	public void initLemurHK(){efHK=new LemurGuiExtraFunctionalitiesHK(this);};
 	
 	/**
 	 * other vars!
@@ -466,7 +469,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		if(sapp==null)throw new NullPointerException("base initialization required");
 		
 		CursorEventControl.addListenersToSpatial(lstbxAutoCompleteHint, consoleCursorListener);
-		lstbxAutoCompleteHint.setName("Hints");
+		lstbxAutoCompleteHint.setName("ConsoleHints");
 		
 //		tdLetCpuRest.updateTime();
 //		tdStatsRefresh.updateTime();
@@ -535,7 +538,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		 * CENTER ELEMENT (dump entries area) ===========================================
 		 */
 		lstbxDumpArea = new ListBox<String>(new VersionedList<String>(),strStyle);
-		lstbxDumpArea.setName("DumpArea");
+		lstbxDumpArea.setName("ConsoleDumpArea");
     CursorEventControl.addListenersToSpatial(lstbxDumpArea, consoleCursorListener);
 		Vector3f v3fLstbxSize = v3fConsoleSize.clone();
 //		v3fLstbxSize.x/=2;
@@ -561,7 +564,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		 */
 		// input
 		tfInput = new TextField(""+cc.getCommandPrefix(),strStyle);
-		tfInput.setName("UserInput");
+		tfInput.setName("ConsoleInput");
     CursorEventControl.addListenersToSpatial(tfInput, consoleCursorListener);
 		fInputHeight = retrieveBitmapTextFor(tfInput).getLineHeight();
 		ctnrConsole.addChild( tfInput, BorderLayout.Position.South );
@@ -650,16 +653,18 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		if(isInputTextFieldEmpty() && strPasted.trim().startsWith(""+cc.getCommandPrefix())){
 			strCurrent = strPasted.trim(); //replace "empty" line with command (can be invalid in this case, user may complete it properly)
 		}else{
-			if(efHK!=null){
-				strCurrent = efHK.pasteAtCaratPositionHK(strCurrent,strPasted);
-			}else{
-				strCurrent+=strPasted;
-			}
+			strCurrent = LemurGuiMisc.i().prepareStringToPasteAtCaratPosition(tfInput, strCurrent, strPasted);
+//			if(efHK!=null){
+//				strCurrent = efHK.pasteAtCaratPositionHK(strCurrent,strPasted);
+//			}else{
+//				strCurrent+=strPasted;
+//			}
 		}
 		
 		setInputField(strCurrent); 
 		
-		if(efHK!=null)efHK.positionCaratProperlyHK();
+		LemurGuiMisc.i().positionCaratProperly(tfInput);//, iMoveCaratTo);
+//		if(efHK!=null)efHK.positionCaratProperlyHK();
 	}
 	
 //	protected void cmdHistSave(String strCmd) {
@@ -1032,18 +1037,14 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		updateDumpAreaSelectedIndex();
 		updateVisibleRowsAmount();
 		updateScrollToBottom();
-		if(efHK!=null)efHK.updateHK();
+//		updateBlinkInputFieldTextCursor(tfInput);
+//		if(efHK!=null)efHK.updateHK();
 		
 		updateOverrideInputFocus();
 	}
 	
-	public FocusManagerState getFocusManagerState(){
-		if(focusState==null)focusState = sapp.getStateManager().getState(FocusManagerState.class);
-		return focusState;
-	}
-	
 	protected void updateOverrideInputFocus(){
-		Spatial sptWithFocus = getFocusManagerState().getFocus();
+		Spatial sptWithFocus = LemurGuiMisc.i().getFocusManagerState().getFocus();
 		
 		if(isEnabled()){
 			if(tfInput!=sptWithFocus){
@@ -1052,7 +1053,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 					bRestorePreviousFocus=true;
 				}
 				
-				GuiGlobals.getInstance().requestFocus(tfInput);
+				LemurGuiMisc.i().requestFocus(tfInput);
 			}
 		}else{
 			/**
@@ -1074,7 +1075,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 					}
 				}
 				
-				GuiGlobals.getInstance().requestFocus(sptPreviousFocus);
+				LemurGuiMisc.i().requestFocus(sptPreviousFocus);
+//				GuiGlobals.getInstance().requestFocus(sptPreviousFocus);
 				sptPreviousFocus = null;
 				bRestorePreviousFocus=false;
 			}
@@ -1557,7 +1559,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		String strCmdPart = getInputText();
 		String strCmdAfterCarat="";
 		
-		Integer iCaratPositionHK = efHK==null?null:efHK.getInputFieldCaratPosition();
+//		Integer iCaratPositionHK = efHK==null?null:efHK.getInputFieldCaratPosition();
+		Integer iCaratPositionHK = tfInput.getDocumentModel().getCarat();
 		if(iCaratPositionHK!=null){
 			strCmdAfterCarat = strCmdPart.substring(iCaratPositionHK);
 			strCmdPart = strCmdPart.substring(0, iCaratPositionHK);
@@ -1640,7 +1643,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		
 		if(strCompletedCmd.trim().isEmpty())strCompletedCmd=""+cc.getCommandPrefix();
 		setInputField(strCompletedCmd+strCmdAfterCarat);
-		if(efHK!=null)efHK.setCaratPosition(strCompletedCmd.length());
+		LemurGuiMisc.i().setCaratPosition(tfInput, strCompletedCmd.length());
+//		if(efHK!=null)efHK.setCaratPosition(strCompletedCmd.length());
 		
 		scrollToBottomRequest();
 	}
@@ -1849,7 +1853,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
     sapp.getInputManager().removeListener(alConsoleToggle);
      */
     
-    if(efHK!=null)efHK.cleanupHK();
+//    if(efHK!=null)efHK.cleanupHK();
     bInitialized=false;
 	}
 	
@@ -2330,20 +2334,20 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		lstbxDumpArea.getSelectionModel().setSelection(-1); //clear selection
 	}
 	
-	@Override
-	public void setHKenabled(Boolean bEnable) {
-		if(getLemurHK()==null && (bEnable==null || bEnable)){
-			initLemurHK();
-		}
-		
-		if(getLemurHK()!=null){
-			getLemurHK().bAllowHK = bEnable==null ? !getLemurHK().bAllowHK : bEnable; //override
-			if(getLemurHK().bAllowHK){
-				cc.dumpWarnEntry("Hacks enabled!");
-			}else{
-				cc.dumpWarnEntry("Hacks may not be completely disabled/cleaned!");
-			}
-		}
-	}
+//	@Override
+//	public void setHKenabled(Boolean bEnable) {
+//		if(getLemurHK()==null && (bEnable==null || bEnable)){
+//			initLemurHK();
+//		}
+//		
+//		if(getLemurHK()!=null){
+//			getLemurHK().bAllowHK = bEnable==null ? !getLemurHK().bAllowHK : bEnable; //override
+//			if(getLemurHK().bAllowHK){
+//				cc.dumpWarnEntry("Hacks enabled!");
+//			}else{
+//				cc.dumpWarnEntry("Hacks may not be completely disabled/cleaned!");
+//			}
+//		}
+//	}
 }
 

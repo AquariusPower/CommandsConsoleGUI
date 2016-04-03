@@ -241,6 +241,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		
 		new Debug(this);
 		Misc.i().setExceptionHandler(this);
+		ReflexFill.setExceptionHandler(this);
 //		addConsoleCommandListener(Debug.i());
 //		Debug.i().setConsoleCommand(this);
 	}
@@ -559,13 +560,13 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		if(checkCmdValidity(null,CMD_HISTORY,"[strFilter] of issued commands (the filter results in sorted uniques)")){
 			bCmdEndedGracefully=cmdShowHistory();
 		}else
-		if(checkCmdValidity(null,CMD_HK_TOGGLE ,"[bEnable] allow hacks to provide workarounds")){
-			if(paramBooleanCheckForToggle(1)){
-				Boolean bEnable = paramBoolean(1);
-				icui.setHKenabled(bEnable);
-				bCmdEndedGracefully=true;
-			}
-		}else
+//		if(checkCmdValidity(null,CMD_HK_TOGGLE ,"[bEnable] allow hacks to provide workarounds")){
+//			if(paramBooleanCheckForToggle(1)){
+//				Boolean bEnable = paramBoolean(1);
+//				icui.setHKenabled(bEnable);
+//				bCmdEndedGracefully=true;
+//			}
+//		}else
 		if(checkCmdValidity(null,CMD_LINE_WRAP_AT,"[iMaxChars] 0 = wrap will be automatic")){
 			Integer i = paramInt(1);
 			if(i!=null && i>=0){ // a value was supplied

@@ -47,7 +47,7 @@ public class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleC
 	public ConsoleCustomCommands(ConsoleGuiTest sapp){
 		super();
 		
-		ConsoleGUILemurState cs = new ConsoleGUILemurState(KeyInput.KEY_F10, this);
+		ConsoleGUILemurState cs = new ConsoleGUILemurState(KeyInput.KEY_F10, this, sapp);
 //		addConsoleCommandListener(cs);
 //		setConsoleUI(cs);
 //		csaTmp = cs;
