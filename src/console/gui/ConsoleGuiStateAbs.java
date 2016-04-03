@@ -384,21 +384,21 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 //		flDB = new File(fileNamePrepareCfg(strFileDatabase,false));
 		
 		// other inits
-		cc.addExecConsoleCommandToQueue(cc.CMD_FIX_LINE_WRAP);
-		cc.addExecConsoleCommandToQueue(cc.CMD_CONSOLE_SCROLL_BOTTOM);
-		cc.addExecConsoleCommandToQueue(cc.CMD_DB+" "+EDataBaseOperations.load);
-		cc.addExecConsoleCommandToQueue(
+		cc.addCmdToQueue(cc.CMD_FIX_LINE_WRAP);
+		cc.addCmdToQueue(cc.CMD_CONSOLE_SCROLL_BOTTOM);
+		cc.addCmdToQueue(cc.CMD_DB+" "+EDataBaseOperations.load);
+		cc.addCmdToQueue(
 			cc.CMD_DB+" "+EDataBaseOperations.save+" "+cc.getCommentPrefix()+"to shrink it");
 		/**
 		 * KEEP AS LAST queued cmds below!!!
 		 */
 		// must be the last queued command after all init ones!
 		// end of initialization
-		cc.addExecConsoleCommandToQueue(cc.RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE);
+		cc.addCmdToQueue(cc.RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE);
 //		addExecConsoleCommandToQueue(cc.btgPreQueue.getCmdIdAsCommand(true)); //		 TODO temporary workaround, pre-queue cannot be enable from start yet...
 		if(bInitiallyClosedOnce){
 			// after all, close the console
-			cc.addExecConsoleCommandToQueue(CMD_CLOSE_CONSOLE);
+			cc.addCmdToQueue(CMD_CLOSE_CONSOLE);
 		}
 		
 		astrStyleList.add(BaseStyles.GLASS);
@@ -814,8 +814,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 						break;
 				}
 			}
-
 		};
+		
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_TAB), actSimpleActions);
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_TAB,KeyAction.CONTROL_DOWN), actSimpleActions);
 		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_RETURN), actSimpleActions);

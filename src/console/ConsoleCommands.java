@@ -424,6 +424,8 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 
 	protected ArrayList<String>	astrBaseCmdCacheList = new ArrayList<String>();
 	protected ArrayList<String>	astrBaseCmdCmtCacheList = new ArrayList<String>();
+
+	private String	strLastTypedUserCommand;
 	
 	protected void assertInitialized(){
 		if(bInitialized)return;
@@ -2002,10 +2004,10 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			}
 		}
 	}
-	public void addExecConsoleCommandToQueue(StringField sfFullCmdLine){
-		addExecConsoleCommandToQueue(sfFullCmdLine.toString());
+	public void addCmdToQueue(StringField sfFullCmdLine){
+		addCmdToQueue(sfFullCmdLine.toString());
 	}
-	public void addExecConsoleCommandToQueue(String strFullCmdLine){
+	public void addCmdToQueue(String strFullCmdLine){
 		addCmdToQueue(strFullCmdLine,false);
 	}
 	protected void addCmdToQueue(String strFullCmdLine, boolean bPrepend){
@@ -2260,10 +2262,10 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		}
 		
 		// before user init file
-		addExecConsoleCommandToQueue(btgShowExecQueuedInfo.getCmdIdAsCommand(false));
-		addExecConsoleCommandToQueue(btgShowDebugEntries.getCmdIdAsCommand(false));
-		addExecConsoleCommandToQueue(btgShowDeveloperWarn.getCmdIdAsCommand(false));
-		addExecConsoleCommandToQueue(btgShowDeveloperInfo.getCmdIdAsCommand(false));
+		addCmdToQueue(btgShowExecQueuedInfo.getCmdIdAsCommand(false));
+		addCmdToQueue(btgShowDebugEntries.getCmdIdAsCommand(false));
+		addCmdToQueue(btgShowDeveloperWarn.getCmdIdAsCommand(false));
+		addCmdToQueue(btgShowDeveloperInfo.getCmdIdAsCommand(false));
 		
 		// init user cfg
 		flInit = new File(fileNamePrepareCfg(strFileInitConsCmds,false));
@@ -2496,7 +2498,13 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	public void resetCmdHistoryCursor(){
 		iCmdHistoryCurrentIndex = astrCmdHistory.size();
 	}
-
+	
+	/**
+	 * This method is only to be called when user types command in the console.
+	 * 
+	 * @param strCmd
+	 * @return
+	 */
 	public boolean actionSubmitCommand(final String strCmd){
 		if(strCmd.isEmpty() || strCmd.trim().equals(""+getCommandPrefix())){
 			icui.clearInputTextField(); 
@@ -2546,6 +2554,8 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		resetCmdHistoryCursor();
 		
 		if(strType.equals(strTypeCmd)){
+			strLastTypedUserCommand = strCmd;
+			
 			if(!executeCommand(strCmd)){
 				dumpWarnEntry(strType+": FAIL: "+strCmd);
 				showHelpForFailedCommand(strCmd);
@@ -2583,4 +2593,9 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //	protected void setConsoleUI(IConsoleUI icui) {
 //		this.icui=icui;
 //	}
+
+	public void repeatLastUserTypedCommand() {
+		dumpInfoEntry("Repeating: "+strLastTypedUserCommand);
+		addCmdToQueue(strLastTypedUserCommand, true);
+	}
 }
