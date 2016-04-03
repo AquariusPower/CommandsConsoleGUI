@@ -48,6 +48,7 @@ public class ReflexFill {
 	public static interface IReflexFillCfgVariant{
 //		public int getReflexFillCfgVariant();
 		public String getCodePrefixVariant();
+		public IReflexFillCfg getOwner();
 	}
 	
 	public static class ReflexFillCfg{
@@ -75,13 +76,92 @@ public class ReflexFill {
 		return instance;
 	}
 	
+//	public static void assertReflexFillFields(IReflexFillCfg owner){
+//		assertAndGetField(owner);
+//	}
+	
+	/**
+	 * Use this at the class constructor that instantiates fields of classes 
+	 * that implements {@link IReflexFillCfgVariant#}, like {@link BoolToggler#} 
+	 * and {@link StringField#}.
+	 * 
+	 * @param objClassOwningTheFields set simply to 'this' at the constructor.
+	 */
+	public static void assertReflexFillFieldsForOwner(IReflexFillCfg objClassOwningTheFields){
+		assertAndGetField(objClassOwningTheFields, null);
+	}
+	
+	/**
+	 * Cannot be used at field constructor because that object is not ready yet 
+	 * and so its class owner does not have yet such field set to a 'this'...
+	 * @param objClassOwningField
+	 * @param objFieldValue if null, will validate if fields of type {@link IReflexFillCfgVariant#} are owned by the specified owner
+	 * @return
+	 */
+	public static Field assertAndGetField(Object objClassOwningField, Object objFieldValue){
+//		Class<?> clFound = null;
+		Field fldFound = null;
+		Class<?> cl = objClassOwningField.getClass();
+		String strExceptionLog="Field object not found at: ";
+		while(true){
+			strExceptionLog+=cl.getName();
+			if(cl.getName().equals(Object.class.getName())){
+				strExceptionLog+="";
+				break;
+			}else{
+				strExceptionLog+=" <= ";
+			}
+			
+			for(Field fld:cl.getDeclaredFields()){
+				try{
+					boolean bWasAccessible = fld.isAccessible();
+					if(!bWasAccessible)fld.setAccessible(true);
+					
+					Object objExistingFieldValue = fld.get(objClassOwningField);
+					if(objFieldValue!=null){
+						if(objExistingFieldValue==objFieldValue)fldFound=fld; //clFound=cl;
+					}else{
+//						if(objExistingFieldValue!=null){
+							if(objExistingFieldValue instanceof IReflexFillCfgVariant){
+								IReflexFillCfg configuredOwner = ((IReflexFillCfgVariant)objExistingFieldValue).getOwner();
+								if(configuredOwner != objClassOwningField){
+									throw new NullPointerException("Field "+fld.getName()
+										+" at "+objClassOwningField.getClass().getName()+" has configured an "
+										+" invalid owner "+configuredOwner.getClass().getName()+". "
+										+" The configured owner should be: "+objClassOwningField.getClass().getName());
+								}
+							}
+//						}
+					}
+					
+					if(!bWasAccessible)fld.setAccessible(false);
+					if(fldFound!=null)return fldFound;
+//					if(clFound!=null)return clFound;
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			cl=cl.getSuperclass();
+		}
+		
+		if(objFieldValue!=null){
+			throw new NullPointerException("Failed to automatically set command id. "
+				+"Was "+objFieldValue.getClass()+" object owner properly set to the class where it is instantiated? "
+				+strExceptionLog);
+		}
+		
+		return null;
+//		throw new NullPointerException("class "+cl.getName()+" doesnt owns field "+objFieldValue.getClass());
+	}
+	
 	/**
 	 * Works on reflected variable name.
 	 * @param rfcfgOwnerOfField
 	 * @param rfcvFieldAtTheOwner
 	 * @return
 	 */
-	protected String createIdentifierWithFieldName(IReflexFillCfg rfcfgOwnerOfField, IReflexFillCfgVariant rfcvFieldAtTheOwner){
+	public String createIdentifierWithFieldName(IReflexFillCfg rfcfgOwnerOfField, IReflexFillCfgVariant rfcvFieldAtTheOwner){
 		ReflexFillCfg rfcfg = rfcfgOwnerOfField.getReflexFillCfg(rfcvFieldAtTheOwner);
 		if(rfcfg==null){
 			if(bUseDefaultCfgIfMissing){
@@ -96,79 +176,126 @@ public class ReflexFill {
 			}
 		}
 		
-		Class<?> cl = rfcfgOwnerOfField.getClass();
-		String strExceptionLog="Field object not found at: ";
-		while(true){
-			strExceptionLog+=cl.getName();
-			if(cl.getName().equals(Object.class.getName())){
-				strExceptionLog+="";
-				break;
-			}else{
-				strExceptionLog+=" <= ";
-			}
-			
-			for(Field fld:cl.getDeclaredFields()){
-				try {
-					boolean bWasAccessible = fld.isAccessible();
-					if(!bWasAccessible)fld.setAccessible(true);
-					if(fld.get(rfcfgOwnerOfField)==rfcvFieldAtTheOwner){ // same object
-						String strFieldName=fld.getName();
-						
-						boolean bFinal=false;
-						if(Modifier.isFinal(fld.getModifiers()))bFinal=true;
-						
-						String strCodeTypePrefix = rfcfg.strCodingStyleFieldNamePrefix;
-//						if(bFinal)strCodeTypePrefix = rfcfg.strCodingStyleFinalFieldNamePrefix;
-						if(strCodeTypePrefix==null){
-							strCodeTypePrefix=rfcvFieldAtTheOwner.getCodePrefixVariant();
-						}
-						
-						String strCommand = strFieldName;
-						if(strCodeTypePrefix==null || strFieldName.startsWith(strCodeTypePrefix)){
-							if(strCodeTypePrefix!=null){
-								//remove prefix
-								strCommand=strCommand.substring(strCodeTypePrefix.length());
-							}
-							
-							if(bFinal){
-								/**
-								 * upper case with underscores
-								 */
-								String strCmdNew = null;
-								for(String strWord : strCommand.split("_")){
-									if(strCmdNew==null){
-										if(rfcfg.bFirstLetterUpperCase){
-											strCmdNew=firstLetter(strWord.toLowerCase(),true);
-										}else{
-											strCmdNew=strWord.toLowerCase();
-										}
-									}else{
-										strCmdNew+=firstLetter(strWord.toLowerCase(),true);
-									}
-								}
-								strCommand=strCmdNew;
-							}else{
-								/**
-								 * Already nice to read field name.
-								 */
-								strCommand=firstLetter(strCommand,rfcfg.bFirstLetterUpperCase);
-							}
-						}
-						strCommand=rfcfg.strCommandPrefix+strCommand+rfcfg.strCommandSuffix;
-						return strCommand;
-					}
-					if(!bWasAccessible)fld.setAccessible(false);
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					e.printStackTrace();
-				}
-			}
-			
-			cl=cl.getSuperclass();
+		Field fld = assertAndGetField(rfcfgOwnerOfField, rfcvFieldAtTheOwner);
+		
+		String strFieldName=fld.getName();
+		
+		boolean bFinal=false;
+		if(Modifier.isFinal(fld.getModifiers()))bFinal=true;
+		
+		String strCodeTypePrefix = rfcfg.strCodingStyleFieldNamePrefix;
+//		if(bFinal)strCodeTypePrefix = rfcfg.strCodingStyleFinalFieldNamePrefix;
+		if(strCodeTypePrefix==null){
+			strCodeTypePrefix=rfcvFieldAtTheOwner.getCodePrefixVariant();
 		}
 		
-		throw new NullPointerException("Failed to automatically set command id. "
-				+"Was "+rfcvFieldAtTheOwner.getClass()+" object owner properly set to the class where it is instantiated? "
-				+strExceptionLog);
+		String strCommand = strFieldName;
+		if(strCodeTypePrefix==null || strFieldName.startsWith(strCodeTypePrefix)){
+			if(strCodeTypePrefix!=null){
+				//remove prefix
+				strCommand=strCommand.substring(strCodeTypePrefix.length());
+			}
+			
+			if(bFinal){
+				/**
+				 * upper case with underscores
+				 */
+				String strCmdNew = null;
+				for(String strWord : strCommand.split("_")){
+					if(strCmdNew==null){
+						if(rfcfg.bFirstLetterUpperCase){
+							strCmdNew=firstLetter(strWord.toLowerCase(),true);
+						}else{
+							strCmdNew=strWord.toLowerCase();
+						}
+					}else{
+						strCmdNew+=firstLetter(strWord.toLowerCase(),true);
+					}
+				}
+				strCommand=strCmdNew;
+			}else{
+				/**
+				 * Already nice to read field name.
+				 */
+				strCommand=firstLetter(strCommand,rfcfg.bFirstLetterUpperCase);
+			}
+		}
+		strCommand=rfcfg.strCommandPrefix+strCommand+rfcfg.strCommandSuffix;
+		return strCommand;
+		
+//		Class<?> cl = rfcfgOwnerOfField.getClass();
+//		String strExceptionLog="Field object not found at: ";
+//		while(true){
+//			strExceptionLog+=cl.getName();
+//			if(cl.getName().equals(Object.class.getName())){
+//				strExceptionLog+="";
+//				break;
+//			}else{
+//				strExceptionLog+=" <= ";
+//			}
+//			
+//			for(Field fld:cl.getDeclaredFields()){
+//				try {
+//					boolean bWasAccessible = fld.isAccessible();
+//					if(!bWasAccessible)fld.setAccessible(true);
+//					if(fld.get(rfcfgOwnerOfField)==rfcvFieldAtTheOwner){ // same object
+//						String strFieldName=fld.getName();
+//						
+//						boolean bFinal=false;
+//						if(Modifier.isFinal(fld.getModifiers()))bFinal=true;
+//						
+//						String strCodeTypePrefix = rfcfg.strCodingStyleFieldNamePrefix;
+////						if(bFinal)strCodeTypePrefix = rfcfg.strCodingStyleFinalFieldNamePrefix;
+//						if(strCodeTypePrefix==null){
+//							strCodeTypePrefix=rfcvFieldAtTheOwner.getCodePrefixVariant();
+//						}
+//						
+//						String strCommand = strFieldName;
+//						if(strCodeTypePrefix==null || strFieldName.startsWith(strCodeTypePrefix)){
+//							if(strCodeTypePrefix!=null){
+//								//remove prefix
+//								strCommand=strCommand.substring(strCodeTypePrefix.length());
+//							}
+//							
+//							if(bFinal){
+//								/**
+//								 * upper case with underscores
+//								 */
+//								String strCmdNew = null;
+//								for(String strWord : strCommand.split("_")){
+//									if(strCmdNew==null){
+//										if(rfcfg.bFirstLetterUpperCase){
+//											strCmdNew=firstLetter(strWord.toLowerCase(),true);
+//										}else{
+//											strCmdNew=strWord.toLowerCase();
+//										}
+//									}else{
+//										strCmdNew+=firstLetter(strWord.toLowerCase(),true);
+//									}
+//								}
+//								strCommand=strCmdNew;
+//							}else{
+//								/**
+//								 * Already nice to read field name.
+//								 */
+//								strCommand=firstLetter(strCommand,rfcfg.bFirstLetterUpperCase);
+//							}
+//						}
+//						strCommand=rfcfg.strCommandPrefix+strCommand+rfcfg.strCommandSuffix;
+//						return strCommand;
+//					}
+//					if(!bWasAccessible)fld.setAccessible(false);
+//				} catch (IllegalArgumentException | IllegalAccessException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//			
+//			cl=cl.getSuperclass();
+//		}
+//		
+//		throw new NullPointerException("Failed to automatically set command id. "
+//			+"Was "+rfcvFieldAtTheOwner.getClass()+" object owner properly set to the class where it is instantiated? "
+//			+strExceptionLog);
 	}
 	
 	/**

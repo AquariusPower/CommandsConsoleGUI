@@ -27,60 +27,27 @@
 
 package console;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 
-import com.jme3.math.Vector3f;
+import misc.Misc;
+import misc.TimedDelay;
+import console.gui.ConsoleGuiStateAbs;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public interface IConsoleUI {
-	public abstract void dumpAllStats();
-
-//	public abstract void setConsoleMaxWidthInCharsForLineWrap(Integer paramInt);
-
-//	public abstract Integer getConsoleMaxWidthInCharsForLineWrap();
-
-	public abstract AbstractList<String> getDumpEntriesSlowedQueue();
-
-	public abstract AbstractList<String> getDumpEntries();
-
-	public abstract AbstractList<String> getAutoCompleteHint();
-
-	public abstract String getInputText();
-
-	public abstract void setInputField(String str);
-
-	public abstract void scrollToBottomRequest();
-
-	public abstract String getDumpAreaSliderStatInfo();
-
-//	public abstract int getCmdHistoryCurrentIndex();
-
-	public abstract int getLineWrapAt();
-
-	public abstract ArrayList<String> wrapLineDynamically(DumpEntry de);
-
-	public abstract void clearDumpAreaSelection();
-
-	public abstract void clearInputTextField();
+public class PreQueueCmdsBlockSubList{
+	protected TimedDelay tdSleep = null;
+	protected String strUId = Misc.i().getNextUniqueId();
+	protected ArrayList<String> astrCmdList = new ArrayList<String>();
+	protected boolean	bPrepend = false;
+	protected boolean bForceFailBlockExecution = false;
+	protected boolean	bInfoSleepBegin = false;
+	protected String	strBlockInfo;
 	
-	public abstract void updateEngineStats();
-	
-	public abstract void cmdLineWrapDisableDumpArea();
-
-	public abstract boolean cmdEditCopyOrCut(boolean b);
-
-	public abstract void setVisibleRowsAdjustRequest(Integer paramInt);
-
-	public abstract boolean isVisibleRowsAdjustRequested();
-
-	public abstract boolean statsFieldToggle();
-
-	public abstract boolean isInitialized();
-
-	public abstract void setHKenabled(Boolean bEnable);
+	protected String getUniqueInfo(){
+		return "UId=\""+strUId+"\","+strBlockInfo;
+	}
 }

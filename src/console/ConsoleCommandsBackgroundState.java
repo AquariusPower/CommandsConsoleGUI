@@ -25,21 +25,28 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package console.gui;
+package console;
+
+import misc.BoolToggler;
+import misc.ReflexFill;
+import misc.ReflexFill.IReflexFillCfg;
+import misc.ReflexFill.IReflexFillCfgVariant;
+import misc.ReflexFill.ReflexFillCfg;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.renderer.RenderManager;
 
-import console.ConsoleCommands;
+import console.gui.ConsoleGuiStateAbs;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleCommandsBackgroundState implements AppState{
+public class ConsoleCommandsBackgroundState implements AppState, IReflexFillCfg{
+	protected BoolToggler	btgExecCommandsInBackground=null;
 	
 	private ConsoleGuiStateAbs	cgsaGraphicalConsoleUI;
 	private ConsoleCommands	ccCommandsPipe;
@@ -50,6 +57,11 @@ public class ConsoleCommandsBackgroundState implements AppState{
 		this.bEnabled=true; //just to let it be initialized at startup by state manager
 		this.cgsaGraphicalConsoleUI = cgsa;
 		this.ccCommandsPipe=cc;
+		
+		btgExecCommandsInBackground=new BoolToggler(this, false, ConsoleCommands.strTogglerCodePrefix,
+			"Will continue running console commands even if console is closed.");
+		
+		ReflexFill.assertReflexFillFieldsForOwner(this);
 	}
 	
 	@Override
@@ -74,21 +86,17 @@ public class ConsoleCommandsBackgroundState implements AppState{
 
 	@Override
 	public void stateAttached(AppStateManager stateManager) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void stateDetached(AppStateManager stateManager) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void update(float tpf) {
 		if(cgsaGraphicalConsoleUI.isEnabled())return; //foreground execution
 		
-		if(!ccCommandsPipe.btgExecCommandsInBackground.b())return;
+		if(!btgExecCommandsInBackground.b())return;
 		
 		/**
 		 * This way, being controlled by JME, the commands will happen in the same 
@@ -99,20 +107,19 @@ public class ConsoleCommandsBackgroundState implements AppState{
 
 	@Override
 	public void render(RenderManager rm) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void postRender() {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void cleanup() {
-		// TODO Auto-generated method stub
-		
+	}
+
+	@Override
+	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+		return ccCommandsPipe.getReflexFillCfg(rfcv);
 	}
 	
 }

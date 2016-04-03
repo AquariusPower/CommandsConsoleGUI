@@ -42,9 +42,7 @@ import console.ConsoleCommands.EStats;
  *	This class holds all commands that allows users to create
  *	scripts that will run in the console.
  *	
- *	For single player games seems ok.
- *	For multiplayer, me be interesting to disable it, just use {@link #ConsoleCommands()}
- *	or restrict what commands will be allowed inside the scripting ones.
+ *	To prevent users using these scripts, extend from {@link #ConsoleCommands()} instead.
  *
  * @author AquariusPower <https://github.com/AquariusPower>
  *
@@ -310,7 +308,7 @@ public class ConsoleScriptCommands extends ConsoleCommands{
 	public String prepareStatsFieldText() {
 		String strStatsLast = super.prepareStatsFieldText();
 		
-		if(EStats.FunctionCreation.b && strPrepareFunctionBlockForId!=null){
+		if(EStats.FunctionCreation.b() && strPrepareFunctionBlockForId!=null){
 			strStatsLast+=
 					"F="+strPrepareFunctionBlockForId
 						+";";

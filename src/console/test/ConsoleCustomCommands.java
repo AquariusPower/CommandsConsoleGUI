@@ -94,7 +94,7 @@ public class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleC
 	public String prepareStatsFieldText() {
 		String strStatsLast = super.prepareStatsFieldText();
 		
-		if(EStats.TimePerFrame.b){
+		if(EStats.TimePerFrame.b()){
 			strStatsLast+=
 					"Tpf"+(fpslState.isEnabled() ? (int)(fTPF*1000.0f) : Misc.i().fmtFloat(fTPF,6)+"s")
 						+(fpslState.isEnabled()?

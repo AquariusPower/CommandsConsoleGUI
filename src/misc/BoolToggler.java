@@ -57,13 +57,29 @@ public class BoolToggler implements IReflexFillCfgVariant{
 	private BoolToggler(){
 		abtgList.add(this);
 	}
-	public BoolToggler(IReflexFillCfg rfcfgOwner, boolean bInitValue, String strReflexFillCfgCodePrefixVariant){
-		this( rfcfgOwner,  bInitValue,  strReflexFillCfgCodePrefixVariant, "");
+	/**
+	 * 
+	 * @param rfcfgOwnerUseThis always pass as "this", the very class must implement it.
+	 * @param bInitValue
+	 * @param strReflexFillCfgCodePrefixVariant
+	 */
+	public BoolToggler(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitValue, String strReflexFillCfgCodePrefixVariant){
+		this( rfcfgOwnerUseThis,  bInitValue,  strReflexFillCfgCodePrefixVariant, "");
 	}
-	public BoolToggler(IReflexFillCfg rfcfgOwner, boolean bInitialValue, String strReflexFillCfgCodePrefixVariant, String strHelp){
+	/**
+	 * 
+	 * @param rfcfgOwnerUseThis always pass as "this", the very class must implement it.
+	 * @param bInitialValue
+	 * @param strReflexFillCfgCodePrefixVariant
+	 * @param strHelp
+	 */
+	public BoolToggler(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitialValue, String strReflexFillCfgCodePrefixVariant, String strHelp){
 		this();
+		
+//		ReflexFill.assertAndGetField(rfcfgOwnerUseThis, this);
+		
 		this.strReflexFillCfgCodePrefixVariant=strReflexFillCfgCodePrefixVariant;
-		this.rfcfgOwner=rfcfgOwner;
+		this.rfcfgOwner=rfcfgOwnerUseThis;
 		this.strHelp=strHelp;
 		set(bInitialValue);
 	}
@@ -78,11 +94,18 @@ public class BoolToggler implements IReflexFillCfgVariant{
 	 * @param strCmd
 	 */
 	protected void setCustomCmdId(String strCmd) {
+		/**
+		 * must be an exception as it can have already been read/collected with automatic value.
+		 */
+		if(this.strCommand!=null)throw new NullPointerException("asked for '"+strCmd+"' but was already set to: "+this.strCommand);
 		this.strCommand=strCmd;
 	}
 	public String getCmdId(){
 		if(strCommand!=null)return strCommand;
-		strCommand=ReflexFill.i().createIdentifierWithFieldName(rfcfgOwner,this);
+		/**
+		 * TODO why again this cannot be at the constructor? endless loop?
+		 */
+		strCommand = ReflexFill.i().createIdentifierWithFieldName(rfcfgOwner,this);
 		return strCommand;
 	}
 	
@@ -126,6 +149,11 @@ public class BoolToggler implements IReflexFillCfgVariant{
 	
 	public String getCmdIdAsCommand(boolean bForceState) {
 		return getCmdId()+" "+bForceState;
+	}
+
+	@Override
+	public IReflexFillCfg getOwner() {
+		return rfcfgOwner;
 	}
 	
 //	public static String getPrefix() {

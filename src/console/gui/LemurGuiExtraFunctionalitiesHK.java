@@ -31,7 +31,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import misc.ReflexFill;
+import misc.ReflexFill.IReflexFillCfgVariant;
+import misc.ReflexFill.ReflexFillCfg;
+import misc.StringField;
 import misc.TimedDelay;
+import misc.ReflexFill.IReflexFillCfg;
 
 import com.jme3.material.MatParam;
 import com.jme3.math.ColorRGBA;
@@ -42,6 +47,10 @@ import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.component.TextEntryComponent;
 import com.simsilica.lemur.focus.FocusManagerState;
 
+import console.ConsoleCommands;
+import console.gui.ConsoleGuiStateAbs;
+import console.IConsoleCommandListener;
+
 /**
  * These are hacks to provide extra functionalities.
  * This class functionality may break, therefore it's usage is optional.
@@ -50,7 +59,9 @@ import com.simsilica.lemur.focus.FocusManagerState;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class LemurGuiExtraFunctionalitiesHK {
+public class LemurGuiExtraFunctionalitiesHK implements IConsoleCommandListener, IReflexFillCfg{
+	public final StringField CMD_FIX_CURSOR;
+	
 	public ConsoleGuiStateAbs	cgs;
 	
 	/**
@@ -78,6 +89,9 @@ public class LemurGuiExtraFunctionalitiesHK {
 
 	public LemurGuiExtraFunctionalitiesHK(ConsoleGuiStateAbs cgs){
 		this.cgs=cgs;
+		this.cgs.getConsoleCommands().addConsoleCommandListener(this);
+		CMD_FIX_CURSOR = new StringField(this, ConsoleCommands.strFinalCmdCodePrefix);
+		ReflexFill.assertReflexFillFieldsForOwner(this);
 	}
 	
 	/**
@@ -276,5 +290,24 @@ public class LemurGuiExtraFunctionalitiesHK {
 	public void setCaratPosition(int iPos) {
 		iMoveCaratTo = iPos;
 		positionCaratProperlyHK();
+	}
+
+	@Override
+	public boolean executePreparedCommand() {
+		boolean bCmdEndedGracefully = false;
+		
+		if(cgs.getConsoleCommands().checkCmdValidity(null,CMD_FIX_CURSOR ,"in case cursor is invisible")){
+			cgs.getConsoleCommands().dumpInfoEntry("requesting: "+CMD_FIX_CURSOR);
+			bFixInvisibleTextInputCursorHK=true;
+			bCmdEndedGracefully = true;
+		}else
+		{}
+		
+		return bCmdEndedGracefully;
+	}
+
+	@Override
+	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+		return this.cgs.getConsoleCommands().getReflexFillCfg(rfcv);
 	}
 }

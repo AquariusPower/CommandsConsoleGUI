@@ -65,6 +65,9 @@ public class StringField implements IReflexFillCfgVariant{
 	public StringField(IReflexFillCfg rfcfgOwner, String strReflexFillCfgCodePrefixVariant){ // int iReflexFillCfgVariant){
 //		this.iReflexFillCfgVariant=iReflexFillCfgVariant;
 		this.strReflexFillCfgCodePrefixVariant = strReflexFillCfgCodePrefixVariant;
+		
+//		ReflexFill.assertAndGetField(rfcfgOwner, this);
+		
 		this.rfcfgOwner=rfcfgOwner;
 		
 		if(this.rfcfgOwner==null){
@@ -124,5 +127,10 @@ public class StringField implements IReflexFillCfgVariant{
 	@Override
 	public String getCodePrefixVariant() {
 		return strReflexFillCfgCodePrefixVariant;
+	}
+
+	@Override
+	public IReflexFillCfg getOwner() {
+		return rfcfgOwner;
 	}
 }

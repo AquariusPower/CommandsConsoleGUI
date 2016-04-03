@@ -84,6 +84,10 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 		super.simpleUpdate(tpf);
 	}
 	
+	public ConsoleGuiTest(){
+		ReflexFill.assertReflexFillFieldsForOwner(this);
+	}
+	
 	public static void main( String... args ) {
 		ConsoleGuiTest main = new ConsoleGuiTest();
 		if(main.bHideSettings){
