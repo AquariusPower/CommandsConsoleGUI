@@ -36,7 +36,7 @@ import console.IConsoleCommandListener;
  *
  */
 public class Debug implements IConsoleCommandListener{
-	private ConsoleCommands	cc;
+//	private ConsoleCommands	cc;
 	
 	/**
 	 * when enabled, these keys are used to perform debug tests
@@ -47,15 +47,15 @@ public class Debug implements IConsoleCommandListener{
 		boolean b;
 	}
 	
-	private static Debug instance;
+	private static Debug instance = new Debug();
 	public static Debug i(){return instance;}
 //	public static void init(Debug dbg){
 //		Debug.instance=dbg;
 //	}
 	
-	public Debug(ConsoleCommands cc){
-		if(Debug.instance==null)Debug.instance=this;
-		this.cc=cc;
+	public void initialize(ConsoleCommands cc){
+//		if(Debug.instance==null)Debug.instance=this;
+//		this.cc=cc;
 		cc.addConsoleCommandListener(this);
 	}
 	
@@ -68,7 +68,7 @@ public class Debug implements IConsoleCommandListener{
 	}
 
 	@Override
-	public boolean executePreparedCommand() {
+	public boolean executePreparedCommand(ConsoleCommands	cc) {
 		boolean bCmdExecEndNicely=false;
 		
 		if(cc.checkCmdValidity(this,"debug","[optionToToggle] empty for a list")){

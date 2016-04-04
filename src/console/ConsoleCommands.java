@@ -41,6 +41,7 @@ import misc.Debug;
 import misc.IHandleExceptions;
 import misc.Misc;
 import misc.ReflexFill;
+import misc.ReflexHacks;
 import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
 import misc.ReflexFill.ReflexFillCfg;
@@ -64,6 +65,9 @@ import console.gui.ConsoleGuiStateAbs;
  *
  */
 public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
+//	public static final T instance;
+	
+	
 	/**
 	 * TODO temporary variable used only during methods migration, commands class must not depend/know about state class.
 	 */
@@ -80,7 +84,9 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 * Adding a toggler field on any class, 
 	 * will automatically create the related console command!
 	 */
-	protected static final String strTogglerCodePrefix="btg";
+	public static final String strTogglerCodePrefix="btg";
+//	public final BoolToggler	btgAcceptExternalExitRequests = new BoolToggler(this,false,strTogglerCodePrefix, 
+//		"if a ");
 	public final BoolToggler	btgDbAutoBkp = new BoolToggler(this,false,strTogglerCodePrefix, 
 		"whenever a save happens, if the DB was modified, a backup will be created of the old file");
 	public final BoolToggler	btgShowWarn = new BoolToggler(this,true,strTogglerCodePrefix);
@@ -234,17 +240,20 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //		instance=this;
 //	}
 	
-	protected ConsoleCommands(){ //IConsoleUI icg) {
-		ReflexFill.assertReflexFillFieldsForOwner(this);
-//		this();
-//		this.icui=icg;
-		
-		new Debug(this);
-		Misc.i().setExceptionHandler(this);
-		ReflexFill.setExceptionHandler(this);
-//		addConsoleCommandListener(Debug.i());
-//		Debug.i().setConsoleCommand(this);
-	}
+//	protected ConsoleCommands(){ //IConsoleUI icg) {
+////		ReflexFill.assertReflexFillFieldsForOwner(this);
+//////		this();
+//////		this.icui=icg;
+////		
+////		Debug.i().initialize(this);
+//////		new Debug(this);
+////		Misc.i().initialize(this);
+////		ReflexHacks.i().initialize(sapp, this, this);
+//		
+////		ReflexFill.setExceptionHandler(this);
+////		addConsoleCommandListener(Debug.i());
+////		Debug.i().setConsoleCommand(this);
+//	}
 	
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
@@ -361,7 +370,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	protected boolean checkCmdValidityBoolTogglers(){
 		btgReferenceMatched=null;
 		for(BoolToggler btg : BoolToggler.getBoolTogglerListCopy()){
-			if(checkCmdValidity(null, btg.getCmdId(), "[bEnable] "+btg.getHelp(), true)){
+			if(checkCmdValidity(btg.getOwnerAsCmdListener(), btg.getCmdId(), "[bEnable] "+btg.getHelp(), true)){
 				btgReferenceMatched = btg;
 				break;
 			}
@@ -685,7 +694,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		}else
 		{
 			for(IConsoleCommandListener icc:aConsoleCommandListenerList){
-				bCmdEndedGracefully = icc.executePreparedCommand();
+				bCmdEndedGracefully = icc.executePreparedCommand(this);
 				if(bCmdEndedGracefully)break;
 			}
 //			if(strCmdLinePrepared!=null){
@@ -2251,6 +2260,11 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 
 	public void initialize(IConsoleUI icui, SimpleApplication sapp){
+		ReflexFill.assertReflexFillFieldsForOwner(this);
+		Debug.i().initialize(this);
+		Misc.i().initialize(this);
+		ReflexHacks.i().initialize(sapp, this, this);
+		
 		this.icui=icui;
 		this.sapp=sapp;
 		

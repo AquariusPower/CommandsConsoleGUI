@@ -31,6 +31,7 @@ import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
 import misc.ReflexFill.ReflexFillCfg;
 import misc.ReflexFill;
+import misc.ReflexHacks;
 import misc.StringField;
 import misc.TimedDelay;
 
@@ -60,7 +61,7 @@ import console.IConsoleCommandListener;
  *
  */
 public class LemurGuiMisc implements AppState, IConsoleCommandListener, IReflexFillCfg{
-	public final StringField CMD_FIX_CURSOR = new StringField(this, ConsoleCommands.strFinalCmdCodePrefix);
+	public final StringField CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringField(this, ConsoleCommands.strFinalCmdCodePrefix);
 	
 	private static LemurGuiMisc instance = new LemurGuiMisc(); 
 	public static LemurGuiMisc i(){return instance;}
@@ -119,9 +120,23 @@ public class LemurGuiMisc implements AppState, IConsoleCommandListener, IReflexF
 	
 	private void fixInvisibleCursor(TextField tf){
 		if(!bFixInvisibleTextInputCursor)return;
-		ColorRGBA color = tf.getColor();
-		color.a=1f;
-		tf.setColor(color);
+		BitmapText bmt = getBitmapTextFrom(tf);
+		
+		/**
+		 * The BitmapText base alpha is set to an invalid value -1.
+		 * That value seems to be used as a marker/indicator of "invalidity?".
+		 * But the problem is, it is used as a normal value and never verified/validadted 
+		 * towards its invalidity of -1.
+		 * Wouldnt have been better if it was used 'null' as indicator of invalidity?
+		 * 
+		 * This flow will fix that base alpha to fully visible.
+		 */
+		bmt.setAlpha(1f); // alpha need to be fixed, it was -1; -1 is an invalid value used as a merker/indicator, woulndt be better it be a null marker?
+		
+		/**
+		 * This flow will apply the base alpha of BitmapText to the text cursor.
+		 */
+		tf.setColor(tf.getColor());
 	}
 	/**
 	 * see {@link TextEntryComponent#resetCursorColor()}
@@ -129,7 +144,7 @@ public class LemurGuiMisc implements AppState, IConsoleCommandListener, IReflexF
 	private void fixInvisibleCursor(Geometry geomCursor){
 		if(!bFixInvisibleTextInputCursor)return;
 //	getBitmapTextFrom(tf).setAlpha(1f); //this is a fix to let text cursor be visible.
-		geomCursor.getMaterial().setColor("Color", ColorRGBA.White.clone());
+		geomCursor.getMaterial().setColor("Color",ColorRGBA.White.clone());
 	}
 	
 	private void updateBlinkInputFieldTextCursor(TextField tf) {
@@ -167,8 +182,8 @@ public class LemurGuiMisc implements AppState, IConsoleCommandListener, IReflexF
 				if(geomCursor.getCullHint().compareTo(CullHint.Always)!=0){
 					geomCursor.setCullHint(CullHint.Always);
 				}else{
-//					fixInvisibleCursor(tf);
-					fixInvisibleCursor(geomCursor);
+					fixInvisibleCursor(tf);
+//					fixInvisibleCursor(geomCursor);
 					geomCursor.setCullHint(CullHint.Inherit);
 				}
 				
@@ -239,11 +254,11 @@ public class LemurGuiMisc implements AppState, IConsoleCommandListener, IReflexF
 	}
 
 	@Override
-	public boolean executePreparedCommand() {
+	public boolean executePreparedCommand(ConsoleCommands	cc) {
 		boolean bCmdEndedGracefully = false;
 		
-		if(cc.checkCmdValidity(this,CMD_FIX_CURSOR ,"in case cursor is invisible")){
-			cc.dumpInfoEntry("requesting: "+CMD_FIX_CURSOR);
+		if(cc.checkCmdValidity(this,CMD_FIX_INVISIBLE_TEXT_CURSOR ,"in case text cursor is invisible")){
+			cc.dumpInfoEntry("requesting: "+CMD_FIX_INVISIBLE_TEXT_CURSOR);
 			bFixInvisibleTextInputCursor=true;
 			bCmdEndedGracefully = true;
 		}else
@@ -297,8 +312,9 @@ public class LemurGuiMisc implements AppState, IConsoleCommandListener, IReflexF
 	}
 	
 	/**
-	 * To show the cursor at the new carat position, this method must be called in some way:
-	 * {@link TextEntryComponent#resetCursorPosition}
+	 * To show the cursor at the new carat position, 
+	 * this required method: {@link TextEntryComponent#resetCursorPosition}
+	 * must be reached in some way...
 	 * 
 	 * @param tf
 	 * @param iMoveCaratTo
@@ -311,13 +327,23 @@ public class LemurGuiMisc implements AppState, IConsoleCommandListener, IReflexF
 			dm.right();
 		}
 		
-		/**
-		 * this trick updates the displayed cursor position
-		 */
-		tf.setFontSize(tf.getFontSize());
-		// this below would be a hack...
-		if(false)ReflexFill.reflexMethodCallHK(
-			((TextEntryComponent)ReflexFill.reflexFieldHK(tf, "text")), 
-			"resetCursorPosition");
+		resetCursorPosition(tf);
+	}
+	
+	/**
+	 * This updates the displayed text cursor position.
+	 * 
+	 * This below is actually a trick, 
+	 * because this flow will finally call the required method.
+	 *  
+	 * @param tf
+	 */
+	public void resetCursorPosition(TextField tf){
+		tf.setFontSize(tf.getFontSize()); //resetCursorPositionHK(tf);
+	}	
+	@Deprecated
+	public void resetCursorPositionHK(TextField tf){
+		TextEntryComponent tec = ((TextEntryComponent)ReflexHacks.i().getFieldValueHK(tf, "text"));
+		ReflexHacks.i().callMethodHK(tec,"resetCursorPosition");
 	}
 }

@@ -55,7 +55,7 @@ public class Misc {
 	private IHandleExceptions	ihe;
 	private String	strLastUid = "0";
 	
-	public void setExceptionHandler(IHandleExceptions ihe){
+	public void initialize(IHandleExceptions ihe){
 		this.ihe=ihe;
 	}
 	

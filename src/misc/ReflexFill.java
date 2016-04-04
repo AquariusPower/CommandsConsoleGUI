@@ -32,13 +32,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import console.ConsoleCommands;
+import console.IConsoleCommandListener;
+
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ReflexFill {
-	private static IHandleExceptions	ihe;
+public class ReflexFill{ //implements IConsoleCommandListener{
+//	private static IHandleExceptions	ihe;
 	
 	private static boolean bUseDefaultCfgIfMissing=false;
 	
@@ -71,6 +74,8 @@ public class ReflexFill {
 	}
 	
 	private static ReflexFill instance = new ReflexFill();
+
+	private static boolean	bAllowHK = true;
 	
 	/**
 	 * 
@@ -161,6 +166,8 @@ public class ReflexFill {
 	
 	/**
 	 * Works on reflected variable name.
+	 * If it is all uppercase, it will be prettyfied.
+	 * 
 	 * @param rfcfgOwnerOfField
 	 * @param rfcvFieldAtTheOwner
 	 * @return
@@ -184,8 +191,13 @@ public class ReflexFill {
 		
 		String strFieldName=fld.getName();
 		
-		boolean bFinal=false;
-		if(Modifier.isFinal(fld.getModifiers()))bFinal=true;
+//		boolean bFinal=false;
+//		if(Modifier.isFinal(fld.getModifiers()))bFinal=true;
+//		boolean bMakePretty=bFinal;
+//		boolean bMakePretty=false;
+		boolean bMakePretty=!strFieldName.matches(".*[a-z].*");
+//		if(strFieldName.matches(".*[a-z].*"))bMakePretty=false; //if it has lower case, it is already prettied
+//		if(!strFieldName.matches(".*[a-z].*"))bMakePretty=true; //if it has lower case, it is already prettied
 		
 		String strCodeTypePrefix = rfcfg.strCodingStyleFieldNamePrefix;
 //		if(bFinal)strCodeTypePrefix = rfcfg.strCodingStyleFinalFieldNamePrefix;
@@ -200,7 +212,7 @@ public class ReflexFill {
 				strCommand=strCommand.substring(strCodeTypePrefix.length());
 			}
 			
-			if(bFinal){
+			if(bMakePretty){
 				/**
 				 * upper case with underscores
 				 */
@@ -326,62 +338,22 @@ public class ReflexFill {
 		ReflexFill.bUseDefaultCfgIfMissing = bUseDefaultCfgIfMissing;
 	}
 	
-	public static void setExceptionHandler(IHandleExceptions ihe){
-		ReflexFill.ihe=ihe;
-	}
+//	private static IHandleExceptions	ihe;
+//	public static void setExceptionHandler(IHandleExceptions ihe){
+//		ReflexFill.ihe=ihe;
+//	}
 	
-	/**
-	 * We shouldnt access private fields/methods as things may break.
-	 * Any code depending on this must ALWAYS be optional!
-	 * 
-	 * @param clazzOfObjectFrom what superclass of the object from is to be used?
-	 * @param objFrom
-	 * @param strFieldName will break if changed..
-	 * @return field value
-	 */
-	public static Object reflexFieldHK(Class<?> clazzOfObjectFrom, Object objFrom, String strFieldName){
-		Object objFieldValue = null;
-		try{
-			Field field = clazzOfObjectFrom.getDeclaredField(strFieldName);
-			field.setAccessible(true);
-			objFieldValue = field.get(objFrom);
-			field.setAccessible(false);
-		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
-			ihe.handleException(e);
-//			instance.cgs.cc.dumpExceptionEntry(e);
-		}
-		
-		return objFieldValue;
-	}
-	public static Object reflexFieldHK(Object objFrom, String strFieldName){
-//		if(!bAllowHK)return null;
-		
-		return reflexFieldHK(objFrom.getClass(), objFrom, strFieldName);
-	}
-	
-	/**
-	 * We shouldnt access private fields/methods as things may break.
-	 * Any code depending on this must ALWAYS be optional!
-	 * 
-	 * @param objInvoker
-	 * @param strMethodName
-	 * @param aobjParams
-	 */
-	public static Object reflexMethodCallHK(Object objInvoker, String strMethodName, Object... aobjParams) {
-//		if(!bAllowHK)return null;
-		
-		Object objReturn = null;
-		try {
-			Method m = objInvoker.getClass().getDeclaredMethod(strMethodName);
-			boolean bWasAccessible=m.isAccessible();
-			if(!bWasAccessible)m.setAccessible(true);
-			objReturn = m.invoke(objInvoker);
-			if(!bWasAccessible)m.setAccessible(false);
-		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			ihe.handleException(e);
-//			cgs.cc.dumpExceptionEntry(e);
-		}
-		return objReturn;
-	}
+//	@Override
+//	public boolean executePreparedCommand(ConsoleCommands	cc) {
+//		boolean bCommandWorked = false;
+//		
+//		if(cc.checkCmdValidity(this,btgHacks,"[iHowMany] users working")){
+//			bAllowHK=cc.paramBoolean(1);
+//			bCommandWorked = true;
+//		}else
+//		{}
+//			
+//		return bCommandWorked;
+//	}
 
 }

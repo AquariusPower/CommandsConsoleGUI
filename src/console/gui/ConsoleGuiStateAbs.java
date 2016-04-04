@@ -1897,7 +1897,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	}
 
 	@Override
-	public boolean executePreparedCommand(){
+	public boolean executePreparedCommand(ConsoleCommands	cc){
 		boolean bCommandWorked = false;
 		
 		if(cc.checkCmdValidity(this,CMD_CLOSE_CONSOLE,"like the bound key to do it")){

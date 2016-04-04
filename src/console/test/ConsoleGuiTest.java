@@ -27,8 +27,6 @@
 
 package console.test;
 
-import misc.Debug;
-import misc.Misc;
 import misc.ReflexFill;
 import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
@@ -36,14 +34,10 @@ import misc.ReflexFill.ReflexFillCfg;
 import misc.StringField;
 
 import com.jme3.app.SimpleApplication;
-import com.jme3.input.KeyInput;
 import com.jme3.system.AppSettings;
 
-import console.ConsoleScriptCommands;
+import console.ConsoleCommands;
 import console.IConsoleCommandListener;
-import console.IConsoleUI;
-import console.gui.ConsoleGUILemurState;
-import extras.FpsLimiterState;
 
 /**
  * 
@@ -51,32 +45,32 @@ import extras.FpsLimiterState;
  *
  */
 public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommandListener, IReflexFillCfg{
-	protected ConsoleCustomCommands	cgsCustomizedState;	
+	protected ConsoleCustomCommands	cc;	
 	protected boolean bHideSettings=true; 
 	
 	//private final String strFinalFieldCodePrefix="CMD_";
 	private final String strFieldCodePrefix="sf";
 	private final String strFieldCodePrefixLess = "VariantAsPrefixLess";
 	
-	public final StringField CMD_END_USER_COMMAND_TEST = new StringField(this,cgsCustomizedState.strFinalCmdCodePrefix);
+	public final StringField CMD_END_USER_COMMAND_TEST = new StringField(this,cc.strFinalCmdCodePrefix);
 	private StringField sfTestCommandAutoFillVariant1 = new StringField(this,strFieldCodePrefix);
 	private StringField testCommandAutoFillPrefixLessVariant2 = new StringField(this,strFieldCodePrefixLess);
 	private StringField testCommandAutoFillPrefixLessVariantDefaulted3 = new StringField(this,null);
 	
 	public boolean endUserCustomMethod(Integer i){
-		cgsCustomizedState.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
-		cgsCustomizedState.dumpSubEntry("CommandTest1: "+sfTestCommandAutoFillVariant1);
-		cgsCustomizedState.dumpSubEntry("CommandTest2: "+testCommandAutoFillPrefixLessVariant2);
+		cc.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
+		cc.dumpSubEntry("CommandTest1: "+sfTestCommandAutoFillVariant1);
+		cc.dumpSubEntry("CommandTest2: "+testCommandAutoFillPrefixLessVariant2);
 		if(ReflexFill.isbUseDefaultCfgIfMissing()){
-			cgsCustomizedState.dumpSubEntry("CommandTest3: "+testCommandAutoFillPrefixLessVariantDefaulted3);
+			cc.dumpSubEntry("CommandTest3: "+testCommandAutoFillPrefixLessVariantDefaulted3);
 		}
 		return true;
 	}
 	
 	@Override
 	public void simpleInitApp() {
-		cgsCustomizedState = new ConsoleCustomCommands(this);
-		cgsCustomizedState.addConsoleCommandListener(this);
+		cc = new ConsoleCustomCommands(this);
+		cc.addConsoleCommandListener(this);
 	}
 	
 	@Override
@@ -103,19 +97,11 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 	}
 
 	@Override
-	public boolean executePreparedCommand() {
+	public boolean executePreparedCommand(ConsoleCommands	cc) {
 		boolean bCommandWorked = false;
 		
-		if(cgsCustomizedState.checkCmdValidity(this,CMD_END_USER_COMMAND_TEST,"[iHowMany] users working")){
-			bCommandWorked = endUserCustomMethod(cgsCustomizedState.paramInt(1));
-//		}else
-//		if(cgsCustomizedState.checkCmdValidity("fpsLimit","[iMaxFps]")){
-//			Integer iMaxFps = cgsCustomizedState.paramInt(1);
-//			if(iMaxFps!=null){
-//				cgsCustomizedState.fpslState.setMaxFps(iMaxFps);
-//				bCommandWorked=true;
-//			}
-//			cgsCustomizedState.dumpSubEntry("FpsLimit = "+cgsCustomizedState.fpslState.getFpsLimit());
+		if(cc.checkCmdValidity(this,CMD_END_USER_COMMAND_TEST,"[iHowMany] users working")){
+			bCommandWorked = endUserCustomMethod(cc.paramInt(1));
 		}else
 		{}
 			
@@ -146,7 +132,7 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 		 * Remember to set the same variant!
 		 */
 //		if(rfcfg==null)rfcfg = getReflexFillCfg(rfcv);
-		if(rfcfg==null)rfcfg = cgsCustomizedState.getReflexFillCfg(rfcv);
+		if(rfcfg==null)rfcfg = cc.getReflexFillCfg(rfcv);
 		
 		return rfcfg;
 	}

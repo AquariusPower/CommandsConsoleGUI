@@ -33,12 +33,11 @@ package console;
  *
  */
 public interface IConsoleCommandListener{
-	
 	/**
 	 * Any class can implement commands, you just need to add them with:
 	 * {@link ConsoleCommands#addConsoleCommandListener(IConsoleCommandListener)}
 	 * 
 	 * @return
 	 */
-	public abstract boolean executePreparedCommand();
+	public abstract boolean executePreparedCommand(ConsoleCommands cc);
 }

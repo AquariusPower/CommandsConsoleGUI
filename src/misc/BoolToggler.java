@@ -29,6 +29,7 @@ package misc;
 
 import java.util.ArrayList;
 
+import console.IConsoleCommandListener;
 import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
 
@@ -154,6 +155,14 @@ public class BoolToggler implements IReflexFillCfgVariant{
 	@Override
 	public IReflexFillCfg getOwner() {
 		return rfcfgOwner;
+	}
+
+	public IConsoleCommandListener getOwnerAsCmdListener() {
+		if(rfcfgOwner instanceof IConsoleCommandListener){
+			return (IConsoleCommandListener)rfcfgOwner;
+		}
+		
+		return null;
 	}
 	
 //	public static String getPrefix() {
