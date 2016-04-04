@@ -27,6 +27,8 @@
 
 package misc;
 
+import java.lang.management.ManagementFactory;
+
 import console.ConsoleCommands;
 import console.IConsoleCommandListener;
 
@@ -52,6 +54,8 @@ public class Debug implements IConsoleCommandListener{
 //	public static void init(Debug dbg){
 //		Debug.instance=dbg;
 //	}
+
+	private Boolean	bDebugMode;
 	
 	public void initialize(ConsoleCommands cc){
 //		if(Debug.instance==null)Debug.instance=this;
@@ -90,5 +94,13 @@ public class Debug implements IConsoleCommandListener{
 		{}
 		
 		return bCmdExecEndNicely;
+	}
+
+	public boolean isInIDEdebugMode() {
+		if(bDebugMode==null){
+			bDebugMode=ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
+				.indexOf("-agentlib:jdwp") > 0;
+		}
+		return bDebugMode;
 	}
 }

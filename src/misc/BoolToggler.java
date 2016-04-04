@@ -133,6 +133,8 @@ public class BoolToggler implements IReflexFillCfgVariant{
 		return false;
 	}
 	
+	
+	
 	@Override
 	public String toString() {
 		return ""+bCurrent;
@@ -163,6 +165,10 @@ public class BoolToggler implements IReflexFillCfgVariant{
 		}
 		
 		return null;
+	}
+
+	public String getReport() {
+		return getCmdId()+" = "+bCurrent;
 	}
 	
 //	public static String getPrefix() {

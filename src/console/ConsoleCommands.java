@@ -41,18 +41,17 @@ import misc.Debug;
 import misc.IHandleExceptions;
 import misc.Misc;
 import misc.ReflexFill;
-import misc.ReflexHacks;
 import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
 import misc.ReflexFill.ReflexFillCfg;
+import misc.ReflexHacks;
+import misc.SingleInstance;
 import misc.StringField;
 import misc.TimedDelay;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.jme3.app.SimpleApplication;
-
-import console.gui.ConsoleGuiStateAbs;
 
 /**
  * All methods starting with "cmd" are directly accessible by user console commands.
@@ -2152,8 +2151,8 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		
 //		dumpSubEntry("Previous Second FPS  = "+lPreviousSecondFPS);
 		
-		for(BoolToggler bh : BoolToggler.getBoolTogglerListCopy()){
-			dumpSubEntry(bh.getCmdId()+" = "+bh.get());
+		for(BoolToggler btg : BoolToggler.getBoolTogglerListCopy()){
+			dumpSubEntry(btg.getReport());
 		}
 		
 		dumpSubEntry("User Dump File = "+flLastDump.getAbsolutePath());
@@ -2260,10 +2259,12 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 
 	public void initialize(IConsoleUI icui, SimpleApplication sapp){
+//		Init.i().initialize(sapp, this);
 		ReflexFill.assertReflexFillFieldsForOwner(this);
 		Debug.i().initialize(this);
 		Misc.i().initialize(this);
 		ReflexHacks.i().initialize(sapp, this, this);
+		SingleInstance.i().initialize(sapp, this);
 		
 		this.icui=icui;
 		this.sapp=sapp;
