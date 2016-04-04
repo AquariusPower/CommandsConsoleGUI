@@ -39,11 +39,14 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+
+import javax.naming.directory.BasicAttributes;
 
 /**
  * 
@@ -75,7 +78,14 @@ public class Misc {
 	}
 	
 	public String getDateTimeForFilename(){
-		return new SimpleDateFormat("yyyyMMdd-HHmmss").format(Calendar.getInstance().getTime());
+		return getDateTimeForFilename(false);
+	}
+	public String getDateTimeForFilename(boolean bShowMilis){
+		String strMilis="";
+		if(bShowMilis)strMilis="-SSS";
+		
+		return new SimpleDateFormat("yyyyMMdd-HHmmss"+strMilis)
+			.format(Calendar.getInstance().getTime());
 	}
 	
 	public String fmtFloat(double d){
@@ -192,5 +202,14 @@ public class Misc {
 		}
 		
 		return "";
+	}
+	
+	public BasicFileAttributes fileAttributes(File fl){
+		try {
+			return Files.readAttributes(fl.toPath(), BasicFileAttributes.class);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

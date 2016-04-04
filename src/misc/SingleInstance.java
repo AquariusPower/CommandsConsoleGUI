@@ -30,8 +30,8 @@ package misc;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 
 import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
@@ -46,6 +46,7 @@ import com.jme3.renderer.RenderManager;
 import console.ConsoleCommands;
 
 /**
+ * Locks have a short timeout.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
@@ -67,6 +68,9 @@ public class SingleInstance implements IReflexFillCfg, AppState{
 	private boolean	bEnabled = true;
 	private FilenameFilter	fnf;
 	private File	flFolder;
+	private long lLockUpdateDelayMilis=3000;
+	private long	lSelfLockCreationTime;
+	private String	strExitReasonOtherInstance = "";
 	
 	private static SingleInstance instance = new SingleInstance();
 	public static SingleInstance i(){return instance;}
@@ -75,19 +79,35 @@ public class SingleInstance implements IReflexFillCfg, AppState{
 		return flFolder.listFiles(fnf);
 	}
 	
+//	/**
+//	 * This will happen if newer instances are to exit promptly
+//	 * allowing only the older instance to remain running.
+//	 * 
+//	 * So, broken locks will be cleaned.
+//	 */
+//	private void clearBrokenLocks(){
+//		if(bDevModeExitIfThereIsANewerInstance)return;
+//			
+//		for(File fl:getAllLocks()){
+//			if(cmpSelfWith(fl))continue;
+//			System.err.println("Cleaning lock: "+fl.getName());
+//			fl.delete();
+//		}
+//	}
+	
 	/**
-	 * This will happen if newer instances are to exit promptly
-	 * allowing only the older instance to remain running.
-	 * 
-	 * So, broken locks will be cleaned.
+	 * Clear locks that have not been updated lately.
 	 */
-	private void clearBrokenLocks(){
-		if(bDevModeExitIfThereIsANewerInstance)return;
-			
+	private void clearOldLocks(){
 		for(File fl:getAllLocks()){
 			if(cmpSelfWith(fl))continue;
-			System.err.println("Cleaning lock: "+fl.getName());
-			fl.delete();
+			
+			BasicFileAttributes attr = Misc.i().fileAttributes(fl);
+			long lTimeLimit = System.currentTimeMillis() - (lLockUpdateDelayMilis*2);
+			if(attr.lastModifiedTime().toMillis() < lTimeLimit){
+				System.err.println("Cleaning old lock: "+fl.getName());
+				fl.delete();
+			}
 		}
 	}
 	
@@ -100,50 +120,69 @@ public class SingleInstance implements IReflexFillCfg, AppState{
 		if(!btgAllowSingleInstace.b())return false;
 		
 		boolean bExit=false;
-		for(File fl:getAllLocks()){
-			if(cmpSelfWith(fl))continue;
+		String strReport="";
+		strReport+="-----------------SimultaneousLocks--------------------\n";
+		strReport+="ThisLock:  "+flSelfLock.getName()+"\n";
+		int iSimultaneousLocksCount=0;
+		for(File flOtherLock:getAllLocks()){
+			if(cmpSelfWith(flOtherLock))continue;
 			
-			try {
-//				String strOther="";
-				BasicFileAttributes attr = Files.readAttributes(fl.toPath(), BasicFileAttributes.class);
-				
-				boolean  bOtherIsNewer = attrSelfLock.creationTime().compareTo(attr.creationTime())<0;
-				
-				if(bDevModeExitIfThereIsANewerInstance && bOtherIsNewer){
-//					strOther="NEWER";
-					bExit=true;
-				}else
-				if(!bDevModeExitIfThereIsANewerInstance && !bOtherIsNewer){
-					/**
-					 * exit if there is an older instance
-					 */
-//					strOther="OLDER";
-					bExit=true;
-				}
-				
-//				if(btgSingleInstaceOverrideOlder.b() && bOtherIsNewer)continue;
-//				
-//				if(btgSingleInstaceOverrideOlder.b()){
-//					if(attrSelfLock.creationTime().compareTo(attr.creationTime())<0){
-//						strOther="NEWER";
-//						bExit=true;
-//					}
-//				}else{
-//					if(attrSelfLock.creationTime().compareTo(attr.creationTime())>0){
-//						strOther="OLDER";
-//						bExit=true;
-//					}
-//				}
-				
-				if(bExit){
-					System.err.println(other()+" file lock: "+fl.getName());
-					break;
-				}
-				
-			} catch (IOException e) {
-				e.printStackTrace();
+//			attrSelfLock = Misc.i().fileAttributes(flSelfLock);
+//			BasicFileAttributes attrOtherLock = Misc.i().fileAttributes(flOtherLock);
+			
+//			long lThisCreationTime = Long.parseLong(Misc.i().fileLoad(flSelfLock).get(0));
+			long lOtherCreationTime = Long.parseLong(Misc.i().fileLoad(flOtherLock).get(0));
+			
+//			System.err.println("ThisLock: "+attrSelfLock.creationTime()+", "+flSelfLock.getName());
+//			System.err.println("OtherLock:"+attrOtherLock.creationTime()+", "+flOtherLock.getName());
+			strReport+="OtherLock: "+flOtherLock.getName()+"\n";
+			
+//			boolean  bOtherIsNewer = attrSelfLock.creationTime().compareTo(attrOtherLock.creationTime())<0;
+			boolean  bOtherIsNewer = lSelfLockCreationTime < lOtherCreationTime;
+			
+			if(bDevModeExitIfThereIsANewerInstance && bOtherIsNewer){
+				strExitReasonOtherInstance="NEWER";
+				bExit=true;
+			}else
+			if(!bDevModeExitIfThereIsANewerInstance && !bOtherIsNewer){
+				/**
+				 * exit if there is an older instance
+				 */
+				strExitReasonOtherInstance="OLDER";
+				bExit=true;
 			}
 			
+			if(!bExit){
+				/**
+				 * If the other instance is in release mode,
+				 * this debug mode instance will exit.
+				 * 
+				 * To test, start a release mode, and AFTER that, start a debug mode one.
+				 */
+				if(Debug.i().isInIDEdebugMode()){
+					if(!getLockMode(flOtherLock).equalsIgnoreCase(strDebugMode)){
+						strExitReasonOtherInstance="ReleaseMode";
+						bExit=true;
+					}
+				}
+			}
+			
+			iSimultaneousLocksCount++;
+//			if(bExit)break;
+//			{
+////				System.err.println(strReport);
+////				System.err.println(otherPrefixInfo()+" file lock: "+flOtherLock.getName());
+//				break;
+//			}
+		}
+		
+		if(bExit){
+			System.err.println(strReport);
+		}else{
+			if(iSimultaneousLocksCount>0){
+				System.err.println(strReport+"This instance will continue running.");
+				clearOldLocks();
+			}
 		}
 		
 		return bExit;
@@ -152,10 +191,12 @@ public class SingleInstance implements IReflexFillCfg, AppState{
 	class ThreadChecker implements Runnable{
 		@Override
 		public void run() {
-			boolean bCleanOnce=true;
 			while(true){
 				try {
-					Thread.sleep(3000);
+					if(!flSelfLock.exists()){
+						System.err.println("Lock was deleted, recreating: "+flSelfLock.getName());
+						createSelfLockFile();
+					}
 					
 					if(checkExit()){
 //						System.err.println(btgSingleInstaceExitSelfIfOlder.getReport());
@@ -163,52 +204,103 @@ public class SingleInstance implements IReflexFillCfg, AppState{
 //						if(bDevModeExitIfThereIsANewerInstance){
 //							strOther="NEWER";
 //						}
-						System.err.println(other()+" is running, exiting...");
+						
+						System.err.println("Other "+strExitReasonOtherInstance+" instance is running, exiting this...");
+//						if(strExitReason.equalsIgnoreCase(strDebugMode)){
+//							System.err.println("Other instance is running, exiting this...");
+//						}else{
+//							if(bDevModeExitIfThereIsANewerInstance){
+//								System.err.println("Other NEWER instance is running, exiting this...");
+//							}else{
+//								System.err.println("Other OLDER instance is running, exiting this...");
+//							}
+//						}
+						
+//						System.err.println(otherPrefixInfo()+" is running, exiting...");
 						flSelfLock.delete();
 						System.exit(0);
-					}else
-					if(bCleanOnce){
-						clearBrokenLocks();
-						bCleanOnce=false;
 					}
+//					else
+//					if(bCleanOnce){
+//						clearBrokenLocks();
+//						bCleanOnce=false;
+//					}
+					
+					/**
+					 * This will also update the file creation time...
+					 */
+					flSelfLock.setLastModified(System.currentTimeMillis());
+					
+					/**
+					 * sleep after to help on avoiding allocating resources.
+					 */
+					Thread.sleep(lLockUpdateDelayMilis);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 					flSelfLock.delete();
 				}
 			}
 		}
+
 	}
 	
-	private String other(){
-		String strOther="Another ";
-		if(bDevModeExitIfThereIsANewerInstance){
-			strOther+="NEWER";
-		}else{
-			strOther+="OLDER";
-		}
-		if(Debug.i().isInIDEdebugMode())strOther+="(DebugMode)";
-		return strOther+" instance";
+	String strDebugMode="DebugMode";
+	
+	private String getLockMode(File fl){
+		ArrayList<String> astr = Misc.i().fileLoad(fl);
+		return astr.get(1); // line 2
 	}
 	
-	public void initialize(SimpleApplication sapp, ConsoleCommands cc){
-		this.sapp=sapp;
-		this.cc=cc;
-		
-		if(Debug.i().isInIDEdebugMode())strPrefix="DebugMode-"+strPrefix;
-		
-		strId=strPrefix+Misc.i().getDateTimeForFilename()+strSuffix;
-		
-		flSelfLock = new File(strId);
-		
-		try {
+	private void createSelfLockFile() {
+		try{
 			flSelfLock.createNewFile();
+			
+			ArrayList<String> astr = new ArrayList<String>();
+			// line 1
+			astr.add(""+lSelfLockCreationTime);
+			// line 2
+			if(Debug.i().isInIDEdebugMode()){
+				astr.add(strDebugMode);
+			}else{
+				astr.add("ReleaseMode");
+			}
+			
+			Misc.i().fileAppendList(flSelfLock, astr);
+			
+			attrSelfLock = Misc.i().fileAttributes(flSelfLock);
+			
 			System.err.println("Created lock: "+flSelfLock.getName());
-			attrSelfLock = Files.readAttributes(flSelfLock.toPath(), BasicFileAttributes.class);
+			
 			flSelfLock.deleteOnExit();
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new NullPointerException("unable to create lock file "+flSelfLock.getAbsolutePath());
 		}
+	}
+	
+//	private String otherPrefixInfo(){
+//		String strOther="Other ";
+//		if(bDevModeExitIfThereIsANewerInstance){
+//			strOther+="NEWER";
+//		}else{
+//			strOther+="OLDER";
+//		}
+//		if(Debug.i().isInIDEdebugMode())strOther+="(DebugMode)";
+//		return strOther+" instance";
+//	}
+	
+	public void initialize(SimpleApplication sapp, ConsoleCommands cc){
+		this.sapp=sapp;
+		this.cc=cc;
+		
+//		if(Debug.i().isInIDEdebugMode())strPrefix="DebugMode-"+strPrefix;
+		
+		strId=strPrefix+Misc.i().getDateTimeForFilename(true)+strSuffix;
+		
+		flSelfLock = new File(strId);
+		
+		lSelfLockCreationTime = System.currentTimeMillis();
+		createSelfLockFile();
 		
 		flFolder = new File("./");
 		fnf = new FilenameFilter() {
@@ -221,9 +313,15 @@ public class SingleInstance implements IReflexFillCfg, AppState{
 		
 		bDevModeExitIfThereIsANewerInstance = Debug.i().isInIDEdebugMode();
 		
+		if(Debug.i().isInIDEdebugMode()){
+			System.err.println("This instance is in DEBUG mode.");
+		}
+		
 		new Thread(new ThreadChecker()).start();
 		
 		sapp.getStateManager().attach(this);
+		
+		clearOldLocks();
 	}
 	
 	@Override
