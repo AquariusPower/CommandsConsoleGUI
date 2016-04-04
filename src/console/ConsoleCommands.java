@@ -45,7 +45,6 @@ import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
 import misc.ReflexFill.ReflexFillCfg;
 import misc.ReflexHacks;
-import misc.SingleInstance;
 import misc.StringField;
 import misc.TimedDelay;
 
@@ -200,6 +199,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	protected int iMaxCmdHistSize = 1000;
 	protected int iMaxDumpEntriesAmount = 100000;
 	protected ArrayList<String>	astrCmdAndParams = new ArrayList<String>();
+	protected ArrayList<String>	astrImportantMsgBufferList = new ArrayList<String>();
 	protected ArrayList<String>	astrExecConsoleCmdsQueue = new ArrayList<String>();
 	protected ArrayList<PreQueueCmdsBlockSubList>	astrExecConsoleCmdsPreQueue = new ArrayList<PreQueueCmdsBlockSubList>();
 	protected String	strCmdLinePrepared = "";
@@ -429,16 +429,16 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 
 	public String	strDebugTest = ""; //no problem be public
 
-	protected boolean	bInitialized;
+	protected boolean	bConfigured;
 
 	protected ArrayList<String>	astrBaseCmdCacheList = new ArrayList<String>();
 	protected ArrayList<String>	astrBaseCmdCmtCacheList = new ArrayList<String>();
 
 	private String	strLastTypedUserCommand;
 	
-	protected void assertInitialized(){
-		if(bInitialized)return;
-		throw new NullPointerException(ConsoleCommands.class.getName()+" was not initialized!");
+	protected void assertConfigured(){
+		if(bConfigured)return;
+		throw new NullPointerException(ConsoleCommands.class.getName()+" was not configured!");
 	}
 	
 	/**
@@ -589,6 +589,15 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //				}
 			}
 //			csaTmp.updateFontStuff();
+			bCmdEndedGracefully=true;
+		}else
+		if(checkCmdValidity(null,"messageReview","[filter]")){
+			String strFilter = paramString(1);
+			for(String str:astrImportantMsgBufferList){
+				if(strFilter!=null && !str.toLowerCase().contains(strFilter.toLowerCase()))continue;
+				dumpSubEntry(str);
+			}
+			dumpSubEntry("Total: "+astrImportantMsgBufferList.size());
 			bCmdEndedGracefully=true;
 		}else
 		if(checkCmdValidity(null,"quit","the application")){
@@ -907,10 +916,26 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public void dumpWarnEntry(String str){
+		addImportantMsgToBuffer("Warn",str);
 		dumpEntry(false, btgShowWarn.get(), false, Misc.i().getSimpleTime(btgShowMiliseconds.get())+strWarnEntryPrefix+str);
 	}
 	
+	private void addImportantMsgToBuffer(String strType,String strMsg){
+		String str="["+strType+"] "+strMsg;
+		if(astrImportantMsgBufferList.contains(str)){
+			/**
+			 * so, being re-added it will be refreshed and remain longer on the list
+			 */
+			astrImportantMsgBufferList.remove(str);
+		}
+		
+		astrImportantMsgBufferList.add(str);
+		
+		if(astrImportantMsgBufferList.size()>1000)astrImportantMsgBufferList.remove(0);
+	}
+	
 	public void dumpErrorEntry(String str){
+		addImportantMsgToBuffer("ERROR",str);
 		dumpEntry(new DumpEntry()
 			.setDumpToConsole(btgShowWarn.get())
 			.setLineOriginal(Misc.i().getSimpleTime(btgShowMiliseconds.get())+strErrorEntryPrefix+str)
@@ -923,6 +948,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 * @param str
 	 */
 	public void dumpDevWarnEntry(String str){
+		addImportantMsgToBuffer("DevWarn",str);
 		dumpEntry(false, btgShowDeveloperWarn.get(), false, 
 				Misc.i().getSimpleTime(btgShowMiliseconds.get())+strDevWarnEntryPrefix+str);
 	}
@@ -944,6 +970,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public void dumpExceptionEntry(Exception e){
+		addImportantMsgToBuffer("Exception",e.toString());
 		dumpEntry(false, btgShowException.get(), false, 
 			Misc.i().getSimpleTime(btgShowMiliseconds.get())+strExceptionEntryPrefix+e.toString());
 		e.printStackTrace();
@@ -1832,7 +1859,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 * @return false if command execution failed
 	 */
 	protected boolean executeCommand(final String strFullCmdLineOriginal){
-		assertInitialized();
+		assertConfigured();
 		
 		strCmdLineOriginal = strFullCmdLineOriginal;
 		
@@ -2257,20 +2284,31 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	protected void cmdHistSave(String strCmd) {
 		Misc.i().fileAppendLine(flCmdHist,strCmd);
 	}
-
-	public void initialize(IConsoleUI icui, SimpleApplication sapp){
+	
+	/**
+	 * configure must happen before initialization
+	 * @param icui
+	 * @param sapp
+	 */
+	public void configure(IConsoleUI icui, SimpleApplication sapp){
+		if(bConfigured)throw new NullPointerException("already configured.");		// KEEP ON TOP
+		
 //		Init.i().initialize(sapp, this);
 		ReflexFill.assertReflexFillFieldsForOwner(this);
-		Debug.i().initialize(this);
-		Misc.i().initialize(this);
-		ReflexHacks.i().initialize(sapp, this, this);
-		SingleInstance.i().initialize(sapp, this);
+		Debug.i().configure(this);
+		Misc.i().configure(this);
+		ReflexHacks.i().configure(sapp, this, this);
+//		SingleInstanceState.i().initialize(sapp, this);
+		
+		ConsoleCommandsBackgroundState.i().configure(sapp, icui, this);
 		
 		this.icui=icui;
 		this.sapp=sapp;
 		
-		if(bInitialized)throw new NullPointerException("already initialized.");
-		
+		bConfigured=true;
+	}
+	
+	public void initialize(){
 		tdDumpQueuedEntry.updateTime();
 		
 		// init dump file, MUST BE THE FIRST!
@@ -2304,8 +2342,6 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		
 		// init DB
 		flDB = new File(fileNamePrepareCfg(strFileDatabase,false));
-		
-		bInitialized=true;
 		
 		// init valid cmd list
 		executeCommand(null); //to populate the array with available commands
@@ -2503,6 +2539,13 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				icui.clearDumpAreaSelection();
 //				lstbxDumpArea.getSelectionModel().setSelection(-1); //clear selection
 			}
+		}else{
+			/**
+			 * nothing selected at dump area,
+			 * use text input field as source
+			 */
+			String str = icui.getInputText();
+			if(!str.trim().equals(""+chCommandPrefix))Misc.i().putStringToClipboard(str);
 		}
 		
 		if(!bJustCollectText){

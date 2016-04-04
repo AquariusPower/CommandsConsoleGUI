@@ -45,6 +45,9 @@ import console.IConsoleCommandListener;
  *
  */
 public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommandListener, IReflexFillCfg{
+	private static ConsoleGuiTest instance = new ConsoleGuiTest();
+	public static ConsoleGuiTest i(){return instance;}
+	
 	protected ConsoleCustomCommands	cc;	
 	protected boolean bHideSettings=true; 
 	
@@ -78,12 +81,10 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 		super.simpleUpdate(tpf);
 	}
 	
-	public ConsoleGuiTest(){
-		ReflexFill.assertReflexFillFieldsForOwner(this);
-	}
-	
 	public static void main( String... args ) {
-		ConsoleGuiTest main = new ConsoleGuiTest();
+		ConsoleGuiTest main = ConsoleGuiTest.i();
+		main.configure();
+		
 		if(main.bHideSettings){
 			AppSettings as = new AppSettings(true);
 			as.setResizable(true);
@@ -93,7 +94,12 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 			main.setSettings(as);
 			main.setShowSettings(false);
 		}
+		
 		main.start();
+	}
+
+	private void configure() {
+		ReflexFill.assertReflexFillFieldsForOwner(this);
 	}
 
 	@Override

@@ -57,9 +57,12 @@ public class Misc {
 //	public long lLastUniqueId = 0;
 	private IHandleExceptions	ihe;
 	private String	strLastUid = "0";
+	private boolean	bConfigured;
 	
-	public void initialize(IHandleExceptions ihe){
+	public void configure(IHandleExceptions ihe){
+		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 		this.ihe=ihe;
+		bConfigured=true;
 	}
 	
 	private static Misc instance = new Misc();

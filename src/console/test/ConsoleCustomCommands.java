@@ -35,6 +35,7 @@ import com.jme3.input.KeyInput;
 import console.ConsoleScriptCommands;
 import console.gui.ConsoleGUILemurState;
 import extras.FpsLimiterState;
+import extras.SingleInstanceState;
 
 /**
  * 
@@ -42,19 +43,22 @@ import extras.FpsLimiterState;
  *
  */
 public class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleCommands to prevent scripts usage
-	public FpsLimiterState fpslState = new FpsLimiterState();
+//	public FpsLimiterState fpslState = new FpsLimiterState();
 	
 	public ConsoleCustomCommands(ConsoleGuiTest sapp){
 		super();
 		
-		ConsoleGUILemurState cs = new ConsoleGUILemurState(KeyInput.KEY_F10, this, sapp);
+//		ConsoleGUILemurState cs = new ConsoleGUILemurState(KeyInput.KEY_F10, this, sapp);
+		ConsoleGUILemurState.i().configure(sapp, this, KeyInput.KEY_F10);
 //		addConsoleCommandListener(cs);
 //		setConsoleUI(cs);
 //		csaTmp = cs;
 		
-		sapp.getStateManager().attach(cs);
+//		sapp.getStateManager().attach(cs);
 		
-		sapp.getStateManager().attach(fpslState);
+//		sapp.getStateManager().attach(fpslState);
+		FpsLimiterState.i().configure(sapp, this);
+		SingleInstanceState.i().configure(sapp, this);
 		
 		/**
 		 *  This allows test3 at endUserCustomMethod() to work.
@@ -72,10 +76,10 @@ public class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleC
 		if(checkCmdValidity(null,"fpsLimit","[iMaxFps]")){
 			Integer iMaxFps = paramInt(1);
 			if(iMaxFps!=null){
-				fpslState.setMaxFps(iMaxFps);
+				FpsLimiterState.i().setMaxFps(iMaxFps);
 				bCommandWorked=true;
 			}
-			dumpSubEntry("FpsLimit = "+fpslState.getFpsLimit());
+			dumpSubEntry("FpsLimit = "+FpsLimiterState.i().getFpsLimit());
 		}else
 		{
 			return super.executePreparedCommandRoot();
@@ -86,7 +90,7 @@ public class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleC
 	
 	@Override
 	public void updateToggles() {
-		if(btgFpsLimit.checkChangedAndUpdate())fpslState.setEnabled(btgFpsLimit.b());
+		if(btgFpsLimit.checkChangedAndUpdate())FpsLimiterState.i().setEnabled(btgFpsLimit.b());
 		super.updateToggles();
 	}
 	
@@ -96,9 +100,9 @@ public class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleC
 		
 		if(EStats.TimePerFrame.b()){
 			strStatsLast+=
-					"Tpf"+(fpslState.isEnabled() ? (int)(fTPF*1000.0f) : Misc.i().fmtFloat(fTPF,6)+"s")
-						+(fpslState.isEnabled()?
-							"="+fpslState.getFrameDelayByCpuUsageMilis()+"+"+fpslState.getThreadSleepTimeMilis()+"ms"
+					"Tpf"+(FpsLimiterState.i().isEnabled() ? (int)(fTPF*1000.0f) : Misc.i().fmtFloat(fTPF,6)+"s")
+						+(FpsLimiterState.i().isEnabled()?
+							"="+FpsLimiterState.i().getFrameDelayByCpuUsageMilis()+"+"+FpsLimiterState.i().getThreadSleepTimeMilis()+"ms"
 							:"")
 						+";";
 		}

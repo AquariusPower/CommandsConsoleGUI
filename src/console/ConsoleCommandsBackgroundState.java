@@ -34,11 +34,10 @@ import misc.ReflexFill.IReflexFillCfgVariant;
 import misc.ReflexFill.ReflexFillCfg;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.renderer.RenderManager;
-
-import console.gui.ConsoleGuiStateAbs;
 
 /**
  * 
@@ -46,22 +45,37 @@ import console.gui.ConsoleGuiStateAbs;
  *
  */
 public class ConsoleCommandsBackgroundState implements AppState, IReflexFillCfg{
-	protected BoolToggler	btgExecCommandsInBackground=null;
+	private static ConsoleCommandsBackgroundState instance = new ConsoleCommandsBackgroundState();
+	public static ConsoleCommandsBackgroundState i(){return instance;}
 	
-	private ConsoleGuiStateAbs	cgsaGraphicalConsoleUI;
+	protected BoolToggler	btgExecCommandsInBackground=new BoolToggler(this, false, ConsoleCommands.strTogglerCodePrefix,
+		"Will continue running console commands even if console is closed.");
+	
+	private IConsoleUI	cgsaGraphicalConsoleUI;
 	private ConsoleCommands	ccCommandsPipe;
 	private boolean	bEnabled;
 	private boolean	bInitialized;
 
-	public ConsoleCommandsBackgroundState(ConsoleGuiStateAbs cgsa, ConsoleCommands cc){
+	private SimpleApplication	sapp;
+
+	private boolean	bConfigured;
+
+	public void configure(SimpleApplication sapp, IConsoleUI cgsa, ConsoleCommands cc){
+		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
+		
+		this.sapp=sapp;
 		this.bEnabled=true; //just to let it be initialized at startup by state manager
 		this.cgsaGraphicalConsoleUI = cgsa;
 		this.ccCommandsPipe=cc;
 		
-		btgExecCommandsInBackground=new BoolToggler(this, false, ConsoleCommands.strTogglerCodePrefix,
-			"Will continue running console commands even if console is closed.");
+		if(!sapp.getStateManager().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
+		
+//		btgExecCommandsInBackground=new BoolToggler(this, false, ConsoleCommands.strTogglerCodePrefix,
+//			"Will continue running console commands even if console is closed.");
 		
 		ReflexFill.assertReflexFillFieldsForOwner(this);
+		
+		bConfigured=true;
 	}
 	
 	@Override

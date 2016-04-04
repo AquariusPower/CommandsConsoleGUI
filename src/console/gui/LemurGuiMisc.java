@@ -27,10 +27,10 @@
 
 package console.gui;
 
+import misc.ReflexFill;
 import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
 import misc.ReflexFill.ReflexFillCfg;
-import misc.ReflexFill;
 import misc.ReflexHacks;
 import misc.StringField;
 import misc.TimedDelay;
@@ -84,6 +84,8 @@ public class LemurGuiMisc implements AppState, IConsoleCommandListener, IReflexF
 	private ConsoleCommands	cc;
 
 	private boolean	bFixInvisibleTextInputCursor;
+
+	private boolean	bConfigured;
 
 //	private int	iMoveCaratTo;
 	
@@ -197,10 +199,11 @@ public class LemurGuiMisc implements AppState, IConsoleCommandListener, IReflexF
 	public void initialize(AppStateManager stateManager, Application app) {
 		this.sapp = (SimpleApplication) app;
 		tdTextCursorBlink.updateTime();
-		bInitialized=true;
 		
 		cc.addConsoleCommandListener(this);
-		ReflexFill.assertReflexFillFieldsForOwner(this);
+//		ReflexFill.assertReflexFillFieldsForOwner(this);
+		
+		bInitialized=true;
 	}
 
 	@Override
@@ -267,8 +270,13 @@ public class LemurGuiMisc implements AppState, IConsoleCommandListener, IReflexF
 		return bCmdEndedGracefully;
 	}
 
-	public void setConsoleCommands(ConsoleCommands cc) {
+	public void configure(SimpleApplication sapp, ConsoleCommands cc) {
+		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
+		this.sapp=sapp;
 		this.cc=cc;
+		ReflexFill.assertReflexFillFieldsForOwner(this);
+		cc.addConsoleCommandListener(this);
+		bConfigured=true;
 	}
 
 	@Override

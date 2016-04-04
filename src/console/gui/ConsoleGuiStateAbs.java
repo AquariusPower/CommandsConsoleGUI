@@ -293,6 +293,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	private FocusManagerState	focusState;
 	private Spatial	sptPreviousFocus;
 	private boolean	bRestorePreviousFocus;
+	private boolean	bInitializeOnlyTheUI;
+	private boolean	bConfigured;
 
 //	private boolean	bUsePreQueue = false; 
 	
@@ -307,27 +309,56 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	protected abstract void scrollHintToIndex(int i);
 	protected abstract void lineWrapDisableForChildrenOf(Node gp);
 	
-	protected static ConsoleGuiStateAbs instance;
-	protected static ConsoleGuiStateAbs i(){
-		return instance;
-	}
-	protected ConsoleGuiStateAbs(ConsoleCommands cc) {
-		if(instance==null)instance=this;
-//		this.cc = cc==null ? new ConsoleScriptCommands() : cc;
+//	protected static ConsoleGuiStateAbs instance;
+//	protected static ConsoleGuiStateAbs i(){
+//		return instance;
+//	}
+//	
+	
+	/**
+	 * configure must happen before initialization
+	 * @param sapp
+	 * @param cc
+	 * @param iToggleConsoleKey
+	 */
+	public void configure(SimpleApplication sapp, ConsoleCommands cc, int iToggleConsoleKey){
+		if(bConfigured)throw new NullPointerException("already configured.");		// KEEP ON TOP
+		
+		this.sapp=sapp;
+		
 		this.cc = cc;
 		if(cc==null)throw new NullPointerException("Missing "+ConsoleCommands.class.getName()+" instance (or a more specialized, like the scripting one)");
+		cc.configure(this,sapp);
 		cc.addConsoleCommandListener(this);
-//		this.cc.csaTmp=this;
-	}
-	protected ConsoleGuiStateAbs(int iToggleConsoleKey, ConsoleCommands cc) {
-		this(cc);
+		
 		this.bEnabled=true; //just to let it be initialized at startup by state manager
+		
 		this.iToggleConsoleKey=iToggleConsoleKey;
+		
 		ReflexFill.assertReflexFillFieldsForOwner(this);
+		
+		if(!sapp.getStateManager().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
+		
+		bConfigured=true;
 	}
-	protected ConsoleGuiStateAbs(int iToggleConsoleKey) {
-		this(iToggleConsoleKey,null);
-	}
+	
+//	protected ConsoleGuiStateAbs(ConsoleCommands cc) {
+//		if(instance==null)instance=this;
+////		this.cc = cc==null ? new ConsoleScriptCommands() : cc;
+//		this.cc = cc;
+//		if(cc==null)throw new NullPointerException("Missing "+ConsoleCommands.class.getName()+" instance (or a more specialized, like the scripting one)");
+//		cc.addConsoleCommandListener(this);
+////		this.cc.csaTmp=this;
+//	}
+//	protected ConsoleGuiStateAbs(int iToggleConsoleKey, ConsoleCommands cc) {
+//		this(cc);
+//		this.bEnabled=true; //just to let it be initialized at startup by state manager
+//		this.iToggleConsoleKey=iToggleConsoleKey;
+//		ReflexFill.assertReflexFillFieldsForOwner(this);
+//	}
+//	protected ConsoleGuiStateAbs(int iToggleConsoleKey) {
+//		this(iToggleConsoleKey,null);
+//	}
 	
 //	protected String fileNamePrepare(String strFileBaseName, String strFileType, boolean bAddDateTime){
 //		return strFileBaseName
@@ -345,7 +376,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	public void initialize(AppStateManager stateManager, Application app) {
 		if(isInitialized())throw new NullPointerException("already initialized...");
 		
-		sapp = (SimpleApplication)app;
+//		sapp = (SimpleApplication)app;
 //		cc.sapp = sapp;
 		
 //		sapp.getStateManager().attach(fpslState);
@@ -354,7 +385,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		GuiGlobals.initialize(sapp);
 		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
 		
-		cc.initialize(this,sapp);
+//		cc.configure(this,sapp);
+		cc.initialize();
 		
 //		// init dump file, MUST BE THE FIRST!
 //		flLastDump = new File(fileNamePrepareLog(strFileLastDump,false));
@@ -418,11 +450,15 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		updateEngineStats();
 		
 		// instantiations initializer
-		initialize();
+		initializeOnlyTheUI();
 		
 		bInitiallyClosedOnce=false; // to not interfere on reinitializing after a cleanup
 		
-		sapp.getStateManager().attach(new ConsoleCommandsBackgroundState(this, cc));
+//		ConsoleCommandsBackgroundState ccbs = new ConsoleCommandsBackgroundState(this, cc);
+//		ConsoleCommandsBackgroundState.i().configure(sapp,this,cc);
+//		if(!sapp.getStateManager().attach(ccbs))throw new NullPointerException("already attached state "+ccbs.getClass().getName());
+		
+		bInitialized=true;
 	}
 	
 	@Override
@@ -432,8 +468,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 
 	@Override
 	public void setEnabled(boolean bEnabled) {
-		if(!isInitialized()){
-			initialize();
+		if(!bInitializeOnlyTheUI){
+			initializeOnlyTheUI();
 		}
 		
 		this.bEnabled=bEnabled;
@@ -465,7 +501,9 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	/**
 	 * this can be used after a cleanup() too
 	 */
-	protected void initialize(){
+	protected void initializeOnlyTheUI(){
+		if(bInitializeOnlyTheUI)throw new NullPointerException("already configured!");
+		
 		if(sapp==null)throw new NullPointerException("base initialization required");
 		
 		CursorEventControl.addListenersToSpatial(lstbxAutoCompleteHint, consoleCursorListener);
@@ -588,7 +626,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		 * =========================== LAST THING ================================
 		 * =======================================================================
 		 */
-		bInitialized=true;
+		bInitializeOnlyTheUI=true;
 	}
 	
 //	protected void showClipboard(){
@@ -1854,7 +1892,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
      */
     
 //    if(efHK!=null)efHK.cleanupHK();
-    bInitialized=false;
+    bInitializeOnlyTheUI=false;
+//    bInitialized=false;
 	}
 	
 //	protected boolean isInitiallyClosed() {

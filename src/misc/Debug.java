@@ -56,11 +56,14 @@ public class Debug implements IConsoleCommandListener{
 //	}
 
 	private Boolean	bDebugMode;
+	private boolean	bConfigured;
 	
-	public void initialize(ConsoleCommands cc){
-//		if(Debug.instance==null)Debug.instance=this;
+	public void configure(ConsoleCommands cc){
+		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
+		//		if(Debug.instance==null)Debug.instance=this;
 //		this.cc=cc;
 		cc.addConsoleCommandListener(this);
+		bConfigured=true;
 	}
 	
 //	public void setConsoleCommand(ConsoleCommands cc){

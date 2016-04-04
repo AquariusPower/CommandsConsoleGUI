@@ -74,8 +74,6 @@ TODO.FastToImplement:
 	+ stats displayed in buttons, click each to expand/shrink.
 	
 TODO.TimeConsuming:
-	.Important
-	+ HK - ReflexByFieldType.singleMatchIsSafe.insteadOfSolelyByFieldName.MayBeThrowTheOptionsInConsoleForUserToSet
 	.Good
 	+ navigate thru words with ctrl+left/right
 	+ BitmapFontBkgColor.shiftRightLeftSelect.inputField
@@ -89,6 +87,7 @@ TODO.OneDay:
 	+ consoleStyle strTtype s=16.34 #ff4d8a0b|c=255,255,128,50|c=0.5,.85,1.0,.25 "f=Interface/Font/Console.fnt"
 	+ FailProof (if console bugs, app must not crash): Update.tryCatch; Listeners-»listenerAction(enum,aobj); UpdtLstnrAct; DumpException(e,aobj); Init.simplyStderrPrintExceptionWithoutExitApp.retryInitWithDefaultsOnce?
 	+ Extract all annotations values concerning styles attributes (see at Label.java) and auto generate a class code with final strings. 
+	+ HK - ReflexByFieldType.singleMatchIsSafe.insteadOfSolelyByFieldName.MayBeThrowTheOptionsInConsoleForUserToSet
 	
 TODO.REALLY???:
 	? EachLine1stControlCharMarker.w.e.multiline. To be used as filters

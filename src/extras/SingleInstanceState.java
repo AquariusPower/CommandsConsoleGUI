@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package misc;
+package extras;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -33,6 +33,9 @@ import java.io.IOException;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 
+import misc.BoolToggler;
+import misc.Debug;
+import misc.Misc;
 import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
 import misc.ReflexFill.ReflexFillCfg;
@@ -51,13 +54,14 @@ import console.ConsoleCommands;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class SingleInstance implements IReflexFillCfg, AppState{
-	public final BoolToggler	btgAllowSingleInstace = new BoolToggler(this,true,ConsoleCommands.strTogglerCodePrefix);
+public class SingleInstanceState implements IReflexFillCfg, AppState{
+	public final BoolToggler	btgSingleInstaceMode = new BoolToggler(this,true,ConsoleCommands.strTogglerCodePrefix,
+		"better keep this enabled, other instances may conflict during files access.");
 	private boolean bDevModeExitIfThereIsANewerInstance = true; //true if in debug mode
 //	public final BoolToggler	btgSingleInstaceOverrideOlder = new BoolToggler(this,false,ConsoleCommands.strTogglerCodePrefix,
 //		"If true, any older instance will exit and this will keep running."
 //		+"If false, the oldest instance will keep running and this one will exit.");
-	String strPrefix=SingleInstance.class.getSimpleName()+"-";
+	String strPrefix=SingleInstanceState.class.getSimpleName()+"-";
 	String strSuffix=".lock";
 	String strId;
 	private File	flSelfLock;
@@ -72,8 +76,8 @@ public class SingleInstance implements IReflexFillCfg, AppState{
 	private long	lSelfLockCreationTime;
 	private String	strExitReasonOtherInstance = "";
 	
-	private static SingleInstance instance = new SingleInstance();
-	public static SingleInstance i(){return instance;}
+	private static SingleInstanceState instance = new SingleInstanceState();
+	public static SingleInstanceState i(){return instance;}
 	
 	private File[] getAllLocks(){
 		return flFolder.listFiles(fnf);
@@ -117,7 +121,7 @@ public class SingleInstance implements IReflexFillCfg, AppState{
 	}
 	
 	private boolean checkExit(){
-		if(!btgAllowSingleInstace.b())return false;
+		if(!btgSingleInstaceMode.b())return false;
 		
 		boolean bExit=false;
 		String strReport="";
@@ -245,6 +249,7 @@ public class SingleInstance implements IReflexFillCfg, AppState{
 	}
 	
 	String strDebugMode="DebugMode";
+	private boolean	bConfigured;
 	
 	private String getLockMode(File fl){
 		ArrayList<String> astr = Misc.i().fileLoad(fl);
@@ -289,7 +294,9 @@ public class SingleInstance implements IReflexFillCfg, AppState{
 //		return strOther+" instance";
 //	}
 	
-	public void initialize(SimpleApplication sapp, ConsoleCommands cc){
+	public void configure(SimpleApplication sapp, ConsoleCommands cc){
+		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
+		
 		this.sapp=sapp;
 		this.cc=cc;
 		
@@ -319,9 +326,11 @@ public class SingleInstance implements IReflexFillCfg, AppState{
 		
 		new Thread(new ThreadChecker()).start();
 		
-		sapp.getStateManager().attach(this);
+		if(!sapp.getStateManager().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
 		
 		clearOldLocks();
+		
+		bConfigured=true;
 	}
 	
 	@Override

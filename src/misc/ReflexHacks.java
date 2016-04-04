@@ -73,6 +73,7 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 //	public void setExceptionHandler(IHandleExceptions ihe){
 //		this.ihe=ihe;
 //	}
+	private boolean	bConfigured;
 	
 	/**
 	 * We shouldnt access private fields/methods as things may break.
@@ -128,10 +129,12 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 		return objReturn;
 	}
 	
-	public void initialize(SimpleApplication sapp, ConsoleCommands cc, IHandleExceptions ihe){
+	public void configure(SimpleApplication sapp, ConsoleCommands cc, IHandleExceptions ihe){
+		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 		this.sapp = sapp;
 		this.cc=cc;
 		this.ihe=ihe;
+		bConfigured=true;
 	}
 	
 	@Override

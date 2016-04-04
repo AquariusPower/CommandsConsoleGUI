@@ -28,6 +28,7 @@
 package console.gui;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.LineWrapMode;
 import com.jme3.math.ColorRGBA;
@@ -56,14 +57,23 @@ import console.ConsoleCommands;
  *
  */
 public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
-//	public ListBox<String>	lstbxAutoCompleteHint;
-//	public VersionedList<String>	vlstrAutoCompleteHint = new VersionedList<String>();
-
-	public ConsoleGUILemurState(int iOpenConsoleHotKey, ConsoleCommands cc, Application app) {
-		super(iOpenConsoleHotKey, cc);
-		app.getStateManager().attach(LemurGuiMisc.i());
-		LemurGuiMisc.i().setConsoleCommands(cc);
+	private static ConsoleGUILemurState instance = new ConsoleGUILemurState();
+	public static ConsoleGUILemurState i(){return instance;}
+	
+	@Override
+	public void configure(SimpleApplication sapp, ConsoleCommands cc, int iToggleConsoleKey) {
+		super.configure(sapp, cc, iToggleConsoleKey);
+		
+		// misc cfg
+		LemurGuiMisc.i().configure(sapp, cc);
+		if(!sapp.getStateManager().attach(LemurGuiMisc.i()))throw new NullPointerException("already attached state "+LemurGuiMisc.class.getName());
 	}
+	
+//	public void ConsoleGUILemurState(int iOpenConsoleHotKey, ConsoleCommands cc, Application app) {
+//		super(iOpenConsoleHotKey, cc);
+//		app.getStateManager().attach(LemurGuiMisc.i());
+//		LemurGuiMisc.i().setConsoleCommands(cc);
+//	}
 	
 //	@Override
 //	public void initialize(AppStateManager stateManager, Application app) {
@@ -127,7 +137,7 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 	}
 	
 	@Override
-	public void initialize() {
+	public void initializeOnlyTheUI() {
 		createMonoSpaceFixedFontStyle();
 		
 		// auto complete hint
@@ -135,7 +145,7 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		super.lstbxAutoCompleteHint = new ListBox<String>(new VersionedList<String>(),strStyle);
 		getHintBox().setModel(getHintList());
 		
-		super.initialize();
+		super.initializeOnlyTheUI();
 	}
 	
 	public VersionedList<String> getHintList(){
