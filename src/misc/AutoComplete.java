@@ -93,10 +93,11 @@ public class AutoComplete {
 			}
 		}
 		
-		// prepend partial better match, or simply unmodified part
-		astrPossibleMatches.add(0,strPart);
-		
+		// sort before prepending the improved match
 		Collections.sort(astrPossibleMatches);
+		
+		// prepend improved partial match (or it can be simply the unmodified part...)
+		astrPossibleMatches.add(0,strPart);
 		
 		return astrPossibleMatches;
 	}

@@ -186,7 +186,7 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 	class ThreadChecker implements Runnable{
 		@Override
 		public void run() {
-			while(true){
+			while(threadMain.isAlive()){
 				try {
 					if(!flSelfLock.exists()){
 						System.err.println("Lock was deleted, recreating: "+flSelfLock.getName());
@@ -213,6 +213,7 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 					flSelfLock.delete();
 				}
 			}
+			System.err.println("Main thread ended.");
 		}
 
 	}
@@ -221,7 +222,9 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 	String strReleaseMode="ReleaseMode";
 	private boolean	bConfigured;
 	private String	strErrorMissingValue="ERROR_MISSING_VALUE";
-	private boolean	bDebugMode;
+	private Boolean	bDebugMode;
+	private Thread	threadMain;
+	private Thread	threadChecker;
 	
 	private Long getCreationTimeOfTD(File fl){
 		ArrayList<String> astr = Misc.i().fileLoad(fl);
@@ -277,11 +280,14 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 //		return strOther+" instance";
 //	}
 	
-	public void configure(SimpleApplication sapp, ConsoleCommands cc){
+	public void configure(SimpleApplication sapp, ConsoleCommands cc, Thread threadMain){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 		
 		this.sapp=sapp;
 		this.cc=cc;
+		this.threadMain=threadMain;
+		
+		bDebugMode = Debug.i().isInIDEdebugMode();
 		
 //		if(Debug.i().isInIDEdebugMode())strPrefix="DebugMode-"+strPrefix;
 		
@@ -290,7 +296,6 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 		flSelfLock = new File(strId);
 		
 		lSelfLockCreationTime = System.currentTimeMillis();
-		createSelfLockFileTD();
 		
 		flFolder = new File("./");
 		fnf = new FilenameFilter() {
@@ -301,18 +306,21 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 			}
 		};
 		
-		bDebugMode = Debug.i().isInIDEdebugMode();
 		bDevModeExitIfThereIsANewerInstance = bDebugMode;
 		
 		if(bDebugMode){
 			System.err.println("This instance is in DEBUG mode.");
 		}
 		
-		new Thread(new ThreadChecker()).start();
-		
 		if(!sapp.getStateManager().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
 		
+		/**
+		 * creating the new thread here will make the application ends faster if it can.
+		 */
 		clearOldLocksTD();
+		createSelfLockFileTD();
+		threadChecker = new Thread(new ThreadChecker());
+		threadChecker.start();
 		
 		bConfigured=true;
 	}

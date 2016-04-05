@@ -58,7 +58,7 @@ public class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleC
 		
 //		sapp.getStateManager().attach(fpslState);
 		FpsLimiterState.i().configure(sapp, this);
-		SingleInstanceState.i().configure(sapp, this);
+		SingleInstanceState.i().configure(sapp, this, Thread.currentThread());
 		
 		/**
 		 *  This allows test3 at endUserCustomMethod() to work.
