@@ -29,9 +29,10 @@ package misc;
 
 import java.util.ArrayList;
 
-import console.IConsoleCommandListener;
 import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
+import console.IConsoleCommandListener;
+import console.VarIdValueOwner.IVarIdValueOwner;
 
 /**
  * This class can provide automatic boolean console options toggle.
@@ -40,8 +41,11 @@ import misc.ReflexFill.IReflexFillCfgVariant;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class BoolToggler implements IReflexFillCfgVariant{
+public class BoolToggler implements IReflexFillCfgVariant, IVarIdValueOwner{
+	public static final String strTogglerCodePrefix="btg";
 	protected static ArrayList<BoolToggler> abtgList = new ArrayList<BoolToggler>();
+	private static boolean	bConfigured;
+	private static IHandleExceptions	ihe;
 	
 	protected boolean bPrevious;
 	protected boolean bCurrent;
@@ -51,12 +55,21 @@ public class BoolToggler implements IReflexFillCfgVariant{
 
 	private String	strReflexFillCfgCodePrefixVariant;
 	
+	public static void configure(IHandleExceptions ihe){
+		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
+		BoolToggler.ihe=ihe;
+		bConfigured=true;
+	}
+	
 	public static ArrayList<BoolToggler> getBoolTogglerListCopy(){
 		return new ArrayList<BoolToggler>(abtgList);
 	}
 	
 	private BoolToggler(){
 		abtgList.add(this);
+	}
+	public BoolToggler(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitValue){
+		this( rfcfgOwnerUseThis,  bInitValue, BoolToggler.strTogglerCodePrefix, "");
 	}
 	/**
 	 * 
@@ -103,9 +116,6 @@ public class BoolToggler implements IReflexFillCfgVariant{
 	}
 	public String getCmdId(){
 		if(strCommand!=null)return strCommand;
-		/**
-		 * TODO why again this cannot be at the constructor? endless loop?
-		 */
 		strCommand = ReflexFill.i().createIdentifierWithFieldName(rfcfgOwner,this);
 		return strCommand;
 	}
@@ -119,8 +129,6 @@ public class BoolToggler implements IReflexFillCfgVariant{
 	public boolean getBool(){return bCurrent;}
 	public boolean is(){return bCurrent;}
 	public boolean b(){return bCurrent;}
-	
-	public void set(boolean b){this.bCurrent=b;}
 	
 	/**
 	 * @return true if value changed
@@ -169,6 +177,15 @@ public class BoolToggler implements IReflexFillCfgVariant{
 
 	public String getReport() {
 		return getCmdId()+" = "+bCurrent;
+	}
+
+	public void set(boolean b){
+		this.bCurrent=b;
+	}
+	
+	@Override
+	public void setObjectValue(Object objValue) {
+		this.set((Boolean)objValue);
 	}
 	
 //	public static String getPrefix() {

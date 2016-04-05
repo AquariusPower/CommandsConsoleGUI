@@ -102,10 +102,10 @@ public class Misc {
 		return d==null?"null":String.format("%."+iDecimalPlaces+"f", d);
 	}
 	
-	public ArrayList<String> fileLoad(String strFile)  {
+	synchronized public ArrayList<String> fileLoad(String strFile)  {
 		return fileLoad(new File(strFile));
 	}
-	public ArrayList<String> fileLoad(File fl)  {
+	synchronized public ArrayList<String> fileLoad(File fl)  {
 		ArrayList<String> astr = new ArrayList<String>();
 		if(fl.exists()){
 			try{
@@ -118,40 +118,99 @@ public class Misc {
 						astr.add(strLine);
 		    	}
 				} catch (IOException e) {
-					ihe.handleException(e);
+					ihe.handleExceptionThreaded(e);
 				}finally{
 					if(br!=null)br.close();
 				}
 			} catch (IOException e) {
-				ihe.handleException(e);
+				ihe.handleExceptionThreaded(e);
 			}
 		}else{
-			ihe.handleException(new FileNotFoundException("File not found: "+fl.getAbsolutePath()));
+			ihe.handleExceptionThreaded(new FileNotFoundException(fl.getAbsolutePath()));
 //			dumpWarnEntry("File not found: "+fl.getAbsolutePath());
 		}
 		
 		return astr;
 	}
-	public void fileAppendList(File fl, ArrayList<String> astr) {
+	synchronized public void fileAppendList(File fl, ArrayList<String> astr) {
 		BufferedWriter bw = null;
 		try{
 			try {
+				if(!fl.exists())fl.createNewFile();
 				bw = new BufferedWriter(new FileWriter(fl, true));
 				for(String str:astr){
 					bw.write(str);
 					bw.newLine();
 				}
 			} catch (IOException e) {
-				ihe.handleException(e);
+				ihe.handleExceptionThreaded(e);
 			}finally{
 				if(bw!=null)bw.close();
 			}
 		} catch (IOException e) {
-			ihe.handleException(e);
+			ihe.handleExceptionThreaded(e);
 		}
 	}
 	
-	public void fileAppendLine(File fl, String str) {
+	/**
+	 * 
+	 * @param str
+	 * @param bCapitalize if false will lower case
+	 * @return
+	 */
+	public String firstLetter(String str, boolean bCapitalize){
+		if(bCapitalize){
+			return Character.toUpperCase(str.charAt(0))
+				+str.substring(1);
+		}else{
+			return Character.toLowerCase(str.charAt(0))
+				+str.substring(1);
+		}
+	}
+	
+	/**
+	 * full package and class name prettified to be an Id
+	 * @param cl
+	 * @param bFirstLetterUpperCase
+	 * @return
+	 */
+	public String makePretty(Class<?> cl, boolean bFirstLetterUpperCase){
+		String strPkgClass = cl.getName();
+		String[] astr = strPkgClass.split("[.]");
+		String strPretty="";
+		for(String str:astr){
+			strPretty+=firstLetter(str, true);
+		}
+		return strPretty;
+	}
+	
+	/**
+	 * make all uppercase and underscored string into a pretty Id
+	 * @param strCommand
+	 * @param bFirstLetterUpperCase
+	 * @return
+	 */
+	public String makePretty(String strCommand, boolean bFirstLetterUpperCase){
+		/**
+		 * upper case with underscores
+		 */
+		String strCmdNew = null;
+		for(String strWord : strCommand.split("_")){
+			if(strCmdNew==null){
+				if(bFirstLetterUpperCase){
+					strCmdNew=firstLetter(strWord.toLowerCase(),true);
+				}else{
+					strCmdNew=strWord.toLowerCase();
+				}
+			}else{
+				strCmdNew+=firstLetter(strWord.toLowerCase(),true);
+			}
+		}
+		
+		return strCmdNew;
+	}
+	
+	synchronized public void fileAppendLine(File fl, String str) {
 		ArrayList<String> astr = new ArrayList<String>();
 		astr.add(str);
 		fileAppendList(fl, astr);
@@ -201,18 +260,23 @@ public class Misc {
 			}
 			return str;
 		} catch (UnsupportedFlavorException | IOException e) {
-			ihe.handleException(e);
+			ihe.handleExceptionThreaded(e);
 		}
 		
 		return "";
 	}
 	
-	public BasicFileAttributes fileAttributes(File fl){
-		try {
-			return Files.readAttributes(fl.toPath(), BasicFileAttributes.class);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	synchronized public BasicFileAttributes fileAttributes(File fl){
+//		if(fl.exists()){
+			try {
+				return Files.readAttributes(fl.toPath(), BasicFileAttributes.class);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+//		}else{
+//			ihe.handleException(new NullPointerException("file not found "+fl.getAbsolutePath()));
+//		}
+		
 		return null;
 	}
 }

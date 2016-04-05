@@ -134,11 +134,19 @@ public class ReflexFill{ //implements IConsoleCommandListener{
 							if(objExistingFieldValue instanceof IReflexFillCfgVariant){
 								IReflexFillCfg configuredOwner = ((IReflexFillCfgVariant)objExistingFieldValue).getOwner();
 								if(configuredOwner != objClassOwningField){
-									throw new NullPointerException("Field "+fld.getName()
-										+" at "+objClassOwningField.getClass().getName()+" has configured an "
-										+" invalid owner "+configuredOwner.getClass().getName()+". "
-										+" The configured owner should be: "+objClassOwningField.getClass().getName());
-								}
+									throwExceptionAboutMissConfiguration(cl, fld, configuredOwner, objClassOwningField);
+									
+//									throw new NullPointerException(
+//										"The field "+cl.getName()+"."+fld.getName()+"("+cl.getSimpleName()+":0)"+" was configured with an "
+//										+"invalid owner '"+(configuredOwner!=null?configuredOwner.getClass().getName():"null")+"', "
+//										+"at an object of "+objClassOwningField.getClass().getName()+". "
+//										+"Fix it by setting the owner to that object by using 'this' at "+IReflexFillCfg.class.getName()+" configuration parameter.");
+//											"Field "+fld.getName()
+//										+" at "+objClassOwningField.getClass().getName()+" has configured an "
+//										+" invalid owner '"+(configuredOwner!=null?configuredOwner.getClass().getName():"null")+"'. "
+////										+" The configured owner could be: "+objClassOwningField.getClass().getName()+"?");
+//										+" At class "+cl.getName()+", find that field and set the owner to that class 'this' object.");
+								} 
 							}
 //						}
 					}
@@ -164,9 +172,33 @@ public class ReflexFill{ //implements IConsoleCommandListener{
 //		throw new NullPointerException("class "+cl.getName()+" doesnt owns field "+objFieldValue.getClass());
 	}
 	
+	private static void throwExceptionAboutMissConfiguration(Class<?> cl, Field fld, IReflexFillCfg configuredOwner, Object objClassOwningField){
+		throw new NullPointerException(
+			"The field "+cl.getName()+"."+fld.getName() + "("+cl.getSimpleName()+".java:0) "
+			+" was configured with an invalid owner "
+			+"'"+(configuredOwner!=null?configuredOwner.getClass().getName():"null")+"', "
+			
+			+"at an instance of "+objClassOwningField.getClass().getName()
+				+"("+objClassOwningField.getClass().getSimpleName()+".java:0)" +". "
+			
+			+"Fix that field instance of "+fld.getType().getName()
+				+"("+fld.getType().getSimpleName()+".java:0) "
+				+"by setting "
+				+"it's owner to 'this' at the configuration parameter type: "
+			
+			+IReflexFillCfg.class.getName()
+				+"("+IReflexFillCfg.class.getSimpleName()+".java:0) "
+				
+			+" ");
+	}
+	
 	/**
 	 * Works on reflected variable name.
 	 * If it is all uppercase, it will be prettyfied.
+	 * 
+	 * IMPORTANT:
+	 * This cannot be used at constructors because it depends on the field value being set.
+	 * At the constructor, it has not returned yet, therefore the class field is still null!!!
 	 * 
 	 * @param rfcfgOwnerOfField
 	 * @param rfcvFieldAtTheOwner
@@ -213,27 +245,28 @@ public class ReflexFill{ //implements IConsoleCommandListener{
 			}
 			
 			if(bMakePretty){
-				/**
-				 * upper case with underscores
-				 */
-				String strCmdNew = null;
-				for(String strWord : strCommand.split("_")){
-					if(strCmdNew==null){
-						if(rfcfg.bFirstLetterUpperCase){
-							strCmdNew=firstLetter(strWord.toLowerCase(),true);
-						}else{
-							strCmdNew=strWord.toLowerCase();
-						}
-					}else{
-						strCmdNew+=firstLetter(strWord.toLowerCase(),true);
-					}
-				}
-				strCommand=strCmdNew;
+				strCommand=Misc.i().makePretty(strCommand, rfcfg.bFirstLetterUpperCase);
+//				/**
+//				 * upper case with underscores
+//				 */
+//				String strCmdNew = null;
+//				for(String strWord : strCommand.split("_")){
+//					if(strCmdNew==null){
+//						if(rfcfg.bFirstLetterUpperCase){
+//							strCmdNew=firstLetter(strWord.toLowerCase(),true);
+//						}else{
+//							strCmdNew=strWord.toLowerCase();
+//						}
+//					}else{
+//						strCmdNew+=firstLetter(strWord.toLowerCase(),true);
+//					}
+//				}
+//				strCommand=strCmdNew;
 			}else{
 				/**
 				 * Already nice to read field name.
 				 */
-				strCommand=firstLetter(strCommand,rfcfg.bFirstLetterUpperCase);
+				strCommand=Misc.i().firstLetter(strCommand,rfcfg.bFirstLetterUpperCase);
 			}
 		}
 		strCommand=rfcfg.strCommandPrefix+strCommand+rfcfg.strCommandSuffix;
@@ -314,22 +347,6 @@ public class ReflexFill{ //implements IConsoleCommandListener{
 //			+strExceptionLog);
 	}
 	
-	/**
-	 * 
-	 * @param str
-	 * @param bCapitalize if false will lower case
-	 * @return
-	 */
-	public String firstLetter(String str, boolean bCapitalize){
-		if(bCapitalize){
-			return Character.toUpperCase(str.charAt(0))
-				+str.substring(1);
-		}else{
-			return Character.toLowerCase(str.charAt(0))
-				+str.substring(1);
-		}
-	}
-
 	public static boolean isbUseDefaultCfgIfMissing() {
 		return bUseDefaultCfgIfMissing;
 	}

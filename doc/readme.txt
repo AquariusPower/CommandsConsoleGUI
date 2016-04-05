@@ -58,6 +58,7 @@ DONE:
 	= auto-scroll toggle button/option.
 	= toggle run console commands in background (with console closed)
 	= commands setup value can be retrieved like: ${&consoleHeight}
+	= transform TimedDelay main value into varible like BoolTogglers!
 
 DOING:
 	... SeparateGUI class from Commands Management, independent from Lemur and JME, so can be used even on a text console or 2D application etc.

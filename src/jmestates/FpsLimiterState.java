@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package extras;
+package jmestates;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;

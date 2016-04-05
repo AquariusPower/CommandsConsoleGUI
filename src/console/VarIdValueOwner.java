@@ -25,17 +25,28 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package misc;
+package console;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public interface IHandleExceptions {
-	/**
-	 * make it sure it is thread safe and synchronized!
-	 * @param e
-	 */
-	public abstract void handleExceptionThreaded(Exception e);
+public class VarIdValueOwner {
+	public static interface IVarIdValueOwner{
+		public abstract void setObjectValue(Object objValue);
+	}
+	
+	String strId;
+	Object objValue;
+	IVarIdValueOwner owner;
+	
+	public VarIdValueOwner(String strId, Object objValue,	IVarIdValueOwner vivoOwner) {
+		super();
+		this.strId = strId;
+		this.objValue = objValue;
+		this.owner = vivoOwner;
+	}
+	
+	
 }

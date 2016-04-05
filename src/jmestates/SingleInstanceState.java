@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package extras;
+package jmestates;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -55,7 +55,7 @@ import console.ConsoleCommands;
  *
  */
 public class SingleInstanceState implements IReflexFillCfg, AppState{
-	public final BoolToggler	btgSingleInstaceMode = new BoolToggler(this,true,ConsoleCommands.strTogglerCodePrefix,
+	public final BoolToggler	btgSingleInstaceMode = new BoolToggler(this,true,BoolToggler.strTogglerCodePrefix,
 		"better keep this enabled, other instances may conflict during files access.");
 	private boolean bDevModeExitIfThereIsANewerInstance = true; //true if in debug mode
 //	public final BoolToggler	btgSingleInstaceOverrideOlder = new BoolToggler(this,false,ConsoleCommands.strTogglerCodePrefix,
@@ -107,6 +107,8 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 			if(cmpSelfWith(fl))continue;
 			
 			BasicFileAttributes attr = Misc.i().fileAttributes(fl);
+			if(attr==null)continue;
+			
 			long lTimeLimit = System.currentTimeMillis() - (lLockUpdateDelayMilis*2);
 			if(attr.lastModifiedTime().toMillis() < lTimeLimit){
 				System.err.println("Cleaning old lock: "+fl.getName());
@@ -135,7 +137,8 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 //			BasicFileAttributes attrOtherLock = Misc.i().fileAttributes(flOtherLock);
 			
 //			long lThisCreationTime = Long.parseLong(Misc.i().fileLoad(flSelfLock).get(0));
-			long lOtherCreationTime = Long.parseLong(Misc.i().fileLoad(flOtherLock).get(0));
+			Long lOtherCreationTime = getCreationTimeOf(flOtherLock);
+			if(lOtherCreationTime==null)continue;
 			
 //			System.err.println("ThisLock: "+attrSelfLock.creationTime()+", "+flSelfLock.getName());
 //			System.err.println("OtherLock:"+attrOtherLock.creationTime()+", "+flOtherLock.getName());
@@ -164,7 +167,7 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 				 * To test, start a release mode, and AFTER that, start a debug mode one.
 				 */
 				if(Debug.i().isInIDEdebugMode()){
-					if(!getLockMode(flOtherLock).equalsIgnoreCase(strDebugMode)){
+					if(!getLockModeOf(flOtherLock).equalsIgnoreCase(strDebugMode)){
 						strExitReasonOtherInstance="ReleaseMode";
 						bExit=true;
 					}
@@ -250,10 +253,22 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 	
 	String strDebugMode="DebugMode";
 	private boolean	bConfigured;
+	private String	strErrorMissingValue="ERROR_MISSING_VALUE";
 	
-	private String getLockMode(File fl){
+	private Long getCreationTimeOf(File fl){
 		ArrayList<String> astr = Misc.i().fileLoad(fl);
-		return astr.get(1); // line 2
+		Long l = null;
+		if(astr.size()>0){
+			// line 1
+			try{l = Long.parseLong(astr.get(0));}catch(NumberFormatException ex){};
+		}
+		return l;
+	}
+	
+	private String getLockModeOf(File fl){
+		ArrayList<String> astr = Misc.i().fileLoad(fl);
+		if(astr.size()>0)return astr.get(1); // line 2
+		return strErrorMissingValue;
 	}
 	
 	private void createSelfLockFile() {

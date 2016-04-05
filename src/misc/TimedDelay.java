@@ -27,69 +27,149 @@
 
 package misc;
 
+import java.util.ArrayList;
+
+import console.VarIdValueOwner.IVarIdValueOwner;
+import misc.ReflexFill.IReflexFillCfg;
+import misc.ReflexFill.IReflexFillCfgVariant;
+
 /**
  * Use this class to avoid running code on every loop.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class TimedDelay{
-	protected static Long lCurrentTime;
+public class TimedDelay implements IReflexFillCfgVariant, IVarIdValueOwner{
+	private static IHandleExceptions ihe;
+	protected static ArrayList<TimedDelay> atdList = new ArrayList<TimedDelay>();
+	
+	protected static Long lCurrentTimeNano;
+	private static boolean	bConfigured;
 	
 	public static final long lNanoOneSecond = 1000000000L; // 1s in nano time
 	public static final float fNanoToSeconds = 1f/lNanoOneSecond; //multiply nano by it to get in seconds
 	
-	protected Long	lNanoTime;
-	protected float	fDelayLimit;
-	protected long	lNanoDelayLimit;
+	protected Long	lLastUpdateReferenceTimeNano;
+	protected float	fDelayLimitSeconds;
+	protected long	lDelayLimitNano;
+
+	private String strVarId;
+
+	private IReflexFillCfg	rfcfgOwner;
+
+	public static final String	strCodePrefixVariant = "td";
+	
+	public static void configure(IHandleExceptions ihe){
+		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
+		TimedDelay.ihe=ihe;
+		bConfigured=true;
+	}
 	
 	/**
 	 * use this to prevent current time to read from realtime
-	 * @param lCurrentTime if null, will use realtime
+	 * @param lCurrentTimeNano if null, will use realtime
 	 */
-	public static void setCurrentTime(Long lCurrentTime){
-		TimedDelay.lCurrentTime = lCurrentTime;
+	public static void setCurrentTimeNano(Long lCurrentTimeNano){
+		TimedDelay.lCurrentTimeNano = lCurrentTimeNano;
 	}
 	
-	public static long getCurrentTime(){
-		if(lCurrentTime==null)return System.nanoTime();
-		return lCurrentTime;
+	public static long getCurrentTimeNano(){
+		if(lCurrentTimeNano==null)return System.nanoTime();
+		return lCurrentTimeNano;
 	}
 	
+	/**
+	 * this constructor is exclusively for local variables
+	 * @param rfcfgOwnerUseThis
+	 * @param fDelay
+	 */
 	public TimedDelay(float fDelay) {
-		super();
-		this.fDelayLimit = fDelay;
-		this.lNanoDelayLimit = (long) (this.fDelayLimit * lNanoOneSecond);;
+		this(null,fDelay);
 	}
-	public long getCurrentDelay() {
+	/**
+	 * this constructor is for field variables
+	 * @param rfcfgOwnerUseThis use null if this is not a class field, but a local variable
+	 * @param fDelay
+	 */
+	public TimedDelay(IReflexFillCfg rfcfgOwnerUseThis, float fDelay) {
+		if(rfcfgOwnerUseThis!=null)atdList.add(this); //only fields allowed
+		this.rfcfgOwner=rfcfgOwnerUseThis;
+		setDelayLimitSeconds(fDelay);
+	}
+	
+	private void setDelayLimitSeconds(float fDelaySeconds){
+		this.fDelayLimitSeconds = fDelaySeconds;
+		this.lDelayLimitNano = (long) (this.fDelayLimitSeconds * lNanoOneSecond);;
+//		if(isActive())updateTime(); //this is required for consistency at get percentual 
+	}
+	
+	public long getCurrentDelayNano() {
+		return getCurrentDelayNano(false,false);
+	}
+	
+	/**
+	 * 
+	 * @param bOverlapLimit if false, update is required to get a value withing the limit. If true,
+	 * will use {@link #lLastUpdateReferenceTimeNano} to precisely determine the delay based on 
+	 * the remainder of a the division by {@link #lDelayLimitNano} 
+	 * @param bOverlapModeAlsoUpdateReferenceTime
+	 * @return
+	 */
+	public long getCurrentDelayNano(boolean bOverlapLimit, boolean bOverlapModeAlsoUpdateReferenceTime) {
 		if(!isActive())throw new NullPointerException("inactive"); //this, of course, affects all others using this method
 //		System.err.println(getCurrentTime()-lNanoTime);
-		return getCurrentTime()-lNanoTime;
+		
+		long lCurrentDelay = 0;
+		
+		if(bOverlapLimit){
+			long lCurrentTimeNano = getCurrentTimeNano();
+			
+			long lTotalDelayNano = lCurrentTimeNano - lLastUpdateReferenceTimeNano;
+			
+			lCurrentDelay = lTotalDelayNano%lDelayLimitNano;
+			
+//			while(lTimeNanoCopy<lCurrentTimeNano){
+//				lTimeNanoCopy+=lDelayLimitNano;
+//			}
+//			
+//			long lOverlappedDiff = lTimeNanoCopy - lCurrentTimeNano;
+//			
+//			lCurrentDelay = lDelayLimitNano - lOverlappedDiff;
+			
+			if(bOverlapModeAlsoUpdateReferenceTime){
+				lLastUpdateReferenceTimeNano = lCurrentTimeNano;
+			}
+		}else{
+			lCurrentDelay = getCurrentTimeNano()-lLastUpdateReferenceTimeNano;
+		}
+		
+		return lCurrentDelay;
 	}
+	
 	public void updateTime() {
-		lNanoTime = getCurrentTime();
+		lLastUpdateReferenceTimeNano = getCurrentTimeNano();
 	}
 	public boolean isReady() {
 		return isReady(false);
 	}
 	public boolean isReady(boolean bIfReadyWillAlsoUpdate) {
-		boolean bReady = getCurrentDelay() >= lNanoDelayLimit;
+		boolean bReady = getCurrentDelayNano() >= lDelayLimitNano;
 		if(bIfReadyWillAlsoUpdate){
 			if(bReady)updateTime();
 		}
 		return bReady;
 	}
-	public long getNanoDelayLimit(){
-		return lNanoDelayLimit;
+	public long getDelayLimitNano(){
+		return lDelayLimitNano;
 	}
-	public float getDelayLimit(){
-		return fDelayLimit;
+	public float getDelayLimitSeconds(){
+		return fDelayLimitSeconds;
 	}
 	public void reset() {
-		lNanoTime=null;
+		lLastUpdateReferenceTimeNano=null;
 	}
 	public boolean isActive() {
-		return lNanoTime!=null;
+		return lLastUpdateReferenceTimeNano!=null;
 	}
 	public void setActive(boolean b){
 		if(b){
@@ -98,16 +178,79 @@ public class TimedDelay{
 			reset();
 		}
 	}
-	public float getCurrentDelayPercentual() {
-		float f = 1.0f - ((lNanoDelayLimit-getCurrentDelay())*fNanoToSeconds);
-		if(f<0f)throw new NullPointerException("negative value: "+f);
-		return f;
+	
+	/**
+	 * Will overlap {@link #lDelayLimitNano} not requiring {@link #updateTime()} 
+	 * to return precise values.
+	 * 
+	 * @return
+	 */
+	public float getCurrentDelayPercentualDynamic() {
+		long lCurrentDelay = getCurrentDelayNano(true,false);
+		
+//		long lTimeNanoCopy = lLastUpdateReferenceTimeNano;
+//		long lCurrentTimeNano = getCurrentTimeNano();
+//		
+//		long lDiff = lCurrentTimeNano-lTimeNanoCopy;
+//		
+//		long lRemainder = lDiff%lDelayLimitNano;
+//		
+//		
+//		while(lTimeNanoCopy<lCurrentTimeNano){
+//			lTimeNanoCopy+=lDelayLimitNano;
+//		}
+//		
+//		long lCurrentDelay = lDelayLimitNano - (lTimeNanoCopy - lCurrentTimeNano);
+//		
+//		
+//		
+//		
+//		long lCurrentDelay = getCurrentDelayNano();
+//		long lDiff = lDelayLimitNano-lCurrentDelay;
+//		
+//		while(lDiff<0){
+//			updateTime();
+//		}
+		
+		double dPerc = 1.0 - ((double)lCurrentDelay)/((double)lDelayLimitNano);
+		
+		return (float)dPerc;
 	}
-	public float getCurrentDelayPercentualWithinBounds() {
-		float f = getCurrentDelayPercentual();
-		if(f>1f)return 1f;
-		return f;
+	
+	/**
+	 * Will not overlap {@link #lDelayLimitNano}, so {@link #updateTime()} is required.
+	 * 
+	 * @return if null, indicates that an update is required.
+	 */
+	public Float getCurrentDelayPercentual(boolean bIfReadyWillAlsoUpdate) {
+		if(bIfReadyWillAlsoUpdate)isReady(true); //just to auto update.
+		
+		long lCurrentDelay = getCurrentDelayNano();
+		long lDiff = lDelayLimitNano-lCurrentDelay;
+		if(lDiff<0){
+			if(bIfReadyWillAlsoUpdate){
+				return 0f;
+			}else{
+				return null;
+			}
+		}
+		double dPerc = 1.0 - ((double)lDiff)/((double)lDelayLimitNano);
+		
+		return (float)dPerc;
+//		
+//		float f = 1.0f - ((lNanoDelayLimit-getCurrentDelayNano())*fNanoToSeconds);
+//		if(f<0f){
+//			ihe.handleExceptionThreaded(new NullPointerException("negative value: "+f));
+//			f=0f;
+//		}
+//		return f;
 	}
+	
+//	public float getCurrentDelayPercentualWithinBounds() {
+//		float f = getCurrentDelayPercentual();
+//		if(f>1f)return 1f;
+//		return f;
+//	}
 	
 //	/**
 //	 * Will use the delay value to sleep the thread.
@@ -141,4 +284,46 @@ public class TimedDelay{
 //		}
 //	}
 	
+	public static ArrayList<TimedDelay> getTimedDelayListCopy(){
+		return new ArrayList<TimedDelay>(atdList);
+	}
+
+	public String getVarId() {
+		if(strVarId!=null)return strVarId;
+		if(rfcfgOwner==null){
+			throw new NullPointerException("Invalid usage, "
+				+IReflexFillCfg.class.getName()+" owner is null, is this a local (non field) variable?");
+		}
+		
+		strVarId = strCodePrefixVariant
+			+Misc.i().makePretty(rfcfgOwner.getClass(),false)
+			+Misc.i().firstLetter(
+				ReflexFill.i().createIdentifierWithFieldName(rfcfgOwner,this),
+				true);
+		
+		return strVarId;
+	}
+
+	@Override
+	public String getCodePrefixVariant() {
+		return strCodePrefixVariant ;
+	}
+
+	@Override
+	public IReflexFillCfg getOwner() {
+		return rfcfgOwner;
+	}
+
+	@Override
+	public void setObjectValue(Object objValue) {
+		if(objValue instanceof Double){
+			setDelayLimitSeconds( ((Double)objValue).floatValue() );
+		}else{
+			setDelayLimitSeconds((Float)objValue);
+		}
+	}
+
+	public String getReport() {
+		return getVarId()+" = "+getDelayLimitSeconds();
+	}
 }

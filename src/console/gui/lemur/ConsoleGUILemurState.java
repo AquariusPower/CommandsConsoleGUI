@@ -25,9 +25,8 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package console.gui;
+package console.gui.lemur;
 
-import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.LineWrapMode;
@@ -47,6 +46,7 @@ import com.simsilica.lemur.style.Attributes;
 import com.simsilica.lemur.style.Styles;
 
 import console.ConsoleCommands;
+import console.gui.ConsoleGuiStateAbs;
 
 /**
  * Here is the specific code that links the JME console state with Lemur GUI.
@@ -65,8 +65,8 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		super.configure(sapp, cc, iToggleConsoleKey);
 		
 		// misc cfg
-		LemurGuiMisc.i().configure(sapp, cc);
-		if(!sapp.getStateManager().attach(LemurGuiMisc.i()))throw new NullPointerException("already attached state "+LemurGuiMisc.class.getName());
+		LemurMiscHelpers.i().configure(sapp, cc);
+		if(!sapp.getStateManager().attach(LemurMiscHelpers.i()))throw new NullPointerException("already attached state "+LemurMiscHelpers.class.getName());
 	}
 	
 //	public void ConsoleGUILemurState(int iOpenConsoleHotKey, ConsoleCommands cc, Application app) {

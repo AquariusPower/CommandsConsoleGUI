@@ -52,6 +52,8 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.jme3.app.SimpleApplication;
 
+import console.VarIdValueOwner.IVarIdValueOwner;
+
 /**
  * All methods starting with "cmd" are directly accessible by user console commands.
  * Here are all base command related methods.
@@ -82,22 +84,21 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 * Adding a toggler field on any class, 
 	 * will automatically create the related console command!
 	 */
-	public static final String strTogglerCodePrefix="btg";
 //	public final BoolToggler	btgAcceptExternalExitRequests = new BoolToggler(this,false,strTogglerCodePrefix, 
 //		"if a ");
-	public final BoolToggler	btgDbAutoBkp = new BoolToggler(this,false,strTogglerCodePrefix, 
+	public final BoolToggler	btgDbAutoBkp = new BoolToggler(this,false,BoolToggler.strTogglerCodePrefix, 
 		"whenever a save happens, if the DB was modified, a backup will be created of the old file");
-	public final BoolToggler	btgShowWarn = new BoolToggler(this,true,strTogglerCodePrefix);
-	public final BoolToggler	btgShowInfo = new BoolToggler(this,true,strTogglerCodePrefix);
-	public final BoolToggler	btgShowException = new BoolToggler(this,true,strTogglerCodePrefix);
-	public final BoolToggler	btgEngineStatsView = new BoolToggler(this,false,strTogglerCodePrefix);
-	public final BoolToggler	btgEngineStatsFps = new BoolToggler(this,false,strTogglerCodePrefix);
-	public final BoolToggler	btgShowMiliseconds=new BoolToggler(this,false,strTogglerCodePrefix);
-	public final BoolToggler	btgFpsLimit=new BoolToggler(this,false,strTogglerCodePrefix);
-	public final BoolToggler	btgConsoleCpuRest=new BoolToggler(this,false,strTogglerCodePrefix,
+	public final BoolToggler	btgShowWarn = new BoolToggler(this,true);
+	public final BoolToggler	btgShowInfo = new BoolToggler(this,true);
+	public final BoolToggler	btgShowException = new BoolToggler(this,true);
+	public final BoolToggler	btgEngineStatsView = new BoolToggler(this,false);
+	public final BoolToggler	btgEngineStatsFps = new BoolToggler(this,false);
+	public final BoolToggler	btgShowMiliseconds=new BoolToggler(this,false);
+	public final BoolToggler	btgFpsLimit=new BoolToggler(this,false);
+	public final BoolToggler	btgConsoleCpuRest=new BoolToggler(this,false,BoolToggler.strTogglerCodePrefix,
 		"Console update steps will be skipped if this is enabled.");
-	public final BoolToggler	btgAutoScroll=new BoolToggler(this,true,strTogglerCodePrefix);
-	public final BoolToggler	btgUseFixedLineWrapModeForAllFonts=new BoolToggler(this,false,strTogglerCodePrefix,
+	public final BoolToggler	btgAutoScroll=new BoolToggler(this,true);
+	public final BoolToggler	btgUseFixedLineWrapModeForAllFonts=new BoolToggler(this,false,BoolToggler.strTogglerCodePrefix,
 		"If enabled, this will use a fixed line wrap column even for non mono spaced fonts, "
 		+"based on the width of the 'W' character. Otherwise it will dynamically guess the best "
 		+"fitting string size.");
@@ -106,17 +107,17 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 * Developer vars, keep together!
 	 * Initialy true, the default init will disable them.
 	 */
-	public final BoolToggler	btgShowDebugEntries=new BoolToggler(this,true,strTogglerCodePrefix);
-	public final BoolToggler	btgShowDeveloperInfo=new BoolToggler(this,true,strTogglerCodePrefix);
-	public final BoolToggler	btgShowDeveloperWarn=new BoolToggler(this,true,strTogglerCodePrefix);
-	public final BoolToggler	btgShowExecQueuedInfo=new BoolToggler(this,true,strTogglerCodePrefix);
+	public final BoolToggler	btgShowDebugEntries=new BoolToggler(this,true);
+	public final BoolToggler	btgShowDeveloperInfo=new BoolToggler(this,true);
+	public final BoolToggler	btgShowDeveloperWarn=new BoolToggler(this,true);
+	public final BoolToggler	btgShowExecQueuedInfo=new BoolToggler(this,true);
 	
 	/**
 	 * keep delayers together!
 	 */
-	protected TimedDelay tdLetCpuRest = new TimedDelay(0.1f);
-	protected TimedDelay tdDumpQueuedEntry = new TimedDelay(1f/5f); // per second
-	protected TimedDelay tdSpareGpuFan = new TimedDelay(1.0f/60f); // like 60 FPS
+	protected TimedDelay tdLetCpuRest = new TimedDelay(this,0.1f);
+	protected TimedDelay tdDumpQueuedEntry = new TimedDelay(this,1f/5f); // per second
+	protected TimedDelay tdSpareGpuFan = new TimedDelay(this,1.0f/60f); // like 60 FPS
 	
 	/**
 	 * used to hold a reference to the identified/typed user command
@@ -203,10 +204,10 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	protected ArrayList<String>	astrExecConsoleCmdsQueue = new ArrayList<String>();
 	protected ArrayList<PreQueueCmdsBlockSubList>	astrExecConsoleCmdsPreQueue = new ArrayList<PreQueueCmdsBlockSubList>();
 	protected String	strCmdLinePrepared = "";
-	protected TreeMap<String,Object> tmUserVariables = 
-		new TreeMap<String, Object>(String.CASE_INSENSITIVE_ORDER);
-	protected TreeMap<String,Object> tmRestrictedVariables =
-		new TreeMap<String, Object>(String.CASE_INSENSITIVE_ORDER);
+	protected TreeMap<String,VarIdValueOwner> tmUserVariables = 
+		new TreeMap<String, VarIdValueOwner>(String.CASE_INSENSITIVE_ORDER);
+	protected TreeMap<String,VarIdValueOwner> tmRestrictedVariables =
+		new TreeMap<String, VarIdValueOwner>(String.CASE_INSENSITIVE_ORDER);
 	protected File	flCmdHist;
 	protected File	flLastDump;
 	protected File	flInit;
@@ -259,7 +260,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		ReflexFillCfg rfcfg = null;
 		
 		if(rfcv.getClass().isAssignableFrom(BoolToggler.class)){
-			if(strTogglerCodePrefix.equals(rfcv.getCodePrefixVariant())){
+			if(BoolToggler.strTogglerCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
 				rfcfg.strCommandSuffix="Toggle";
 			}
@@ -435,6 +436,8 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	protected ArrayList<String>	astrBaseCmdCmtCacheList = new ArrayList<String>();
 
 	private String	strLastTypedUserCommand;
+
+	private ArrayList<Exception>	aExceptionList = new ArrayList<Exception>();
 	
 	protected void assertConfigured(){
 		if(bConfigured)return;
@@ -1350,7 +1353,11 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	protected boolean hasVar(String strVarId){
-		return selectVarSource(strVarId).get(strVarId)!=null;
+		return getVar(strVarId)!=null;
+	}
+	
+	protected VarIdValueOwner getVar(String strVarId){
+		return selectVarSource(strVarId).get(strVarId);
 	}
 
 	/**
@@ -1361,7 +1368,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		if(paramBooleanCheckForToggle(1)){
 			Boolean bEnable = paramBoolean(1);
 			btg.set(bEnable==null ? !btg.get() : bEnable); //overrider
-			varSet(btg, ""+btg.getBoolean(), true);
+			varSet(btg,true);
 			dumpInfoEntry("Toggle, setting "+paramString(0)+" to "+btg.get());
 			return true;
 		}
@@ -1590,6 +1597,9 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		return strParam;
 	}
 
+	protected boolean cmdVarAdd(String strVarId, String strValueAdd, boolean bSave, boolean bOverwrite){
+		return cmdVarAdd(getVar(strVarId), new VarIdValueOwner(strVarId, strValueAdd, null), bSave, bOverwrite);
+	}
 	/**
 	 * In case variable exists will be this method.
 	 * @param strVarId
@@ -1597,24 +1607,25 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 * @param bOverwrite
 	 * @return
 	 */
-	protected boolean cmdVarAdd(String strVarId, String strValueAdd, boolean bSave, boolean bOverwrite){
-		if(isRestrictedAndDoesNotExist(strVarId))return false;
+	protected boolean cmdVarAdd(VarIdValueOwner vivoExisting, VarIdValueOwner vivoAdd, boolean bSave, boolean bOverwrite){
+		if(isRestrictedAndDoesNotExist(vivoExisting.strId))return false;
 		
 		Object objValueNew = null;
-		Object objValueCurrent = selectVarSource(strVarId).get(strVarId);
+		VarIdValueOwner vivoCurrent = selectVarSource(vivoExisting.strId).get(vivoExisting.strId);
 		
-		if(objValueCurrent==null){
-			dumpExceptionEntry(new NullPointerException("value is null for var "+strVarId));
+		if(vivoCurrent.objValue==null){
+			dumpExceptionEntry(new NullPointerException("value is null for var "+vivoExisting.strId));
 			return false;
 		}
-			
-//		if(objValueCurrent!=null){
-			if(Boolean.class.isAssignableFrom(objValueCurrent.getClass())){
+		
+		String strValueAdd = ""+vivoAdd.objValue;
+//		if(vivoCurrent.objValue!=null){
+			if(Boolean.class.isAssignableFrom(vivoCurrent.objValue.getClass())){
 				// boolean is always overwrite
 				objValueNew = Misc.i().parseBoolean(strValueAdd);
 			}else
-			if(Long.class.isAssignableFrom(objValueCurrent.getClass())){
-				Long lValueCurrent = (Long)objValueCurrent;
+			if(Long.class.isAssignableFrom(vivoCurrent.objValue.getClass())){
+				Long lValueCurrent = (Long)vivoCurrent.objValue;
 				Long lValueAdd=null;
 				try{lValueAdd = Long.parseLong(strValueAdd);}catch(NumberFormatException e){}// accepted exception!
 				if(lValueAdd!=null){
@@ -1625,8 +1636,8 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 					dumpWarnEntry("Add value should be: "+Long.class.getSimpleName());
 				}
 			}else
-			if(Double.class.isAssignableFrom(objValueCurrent.getClass())){
-				Double dValueCurrent = (Double)objValueCurrent;
+			if(Double.class.isAssignableFrom(vivoCurrent.objValue.getClass())){
+				Double dValueCurrent = (Double)vivoCurrent.objValue;
 				Double dValueAdd=null;
 				try{dValueAdd = Double.parseDouble(strValueAdd);}catch(NumberFormatException e){}// accepted exception!
 				if(dValueAdd!=null){
@@ -1637,16 +1648,20 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 					dumpWarnEntry("Add value should be: "+Double.class.getSimpleName());
 				}
 			}else{
-				if(bOverwrite)objValueCurrent="";
-				objValueNew = ""+objValueCurrent+strValueAdd;
+				/**
+				 * simple String
+				 */
+				if(bOverwrite)vivoCurrent.objValue="";
+				objValueNew = ""+vivoCurrent.objValue+strValueAdd;
 			}
 //		}else{
-//			return varSet(strVarId, strValueAdd, true);
+//			return varSet(vivo.strId, strValueAdd, true);
 //		}
 		
 //		if(objValueNew==null)return false;
 		
-		varApply(strVarId,objValueNew,bSave);
+		vivoExisting.objValue=objValueNew;
+		varApply(vivoExisting,bSave);
 		return true;
 	}
 	
@@ -1655,12 +1670,12 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	protected Object getVarValue(String strVarId){
-		return selectVarSource(strVarId).get(strVarId);
+		return selectVarSource(strVarId).get(strVarId).objValue;
 	}
-	protected void setVarValue(String strVarId, Object objValue){
-		selectVarSource(strVarId).put(strVarId,objValue);
-	}
-	protected TreeMap<String, Object> selectVarSource(String strVarId){
+//	protected void setVarValue(String strVarId, VarIdValueOwner vivo){
+//		selectVarSource(strVarId).put(strVarId,vivo);
+//	}
+	protected TreeMap<String, VarIdValueOwner> selectVarSource(String strVarId){
 		if(isRestricted(strVarId)){
 			return tmRestrictedVariables;
 		}else{
@@ -1698,19 +1713,19 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		Misc.i().fileAppendLine(getVarFile(strVarId), strCommentOut+varReportPrepare(strVarId)+strReadOnlyComment);
 	}
 	
-	protected boolean varApply(String strVarId, Object objValue, boolean bSave){
-		selectVarSource(strVarId).put(strVarId,objValue);
-		if(bSave)fileAppendVar(strVarId);
+	protected boolean varApply(VarIdValueOwner vivo, boolean bSave){
+		selectVarSource(vivo.strId).put(vivo.strId,vivo);
+		if(bSave)fileAppendVar(vivo.strId);
 		
-		if(isRestricted(strVarId) && btgShowDeveloperInfo.b()){
-			varReport(strVarId);
+		if(isRestricted(vivo.strId) && btgShowDeveloperInfo.b()){
+			varReport(vivo.strId);
 		}
 		
 		return true;
 	}
 	
 	public String varReportPrepare(String strVarId) {
-		Object objValue = selectVarSource(strVarId).get(strVarId);
+		VarIdValueOwner vivo = selectVarSource(strVarId).get(strVarId);
 		String str="";
 		
 		str+=getCommandPrefix();
@@ -1718,13 +1733,13 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		str+=" ";
 		str+=strVarId;
 		str+=" ";
-		if(objValue!=null){
-			str+="\""+objValue+"\"";
+		if(vivo!=null){
+			str+="\""+vivo.objValue+"\"";
 			str+=" ";
 		}
 		str+="#";
-		if(objValue!=null){
-			str+=objValue.getClass().getSimpleName();
+		if(vivo!=null){
+			str+=vivo.objValue.getClass().getSimpleName();
 		}else{
 			str+="(ValueNotSet)";
 		}
@@ -1735,8 +1750,8 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public void varReport(String strVarId) {
-		Object objValue=selectVarSource(strVarId).get(strVarId);
-		if(objValue!=null){
+		VarIdValueOwner vivo=selectVarSource(strVarId).get(strVarId);
+		if(vivo!=null){
 			dumpSubEntry(varReportPrepare(strVarId));
 		}else{
 			dumpSubEntry(strVarId+" is not set...");
@@ -1744,10 +1759,79 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public boolean varSet(StringField sfId, String strValue, boolean bSave) {
-		return varSet(RESTRICTED_TOKEN+sfId.toString(), strValue, bSave);
+		return varSet(
+			RESTRICTED_TOKEN+sfId.toString(),
+			strValue,
+			bSave);
 	}
-	public boolean varSet(BoolToggler btg, String strValue, boolean bSave) {
-		return varSet(RESTRICTED_TOKEN+btg.getCmdId(), strValue, bSave);
+	
+	private boolean varRestoreTo(BoolToggler btgOwner){
+		VarIdValueOwner vivo = getVar(RESTRICTED_TOKEN+btgOwner.getCmdId());
+		if(vivo==null)return false;
+		btgOwner.setObjectValue(vivo.objValue);
+		dumpSubEntry(btgOwner.getReport());
+		return true;
+	}
+	
+	private boolean varRestoreTo(TimedDelay tdOwner){
+		VarIdValueOwner vivo = getVar(RESTRICTED_TOKEN+tdOwner.getVarId());
+		if(vivo==null)return false;
+		tdOwner.setObjectValue(vivo.objValue);
+		dumpSubEntry(tdOwner.getReport());
+		return true;
+	}
+	
+	public boolean varSet(BoolToggler btgOwner, boolean bSave) {
+		if(btgOwner.getOwner()==null)return false; //check if it is configured as a field should be
+		
+		return varSet(
+			new VarIdValueOwner(
+				RESTRICTED_TOKEN+btgOwner.getCmdId(),
+				""+btgOwner.getBoolean(),
+				btgOwner),
+			bSave);
+	}
+	/**
+	 * 
+	 * @param tdOwner only the ones configured as class field variables 
+	 * @param bSave
+	 * @return
+	 */
+	public boolean varSet(TimedDelay tdOwner, boolean bSave) {
+		if(tdOwner.getOwner()==null)return false; //check if it is configured as a field should be
+		
+		return varSet(
+			new VarIdValueOwner(
+				RESTRICTED_TOKEN+tdOwner.getVarId(),
+				Misc.i().fmtFloat(tdOwner.getDelayLimitSeconds(),3), //store with milis precision
+				tdOwner),
+			bSave);
+	}
+	
+	/**
+	 * this will apply the value at the owner also (if it exists)
+	 * @param strVarId
+	 * @param strValue
+	 * @param bSave
+	 * @return
+	 */
+	public boolean varSet(String strVarId, String strValue, boolean bSave) {
+		boolean bOk=varSet(new VarIdValueOwner(strVarId, strValue, null), bSave);
+		
+		if(bOk){
+			VarIdValueOwner vivo = getVar(strVarId);
+			if(vivo.owner instanceof BoolToggler){
+				varRestoreTo((BoolToggler)vivo.owner);
+			}else
+			if(vivo.owner instanceof TimedDelay){
+				varRestoreTo((TimedDelay)vivo.owner);
+			}else
+			if(vivo.owner!=null){
+				throw new UnsupportedOperationException("Unsupported owner type: "+vivo.owner.getClass().getName());
+			}
+		}
+		
+		return bOk;
 	}
 	
 	/**
@@ -1757,16 +1841,20 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 * @param strValue
 	 * @return
 	 */
-	public boolean varSet(String strVarId, String strValue, boolean bSave) {
-		if(getAlias(strVarId)!=null){
-			dumpErrorEntry("Variable identifier '"+strVarId+"' conflicts with existing alias!");
+	public boolean varSet(VarIdValueOwner vivo, boolean bSave) {
+		if(getAlias(vivo.strId)!=null){
+			dumpErrorEntry("Variable identifier '"+vivo.strId+"' conflicts with existing alias!");
 			return false;
 		}
 		
-		if(strValue==null)return false; //strValue=""; //just creates the var
+		if(vivo.objValue==null)return false; //strValue=""; //just creates the var
 		
-		if(hasVar(strVarId)){
-			return cmdVarAdd(strVarId, strValue, bSave, true);
+		VarIdValueOwner vivoExisting = getVar(vivo.strId);
+		if(vivoExisting!=null){
+//			if(vivoExisting.owner instanceof BoolToggler){
+//				int i=0;
+//			}
+			return cmdVarAdd(vivoExisting, vivo, bSave, true);
 		}
 		
 		boolean bOk=false;
@@ -1776,10 +1864,11 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		 * Double would parse a Long.
 		 * Boolean would be accepted by String that accepts everything. 
 		 */
-		if(!bOk)try{bOk=varApply(strVarId, Long  .parseLong     (strValue),bSave);}catch(NumberFormatException e){}// accepted exception!
-		if(!bOk)try{bOk=varApply(strVarId, Double.parseDouble   (strValue),bSave);}catch(NumberFormatException e){}// accepted exception!
-		if(!bOk)try{bOk=varApply(strVarId, Misc.i().parseBoolean(strValue),bSave);}catch(NumberFormatException e){}// accepted exception!
-		if(!bOk)bOk=varApply(strVarId,strValue,bSave);
+		String strValue = ""+vivo.objValue;
+		if(!bOk)try{vivo.objValue=Long  .parseLong     (strValue);bOk=varApply(vivo,bSave);}catch(NumberFormatException e){}// accepted exception!
+		if(!bOk)try{vivo.objValue=Double.parseDouble   (strValue);bOk=varApply(vivo,bSave);}catch(NumberFormatException e){}// accepted exception!
+		if(!bOk)try{vivo.objValue=Misc.i().parseBoolean(strValue);bOk=varApply(vivo,bSave);}catch(NumberFormatException e){}// accepted exception!
+		if(!bOk){vivo.objValue=strValue;bOk=varApply(vivo,bSave);}
 		
 		return bOk;
 	}
@@ -1928,6 +2017,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		updateExecPreQueuedCmdsBlockDispatcher(); //before exec queue 
 		updateExecConsoleCmdQueue(); // after pre queue
 		updateDumpQueueEntry();
+		updateHandleException();
 	}
 	protected void updateToggles() {
 		if(btgEngineStatsView.checkChangedAndUpdate())icui.updateEngineStats();
@@ -1999,7 +2089,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				}else{
 					if(!pqe.bInfoSleepBegin){
 						dumpDevInfoEntry("Sleeping for "
-							+Misc.i().fmtFloat(pqe.tdSleep.getDelayLimit())+"s: "
+							+Misc.i().fmtFloat(pqe.tdSleep.getDelayLimitSeconds())+"s: "
 							+commentToAppend(pqe.getUniqueInfo()));
 						pqe.bInfoSleepBegin =true;
 					}
@@ -2118,8 +2208,13 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	protected void setupRecreateFile(){
+		dumpDevInfoEntry("Recreating restricted vars setup file:");
+		
 		flSetup.delete();
 		
+		/**
+		 * comments for user
+		 */
 		Misc.i().fileAppendLine(flSetup, getCommentPrefix()+" DO NOT EDIT!");
 		Misc.i().fileAppendLine(flSetup, getCommentPrefix()
 			+" This file will be overwritten by the application!");
@@ -2141,6 +2236,14 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		varSet(""+RESTRICTED_TOKEN+ERestrictedSetupLoadableVars.userAliasListHashcode,
 			""+aAliasList.hashCode(),
 			false);
+		
+		for(BoolToggler btg:BoolToggler.getBoolTogglerListCopy()){
+			varSet(btg,false);
+		}
+		
+		for(TimedDelay td:TimedDelay.getTimedDelayListCopy()){
+			varSet(td,false);
+		}
 		
 		if(bSave)varSaveSetupFile();
 	}
@@ -2180,6 +2283,10 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		
 		for(BoolToggler btg : BoolToggler.getBoolTogglerListCopy()){
 			dumpSubEntry(btg.getReport());
+		}
+		
+		for(TimedDelay td : TimedDelay.getTimedDelayListCopy()){
+			dumpSubEntry(td.getReport());
 		}
 		
 		dumpSubEntry("User Dump File = "+flLastDump.getAbsolutePath());
@@ -2294,6 +2401,8 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		if(bConfigured)throw new NullPointerException("already configured.");		// KEEP ON TOP
 		
 //		Init.i().initialize(sapp, this);
+		TimedDelay.configure(this);
+		BoolToggler.configure(this);
 		ReflexFill.assertReflexFillFieldsForOwner(this);
 		Debug.i().configure(this);
 		Misc.i().configure(this);
@@ -2432,8 +2541,14 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 
 	@Override
-	public void handleException(Exception e) {
-		dumpExceptionEntry(e);
+	synchronized public void handleExceptionThreaded(Exception e) {
+		aExceptionList.add(e);
+	}
+	
+	private void updateHandleException(){
+		while(aExceptionList.size()>0){
+			dumpExceptionEntry(aExceptionList.remove(0));
+		}
 	}
 	
 	public String convertNewLineToCmdDelimiter(String str){

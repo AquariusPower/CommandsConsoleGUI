@@ -25,13 +25,17 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package console.gui;
+package console.gui.lemur;
 
+import com.jme3.app.SimpleApplication;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.event.CursorButtonEvent;
 import com.simsilica.lemur.event.CursorMotionEvent;
 import com.simsilica.lemur.event.DefaultCursorListener;
+
+import console.ConsoleCommands;
+import console.gui.ConsoleGuiStateAbs;
 
 /**
  * 
@@ -40,20 +44,25 @@ import com.simsilica.lemur.event.DefaultCursorListener;
  */
 public class ConsoleCursorListener extends DefaultCursorListener {
 	ConsoleGuiStateAbs csa;
+	private SimpleApplication	sapp;
+	private ConsoleCommands	cc;
+	private ConsoleGuiStateAbs	cgui;
 	
-	public ConsoleCursorListener(ConsoleGuiStateAbs csa) {
-		this.csa=csa;
+	public void configure(SimpleApplication sapp, ConsoleCommands cc, ConsoleGuiStateAbs cgui){
+		this.sapp=sapp;
+		this.cc=cc;
+		this.cgui=cgui;
 	}
 
 	protected String debugPart(Panel pnl){
 		return pnl.getName()+","
-				+pnl.getElementId()+","
-				+pnl.getClass().getSimpleName()
-				+";";
+			+pnl.getElementId()+","
+			+pnl.getClass().getSimpleName()
+			+";";
 	}
 	
 	public void debugReport(CursorMotionEvent eventM, CursorButtonEvent eventB, Spatial target,	Spatial capture){
-		if(!csa.cc.btgShowDebugEntries.b())return;
+		if(!cc.btgShowDebugEntries.b())return;
 		
 		Panel pnlTgt = (Panel)target;
 		Panel pnlCap = (Panel)capture;
@@ -62,15 +71,15 @@ public class ConsoleCursorListener extends DefaultCursorListener {
 		String strCap	=	"";if(pnlCap!=null)strCap	="Cap:"+debugPart(pnlCap);
 		String strB		=	"";if(eventB!=null)strB		="B:"+eventB.getButtonIndex()+";";
 		String strM		=	"";if(eventM!=null)strM		="M:"+eventM.getX()+","+eventM.getY()+";";
-		csa.cc.dumpDebugEntry("FOCUS@"+strTgt+strCap+strB+strM);
+		cc.dumpDebugEntry("FOCUS@"+strTgt+strCap+strB+strM);
 	}
 	
 	protected void cursorMoveEvent(CursorMotionEvent event, Spatial target,	Spatial capture) {
-		if(csa.sptScrollTarget!=target){
+		if(!cgui.isScrollRequestTarget(target)){ //detect changed
 			debugReport(event, null, target, capture);
 		}
 		
-		csa.sptScrollTarget = target;
+		cgui.setScrollRequestTarget(target);
 	}
 	
 	@Override
@@ -91,8 +100,8 @@ public class ConsoleCursorListener extends DefaultCursorListener {
 		
 		if(!event.isPressed()){ //on release
 			if(event.getButtonIndex()==0){ //main button
-				if(target==csa.lstbxAutoCompleteHint){
-					csa.checkAndApplyHintAtInputField();
+				if(cgui.isHintBox(target)){
+					cgui.checkAndApplyHintAtInputField();
 				}
 			}
 		}

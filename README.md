@@ -1,2 +1,4 @@
 # CommandsConsoleGUI
-Graphical commands console for Lemur GUI + JMonkeyEngine
+Power Developer Commands Console UI (Java)
+Currently supports: Lemur GUI at JMonkeyEngine
+

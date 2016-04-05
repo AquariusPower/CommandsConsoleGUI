@@ -57,11 +57,9 @@ import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.Trigger;
-import com.jme3.material.MatParam;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
@@ -85,12 +83,12 @@ import com.simsilica.lemur.style.BaseStyles;
 import com.simsilica.lemur.style.Styles;
 
 import console.ConsoleCommands;
-import console.ConsoleCommandsBackgroundState;
-import console.ConsoleScriptCommands;
 import console.DumpEntry;
 import console.EDataBaseOperations;
 import console.IConsoleCommandListener;
 import console.IConsoleUI;
+import console.gui.lemur.ConsoleCursorListener;
+import console.gui.lemur.LemurMiscHelpers;
 
 /**
  * A graphical console where developers and users can issue application commands.
@@ -98,6 +96,8 @@ import console.IConsoleUI;
  * It must contain the base for the GUI to work.
  * 
  * Project at: https://github.com/AquariusPower/CommandsConsoleGUI
+ * 
+ * TODO complete lemur specifics migration
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
@@ -132,9 +132,9 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	/**
 	 * keep delayers together!
 	 */
-	protected TimedDelay tdStatsRefresh = new TimedDelay(0.5f);
-	protected TimedDelay tdScrollToBottomRequestAndSuspend = new TimedDelay(0.5f);
-	protected TimedDelay tdScrollToBottomRetry = new TimedDelay(0.1f);
+	protected TimedDelay tdStatsRefresh = new TimedDelay(this,0.5f);
+	protected TimedDelay tdScrollToBottomRequestAndSuspend = new TimedDelay(this,0.5f);
+	protected TimedDelay tdScrollToBottomRetry = new TimedDelay(this,0.1f);
 
 //	protected TimedDelay tdLetCpuRest = new TimedDelay(0.1f);
 //	protected TimedDelay tdStatsRefresh = new TimedDelay(0.5f);
@@ -284,7 +284,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 //	protected boolean	bFuncCmdLineSkipTilEnd;
 //	protected long lLastUniqueId = 0;
 
-	private ConsoleCursorListener consoleCursorListener = new ConsoleCursorListener(this);
+	private ConsoleCursorListener consoleCursorListener;
 
 	protected Spatial	sptScrollTarget;
 	private Integer	iStatsTextSafeLength = null;
@@ -506,6 +506,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		
 		if(sapp==null)throw new NullPointerException("base initialization required");
 		
+		consoleCursorListener = new ConsoleCursorListener();
+		consoleCursorListener.configure(sapp, cc, this);
 		CursorEventControl.addListenersToSpatial(lstbxAutoCompleteHint, consoleCursorListener);
 		lstbxAutoCompleteHint.setName("ConsoleHints");
 		
@@ -691,7 +693,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		if(isInputTextFieldEmpty() && strPasted.trim().startsWith(""+cc.getCommandPrefix())){
 			strCurrent = strPasted.trim(); //replace "empty" line with command (can be invalid in this case, user may complete it properly)
 		}else{
-			strCurrent = LemurGuiMisc.i().prepareStringToPasteAtCaratPosition(tfInput, strCurrent, strPasted);
+			strCurrent = LemurMiscHelpers.i().prepareStringToPasteAtCaratPosition(tfInput, strCurrent, strPasted);
 //			if(efHK!=null){
 //				strCurrent = efHK.pasteAtCaratPositionHK(strCurrent,strPasted);
 //			}else{
@@ -701,7 +703,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		
 		setInputField(strCurrent); 
 		
-		LemurGuiMisc.i().positionCaratProperly(tfInput);//, iMoveCaratTo);
+		LemurMiscHelpers.i().positionCaratProperly(tfInput);//, iMoveCaratTo);
 //		if(efHK!=null)efHK.positionCaratProperlyHK();
 	}
 	
@@ -1082,7 +1084,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	}
 	
 	protected void updateOverrideInputFocus(){
-		Spatial sptWithFocus = LemurGuiMisc.i().getFocusManagerState().getFocus();
+		Spatial sptWithFocus = LemurMiscHelpers.i().getFocusManagerState().getFocus();
 		
 		if(isEnabled()){
 			if(tfInput!=sptWithFocus){
@@ -1091,7 +1093,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 					bRestorePreviousFocus=true;
 				}
 				
-				LemurGuiMisc.i().requestFocus(tfInput);
+				LemurMiscHelpers.i().requestFocus(tfInput);
 			}
 		}else{
 			/**
@@ -1113,7 +1115,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 					}
 				}
 				
-				LemurGuiMisc.i().requestFocus(sptPreviousFocus);
+				LemurMiscHelpers.i().requestFocus(sptPreviousFocus);
 //				GuiGlobals.getInstance().requestFocus(sptPreviousFocus);
 				sptPreviousFocus = null;
 				bRestorePreviousFocus=false;
@@ -1426,7 +1428,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		return cc.actionSubmitCommand(strCmd);
 	}
 	
-	protected boolean checkAndApplyHintAtInputField(){
+	public boolean checkAndApplyHintAtInputField(){
 		/**
 		 * if hint area is active and has a selected entry, 
 		 * it will override default command submit.
@@ -1681,7 +1683,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		
 		if(strCompletedCmd.trim().isEmpty())strCompletedCmd=""+cc.getCommandPrefix();
 		setInputField(strCompletedCmd+strCmdAfterCarat);
-		LemurGuiMisc.i().setCaratPosition(tfInput, strCompletedCmd.length());
+		LemurMiscHelpers.i().setCaratPosition(tfInput, strCompletedCmd.length());
 //		if(efHK!=null)efHK.setCaratPosition(strCompletedCmd.length());
 		
 		scrollToBottomRequest();
@@ -2371,6 +2373,15 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	@Override
 	public void clearDumpAreaSelection() {
 		lstbxDumpArea.getSelectionModel().setSelection(-1); //clear selection
+	}
+	public boolean isHintBox(Spatial target) {
+		return target==lstbxAutoCompleteHint;
+	}
+	public boolean isScrollRequestTarget(Spatial target) {
+		return target == sptScrollTarget;
+	}
+	public void setScrollRequestTarget(Spatial target) {
+		this.sptScrollTarget = target;
 	}
 	
 //	@Override

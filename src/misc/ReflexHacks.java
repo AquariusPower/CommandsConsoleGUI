@@ -65,7 +65,7 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 	public static ReflexHacks i(){return instance;}
 	
 	private ConsoleCommands cc;
-	public final BoolToggler	btgAllowHacks = new BoolToggler(this,false,ConsoleCommands.strTogglerCodePrefix,
+	public final BoolToggler	btgAllowHacks = new BoolToggler(this,false,BoolToggler.strTogglerCodePrefix,
 		"Hacks allows for otherwise impossible features, but they may break if targeted classes are updated.");
 
 	private IHandleExceptions	ihe;
@@ -94,7 +94,7 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 			objFieldValue = field.get(objFrom);
 			field.setAccessible(false);
 		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
-			ihe.handleException(e);
+			ihe.handleExceptionThreaded(e);
 		}
 		
 		return objFieldValue;
@@ -124,7 +124,7 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 			objReturn = m.invoke(objInvoker);
 			if(!bWasAccessible)m.setAccessible(false);
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			ihe.handleException(e);
+			ihe.handleExceptionThreaded(e);
 		}
 		return objReturn;
 	}

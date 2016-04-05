@@ -106,7 +106,7 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 	public boolean executePreparedCommand(ConsoleCommands	cc) {
 		boolean bCommandWorked = false;
 		
-		if(cc.checkCmdValidity(this,CMD_END_USER_COMMAND_TEST,"[iHowMany] users working")){
+		if(cc.checkCmdValidity(this,CMD_END_USER_COMMAND_TEST,"[iHowMany] users working?")){
 			bCommandWorked = endUserCustomMethod(cc.paramInt(1));
 		}else
 		{}

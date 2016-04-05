@@ -25,8 +25,9 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package console.gui;
+package console.gui.lemur;
 
+import misc.BoolToggler;
 import misc.ReflexFill;
 import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
@@ -41,6 +42,7 @@ import com.jme3.app.state.AppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.font.BitmapText;
 import com.jme3.material.MatParam;
+import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
@@ -60,11 +62,12 @@ import console.IConsoleCommandListener;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class LemurGuiMisc implements AppState, IConsoleCommandListener, IReflexFillCfg{
+public class LemurMiscHelpers implements AppState, IConsoleCommandListener, IReflexFillCfg{
+	public final BoolToggler	btgTextCursorPulseFadeBlinkMode = new BoolToggler(this,true);
 	public final StringField CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringField(this, ConsoleCommands.strFinalCmdCodePrefix);
 	
-	private static LemurGuiMisc instance = new LemurGuiMisc(); 
-	public static LemurGuiMisc i(){return instance;}
+	private static LemurMiscHelpers instance = new LemurMiscHelpers(); 
+	public static LemurMiscHelpers i(){return instance;}
 
 	private SimpleApplication	sapp;
 	
@@ -72,7 +75,7 @@ public class LemurGuiMisc implements AppState, IConsoleCommandListener, IReflexF
 //		this.sapp = sapp;
 //	}
 	
-	protected TimedDelay tdTextCursorBlink = new TimedDelay(1f);
+	protected TimedDelay tdTextCursorBlink = new TimedDelay(this,1f);
 	private boolean	bBlinkingTextCursor = true;
 	private FocusManagerState	focusState;
 	private TextField	tfToBlinkCursor;
@@ -86,6 +89,7 @@ public class LemurGuiMisc implements AppState, IConsoleCommandListener, IReflexF
 	private boolean	bFixInvisibleTextInputCursor;
 
 	private boolean	bConfigured;
+	private boolean	bBlinkFadeInAndOut =true;
 
 //	private int	iMoveCaratTo;
 	
@@ -120,8 +124,12 @@ public class LemurGuiMisc implements AppState, IConsoleCommandListener, IReflexF
 		return focusState;
 	}
 	
-	private void fixInvisibleCursor(TextField tf){
+	private void bugfixInvisibleCursor(TextField tf){
 		if(!bFixInvisibleTextInputCursor)return;
+		
+		String strInvisibleCursorFixed="InvisibleCursorFixed";
+		if(tf.getUserData(strInvisibleCursorFixed)!=null)return;
+		
 		BitmapText bmt = getBitmapTextFrom(tf);
 		
 		/**
@@ -132,18 +140,23 @@ public class LemurGuiMisc implements AppState, IConsoleCommandListener, IReflexF
 		 * Wouldnt have been better if it was used 'null' as indicator of invalidity?
 		 * 
 		 * This flow will fix that base alpha to fully visible.
+		 * -> BitmapText.letters.setBaseAlpha(alpha);
 		 */
 		bmt.setAlpha(1f); // alpha need to be fixed, it was -1; -1 is an invalid value used as a merker/indicator, woulndt be better it be a null marker?
 		
 		/**
 		 * This flow will apply the base alpha of BitmapText to the text cursor.
+		 * -> TextField.text.setColor(color)->resetCursorColor()
 		 */
 		tf.setColor(tf.getColor());
+		
+		tf.setUserData(strInvisibleCursorFixed,true);
 	}
 	/**
+	 * To the point, but unnecessary.
 	 * see {@link TextEntryComponent#resetCursorColor()}
 	 */
-	private void fixInvisibleCursor(Geometry geomCursor){
+	private void bugfixInvisibleCursor(Geometry geomCursor){
 		if(!bFixInvisibleTextInputCursor)return;
 //	getBitmapTextFrom(tf).setAlpha(1f); //this is a fix to let text cursor be visible.
 		geomCursor.getMaterial().setColor("Color",ColorRGBA.White.clone());
@@ -156,35 +169,75 @@ public class LemurGuiMisc implements AppState, IConsoleCommandListener, IReflexF
 //		tdTextCursorBlink.updateTime();
 		
 		String strCursorHotLink="CursorHotLink";
+		String strExclusiveCursorMaterial="CursorMaterial";
+		String strCursorMaterialBkp="CursorMaterialBkp";
+		String strExclusiveCursorColor="ExclusiveCursorColor";
 		Geometry geomCursor = tf.getUserData(strCursorHotLink);
 		if(geomCursor==null){
 			geomCursor = getTextCursorFrom(tf);
 			tf.setUserData(strCursorHotLink, geomCursor);
-//		fixInvisibleCursor(geomCursor);
 		}
 		
-		long lDelay = tdTextCursorBlink.getCurrentDelay();
+//		BitmapText bmt = getBitmapTextFrom(tf);
+//		((BitmapTextPage)bmt.getChild("BitmapFont")).
 		
-		boolean bUseCursorFade = false; //it actually is the same material used on the text, so will be a problem...
-		if(bUseCursorFade){
+		long lDelay = tdTextCursorBlink.getCurrentDelayNano();
+		
+		if(btgTextCursorPulseFadeBlinkMode.b()){
+			Material matCursorOnly = tf.getUserData(strExclusiveCursorMaterial);
+	//		matCursorOnly=null;
+			/**
+			 * check if cursor material was updated outside here
+			 */
+			if(matCursorOnly==null || !matCursorOnly.equals(geomCursor.getMaterial())){
+				/**
+				 * The material is shared with the cursor and the text.
+				 * As the material may affect also the text, and a fading text is horrible
+				 * using a cloned material to substitute it.
+				 */
+				tf.setUserData(strCursorMaterialBkp, geomCursor.getMaterial());
+				matCursorOnly = geomCursor.getMaterial().clone();
+				MatParam param = matCursorOnly.getParam("Color");
+				ColorRGBA colorClone = ((ColorRGBA)param.getValue()).clone();
+				matCursorOnly.setColor("Color", colorClone);
+	//			matCursorOnly.setParam("Color", ColorRGBA.class, matCursorOnly.getParam("Color").clone());
+				
+				geomCursor.setMaterial(matCursorOnly);
+	//		fixInvisibleCursor(geomCursor);
+				tf.setUserData(strExclusiveCursorMaterial, matCursorOnly);
+				tf.setUserData(strExclusiveCursorColor, colorClone);
+			}
+			
 		//		if(lDelay > lTextCursorBlinkDelay){
-			MatParam param = geomCursor.getMaterial().getParam("Color");
-			ColorRGBA color = (ColorRGBA)param.getValue();
+			ColorRGBA color = tf.getUserData(strExclusiveCursorColor);
+//			MatParam param = matCursorOnly.getParam("Color");
+//			ColorRGBA color = (ColorRGBA)param.getValue();
 //			color.a = (tdTextCursorBlink.lDelayLimit-lDelay)*fNanoToSeconds;
-			color.a = tdTextCursorBlink.getCurrentDelayPercentual();
+			color.a = tdTextCursorBlink.getCurrentDelayPercentualDynamic();
+			if(bBlinkFadeInAndOut){
+				if(color.a>0.5f)color.a=1f-color.a; //to allow it fade in and out
+				color.a*=2f;
+//				if(color.a<0.75f)color.a=0.75f;
+			}
 			if(color.a<0)color.a=0;
 			if(color.a>1)color.a=1;
-			geomCursor.getMaterial().setColor("Color", color);
+//			matCursorOnly.setColor("Color", color);
 			
-			if(lDelay > tdTextCursorBlink.getNanoDelayLimit()){
-				tdTextCursorBlink.updateTime();
-			}
+//			if(lDelay > tdTextCursorBlink.getDelayLimitNano()){
+//				tdTextCursorBlink.updateTime();
+//			}
 		}else{
-			if(lDelay > tdTextCursorBlink.getNanoDelayLimit()){
+			Material matBkp = tf.getUserData(strCursorMaterialBkp);
+			if(matBkp!=null){
+				geomCursor.setMaterial(matBkp);
+				tf.setUserData(strCursorMaterialBkp,null); //clear
+			}
+			
+			if(lDelay > tdTextCursorBlink.getDelayLimitNano()){
 				if(geomCursor.getCullHint().compareTo(CullHint.Always)!=0){
 					geomCursor.setCullHint(CullHint.Always);
 				}else{
-					fixInvisibleCursor(tf);
+					bugfixInvisibleCursor(tf);
 //					fixInvisibleCursor(geomCursor);
 					geomCursor.setCullHint(CullHint.Inherit);
 				}

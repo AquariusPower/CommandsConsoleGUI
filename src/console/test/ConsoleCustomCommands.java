@@ -27,15 +27,15 @@
 
 package console.test;
 
+import jmestates.FpsLimiterState;
+import jmestates.SingleInstanceState;
 import misc.Misc;
 import misc.ReflexFill;
 
 import com.jme3.input.KeyInput;
 
 import console.ConsoleScriptCommands;
-import console.gui.ConsoleGUILemurState;
-import extras.FpsLimiterState;
-import extras.SingleInstanceState;
+import console.gui.lemur.ConsoleGUILemurState;
 
 /**
  * 

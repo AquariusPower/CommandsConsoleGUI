@@ -48,7 +48,7 @@ public class ConsoleCommandsBackgroundState implements AppState, IReflexFillCfg{
 	private static ConsoleCommandsBackgroundState instance = new ConsoleCommandsBackgroundState();
 	public static ConsoleCommandsBackgroundState i(){return instance;}
 	
-	protected BoolToggler	btgExecCommandsInBackground=new BoolToggler(this, false, ConsoleCommands.strTogglerCodePrefix,
+	protected BoolToggler	btgExecCommandsInBackground=new BoolToggler(this, false, BoolToggler.strTogglerCodePrefix,
 		"Will continue running console commands even if console is closed.");
 	
 	private IConsoleUI	cgsaGraphicalConsoleUI;
