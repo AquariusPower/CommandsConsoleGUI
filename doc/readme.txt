@@ -36,6 +36,10 @@ Features:
 	= Ctrl+/ comment toggle on the input line.
 	= Any changes to the input text will reset the command history cursor, hit Down to access your last non issued command.
 
+NAMING CONVENTION:
+	. Methods ending with TS are synchronized/threadSafe, it overrides TD idea below.
+	. Methods ending with TD will be running in a separate (other than main) thread, therefore they go better if only directly call TS methods.
+
 DONE:
 	= BaseOutputFilemameOnClass
 	= Log all to file. But show only enabled ones

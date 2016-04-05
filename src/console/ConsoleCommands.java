@@ -1191,7 +1191,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		
 		flDB.delete();
 		Misc.i().fileAppendLine(flDB, getCommentPrefix()+" DO NOT MODIFY! auto generated. Set overrides at user init file!");
-		Misc.i().fileAppendList(flDB, astr);
+		Misc.i().fileAppendListTS(flDB, astr);
 		
 		dumpInfoEntry("Database saved: "
 			+astrVarList.size()+" vars, "

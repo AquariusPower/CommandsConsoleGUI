@@ -132,7 +132,7 @@ public class Misc {
 		
 		return astr;
 	}
-	synchronized public void fileAppendList(File fl, ArrayList<String> astr) {
+	synchronized public void fileAppendListTS(File fl, ArrayList<String> astr) {
 		BufferedWriter bw = null;
 		try{
 			try {
@@ -213,7 +213,7 @@ public class Misc {
 	synchronized public void fileAppendLine(File fl, String str) {
 		ArrayList<String> astr = new ArrayList<String>();
 		astr.add(str);
-		fileAppendList(fl, astr);
+		fileAppendListTS(fl, astr);
 	}
 	
 	/**
@@ -266,7 +266,7 @@ public class Misc {
 		return "";
 	}
 	
-	synchronized public BasicFileAttributes fileAttributes(File fl){
+	synchronized public BasicFileAttributes fileAttributesTS(File fl){
 //		if(fl.exists()){
 			try {
 				return Files.readAttributes(fl.toPath(), BasicFileAttributes.class);

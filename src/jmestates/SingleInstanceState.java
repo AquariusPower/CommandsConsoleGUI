@@ -79,7 +79,7 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 	private static SingleInstanceState instance = new SingleInstanceState();
 	public static SingleInstanceState i(){return instance;}
 	
-	private File[] getAllLocks(){
+	private File[] getAllLocksTD(){
 		return flFolder.listFiles(fnf);
 	}
 	
@@ -102,11 +102,11 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 	/**
 	 * Clear locks that have not been updated lately.
 	 */
-	private void clearOldLocks(){
-		for(File fl:getAllLocks()){
-			if(cmpSelfWith(fl))continue;
+	private void clearOldLocksTD(){
+		for(File fl:getAllLocksTD()){
+			if(cmpSelfWithTD(fl))continue;
 			
-			BasicFileAttributes attr = Misc.i().fileAttributes(fl);
+			BasicFileAttributes attr = Misc.i().fileAttributesTS(fl);
 			if(attr==null)continue;
 			
 			long lTimeLimit = System.currentTimeMillis() - (lLockUpdateDelayMilis*2);
@@ -117,12 +117,12 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 		}
 	}
 	
-	private boolean cmpSelfWith(File fl){
+	private boolean cmpSelfWithTD(File fl){
 //		System.out.println(">>>"+flSelfLock.getName()()+">>>"+(fl.getAbsolutePath()));
 		return flSelfLock.getName().equalsIgnoreCase(fl.getName());
 	}
 	
-	private boolean checkExit(){
+	private boolean checkExitTD(){
 		if(!btgSingleInstaceMode.b())return false;
 		
 		boolean bExit=false;
@@ -130,21 +130,14 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 		strReport+="-----------------SimultaneousLocks--------------------\n";
 		strReport+="ThisLock:  "+flSelfLock.getName()+"\n";
 		int iSimultaneousLocksCount=0;
-		for(File flOtherLock:getAllLocks()){
-			if(cmpSelfWith(flOtherLock))continue;
+		for(File flOtherLock:getAllLocksTD()){
+			if(cmpSelfWithTD(flOtherLock))continue;
 			
-//			attrSelfLock = Misc.i().fileAttributes(flSelfLock);
-//			BasicFileAttributes attrOtherLock = Misc.i().fileAttributes(flOtherLock);
-			
-//			long lThisCreationTime = Long.parseLong(Misc.i().fileLoad(flSelfLock).get(0));
-			Long lOtherCreationTime = getCreationTimeOf(flOtherLock);
+			Long lOtherCreationTime = getCreationTimeOfTD(flOtherLock);
 			if(lOtherCreationTime==null)continue;
 			
-//			System.err.println("ThisLock: "+attrSelfLock.creationTime()+", "+flSelfLock.getName());
-//			System.err.println("OtherLock:"+attrOtherLock.creationTime()+", "+flOtherLock.getName());
 			strReport+="OtherLock: "+flOtherLock.getName()+"\n";
 			
-//			boolean  bOtherIsNewer = attrSelfLock.creationTime().compareTo(attrOtherLock.creationTime())<0;
 			boolean  bOtherIsNewer = lSelfLockCreationTime < lOtherCreationTime;
 			
 			if(bDevModeExitIfThereIsANewerInstance && bOtherIsNewer){
@@ -166,8 +159,8 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 				 * 
 				 * To test, start a release mode, and AFTER that, start a debug mode one.
 				 */
-				if(Debug.i().isInIDEdebugMode()){
-					String strMode = getLockModeOf(flOtherLock);
+				if(bDebugMode){
+					String strMode = getLockModeOfTD(flOtherLock);
 					if(!strMode.equalsIgnoreCase(strDebugMode)){
 						strExitReasonOtherInstance=strMode;
 						bExit=true;
@@ -176,12 +169,6 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 			}
 			
 			iSimultaneousLocksCount++;
-//			if(bExit)break;
-//			{
-////				System.err.println(strReport);
-////				System.err.println(otherPrefixInfo()+" file lock: "+flOtherLock.getName());
-//				break;
-//			}
 		}
 		
 		if(bExit){
@@ -189,7 +176,7 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 		}else{
 			if(iSimultaneousLocksCount>0){
 				System.err.println(strReport+"This instance will continue running.");
-				clearOldLocks();
+				clearOldLocksTD();
 			}
 		}
 		
@@ -203,36 +190,14 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 				try {
 					if(!flSelfLock.exists()){
 						System.err.println("Lock was deleted, recreating: "+flSelfLock.getName());
-						createSelfLockFile();
+						createSelfLockFileTD();
 					}
 					
-					if(checkExit()){
-//						System.err.println(btgSingleInstaceExitSelfIfOlder.getReport());
-//						String strOther="OLDER";
-//						if(bDevModeExitIfThereIsANewerInstance){
-//							strOther="NEWER";
-//						}
-						
+					if(checkExitTD()){
 						System.err.println("Other "+strExitReasonOtherInstance+" instance is running, exiting this...");
-//						if(strExitReason.equalsIgnoreCase(strDebugMode)){
-//							System.err.println("Other instance is running, exiting this...");
-//						}else{
-//							if(bDevModeExitIfThereIsANewerInstance){
-//								System.err.println("Other NEWER instance is running, exiting this...");
-//							}else{
-//								System.err.println("Other OLDER instance is running, exiting this...");
-//							}
-//						}
-						
-//						System.err.println(otherPrefixInfo()+" is running, exiting...");
 						flSelfLock.delete();
 						System.exit(0);
 					}
-//					else
-//					if(bCleanOnce){
-//						clearBrokenLocks();
-//						bCleanOnce=false;
-//					}
 					
 					/**
 					 * This will also update the file creation time...
@@ -253,10 +218,12 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 	}
 	
 	String strDebugMode="DebugMode";
+	String strReleaseMode="ReleaseMode";
 	private boolean	bConfigured;
 	private String	strErrorMissingValue="ERROR_MISSING_VALUE";
+	private boolean	bDebugMode;
 	
-	private Long getCreationTimeOf(File fl){
+	private Long getCreationTimeOfTD(File fl){
 		ArrayList<String> astr = Misc.i().fileLoad(fl);
 		Long l = null;
 		if(astr.size()>0){
@@ -266,13 +233,13 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 		return l;
 	}
 	
-	private String getLockModeOf(File fl){
+	private String getLockModeOfTD(File fl){
 		ArrayList<String> astr = Misc.i().fileLoad(fl);
 		if(astr.size()>0)return astr.get(1); // line 2
 		return strErrorMissingValue;
 	}
 	
-	private void createSelfLockFile() {
+	private void createSelfLockFileTD() {
 		try{
 			flSelfLock.createNewFile();
 			
@@ -280,15 +247,15 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 			// line 1
 			astr.add(""+lSelfLockCreationTime);
 			// line 2
-			if(Debug.i().isInIDEdebugMode()){
+			if(bDebugMode){
 				astr.add(strDebugMode);
 			}else{
-				astr.add("ReleaseMode");
+				astr.add(strReleaseMode);
 			}
 			
-			Misc.i().fileAppendList(flSelfLock, astr);
+			Misc.i().fileAppendListTS(flSelfLock, astr);
 			
-			attrSelfLock = Misc.i().fileAttributes(flSelfLock);
+			attrSelfLock = Misc.i().fileAttributesTS(flSelfLock);
 			
 			System.err.println("Created lock: "+flSelfLock.getName());
 			
@@ -323,7 +290,7 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 		flSelfLock = new File(strId);
 		
 		lSelfLockCreationTime = System.currentTimeMillis();
-		createSelfLockFile();
+		createSelfLockFileTD();
 		
 		flFolder = new File("./");
 		fnf = new FilenameFilter() {
@@ -334,9 +301,10 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 			}
 		};
 		
-		bDevModeExitIfThereIsANewerInstance = Debug.i().isInIDEdebugMode();
+		bDebugMode = Debug.i().isInIDEdebugMode();
+		bDevModeExitIfThereIsANewerInstance = bDebugMode;
 		
-		if(Debug.i().isInIDEdebugMode()){
+		if(bDebugMode){
 			System.err.println("This instance is in DEBUG mode.");
 		}
 		
@@ -344,7 +312,7 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 		
 		if(!sapp.getStateManager().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
 		
-		clearOldLocks();
+		clearOldLocksTD();
 		
 		bConfigured=true;
 	}

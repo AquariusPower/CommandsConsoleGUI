@@ -40,6 +40,9 @@ import com.jme3.app.state.AppStateManager;
 import com.jme3.renderer.RenderManager;
 
 /**
+ * This is not a thread.
+ * This is a state, at the main thread, that will keep the console running
+ * while it is closed.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
