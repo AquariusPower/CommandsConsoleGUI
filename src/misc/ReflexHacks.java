@@ -65,7 +65,7 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 	public static ReflexHacks i(){return instance;}
 	
 	private ConsoleCommands cc;
-	public final BoolToggler	btgAllowHacks = new BoolToggler(this,false,BoolToggler.strTogglerCodePrefix,
+	public final BoolTogglerCmd	btgAllowHacks = new BoolTogglerCmd(this,false,BoolTogglerCmd.strTogglerCodePrefix,
 		"Hacks allows for otherwise impossible features, but they may break if targeted classes are updated.");
 
 	private IHandleExceptions	ihe;

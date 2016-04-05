@@ -41,16 +41,24 @@ import console.IConsoleCommandListener;
  *
  */
 public class ReflexFill{ //implements IConsoleCommandListener{
+	private static ReflexFill instance = new ReflexFill();
+	public static ReflexFill i(){return instance;}
 //	private static IHandleExceptions	ihe;
 	
-	private static boolean bUseDefaultCfgIfMissing=false;
+	private boolean bUseDefaultCfgIfMissing=false;
 	
+	/**
+	 * the owner class will have the configurations for each
+	 * field class type.
+	 *
+	 */
 	public static interface IReflexFillCfg{
 		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv);
 	}
 	
 	/**
-	 * for the same class, there may have user preferred prefix/suffix
+	 * for the same owner class, there may have user preferred prefix/suffix
+	 * for each class type implementing this interface.
 	 */
 	public static interface IReflexFillCfgVariant{
 //		public int getReflexFillCfgVariant();
@@ -72,18 +80,8 @@ public class ReflexFill{ //implements IConsoleCommandListener{
 		
 		public boolean bFirstLetterUpperCase = false;
 	}
-	
-	private static ReflexFill instance = new ReflexFill();
 
 	private static boolean	bAllowHK = true;
-	
-	/**
-	 * 
-	 * @return instance
-	 */
-	public static ReflexFill i(){
-		return instance;
-	}
 	
 //	public static void assertReflexFillFields(IReflexFillCfg owner){
 //		assertAndGetField(owner);
@@ -96,7 +94,7 @@ public class ReflexFill{ //implements IConsoleCommandListener{
 	 * 
 	 * @param objClassOwningTheFields set simply to 'this' at the constructor.
 	 */
-	public static void assertReflexFillFieldsForOwner(IReflexFillCfg objClassOwningTheFields){
+	public void assertReflexFillFieldsForOwner(IReflexFillCfg objClassOwningTheFields){
 		assertAndGetField(objClassOwningTheFields, null);
 	}
 	
@@ -107,7 +105,7 @@ public class ReflexFill{ //implements IConsoleCommandListener{
 	 * @param objFieldValue if null, will validate if fields of type {@link IReflexFillCfgVariant#} are owned by the specified owner
 	 * @return
 	 */
-	public static Field assertAndGetField(Object objClassOwningField, Object objFieldValue){
+	public Field assertAndGetField(Object objClassOwningField, Object objFieldValue){
 //		Class<?> clFound = null;
 		Field fldFound = null;
 		Class<?> cl = objClassOwningField.getClass();
@@ -172,7 +170,7 @@ public class ReflexFill{ //implements IConsoleCommandListener{
 //		throw new NullPointerException("class "+cl.getName()+" doesnt owns field "+objFieldValue.getClass());
 	}
 	
-	private static void throwExceptionAboutMissConfiguration(Class<?> cl, Field fld, IReflexFillCfg configuredOwner, Object objClassOwningField){
+	private void throwExceptionAboutMissConfiguration(Class<?> cl, Field fld, IReflexFillCfg configuredOwner, Object objClassOwningField){
 		throw new NullPointerException(
 			"The field "+cl.getName()+"."+fld.getName() + "("+cl.getSimpleName()+".java:0) "
 			+" was configured with an invalid owner "
@@ -347,12 +345,12 @@ public class ReflexFill{ //implements IConsoleCommandListener{
 //			+strExceptionLog);
 	}
 	
-	public static boolean isbUseDefaultCfgIfMissing() {
+	public boolean isbUseDefaultCfgIfMissing() {
 		return bUseDefaultCfgIfMissing;
 	}
 
-	public static void setUseDefaultCfgIfMissing(boolean bUseDefaultCfgIfMissing) {
-		ReflexFill.bUseDefaultCfgIfMissing = bUseDefaultCfgIfMissing;
+	public void setUseDefaultCfgIfMissing(boolean bUseDefaultCfgIfMissing) {
+		this.bUseDefaultCfgIfMissing = bUseDefaultCfgIfMissing;
 	}
 	
 //	private static IHandleExceptions	ihe;
@@ -373,4 +371,18 @@ public class ReflexFill{ //implements IConsoleCommandListener{
 //		return bCommandWorked;
 //	}
 
+	public String getVarId(IReflexFillCfg rfcfgOwner, String strCodePrefixVariant, IReflexFillCfgVariant irfcv) {
+		if(rfcfgOwner==null){
+			throw new NullPointerException("Invalid usage, "
+				+IReflexFillCfg.class.getName()+" owner is null, is this a local (non field) variable?");
+		}
+		
+		String strVarId = strCodePrefixVariant
+			+Misc.i().makePretty(rfcfgOwner.getClass(),false)
+			+Misc.i().firstLetter(
+				ReflexFill.i().createIdentifierWithFieldName(rfcfgOwner,irfcv),
+				true);
+		
+		return strVarId;
+	}
 }

@@ -36,9 +36,11 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import misc.BoolToggler;
+import misc.BoolTogglerCmd;
 import misc.Debug;
+import misc.FloatingDoubleVar;
 import misc.IHandleExceptions;
+import misc.IntegerLongVar;
 import misc.Misc;
 import misc.ReflexFill;
 import misc.ReflexFill.IReflexFillCfg;
@@ -46,7 +48,7 @@ import misc.ReflexFill.IReflexFillCfgVariant;
 import misc.ReflexFill.ReflexFillCfg;
 import misc.ReflexHacks;
 import misc.StringField;
-import misc.TimedDelay;
+import misc.TimedDelayVar;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
@@ -86,19 +88,19 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 */
 //	public final BoolToggler	btgAcceptExternalExitRequests = new BoolToggler(this,false,strTogglerCodePrefix, 
 //		"if a ");
-	public final BoolToggler	btgDbAutoBkp = new BoolToggler(this,false,BoolToggler.strTogglerCodePrefix, 
+	public final BoolTogglerCmd	btgDbAutoBkp = new BoolTogglerCmd(this,false,BoolTogglerCmd.strTogglerCodePrefix, 
 		"whenever a save happens, if the DB was modified, a backup will be created of the old file");
-	public final BoolToggler	btgShowWarn = new BoolToggler(this,true);
-	public final BoolToggler	btgShowInfo = new BoolToggler(this,true);
-	public final BoolToggler	btgShowException = new BoolToggler(this,true);
-	public final BoolToggler	btgEngineStatsView = new BoolToggler(this,false);
-	public final BoolToggler	btgEngineStatsFps = new BoolToggler(this,false);
-	public final BoolToggler	btgShowMiliseconds=new BoolToggler(this,false);
-	public final BoolToggler	btgFpsLimit=new BoolToggler(this,false);
-	public final BoolToggler	btgConsoleCpuRest=new BoolToggler(this,false,BoolToggler.strTogglerCodePrefix,
+	public final BoolTogglerCmd	btgShowWarn = new BoolTogglerCmd(this,true);
+	public final BoolTogglerCmd	btgShowInfo = new BoolTogglerCmd(this,true);
+	public final BoolTogglerCmd	btgShowException = new BoolTogglerCmd(this,true);
+	public final BoolTogglerCmd	btgEngineStatsView = new BoolTogglerCmd(this,false);
+	public final BoolTogglerCmd	btgEngineStatsFps = new BoolTogglerCmd(this,false);
+	public final BoolTogglerCmd	btgShowMiliseconds=new BoolTogglerCmd(this,false);
+	public final BoolTogglerCmd	btgFpsLimit=new BoolTogglerCmd(this,false);
+	public final BoolTogglerCmd	btgConsoleCpuRest=new BoolTogglerCmd(this,false,BoolTogglerCmd.strTogglerCodePrefix,
 		"Console update steps will be skipped if this is enabled.");
-	public final BoolToggler	btgAutoScroll=new BoolToggler(this,true);
-	public final BoolToggler	btgUseFixedLineWrapModeForAllFonts=new BoolToggler(this,false,BoolToggler.strTogglerCodePrefix,
+	public final BoolTogglerCmd	btgAutoScroll=new BoolTogglerCmd(this,true);
+	public final BoolTogglerCmd	btgUseFixedLineWrapModeForAllFonts=new BoolTogglerCmd(this,false,BoolTogglerCmd.strTogglerCodePrefix,
 		"If enabled, this will use a fixed line wrap column even for non mono spaced fonts, "
 		+"based on the width of the 'W' character. Otherwise it will dynamically guess the best "
 		+"fitting string size.");
@@ -107,22 +109,22 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 * Developer vars, keep together!
 	 * Initialy true, the default init will disable them.
 	 */
-	public final BoolToggler	btgShowDebugEntries=new BoolToggler(this,true);
-	public final BoolToggler	btgShowDeveloperInfo=new BoolToggler(this,true);
-	public final BoolToggler	btgShowDeveloperWarn=new BoolToggler(this,true);
-	public final BoolToggler	btgShowExecQueuedInfo=new BoolToggler(this,true);
+	public final BoolTogglerCmd	btgShowDebugEntries=new BoolTogglerCmd(this,true);
+	public final BoolTogglerCmd	btgShowDeveloperInfo=new BoolTogglerCmd(this,true);
+	public final BoolTogglerCmd	btgShowDeveloperWarn=new BoolTogglerCmd(this,true);
+	public final BoolTogglerCmd	btgShowExecQueuedInfo=new BoolTogglerCmd(this,true);
 	
 	/**
 	 * keep delayers together!
 	 */
-	protected TimedDelay tdLetCpuRest = new TimedDelay(this,0.1f);
-	protected TimedDelay tdDumpQueuedEntry = new TimedDelay(this,1f/5f); // per second
-	protected TimedDelay tdSpareGpuFan = new TimedDelay(this,1.0f/60f); // like 60 FPS
+	protected TimedDelayVar tdLetCpuRest = new TimedDelayVar(this,0.1f);
+	protected TimedDelayVar tdDumpQueuedEntry = new TimedDelayVar(this,1f/5f); // per second
+	protected TimedDelayVar tdSpareGpuFan = new TimedDelayVar(this,1.0f/60f); // like 60 FPS
 	
 	/**
 	 * used to hold a reference to the identified/typed user command
 	 */
-	protected BoolToggler	btgReferenceMatched;
+	protected BoolTogglerCmd	btgReferenceMatched;
 	
 	/**
 	 * user can type these below at console (the actual commands are prepared by reflex)
@@ -197,8 +199,8 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	protected String	strFileInitConsCmds = strFilePrefix+"-Init";
 	protected String	strFileSetup = strFilePrefix+"-Setup";
 	protected String	strFileDatabase = strFilePrefix+"-DB";
-	protected int iMaxCmdHistSize = 1000;
-	protected int iMaxDumpEntriesAmount = 100000;
+	protected IntegerLongVar ilvMaxCmdHistSize = new IntegerLongVar(this,1000);
+	protected IntegerLongVar ilvMaxDumpEntriesAmount = new IntegerLongVar(this,100000);
 	protected ArrayList<String>	astrCmdAndParams = new ArrayList<String>();
 	protected ArrayList<String>	astrImportantMsgBufferList = new ArrayList<String>();
 	protected ArrayList<String>	astrExecConsoleCmdsQueue = new ArrayList<String>();
@@ -259,8 +261,8 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		ReflexFillCfg rfcfg = null;
 		
-		if(rfcv.getClass().isAssignableFrom(BoolToggler.class)){
-			if(BoolToggler.strTogglerCodePrefix.equals(rfcv.getCodePrefixVariant())){
+		if(rfcv.getClass().isAssignableFrom(BoolTogglerCmd.class)){
+			if(BoolTogglerCmd.strTogglerCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
 				rfcfg.strCommandSuffix="Toggle";
 			}
@@ -369,7 +371,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	
 	protected boolean checkCmdValidityBoolTogglers(){
 		btgReferenceMatched=null;
-		for(BoolToggler btg : BoolToggler.getBoolTogglerListCopy()){
+		for(BoolTogglerCmd btg : BoolTogglerCmd.getListCopy()){
 			if(checkCmdValidity(btg.getOwnerAsCmdListener(), btg.getCmdId(), "[bEnable] "+btg.getHelp(), true)){
 				btgReferenceMatched = btg;
 				break;
@@ -908,7 +910,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		if(icui.getDumpEntriesSlowedQueue().size()>0){
 			icui.getDumpEntries().add(icui.getDumpEntriesSlowedQueue().remove(0));
 			
-			while(icui.getDumpEntries().size() > iMaxDumpEntriesAmount){
+			while(icui.getDumpEntries().size() > ilvMaxDumpEntriesAmount.getLong()){
 				icui.getDumpEntries().remove(0);
 			}
 		}
@@ -1070,7 +1072,12 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			if(isRestricted(strVarId) && !bRestrictedOnly)continue;
 			if(!isRestricted(strVarId) && bRestrictedOnly)continue;
 			
-			if(strVarId.toLowerCase().contains(strFilter.toLowerCase()))varReport(strVarId);
+			/**
+			 * empty filter will work too.
+			 */
+			if(strVarId.toLowerCase().contains(strFilter.toLowerCase())){
+				varReport(strVarId);
+			}
 		}
 		dumpSubEntry(getCommentPrefix()+"UserVarListHashCode="+tmUserVariables.hashCode());
 		
@@ -1364,7 +1371,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 * 
 	 * @return false if toggle failed
 	 */
-	protected boolean toggle(BoolToggler btg){
+	protected boolean toggle(BoolTogglerCmd btg){
 		if(paramBooleanCheckForToggle(1)){
 			Boolean bEnable = paramBoolean(1);
 			btg.set(bEnable==null ? !btg.get() : bEnable); //overrider
@@ -1714,7 +1721,15 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	protected boolean varApply(VarIdValueOwner vivo, boolean bSave){
-		selectVarSource(vivo.strId).put(vivo.strId,vivo);
+		/**
+		 * creates the console variable
+		 */
+		selectVarSource(vivo.strId).put(vivo.strId, vivo);
+		if(vivo.owner!=null)vivo.owner.setConsoleVarLink(vivo);
+		
+		/**
+		 * save the console variable
+		 */
 		if(bSave)fileAppendVar(vivo.strId);
 		
 		if(isRestricted(vivo.strId) && btgShowDeveloperInfo.b()){
@@ -1765,46 +1780,87 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			bSave);
 	}
 	
-	private boolean varRestoreTo(BoolToggler btgOwner){
-		VarIdValueOwner vivo = getVar(RESTRICTED_TOKEN+btgOwner.getCmdId());
+//	private boolean varRestoreTo(BoolTogglerCmd btgOwner){
+//		VarIdValueOwner vivo = getVar(RESTRICTED_TOKEN+btgOwner.getCmdId());
+//		if(vivo==null)return false;
+//		btgOwner.setObjectValue(vivo.objValue);
+//		dumpSubEntry(btgOwner.getReport());
+//		return true;
+//	}
+//	
+//	private boolean varRestoreTo(TimedDelayVar tdOwner){
+//		VarIdValueOwner vivo = getVar(RESTRICTED_TOKEN+tdOwner.getVarId());
+//		if(vivo==null)return false;
+//		tdOwner.setObjectValue(vivo.objValue);
+//		dumpSubEntry(tdOwner.getReport());
+//		return true;
+//	}
+	
+	private boolean varRestoreTo(IVarIdValueOwner owner){
+		VarIdValueOwner vivo = getVar(RESTRICTED_TOKEN+owner.getVarId());
 		if(vivo==null)return false;
-		btgOwner.setObjectValue(vivo.objValue);
-		dumpSubEntry(btgOwner.getReport());
+		owner.setObjectValue(vivo.objValue);
+		dumpSubEntry(owner.getReport());
 		return true;
 	}
 	
-	private boolean varRestoreTo(TimedDelay tdOwner){
-		VarIdValueOwner vivo = getVar(RESTRICTED_TOKEN+tdOwner.getVarId());
-		if(vivo==null)return false;
-		tdOwner.setObjectValue(vivo.objValue);
-		dumpSubEntry(tdOwner.getReport());
-		return true;
-	}
+//	public boolean varSet(BoolTogglerCmd btgOwner, boolean bSave) {
+//		if(btgOwner.getOwner()==null)return false; //check if it is configured as a field should be
+//		
+//		return varSet(
+//			new VarIdValueOwner(
+//				RESTRICTED_TOKEN+btgOwner.getCmdId(),
+//				""+btgOwner.getBoolean(),
+//				btgOwner),
+//			bSave);
+//	}
+//	/**
+//	 * 
+//	 * @param tdOwner only the ones configured as class field variables 
+//	 * @param bSave
+//	 * @return
+//	 */
+//	public boolean varSet(TimedDelayVar tdOwner, boolean bSave) {
+//		if(tdOwner.getOwner()==null)return false; //check if it is configured as a field should be
+//		
+//		return varSet(
+//			new VarIdValueOwner(
+//				RESTRICTED_TOKEN+tdOwner.getVarId(),
+//				Misc.i().fmtFloat(tdOwner.getDelayLimitSeconds(),3), //store with milis precision
+//				tdOwner),
+//			bSave);
+//	}
 	
-	public boolean varSet(BoolToggler btgOwner, boolean bSave) {
-		if(btgOwner.getOwner()==null)return false; //check if it is configured as a field should be
+//	public boolean varSet(FloatingDoubleVar fdvOwner, boolean bSave) {
+//		return varSet(
+//			new VarIdValueOwner(
+//				RESTRICTED_TOKEN+fdvOwner.getVarId(),
+//				Misc.i().fmtFloat(fdvOwner.getDouble(),3), //store with milis precision
+//				fdvOwner),
+//			bSave);
+//	}
+//	public boolean varSet(IntegerLongVar ilvOwner, boolean bSave) {
+//		return varSet(
+//			new VarIdValueOwner(
+//				RESTRICTED_TOKEN+ilvOwner.getVarId(),
+//				ilvOwner.getLong(),
+//				ilvOwner),
+//			bSave);
+//	}
+	
+	public boolean varSet(IVarIdValueOwner owner, boolean bSave) {
+		if(owner instanceof IReflexFillCfgVariant){
+			/**
+			 * check if it is configured as a class field should be
+			 */
+			if(((IReflexFillCfgVariant)owner).getOwner()==null)return false;
+		}
 		
 		return varSet(
 			new VarIdValueOwner(
-				RESTRICTED_TOKEN+btgOwner.getCmdId(),
-				""+btgOwner.getBoolean(),
-				btgOwner),
-			bSave);
-	}
-	/**
-	 * 
-	 * @param tdOwner only the ones configured as class field variables 
-	 * @param bSave
-	 * @return
-	 */
-	public boolean varSet(TimedDelay tdOwner, boolean bSave) {
-		if(tdOwner.getOwner()==null)return false; //check if it is configured as a field should be
-		
-		return varSet(
-			new VarIdValueOwner(
-				RESTRICTED_TOKEN+tdOwner.getVarId(),
-				Misc.i().fmtFloat(tdOwner.getDelayLimitSeconds(),3), //store with milis precision
-				tdOwner),
+				RESTRICTED_TOKEN+owner.getVarId(),
+				owner.getValueRaw(),
+				owner),
 			bSave);
 	}
 	
@@ -1820,12 +1876,21 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		
 		if(bOk){
 			VarIdValueOwner vivo = getVar(strVarId);
-			if(vivo.owner instanceof BoolToggler){
-				varRestoreTo((BoolToggler)vivo.owner);
+			if(vivo.owner instanceof IVarIdValueOwner){
+				varRestoreTo(vivo.owner);
 			}else
-			if(vivo.owner instanceof TimedDelay){
-				varRestoreTo((TimedDelay)vivo.owner);
-			}else
+//				if(vivo.owner instanceof BoolTogglerCmd){
+//					varRestoreTo((BoolTogglerCmd)vivo.owner);
+//				}else
+//					if(vivo.owner instanceof TimedDelayVar){
+//						varRestoreTo((TimedDelayVar)vivo.owner);
+//					}else
+//						if(vivo.owner instanceof FloatingDoubleVar){
+//							varRestoreTo((FloatingDoubleVar)vivo.owner);
+//						}else
+//							if(vivo.owner instanceof IntegerLongVar){
+//								varRestoreTo((IntegerLongVar)vivo.owner);
+//							}else
 			if(vivo.owner!=null){
 				throw new UnsupportedOperationException("Unsupported owner type: "+vivo.owner.getClass().getName());
 			}
@@ -1855,22 +1920,22 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //				int i=0;
 //			}
 			return cmdVarAdd(vivoExisting, vivo, bSave, true);
+		}else{
+			/**
+			 * Priority:
+			 * Double would parse a Long.
+			 * Boolean would be accepted by String that accepts everything. 
+			 */
+			boolean bOk=false;
+			
+			String strValue = ""+vivo.objValue;
+			if(!bOk)try{vivo.objValue=Long  .parseLong     (strValue);bOk=varApply(vivo,bSave);}catch(NumberFormatException e){}// accepted exception!
+			if(!bOk)try{vivo.objValue=Double.parseDouble   (strValue);bOk=varApply(vivo,bSave);}catch(NumberFormatException e){}// accepted exception!
+			if(!bOk)try{vivo.objValue=Misc.i().parseBoolean(strValue);bOk=varApply(vivo,bSave);}catch(NumberFormatException e){}// accepted exception!
+			if(!bOk){vivo.objValue=strValue;bOk=varApply(vivo,bSave);}
+			
+			return bOk;
 		}
-		
-		boolean bOk=false;
-		
-		/**
-		 * Priority:
-		 * Double would parse a Long.
-		 * Boolean would be accepted by String that accepts everything. 
-		 */
-		String strValue = ""+vivo.objValue;
-		if(!bOk)try{vivo.objValue=Long  .parseLong     (strValue);bOk=varApply(vivo,bSave);}catch(NumberFormatException e){}// accepted exception!
-		if(!bOk)try{vivo.objValue=Double.parseDouble   (strValue);bOk=varApply(vivo,bSave);}catch(NumberFormatException e){}// accepted exception!
-		if(!bOk)try{vivo.objValue=Misc.i().parseBoolean(strValue);bOk=varApply(vivo,bSave);}catch(NumberFormatException e){}// accepted exception!
-		if(!bOk){vivo.objValue=strValue;bOk=varApply(vivo,bSave);}
-		
-		return bOk;
 	}
 	
 	/**
@@ -2116,7 +2181,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 							pqe.bForceFailBlockExecution=true;
 							break;
 						}
-						pqe.tdSleep = new TimedDelay(fDelay);
+						pqe.tdSleep = new TimedDelayVar(fDelay);
 						pqe.tdSleep.updateTime();
 //						dumpDevInfoEntry(strCmd);
 						break;
@@ -2237,11 +2302,19 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			""+aAliasList.hashCode(),
 			false);
 		
-		for(BoolToggler btg:BoolToggler.getBoolTogglerListCopy()){
+		for(BoolTogglerCmd btg:BoolTogglerCmd.getListCopy()){
 			varSet(btg,false);
 		}
 		
-		for(TimedDelay td:TimedDelay.getTimedDelayListCopy()){
+		for(TimedDelayVar td:TimedDelayVar.getListCopy()){
+			varSet(td,false);
+		}
+		
+		for(FloatingDoubleVar td:FloatingDoubleVar.getListCopy()){
+			varSet(td,false);
+		}
+		
+		for(IntegerLongVar td:IntegerLongVar.getListCopy()){
 			varSet(td,false);
 		}
 		
@@ -2281,13 +2354,13 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		
 //		dumpSubEntry("Previous Second FPS  = "+lPreviousSecondFPS);
 		
-		for(BoolToggler btg : BoolToggler.getBoolTogglerListCopy()){
+		for(BoolTogglerCmd btg : BoolTogglerCmd.getListCopy()){
 			dumpSubEntry(btg.getReport());
 		}
 		
-		for(TimedDelay td : TimedDelay.getTimedDelayListCopy()){
-			dumpSubEntry(td.getReport());
-		}
+//		for(TimedDelayVar td : TimedDelayVar.getListCopy()){
+//			dumpSubEntry(td.getReport());
+//		}
 		
 		dumpSubEntry("User Dump File = "+flLastDump.getAbsolutePath());
 		dumpSubEntry("User Commands History File = "+flCmdHist.getAbsolutePath());
@@ -2401,9 +2474,9 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		if(bConfigured)throw new NullPointerException("already configured.");		// KEEP ON TOP
 		
 //		Init.i().initialize(sapp, this);
-		TimedDelay.configure(this);
-		BoolToggler.configure(this);
-		ReflexFill.assertReflexFillFieldsForOwner(this);
+		TimedDelayVar.configure(this);
+		BoolTogglerCmd.configure(this);
+		ReflexFill.i().assertReflexFillFieldsForOwner(this);
 		Debug.i().configure(this);
 		Misc.i().configure(this);
 		ReflexHacks.i().configure(sapp, this, this);
@@ -2441,6 +2514,12 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		addCmdToQueue(btgShowDeveloperWarn.getCmdIdAsCommand(false));
 		addCmdToQueue(btgShowDeveloperInfo.getCmdIdAsCommand(false));
 		
+		// init DB
+		flDB = new File(fileNamePrepareCfg(strFileDatabase,false));
+		addCmdToQueue(CMD_DB+" "+EDataBaseOperations.load);
+		addCmdToQueue(CMD_DB+" "+EDataBaseOperations.save
+			+" "+commentToAppend("to shrink it"));
+		
 		// init user cfg
 		flInit = new File(fileNamePrepareCfg(strFileInitConsCmds,false));
 		if(flInit.exists()){
@@ -2448,9 +2527,6 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		}else{
 			Misc.i().fileAppendLine(flInit, getCommentPrefix()+" User console commands here will be executed at startup.");
 		}
-		
-		// init DB
-		flDB = new File(fileNamePrepareCfg(strFileDatabase,false));
 		
 		// init valid cmd list
 		executeCommand(null); //to populate the array with available commands
@@ -2498,13 +2574,13 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		String[] astr = strClipboard.split("\n");
 	//	for(String str:astr)dumpEntry(strLineEncloseChar+str+strLineEncloseChar);
 	//	dumpEntry(""); // this empty line for clipboard content display is i
-		dumpEntry(">>> Clipboard BEGIN");
+		dumpEntry(">############ Clipboard BEGIN ###########>");
 		for(int i=0;i<astr.length;i++){
 			String str=astr[i];
 			if(bShowNL && i<(astr.length-1))str+="\\n";
 			dumpEntry(false,true,false,str);
 		}
-		dumpEntry("<<< Clipboard END");
+		dumpEntry("<############# Clipboard END ############<");
 		if(bAddEmptyLineAfterCommand)dumpEntry("");
 	//	dumpEntry("");
 		icui.scrollToBottomRequest();
@@ -2731,7 +2807,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			astrCmdHistory.add(strCmd);
 			
 			cmdHistSave(strCmd);
-			while(astrCmdHistory.size()>iMaxCmdHistSize){
+			while(astrCmdHistory.size()>ilvMaxCmdHistSize.getLong()){
 				astrCmdHistory.remove(0);
 			}
 		}

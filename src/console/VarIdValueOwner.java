@@ -35,6 +35,10 @@ package console;
 public class VarIdValueOwner {
 	public static interface IVarIdValueOwner{
 		public abstract void setObjectValue(Object objValue);
+		public abstract String getReport();
+		public abstract String getVarId();
+		public abstract Object getValueRaw();
+		public abstract void setConsoleVarLink(VarIdValueOwner vivo);
 	}
 	
 	String strId;
@@ -46,6 +50,10 @@ public class VarIdValueOwner {
 		this.strId = strId;
 		this.objValue = objValue;
 		this.owner = vivoOwner;
+	}
+
+	public void setObjectValue(Object objValue) {
+		this.objValue=objValue;
 	}
 	
 	

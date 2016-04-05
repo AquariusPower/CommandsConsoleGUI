@@ -64,7 +64,7 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 		cc.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
 		cc.dumpSubEntry("CommandTest1: "+sfTestCommandAutoFillVariant1);
 		cc.dumpSubEntry("CommandTest2: "+testCommandAutoFillPrefixLessVariant2);
-		if(ReflexFill.isbUseDefaultCfgIfMissing()){
+		if(ReflexFill.i().isbUseDefaultCfgIfMissing()){
 			cc.dumpSubEntry("CommandTest3: "+testCommandAutoFillPrefixLessVariantDefaulted3);
 		}
 		return true;
@@ -99,7 +99,7 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 	}
 
 	private void configure() {
-		ReflexFill.assertReflexFillFieldsForOwner(this);
+		ReflexFill.i().assertReflexFillFieldsForOwner(this);
 	}
 
 	@Override

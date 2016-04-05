@@ -63,7 +63,7 @@ public class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleC
 		/**
 		 *  This allows test3 at endUserCustomMethod() to work.
 		 */
-		ReflexFill.setUseDefaultCfgIfMissing(true);
+		ReflexFill.i().setUseDefaultCfgIfMissing(true);
 	}
 	
 	@Override

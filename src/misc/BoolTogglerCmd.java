@@ -32,18 +32,19 @@ import java.util.ArrayList;
 import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
 import console.IConsoleCommandListener;
+import console.VarIdValueOwner;
 import console.VarIdValueOwner.IVarIdValueOwner;
 
 /**
- * This class can provide automatic boolean console options toggle.
+ * This class can provide automatic boolean console command options to toggle.
  * You just need to create the variable properly and it will be automatically recognized.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class BoolToggler implements IReflexFillCfgVariant, IVarIdValueOwner{
+public class BoolTogglerCmd implements IReflexFillCfgVariant, IVarIdValueOwner{
 	public static final String strTogglerCodePrefix="btg";
-	protected static ArrayList<BoolToggler> abtgList = new ArrayList<BoolToggler>();
+	protected static ArrayList<BoolTogglerCmd> abtgList = new ArrayList<BoolTogglerCmd>();
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe;
 	
@@ -54,22 +55,23 @@ public class BoolToggler implements IReflexFillCfgVariant, IVarIdValueOwner{
 	protected String strHelp="";
 
 	private String	strReflexFillCfgCodePrefixVariant;
+	private VarIdValueOwner	vivo;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		BoolToggler.ihe=ihe;
+		BoolTogglerCmd.ihe=ihe;
 		bConfigured=true;
 	}
 	
-	public static ArrayList<BoolToggler> getBoolTogglerListCopy(){
-		return new ArrayList<BoolToggler>(abtgList);
+	public static ArrayList<BoolTogglerCmd> getListCopy(){
+		return new ArrayList<BoolTogglerCmd>(abtgList);
 	}
 	
-	private BoolToggler(){
+	private BoolTogglerCmd(){
 		abtgList.add(this);
 	}
-	public BoolToggler(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitValue){
-		this( rfcfgOwnerUseThis,  bInitValue, BoolToggler.strTogglerCodePrefix, "");
+	public BoolTogglerCmd(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitValue){
+		this( rfcfgOwnerUseThis,  bInitValue, BoolTogglerCmd.strTogglerCodePrefix, "");
 	}
 	/**
 	 * 
@@ -77,7 +79,7 @@ public class BoolToggler implements IReflexFillCfgVariant, IVarIdValueOwner{
 	 * @param bInitValue
 	 * @param strReflexFillCfgCodePrefixVariant
 	 */
-	public BoolToggler(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitValue, String strReflexFillCfgCodePrefixVariant){
+	public BoolTogglerCmd(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitValue, String strReflexFillCfgCodePrefixVariant){
 		this( rfcfgOwnerUseThis,  bInitValue,  strReflexFillCfgCodePrefixVariant, "");
 	}
 	/**
@@ -87,7 +89,7 @@ public class BoolToggler implements IReflexFillCfgVariant, IVarIdValueOwner{
 	 * @param strReflexFillCfgCodePrefixVariant
 	 * @param strHelp
 	 */
-	public BoolToggler(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitialValue, String strReflexFillCfgCodePrefixVariant, String strHelp){
+	public BoolTogglerCmd(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitialValue, String strReflexFillCfgCodePrefixVariant, String strHelp){
 		this();
 		
 //		ReflexFill.assertAndGetField(rfcfgOwnerUseThis, this);
@@ -97,11 +99,11 @@ public class BoolToggler implements IReflexFillCfgVariant, IVarIdValueOwner{
 		this.strHelp=strHelp;
 		set(bInitialValue);
 	}
-	public BoolToggler(boolean bInitValue, String strCustomCmdId){
-		this();
-		set(bInitValue);
-		setCustomCmdId(strCustomCmdId);
-	}
+//	public BoolTogglerCmd(boolean bInitValue, String strCustomCmdId){
+//		this();
+//		set(bInitValue);
+//		setCustomCmdId(strCustomCmdId);
+//	}
 	
 	/**
 	 * sets the command identifier that user will type in the console
@@ -175,6 +177,7 @@ public class BoolToggler implements IReflexFillCfgVariant, IVarIdValueOwner{
 		return null;
 	}
 
+	@Override
 	public String getReport() {
 		return getCmdId()+" = "+bCurrent;
 	}
@@ -186,6 +189,22 @@ public class BoolToggler implements IReflexFillCfgVariant, IVarIdValueOwner{
 	@Override
 	public void setObjectValue(Object objValue) {
 		this.set((Boolean)objValue);
+		if(vivo!=null)vivo.setObjectValue(objValue);
+	}
+
+	@Override
+	public String getVarId() {
+		return getCmdId();
+	}
+
+	@Override
+	public Object getValueRaw() {
+		return this.bCurrent;
+	}
+
+	@Override
+	public void setConsoleVarLink(VarIdValueOwner vivo) {
+		this.vivo=vivo;
 	}
 	
 //	public static String getPrefix() {

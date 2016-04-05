@@ -27,14 +27,14 @@
 
 package console.gui.lemur;
 
-import misc.BoolToggler;
+import misc.BoolTogglerCmd;
 import misc.ReflexFill;
 import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
 import misc.ReflexFill.ReflexFillCfg;
 import misc.ReflexHacks;
 import misc.StringField;
-import misc.TimedDelay;
+import misc.TimedDelayVar;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -63,7 +63,8 @@ import console.IConsoleCommandListener;
  *
  */
 public class LemurMiscHelpers implements AppState, IConsoleCommandListener, IReflexFillCfg{
-	public final BoolToggler	btgTextCursorPulseFadeBlinkMode = new BoolToggler(this,true);
+	public final BoolTogglerCmd	btgTextCursorPulseFadeBlinkMode = new BoolTogglerCmd(this,true);
+	public final BoolTogglerCmd	btgTextCursorLarge = new BoolTogglerCmd(this,true);
 	public final StringField CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringField(this, ConsoleCommands.strFinalCmdCodePrefix);
 	
 	private static LemurMiscHelpers instance = new LemurMiscHelpers(); 
@@ -75,7 +76,7 @@ public class LemurMiscHelpers implements AppState, IConsoleCommandListener, IRef
 //		this.sapp = sapp;
 //	}
 	
-	protected TimedDelay tdTextCursorBlink = new TimedDelay(this,1f);
+	protected TimedDelayVar tdTextCursorBlink = new TimedDelayVar(this,1f);
 	private boolean	bBlinkingTextCursor = true;
 	private FocusManagerState	focusState;
 	private TextField	tfToBlinkCursor;
@@ -91,10 +92,14 @@ public class LemurMiscHelpers implements AppState, IConsoleCommandListener, IRef
 	private boolean	bConfigured;
 	private boolean	bBlinkFadeInAndOut =true;
 
-	String strCursorHotLink="CursorHotLink";
-	String strExclusiveCursorMaterial="CursorMaterial";
-	String strCursorMaterialBkp="CursorMaterialBkp";
-	String strExclusiveCursorColor="ExclusiveCursorColor";
+	private enum EKey{
+		CursorHotLink,
+		ExclusiveCursorMaterial,
+		CursorMaterialBkp,
+		ExclusiveCursorColor,
+		CursorLargeMode,
+		;
+	}
 
 //	private int	iMoveCaratTo;
 	
@@ -168,7 +173,7 @@ public class LemurMiscHelpers implements AppState, IConsoleCommandListener, IRef
 	}
 	
 	private void checkAndPrepareExclusiveCursorMaterialFor(TextField tf, Geometry geomCursor){
-		Material matCursorOnly = tf.getUserData(strExclusiveCursorMaterial);
+		Material matCursorOnly = tf.getUserData(EKey.ExclusiveCursorMaterial.toString());
 //		matCursorOnly=null;
 		/**
 		 * check if cursor material was updated outside here
@@ -179,7 +184,7 @@ public class LemurMiscHelpers implements AppState, IConsoleCommandListener, IRef
 			 * As the material may affect also the text, and a fading text is horrible
 			 * using a cloned material to substitute it.
 			 */
-			tf.setUserData(strCursorMaterialBkp, geomCursor.getMaterial());
+			tf.setUserData(EKey.CursorMaterialBkp.toString(), geomCursor.getMaterial());
 			matCursorOnly = geomCursor.getMaterial().clone();
 			MatParam param = matCursorOnly.getParam("Color");
 			ColorRGBA colorClone = ((ColorRGBA)param.getValue()).clone();
@@ -188,8 +193,8 @@ public class LemurMiscHelpers implements AppState, IConsoleCommandListener, IRef
 			
 			geomCursor.setMaterial(matCursorOnly);
 //		fixInvisibleCursor(geomCursor);
-			tf.setUserData(strExclusiveCursorMaterial, matCursorOnly);
-			tf.setUserData(strExclusiveCursorColor, colorClone);
+			tf.setUserData(EKey.ExclusiveCursorMaterial.toString(), matCursorOnly);
+			tf.setUserData(EKey.ExclusiveCursorColor.toString(), colorClone);
 		}
 	}
 	
@@ -199,10 +204,10 @@ public class LemurMiscHelpers implements AppState, IConsoleCommandListener, IRef
 		
 //		tdTextCursorBlink.updateTime();
 		
-		Geometry geomCursor = tf.getUserData(strCursorHotLink);
+		Geometry geomCursor = tf.getUserData(EKey.CursorHotLink.toString());
 		if(geomCursor==null){
 			geomCursor = getTextCursorFrom(tf);
-			tf.setUserData(strCursorHotLink, geomCursor);
+			tf.setUserData(EKey.CursorHotLink.toString(), geomCursor);
 		}
 		
 //		BitmapText bmt = getBitmapTextFrom(tf);
@@ -213,7 +218,7 @@ public class LemurMiscHelpers implements AppState, IConsoleCommandListener, IRef
 		if(btgTextCursorPulseFadeBlinkMode.b()){
 			checkAndPrepareExclusiveCursorMaterialFor(tf,geomCursor);
 			
-			ColorRGBA color = tf.getUserData(strExclusiveCursorColor);
+			ColorRGBA color = tf.getUserData(EKey.ExclusiveCursorColor.toString());
 			color.a = tdTextCursorBlink.getCurrentDelayPercentualDynamic();
 			if(bBlinkFadeInAndOut){
 				if(color.a>0.5f)color.a=1f-color.a; //to allow it fade in and out
@@ -223,10 +228,10 @@ public class LemurMiscHelpers implements AppState, IConsoleCommandListener, IRef
 			if(color.a<0)color.a=0;
 			if(color.a>1)color.a=1;
 		}else{
-			Material matBkp = tf.getUserData(strCursorMaterialBkp);
+			Material matBkp = tf.getUserData(EKey.CursorMaterialBkp.toString());
 			if(matBkp!=null){
 				geomCursor.setMaterial(matBkp);
-				tf.setUserData(strCursorMaterialBkp,null); //clear
+				tf.setUserData(EKey.CursorMaterialBkp.toString(),null); //clear
 			}
 			
 			if(lDelay > tdTextCursorBlink.getDelayLimitNano()){
@@ -242,6 +247,24 @@ public class LemurMiscHelpers implements AppState, IConsoleCommandListener, IRef
 			}
 		}
 			
+	}
+	
+	private void updateLargeTextCursorMode(TextField tf){
+		if(btgTextCursorLarge.b()){
+			if(tf.getUserData(EKey.CursorLargeMode.toString())==null){
+				enableLargeCursor(tf,true);
+			}
+		}else{
+			if(tf.getUserData(EKey.CursorLargeMode.toString())!=null){
+				enableLargeCursor(tf,false);
+			}
+		}
+	}
+	
+	private void enableLargeCursor(TextField tf, boolean b){
+		Geometry geomCursor = getTextCursorFrom(tf);
+		geomCursor.setLocalScale(b?3f:1f/3f,1f,1f);
+		tf.setUserData(EKey.CursorLargeMode.toString(), b?true:null);
 	}
 	
 	@Override
@@ -281,7 +304,10 @@ public class LemurMiscHelpers implements AppState, IConsoleCommandListener, IRef
 	@Override
 	public void update(float tpf) {
 		if(isEnabled()){
-			if(tfToBlinkCursor!=null)updateBlinkInputFieldTextCursor(tfToBlinkCursor);
+			if(tfToBlinkCursor!=null){
+				updateBlinkInputFieldTextCursor(tfToBlinkCursor);
+				updateLargeTextCursorMode(tfToBlinkCursor);
+			}
 		}
 	}
 
@@ -323,7 +349,7 @@ public class LemurMiscHelpers implements AppState, IConsoleCommandListener, IRef
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 		this.sapp=sapp;
 		this.cc=cc;
-		ReflexFill.assertReflexFillFieldsForOwner(this);
+		ReflexFill.i().assertReflexFillFieldsForOwner(this);
 		cc.addConsoleCommandListener(this);
 		bConfigured=true;
 	}

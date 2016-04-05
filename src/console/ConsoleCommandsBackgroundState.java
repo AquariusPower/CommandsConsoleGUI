@@ -27,7 +27,7 @@
 
 package console;
 
-import misc.BoolToggler;
+import misc.BoolTogglerCmd;
 import misc.ReflexFill;
 import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
@@ -48,7 +48,7 @@ public class ConsoleCommandsBackgroundState implements AppState, IReflexFillCfg{
 	private static ConsoleCommandsBackgroundState instance = new ConsoleCommandsBackgroundState();
 	public static ConsoleCommandsBackgroundState i(){return instance;}
 	
-	protected BoolToggler	btgExecCommandsInBackground=new BoolToggler(this, false, BoolToggler.strTogglerCodePrefix,
+	protected BoolTogglerCmd	btgExecCommandsInBackground=new BoolTogglerCmd(this, false, BoolTogglerCmd.strTogglerCodePrefix,
 		"Will continue running console commands even if console is closed.");
 	
 	private IConsoleUI	cgsaGraphicalConsoleUI;
@@ -73,7 +73,7 @@ public class ConsoleCommandsBackgroundState implements AppState, IReflexFillCfg{
 //		btgExecCommandsInBackground=new BoolToggler(this, false, ConsoleCommands.strTogglerCodePrefix,
 //			"Will continue running console commands even if console is closed.");
 		
-		ReflexFill.assertReflexFillFieldsForOwner(this);
+		ReflexFill.i().assertReflexFillFieldsForOwner(this);
 		
 		bConfigured=true;
 	}

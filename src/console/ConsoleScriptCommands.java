@@ -62,6 +62,7 @@ public class ConsoleScriptCommands extends ConsoleCommands{
 	public String	strPrepareFunctionBlockForId;
 	public boolean	bFuncCmdLineRunning;
 	public boolean	bFuncCmdLineSkipTilEnd;
+	
 	public TreeMap<String,ArrayList<String>> tmFunctions = 
 		new TreeMap<String, ArrayList<String>>(String.CASE_INSENSITIVE_ORDER);
 	

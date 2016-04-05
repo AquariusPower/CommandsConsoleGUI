@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 
-import misc.BoolToggler;
+import misc.BoolTogglerCmd;
 import misc.Debug;
 import misc.Misc;
 import misc.ReflexFill.IReflexFillCfg;
@@ -55,7 +55,7 @@ import console.ConsoleCommands;
  *
  */
 public class SingleInstanceState implements IReflexFillCfg, AppState{
-	public final BoolToggler	btgSingleInstaceMode = new BoolToggler(this,true,BoolToggler.strTogglerCodePrefix,
+	public final BoolTogglerCmd	btgSingleInstaceMode = new BoolTogglerCmd(this,true,BoolTogglerCmd.strTogglerCodePrefix,
 		"better keep this enabled, other instances may conflict during files access.");
 	private boolean bDevModeExitIfThereIsANewerInstance = true; //true if in debug mode
 //	public final BoolToggler	btgSingleInstaceOverrideOlder = new BoolToggler(this,false,ConsoleCommands.strTogglerCodePrefix,
@@ -167,8 +167,9 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 				 * To test, start a release mode, and AFTER that, start a debug mode one.
 				 */
 				if(Debug.i().isInIDEdebugMode()){
-					if(!getLockModeOf(flOtherLock).equalsIgnoreCase(strDebugMode)){
-						strExitReasonOtherInstance="ReleaseMode";
+					String strMode = getLockModeOf(flOtherLock);
+					if(!strMode.equalsIgnoreCase(strDebugMode)){
+						strExitReasonOtherInstance=strMode;
 						bExit=true;
 					}
 				}

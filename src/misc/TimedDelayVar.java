@@ -29,19 +29,24 @@ package misc;
 
 import java.util.ArrayList;
 
+import console.VarIdValueOwner;
 import console.VarIdValueOwner.IVarIdValueOwner;
 import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
 
 /**
  * Use this class to avoid running code on every loop.
+ * Or to have any kind of delayed execution.
+ * Even just retrieve the current delay percentual for gradual variations.
+ * 
+ * For this class are also automatically generated console variables to directly tweak them.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class TimedDelay implements IReflexFillCfgVariant, IVarIdValueOwner{
+public class TimedDelayVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 	private static IHandleExceptions ihe;
-	protected static ArrayList<TimedDelay> atdList = new ArrayList<TimedDelay>();
+	protected static ArrayList<TimedDelayVar> atdList = new ArrayList<TimedDelayVar>();
 	
 	protected static Long lCurrentTimeNano;
 	private static boolean	bConfigured;
@@ -56,12 +61,13 @@ public class TimedDelay implements IReflexFillCfgVariant, IVarIdValueOwner{
 	private String strVarId;
 
 	private IReflexFillCfg	rfcfgOwner;
+	private VarIdValueOwner	vivo;
 
 	public static final String	strCodePrefixVariant = "td";
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		TimedDelay.ihe=ihe;
+		TimedDelayVar.ihe=ihe;
 		bConfigured=true;
 	}
 	
@@ -70,7 +76,7 @@ public class TimedDelay implements IReflexFillCfgVariant, IVarIdValueOwner{
 	 * @param lCurrentTimeNano if null, will use realtime
 	 */
 	public static void setCurrentTimeNano(Long lCurrentTimeNano){
-		TimedDelay.lCurrentTimeNano = lCurrentTimeNano;
+		TimedDelayVar.lCurrentTimeNano = lCurrentTimeNano;
 	}
 	
 	public static long getCurrentTimeNano(){
@@ -83,7 +89,7 @@ public class TimedDelay implements IReflexFillCfgVariant, IVarIdValueOwner{
 	 * @param rfcfgOwnerUseThis
 	 * @param fDelay
 	 */
-	public TimedDelay(float fDelay) {
+	public TimedDelayVar(float fDelay) {
 		this(null,fDelay);
 	}
 	/**
@@ -91,7 +97,7 @@ public class TimedDelay implements IReflexFillCfgVariant, IVarIdValueOwner{
 	 * @param rfcfgOwnerUseThis use null if this is not a class field, but a local variable
 	 * @param fDelay
 	 */
-	public TimedDelay(IReflexFillCfg rfcfgOwnerUseThis, float fDelay) {
+	public TimedDelayVar(IReflexFillCfg rfcfgOwnerUseThis, float fDelay) {
 		if(rfcfgOwnerUseThis!=null)atdList.add(this); //only fields allowed
 		this.rfcfgOwner=rfcfgOwnerUseThis;
 		setDelayLimitSeconds(fDelay);
@@ -284,29 +290,31 @@ public class TimedDelay implements IReflexFillCfgVariant, IVarIdValueOwner{
 //		}
 //	}
 	
-	public static ArrayList<TimedDelay> getTimedDelayListCopy(){
-		return new ArrayList<TimedDelay>(atdList);
+	public static ArrayList<TimedDelayVar> getListCopy(){
+		return new ArrayList<TimedDelayVar>(atdList);
 	}
 
 	public String getVarId() {
-		if(strVarId!=null)return strVarId;
-		if(rfcfgOwner==null){
-			throw new NullPointerException("Invalid usage, "
-				+IReflexFillCfg.class.getName()+" owner is null, is this a local (non field) variable?");
-		}
-		
-		strVarId = strCodePrefixVariant
-			+Misc.i().makePretty(rfcfgOwner.getClass(),false)
-			+Misc.i().firstLetter(
-				ReflexFill.i().createIdentifierWithFieldName(rfcfgOwner,this),
-				true);
-		
+		if(strVarId==null)strVarId=ReflexFill.i().getVarId(rfcfgOwner, strCodePrefixVariant, this);
 		return strVarId;
+//		if(strVarId!=null)return strVarId;
+//		if(rfcfgOwner==null){
+//			throw new NullPointerException("Invalid usage, "
+//				+IReflexFillCfg.class.getName()+" owner is null, is this a local (non field) variable?");
+//		}
+//		
+//		strVarId = strCodePrefixVariant
+//			+Misc.i().makePretty(rfcfgOwner.getClass(),false)
+//			+Misc.i().firstLetter(
+//				ReflexFill.i().createIdentifierWithFieldName(rfcfgOwner,this),
+//				true);
+//		
+//		return strVarId;
 	}
 
 	@Override
 	public String getCodePrefixVariant() {
-		return strCodePrefixVariant ;
+		return strCodePrefixVariant;
 	}
 
 	@Override
@@ -321,9 +329,28 @@ public class TimedDelay implements IReflexFillCfgVariant, IVarIdValueOwner{
 		}else{
 			setDelayLimitSeconds((Float)objValue);
 		}
+		
+		if(vivo!=null)vivo.setObjectValue(objValue);
 	}
 
+	@Override
 	public String getReport() {
 		return getVarId()+" = "+getDelayLimitSeconds();
+	}
+
+	@Override
+	public Object getValueRaw() {
+		return getDelayLimitSeconds();
+	}
+
+	@Override
+	public void setConsoleVarLink(VarIdValueOwner vivo) {
+		this.vivo=vivo;
+	}
+	
+	@Override
+	public String toString() {
+//		if(getValueRaw()==null)return null;
+		return Misc.i().fmtFloat(getDelayLimitSeconds(),3);
 	}
 }

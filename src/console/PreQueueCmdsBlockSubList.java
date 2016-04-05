@@ -30,7 +30,7 @@ package console;
 import java.util.ArrayList;
 
 import misc.Misc;
-import misc.TimedDelay;
+import misc.TimedDelayVar;
 import console.gui.ConsoleGuiStateAbs;
 
 /**
@@ -39,7 +39,7 @@ import console.gui.ConsoleGuiStateAbs;
  *
  */
 public class PreQueueCmdsBlockSubList{
-	protected TimedDelay tdSleep = null;
+	protected TimedDelayVar tdSleep = null;
 	protected String strUId = Misc.i().getNextUniqueId();
 	protected ArrayList<String> astrCmdList = new ArrayList<String>();
 	protected boolean	bPrepend = false;

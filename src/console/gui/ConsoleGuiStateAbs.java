@@ -34,12 +34,13 @@ import java.util.regex.Pattern;
 
 import misc.AutoComplete;
 import misc.Debug;
+import misc.FloatingDoubleVar;
 import misc.Misc;
 import misc.ReflexFill;
 import misc.ReflexFill.IReflexFillCfgVariant;
 import misc.ReflexFill.ReflexFillCfg;
 import misc.StringField;
-import misc.TimedDelay;
+import misc.TimedDelayVar;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -132,9 +133,9 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	/**
 	 * keep delayers together!
 	 */
-	protected TimedDelay tdStatsRefresh = new TimedDelay(this,0.5f);
-	protected TimedDelay tdScrollToBottomRequestAndSuspend = new TimedDelay(this,0.5f);
-	protected TimedDelay tdScrollToBottomRetry = new TimedDelay(this,0.1f);
+	protected TimedDelayVar tdStatsRefresh = new TimedDelayVar(this,0.5f);
+	protected TimedDelayVar tdScrollToBottomRequestAndSuspend = new TimedDelayVar(this,0.5f);
+	protected TimedDelayVar tdScrollToBottomRetry = new TimedDelayVar(this,0.1f);
 
 //	protected TimedDelay tdLetCpuRest = new TimedDelay(0.1f);
 //	protected TimedDelay tdStatsRefresh = new TimedDelay(0.5f);
@@ -208,8 +209,13 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 //	protected String	strFileInitConsCmds = strFilePrefix+"-Init";
 //	protected String	strFileSetup = strFilePrefix+"-Setup";
 //	protected String	strFileDatabase = strFilePrefix+"-DB";
-	protected float	fConsoleHeightPercDefault = 0.5f;
-	protected float	fConsoleHeightPerc = fConsoleHeightPercDefault;
+	protected FloatingDoubleVar	fdvConsoleHeightPercDefault = new FloatingDoubleVar(this,0.5);
+	
+	/**
+	 * use the console height command to set this var, do not use a console variable for it,
+	 * mainly because it is already implemented that way and working well...
+	 */
+	protected float	fConsoleHeightPerc = fdvConsoleHeightPercDefault.getFloat();
 //	protected ArrayList<String>	astrCmdAndParams = new ArrayList<String>();
 //	protected ArrayList<String>	astrExecConsoleCmdsQueue = new ArrayList<String>();
 //	protected ArrayList<PreQueueCmdsBlockSubList>	astrExecConsoleCmdsPreQueue = new ArrayList<PreQueueCmdsBlockSubList>();
@@ -335,7 +341,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		
 		this.iToggleConsoleKey=iToggleConsoleKey;
 		
-		ReflexFill.assertReflexFillFieldsForOwner(this);
+		ReflexFill.i().assertReflexFillFieldsForOwner(this);
 		
 		if(!sapp.getStateManager().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
 		
@@ -426,9 +432,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		// other inits
 		cc.addCmdToQueue(cc.CMD_FIX_LINE_WRAP);
 		cc.addCmdToQueue(cc.CMD_CONSOLE_SCROLL_BOTTOM);
-		cc.addCmdToQueue(cc.CMD_DB+" "+EDataBaseOperations.load);
-		cc.addCmdToQueue(
-			cc.CMD_DB+" "+EDataBaseOperations.save+" "+cc.getCommentPrefix()+"to shrink it");
+		
 		/**
 		 * KEEP AS LAST queued cmds below!!!
 		 */
@@ -1765,7 +1769,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 			cc.dumpDevWarnEntry("sizes should be equal: "+v3fNew+v3fConsoleSize);
 		}
 		
-		if(fNewHeightPercent==null)fNewHeightPercent=fConsoleHeightPercDefault;
+		if(fNewHeightPercent==null)fNewHeightPercent=fdvConsoleHeightPercDefault.getFloat();
 		
 		if(fNewHeightPercent>0.95f)fNewHeightPercent=0.95f;
 		
@@ -1779,7 +1783,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 //		ctnrConsole.setSize(v3fNew); //setSize() does not work well..
 		v3fConsoleSize.set(v3fNew);
 		
-		fConsoleHeightPerc = fNewHeightPercent;
+		fConsoleHeightPerc = (fNewHeightPercent);
 		
 		cc.varSet(CMD_CONSOLE_HEIGHT, ""+fConsoleHeightPerc, true);
 		
