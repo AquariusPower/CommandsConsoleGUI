@@ -91,6 +91,11 @@ public class LemurMiscHelpers implements AppState, IConsoleCommandListener, IRef
 	private boolean	bConfigured;
 	private boolean	bBlinkFadeInAndOut =true;
 
+	String strCursorHotLink="CursorHotLink";
+	String strExclusiveCursorMaterial="CursorMaterial";
+	String strCursorMaterialBkp="CursorMaterialBkp";
+	String strExclusiveCursorColor="ExclusiveCursorColor";
+
 //	private int	iMoveCaratTo;
 	
 	public Geometry getTextCursorFrom(TextField tf){
@@ -162,16 +167,38 @@ public class LemurMiscHelpers implements AppState, IConsoleCommandListener, IRef
 		geomCursor.getMaterial().setColor("Color",ColorRGBA.White.clone());
 	}
 	
+	private void checkAndPrepareExclusiveCursorMaterialFor(TextField tf, Geometry geomCursor){
+		Material matCursorOnly = tf.getUserData(strExclusiveCursorMaterial);
+//		matCursorOnly=null;
+		/**
+		 * check if cursor material was updated outside here
+		 */
+		if(matCursorOnly==null || !matCursorOnly.equals(geomCursor.getMaterial())){
+			/**
+			 * The material is shared with the cursor and the text.
+			 * As the material may affect also the text, and a fading text is horrible
+			 * using a cloned material to substitute it.
+			 */
+			tf.setUserData(strCursorMaterialBkp, geomCursor.getMaterial());
+			matCursorOnly = geomCursor.getMaterial().clone();
+			MatParam param = matCursorOnly.getParam("Color");
+			ColorRGBA colorClone = ((ColorRGBA)param.getValue()).clone();
+			matCursorOnly.setColor("Color", colorClone);
+//			matCursorOnly.setParam("Color", ColorRGBA.class, matCursorOnly.getParam("Color").clone());
+			
+			geomCursor.setMaterial(matCursorOnly);
+//		fixInvisibleCursor(geomCursor);
+			tf.setUserData(strExclusiveCursorMaterial, matCursorOnly);
+			tf.setUserData(strExclusiveCursorColor, colorClone);
+		}
+	}
+	
 	private void updateBlinkInputFieldTextCursor(TextField tf) {
 		if(!bBlinkingTextCursor)return;
 		if(!tf.equals(getFocusManagerState().getFocus()))return;
 		
 //		tdTextCursorBlink.updateTime();
 		
-		String strCursorHotLink="CursorHotLink";
-		String strExclusiveCursorMaterial="CursorMaterial";
-		String strCursorMaterialBkp="CursorMaterialBkp";
-		String strExclusiveCursorColor="ExclusiveCursorColor";
 		Geometry geomCursor = tf.getUserData(strCursorHotLink);
 		if(geomCursor==null){
 			geomCursor = getTextCursorFrom(tf);
@@ -184,35 +211,9 @@ public class LemurMiscHelpers implements AppState, IConsoleCommandListener, IRef
 		long lDelay = tdTextCursorBlink.getCurrentDelayNano();
 		
 		if(btgTextCursorPulseFadeBlinkMode.b()){
-			Material matCursorOnly = tf.getUserData(strExclusiveCursorMaterial);
-	//		matCursorOnly=null;
-			/**
-			 * check if cursor material was updated outside here
-			 */
-			if(matCursorOnly==null || !matCursorOnly.equals(geomCursor.getMaterial())){
-				/**
-				 * The material is shared with the cursor and the text.
-				 * As the material may affect also the text, and a fading text is horrible
-				 * using a cloned material to substitute it.
-				 */
-				tf.setUserData(strCursorMaterialBkp, geomCursor.getMaterial());
-				matCursorOnly = geomCursor.getMaterial().clone();
-				MatParam param = matCursorOnly.getParam("Color");
-				ColorRGBA colorClone = ((ColorRGBA)param.getValue()).clone();
-				matCursorOnly.setColor("Color", colorClone);
-	//			matCursorOnly.setParam("Color", ColorRGBA.class, matCursorOnly.getParam("Color").clone());
-				
-				geomCursor.setMaterial(matCursorOnly);
-	//		fixInvisibleCursor(geomCursor);
-				tf.setUserData(strExclusiveCursorMaterial, matCursorOnly);
-				tf.setUserData(strExclusiveCursorColor, colorClone);
-			}
+			checkAndPrepareExclusiveCursorMaterialFor(tf,geomCursor);
 			
-		//		if(lDelay > lTextCursorBlinkDelay){
 			ColorRGBA color = tf.getUserData(strExclusiveCursorColor);
-//			MatParam param = matCursorOnly.getParam("Color");
-//			ColorRGBA color = (ColorRGBA)param.getValue();
-//			color.a = (tdTextCursorBlink.lDelayLimit-lDelay)*fNanoToSeconds;
 			color.a = tdTextCursorBlink.getCurrentDelayPercentualDynamic();
 			if(bBlinkFadeInAndOut){
 				if(color.a>0.5f)color.a=1f-color.a; //to allow it fade in and out
@@ -221,11 +222,6 @@ public class LemurMiscHelpers implements AppState, IConsoleCommandListener, IRef
 			}
 			if(color.a<0)color.a=0;
 			if(color.a>1)color.a=1;
-//			matCursorOnly.setColor("Color", color);
-			
-//			if(lDelay > tdTextCursorBlink.getDelayLimitNano()){
-//				tdTextCursorBlink.updateTime();
-//			}
 		}else{
 			Material matBkp = tf.getUserData(strCursorMaterialBkp);
 			if(matBkp!=null){
