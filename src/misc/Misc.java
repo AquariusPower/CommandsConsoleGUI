@@ -227,9 +227,10 @@ public class Misc {
 	 * @return
 	 */
 	public String getNextUniqueId(String strLastId){
-		BigInteger bi = new BigInteger(strLastId);
+		int iRadix=36;
+		BigInteger bi = new BigInteger(strLastId,iRadix);
 		bi=bi.add(new BigInteger("1"));
-		return bi.toString(36);
+		return bi.toString(iRadix);
 	}
 	
 	/**
@@ -239,7 +240,8 @@ public class Misc {
 	 */
 	public String getNextUniqueId(){
 //		return ""+(++lLastUniqueId);
-		return getNextUniqueId(strLastUid );
+		strLastUid=getNextUniqueId(strLastUid);
+		return strLastUid;
 	}
 
 	public String retrieveClipboardString() {

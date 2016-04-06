@@ -53,6 +53,7 @@ import misc.TimedDelayVar;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.jme3.app.SimpleApplication;
+import com.jme3.math.FastMath;
 
 import console.VarIdValueOwner.IVarIdValueOwner;
 
@@ -202,7 +203,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	protected IntegerLongVar ilvMaxCmdHistSize = new IntegerLongVar(this,1000);
 	protected IntegerLongVar ilvMaxDumpEntriesAmount = new IntegerLongVar(this,100000);
 	protected ArrayList<String>	astrCmdAndParams = new ArrayList<String>();
-	protected ArrayList<String>	astrImportantMsgBufferList = new ArrayList<String>();
+	protected ArrayList<ImportantMsg>	astrImportantMsgBufferList = new ArrayList<ImportantMsg>();
 	protected ArrayList<String>	astrExecConsoleCmdsQueue = new ArrayList<String>();
 	protected ArrayList<PreQueueCmdsBlockSubList>	astrExecConsoleCmdsPreQueue = new ArrayList<PreQueueCmdsBlockSubList>();
 	protected String	strCmdLinePrepared = "";
@@ -232,6 +233,38 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //	protected ArrayList<String> astrBaseCmdValidList = new ArrayList<String>();
 	protected ArrayList<Alias> aAliasList = new ArrayList<Alias>();
 	protected ArrayList<Command> acmdList = new ArrayList<Command>();
+	
+	class ImportantMsg{
+		String strMsg;
+		Exception ex;
+		public ImportantMsg(String str, Exception ex) {
+			this.strMsg=str;
+			this.ex=ex;
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((strMsg == null) ? 0 : strMsg.hashCode());
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			ImportantMsg other = (ImportantMsg) obj;
+			if (strMsg == null) {
+				if (other.strMsg != null)
+					return false;
+			} else if (!strMsg.equals(other.strMsg))
+				return false;
+			return true;
+		}
+	}
 	
 //	/**
 //	 * instance
@@ -596,11 +629,23 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //			csaTmp.updateFontStuff();
 			bCmdEndedGracefully=true;
 		}else
-		if(checkCmdValidity(null,"messageReview","[filter]")){
+		if(checkCmdValidity(null,"messageReview","[filter]|[index [stackLimit]] if filter is an index, and it has an exception, the complete exception will be dumped.")){
 			String strFilter = paramString(1);
-			for(String str:astrImportantMsgBufferList){
-				if(strFilter!=null && !str.toLowerCase().contains(strFilter.toLowerCase()))continue;
-				dumpSubEntry(str);
+			Integer iIndex = paramInt(1,true);
+			
+			Integer iStackLimit = paramInt(2,true);
+			
+//			for(ImportantMsg imsg:astrImportantMsgBufferList){
+			for(int i=0;i<astrImportantMsgBufferList.size();i++){
+				if(iIndex!=null && iIndex.intValue()!=i)continue;
+				
+				ImportantMsg imsg = astrImportantMsgBufferList.get(i);
+				if(iIndex==null && strFilter!=null && !imsg.strMsg.toLowerCase().contains(strFilter.toLowerCase()))continue;
+				
+				dumpSubEntry(""+i+": "+imsg.strMsg);
+				if(iIndex!=null && imsg.ex!=null){
+					dumpExceptionEntry(imsg.ex,iStackLimit==null?0:iStackLimit,false);
+				}
 			}
 			dumpSubEntry("Total: "+astrImportantMsgBufferList.size());
 			bCmdEndedGracefully=true;
@@ -921,26 +966,27 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public void dumpWarnEntry(String str){
-		addImportantMsgToBuffer("Warn",str);
+		addImportantMsgToBuffer("Warn",str,null);
 		dumpEntry(false, btgShowWarn.get(), false, Misc.i().getSimpleTime(btgShowMiliseconds.get())+strWarnEntryPrefix+str);
 	}
 	
-	private void addImportantMsgToBuffer(String strType,String strMsg){
-		String str="["+strType+"] "+strMsg;
-		if(astrImportantMsgBufferList.contains(str)){
+	private void addImportantMsgToBuffer(String strMsgType,String strMsgKey,Exception ex){
+		String str="["+strMsgType+"] "+strMsgKey;
+		ImportantMsg imsg = new ImportantMsg(str,ex);
+		if(astrImportantMsgBufferList.contains(imsg)){
 			/**
 			 * so, being re-added it will be refreshed and remain longer on the list
 			 */
-			astrImportantMsgBufferList.remove(str);
+			astrImportantMsgBufferList.remove(imsg);
 		}
 		
-		astrImportantMsgBufferList.add(str);
+		astrImportantMsgBufferList.add(imsg);
 		
 		if(astrImportantMsgBufferList.size()>1000)astrImportantMsgBufferList.remove(0);
 	}
 	
 	public void dumpErrorEntry(String str){
-		addImportantMsgToBuffer("ERROR",str);
+		addImportantMsgToBuffer("ERROR",str,null);
 		dumpEntry(new DumpEntry()
 			.setDumpToConsole(btgShowWarn.get())
 			.setLineOriginal(Misc.i().getSimpleTime(btgShowMiliseconds.get())+strErrorEntryPrefix+str)
@@ -953,7 +999,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 * @param str
 	 */
 	public void dumpDevWarnEntry(String str){
-		addImportantMsgToBuffer("DevWarn",str);
+		addImportantMsgToBuffer("DevWarn",str,null);
 		dumpEntry(false, btgShowDeveloperWarn.get(), false, 
 				Misc.i().getSimpleTime(btgShowMiliseconds.get())+strDevWarnEntryPrefix+str);
 	}
@@ -974,11 +1020,30 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //			Misc.i().getSimpleTime(btgShowMiliseconds.get())+strDevInfoEntryPrefix+str);
 	}
 	
-	public void dumpExceptionEntry(Exception e){
-		addImportantMsgToBuffer("Exception",e.toString());
+	public void dumpExceptionEntry(Exception ex){
+		dumpExceptionEntry(ex, null, true);
+	}
+	/**
+	 * 
+	 * @param ex
+	 * @param iShowStackElementsCount if null, will show nothing. If 0, will show all.
+	 */
+	public void dumpExceptionEntry(Exception ex, Integer iShowStackElementsCount, boolean bAddToMsgBuffer){
+		if(bAddToMsgBuffer){
+			addImportantMsgToBuffer("Exception",ex.toString(),ex);
+		}
+		
 		dumpEntry(false, btgShowException.get(), false, 
-			Misc.i().getSimpleTime(btgShowMiliseconds.get())+strExceptionEntryPrefix+e.toString());
-		e.printStackTrace();
+			Misc.i().getSimpleTime(btgShowMiliseconds.get())+strExceptionEntryPrefix+ex.toString());
+		if(iShowStackElementsCount!=null){
+			StackTraceElement[] aste = ex.getStackTrace();
+			for(int i=0;i<aste.length;i++){
+				StackTraceElement ste = aste[i]; 
+				if(iShowStackElementsCount>0 && i>=iShowStackElementsCount)break;
+				dumpSubEntry(ste.toString());
+			}
+		}
+		ex.printStackTrace();
 	}
 	
 	/**
@@ -1399,6 +1464,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		 *	if user type "tre" instead of "true", it will result in `false`.
 		 *	But false may be an undesired option.
 		 *	Instead, user will be warned of the wrong typed value "tre".
+		 *	KEEP THIS COMMENTED CODE AS A WARNING!
 		return Boolean.parseBoolean(str);
 		 */
 		if(str.equals("0"))return false;
@@ -1406,19 +1472,31 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		if(str.equalsIgnoreCase("false"))return false;
 		if(str.equalsIgnoreCase("true"))return true;
 		
-		dumpWarnEntry("invalid boolean value: "+str);
+		dumpExceptionEntry(new NumberFormatException("invalid string to boolean: "+str));
 		
 		return null;
 	}
 	public Integer paramInt(int iIndex){
+		return paramInt(iIndex,false);
+	}
+	public Integer paramInt(int iIndex, boolean bNullOnParseFail){
 		String str = paramString(iIndex);
 		if(str==null)return null;
-		return Integer.parseInt(str);
+		try{return Integer.parseInt(str);}catch(NumberFormatException ex){
+			if(!bNullOnParseFail)throw ex;
+		};
+		return null;
 	}
 	public Float paramFloat(int iIndex){
+		return paramFloat(iIndex,false);
+	}
+	public Float paramFloat(int iIndex, boolean bNullOnParseFail){
 		String str = paramString(iIndex);
 		if(str==null)return null;
-		return Float.parseFloat(str);
+		try{return Float.parseFloat(str);}catch(NumberFormatException ex){
+			if(!bNullOnParseFail)throw ex;
+		};
+		return null;
 	}
 	
 	protected String prepareCmdAndParams(String strFullCmdLine){
@@ -2536,6 +2614,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		fps,
 		allchars,
 		stats,
+		exception
 	}
 	protected void cmdTest(){
 		dumpInfoEntry("testing...");
@@ -2559,6 +2638,9 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			case stats:
 				strDebugTest=paramString(2);
 //				dumpDevInfoEntry("lblTxtSize="+csaTmp.lblStats.getText().length());
+				break;
+			case exception:
+				dumpExceptionEntry(new NullPointerException("test uid="+Misc.i().getNextUniqueId()));
 				break;
 		}
 		

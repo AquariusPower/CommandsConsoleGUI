@@ -204,7 +204,7 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 		bExitApplicationTD=true;
 	}
 	
-	class ThreadChecker implements Runnable{
+	class RunnableChecker implements Runnable{
 		@Override
 		public void run() {
 			long lStartMilis = System.currentTimeMillis();
@@ -405,7 +405,8 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 		 */
 		clearOldLocksTD();
 		createSelfLockFileTD();
-		threadChecker = new Thread(new ThreadChecker());
+		threadChecker = new Thread(new RunnableChecker());
+		threadChecker.setName(RunnableChecker.class.getSimpleName());
 		threadChecker.start();
 		
 		/**
