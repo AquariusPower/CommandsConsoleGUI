@@ -170,6 +170,8 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	protected	Character chVarDeleteToken = '-';
 	protected	Character	chCommentPrefix='#';
 	protected	Character	chCommandPrefix='/';
+	protected char chCopyRangeIndicator=182;
+	protected String strCopyRangeIndicator=""+chCopyRangeIndicator;
 	
 	/**
 	 * etc
@@ -2653,16 +2655,17 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		String strClipboard=Misc.i().retrieveClipboardString();
 	//	dumpInfoEntry("Clipboard contents, size="+strClipboard.length()+" ( each line enclosed with \\"+strLineEncloseChar+" ):");
 		dumpInfoEntry("Clipboard contents, size="+strClipboard.length()+":");
-		String[] astr = strClipboard.split("\n");
+		String[] astrLines = strClipboard.split("\n");
 	//	for(String str:astr)dumpEntry(strLineEncloseChar+str+strLineEncloseChar);
 	//	dumpEntry(""); // this empty line for clipboard content display is i
-		dumpEntry(">############ Clipboard BEGIN ###########>");
-		for(int i=0;i<astr.length;i++){
-			String str=astr[i];
-			if(bShowNL && i<(astr.length-1))str+="\\n";
-			dumpEntry(false,true,false,str);
+		String strFill="";for(int i=0;i<20;i++)strFill+=strCopyRangeIndicator;
+		dumpEntry(strFill+" Clipboard BEGIN>>>");
+		for(int i=0;i<astrLines.length;i++){
+			String strLine=astrLines[i];
+			if(bShowNL && i<(astrLines.length-1))strLine+="\\n";
+			dumpEntry(false,true,false,strLine);
 		}
-		dumpEntry("<############# Clipboard END ############<");
+		dumpEntry("<<<Clipboard END "+strFill);
 		if(bAddEmptyLineAfterCommand)dumpEntry("");
 	//	dumpEntry("");
 		icui.scrollToBottomRequest();
@@ -2722,22 +2725,49 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 					iCopyFrom = iSelected;
 					iCopyTo = iSelected;
 				}else{
+					updateCopyRangeCharIndicator(iCopyFrom,iCopyTo,false);
 					iCopyFrom = iCopyTo;
 					iCopyTo = iSelected;
+					updateCopyRangeCharIndicator(iCopyFrom,iCopyTo,true);
 				}
 			}else{
+				updateCopyRangeCharIndicator(iCopyFrom,iCopyTo,false);
 				iCopyFrom = iSelected;
 				iCopyTo = iSelected;
 			}
 		}
 	}
 	
+	/**
+	 * 
+	 * @param iCpFrom
+	 * @param iCpTo
+	 * @param bApply if false will clear
+	 */
+	private void updateCopyRangeCharIndicator(int iCpFrom, int iCpTo, boolean bApply) {
+	  if(iCpFrom>=0 && iCpTo>=0 && iCpFrom!=iCpTo){
+	  	int iMin=Math.min(iCpFrom,iCpTo);
+	  	int iMax=Math.max(iCpFrom,iCpTo);
+	  	for(int i=iMin;i<=iMax;i++){
+	  		if(bApply){
+		  		icui.getDumpEntries().set(i,strCopyRangeIndicator+icui.getDumpEntries().get(i));
+	  		}else{
+		  		icui.getDumpEntries().set(i,icui.getDumpEntries().get(i)
+		  			.replaceFirst("^["+strCopyRangeIndicator+"]",""));
+	  		}
+	  	}
+	  }
+	}
+
 	public String editCopyOrCut(boolean bJustCollectText, boolean bCut, boolean bUseCommandDelimiterInsteadOfNewLine) {
 	//	Integer iCopyTo = getDumpAreaSelectedIndex();
 		String strTextToCopy = null;
 		
 		int iCopyToWork = iCopyTo;
 		int iCopyFromWork = iCopyFrom;
+		if(!bJustCollectText){
+			updateCopyRangeCharIndicator(iCopyFrom, iCopyTo, false);
+		}
 		
 	//	String strNL="\n";
 	//	if(bUseCommandDelimiterInsteadOfNewLine){

@@ -390,8 +390,13 @@ public class LemurMiscHelpers implements AppState, IConsoleCommandListener, IRef
 	 * @param tf must have had the new carat set by {@link #prepareStringToPasteAtCaratPosition(TextField, String, String)} 
 	 */
 	public void positionCaratProperly(TextField tf) {
-		int iMoveCaratTo = (int) tf.getUserData(strCaratNewPosition);
-		setCaratPosition(tf, iMoveCaratTo);
+		Object objUD = tf.getUserData(strCaratNewPosition);
+		if(objUD==null){
+			cc.dumpExceptionEntry(new NullPointerException("missing carat new position user data"));
+		}else{
+			int iMoveCaratTo = (int)objUD;
+			setCaratPosition(tf, iMoveCaratTo);
+		}
 	}
 	
 	/**
