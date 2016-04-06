@@ -222,7 +222,9 @@ public class Misc {
 	}
 	
 	/**
-	 * This allows for unrelated things have same uid.
+	 * "Unlimited?" uid!
+	 * This allows for unrelated/non-conflicting things to have same uid.
+	 * 
 	 * @param strLastId
 	 * @return
 	 */
@@ -234,12 +236,10 @@ public class Misc {
 	}
 	
 	/**
-	 * This uses a global uid, 
-	 * unrelated things can have the same uid tho.
+	 * This uses a global uid.
 	 * @return
 	 */
 	public String getNextUniqueId(){
-//		return ""+(++lLastUniqueId);
 		strLastUid=getNextUniqueId(strLastUid);
 		return strLastUid;
 	}
