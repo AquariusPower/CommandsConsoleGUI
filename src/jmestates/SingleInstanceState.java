@@ -31,7 +31,6 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import misc.BoolTogglerCmd;
@@ -40,13 +39,6 @@ import misc.Misc;
 import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
 import misc.ReflexFill.ReflexFillCfg;
-
-import com.jme3.app.Application;
-import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.AppState;
-import com.jme3.app.state.AppStateManager;
-import com.jme3.renderer.RenderManager;
-
 import console.ConsoleCommands;
 
 /**
@@ -55,7 +47,7 @@ import console.ConsoleCommands;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class SingleInstanceState implements IReflexFillCfg, AppState{
+public class SingleInstanceState implements IReflexFillCfg{
 	public final BoolTogglerCmd	btgSingleInstaceMode = new BoolTogglerCmd(this,true,BoolTogglerCmd.strTogglerCodePrefix,
 		"better keep this enabled, other instances may conflict during files access.");
 	private boolean bDevModeExitIfThereIsANewerInstance = true; //true if in debug mode
@@ -66,11 +58,9 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 	String strSuffix=".lock";
 	String strId;
 	private File	flSelfLock;
-	private SimpleApplication	sapp;
 	private ConsoleCommands	cc;
 	private BasicFileAttributes	attrSelfLock;
-	private boolean	bInitialized;
-	private boolean	bEnabled = true;
+//	private boolean	bInitialized;
 	private FilenameFilter	fnf;
 	private File	flFolder;
 	private long lLockUpdateTargetDelayMilis=3000;
@@ -264,9 +254,9 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 //	String strDebugMode="DebugMode";
 //	String strReleaseMode="ReleaseMode";
 	private boolean	bConfigured;
-	private String	strErrorMissingValue="ERROR_MISSING_VALUE";
+//	private String	strErrorMissingValue="ERROR_MISSING_VALUE";
 	private Boolean	bSelfIsDebugMode;
-	private Thread	threadMain;
+	private Thread	threadMain; // threadApplicationRendering
 	private Thread	threadChecker;
 	private int	lWaitCount;
 	private boolean	bAllowCfgOutOfMainMethod = false;
@@ -299,17 +289,17 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 		return ERunMode.Undefined;
 	}
 	
-	/**
-	 * 
-	 * @param fl
-	 * @return if not found, returns a missing value indicator string.
-	 */
-	@Deprecated
-	private String getLockModeOfTD(File fl){
-		ArrayList<String> astr = Misc.i().fileLoad(fl);
-		if(astr.size()>0)return astr.get(1); // line 2
-		return strErrorMissingValue;
-	}
+//	/**
+//	 * 
+//	 * @param fl
+//	 * @return if not found, returns a missing value indicator string.
+//	 */
+//	@Deprecated
+//	private String getLockModeOfTD(File fl){
+//		ArrayList<String> astr = Misc.i().fileLoad(fl);
+//		if(astr.size()>0)return astr.get(1); // line 2
+//		return strErrorMissingValue;
+//	}
 	
 	private String getSelfMode(boolean bReportMode){
 		return getMode((bSelfIsDebugMode?ERunMode.Debug:ERunMode.Release), bReportMode);
@@ -345,31 +335,34 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 		}
 	}
 	
-//	private String otherPrefixInfo(){
-//		String strOther="Other ";
-//		if(bDevModeExitIfThereIsANewerInstance){
-//			strOther+="NEWER";
-//		}else{
-//			strOther+="OLDER";
-//		}
-//		if(Debug.i().isInIDEdebugMode())strOther+="(DebugMode)";
-//		return strOther+" instance";
-//	}
-	
-	public void configureBeforeInitializing(SimpleApplication sapp){
-		configureBeforeInitializing(sapp,false);
+	/**
+	 * at main()
+	 * 
+	 * This will allow for a very fast exit avoiding resources allocation.
+	 * The {@link #configureRequiredAtApplicationInitialization(ConsoleCommands)} call is still required!
+	 */
+	public void configureOptionalAtMainMethod(){
+		configureAndInitialize(true);
 	}
 	
 	/**
-	 * 
-	 * @param sapp
-	 * @param bAllowCfgOutOfMainMethod use this to skip the resources allocation preventer code checker {@link #assertFlowAtMainMethodThread()}
+	 * If used alone, without {@link #configureOptionalAtMainMethod()},
+	 * this alternative will ignore the resources allocation preventer code. 
 	 */
-	public void configureBeforeInitializing(SimpleApplication sapp, boolean bAllowCfgOutOfMainMethod){
+	public void configureRequiredAtApplicationInitialization(ConsoleCommands cc){
+		if(!bConfigured)configureAndInitialize(false);
+		this.cc=cc;
+		this.threadMain=Thread.currentThread();
+	}
+	
+	private void configureAndInitialize(boolean bAllowCfgOutOfMainMethod){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 		
-		this.sapp=sapp;
+		
 		this.bAllowCfgOutOfMainMethod=bAllowCfgOutOfMainMethod;
+		if(!bAllowCfgOutOfMainMethod){
+			outputTD("DEVELOPER: if too much resources are being allocated, try the 'configuration at main()' option.");
+		}
 //		this.cc=cc;
 //		this.threadMain=threadMain;
 		
@@ -396,9 +389,9 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 			outputTD("This instance is in DEBUG mode. ");
 		}
 		
-		if(!sapp.getStateManager().attach(this)){
-			throw new NullPointerException("already attached state "+this.getClass().getName());
-		}
+//		if(!sapp.getStateManager().attach(this)){
+//			throw new NullPointerException("already attached state "+this.getClass().getName());
+//		}
 		
 		/**
 		 * creating the new thread here will make the application ends faster if it can.
@@ -486,64 +479,8 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 		return cc.getReflexFillCfg(rfcv);
 	}
 
-	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		bInitialized=true;
-	}
-
-	@Override
-	public boolean isInitialized() {
-		return bInitialized;
-	}
-
-	@Override
-	public void setEnabled(boolean active) {
-		this.bEnabled=active;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return bEnabled;
-	}
-
-	@Override
-	public void stateAttached(AppStateManager stateManager) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void stateDetached(AppStateManager stateManager) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void update(float tpf) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void render(RenderManager rm) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void postRender() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public void cleanup() {
 		flSelfLock.delete();
 	}
 
-	public void configureBeforeInitializing(ConsoleCommands cc,Thread threadMain) {
-		this.cc=cc;
-		this.threadMain=threadMain;
-	}
-	
 }

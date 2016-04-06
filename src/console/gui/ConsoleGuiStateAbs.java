@@ -34,12 +34,13 @@ import java.util.regex.Pattern;
 
 import misc.AutoComplete;
 import misc.Debug;
-import misc.FloatingDoubleVar;
+import misc.FloatDoubleVar;
 import misc.Misc;
 import misc.ReflexFill;
 import misc.ReflexFill.IReflexFillCfgVariant;
 import misc.ReflexFill.ReflexFillCfg;
-import misc.StringField;
+import misc.StringFieldCmd;
+import misc.StringVar;
 import misc.TimedDelayVar;
 
 import com.jme3.app.Application;
@@ -108,11 +109,11 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	
 //	protected final String strInputIMCPREFIX = "CONSOLEGUISTATE_";
 	public final String strFinalFieldInputCodePrefix="INPUT_MAPPING_CONSOLE_";
-	public final StringField INPUT_MAPPING_CONSOLE_TOGGLE = new StringField(this,strFinalFieldInputCodePrefix);
-	public final StringField INPUT_MAPPING_CONSOLE_SCROLL_UP = new StringField(this,strFinalFieldInputCodePrefix);
-	public final StringField INPUT_MAPPING_CONSOLE_SCROLL_DOWN = new StringField(this,strFinalFieldInputCodePrefix);
-	public final StringField INPUT_MAPPING_CONSOLE_SHIFT_PRESSED	= new StringField(this,strFinalFieldInputCodePrefix);
-	public final StringField INPUT_MAPPING_CONSOLE_CONTROL_PRESSED	= new StringField(this,strFinalFieldInputCodePrefix);
+	public final StringFieldCmd INPUT_MAPPING_CONSOLE_TOGGLE = new StringFieldCmd(this,strFinalFieldInputCodePrefix);
+	public final StringFieldCmd INPUT_MAPPING_CONSOLE_SCROLL_UP = new StringFieldCmd(this,strFinalFieldInputCodePrefix);
+	public final StringFieldCmd INPUT_MAPPING_CONSOLE_SCROLL_DOWN = new StringFieldCmd(this,strFinalFieldInputCodePrefix);
+	public final StringFieldCmd INPUT_MAPPING_CONSOLE_SHIFT_PRESSED	= new StringFieldCmd(this,strFinalFieldInputCodePrefix);
+	public final StringFieldCmd INPUT_MAPPING_CONSOLE_CONTROL_PRESSED	= new StringFieldCmd(this,strFinalFieldInputCodePrefix);
 	
 	public final String STYLE_CONSOLE="console";
 	
@@ -121,9 +122,11 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	/**
 	 * commands user can type
 	 */
-	public final StringField CMD_CLOSE_CONSOLE = new StringField(this,ConsoleCommands.strFinalCmdCodePrefix);
-	public final StringField CMD_CONSOLE_HEIGHT = new StringField(this,ConsoleCommands.strFinalCmdCodePrefix);
-	public final StringField CMD_CONSOLE_STYLE = new StringField(this,ConsoleCommands.strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_CLOSE_CONSOLE = new StringFieldCmd(this,ConsoleCommands.strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_CONSOLE_HEIGHT = new StringFieldCmd(this,ConsoleCommands.strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_CONSOLE_STYLE = new StringFieldCmd(this,ConsoleCommands.strFinalCmdCodePrefix);
+	
+	protected StringVar	svUserFontOption = new StringVar(this, "DroidSansMono");
 	
 	/**
 	 * keep "initialized" vars together!
@@ -209,7 +212,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 //	protected String	strFileInitConsCmds = strFilePrefix+"-Init";
 //	protected String	strFileSetup = strFilePrefix+"-Setup";
 //	protected String	strFileDatabase = strFilePrefix+"-DB";
-	protected FloatingDoubleVar	fdvConsoleHeightPercDefault = new FloatingDoubleVar(this,0.5);
+	protected FloatDoubleVar	fdvConsoleHeightPercDefault = new FloatDoubleVar(this,0.5);
 	
 	/**
 	 * use the console height command to set this var, do not use a console variable for it,
@@ -290,19 +293,19 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 //	protected boolean	bFuncCmdLineSkipTilEnd;
 //	protected long lLastUniqueId = 0;
 
-	private ConsoleCursorListener consoleCursorListener;
+	protected ConsoleCursorListener consoleCursorListener;
 
 	protected Spatial	sptScrollTarget;
-	private Integer	iStatsTextSafeLength = null;
-	private boolean	bExceptionOnce = true;
-	private boolean	bKeepInitiallyInvisibleUntilFirstClosed = false;
-	private FocusManagerState	focusState;
-	private Spatial	sptPreviousFocus;
-	private boolean	bRestorePreviousFocus;
-	private boolean	bInitializeOnlyTheUI;
-	private boolean	bConfigured;
+	protected Integer	iStatsTextSafeLength = null;
+	protected boolean	bExceptionOnce = true;
+	protected boolean	bKeepInitiallyInvisibleUntilFirstClosed = false;
+	protected FocusManagerState	focusState;
+	protected Spatial	sptPreviousFocus;
+	protected boolean	bRestorePreviousFocus;
+	protected boolean	bInitializeOnlyTheUI;
+	protected boolean	bConfigured;
 
-//	private boolean	bUsePreQueue = false; 
+//	protected boolean	bUsePreQueue = false; 
 	
 	/**
 	 * USER MUST IMPLEMENT THESE METHODS,
@@ -1913,7 +1916,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		ReflexFillCfg rfcfg = null;
 		
-		if(rfcv.getClass().isAssignableFrom(StringField.class)){
+		if(rfcv.getClass().isAssignableFrom(StringFieldCmd.class)){
 			if(strFinalFieldInputCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
 				rfcfg.strCommandPrefix = "CONSOLEGUISTATE_";

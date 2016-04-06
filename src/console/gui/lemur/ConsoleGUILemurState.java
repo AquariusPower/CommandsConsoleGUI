@@ -27,7 +27,12 @@
 
 package console.gui.lemur;
 
+import groovy.util.ResourceException;
+
+import java.io.FileNotFoundException;
+
 import com.jme3.app.SimpleApplication;
+import com.jme3.asset.AssetNotFoundException;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.LineWrapMode;
 import com.jme3.math.ColorRGBA;
@@ -59,7 +64,7 @@ import console.gui.ConsoleGuiStateAbs;
 public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 	private static ConsoleGUILemurState instance = new ConsoleGUILemurState();
 	public static ConsoleGUILemurState i(){return instance;}
-	
+
 	@Override
 	public void configureBeforeInitializing(SimpleApplication sapp, ConsoleCommands cc, int iToggleConsoleKey) {
 		super.configureBeforeInitializing(sapp, cc, iToggleConsoleKey);
@@ -82,10 +87,18 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 //	}
 	
 	public void createMonoSpaceFixedFontStyle(){
-		if(bConsoleStyleCreated)return;
+		String strFontName=svUserFontOption.getStringValue();
+//		if(bConsoleStyleCreated)return;
 		
-//		BitmapFont font = sapp.getAssetManager().loadFont("Interface/Fonts/Console.fnt");
-		BitmapFont font = sapp.getAssetManager().loadFont("Interface/Fonts/DroidSansMono.fnt");
+		strFontName=strFontName.replace(" ","");
+		
+		BitmapFont font=null;
+		try{
+			font = sapp.getAssetManager().loadFont("Interface/Fonts/"+strFontName+".fnt");
+		}catch(AssetNotFoundException ex){
+			cc.dumpExceptionEntry(ex);
+			font = sapp.getAssetManager().loadFont("Interface/Fonts/Console.fnt");
+		}
 //		BitmapFont font = sapp.getAssetManager().loadFont("Interface/Fonts/Console512x.fnt");
 		
 		Styles styles = GuiGlobals.getInstance().getStyles();
@@ -133,7 +146,7 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 //		String strAllChars="W";
 //		fMonofontCharWidth = fontWidth(strAllChars,STYLE_CONSOLE);
 		
-		bConsoleStyleCreated=true;
+//		bConsoleStyleCreated=true;
 	}
 	
 	@Override

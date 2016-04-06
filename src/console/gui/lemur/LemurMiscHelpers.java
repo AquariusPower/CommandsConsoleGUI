@@ -33,7 +33,7 @@ import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
 import misc.ReflexFill.ReflexFillCfg;
 import misc.ReflexHacks;
-import misc.StringField;
+import misc.StringFieldCmd;
 import misc.TimedDelayVar;
 
 import com.jme3.app.Application;
@@ -65,7 +65,7 @@ import console.IConsoleCommandListener;
 public class LemurMiscHelpers implements AppState, IConsoleCommandListener, IReflexFillCfg{
 	public final BoolTogglerCmd	btgTextCursorPulseFadeBlinkMode = new BoolTogglerCmd(this,true);
 	public final BoolTogglerCmd	btgTextCursorLarge = new BoolTogglerCmd(this,true);
-	public final StringField CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringField(this, ConsoleCommands.strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringFieldCmd(this, ConsoleCommands.strFinalCmdCodePrefix);
 	
 	private static LemurMiscHelpers instance = new LemurMiscHelpers(); 
 	public static LemurMiscHelpers i(){return instance;}

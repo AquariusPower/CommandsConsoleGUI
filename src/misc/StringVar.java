@@ -37,51 +37,46 @@ import console.VarIdValueOwner.IVarIdValueOwner;
 /**
  * This class is intended to be used only as class field variables.
  * It automatically creates console variables.
- *
+ * 
  * @author AquariusPower <https://github.com/AquariusPower>
+ *
  */
-public class FloatingDoubleVar implements IReflexFillCfgVariant, IVarIdValueOwner{
+public class StringVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
-	private static String	strCodePrefixVariant = "fdv";
-	private static ArrayList<FloatingDoubleVar> afdvList = new ArrayList<FloatingDoubleVar>();
-	Double dValue;
+	private static String	strCodePrefixVariant = "sv";
+	private static ArrayList<StringVar> ailvList = new ArrayList<StringVar>();
+	String strValue;
 	private IReflexFillCfg	rfcfgOwner;
 	private String	strVarId;
 	private VarIdValueOwner	vivo;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		FloatingDoubleVar.ihe=ihe;
+		StringVar.ihe=ihe;
 		bConfigured=true;
 	}
 	
-	public FloatingDoubleVar(IReflexFillCfg rfcfgOwnerUseThis, FloatingDoubleVar fdv) {
-		this(rfcfgOwnerUseThis, fdv.dValue);
-	}
-	public FloatingDoubleVar(IReflexFillCfg rfcfgOwnerUseThis, Float fInitialValue) {
-		this(rfcfgOwnerUseThis, fInitialValue==null?null:fInitialValue.doubleValue());
+	public StringVar(IReflexFillCfg rfcfgOwnerUseThis, StringVar ilv) {
+		this(rfcfgOwnerUseThis, ilv.strValue);
 	}
 	/**
 	 * @param rfcfgOwnerUseThis use null if this is not a class field, but a local variable
-	 * @param dInitialValue if null, the variable will be removed from console vars.
+	 * @param lInitialValue if null, the variable will be removed from console vars.
 	 */
-	public FloatingDoubleVar(IReflexFillCfg rfcfgOwnerUseThis, Double dInitialValue) {
-		if(rfcfgOwnerUseThis!=null)afdvList.add(this); //only fields allowed
+	public StringVar(IReflexFillCfg rfcfgOwnerUseThis, String strInitialValue) {
+		if(rfcfgOwnerUseThis!=null)ailvList.add(this); //only fields allowed
 		this.rfcfgOwner=rfcfgOwnerUseThis;
-		this.dValue=dInitialValue;
+		this.strValue=strInitialValue;
 	}
 	
 	@Override
 	public void setObjectValue(Object objValue) {
-		if(objValue instanceof Double){
-			dValue = ((Double)objValue);
-		}else
-		if(objValue instanceof FloatingDoubleVar){
-			dValue = ((FloatingDoubleVar)objValue).dValue;
+		if(objValue instanceof StringVar){
+			strValue = ((StringVar)objValue).strValue;
 		}else
 		{
-			dValue = ((Float)objValue).doubleValue();
+			strValue = ""+objValue;
 		}
 		
 		if(vivo!=null)vivo.setObjectValue(objValue);
@@ -89,30 +84,16 @@ public class FloatingDoubleVar implements IReflexFillCfgVariant, IVarIdValueOwne
 
 	@Override
 	public String getCodePrefixVariant() {
-		return FloatingDoubleVar.strCodePrefixVariant ;
+		return StringVar.strCodePrefixVariant ;
 	}
 
 	@Override
 	public IReflexFillCfg getOwner() {
 		return rfcfgOwner;
 	}
-	
-	public Float getFloat(){
-		if(dValue==null)return null;
-		return dValue.floatValue();
-	}
-	public float floatValue(){
-		return dValue.floatValue();
-	}
-	public Double getDouble(){
-		return dValue;
-	}
-	public double doubleValue(){
-		return dValue.doubleValue();
-	}
-	
-	public static ArrayList<FloatingDoubleVar> getListCopy(){
-		return new ArrayList<FloatingDoubleVar>(afdvList);
+
+	public static ArrayList<StringVar> getListCopy(){
+		return new ArrayList<StringVar>(ailvList);
 	}
 	
 	@Override
@@ -123,12 +104,12 @@ public class FloatingDoubleVar implements IReflexFillCfgVariant, IVarIdValueOwne
 
 	@Override
 	public String getReport() {
-		return getVarId()+" = "+Misc.i().fmtFloat(getDouble(),3);
+		return getVarId()+" = "+(strValue==null?"null":"\""+strValue+"\"");
 	}
 
 	@Override
 	public Object getValueRaw() {
-		return getDouble();
+		return strValue;
 	}
 
 	@Override
@@ -138,7 +119,12 @@ public class FloatingDoubleVar implements IReflexFillCfgVariant, IVarIdValueOwne
 	
 	@Override
 	public String toString() {
-		if(dValue==null)return null;
-		return Misc.i().fmtFloat(dValue,3);
+		if(strValue==null)return null;
+		return ""+strValue;
 	}
+
+	public String getStringValue() {
+		return strValue;
+	}
+	
 }

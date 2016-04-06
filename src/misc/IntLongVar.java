@@ -41,11 +41,11 @@ import console.VarIdValueOwner.IVarIdValueOwner;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class IntegerLongVar implements IReflexFillCfgVariant, IVarIdValueOwner{
+public class IntLongVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	private static String	strCodePrefixVariant = "ilv";
-	private static ArrayList<IntegerLongVar> ailvList = new ArrayList<IntegerLongVar>();
+	private static ArrayList<IntLongVar> ailvList = new ArrayList<IntLongVar>();
 	Long lValue;
 	private IReflexFillCfg	rfcfgOwner;
 	private String	strVarId;
@@ -53,21 +53,21 @@ public class IntegerLongVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		IntegerLongVar.ihe=ihe;
+		IntLongVar.ihe=ihe;
 		bConfigured=true;
 	}
 	
-	public IntegerLongVar(IReflexFillCfg rfcfgOwnerUseThis, IntegerLongVar ilv) {
+	public IntLongVar(IReflexFillCfg rfcfgOwnerUseThis, IntLongVar ilv) {
 		this(rfcfgOwnerUseThis, ilv.lValue);
 	}
-	public IntegerLongVar(IReflexFillCfg rfcfgOwnerUseThis, Integer iInitialValue) {
+	public IntLongVar(IReflexFillCfg rfcfgOwnerUseThis, Integer iInitialValue) {
 		this(rfcfgOwnerUseThis, iInitialValue==null?null:iInitialValue.longValue());
 	}
 	/**
 	 * @param rfcfgOwnerUseThis use null if this is not a class field, but a local variable
 	 * @param lInitialValue if null, the variable will be removed from console vars.
 	 */
-	public IntegerLongVar(IReflexFillCfg rfcfgOwnerUseThis, Long lInitialValue) {
+	public IntLongVar(IReflexFillCfg rfcfgOwnerUseThis, Long lInitialValue) {
 		if(rfcfgOwnerUseThis!=null)ailvList.add(this); //only fields allowed
 		this.rfcfgOwner=rfcfgOwnerUseThis;
 		this.lValue=lInitialValue;
@@ -78,8 +78,8 @@ public class IntegerLongVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 		if(objValue instanceof Long){
 			lValue = ((Long)objValue);
 		}else
-		if(objValue instanceof IntegerLongVar){
-			lValue = ((IntegerLongVar)objValue).lValue;
+		if(objValue instanceof IntLongVar){
+			lValue = ((IntLongVar)objValue).lValue;
 		}else
 		{
 			lValue = ((Integer)objValue).longValue();
@@ -90,7 +90,7 @@ public class IntegerLongVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 
 	@Override
 	public String getCodePrefixVariant() {
-		return IntegerLongVar.strCodePrefixVariant ;
+		return IntLongVar.strCodePrefixVariant ;
 	}
 
 	@Override
@@ -113,8 +113,8 @@ public class IntegerLongVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 		return lValue.longValue();
 	}
 	
-	public static ArrayList<IntegerLongVar> getListCopy(){
-		return new ArrayList<IntegerLongVar>(ailvList);
+	public static ArrayList<IntLongVar> getListCopy(){
+		return new ArrayList<IntLongVar>(ailvList);
 	}
 	
 	@Override

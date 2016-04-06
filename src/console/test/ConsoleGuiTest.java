@@ -32,7 +32,7 @@ import misc.ReflexFill;
 import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
 import misc.ReflexFill.ReflexFillCfg;
-import misc.StringField;
+import misc.StringFieldCmd;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.system.AppSettings;
@@ -56,10 +56,10 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 	private final String strFieldCodePrefix="sf";
 	private final String strFieldCodePrefixLess = "VariantAsPrefixLess";
 	
-	public final StringField CMD_END_USER_COMMAND_TEST = new StringField(this,cc.strFinalCmdCodePrefix);
-	private StringField sfTestCommandAutoFillVariant1 = new StringField(this,strFieldCodePrefix);
-	private StringField testCommandAutoFillPrefixLessVariant2 = new StringField(this,strFieldCodePrefixLess);
-	private StringField testCommandAutoFillPrefixLessVariantDefaulted3 = new StringField(this,null);
+	public final StringFieldCmd CMD_END_USER_COMMAND_TEST = new StringFieldCmd(this,cc.strFinalCmdCodePrefix);
+	private StringFieldCmd sfTestCommandAutoFillVariant1 = new StringFieldCmd(this,strFieldCodePrefix);
+	private StringFieldCmd testCommandAutoFillPrefixLessVariant2 = new StringFieldCmd(this,strFieldCodePrefixLess);
+	private StringFieldCmd testCommandAutoFillPrefixLessVariantDefaulted3 = new StringFieldCmd(this,null);
 	
 	public boolean endUserCustomMethod(Integer i){
 		cc.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
@@ -77,7 +77,7 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 		cc.addConsoleCommandListener(this);
 		
 //		SingleInstanceState.i().configureBeforeInitializing(this,true);
-		SingleInstanceState.i().configureBeforeInitializing(cc,Thread.currentThread());
+		SingleInstanceState.i().configureRequiredAtApplicationInitialization(cc);
 	}
 	
 	@Override
@@ -99,7 +99,7 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 			main.setShowSettings(false);
 		}
 		
-		SingleInstanceState.i().configureBeforeInitializing(main);
+		SingleInstanceState.i().configureOptionalAtMainMethod();
 		
 		main.start();
 	}
@@ -124,7 +124,7 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		ReflexFillCfg rfcfg = null;
 		
-		if(rfcv.getClass().isAssignableFrom(StringField.class)){
+		if(rfcv.getClass().isAssignableFrom(StringFieldCmd.class)){
 			if(strFieldCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
 				rfcfg.strCommandPrefix = "Niceprefix";

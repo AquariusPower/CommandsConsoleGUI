@@ -37,7 +37,7 @@ import misc.ReflexFill.IReflexFillCfgVariant;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class StringField implements IReflexFillCfgVariant{
+public class StringFieldCmd implements IReflexFillCfgVariant{
 //	String str = "ERROR: NOT SET"; // hashcode depends on it not being null
 	protected String strValue = null;
 	protected IReflexFillCfg rfcfgOwner;
@@ -62,7 +62,7 @@ public class StringField implements IReflexFillCfgVariant{
 	 * as it has not returned yet, so it's object owner will not have 
 	 * a valid field (will still be null).
 	 */
-	public StringField(IReflexFillCfg rfcfgOwner, String strReflexFillCfgCodePrefixVariant){ // int iReflexFillCfgVariant){
+	public StringFieldCmd(IReflexFillCfg rfcfgOwner, String strReflexFillCfgCodePrefixVariant){ // int iReflexFillCfgVariant){
 //		this.iReflexFillCfgVariant=iReflexFillCfgVariant;
 		this.strReflexFillCfgCodePrefixVariant = strReflexFillCfgCodePrefixVariant;
 		
@@ -74,7 +74,7 @@ public class StringField implements IReflexFillCfgVariant{
 			throw new NullPointerException("cant be null for: "+IReflexFillCfg.class.getName());
 		}
 	}
-	public StringField(String strValue){
+	public StringFieldCmd(String strValue){
 		this.strValue=strValue;
 	}
 	
@@ -98,7 +98,7 @@ public class StringField implements IReflexFillCfgVariant{
 	}
 	
 	private String errorMessage(){
-		return "ERROR: "+StringField.class.getName()+" not yet properly initialized!";
+		return "ERROR: "+StringFieldCmd.class.getName()+" not yet properly initialized!";
 	}
 	
 	@Override

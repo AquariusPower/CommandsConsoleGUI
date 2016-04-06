@@ -32,7 +32,7 @@ import java.util.Collections;
 import java.util.TreeMap;
 
 import misc.Misc;
-import misc.StringField;
+import misc.StringFieldCmd;
 
 import com.google.common.collect.Lists;
 
@@ -48,16 +48,16 @@ import console.ConsoleCommands.EStats;
  *
  */
 public class ConsoleScriptCommands extends ConsoleCommands{
-	public final StringField CMD_FUNCTION = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_FUNCTION_CALL = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_FUNCTION_END = new StringField(this,strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_FUNCTION = new StringFieldCmd(this,strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_FUNCTION_CALL = new StringFieldCmd(this,strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_FUNCTION_END = new StringFieldCmd(this,strFinalCmdCodePrefix);
 	/**
 	 * conditional user coding
 	 */
-	public final StringField CMD_IF = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_ELSE_IF = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_ELSE = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_IF_END = new StringField(this,strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_IF = new StringFieldCmd(this,strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_ELSE_IF = new StringFieldCmd(this,strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_ELSE = new StringFieldCmd(this,strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_IF_END = new StringFieldCmd(this,strFinalCmdCodePrefix);
 
 	public String	strPrepareFunctionBlockForId;
 	public boolean	bFuncCmdLineRunning;

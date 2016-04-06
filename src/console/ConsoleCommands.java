@@ -38,22 +38,22 @@ import java.util.regex.Pattern;
 
 import misc.BoolTogglerCmd;
 import misc.Debug;
-import misc.FloatingDoubleVar;
+import misc.FloatDoubleVar;
 import misc.IHandleExceptions;
-import misc.IntegerLongVar;
+import misc.IntLongVar;
 import misc.Misc;
 import misc.ReflexFill;
 import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
 import misc.ReflexFill.ReflexFillCfg;
 import misc.ReflexHacks;
-import misc.StringField;
+import misc.StringFieldCmd;
+import misc.StringVar;
 import misc.TimedDelayVar;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.jme3.app.SimpleApplication;
-import com.jme3.math.FastMath;
 
 import console.VarIdValueOwner.IVarIdValueOwner;
 
@@ -135,17 +135,17 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //	public final StringField CMD_CONSOLE_HEIGHT = new StringField(this,strFinalCmdCodePrefix);
 //	public final StringField CMD_CONSOLE_SCROLL_BOTTOM = new StringField(this,strFinalCmdCodePrefix);
 //	public final StringField CMD_CONSOLE_STYLE = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_CONSOLE_SCROLL_BOTTOM = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_DB = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_ECHO = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_FIX_LINE_WRAP = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_FIX_VISIBLE_ROWS_AMOUNT = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_HELP = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_HISTORY = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_HK_TOGGLE = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_LINE_WRAP_AT = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_VAR_SET = new StringField(this,strFinalCmdCodePrefix);
-	public final StringField CMD_SLEEP = new StringField(this,strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_CONSOLE_SCROLL_BOTTOM = new StringFieldCmd(this,strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_DB = new StringFieldCmd(this,strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_ECHO = new StringFieldCmd(this,strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_FIX_LINE_WRAP = new StringFieldCmd(this,strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_FIX_VISIBLE_ROWS_AMOUNT = new StringFieldCmd(this,strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_HELP = new StringFieldCmd(this,strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_HISTORY = new StringFieldCmd(this,strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_HK_TOGGLE = new StringFieldCmd(this,strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_LINE_WRAP_AT = new StringFieldCmd(this,strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_VAR_SET = new StringFieldCmd(this,strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_SLEEP = new StringFieldCmd(this,strFinalCmdCodePrefix);
 	
 	/**
 	 * this char indicates something that users (non developers) 
@@ -153,10 +153,10 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 */
 	public final Character	RESTRICTED_TOKEN	= '&';
 	public final String strFinalFieldRestrictedCmdCodePrefix="RESTRICTED_CMD_";
-	public final StringField	RESTRICTED_CMD_SKIP_CURRENT_COMMAND	= new StringField(this,strFinalFieldRestrictedCmdCodePrefix);
-	public final StringField	RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE	= new StringField(this,strFinalFieldRestrictedCmdCodePrefix);
-	public final StringField	RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS	= new StringField(this,strFinalFieldRestrictedCmdCodePrefix);
-	public final StringField	RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS	= new StringField(this,strFinalFieldRestrictedCmdCodePrefix);
+	public final StringFieldCmd	RESTRICTED_CMD_SKIP_CURRENT_COMMAND	= new StringFieldCmd(this,strFinalFieldRestrictedCmdCodePrefix);
+	public final StringFieldCmd	RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE	= new StringFieldCmd(this,strFinalFieldRestrictedCmdCodePrefix);
+	public final StringFieldCmd	RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS	= new StringFieldCmd(this,strFinalFieldRestrictedCmdCodePrefix);
+	public final StringFieldCmd	RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS	= new StringFieldCmd(this,strFinalFieldRestrictedCmdCodePrefix);
 	
 	/**
 	 * more tokens
@@ -179,7 +179,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	protected String	strTypeCmd="Cmd";
 	
 	/** 0 is auto wrap, -1 will trunc big lines */
-	protected IntegerLongVar iConsoleMaxWidthInCharsForLineWrap = new IntegerLongVar(this,0);
+	protected IntLongVar iConsoleMaxWidthInCharsForLineWrap = new IntLongVar(this,0);
 	
 	protected boolean	bAddEmptyLineAfterCommand = true;
 	protected IConsoleUI	icui;
@@ -202,8 +202,8 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	protected String	strFileInitConsCmds = strFilePrefix+"-Init";
 	protected String	strFileSetup = strFilePrefix+"-Setup";
 	protected String	strFileDatabase = strFilePrefix+"-DB";
-	protected IntegerLongVar ilvMaxCmdHistSize = new IntegerLongVar(this,1000);
-	protected IntegerLongVar ilvMaxDumpEntriesAmount = new IntegerLongVar(this,100000);
+	protected IntLongVar ilvMaxCmdHistSize = new IntLongVar(this,1000);
+	protected IntLongVar ilvMaxDumpEntriesAmount = new IntLongVar(this,100000);
 	protected ArrayList<String>	astrCmdAndParams = new ArrayList<String>();
 	protected ArrayList<ImportantMsg>	astrImportantMsgBufferList = new ArrayList<ImportantMsg>();
 	protected ArrayList<String>	astrExecConsoleCmdsQueue = new ArrayList<String>();
@@ -302,7 +302,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				rfcfg.strCommandSuffix="Toggle";
 			}
 		}else
-		if(rfcv.getClass().isAssignableFrom(StringField.class)){
+		if(rfcv.getClass().isAssignableFrom(StringFieldCmd.class)){
 			if(strFinalCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
 			}else
@@ -418,7 +418,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strValidCmd){
 		return checkCmdValidity(iccl, strValidCmd, null);
 	}
-	public boolean checkCmdValidity(IConsoleCommandListener iccl, StringField strfValidCmd, String strComment){
+	public boolean checkCmdValidity(IConsoleCommandListener iccl, StringFieldCmd strfValidCmd, String strComment){
 		return checkCmdValidity(iccl, strfValidCmd.toString(), strComment);
 	}
 	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strValidCmd, String strComment){
@@ -1853,7 +1853,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		}
 	}
 	
-	public boolean varSet(StringField sfId, String strValue, boolean bSave) {
+	public boolean varSet(StringFieldCmd sfId, String strValue, boolean bSave) {
 		return varSet(
 			RESTRICTED_TOKEN+sfId.toString(),
 			strValue,
@@ -2286,7 +2286,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			}
 		}
 	}
-	public void addCmdToQueue(StringField sfFullCmdLine){
+	public void addCmdToQueue(StringFieldCmd sfFullCmdLine){
 		addCmdToQueue(sfFullCmdLine.toString());
 	}
 	public void addCmdToQueue(String strFullCmdLine){
@@ -2390,11 +2390,15 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			varSet(td,false);
 		}
 		
-		for(FloatingDoubleVar td:FloatingDoubleVar.getListCopy()){
+		for(FloatDoubleVar td:FloatDoubleVar.getListCopy()){
 			varSet(td,false);
 		}
 		
-		for(IntegerLongVar td:IntegerLongVar.getListCopy()){
+		for(IntLongVar td:IntLongVar.getListCopy()){
+			varSet(td,false);
+		}
+		
+		for(StringVar td:StringVar.getListCopy()){
 			varSet(td,false);
 		}
 		
