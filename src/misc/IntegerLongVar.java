@@ -36,6 +36,7 @@ import console.VarIdValueOwner.IVarIdValueOwner;
 
 /**
  * This class is intended to be used only as class field variables.
+ * It automatically creates console variables.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
@@ -101,9 +102,17 @@ public class IntegerLongVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 		if(lValue==null)return null;
 		return lValue.intValue();
 	}
+	public int intValue() {
+		return lValue.intValue();
+	}
+	
 	public Long getLong() {
 		return lValue;
 	}
+	public long longValue(){
+		return lValue.longValue();
+	}
+	
 	public static ArrayList<IntegerLongVar> getListCopy(){
 		return new ArrayList<IntegerLongVar>(ailvList);
 	}
@@ -134,4 +143,5 @@ public class IntegerLongVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 		if(lValue==null)return null;
 		return ""+lValue;
 	}
+	
 }

@@ -36,6 +36,7 @@ import console.VarIdValueOwner.IVarIdValueOwner;
 
 /**
  * This class is intended to be used only as class field variables.
+ * It automatically creates console variables.
  *
  * @author AquariusPower <https://github.com/AquariusPower>
  */
@@ -100,9 +101,16 @@ public class FloatingDoubleVar implements IReflexFillCfgVariant, IVarIdValueOwne
 		if(dValue==null)return null;
 		return dValue.floatValue();
 	}
+	public float floatValue(){
+		return dValue.floatValue();
+	}
 	public Double getDouble(){
 		return dValue;
 	}
+	public double doubleValue(){
+		return dValue.doubleValue();
+	}
+	
 	public static ArrayList<FloatingDoubleVar> getListCopy(){
 		return new ArrayList<FloatingDoubleVar>(afdvList);
 	}

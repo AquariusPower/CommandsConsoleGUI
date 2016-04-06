@@ -84,9 +84,9 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 	public void createMonoSpaceFixedFontStyle(){
 		if(bConsoleStyleCreated)return;
 		
-		BitmapFont font = sapp.getAssetManager().loadFont("Interface/Fonts/Console.fnt");
+//		BitmapFont font = sapp.getAssetManager().loadFont("Interface/Fonts/Console.fnt");
+		BitmapFont font = sapp.getAssetManager().loadFont("Interface/Fonts/DroidSansMono.fnt");
 //		BitmapFont font = sapp.getAssetManager().loadFont("Interface/Fonts/Console512x.fnt");
-		//TODO improve the font quality to be more readable, how???
 		
 		Styles styles = GuiGlobals.getInstance().getStyles();
 		

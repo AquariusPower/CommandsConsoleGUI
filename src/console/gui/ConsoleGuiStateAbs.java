@@ -1973,7 +1973,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	public void dumpAllStats() {
 		cc.dumpEntry(true, cc.btgShowDeveloperInfo.get(), false,	
 			Misc.i().getSimpleTime(cc.btgShowMiliseconds.get())
-				+cc.getDevInfoEntryPrefix()+"Console stats (Dev):"+"\n"
+				+cc.getDevInfoEntryPrefix()+"Console stats (Dev): "+"\n"
 			
 			+"Console Height = "+Misc.i().fmtFloat(ctnrConsole.getSize().y)+"\n"
 			+"Visible Rows = "+lstbxDumpArea.getGridPanel().getVisibleRows()+"\n"

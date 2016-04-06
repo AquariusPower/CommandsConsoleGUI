@@ -177,7 +177,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	protected String	strTypeCmd="Cmd";
 	
 	/** 0 is auto wrap, -1 will trunc big lines */
-	protected int iConsoleMaxWidthInCharsForLineWrap = 0;
+	protected IntegerLongVar iConsoleMaxWidthInCharsForLineWrap = new IntegerLongVar(this,0);
 	
 	protected boolean	bAddEmptyLineAfterCommand = true;
 	protected IConsoleUI	icui;
@@ -616,7 +616,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		if(checkCmdValidity(null,CMD_LINE_WRAP_AT,"[iMaxChars] 0 = wrap will be automatic")){
 			Integer i = paramInt(1);
 			if(i!=null && i>=0){ // a value was supplied
-				iConsoleMaxWidthInCharsForLineWrap = i;
+				iConsoleMaxWidthInCharsForLineWrap.setObjectValue(i);
 //				if(i==-1){
 //					/**
 //					 * prefered using null instead of -1 that is for the user type a valid integer
@@ -878,9 +878,9 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //				}
 //			}
 			
-			int iWrapAt = iConsoleMaxWidthInCharsForLineWrap;
+			int iWrapAt = iConsoleMaxWidthInCharsForLineWrap.intValue();
 //			if(iConsoleMaxWidthInCharsForLineWrap==null){
-			if(iConsoleMaxWidthInCharsForLineWrap==0){
+			if(iConsoleMaxWidthInCharsForLineWrap.intValue()==0){
 				iWrapAt = icui.getLineWrapAt();
 //				if(STYLE_CONSOLE.equals(strStyle)){ //TODO is faster?
 //					iWrapAt = (int) (widthForDumpEntryField() / fWidestCharForCurrentStyleFont ); //'W' but any char will do for monospaced font
@@ -2931,7 +2931,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public int getConsoleMaxWidthInCharsForLineWrap(){
-		return iConsoleMaxWidthInCharsForLineWrap;
+		return iConsoleMaxWidthInCharsForLineWrap.intValue();
 	}
 //	protected void setConsoleUI(IConsoleUI icui) {
 //		this.icui=icui;
