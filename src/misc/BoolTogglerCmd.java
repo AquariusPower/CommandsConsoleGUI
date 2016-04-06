@@ -46,7 +46,7 @@ public class BoolTogglerCmd implements IReflexFillCfgVariant, IVarIdValueOwner{
 	public static final String strTogglerCodePrefix="btg";
 	protected static ArrayList<BoolTogglerCmd> abtgList = new ArrayList<BoolTogglerCmd>();
 	private static boolean	bConfigured;
-	private static IHandleExceptions	ihe;
+	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	
 	protected boolean bPrevious;
 	protected boolean bCurrent;

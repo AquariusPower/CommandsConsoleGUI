@@ -42,7 +42,7 @@ import console.VarIdValueOwner.IVarIdValueOwner;
  */
 public class IntegerLongVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 	private static boolean	bConfigured;
-	private static IHandleExceptions	ihe;
+	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	private static String	strCodePrefixVariant = "ilv";
 	private static ArrayList<IntegerLongVar> ailvList = new ArrayList<IntegerLongVar>();
 	Long lValue;

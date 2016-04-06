@@ -45,6 +45,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 import javax.naming.directory.BasicAttributes;
 
@@ -55,7 +56,7 @@ import javax.naming.directory.BasicAttributes;
  */
 public class Misc {
 //	public long lLastUniqueId = 0;
-	private IHandleExceptions	ihe;
+	private IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	private String	strLastUid = "0";
 	private boolean	bConfigured;
 	
@@ -84,11 +85,15 @@ public class Misc {
 		return getDateTimeForFilename(false);
 	}
 	public String getDateTimeForFilename(boolean bShowMilis){
+		return getDateTimeForFilename(System.currentTimeMillis(), bShowMilis);
+	}
+	public String getDateTimeForFilename(long lTimeMilis, boolean bShowMilis){
 		String strMilis="";
 		if(bShowMilis)strMilis="-SSS";
 		
 		return new SimpleDateFormat("yyyyMMdd-HHmmss"+strMilis)
-			.format(Calendar.getInstance().getTime());
+			.format(new Date(lTimeMilis));
+//			.format(Calendar.getInstance().getTime());
 	}
 	
 	public String fmtFloat(double d){

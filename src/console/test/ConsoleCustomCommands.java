@@ -49,7 +49,7 @@ public class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleC
 		super();
 		
 //		ConsoleGUILemurState cs = new ConsoleGUILemurState(KeyInput.KEY_F10, this, sapp);
-		ConsoleGUILemurState.i().configure(sapp, this, KeyInput.KEY_F10);
+		ConsoleGUILemurState.i().configureBeforeInitializing(sapp, this, KeyInput.KEY_F10);
 //		addConsoleCommandListener(cs);
 //		setConsoleUI(cs);
 //		csaTmp = cs;
@@ -57,8 +57,8 @@ public class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleC
 //		sapp.getStateManager().attach(cs);
 		
 //		sapp.getStateManager().attach(fpslState);
-		FpsLimiterState.i().configure(sapp, this);
-		SingleInstanceState.i().configure(sapp, this, Thread.currentThread());
+		FpsLimiterState.i().configureBeforeInitializing(sapp, this);
+//		SingleInstanceState.i().configureBeforeInitializing(this,Thread.currentThread());
 		
 		/**
 		 *  This allows test3 at endUserCustomMethod() to work.

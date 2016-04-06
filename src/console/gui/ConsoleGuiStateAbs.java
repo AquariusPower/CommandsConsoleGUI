@@ -327,7 +327,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	 * @param cc
 	 * @param iToggleConsoleKey
 	 */
-	public void configure(SimpleApplication sapp, ConsoleCommands cc, int iToggleConsoleKey){
+	public void configureBeforeInitializing(SimpleApplication sapp, ConsoleCommands cc, int iToggleConsoleKey){
 		if(bConfigured)throw new NullPointerException("already configured.");		// KEEP ON TOP
 		
 		this.sapp=sapp;

@@ -1,4 +1,6 @@
 Console-*
 *.lock
+*.java.todo
 /bin/
 /tmp/
+

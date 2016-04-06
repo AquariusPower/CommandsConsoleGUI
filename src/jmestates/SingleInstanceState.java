@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import misc.BoolTogglerCmd;
@@ -72,9 +73,12 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 	private boolean	bEnabled = true;
 	private FilenameFilter	fnf;
 	private File	flFolder;
-	private long lLockUpdateDelayMilis=3000;
+	private long lLockUpdateTargetDelayMilis=3000;
 	private long	lSelfLockCreationTime;
 	private String	strExitReasonOtherInstance = "";
+	public int	lCheckCountsTD;
+	private boolean	bExitApplicationTD;
+	public long	lCheckTotalDelay;
 	
 	private static SingleInstanceState instance = new SingleInstanceState();
 	public static SingleInstanceState i(){return instance;}
@@ -94,7 +98,7 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 //			
 //		for(File fl:getAllLocks()){
 //			if(cmpSelfWith(fl))continue;
-//			System.err.println("Cleaning lock: "+fl.getName());
+//			output("Cleaning lock: "+fl.getName());
 //			fl.delete();
 //		}
 //	}
@@ -109,9 +113,9 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 			BasicFileAttributes attr = Misc.i().fileAttributesTS(fl);
 			if(attr==null)continue;
 			
-			long lTimeLimit = System.currentTimeMillis() - (lLockUpdateDelayMilis*2);
+			long lTimeLimit = System.currentTimeMillis() - (lLockUpdateTargetDelayMilis*2);
 			if(attr.lastModifiedTime().toMillis() < lTimeLimit){
-				System.err.println("Cleaning old lock: "+fl.getName());
+				outputTD("Cleaning old lock: "+fl.getName());
 				fl.delete();
 			}
 		}
@@ -125,10 +129,10 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 	private boolean checkExitTD(){
 		if(!btgSingleInstaceMode.b())return false;
 		
-		boolean bExit=false;
+		bExitApplicationTD=false;
 		String strReport="";
 		strReport+="-----------------SimultaneousLocks--------------------\n";
-		strReport+="ThisLock:  "+flSelfLock.getName()+"\n";
+		strReport+="ThisLock:  "+flSelfLock.getName()+" "+getSelfMode(true)+"\n";
 		int iSimultaneousLocksCount=0;
 		for(File flOtherLock:getAllLocksTD()){
 			if(cmpSelfWithTD(flOtherLock))continue;
@@ -136,34 +140,44 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 			Long lOtherCreationTime = getCreationTimeOfTD(flOtherLock);
 			if(lOtherCreationTime==null)continue;
 			
-			strReport+="OtherLock: "+flOtherLock.getName()+"\n";
+			ERunMode ermOther = getLockRunModeOfTD(flOtherLock);
+			strReport+="OtherLock: "+flOtherLock.getName()+" "+getMode(ermOther,true)+"\n";
 			
 			boolean  bOtherIsNewer = lSelfLockCreationTime < lOtherCreationTime;
 			
 			if(bDevModeExitIfThereIsANewerInstance && bOtherIsNewer){
-				strExitReasonOtherInstance="NEWER";
-				bExit=true;
+				applyExitReason("NEWER"+getMode(ermOther,true));
 			}else
 			if(!bDevModeExitIfThereIsANewerInstance && !bOtherIsNewer){
 				/**
 				 * exit if there is an older instance
 				 */
-				strExitReasonOtherInstance="OLDER";
-				bExit=true;
+				applyExitReason("OLDER"+getMode(ermOther,true));
 			}
 			
-			if(!bExit){
+			/**
+			 * the priority is to keep the release mode instance running
+			 * despite.. it may never happen at the end user machine...
+			 */
+			if(bExitApplicationTD){
+				if(!bSelfIsDebugMode){ // self is release mode
+					if(ermOther.compareTo(ERunMode.Debug)==0){
+						/**
+						 * will ignore exit request if the other is in debug mode.
+						 */
+						bExitApplicationTD=false;
+					}
+				}
+			}else{
 				/**
 				 * If the other instance is in release mode,
 				 * this debug mode instance will exit.
 				 * 
 				 * To test, start a release mode, and AFTER that, start a debug mode one.
 				 */
-				if(bDebugMode){
-					String strMode = getLockModeOfTD(flOtherLock);
-					if(!strMode.equalsIgnoreCase(strDebugMode)){
-						strExitReasonOtherInstance=strMode;
-						bExit=true;
+				if(bSelfIsDebugMode){
+					if(ermOther.compareTo(ERunMode.Release)==0){
+						applyExitReason(ermOther.toString());
 					}
 				}
 			}
@@ -171,32 +185,43 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 			iSimultaneousLocksCount++;
 		}
 		
-		if(bExit){
-			System.err.println(strReport);
+		if(bExitApplicationTD){
+			outputTD(strReport);
 		}else{
 			if(iSimultaneousLocksCount>0){
-				System.err.println(strReport+"This instance will continue running.");
+				outputTD(strReport+"This instance will continue running.");
 				clearOldLocksTD();
 			}
 		}
 		
-		return bExit;
+		lCheckCountsTD++;
+		
+		return bExitApplicationTD;
+	}
+	
+	private void applyExitReason(String str){
+		strExitReasonOtherInstance=str;
+		bExitApplicationTD=true;
 	}
 	
 	class ThreadChecker implements Runnable{
 		@Override
 		public void run() {
-			while(threadMain.isAlive()){
+			long lStartMilis = System.currentTimeMillis();
+			
+			long lIncStep=50;
+			long lLockUpdateFastInitDelayMilis=lIncStep;
+			while(threadMain==null || threadMain.isAlive()){ //null means not configured yet
 				try {
 					if(!flSelfLock.exists()){
-						System.err.println("Lock was deleted, recreating: "+flSelfLock.getName());
+						outputTD("Lock was deleted, recreating: "+flSelfLock.getName());
 						createSelfLockFileTD();
 					}
 					
 					if(checkExitTD()){
-						System.err.println("Other "+strExitReasonOtherInstance+" instance is running, exiting this...");
+						outputTD("Other "+strExitReasonOtherInstance+" instance is running, exiting this...");
 						flSelfLock.delete();
-						System.exit(0);
+						break;
 					}
 					
 					/**
@@ -207,24 +232,44 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 					/**
 					 * sleep after to help on avoiding allocating resources.
 					 */
-					Thread.sleep(lLockUpdateDelayMilis);
+					Thread.sleep(lLockUpdateFastInitDelayMilis);
+					lCheckTotalDelay+=lLockUpdateFastInitDelayMilis;
+					
+					if(lLockUpdateFastInitDelayMilis<lLockUpdateTargetDelayMilis){
+						lLockUpdateFastInitDelayMilis+=lIncStep;
+//						outputTD("update delay milis "+lLockUpdateFastInitDelayMilis);
+					}
+					
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 					flSelfLock.delete();
 				}
 			}
-			System.err.println("Main thread ended.");
+			
+			long lDelayMilis = System.currentTimeMillis()-lStartMilis;
+			
+			if(threadMain!=null && !threadMain.isAlive()){
+				outputTD("Main thread ended.");
+			}
+			
+			outputTD("Checked times: "+lCheckCountsTD);
+			outputTD("Checked total delay (milis): "+lCheckTotalDelay);
+			outputTD("Lasted for "+Misc.i().fmtFloat(lDelayMilis/1000f,3)+"s");
+			
+			System.exit(0);
 		}
 
 	}
 	
-	String strDebugMode="DebugMode";
-	String strReleaseMode="ReleaseMode";
+//	String strDebugMode="DebugMode";
+//	String strReleaseMode="ReleaseMode";
 	private boolean	bConfigured;
 	private String	strErrorMissingValue="ERROR_MISSING_VALUE";
-	private Boolean	bDebugMode;
+	private Boolean	bSelfIsDebugMode;
 	private Thread	threadMain;
 	private Thread	threadChecker;
+	private int	lWaitCount;
+	private boolean	bAllowCfgOutOfMainMethod = false;
 	
 	private Long getCreationTimeOfTD(File fl){
 		ArrayList<String> astr = Misc.i().fileLoad(fl);
@@ -236,10 +281,45 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 		return l;
 	}
 	
+	private enum ERunMode{
+		Debug,
+		Release,
+		Undefined,
+		;
+	}
+	
+	/**
+	 * LINE 2
+	 * @param fl
+	 * @return
+	 */
+	private ERunMode getLockRunModeOfTD(File fl){
+		ArrayList<String> astr = Misc.i().fileLoad(fl);
+		try{return ERunMode.valueOf(astr.get(1));}catch(IllegalArgumentException|IndexOutOfBoundsException e){}
+		return ERunMode.Undefined;
+	}
+	
+	/**
+	 * 
+	 * @param fl
+	 * @return if not found, returns a missing value indicator string.
+	 */
+	@Deprecated
 	private String getLockModeOfTD(File fl){
 		ArrayList<String> astr = Misc.i().fileLoad(fl);
 		if(astr.size()>0)return astr.get(1); // line 2
 		return strErrorMissingValue;
+	}
+	
+	private String getSelfMode(boolean bReportMode){
+		return getMode((bSelfIsDebugMode?ERunMode.Debug:ERunMode.Release), bReportMode);
+	}
+	private String getMode(ERunMode erm, boolean bReportMode){
+		return ""
+			+(bReportMode?"(":"")
+			+erm
+			+(bReportMode?")":"")
+			;
 	}
 	
 	private void createSelfLockFileTD() {
@@ -250,17 +330,13 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 			// line 1
 			astr.add(""+lSelfLockCreationTime);
 			// line 2
-			if(bDebugMode){
-				astr.add(strDebugMode);
-			}else{
-				astr.add(strReleaseMode);
-			}
+			astr.add(getSelfMode(false));
 			
 			Misc.i().fileAppendListTS(flSelfLock, astr);
 			
 			attrSelfLock = Misc.i().fileAttributesTS(flSelfLock);
 			
-			System.err.println("Created lock: "+flSelfLock.getName());
+			outputTD("Created lock: "+flSelfLock.getName()+" "+getSelfMode(true));
 			
 			flSelfLock.deleteOnExit();
 		} catch (IOException e) {
@@ -280,22 +356,30 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 //		return strOther+" instance";
 //	}
 	
-	public void configure(SimpleApplication sapp, ConsoleCommands cc, Thread threadMain){
+	public void configureBeforeInitializing(SimpleApplication sapp){
+		configureBeforeInitializing(sapp,false);
+	}
+	
+	/**
+	 * 
+	 * @param sapp
+	 * @param bAllowCfgOutOfMainMethod use this to skip the resources allocation preventer code checker {@link #assertFlowAtMainMethodThread()}
+	 */
+	public void configureBeforeInitializing(SimpleApplication sapp, boolean bAllowCfgOutOfMainMethod){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 		
 		this.sapp=sapp;
-		this.cc=cc;
-		this.threadMain=threadMain;
+		this.bAllowCfgOutOfMainMethod=bAllowCfgOutOfMainMethod;
+//		this.cc=cc;
+//		this.threadMain=threadMain;
 		
-		bDebugMode = Debug.i().isInIDEdebugMode();
+		bSelfIsDebugMode = Debug.i().isInIDEdebugMode();
 		
 //		if(Debug.i().isInIDEdebugMode())strPrefix="DebugMode-"+strPrefix;
 		
-		strId=strPrefix+Misc.i().getDateTimeForFilename(true)+strSuffix;
-		
-		flSelfLock = new File(strId);
-		
 		lSelfLockCreationTime = System.currentTimeMillis();
+		strId=strPrefix+Misc.i().getDateTimeForFilename(lSelfLockCreationTime,true)+strSuffix;
+		flSelfLock = new File(strId);
 		
 		flFolder = new File("./");
 		fnf = new FilenameFilter() {
@@ -306,13 +390,15 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 			}
 		};
 		
-		bDevModeExitIfThereIsANewerInstance = bDebugMode;
+		bDevModeExitIfThereIsANewerInstance = bSelfIsDebugMode;
 		
-		if(bDebugMode){
-			System.err.println("This instance is in DEBUG mode.");
+		if(bSelfIsDebugMode){
+			outputTD("This instance is in DEBUG mode. ");
 		}
 		
-		if(!sapp.getStateManager().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
+		if(!sapp.getStateManager().attach(this)){
+			throw new NullPointerException("already attached state "+this.getClass().getName());
+		}
 		
 		/**
 		 * creating the new thread here will make the application ends faster if it can.
@@ -322,7 +408,76 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 		threadChecker = new Thread(new ThreadChecker());
 		threadChecker.start();
 		
+		/**
+		 * this will sleep the main thread (the thread configuring this class)
+		 */
+		threadSleepWaitSingleInstanceFastCheck();
+		
 		bConfigured=true;
+	}
+	
+	private void assertFlowAtMainMethodThread(){
+		StackTraceElement[] ast = Thread.currentThread().getStackTrace();
+		boolean bIsFromMainMethod=false;
+		for(StackTraceElement ste:ast){
+			if(ste.getMethodName()=="main"){
+				bIsFromMainMethod=true;
+				break;
+			}
+		}
+		
+		if(!bIsFromMainMethod){
+			outputTD(
+				"The flow that reaches this method must be called at 'main()'. " 
+				+"This must be called before the main window shows up, what will allocate resources."
+				+"Alternatively, skip it by allowing configuration out of 'main()' method."
+			);
+			Thread.dumpStack();
+			System.exit(1);
+		}
+	}
+	
+	/**
+	 * This helps on avoiding allocating too much resources.
+	 */
+	private void threadSleepWaitSingleInstanceFastCheck(){
+		if(!bAllowCfgOutOfMainMethod)assertFlowAtMainMethodThread();
+		
+		try {
+			long lWaitDelayMilis=100;
+			long lMaxDelayToWaitForChecksMilis=1000;
+			while(true){
+				if(bExitApplicationTD){
+					/**
+					 * if the application is exiting, keep sleeping.
+					 */
+					Thread.sleep(lWaitDelayMilis);
+				}else{
+//					if(lCheckCountsTD==0){
+					if(lCheckTotalDelay<lMaxDelayToWaitForChecksMilis){
+						Thread.sleep(lWaitDelayMilis);
+					}else{
+						/**
+						 * initial check allowed this instance of the application
+						 * to continue running 
+						 */
+						break;
+					}
+				}
+				lWaitCount++;
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		outputTD("Waited times: "+lWaitCount);
+	}
+	
+	private void outputTD(String str){
+		System.err.println(""
+			+"["+SingleInstanceState.class.getSimpleName()+"]"
+			+Misc.i().getSimpleTime(true)
+			+": "
+			+str.replace("\n", "\n\t"));
 	}
 	
 	@Override
@@ -383,6 +538,11 @@ public class SingleInstanceState implements IReflexFillCfg, AppState{
 	@Override
 	public void cleanup() {
 		flSelfLock.delete();
+	}
+
+	public void configureBeforeInitializing(ConsoleCommands cc,Thread threadMain) {
+		this.cc=cc;
+		this.threadMain=threadMain;
 	}
 	
 }

@@ -45,12 +45,13 @@ import console.IConsoleCommandListener;
  * 
  * A - When to use this? 
  *  If you need to do something very specific 
- *   and can't wait for your project class dependencies developers to implement it. 
- *  But, use it only until you find a proper way to implement without this class.
+ *   and can't wait for your project dependencies' developers to implement it,
+ *   or do knot know yet how it can be properly coded and you are in a hurry. 
  * 
  * B - Why not use this? 
- *  Code using this class may break as soon incompatible 
- *   changes happen at the targeted classes it access.
+ *  Code using this class may break as soon incompatible changes happen at the targeted 
+ *   classes it access. Or you may do something that breaks and was not foreseen (of course)
+ *   by the dependencies' developers.
  * 
  * C - What is a better alternative to this? 
  * C.1 - Ask such classes developers to provide proper/safer ways to access 
@@ -68,7 +69,7 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 	public final BoolTogglerCmd	btgAllowHacks = new BoolTogglerCmd(this,false,BoolTogglerCmd.strTogglerCodePrefix,
 		"Hacks allows for otherwise impossible features, but they may break if targeted classes are updated.");
 
-	private IHandleExceptions	ihe;
+	private IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	private SimpleApplication	sapp;
 //	public void setExceptionHandler(IHandleExceptions ihe){
 //		this.ihe=ihe;

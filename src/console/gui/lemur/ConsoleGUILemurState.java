@@ -61,8 +61,8 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 	public static ConsoleGUILemurState i(){return instance;}
 	
 	@Override
-	public void configure(SimpleApplication sapp, ConsoleCommands cc, int iToggleConsoleKey) {
-		super.configure(sapp, cc, iToggleConsoleKey);
+	public void configureBeforeInitializing(SimpleApplication sapp, ConsoleCommands cc, int iToggleConsoleKey) {
+		super.configureBeforeInitializing(sapp, cc, iToggleConsoleKey);
 		
 		// misc cfg
 		LemurMiscHelpers.i().configure(sapp, cc);

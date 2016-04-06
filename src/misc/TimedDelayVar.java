@@ -44,8 +44,9 @@ import misc.ReflexFill.IReflexFillCfgVariant;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
+
 public class TimedDelayVar implements IReflexFillCfgVariant, IVarIdValueOwner{
-	private static IHandleExceptions ihe;
+	private static IHandleExceptions ihe = HandleExceptionsRaw.i();
 	protected static ArrayList<TimedDelayVar> atdList = new ArrayList<TimedDelayVar>();
 	
 	protected static Long lCurrentTimeNano;

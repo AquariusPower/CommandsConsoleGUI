@@ -169,7 +169,7 @@ public class FpsLimiterState implements AppState{
 		return iMaxFPS;
 	}
 
-	public void configure(SimpleApplication sapp, ConsoleCommands cc){
+	public void configureBeforeInitializing(SimpleApplication sapp, ConsoleCommands cc){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 		this.sapp=sapp;
 		this.cc=cc;

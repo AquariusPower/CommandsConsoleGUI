@@ -27,6 +27,7 @@
 
 package console.test;
 
+import jmestates.SingleInstanceState;
 import misc.ReflexFill;
 import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
@@ -74,6 +75,9 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 	public void simpleInitApp() {
 		cc = new ConsoleCustomCommands(this);
 		cc.addConsoleCommandListener(this);
+		
+//		SingleInstanceState.i().configureBeforeInitializing(this,true);
+		SingleInstanceState.i().configureBeforeInitializing(cc,Thread.currentThread());
 	}
 	
 	@Override
@@ -94,6 +98,8 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 			main.setSettings(as);
 			main.setShowSettings(false);
 		}
+		
+		SingleInstanceState.i().configureBeforeInitializing(main);
 		
 		main.start();
 	}

@@ -41,7 +41,7 @@ import console.VarIdValueOwner.IVarIdValueOwner;
  */
 public class FloatingDoubleVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 	private static boolean	bConfigured;
-	private static IHandleExceptions	ihe;
+	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	private static String	strCodePrefixVariant = "fdv";
 	private static ArrayList<FloatingDoubleVar> afdvList = new ArrayList<FloatingDoubleVar>();
 	Double dValue;
