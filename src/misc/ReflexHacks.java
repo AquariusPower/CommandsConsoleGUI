@@ -38,6 +38,7 @@ import misc.ReflexFill.ReflexFillCfg;
 import com.jme3.app.SimpleApplication;
 
 import console.ConsoleCommands;
+import console.ConsoleCommands.ECmdReturnStatus;
 import console.IConsoleCommandListener;
 
 /**
@@ -148,8 +149,8 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 	 * fields to be indicated as owned by this class. 
 	 */
 	@Override
-	public boolean executePreparedCommand(ConsoleCommands cc) {
-		return false;
+	public ECmdReturnStatus executePreparedCommand(ConsoleCommands cc) {
+		return ECmdReturnStatus.NotFound;
 //		/**
 //		 * remove this below if something else is actually implemented here...
 //		 */

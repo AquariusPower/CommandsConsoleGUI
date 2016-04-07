@@ -85,6 +85,7 @@ import com.simsilica.lemur.style.BaseStyles;
 import com.simsilica.lemur.style.Styles;
 
 import console.ConsoleCommands;
+import console.ConsoleCommands.ECmdReturnStatus;
 import console.DumpEntry;
 import console.EDataBaseOperations;
 import console.IConsoleCommandListener;
@@ -1923,7 +1924,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	}
 
 	@Override
-	public boolean executePreparedCommand(ConsoleCommands	cc){
+	public ECmdReturnStatus executePreparedCommand(ConsoleCommands	cc){
 		boolean bCommandWorked = false;
 		
 		if(cc.checkCmdValidity(this,CMD_CLOSE_CONSOLE,"like the bound key to do it")){
@@ -1945,9 +1946,11 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 			if(strStyle==null)strStyle="";
 			bCommandWorked=cmdStyleApply(strStyle);
 		}else
-		{}
+		{
+			return ECmdReturnStatus.NotFound;
+		}
 		
-		return bCommandWorked;
+		return cc.cmdFoundReturnStatus(bCommandWorked);
 	}
 	
 	@Override

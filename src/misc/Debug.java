@@ -31,6 +31,7 @@ import java.lang.management.ManagementFactory;
 
 import console.ConsoleCommands;
 import console.IConsoleCommandListener;
+import console.ConsoleCommands.ECmdReturnStatus;
 
 /**
  * 
@@ -75,8 +76,8 @@ public class Debug implements IConsoleCommandListener{
 	}
 
 	@Override
-	public boolean executePreparedCommand(ConsoleCommands	cc) {
-		boolean bCmdExecEndNicely=false;
+	public ECmdReturnStatus executePreparedCommand(ConsoleCommands	cc) {
+		boolean bCmdWorked=false;
 		
 		if(cc.checkCmdValidity(this,"debug","[optionToToggle] empty for a list")){
 			String str = cc.paramString(1);
@@ -88,15 +89,17 @@ public class Debug implements IConsoleCommandListener{
 				try{
 					EKey ek = EKey.valueOf(str);
 					ek.b=!ek.b;
-					bCmdExecEndNicely=true;
+					bCmdWorked=true;
 				}catch(IllegalArgumentException ex){
 					cc.dumpExceptionEntry(ex);
 				}
 			}
 		}else
-		{}
+		{
+			return ECmdReturnStatus.NotFound;
+		}
 		
-		return bCmdExecEndNicely;
+		return cc.cmdFoundReturnStatus(bCmdWorked);
 	}
 
 	public boolean isInIDEdebugMode() {

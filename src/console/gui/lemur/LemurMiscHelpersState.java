@@ -55,6 +55,7 @@ import com.simsilica.lemur.component.TextEntryComponent;
 import com.simsilica.lemur.focus.FocusManagerState;
 
 import console.ConsoleCommands;
+import console.ConsoleCommands.ECmdReturnStatus;
 import console.IConsoleCommandListener;
 
 /**
@@ -332,7 +333,7 @@ public class LemurMiscHelpersState implements AppState, IConsoleCommandListener,
 	}
 
 	@Override
-	public boolean executePreparedCommand(ConsoleCommands	cc) {
+	public ECmdReturnStatus executePreparedCommand(ConsoleCommands	cc) {
 		boolean bCmdEndedGracefully = false;
 		
 		if(cc.checkCmdValidity(this,CMD_FIX_INVISIBLE_TEXT_CURSOR ,"in case text cursor is invisible")){
@@ -340,9 +341,11 @@ public class LemurMiscHelpersState implements AppState, IConsoleCommandListener,
 			bFixInvisibleTextInputCursor=true;
 			bCmdEndedGracefully = true;
 		}else
-		{}
+		{
+			return ECmdReturnStatus.NotFound;
+		}
 		
-		return bCmdEndedGracefully;
+		return cc.cmdFoundReturnStatus(bCmdEndedGracefully);
 	}
 
 	public void configure(SimpleApplication sapp, ConsoleCommands cc) {

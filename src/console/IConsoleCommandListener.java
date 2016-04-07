@@ -27,6 +27,8 @@
 
 package console;
 
+import console.ConsoleCommands.ECmdReturnStatus;
+
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
@@ -37,7 +39,7 @@ public interface IConsoleCommandListener{
 	 * Any class can implement commands, you just need to add them with:
 	 * {@link ConsoleCommands#addConsoleCommandListener(IConsoleCommandListener)}
 	 * 
-	 * @return
+	 * TODO rename to execCmdFromConsoleRequest();
 	 */
-	public abstract boolean executePreparedCommand(ConsoleCommands cc);
+	public abstract ECmdReturnStatus executePreparedCommand(ConsoleCommands cc);
 }

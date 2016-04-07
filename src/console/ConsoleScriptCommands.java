@@ -179,8 +179,11 @@ public class ConsoleScriptCommands extends ConsoleCommands{
 	}
 	
 	@Override
-	public boolean executePreparedCommandRoot() {
-		boolean bCommandWorked = super.executePreparedCommandRoot();
+	public ECmdReturnStatus executePreparedCommandRoot() {
+		boolean bCommandWorked = false;
+		
+		ECmdReturnStatus ecrs = super.executePreparedCommandRoot();
+		if(ecrs.compareTo(ECmdReturnStatus.NotFound)!=0)return ecrs;
 		
 		if(!bCommandWorked){
 			if(checkCmdValidity(null,CMD_FUNCTION,"<id> begins a function block")){
@@ -229,80 +232,83 @@ public class ConsoleScriptCommands extends ConsoleCommands{
 			if(checkCmdValidity(null,CMD_IF_END,"ends conditional block")){
 				bCommandWorked=cmdIfEnd();
 			}else
-			{}
+			{
+				return ECmdReturnStatus.NotFound;
+			}
 		}
 		
-		return bCommandWorked;
+		return cmdFoundReturnStatus(bCommandWorked);
 	}
 	
 	@Override
-	public boolean stillExecutingCommand() {
-		boolean bCmdWorkDone=false;
+	public ECmdReturnStatus stillExecutingCommand() {
+		Boolean bCmdFoundAndWorked=null; //null is not found, true or false is found but worked or failed
 		
-		if(!bCmdWorkDone){
+		if(bCmdFoundAndWorked==null){
 			if(bFuncCmdLineRunning){
 				if(checkFuncExecEnd()){
 					bFuncCmdLineRunning=false;
 					bFuncCmdLineSkipTilEnd=false;
-					bCmdWorkDone=true;
+					bCmdFoundAndWorked=true;
 				}
 			}
 		}
 		
-		if(!bCmdWorkDone){
+		if(bCmdFoundAndWorked==null){
 			if(checkFuncExecStart()){
 				bFuncCmdLineRunning=true;
-				bCmdWorkDone=true;
+				bCmdFoundAndWorked=true;
 			}else
 			if(strPrepareFunctionBlockForId!=null){
-				if(!bCmdWorkDone)bCmdWorkDone = functionEndCheck(strCmdLineOriginal); //before feed
-				if(!bCmdWorkDone)bCmdWorkDone = functionFeed(strCmdLineOriginal);
+				if(bCmdFoundAndWorked==null)bCmdFoundAndWorked = functionEndCheck(strCmdLineOriginal); //before feed
+				if(bCmdFoundAndWorked==null)bCmdFoundAndWorked = functionFeed(strCmdLineOriginal);
 			}else
 			if(bIfConditionExecCommands!=null && !bIfConditionExecCommands){
 				/**
 				 * These are capable of stopping the skipping.
 				 */
 				if(CMD_ELSE_IF.equals(paramString(0))){
-					if(!bCmdWorkDone)bCmdWorkDone = cmdElseIf();
+					if(bCmdFoundAndWorked==null)bCmdFoundAndWorked = cmdElseIf();
 				}else
 				if(CMD_ELSE.equals(paramString(0))){
-					if(!bCmdWorkDone)bCmdWorkDone = cmdElse();
+					if(bCmdFoundAndWorked==null)bCmdFoundAndWorked = cmdElse();
 				}else
 				if(CMD_IF_END.equals(paramString(0))){
-					if(!bCmdWorkDone)bCmdWorkDone = cmdIfEnd();
+					if(bCmdFoundAndWorked==null)bCmdFoundAndWorked = cmdIfEnd();
 				}else{
 					/**
 					 * The if condition resulted in false, therefore commands must be skipped.
 					 */
 					dumpInfoEntry("ConditionalSkip: "+strCmdLinePrepared);
-					if(!bCmdWorkDone)bCmdWorkDone = true;
+					if(bCmdFoundAndWorked==null)bCmdFoundAndWorked = true;
 				}
 			}
 		}
 		
-		if(!bCmdWorkDone){
+		if(bCmdFoundAndWorked==null){
 			if(bFuncCmdLineRunning && bFuncCmdLineSkipTilEnd){
 				dumpWarnEntry("SkippingRemainingFunctionCmds: "+strCmdLinePrepared);
-				bCmdWorkDone = true; //this just means that the skip worked
+				bCmdFoundAndWorked = true; //this just means that the skip worked
 			}
 		}
 		
-		if(!bCmdWorkDone){
+		if(bCmdFoundAndWorked==null){
 			/**
 			 * normal commands execution
 			 */
-			bCmdWorkDone = super.stillExecutingCommand();
-//			bCmdWorkDone = executePreparedCommand();
+			ECmdReturnStatus ecrs = super.stillExecutingCommand();
+			if(ecrs.compareTo(ECmdReturnStatus.NotFound)!=0)return ecrs;
 		}
 		
-		if(!bCmdWorkDone){
+		if(bCmdFoundAndWorked==null){
 			if(bFuncCmdLineRunning){
 				// a command may fail inside a function, only that first one will generate error message 
 				bFuncCmdLineSkipTilEnd=true;
 			}
 		}
 		
-		return bCmdWorkDone;
+		if(bCmdFoundAndWorked==null)return ECmdReturnStatus.NotFound;
+		return cmdFoundReturnStatus(bCmdFoundAndWorked);
 	}
 	
 	@Override

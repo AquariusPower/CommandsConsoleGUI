@@ -38,6 +38,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.system.AppSettings;
 
 import console.ConsoleCommands;
+import console.ConsoleCommands.ECmdReturnStatus;
 import console.IConsoleCommandListener;
 
 /**
@@ -109,15 +110,17 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 	}
 
 	@Override
-	public boolean executePreparedCommand(ConsoleCommands	cc) {
+	public ECmdReturnStatus executePreparedCommand(ConsoleCommands	cc) {
 		boolean bCommandWorked = false;
 		
 		if(cc.checkCmdValidity(this,CMD_END_USER_COMMAND_TEST,"[iHowMany] users working?")){
 			bCommandWorked = endUserCustomMethod(cc.paramInt(1));
 		}else
-		{}
+		{
+			return ECmdReturnStatus.NotFound;
+		}
 			
-		return bCommandWorked;
+		return cc.cmdFoundReturnStatus(bCommandWorked);
 	}
 	
 	@Override

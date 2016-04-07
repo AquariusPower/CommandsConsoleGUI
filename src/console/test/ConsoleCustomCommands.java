@@ -68,7 +68,7 @@ public class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleC
 	}
 	
 	@Override
-	public boolean executePreparedCommandRoot() {
+	public ECmdReturnStatus executePreparedCommandRoot() {
 		boolean bCommandWorked = false;
 		
 //		if(checkCmdValidity(CMD_END_USER_COMMAND_TEST,"[iHowMany] users working")){
@@ -86,7 +86,7 @@ public class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleC
 			return super.executePreparedCommandRoot();
 		}
 		
-		return bCommandWorked;
+		return cmdFoundReturnStatus(bCommandWorked);
 	}
 	
 	@Override

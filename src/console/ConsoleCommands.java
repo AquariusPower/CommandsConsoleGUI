@@ -57,6 +57,7 @@ import com.google.common.io.Files;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppState;
 
+import console.ConsoleCommands.ECmdReturnStatus;
 import console.VarIdValueOwner.IVarIdValueOwner;
 
 /**
@@ -422,6 +423,8 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	private String	strLastTypedUserCommand;
 
 	private ArrayList<Exception>	aExceptionList = new ArrayList<Exception>();
+
+//	private ECmdReturnStatus	ecrsCurrentCommandReturnStatus;
 	
 	protected void assertConfigured(){
 		if(bConfigured)return;
@@ -437,37 +440,49 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		aConsoleCommandListenerList.add(icc);
 	}
 	
-	protected boolean executePreparedCommandRoot(){
-		if(RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(strCmdLinePrepared))return true;
+	public static enum ECmdReturnStatus{
+		FoundAndWorked,
+		FoundAndFailedGracefully,
+		FoundAndExceptionHappened,
+		NotFound,
+		Skip,
+		;
+	}
+	
+	/**
+	 * TODO rename to execCmdFromConsoleRequestRoot()
+	 * @return
+	 */
+	protected ECmdReturnStatus executePreparedCommandRoot(){
+		if(RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(strCmdLinePrepared)){
+			return ECmdReturnStatus.Skip;
+		}
 		
-		/**
-		 * means the command didnt have any problem, didnt fail, requiring a warning message
-		 */
-		boolean bCmdEndedGracefully = false;
+		Boolean bCmdWorked = null; //must be filled with true or false to have been found!
 		
 		if(checkCmdValidityBoolTogglers()){
-			bCmdEndedGracefully=toggle(btgReferenceMatched);
+			bCmdWorked=toggle(btgReferenceMatched);
 		}else
 		if(checkCmdValidity(null, "alias",getAliasHelp(),true)){
-			bCmdEndedGracefully=cmdAlias();
+			bCmdWorked=cmdAlias();
 		}else
 		if(checkCmdValidity(null,"clearCommandsHistory")){
 			astrCmdHistory.clear();
-			bCmdEndedGracefully=true;
+			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(null,"clearDumpArea")){
 			icui.getDumpEntries().clear();
-			bCmdEndedGracefully=true;
+			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(null,CMD_CONSOLE_SCROLL_BOTTOM,"")){
 			icui.scrollToBottomRequest();
-			bCmdEndedGracefully=true;
+			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(null,CMD_DB,EDataBaseOperations.help())){
-			bCmdEndedGracefully=cmdDb();
+			bCmdWorked=cmdDb();
 		}else
 		if(checkCmdValidity(null,CMD_ECHO," simply echo something")){
-			bCmdEndedGracefully=cmdEcho();
+			bCmdWorked=cmdEcho();
 		}else
 		if(checkCmdValidity(null,"editShowClipboad","--noNL")){
 			String strParam1 = paramString(1);
@@ -478,25 +493,25 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				}
 			}
 			showClipboard(bShowNL);
-			bCmdEndedGracefully=true;
+			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(null,"editCopy","-d end lines with command delimiter instead of NL;")){
-			bCmdEndedGracefully=icui.cmdEditCopyOrCut(false);
+			bCmdWorked=icui.cmdEditCopyOrCut(false);
 		}else
 		if(checkCmdValidity(null,"editCut","like copy, but cut :)")){
-			bCmdEndedGracefully=icui.cmdEditCopyOrCut(true);
+			bCmdWorked=icui.cmdEditCopyOrCut(true);
 		}else
 		if(checkCmdValidity(null,"execBatchCmdsFromFile ","<strFileName>")){
 			String strFile = paramString(1);
 			if(strFile!=null){
 				addCmdListOneByOneToQueue(Misc.i().fileLoad(strFile),false,false);
 //				astrExecConsoleCmdsQueue.addAll(Misc.i().fileLoad(strFile));
-				bCmdEndedGracefully=true;
+				bCmdWorked=true;
 			}
 		}else
 		if(checkCmdValidity(null,"exit","the application")){
 			cmdExit();
-			bCmdEndedGracefully=true;
+			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(null,"fileShowData ","<ini|setup|CompleteFileName> show contents of file at dump area")){
 			String strOpt = paramString(1);
@@ -525,7 +540,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				}
 			}
 			
-			bCmdEndedGracefully=true;
+			bCmdWorked=true;
 		}else
 //		if(checkCmdValidity(null,CMD_FIX_CURSOR ,"in case cursor is invisible")){
 //			if(csaTmp.getLemurHK()==null){
@@ -538,22 +553,22 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //		}else
 		if(checkCmdValidity(null,CMD_FIX_LINE_WRAP ,"in case words are overlapping")){
 			icui.cmdLineWrapDisableDumpArea();
-			bCmdEndedGracefully = true;
+			bCmdWorked = true;
 		}else
 		if(checkCmdValidity(null,CMD_FIX_VISIBLE_ROWS_AMOUNT,"[iAmount] in case it is not showing as many rows as it should")){
 			icui.setVisibleRowsAdjustRequest(paramInt(1));
 			if(!icui.isVisibleRowsAdjustRequested())icui.setVisibleRowsAdjustRequest(0);
-			bCmdEndedGracefully=true;
+			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(null,CMD_HELP,"[strFilter] show (filtered) available commands")){
 			cmdShowHelp(paramString(1));
 			/**
 			 * ALWAYS return TRUE here, to avoid infinite loop when improving some failed command help info!
 			 */
-			bCmdEndedGracefully=true; 
+			bCmdWorked=true; 
 		}else
 		if(checkCmdValidity(null,CMD_HISTORY,"[strFilter] of issued commands (the filter results in sorted uniques)")){
-			bCmdEndedGracefully=cmdShowHistory();
+			bCmdWorked=cmdShowHistory();
 		}else
 //		if(checkCmdValidity(null,CMD_HK_TOGGLE ,"[bEnable] allow hacks to provide workarounds")){
 //			if(paramBooleanCheckForToggle(1)){
@@ -576,7 +591,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //				}
 			}
 //			csaTmp.updateFontStuff();
-			bCmdEndedGracefully=true;
+			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(null,CMD_MESSAGE_REVIEW,"[filter]|[index [stackLimit]] if filter is an index, and it has an exception, the complete exception will be dumped.")){
 			String strFilter = paramString(1);
@@ -598,15 +613,15 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				}
 			}
 			dumpSubEntry("Total: "+astrImportantMsgBufferList.size());
-			bCmdEndedGracefully=true;
+			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(null,"quit","the application")){
 			cmdExit();
-			bCmdEndedGracefully=true;
+			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(null,"reset","will reset the console (restart it)")){
 			cmdResetConsole();
-			bCmdEndedGracefully=true;
+			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(null,"showBinds","")){
 			dumpInfoEntry("Key bindings: ");
@@ -620,13 +635,13 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			dumpSubEntry("Ctrl+TAB - autocomplete (contains)");
 			dumpSubEntry("Ctrl+/ - toggle input field comment");
 			dumpSubEntry("HintListFill: Ctrl (contains mode) or Ctrl+Shift (overrides existing hint list)");
-			bCmdEndedGracefully=true;
+			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(null,"showSetup","show restricted variables")){
 			for(String str:Misc.i().fileLoad(flSetup)){
 				dumpSubEntry(str);
 			}
-			bCmdEndedGracefully=true;
+			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(null,CMD_SLEEP,"<fDelay> [singleCmd] will wait before executing next command in the command block; alternatively will wait before executing command in-line, but then it will not sleep the block it is in!")){
 			Float fSleep = paramFloat(1);
@@ -647,16 +662,16 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				 */
 				dumpWarnEntry(CMD_SLEEP+" without cmd, only works on command blocks like functions");
 			}
-			bCmdEndedGracefully=true;
+			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(null,"statsEnable","[idToEnable [bEnable]] empty for a list. bEnable empty to toggle.")){
-			bCmdEndedGracefully=true;
+			bCmdWorked=true;
 			String strId=paramString(1);
 			Boolean bValue=paramBoolean(2);
 			if(strId!=null){
 				EStats e=null;
 				try{e=EStats.valueOf(strId);}catch(IllegalArgumentException ex){
-					bCmdEndedGracefully=false;
+					bCmdWorked=false;
 					dumpWarnEntry("Invalid option: "+strId+" "+bValue);
 				}
 				
@@ -670,19 +685,19 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			}
 		}else
 		if(checkCmdValidity(null,"statsFieldToggle","[bEnable] toggle simple stats field visibility")){
-			bCmdEndedGracefully=icui.statsFieldToggle();
+			bCmdWorked=icui.statsFieldToggle();
 		}else
 		if(checkCmdValidity(null,"statsShowAll","show all console stats")){
 			dumpAllStats();
-			bCmdEndedGracefully=true;
+			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(null,"test","[...] temporary developer tests")){
 			cmdTest();
 //			if(csaTmp.getLemurHK()!=null)csaTmp.getLemurHK().test();
-			bCmdEndedGracefully=true;
+			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(null,"varAdd","<varId> <[-]value>")){
-			bCmdEndedGracefully=cmdVarAdd(paramString(1),paramString(2),true,false);
+			bCmdWorked=cmdVarAdd(paramString(1),paramString(2),true,false);
 		}else
 		if(
 				checkCmdValidity(null,CMD_VAR_SET,
@@ -693,40 +708,47 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 					+"Restricted variables will have no effect; "
 			)
 		){
-			bCmdEndedGracefully=cmdVarSet();
+			bCmdWorked=cmdVarSet();
 		}else
 		if(checkCmdValidity(null,"varSetCmp","<varIdBool> <value> <cmp> <value>")){
-			bCmdEndedGracefully=cmdVarSetCmp();
+			bCmdWorked=cmdVarSetCmp();
 		}else
 		if(checkCmdValidity(null,"varShow","[["+RESTRICTED_TOKEN+"]filter] list user or restricted variables.")){
-			bCmdEndedGracefully=cmdVarShow();
+			bCmdWorked=cmdVarShow();
 		}else
 		if(checkCmdValidity(null,TOKEN_CMD_NOT_WORKING_YET+"zDisabledCommand"," just to show how to use it")){
 			// keep this as reference
 		}else
 		{
 			for(IConsoleCommandListener icc:aConsoleCommandListenerList){
-				bCmdEndedGracefully = icc.executePreparedCommand(this);
-				if(bCmdEndedGracefully)break;
+				ECmdReturnStatus ecrs = icc.executePreparedCommand(this);
+				switch(ecrs){
+					case NotFound:
+					case Skip:
+						continue; //try next cmd listener
+					default:
+						return ecrs;
+				}
+				
 			}
-//			if(strCmdLinePrepared!=null){
-//				if(SPECIAL_CMD_MULTI_COMMAND_LINE_OK.equals(strCmdLinePrepared)){
-//					bOk=true;
-//				}
-//			}
 		}
 		
-		return bCmdEndedGracefully;
+		if(bCmdWorked==null)return ECmdReturnStatus.NotFound;
+		
+		/**
+		 * exception will be captured out of here
+		 */
+		return cmdFoundReturnStatus(bCmdWorked);
 	}
 	
 	public void cmdResetConsole() {
 		icui.resetConsoleGui();
 	}
 
-	protected boolean cmdRawLineCheckAlias(){
+	protected ECmdReturnStatus cmdRawLineCheckAlias(){
 		bLastAliasCreatedSuccessfuly=false;
 		
-		if(strCmdLineOriginal==null)return false;
+		if(strCmdLineOriginal==null)return ECmdReturnStatus.NotFound;
 		
 		String strCmdLine = strCmdLineOriginal.trim();
 		String strExecAliasPrefix = ""+getCommandPrefix()+getAliasPrefix();
@@ -741,7 +763,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				alias.strAliasId=astr[1];
 				if(hasVar(alias.strAliasId)){
 					dumpErrorEntry("Alias identifier '"+alias.strAliasId+"' conflicts with existing variable!");
-					return false;
+					return ECmdReturnStatus.FoundAndFailedGracefully;
 				}
 				
 				alias.strCmdLine=String.join(" ", Arrays.copyOfRange(astr, 2, astr.length));
@@ -754,9 +776,13 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				dumpSubEntry(alias.toString());
 				
 				bLastAliasCreatedSuccessfuly = true;
+				return ECmdReturnStatus.FoundAndWorked;
 			}
 			
-			return bLastAliasCreatedSuccessfuly;
+			/**
+			 * parameters were missing...
+			 */
+			return ECmdReturnStatus.FoundAndFailedGracefully;
 		}else
 		if(strCmdLine.startsWith(strExecAliasPrefix)){
 			/**
@@ -768,32 +794,26 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				.toLowerCase();
 			Alias alias = getAlias(strAliasId);
 			if(alias!=null){
-				if(!alias.bBlocked){
+				if(alias.bBlocked){
+					dumpWarnEntry(alias.toString()); //will show the blocked status
+					
+					return ECmdReturnStatus.FoundAndFailedGracefully;
+				}else{
 					addCmdToQueue(alias.strCmdLine
 						+commentToAppend("alias="+alias.strAliasId), true);
-					return true;
-				}else{
-					dumpWarnEntry(alias.toString());
+					return ECmdReturnStatus.FoundAndWorked;
 				}
 			}else{
 				dumpWarnEntry("Alias not found: "+strAliasId);
+				
+				/**
+				 * alias execution request/prefix was found, so it is not some other command...
+				 */
+				return ECmdReturnStatus.FoundAndFailedGracefully;
 			}
-			
-//			for(Alias alias:aAliasList){
-//				if(!alias.strAliasId.toLowerCase().equals(strAliasId))continue;
-//				
-//				if(!alias.bBlocked){
-//					addCmdToQueue(alias.strCmdLine
-//						+commentToAppend("alias="+alias.strAliasId), true);
-//					return true;
-//				}else{
-//					dumpWarnEntry(alias.toString());
-//				}
-//			}
 		}
-			
-//		return bLastAliasCreatedSuccessfuly;
-		return false;
+		
+		return ECmdReturnStatus.NotFound;
 	}
 
 	/**
@@ -2025,7 +2045,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	public void cmdShowHelp(String strFilter) {
 		if(strFilter==null){
-			dumpInfoEntry("Available Commands:");
+			dumpInfoEntry("Available Commands ("+acmdList.size()+"):");
 		}else{
 			dumpInfoEntry("Help for '"+strFilter+"':");
 		}
@@ -2060,8 +2080,21 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		return astrBaseCmdCacheList;
 	}
 	
-	protected boolean stillExecutingCommand(){
+	protected ECmdReturnStatus stillExecutingCommand(){
+//		ECmdReturnStatus e = 
 		return executePreparedCommandRoot();
+//		if(e.compareTo(ECmdReturnStatus.NotFound)==0)return false;
+//		return true;
+	}
+	
+	public boolean isFound(ECmdReturnStatus ecrs){
+		switch(ecrs){
+			case FoundAndExceptionHappened:
+			case FoundAndFailedGracefully:
+			case FoundAndWorked:
+				return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -2069,33 +2102,33 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 * @param strFullCmdLineOriginal if null will populate the array of valid commands
 	 * @return false if command execution failed
 	 */
-	protected boolean executeCommand(final String strFullCmdLineOriginal){
+	protected ECmdReturnStatus executeCommand(final String strFullCmdLineOriginal){
 		assertConfigured();
+		
+		ECmdReturnStatus ecrs = ECmdReturnStatus.NotFound;
 		
 		strCmdLineOriginal = strFullCmdLineOriginal;
 		
-		/**
-		 * command found, executed and ended gracefully?
-		 */
-		boolean bCmdFoundExecEndGrace = false;
+//		boolean bCommandFound = false;
 		
 		try{
-			if(!bCmdFoundExecEndGrace)bCmdFoundExecEndGrace=cmdRawLineCheckEndOfStartupCmdQueue();
+			if(!isFound(ecrs))ecrs=cmdRawLineCheckEndOfStartupCmdQueue();
 			
-			if(!bCmdFoundExecEndGrace)bCmdFoundExecEndGrace=cmdRawLineCheckAlias();
+			if(!isFound(ecrs))ecrs=cmdRawLineCheckAlias();
 			
-			if(!bCmdFoundExecEndGrace){
+			if(!isFound(ecrs)){
 				/**
 				 * we will have a prepared line after below
 				 */
 				strCmdLinePrepared = prepareCmdAndParams(strCmdLineOriginal);
 			}
 			
-			if(!bCmdFoundExecEndGrace)bCmdFoundExecEndGrace=stillExecutingCommand();
+			if(!isFound(ecrs))ecrs=stillExecutingCommand();
 			
 		}catch(Exception e){
 			dumpExceptionEntry(e);
-			bCmdFoundExecEndGrace=false;
+			
+			ecrs=ECmdReturnStatus.FoundAndExceptionHappened;
 		}
 		
 //		catch(NumberFormatException e){
@@ -2110,7 +2143,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		 */
 		clearPreparedCommandLine();
 		
-		return bCmdFoundExecEndGrace;
+		return ecrs;
 	}
 	
 	protected void clearPreparedCommandLine() {
@@ -2299,8 +2332,10 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 					dumpInfoEntry("QueueExec: "+str);
 				}
 			}
-			if(!executeCommand(str)){
-				dumpWarnEntry("QueueExecFail: "+str);
+			
+			ECmdReturnStatus ecrs = executeCommand(str);
+			if(ecrs.compareTo(ECmdReturnStatus.FoundAndWorked)!=0){
+					dumpWarnEntry("QueueExecFail("+ecrs+"): "+str);
 			}
 		}
 	}
@@ -2675,12 +2710,13 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		return fileNamePrepare(strFileBaseName, strFileTypeLog, bAddDateTime);
 	}
 
-	protected boolean cmdRawLineCheckEndOfStartupCmdQueue() {
+	protected ECmdReturnStatus cmdRawLineCheckEndOfStartupCmdQueue() {
 		if(RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE.equals(strCmdLineOriginal)){
 			bStartupCmdQueueDone=true;
-			return true;
+			return ECmdReturnStatus.FoundAndWorked;
 		}
-		return false;
+		
+		return ECmdReturnStatus.NotFound;
 	}
 
 	public void toggleLineCommentOrCommand() {
@@ -2921,9 +2957,17 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		if(strType.equals(strTypeCmd)){
 			strLastTypedUserCommand = strCmd;
 			
-			if(!executeCommand(strCmd)){
-				dumpWarnEntry(strType+": FAIL: "+strCmd);
-				showHelpForFailedCommand(strCmd);
+			ECmdReturnStatus ecrs = executeCommand(strCmd);
+			switch(ecrs){
+				case FoundAndExceptionHappened:
+				case FoundAndFailedGracefully:
+					dumpWarnEntry(strType+": FAIL("+ecrs+"): "+strCmd);
+					showHelpForFailedCommand(strCmd);
+					break;
+				case NotFound:
+				case Skip:
+					dumpWarnEntry(strType+": ("+ecrs+"): "+strCmd);
+					break;
 			}
 			
 			if(bAddEmptyLineAfterCommand ){
@@ -2962,5 +3006,9 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	public void repeatLastUserTypedCommand() {
 		dumpInfoEntry("Repeating: "+strLastTypedUserCommand);
 		addCmdToQueue(strLastTypedUserCommand, true);
+	}
+
+	public ECmdReturnStatus cmdFoundReturnStatus(boolean bCommandWorked) {
+		return bCommandWorked?ECmdReturnStatus.FoundAndWorked:ECmdReturnStatus.FoundAndFailedGracefully;
 	}
 }
