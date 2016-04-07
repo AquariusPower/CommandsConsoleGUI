@@ -62,13 +62,13 @@ import console.IConsoleCommandListener;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class LemurMiscHelpers implements AppState, IConsoleCommandListener, IReflexFillCfg{
+public class LemurMiscHelpersState implements AppState, IConsoleCommandListener, IReflexFillCfg{
 	public final BoolTogglerCmd	btgTextCursorPulseFadeBlinkMode = new BoolTogglerCmd(this,true);
 	public final BoolTogglerCmd	btgTextCursorLarge = new BoolTogglerCmd(this,true);
 	public final StringFieldCmd CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringFieldCmd(this, ConsoleCommands.strFinalCmdCodePrefix);
 	
-	private static LemurMiscHelpers instance = new LemurMiscHelpers(); 
-	public static LemurMiscHelpers i(){return instance;}
+	private static LemurMiscHelpersState instance = new LemurMiscHelpersState(); 
+	public static LemurMiscHelpersState i(){return instance;}
 
 	private SimpleApplication	sapp;
 	

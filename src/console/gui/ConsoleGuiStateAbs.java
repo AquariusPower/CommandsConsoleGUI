@@ -90,7 +90,7 @@ import console.EDataBaseOperations;
 import console.IConsoleCommandListener;
 import console.IConsoleUI;
 import console.gui.lemur.ConsoleCursorListener;
-import console.gui.lemur.LemurMiscHelpers;
+import console.gui.lemur.LemurMiscHelpersState;
 
 /**
  * A graphical console where developers and users can issue application commands.
@@ -700,7 +700,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		if(isInputTextFieldEmpty() && strPasted.trim().startsWith(""+cc.getCommandPrefix())){
 			strCurrent = strPasted.trim(); //replace "empty" line with command (can be invalid in this case, user may complete it properly)
 		}else{
-			strCurrent = LemurMiscHelpers.i().prepareStringToPasteAtCaratPosition(tfInput, strCurrent, strPasted);
+			strCurrent = LemurMiscHelpersState.i().prepareStringToPasteAtCaratPosition(tfInput, strCurrent, strPasted);
 //			if(efHK!=null){
 //				strCurrent = efHK.pasteAtCaratPositionHK(strCurrent,strPasted);
 //			}else{
@@ -710,7 +710,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		
 		setInputField(strCurrent); 
 		
-		LemurMiscHelpers.i().positionCaratProperly(tfInput);//, iMoveCaratTo);
+		LemurMiscHelpersState.i().positionCaratProperly(tfInput);//, iMoveCaratTo);
 //		if(efHK!=null)efHK.positionCaratProperlyHK();
 	}
 	
@@ -1091,7 +1091,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	}
 	
 	protected void updateOverrideInputFocus(){
-		Spatial sptWithFocus = LemurMiscHelpers.i().getFocusManagerState().getFocus();
+		Spatial sptWithFocus = LemurMiscHelpersState.i().getFocusManagerState().getFocus();
 		
 		if(isEnabled()){
 			if(tfInput!=sptWithFocus){
@@ -1100,7 +1100,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 					bRestorePreviousFocus=true;
 				}
 				
-				LemurMiscHelpers.i().requestFocus(tfInput);
+				LemurMiscHelpersState.i().requestFocus(tfInput);
 			}
 		}else{
 			/**
@@ -1122,7 +1122,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 					}
 				}
 				
-				LemurMiscHelpers.i().requestFocus(sptPreviousFocus);
+				LemurMiscHelpersState.i().requestFocus(sptPreviousFocus);
 //				GuiGlobals.getInstance().requestFocus(sptPreviousFocus);
 				sptPreviousFocus = null;
 				bRestorePreviousFocus=false;
@@ -1690,7 +1690,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		
 		if(strCompletedCmd.trim().isEmpty())strCompletedCmd=""+cc.getCommandPrefix();
 		setInputField(strCompletedCmd+strCmdAfterCarat);
-		LemurMiscHelpers.i().setCaratPosition(tfInput, strCompletedCmd.length());
+		LemurMiscHelpersState.i().setCaratPosition(tfInput, strCompletedCmd.length());
 //		if(efHK!=null)efHK.setCaratPosition(strCompletedCmd.length());
 		
 		scrollToBottomRequest();

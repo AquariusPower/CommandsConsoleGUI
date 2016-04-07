@@ -80,8 +80,8 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		super.configureBeforeInitializing(sapp, cc, iToggleConsoleKey);
 		
 		// misc cfg
-		LemurMiscHelpers.i().configure(sapp, cc);
-		if(!sapp.getStateManager().attach(LemurMiscHelpers.i()))throw new NullPointerException("already attached state "+LemurMiscHelpers.class.getName());
+		LemurMiscHelpersState.i().configure(sapp, cc);
+		if(!sapp.getStateManager().attach(LemurMiscHelpersState.i()))throw new NullPointerException("already attached state "+LemurMiscHelpersState.class.getName());
 	}
 	
 //	public void ConsoleGUILemurState(int iOpenConsoleHotKey, ConsoleCommands cc, Application app) {
