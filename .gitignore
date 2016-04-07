@@ -1,6 +1,8 @@
 Console-*
 *.lock
 *.java.todo
+*.java.secrfbkp
+*.bkp
 /bin/
 /tmp/
 
