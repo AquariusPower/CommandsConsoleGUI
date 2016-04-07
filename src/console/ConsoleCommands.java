@@ -925,7 +925,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	
 	public void dumpWarnEntry(String str){
 		String strType = "Warn";
-		Exception ex = new Exception("(This is just a "+strType+" stacktrace)");
+		Exception ex = new Exception("(This is just a "+strType+" stacktrace) "+str);
 		ex.setStackTrace(Thread.currentThread().getStackTrace());
 		addImportantMsgToBuffer(strType,str,ex);
 		dumpEntry(false, btgShowWarn.get(), false, Misc.i().getSimpleTime(btgShowMiliseconds.get())+strWarnEntryPrefix+str);
@@ -953,7 +953,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	
 	public void dumpErrorEntry(String str){
 		String strType = "ERROR";
-		Exception ex = new Exception("(This is just a "+strType+" stacktrace)");
+		Exception ex = new Exception("(This is just a "+strType+" stacktrace) "+str);
 		ex.setStackTrace(Thread.currentThread().getStackTrace());
 		addImportantMsgToBuffer(strType,str,ex);
 		dumpEntry(new DumpEntry()
@@ -969,7 +969,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 */
 	public void dumpDevWarnEntry(String str){
 		String strType = "DevWarn";
-		Exception ex = new Exception("(This is just a "+strType+" stacktrace)");
+		Exception ex = new Exception("(This is just a "+strType+" stacktrace) "+str);
 		ex.setStackTrace(Thread.currentThread().getStackTrace());
 		addImportantMsgToBuffer(strType,str,ex);
 		dumpEntry(false, btgShowDeveloperWarn.get(), false, 
