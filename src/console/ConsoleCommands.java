@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,6 +55,7 @@ import misc.TimedDelayVar;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.jme3.app.SimpleApplication;
+import com.jme3.app.state.AppState;
 
 import console.VarIdValueOwner.IVarIdValueOwner;
 
@@ -602,6 +604,10 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			cmdExit();
 			bCmdEndedGracefully=true;
 		}else
+		if(checkCmdValidity(null,"reset","will reset the console (restart it)")){
+			cmdResetConsole();
+			bCmdEndedGracefully=true;
+		}else
 		if(checkCmdValidity(null,"showBinds","")){
 			dumpInfoEntry("Key bindings: ");
 			dumpSubEntry("Ctrl+C - copy");
@@ -713,6 +719,10 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		return bCmdEndedGracefully;
 	}
 	
+	public void cmdResetConsole() {
+		icui.resetConsoleGui();
+	}
+
 	protected boolean cmdRawLineCheckAlias(){
 		bLastAliasCreatedSuccessfuly=false;
 		

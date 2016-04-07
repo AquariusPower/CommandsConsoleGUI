@@ -82,7 +82,13 @@ public interface IConsoleUI {
 
 	public abstract boolean isInitialized();
 
+	public abstract void resetConsoleGui();
+
 	public abstract boolean isEnabled();
+//
+//	public abstract void setEnabled(boolean b);
+//
+//	public abstract void cleanup();
 
 //	public abstract void setHKenabled(Boolean bEnable);
 }

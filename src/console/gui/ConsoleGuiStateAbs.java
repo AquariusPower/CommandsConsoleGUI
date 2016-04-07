@@ -1827,29 +1827,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 			
 			updateFontStuff();
 			
-			sapp.enqueue(new Callable<Void>() {
-				@Override
-				public Void call() throws Exception {
-					final boolean bWasEnabled=isEnabled();
-					setEnabled(false);
-					cleanup();
-					
-//					sapp.enqueue(new Callable<Void>() {
-//						@Override
-//						protected Void call() throws Exception {
-							if(bWasEnabled){
-								setEnabled(true);
-							}
-							modifyConsoleHeight(fConsoleHeightPerc);
-							scrollToBottomRequest();
-//							return null;
-//						}
-//					});
-//					addToExecConsoleCommandQueue(cc.CMD_MODIFY_CONSOLE_HEIGHT+" "+fConsoleHeightPerc);
-//					addToExecConsoleCommandQueue(cc.CMD_SCROLL_BOTTOM);
-					return null;
-				}
-			});
+			cc.cmdResetConsole();
 		}else{
 			cc.dumpWarnEntry("invalid style: "+strStyleNew);
 			styleHelp();
@@ -2406,5 +2384,27 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 //			}
 //		}
 //	}
+	
+	@Override
+	public void resetConsoleGui() {
+		sapp.enqueue(new Callable<Void>() {
+			@Override
+			public Void call() throws Exception {
+//				AppState as = (AppState)icui;
+				
+				final boolean bWasEnabled=isEnabled();
+				setEnabled(false);
+				cleanup();
+				
+				if(bWasEnabled){
+					setEnabled(true);
+				}
+				modifyConsoleHeight(fConsoleHeightPerc);
+				scrollToBottomRequest();
+				
+				return null;
+			}
+		});
+	}
 }
 
