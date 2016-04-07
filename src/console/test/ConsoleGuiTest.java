@@ -27,7 +27,7 @@
 
 package console.test;
 
-import jmestates.SingleInstanceState;
+import jmestates.SingleInstance;
 import misc.ReflexFill;
 import misc.ReflexFill.IReflexFillCfg;
 import misc.ReflexFill.IReflexFillCfgVariant;
@@ -77,7 +77,7 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 		cc.addConsoleCommandListener(this);
 		
 //		SingleInstanceState.i().configureBeforeInitializing(this,true);
-		SingleInstanceState.i().configureRequiredAtApplicationInitialization(cc);
+		SingleInstance.i().configureRequiredAtApplicationInitialization();//cc);
 	}
 	
 	@Override
@@ -99,7 +99,7 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 			main.setShowSettings(false);
 		}
 		
-		SingleInstanceState.i().configureOptionalAtMainMethod();
+		SingleInstance.i().configureOptionalAtMainMethod();
 		
 		main.start();
 	}

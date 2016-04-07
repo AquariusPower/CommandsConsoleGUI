@@ -28,7 +28,7 @@
 package console.test;
 
 import jmestates.FpsLimiterState;
-import jmestates.SingleInstanceState;
+import jmestates.SingleInstance;
 import misc.Misc;
 import misc.ReflexFill;
 
@@ -49,6 +49,7 @@ public class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleC
 		super();
 		
 //		ConsoleGUILemurState cs = new ConsoleGUILemurState(KeyInput.KEY_F10, this, sapp);
+//		ConsoleGUILemurState.setInstance(new ConsoleGUILemurState());
 		ConsoleGUILemurState.i().configureBeforeInitializing(sapp, this, KeyInput.KEY_F10);
 //		addConsoleCommandListener(cs);
 //		setConsoleUI(cs);

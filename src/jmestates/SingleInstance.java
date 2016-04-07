@@ -47,18 +47,18 @@ import console.ConsoleCommands;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class SingleInstanceState implements IReflexFillCfg{
-	public final BoolTogglerCmd	btgSingleInstaceMode = new BoolTogglerCmd(this,true,BoolTogglerCmd.strTogglerCodePrefix,
-		"better keep this enabled, other instances may conflict during files access.");
+public class SingleInstance { //implements IReflexFillCfg{
+//	public final BoolTogglerCmd	btgSingleInstaceMode = new BoolTogglerCmd(this,true,BoolTogglerCmd.strTogglerCodePrefix,
+//		"better keep this enabled, other instances may conflict during files access.");
 	private boolean bDevModeExitIfThereIsANewerInstance = true; //true if in debug mode
 //	public final BoolToggler	btgSingleInstaceOverrideOlder = new BoolToggler(this,false,ConsoleCommands.strTogglerCodePrefix,
 //		"If true, any older instance will exit and this will keep running."
 //		+"If false, the oldest instance will keep running and this one will exit.");
-	String strPrefix=SingleInstanceState.class.getSimpleName()+"-";
+	String strPrefix=SingleInstance.class.getSimpleName()+"-";
 	String strSuffix=".lock";
 	String strId;
 	private File	flSelfLock;
-	private ConsoleCommands	cc;
+//	private ConsoleCommands	cc;
 	private BasicFileAttributes	attrSelfLock;
 //	private boolean	bInitialized;
 	private FilenameFilter	fnf;
@@ -70,8 +70,8 @@ public class SingleInstanceState implements IReflexFillCfg{
 	private boolean	bExitApplicationTD;
 	public long	lCheckTotalDelay;
 	
-	private static SingleInstanceState instance = new SingleInstanceState();
-	public static SingleInstanceState i(){return instance;}
+	private static SingleInstance instance = new SingleInstance();
+	public static SingleInstance i(){return instance;}
 	
 	private File[] getAllLocksTD(){
 		return flFolder.listFiles(fnf);
@@ -117,7 +117,7 @@ public class SingleInstanceState implements IReflexFillCfg{
 	}
 	
 	private boolean checkExitTD(){
-		if(!btgSingleInstaceMode.b())return false;
+//		if(!btgSingleInstaceMode.b())return false;
 		
 		bExitApplicationTD=false;
 		String strReport="";
@@ -349,9 +349,9 @@ public class SingleInstanceState implements IReflexFillCfg{
 	 * If used alone, without {@link #configureOptionalAtMainMethod()},
 	 * this alternative will ignore the resources allocation preventer code. 
 	 */
-	public void configureRequiredAtApplicationInitialization(ConsoleCommands cc){
+	public void configureRequiredAtApplicationInitialization(){//ConsoleCommands cc){
 		if(!bConfigured)configureAndInitialize(false);
-		this.cc=cc;
+//		this.cc=cc;
 		this.threadMain=Thread.currentThread();
 	}
 	
@@ -468,16 +468,16 @@ public class SingleInstanceState implements IReflexFillCfg{
 	
 	private void outputTD(String str){
 		System.err.println(""
-			+"["+SingleInstanceState.class.getSimpleName()+"]"
+			+"["+SingleInstance.class.getSimpleName()+"]"
 			+Misc.i().getSimpleTime(true)
 			+": "
 			+str.replace("\n", "\n\t"));
 	}
 	
-	@Override
-	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
-		return cc.getReflexFillCfg(rfcv);
-	}
+//	@Override
+//	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+//		return cc.getReflexFillCfg(rfcv);
+//	}
 
 	public void cleanup() {
 		flSelfLock.delete();

@@ -144,6 +144,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	public final StringFieldCmd CMD_HISTORY = new StringFieldCmd(this,strFinalCmdCodePrefix);
 	public final StringFieldCmd CMD_HK_TOGGLE = new StringFieldCmd(this,strFinalCmdCodePrefix);
 	public final StringFieldCmd CMD_LINE_WRAP_AT = new StringFieldCmd(this,strFinalCmdCodePrefix);
+	public final StringFieldCmd CMD_MESSAGE_REVIEW = new StringFieldCmd(this,strFinalCmdCodePrefix);
 	public final StringFieldCmd CMD_VAR_SET = new StringFieldCmd(this,strFinalCmdCodePrefix);
 	public final StringFieldCmd CMD_SLEEP = new StringFieldCmd(this,strFinalCmdCodePrefix);
 	
@@ -575,7 +576,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //			csaTmp.updateFontStuff();
 			bCmdEndedGracefully=true;
 		}else
-		if(checkCmdValidity(null,"messageReview","[filter]|[index [stackLimit]] if filter is an index, and it has an exception, the complete exception will be dumped.")){
+		if(checkCmdValidity(null,CMD_MESSAGE_REVIEW,"[filter]|[index [stackLimit]] if filter is an index, and it has an exception, the complete exception will be dumped.")){
 			String strFilter = paramString(1);
 			Integer iIndex = paramInt(1,true);
 			
@@ -2356,16 +2357,16 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			varSet(td,false);
 		}
 		
-		for(FloatDoubleVar td:FloatDoubleVar.getListCopy()){
-			varSet(td,false);
+		for(FloatDoubleVar fdv:FloatDoubleVar.getListCopy()){
+			varSet(fdv,false);
 		}
 		
-		for(IntLongVar td:IntLongVar.getListCopy()){
-			varSet(td,false);
+		for(IntLongVar ilv:IntLongVar.getListCopy()){
+			varSet(ilv,false);
 		}
 		
-		for(StringVar td:StringVar.getListCopy()){
-			varSet(td,false);
+		for(StringVar sv:StringVar.getListCopy()){
+			varSet(sv,false);
 		}
 		
 		if(bSave)varSaveSetupFile();
@@ -2577,6 +2578,9 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		}else{
 			Misc.i().fileAppendLine(flInit, getCommentPrefix()+" User console commands here will be executed at startup.");
 		}
+		
+		// for debug mode, auto show messages
+		if(Debug.i().isInIDEdebugMode())addCmdToQueue(CMD_MESSAGE_REVIEW);
 		
 		// init valid cmd list
 		executeCommand(null); //to populate the array with available commands

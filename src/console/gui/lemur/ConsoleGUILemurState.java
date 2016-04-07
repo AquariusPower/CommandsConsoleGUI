@@ -62,8 +62,18 @@ import console.gui.ConsoleGuiStateAbs;
  *
  */
 public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
-	private static ConsoleGUILemurState instance = new ConsoleGUILemurState();
-	public static ConsoleGUILemurState i(){return instance;}
+	protected static ConsoleGUILemurState instance;
+//	public static void setInstance(ConsoleGUILemurState gui){
+//		if(ConsoleGUILemurState.instance!=null){
+//			throw new NullPointerException("instance already set to: "
+//				+ConsoleGUILemurState.instance.getClass().getName());
+//		}
+//		ConsoleGUILemurState.instance=gui;
+//	}
+	public static ConsoleGUILemurState i(){
+		if(instance==null)instance=new ConsoleGUILemurState();
+		return instance;
+	}
 
 	@Override
 	public void configureBeforeInitializing(SimpleApplication sapp, ConsoleCommands cc, int iToggleConsoleKey) {
@@ -97,7 +107,9 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 			font = sapp.getAssetManager().loadFont("Interface/Fonts/"+strFontName+".fnt");
 		}catch(AssetNotFoundException ex){
 			cc.dumpExceptionEntry(ex);
-			font = sapp.getAssetManager().loadFont("Interface/Fonts/Console.fnt");
+			strFontName="Console";
+			font = sapp.getAssetManager().loadFont("Interface/Fonts/"+strFontName+".fnt");
+			svUserFontOption.setObjectValue(strFontName);
 		}
 //		BitmapFont font = sapp.getAssetManager().loadFont("Interface/Fonts/Console512x.fnt");
 		
