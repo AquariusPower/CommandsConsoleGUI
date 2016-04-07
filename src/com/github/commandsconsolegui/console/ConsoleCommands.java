@@ -178,7 +178,8 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	protected String	strTypeCmd="Cmd";
 	
 	/** 0 is auto wrap, -1 will trunc big lines */
-	protected IntLongVar iConsoleMaxWidthInCharsForLineWrap = new IntLongVar(this,0);
+	protected IntLongVar ilvConsoleMaxWidthInCharsForLineWrap = new IntLongVar(this,0);
+	protected IntLongVar ilvCurrentFixedLineWrapAtColumn = new IntLongVar(this,0);
 	
 	protected boolean	bAddEmptyLineAfterCommand = true;
 	protected IConsoleUI	icui;
@@ -419,6 +420,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 
 	private ArrayList<Exception>	aExceptionList = new ArrayList<Exception>();
 
+
 //	private ECmdReturnStatus	ecrsCurrentCommandReturnStatus;
 	
 	protected void assertConfigured(){
@@ -575,7 +577,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		if(checkCmdValidity(null,CMD_LINE_WRAP_AT,"[iMaxChars] 0 = wrap will be automatic")){
 			Integer i = paramInt(1);
 			if(i!=null && i>=0){ // a value was supplied
-				iConsoleMaxWidthInCharsForLineWrap.setObjectValue(i);
+				ilvConsoleMaxWidthInCharsForLineWrap.setObjectValue(i);
 //				if(i==-1){
 //					/**
 //					 * prefered using null instead of -1 that is for the user type a valid integer
@@ -851,14 +853,16 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //				}
 //			}
 			
-			int iWrapAt = iConsoleMaxWidthInCharsForLineWrap.intValue();
+			int iWrapAt = ilvConsoleMaxWidthInCharsForLineWrap.intValue();
 //			if(iConsoleMaxWidthInCharsForLineWrap==null){
-			if(iConsoleMaxWidthInCharsForLineWrap.intValue()==0){
+			if(ilvConsoleMaxWidthInCharsForLineWrap.intValue()==0){
 				iWrapAt = icui.getLineWrapAt();
 //				if(STYLE_CONSOLE.equals(strStyle)){ //TODO is faster?
 //					iWrapAt = (int) (widthForDumpEntryField() / fWidestCharForCurrentStyleFont ); //'W' but any char will do for monospaced font
 //				}
 			}
+			
+			ilvCurrentFixedLineWrapAtColumn.setObjectValue(iWrapAt);
 			
 			//TODO use \n to create a new line properly
 			if(iWrapAt>0){ //fixed chars wrap
@@ -2991,8 +2995,8 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		return strDevInfoEntryPrefix;
 	}
 	
-	public int getConsoleMaxWidthInCharsForLineWrap(){
-		return iConsoleMaxWidthInCharsForLineWrap.intValue();
+	public int getCurrentFixedLineWrapAtColumn(){
+		return ilvCurrentFixedLineWrapAtColumn.intValue();
 	}
 //	protected void setConsoleUI(IConsoleUI icui) {
 //		this.icui=icui;

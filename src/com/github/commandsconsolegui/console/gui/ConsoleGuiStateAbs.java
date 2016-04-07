@@ -1959,7 +1959,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 			
 			+"Console Height = "+Misc.i().fmtFloat(ctnrConsole.getSize().y)+"\n"
 			+"Visible Rows = "+lstbxDumpArea.getGridPanel().getVisibleRows()+"\n"
-			+"Line Wrap At = "+cc.getConsoleMaxWidthInCharsForLineWrap()+"\n"
+			+"Line Wrap At = "+cc.getCurrentFixedLineWrapAtColumn()+"\n"
 			+"ListBox Height = "+Misc.i().fmtFloat(lstbxDumpArea.getSize().y)+"\n"
 			+"ListBox Entry Height = "+Misc.i().fmtFloat(fLstbxEntryHeight)+"\n"
 			
