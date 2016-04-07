@@ -236,62 +236,6 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	protected ArrayList<Alias> aAliasList = new ArrayList<Alias>();
 	protected ArrayList<Command> acmdList = new ArrayList<Command>();
 	
-	class ImportantMsg{
-		String strMsg;
-		Exception ex;
-		public ImportantMsg(String str, Exception ex) {
-			this.strMsg=str;
-			this.ex=ex;
-		}
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((strMsg == null) ? 0 : strMsg.hashCode());
-			return result;
-		}
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			ImportantMsg other = (ImportantMsg) obj;
-			if (strMsg == null) {
-				if (other.strMsg != null)
-					return false;
-			} else if (!strMsg.equals(other.strMsg))
-				return false;
-			return true;
-		}
-	}
-	
-//	/**
-//	 * instance
-//	 */
-//	protected static ConsoleCommands instance;
-//	protected static ConsoleCommands i(){return instance;}
-//	protected ConsoleCommands(){
-//		instance=this;
-//	}
-	
-//	protected ConsoleCommands(){ //IConsoleUI icg) {
-////		ReflexFill.assertReflexFillFieldsForOwner(this);
-//////		this();
-//////		this.icui=icg;
-////		
-////		Debug.i().initialize(this);
-//////		new Debug(this);
-////		Misc.i().initialize(this);
-////		ReflexHacks.i().initialize(sapp, this, this);
-//		
-////		ReflexFill.setExceptionHandler(this);
-////		addConsoleCommandListener(Debug.i());
-////		Debug.i().setConsoleCommand(this);
-//	}
-	
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		ReflexFillCfg rfcfg = null;
@@ -645,8 +589,9 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				if(iIndex==null && strFilter!=null && !imsg.strMsg.toLowerCase().contains(strFilter.toLowerCase()))continue;
 				
 				dumpSubEntry(""+i+": "+imsg.strMsg);
-				if(iIndex!=null && imsg.ex!=null){
-					dumpExceptionEntry(imsg.ex,iStackLimit==null?0:iStackLimit,false);
+				if(iIndex!=null && (imsg.ex!=null||imsg.aste!=null)){
+//					dumpExceptionEntry(imsg,iStackLimit==null?0:iStackLimit,false);
+					dumpExceptionEntry(imsg,iStackLimit==null?0:iStackLimit);
 				}
 			}
 			dumpSubEntry("Total: "+astrImportantMsgBufferList.size());
@@ -968,14 +913,22 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public void dumpWarnEntry(String str){
-		addImportantMsgToBuffer("Warn",str,null);
+		String strType = "Warn";
+		Exception ex = new Exception("(This is just a "+strType+" stacktrace)");
+		ex.setStackTrace(Thread.currentThread().getStackTrace());
+		addImportantMsgToBuffer(strType,str,ex);
 		dumpEntry(false, btgShowWarn.get(), false, Misc.i().getSimpleTime(btgShowMiliseconds.get())+strWarnEntryPrefix+str);
 	}
 	
 	private void addImportantMsgToBuffer(String strMsgType,String strMsgKey,Exception ex){
-		String str="["+strMsgType+"] "+strMsgKey;
-		ImportantMsg imsg = new ImportantMsg(str,ex);
-		if(astrImportantMsgBufferList.contains(imsg)){
+		addImportantMsgToBuffer(strMsgType, new ImportantMsg(strMsgKey,ex,ex.getStackTrace()));
+	}
+//	private void addImportantMsgToBuffer(String strMsgType,String strMsgKey,StackTraceElement[] aste){
+//		addImportantMsgToBuffer(strMsgType, new ImportantMsg(strMsgKey,null,aste));
+//	}
+	private void addImportantMsgToBuffer(String strMsgType,ImportantMsg imsg){
+		String str="["+strMsgType+"] "+imsg.strMsg;
+		if(astrImportantMsgBufferList.contains(imsg)){ //that object overriden hashcode/equals is used at contains() 
 			/**
 			 * so, being re-added it will be refreshed and remain longer on the list
 			 */
@@ -988,7 +941,10 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public void dumpErrorEntry(String str){
-		addImportantMsgToBuffer("ERROR",str,null);
+		String strType = "ERROR";
+		Exception ex = new Exception("(This is just a "+strType+" stacktrace)");
+		ex.setStackTrace(Thread.currentThread().getStackTrace());
+		addImportantMsgToBuffer(strType,str,ex);
 		dumpEntry(new DumpEntry()
 			.setDumpToConsole(btgShowWarn.get())
 			.setLineOriginal(Misc.i().getSimpleTime(btgShowMiliseconds.get())+strErrorEntryPrefix+str)
@@ -1001,7 +957,10 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 * @param str
 	 */
 	public void dumpDevWarnEntry(String str){
-		addImportantMsgToBuffer("DevWarn",str,null);
+		String strType = "DevWarn";
+		Exception ex = new Exception("(This is just a "+strType+" stacktrace)");
+		ex.setStackTrace(Thread.currentThread().getStackTrace());
+		addImportantMsgToBuffer(strType,str,ex);
 		dumpEntry(false, btgShowDeveloperWarn.get(), false, 
 				Misc.i().getSimpleTime(btgShowMiliseconds.get())+strDevWarnEntryPrefix+str);
 	}
@@ -1022,30 +981,37 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //			Misc.i().getSimpleTime(btgShowMiliseconds.get())+strDevInfoEntryPrefix+str);
 	}
 	
+	protected void dumpExceptionEntry(ImportantMsg imsg, Integer iShowStackElementsCount) {
+		dumpExceptionEntry(imsg.ex, imsg.aste, iShowStackElementsCount, false);
+	}
 	public void dumpExceptionEntry(Exception ex){
-		dumpExceptionEntry(ex, null, true);
+		dumpExceptionEntry(ex, null, null, true);
 	}
 	/**
 	 * 
 	 * @param ex
+	 * @param aste if null will use the exception one
 	 * @param iShowStackElementsCount if null, will show nothing. If 0, will show all.
+	 * @param bAddToMsgBuffer
 	 */
-	public void dumpExceptionEntry(Exception ex, Integer iShowStackElementsCount, boolean bAddToMsgBuffer){
+	protected void dumpExceptionEntry(Exception ex, StackTraceElement[] aste, Integer iShowStackElementsCount, boolean bAddToMsgBuffer){
+		String strTime="";
 		if(bAddToMsgBuffer){
+			strTime=Misc.i().getSimpleTime(btgShowMiliseconds.get());
 			addImportantMsgToBuffer("Exception",ex.toString(),ex);
 		}
 		
 		dumpEntry(false, btgShowException.get(), false, 
-			Misc.i().getSimpleTime(btgShowMiliseconds.get())+strExceptionEntryPrefix+ex.toString());
+			strTime+strExceptionEntryPrefix+ex.toString());
 		if(iShowStackElementsCount!=null){
-			StackTraceElement[] aste = ex.getStackTrace();
+			if(aste==null)aste=ex.getStackTrace();
 			for(int i=0;i<aste.length;i++){
 				StackTraceElement ste = aste[i]; 
 				if(iShowStackElementsCount>0 && i>=iShowStackElementsCount)break;
 				dumpSubEntry(ste.toString());
 			}
 		}
-		ex.printStackTrace();
+		if(ex!=null)ex.printStackTrace();
 	}
 	
 	/**
@@ -2646,11 +2612,19 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //				dumpDevInfoEntry("lblTxtSize="+csaTmp.lblStats.getText().length());
 				break;
 			case exception:
-				dumpExceptionEntry(new NullPointerException("test uid="+Misc.i().getNextUniqueId()));
+				test2();
+				test3();
 				break;
 		}
 		
-	}	
+	}
+	protected void test3(){
+		test2();
+	}
+	protected void test2(){
+		dumpExceptionEntry(new NullPointerException("testEx"));
+		dumpWarnEntry("testWarn");
+	}
 
 	public void showClipboard(){
 		showClipboard(true);
