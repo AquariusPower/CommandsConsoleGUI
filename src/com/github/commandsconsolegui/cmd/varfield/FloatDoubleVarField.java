@@ -121,7 +121,7 @@ public class FloatDoubleVarField implements IReflexFillCfgVariant, IVarIdValueOw
 	
 	@Override
 	public String getVarId() {
-		if(strVarId==null)strVarId=ReflexFillI.i().getVarId(rfcfgOwner, strCodePrefixVariant, this);
+		if(strVarId==null)strVarId=ReflexFillI.i().getVarId(rfcfgOwner, strCodePrefixVariant, this, -1);
 		return strVarId;
 	}
 

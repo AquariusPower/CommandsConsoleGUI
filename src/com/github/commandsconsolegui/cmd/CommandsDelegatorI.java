@@ -1681,7 +1681,7 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	}
 
 	protected boolean cmdVarAdd(String strVarId, String strValueAdd, boolean bSave, boolean bOverwrite){
-		return cmdVarAdd(getVar(strVarId), new VarIdValueOwnerData(strVarId, strValueAdd, null), bSave, bOverwrite);
+		return cmdVarAdd(getVar(strVarId), new VarIdValueOwnerData(strVarId, strValueAdd, null, null), bSave, bOverwrite);
 	}
 	/**
 	 * In case variable exists will be this method.
@@ -1836,6 +1836,12 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 		}
 		str+=" ";
 		str+=(isRestricted(strVarId)?"(Restricted)":"(User)");
+		if(btgShowDeveloperInfo.b()){
+			if(vivo.owner!=null && vivo.rfcfgClassHoldingTheOwner!=null){
+				str+=" ";
+				str+="["+vivo.rfcfgClassHoldingTheOwner.getClass().getName()+"]";
+			}
+		}
 		
 		return str;
 	}
@@ -1925,18 +1931,21 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 //	}
 	
 	public boolean varSet(IVarIdValueOwner owner, boolean bSave) {
+		IReflexFillCfg rfcfg=null;
 		if(owner instanceof IReflexFillCfgVariant){
 			/**
 			 * check if it is configured as a class field should be
 			 */
-			if(((IReflexFillCfgVariant)owner).getOwner()==null)return false;
+			rfcfg = ((IReflexFillCfgVariant)owner).getOwner();
+			if(rfcfg==null)return false;
 		}
 		
 		return varSet(
 			new VarIdValueOwnerData(
 				RESTRICTED_TOKEN+owner.getVarId(),
 				owner.getValueRaw(),
-				owner),
+				owner,
+				rfcfg),
 			bSave);
 	}
 	
@@ -1948,7 +1957,7 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	 * @return
 	 */
 	public boolean varSet(String strVarId, String strValue, boolean bSave) {
-		boolean bOk=varSet(new VarIdValueOwnerData(strVarId, strValue, null), bSave);
+		boolean bOk=varSet(new VarIdValueOwnerData(strVarId, strValue, null, null), bSave);
 		
 		if(bOk){
 			VarIdValueOwnerData vivo = getVar(strVarId);

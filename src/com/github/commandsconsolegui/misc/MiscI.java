@@ -177,14 +177,27 @@ public class MiscI {
 	 * full package and class name prettified to be an Id
 	 * @param cl
 	 * @param bFirstLetterUpperCase
+	 * @param iOnlyFirstLettersCount 
+	 * 	If null, will use the full words,
+	 * 	otherwise, just the first count letters of each word.
+	 * 	If -1, will use the default.
+	 * 	If 0 will use nothing, is like ignoring this function.
 	 * @return
 	 */
-	public String makePretty(Class<?> cl, boolean bFirstLetterUpperCase){
+	public String makePretty(Class<?> cl, boolean bFirstLetterUpperCase, Integer iOnlyFirstLettersCount){
+		if(iOnlyFirstLettersCount!=null && iOnlyFirstLettersCount.intValue()==0)return "";
+		if(iOnlyFirstLettersCount.intValue()==-1)iOnlyFirstLettersCount=1;
 		String strPkgClass = cl.getName();
 		String[] astr = strPkgClass.split("[.]");
 		String strPretty="";
 		for(String str:astr){
-			strPretty+=firstLetter(str, true);
+			String strWord=firstLetter(str, true);
+			if(iOnlyFirstLettersCount!=null){
+				if(strWord.length()>=iOnlyFirstLettersCount){
+					strWord=strWord.substring(0,iOnlyFirstLettersCount);
+				}
+			}
+			strPretty+=strWord;
 		}
 		return strPretty;
 	}

@@ -364,15 +364,23 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 //			
 //		return bCommandWorked;
 //	}
-
-	public String getVarId(IReflexFillCfg rfcfgOwner, String strCodePrefixVariant, IReflexFillCfgVariant irfcv) {
+	
+	/**
+	 * 
+	 * @param rfcfgOwner
+	 * @param strCodePrefixVariant
+	 * @param irfcv
+	 * @param iOnlyFirstLettersCount see {@link MiscI#makePretty(Class, boolean, Integer)}
+	 * @return
+	 */
+	public String getVarId(IReflexFillCfg rfcfgOwner, String strCodePrefixVariant, IReflexFillCfgVariant irfcv, Integer iOnlyFirstLettersCount) {
 		if(rfcfgOwner==null){
 			throw new NullPointerException("Invalid usage, "
 				+IReflexFillCfg.class.getName()+" owner is null, is this a local (non field) variable?");
 		}
 		
 		String strVarId = strCodePrefixVariant
-			+MiscI.i().makePretty(rfcfgOwner.getClass(),false)
+			+MiscI.i().makePretty(rfcfgOwner.getClass(), false, iOnlyFirstLettersCount)
 			+MiscI.i().firstLetter(
 				ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,irfcv),
 				true);

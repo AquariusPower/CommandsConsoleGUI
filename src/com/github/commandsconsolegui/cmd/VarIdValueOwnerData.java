@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.cmd;
 
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
@@ -44,12 +46,14 @@ public class VarIdValueOwnerData {
 	String strId;
 	Object objValue;
 	IVarIdValueOwner owner;
+	IReflexFillCfg rfcfgClassHoldingTheOwner;
 	
-	public VarIdValueOwnerData(String strId, Object objValue,	IVarIdValueOwner vivoOwner) {
+	public VarIdValueOwnerData(String strId, Object objValue,	IVarIdValueOwner vivoOwner, IReflexFillCfg rfcfgClassHoldingTheOwner) {
 		super();
 		this.strId = strId;
 		this.objValue = objValue;
 		this.owner = vivoOwner;
+		this.rfcfgClassHoldingTheOwner = rfcfgClassHoldingTheOwner;
 	}
 
 	public void setObjectValue(Object objValue) {
