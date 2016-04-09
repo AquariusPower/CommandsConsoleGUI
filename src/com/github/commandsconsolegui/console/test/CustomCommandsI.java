@@ -27,11 +27,11 @@
 
 package com.github.commandsconsolegui.console.test;
 
-import com.github.commandsconsolegui.console.ConsoleScriptCommands;
+import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegatorI;
 import com.github.commandsconsolegui.console.gui.lemur.ConsoleGUILemurState;
-import com.github.commandsconsolegui.jmestates.FpsLimiterState;
-import com.github.commandsconsolegui.misc.Misc;
-import com.github.commandsconsolegui.misc.ReflexFill;
+import com.github.commandsconsolegui.extras.FpsLimiterState;
+import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.jme3.input.KeyInput;
 
 /**
@@ -39,38 +39,25 @@ import com.jme3.input.KeyInput;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleCommands to prevent scripts usage
+public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleCommands to prevent scripts usage
 //	public FpsLimiterState fpslState = new FpsLimiterState();
 	
-	public ConsoleCustomCommands(ConsoleGuiTest sapp){
+	public CustomCommandsI(ConsoleGuiTestI sapp){
 		super();
 		
-//		ConsoleGUILemurState cs = new ConsoleGUILemurState(KeyInput.KEY_F10, this, sapp);
-//		ConsoleGUILemurState.setInstance(new ConsoleGUILemurState());
 		ConsoleGUILemurState.i().configureBeforeInitializing(sapp, this, KeyInput.KEY_F10);
-//		addConsoleCommandListener(cs);
-//		setConsoleUI(cs);
-//		csaTmp = cs;
-		
-//		sapp.getStateManager().attach(cs);
-		
-//		sapp.getStateManager().attach(fpslState);
 		FpsLimiterState.i().configureBeforeInitializing(sapp, this);
-//		SingleInstanceState.i().configureBeforeInitializing(this,Thread.currentThread());
 		
 		/**
 		 *  This allows test3 at endUserCustomMethod() to work.
 		 */
-		ReflexFill.i().setUseDefaultCfgIfMissing(true);
+		ReflexFillI.i().setUseDefaultCfgIfMissing(true);
 	}
 	
 	@Override
 	public ECmdReturnStatus executePreparedCommandRoot() {
 		boolean bCommandWorked = false;
 		
-//		if(checkCmdValidity(CMD_END_USER_COMMAND_TEST,"[iHowMany] users working")){
-//			bCommandWorked = sapp.endUserCustomMethod(paramInt(1));
-//		}else
 		if(checkCmdValidity(null,"fpsLimit","[iMaxFps]")){
 			Integer iMaxFps = paramInt(1);
 			if(iMaxFps!=null){
@@ -98,7 +85,7 @@ public class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleC
 		
 		if(EStats.TimePerFrame.b()){
 			strStatsLast+=
-					"Tpf"+(FpsLimiterState.i().isEnabled() ? (int)(fTPF*1000.0f) : Misc.i().fmtFloat(fTPF,6)+"s")
+					"Tpf"+(FpsLimiterState.i().isEnabled() ? (int)(fTPF*1000.0f) : MiscI.i().fmtFloat(fTPF,6)+"s")
 						+(FpsLimiterState.i().isEnabled()?
 							"="+FpsLimiterState.i().getFrameDelayByCpuUsageMilis()+"+"+FpsLimiterState.i().getThreadSleepTimeMilis()+"ms"
 							:"")
@@ -108,33 +95,4 @@ public class ConsoleCustomCommands extends ConsoleScriptCommands{ //use ConsoleC
 		return strStatsLast; 
 	}
 	
-//	@Override
-//	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
-//		ReflexFillCfg rfcfg = null;
-//		
-//		if(rfcv.getClass().isAssignableFrom(StringField.class)){
-//			if(strFieldCodePrefix.equals(rfcv.getCodePrefixVariant())){
-//				rfcfg = new ReflexFillCfg();
-//				rfcfg.strCommandPrefix = "Niceprefix";
-//				rfcfg.strCommandSuffix = "Nicesuffix";
-//				rfcfg.bFirstLetterUpperCase = true;
-//			}else
-//			if(strFieldCodePrefixLess.equals(rfcv.getCodePrefixVariant())){
-//				rfcfg = new ReflexFillCfg();
-//				rfcfg.strCodingStyleFieldNamePrefix=null;
-//				rfcfg.bFirstLetterUpperCase = true;
-//			}
-//		}
-//		
-//		/**
-//		 * If you are coding in the same style of another class,
-//		 * just call it!
-//		 * Remember to set the same variant!
-//		 */
-////		if(rfcfg==null)rfcfg = getReflexFillCfg(rfcv);
-//		if(rfcfg==null)rfcfg = super.getReflexFillCfg(rfcv);
-//		
-//		return rfcfg;
-//	}
-
 }

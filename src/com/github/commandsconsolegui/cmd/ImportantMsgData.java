@@ -25,28 +25,72 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console;
+package com.github.commandsconsolegui.cmd;
 
-import java.util.ArrayList;
-
-import com.github.commandsconsolegui.misc.Misc;
-import com.github.commandsconsolegui.misc.TimedDelayVar;
+import java.util.Arrays;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class PreQueueCmdsBlockSubList{
-	protected TimedDelayVar tdSleep = null;
-	protected String strUId = Misc.i().getNextUniqueId();
-	protected ArrayList<String> astrCmdList = new ArrayList<String>();
-	protected boolean	bPrepend = false;
-	protected boolean bForceFailBlockExecution = false;
-	protected boolean	bInfoSleepBegin = false;
-	protected String	strBlockInfo;
+public class ImportantMsgData{
+	String strMsg;
+	Exception ex;
+	StackTraceElement[] aste;
 	
-	protected String getUniqueInfo(){
-		return "UId=\""+strUId+"\","+strBlockInfo;
+//	/**
+//	 * for warnings
+//	 * @param str
+//	 * @param aste
+//	 */
+//	public ImportantMsg(String str, StackTraceElement[] aste) {
+//		this(str, null, aste);
+//	}
+//	/**
+//	 * for exceptions
+//	 * @param str
+//	 * @param ex
+//	 */
+//	public ImportantMsg(String str, Exception ex) {
+//		this(str, ex, ex.getStackTrace());
+//	}
+	public ImportantMsgData(String str, Exception ex, StackTraceElement[] aste) {
+		this.strMsg=str;
+//		if(ex==null){
+//			ex=new Exception("(no real exception, just the stack trace)");
+//			ex.setStackTrace(aste);
+//		}
+		this.ex=ex;
+		this.aste=aste;
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(aste);
+		result = prime * result + ((strMsg == null) ? 0 : strMsg.hashCode());
+		return result;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ImportantMsgData other = (ImportantMsgData) obj;
+		if (!Arrays.equals(aste, other.aste))
+			return false;
+		if (strMsg == null) {
+			if (other.strMsg != null)
+				return false;
+		} else if (!strMsg.equals(other.strMsg))
+			return false;
+		return true;
+	}
+	
 }

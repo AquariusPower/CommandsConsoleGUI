@@ -27,7 +27,7 @@
 
 package com.github.commandsconsolegui.console.gui.lemur;
 
-import com.github.commandsconsolegui.console.ConsoleCommands;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.console.gui.ConsoleGuiStateAbs;
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetNotFoundException;
@@ -71,7 +71,7 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 	}
 
 	@Override
-	public void configureBeforeInitializing(SimpleApplication sapp, ConsoleCommands cc, int iToggleConsoleKey) {
+	public void configureBeforeInitializing(SimpleApplication sapp, CommandsDelegatorI cc, int iToggleConsoleKey) {
 		super.configureBeforeInitializing(sapp, cc, iToggleConsoleKey);
 		
 		// misc cfg

@@ -25,15 +25,18 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.misc;
+package com.github.commandsconsolegui.cmd.varfield;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.console.IConsoleCommandListener;
-import com.github.commandsconsolegui.console.VarIdValueOwner;
-import com.github.commandsconsolegui.console.VarIdValueOwner.IVarIdValueOwner;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
+import com.github.commandsconsolegui.cmd.VarIdValueOwnerData.IVarIdValueOwner;
+import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
+import com.github.commandsconsolegui.misc.IHandleExceptions;
+import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 
 /**
  * This class can provide automatic boolean console command options to toggle.
@@ -42,9 +45,9 @@ import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfgVariant;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class BoolTogglerCmd implements IReflexFillCfgVariant, IVarIdValueOwner{
+public class BoolTogglerCmdField implements IReflexFillCfgVariant, IVarIdValueOwner{
 	public static final String strTogglerCodePrefix="btg";
-	protected static ArrayList<BoolTogglerCmd> abtgList = new ArrayList<BoolTogglerCmd>();
+	protected static ArrayList<BoolTogglerCmdField> abtgList = new ArrayList<BoolTogglerCmdField>();
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	
@@ -55,23 +58,23 @@ public class BoolTogglerCmd implements IReflexFillCfgVariant, IVarIdValueOwner{
 	protected String strHelp="";
 
 	private String	strReflexFillCfgCodePrefixVariant;
-	private VarIdValueOwner	vivo;
+	private VarIdValueOwnerData	vivo;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		BoolTogglerCmd.ihe=ihe;
+		BoolTogglerCmdField.ihe=ihe;
 		bConfigured=true;
 	}
 	
-	public static ArrayList<BoolTogglerCmd> getListCopy(){
-		return new ArrayList<BoolTogglerCmd>(abtgList);
+	public static ArrayList<BoolTogglerCmdField> getListCopy(){
+		return new ArrayList<BoolTogglerCmdField>(abtgList);
 	}
 	
-	private BoolTogglerCmd(){
+	private BoolTogglerCmdField(){
 		abtgList.add(this);
 	}
-	public BoolTogglerCmd(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitValue){
-		this( rfcfgOwnerUseThis,  bInitValue, BoolTogglerCmd.strTogglerCodePrefix, "");
+	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitValue){
+		this( rfcfgOwnerUseThis,  bInitValue, BoolTogglerCmdField.strTogglerCodePrefix, "");
 	}
 	/**
 	 * 
@@ -79,7 +82,7 @@ public class BoolTogglerCmd implements IReflexFillCfgVariant, IVarIdValueOwner{
 	 * @param bInitValue
 	 * @param strReflexFillCfgCodePrefixVariant
 	 */
-	public BoolTogglerCmd(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitValue, String strReflexFillCfgCodePrefixVariant){
+	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitValue, String strReflexFillCfgCodePrefixVariant){
 		this( rfcfgOwnerUseThis,  bInitValue,  strReflexFillCfgCodePrefixVariant, "");
 	}
 	/**
@@ -89,7 +92,7 @@ public class BoolTogglerCmd implements IReflexFillCfgVariant, IVarIdValueOwner{
 	 * @param strReflexFillCfgCodePrefixVariant
 	 * @param strHelp
 	 */
-	public BoolTogglerCmd(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitialValue, String strReflexFillCfgCodePrefixVariant, String strHelp){
+	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitialValue, String strReflexFillCfgCodePrefixVariant, String strHelp){
 		this();
 		
 //		ReflexFill.assertAndGetField(rfcfgOwnerUseThis, this);
@@ -118,7 +121,7 @@ public class BoolTogglerCmd implements IReflexFillCfgVariant, IVarIdValueOwner{
 	}
 	public String getCmdId(){
 		if(strCommand!=null)return strCommand;
-		strCommand = ReflexFill.i().createIdentifierWithFieldName(rfcfgOwner,this);
+		strCommand = ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this);
 		return strCommand;
 	}
 	
@@ -203,7 +206,7 @@ public class BoolTogglerCmd implements IReflexFillCfgVariant, IVarIdValueOwner{
 	}
 
 	@Override
-	public void setConsoleVarLink(VarIdValueOwner vivo) {
+	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
 		this.vivo=vivo;
 	}
 	

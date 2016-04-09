@@ -25,59 +25,63 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console;
+package com.github.commandsconsolegui.cmd;
+
+import java.util.Comparator;
 
 /**
- * dump strings will always be logged to file even if disabled.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
- * 
+ *
  */
-public class DumpEntry{
-	/**
-	 * Beware, better do NOT change these defaults,
-	 * as many usages of DumpEntry may depend on it.
-	 * Maybe extend this class to have other defaults.
-	 */
-	boolean bApplyNewLineRequests = false; //this is a special behavior, disabled by default
-	boolean bDumpToConsole = true;
-	boolean bUseSlowQueue = false;
-	String strLineOriginal = null;
-	private String strLineBaking = null;
+public class CommandData {
+	String strBaseCmd;
+	String strComment;
+	IConsoleCommandListener icclOwner;
 	
-	public boolean isApplyNewLineRequests() {
-		return bApplyNewLineRequests;
+	
+	
+	public String getBaseCmd() {
+		return strBaseCmd;
 	}
-	public DumpEntry setApplyNewLineRequests(boolean bApplyNewLineRequests) {
-		this.bApplyNewLineRequests = bApplyNewLineRequests;
-		return this;
+	public void setBaseCmd(String strBaseCmd) {
+		this.strBaseCmd = strBaseCmd;
 	}
-	public boolean isDump() {
-		return bDumpToConsole;
+	public String getComment() {
+		return strComment;
 	}
-	public DumpEntry setDumpToConsole(boolean bDump) {
-		this.bDumpToConsole = bDump;
-		return this;
+	public void setComment(String strComment) {
+		this.strComment = strComment;
 	}
-	public boolean isUseQueue() {
-		return bUseSlowQueue;
+	public IConsoleCommandListener getOwner() {
+		return icclOwner;
 	}
-	public DumpEntry setUseSlowQueue(boolean bUseQueue) {
-		this.bUseSlowQueue = bUseQueue;
-		return this;
+	public void setOwner(IConsoleCommandListener icclOwner) {
+		this.icclOwner = icclOwner;
 	}
-	public String getLineOriginal() {
-		return strLineOriginal;
+	
+	public CommandData(IConsoleCommandListener icclOwner, String strBaseCmd, String strComment) {
+		super();
+		this.icclOwner = icclOwner;
+		this.strBaseCmd = strBaseCmd;
+		this.strComment = strComment;
 	}
-	public DumpEntry setLineOriginal(String strLineOriginal) {
-		this.strLineOriginal = strLineOriginal;
-		return this;
+	
+	public static CommandComparator comparator(){
+		return cmp;
 	}
-	public String getLineBaking() {
-		return strLineBaking;
+	
+	private static CommandComparator cmp = new CommandComparator();
+	private static class CommandComparator implements Comparator<CommandData>{
+		@Override
+		public int compare(CommandData c1, CommandData c2){
+			return c1.strBaseCmd.compareToIgnoreCase(c2.strBaseCmd);
+		}
 	}
-	public void setLineBaking(String strLineBaking) {
-		this.strLineBaking = strLineBaking;
+	public String asHelp() {
+		return strBaseCmd+" "
+			+strComment+" "
+			+"("+(icclOwner!=null ? icclOwner.getClass().getSimpleName() : "Root")+")";
 	}
 	
 }

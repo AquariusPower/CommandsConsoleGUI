@@ -39,6 +39,8 @@ Features:
 NAMING CONVENTION:
 	. Methods ending with TS are synchronized/threadSafe, it overrides TD idea below.
 	. Methods ending with TD will be running in a separate (other than main) thread, therefore they go better if only directly call TS methods.
+	. Classes ending with I have only one instance and a static method to access it.
+	. Classes ending with Data have many instances used on lists etc.
 
 DONE:
 	= BaseOutputFilemameOnClass

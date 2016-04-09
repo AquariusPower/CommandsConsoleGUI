@@ -29,16 +29,16 @@ package com.github.commandsconsolegui.misc;
 
 import java.lang.management.ManagementFactory;
 
-import com.github.commandsconsolegui.console.ConsoleCommands;
-import com.github.commandsconsolegui.console.ConsoleCommands.ECmdReturnStatus;
-import com.github.commandsconsolegui.console.IConsoleCommandListener;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
+import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class Debug implements IConsoleCommandListener{
+public class DebugI implements IConsoleCommandListener{
 //	private ConsoleCommands	cc;
 	
 	/**
@@ -50,8 +50,8 @@ public class Debug implements IConsoleCommandListener{
 		boolean b;
 	}
 	
-	private static Debug instance = new Debug();
-	public static Debug i(){return instance;}
+	private static DebugI instance = new DebugI();
+	public static DebugI i(){return instance;}
 //	public static void init(Debug dbg){
 //		Debug.instance=dbg;
 //	}
@@ -59,7 +59,7 @@ public class Debug implements IConsoleCommandListener{
 	private Boolean	bDebugMode;
 	private boolean	bConfigured;
 	
-	public void configure(ConsoleCommands cc){
+	public void configure(CommandsDelegatorI cc){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 		//		if(Debug.instance==null)Debug.instance=this;
 //		this.cc=cc;
@@ -76,7 +76,7 @@ public class Debug implements IConsoleCommandListener{
 	}
 
 	@Override
-	public ECmdReturnStatus executePreparedCommand(ConsoleCommands	cc) {
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI	cc) {
 		boolean bCmdWorked=false;
 		
 		if(cc.checkCmdValidity(this,"debug","[optionToToggle] empty for a list")){

@@ -25,14 +25,17 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.misc;
+package com.github.commandsconsolegui.cmd.varfield;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.console.VarIdValueOwner;
-import com.github.commandsconsolegui.console.VarIdValueOwner.IVarIdValueOwner;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
+import com.github.commandsconsolegui.cmd.VarIdValueOwnerData.IVarIdValueOwner;
+import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
+import com.github.commandsconsolegui.misc.IHandleExceptions;
+import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 
 /**
  * This class is intended to be used only as class field variables.
@@ -41,33 +44,33 @@ import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfgVariant;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class IntLongVar implements IReflexFillCfgVariant, IVarIdValueOwner{
+public class IntLongVarField implements IReflexFillCfgVariant, IVarIdValueOwner{
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	private static String	strCodePrefixVariant = "ilv";
-	private static ArrayList<IntLongVar> ailvList = new ArrayList<IntLongVar>();
+	private static ArrayList<IntLongVarField> ailvList = new ArrayList<IntLongVarField>();
 	Long lValue;
 	private IReflexFillCfg	rfcfgOwner;
 	private String	strVarId;
-	private VarIdValueOwner	vivo;
+	private VarIdValueOwnerData	vivo;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		IntLongVar.ihe=ihe;
+		IntLongVarField.ihe=ihe;
 		bConfigured=true;
 	}
 	
-	public IntLongVar(IReflexFillCfg rfcfgOwnerUseThis, IntLongVar ilv) {
+	public IntLongVarField(IReflexFillCfg rfcfgOwnerUseThis, IntLongVarField ilv) {
 		this(rfcfgOwnerUseThis, ilv.lValue);
 	}
-	public IntLongVar(IReflexFillCfg rfcfgOwnerUseThis, Integer iInitialValue) {
+	public IntLongVarField(IReflexFillCfg rfcfgOwnerUseThis, Integer iInitialValue) {
 		this(rfcfgOwnerUseThis, iInitialValue==null?null:iInitialValue.longValue());
 	}
 	/**
 	 * @param rfcfgOwnerUseThis use null if this is not a class field, but a local variable
 	 * @param lInitialValue if null, the variable will be removed from console vars.
 	 */
-	public IntLongVar(IReflexFillCfg rfcfgOwnerUseThis, Long lInitialValue) {
+	public IntLongVarField(IReflexFillCfg rfcfgOwnerUseThis, Long lInitialValue) {
 		if(rfcfgOwnerUseThis!=null)ailvList.add(this); //only fields allowed
 		this.rfcfgOwner=rfcfgOwnerUseThis;
 		this.lValue=lInitialValue;
@@ -78,8 +81,8 @@ public class IntLongVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 		if(objValue instanceof Long){
 			lValue = ((Long)objValue);
 		}else
-		if(objValue instanceof IntLongVar){
-			lValue = ((IntLongVar)objValue).lValue;
+		if(objValue instanceof IntLongVarField){
+			lValue = ((IntLongVarField)objValue).lValue;
 		}else
 		{
 			lValue = ((Integer)objValue).longValue();
@@ -90,7 +93,7 @@ public class IntLongVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 
 	@Override
 	public String getCodePrefixVariant() {
-		return IntLongVar.strCodePrefixVariant ;
+		return IntLongVarField.strCodePrefixVariant ;
 	}
 
 	@Override
@@ -113,13 +116,13 @@ public class IntLongVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 		return lValue.longValue();
 	}
 	
-	public static ArrayList<IntLongVar> getListCopy(){
-		return new ArrayList<IntLongVar>(ailvList);
+	public static ArrayList<IntLongVarField> getListCopy(){
+		return new ArrayList<IntLongVarField>(ailvList);
 	}
 	
 	@Override
 	public String getVarId() {
-		if(strVarId==null)strVarId=ReflexFill.i().getVarId(rfcfgOwner, strCodePrefixVariant, this);
+		if(strVarId==null)strVarId=ReflexFillI.i().getVarId(rfcfgOwner, strCodePrefixVariant, this);
 		return strVarId;
 	}
 
@@ -134,7 +137,7 @@ public class IntLongVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 	}
 
 	@Override
-	public void setConsoleVarLink(VarIdValueOwner vivo) {
+	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
 		this.vivo=vivo;
 	}
 	

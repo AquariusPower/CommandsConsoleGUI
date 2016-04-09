@@ -25,14 +25,17 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.misc;
+package com.github.commandsconsolegui.cmd.varfield;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.console.VarIdValueOwner;
-import com.github.commandsconsolegui.console.VarIdValueOwner.IVarIdValueOwner;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
+import com.github.commandsconsolegui.cmd.VarIdValueOwnerData.IVarIdValueOwner;
+import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
+import com.github.commandsconsolegui.misc.IHandleExceptions;
+import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 
 /**
  * This class is intended to be used only as class field variables.
@@ -41,30 +44,30 @@ import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfgVariant;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class StringVar implements IReflexFillCfgVariant, IVarIdValueOwner{
+public class StringVarField implements IReflexFillCfgVariant, IVarIdValueOwner{
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	private static String	strCodePrefixVariant = "sv";
-	private static ArrayList<StringVar> ailvList = new ArrayList<StringVar>();
+	private static ArrayList<StringVarField> ailvList = new ArrayList<StringVarField>();
 	String strValue;
 	private IReflexFillCfg	rfcfgOwner;
 	private String	strVarId;
-	private VarIdValueOwner	vivo;
+	private VarIdValueOwnerData	vivo;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		StringVar.ihe=ihe;
+		StringVarField.ihe=ihe;
 		bConfigured=true;
 	}
 	
-	public StringVar(IReflexFillCfg rfcfgOwnerUseThis, StringVar ilv) {
+	public StringVarField(IReflexFillCfg rfcfgOwnerUseThis, StringVarField ilv) {
 		this(rfcfgOwnerUseThis, ilv.strValue);
 	}
 	/**
 	 * @param rfcfgOwnerUseThis use null if this is not a class field, but a local variable
 	 * @param lInitialValue if null, the variable will be removed from console vars.
 	 */
-	public StringVar(IReflexFillCfg rfcfgOwnerUseThis, String strInitialValue) {
+	public StringVarField(IReflexFillCfg rfcfgOwnerUseThis, String strInitialValue) {
 		if(rfcfgOwnerUseThis!=null)ailvList.add(this); //only fields allowed
 		this.rfcfgOwner=rfcfgOwnerUseThis;
 		this.strValue=strInitialValue;
@@ -72,8 +75,8 @@ public class StringVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 	
 	@Override
 	public void setObjectValue(Object objValue) {
-		if(objValue instanceof StringVar){
-			strValue = ((StringVar)objValue).strValue;
+		if(objValue instanceof StringVarField){
+			strValue = ((StringVarField)objValue).strValue;
 		}else
 		{
 			strValue = ""+objValue;
@@ -84,7 +87,7 @@ public class StringVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 
 	@Override
 	public String getCodePrefixVariant() {
-		return StringVar.strCodePrefixVariant ;
+		return StringVarField.strCodePrefixVariant ;
 	}
 
 	@Override
@@ -92,13 +95,13 @@ public class StringVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 		return rfcfgOwner;
 	}
 
-	public static ArrayList<StringVar> getListCopy(){
-		return new ArrayList<StringVar>(ailvList);
+	public static ArrayList<StringVarField> getListCopy(){
+		return new ArrayList<StringVarField>(ailvList);
 	}
 	
 	@Override
 	public String getVarId() {
-		if(strVarId==null)strVarId=ReflexFill.i().getVarId(rfcfgOwner, strCodePrefixVariant, this);
+		if(strVarId==null)strVarId=ReflexFillI.i().getVarId(rfcfgOwner, strCodePrefixVariant, this);
 		return strVarId;
 	}
 
@@ -113,7 +116,7 @@ public class StringVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 	}
 
 	@Override
-	public void setConsoleVarLink(VarIdValueOwner vivo) {
+	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
 		this.vivo=vivo;
 	}
 	

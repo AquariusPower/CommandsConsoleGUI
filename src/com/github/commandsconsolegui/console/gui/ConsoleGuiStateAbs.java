@@ -32,24 +32,24 @@ import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
-import com.github.commandsconsolegui.console.ConsoleCommands;
-import com.github.commandsconsolegui.console.ConsoleCommands.ECmdReturnStatus;
-import com.github.commandsconsolegui.console.DumpEntry;
-import com.github.commandsconsolegui.console.EDataBaseOperations;
-import com.github.commandsconsolegui.console.IConsoleCommandListener;
-import com.github.commandsconsolegui.console.IConsoleUI;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
+import com.github.commandsconsolegui.cmd.DumpEntryData;
+import com.github.commandsconsolegui.cmd.EDataBaseOperations;
+import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.cmd.IConsoleUI;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
+import com.github.commandsconsolegui.cmd.varfield.StringVarField;
+import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.console.gui.lemur.ConsoleCursorListener;
 import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersState;
-import com.github.commandsconsolegui.misc.AutoComplete;
-import com.github.commandsconsolegui.misc.Debug;
-import com.github.commandsconsolegui.misc.FloatDoubleVar;
-import com.github.commandsconsolegui.misc.Misc;
-import com.github.commandsconsolegui.misc.ReflexFill;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.misc.ReflexFill.ReflexFillCfg;
-import com.github.commandsconsolegui.misc.StringFieldCmd;
-import com.github.commandsconsolegui.misc.StringVar;
-import com.github.commandsconsolegui.misc.TimedDelayVar;
+import com.github.commandsconsolegui.misc.AutoCompleteI;
+import com.github.commandsconsolegui.misc.DebugI;
+import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
@@ -103,16 +103,16 @@ import com.simsilica.lemur.style.Styles;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflexFillCfg, IConsoleCommandListener, IConsoleUI{
+public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IReflexFillCfg, IConsoleCommandListener, IConsoleUI{
 //	protected FpsLimiterState fpslState = new FpsLimiterState();
 	
 //	protected final String strInputIMCPREFIX = "CONSOLEGUISTATE_";
 	public final String strFinalFieldInputCodePrefix="INPUT_MAPPING_CONSOLE_";
-	public final StringFieldCmd INPUT_MAPPING_CONSOLE_TOGGLE = new StringFieldCmd(this,strFinalFieldInputCodePrefix);
-	public final StringFieldCmd INPUT_MAPPING_CONSOLE_SCROLL_UP = new StringFieldCmd(this,strFinalFieldInputCodePrefix);
-	public final StringFieldCmd INPUT_MAPPING_CONSOLE_SCROLL_DOWN = new StringFieldCmd(this,strFinalFieldInputCodePrefix);
-	public final StringFieldCmd INPUT_MAPPING_CONSOLE_SHIFT_PRESSED	= new StringFieldCmd(this,strFinalFieldInputCodePrefix);
-	public final StringFieldCmd INPUT_MAPPING_CONSOLE_CONTROL_PRESSED	= new StringFieldCmd(this,strFinalFieldInputCodePrefix);
+	public final StringCmdField INPUT_MAPPING_CONSOLE_TOGGLE = new StringCmdField(this,strFinalFieldInputCodePrefix);
+	public final StringCmdField INPUT_MAPPING_CONSOLE_SCROLL_UP = new StringCmdField(this,strFinalFieldInputCodePrefix);
+	public final StringCmdField INPUT_MAPPING_CONSOLE_SCROLL_DOWN = new StringCmdField(this,strFinalFieldInputCodePrefix);
+	public final StringCmdField INPUT_MAPPING_CONSOLE_SHIFT_PRESSED	= new StringCmdField(this,strFinalFieldInputCodePrefix);
+	public final StringCmdField INPUT_MAPPING_CONSOLE_CONTROL_PRESSED	= new StringCmdField(this,strFinalFieldInputCodePrefix);
 	
 	public final String STYLE_CONSOLE="console";
 	
@@ -121,11 +121,11 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	/**
 	 * commands user can type
 	 */
-	public final StringFieldCmd CMD_CLOSE_CONSOLE = new StringFieldCmd(this,ConsoleCommands.strFinalCmdCodePrefix);
-	public final StringFieldCmd CMD_CONSOLE_HEIGHT = new StringFieldCmd(this,ConsoleCommands.strFinalCmdCodePrefix);
-	public final StringFieldCmd CMD_CONSOLE_STYLE = new StringFieldCmd(this,ConsoleCommands.strFinalCmdCodePrefix);
+	public final StringCmdField CMD_CLOSE_CONSOLE = new StringCmdField(this,CommandsDelegatorI.strFinalCmdCodePrefix);
+	public final StringCmdField CMD_CONSOLE_HEIGHT = new StringCmdField(this,CommandsDelegatorI.strFinalCmdCodePrefix);
+	public final StringCmdField CMD_CONSOLE_STYLE = new StringCmdField(this,CommandsDelegatorI.strFinalCmdCodePrefix);
 	
-	protected StringVar	svUserFontOption = new StringVar(this, "DroidSansMono");
+	protected StringVarField	svUserFontOption = new StringVarField(this, "DroidSansMono");
 	
 	/**
 	 * keep "initialized" vars together!
@@ -135,9 +135,9 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	/**
 	 * keep delayers together!
 	 */
-	protected TimedDelayVar tdStatsRefresh = new TimedDelayVar(this,0.5f);
-	protected TimedDelayVar tdScrollToBottomRequestAndSuspend = new TimedDelayVar(this,0.5f);
-	protected TimedDelayVar tdScrollToBottomRetry = new TimedDelayVar(this,0.1f);
+	protected TimedDelayVarField tdStatsRefresh = new TimedDelayVarField(this,0.5f);
+	protected TimedDelayVarField tdScrollToBottomRequestAndSuspend = new TimedDelayVarField(this,0.5f);
+	protected TimedDelayVarField tdScrollToBottomRetry = new TimedDelayVarField(this,0.1f);
 
 //	protected TimedDelay tdLetCpuRest = new TimedDelay(0.1f);
 //	protected TimedDelay tdStatsRefresh = new TimedDelay(0.5f);
@@ -211,7 +211,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 //	protected String	strFileInitConsCmds = strFilePrefix+"-Init";
 //	protected String	strFileSetup = strFilePrefix+"-Setup";
 //	protected String	strFileDatabase = strFilePrefix+"-DB";
-	protected FloatDoubleVar	fdvConsoleHeightPercDefault = new FloatDoubleVar(this,0.5);
+	protected FloatDoubleVarField	fdvConsoleHeightPercDefault = new FloatDoubleVarField(this,0.5);
 	
 	/**
 	 * use the console height command to set this var, do not use a console variable for it,
@@ -267,7 +267,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	protected String	strPreviousInputValue;
 	protected int	iCmdHistoryPreviousIndex;
 //	protected boolean	bShowExecQueuedInfo = false;
-	protected ConsoleCommands	cc;
+	protected CommandsDelegatorI	cc;
 //	protected Hashtable<String,Object> htUserVariables = new Hashtable<String,Object>();
 //protected Hashtable<String,Object> htRestrictedVariables = new Hashtable<String,Object>();
 //	protected TreeMap<String,Object> tmUserVariables = 
@@ -329,13 +329,13 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	 * @param cc
 	 * @param iToggleConsoleKey
 	 */
-	public void configureBeforeInitializing(SimpleApplication sapp, ConsoleCommands cc, int iToggleConsoleKey){
+	public void configureBeforeInitializing(SimpleApplication sapp, CommandsDelegatorI cc, int iToggleConsoleKey){
 		if(bConfigured)throw new NullPointerException("already configured.");		// KEEP ON TOP
 		
 		this.sapp=sapp;
 		
 		this.cc = cc;
-		if(cc==null)throw new NullPointerException("Missing "+ConsoleCommands.class.getName()+" instance (or a more specialized, like the scripting one)");
+		if(cc==null)throw new NullPointerException("Missing "+CommandsDelegatorI.class.getName()+" instance (or a more specialized, like the scripting one)");
 		cc.configure(this,sapp);
 		cc.addConsoleCommandListener(this);
 		
@@ -343,7 +343,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		
 		this.iToggleConsoleKey=iToggleConsoleKey;
 		
-		ReflexFill.i().assertReflexFillFieldsForOwner(this);
+		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 		
 		if(!sapp.getStateManager().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
 		
@@ -691,7 +691,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	}
 	
 	protected void editPaste() {
-		String strPasted = Misc.i().retrieveClipboardString(true);
+		String strPasted = MiscI.i().retrieveClipboardString(true);
 		if(strPasted.endsWith("\\n"))strPasted=strPasted.substring(0, strPasted.length()-2);
 		
 		String strCurrent = getInputText();
@@ -1324,7 +1324,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 			.replace("\r", "");
 	}
 	
-	public ConsoleCommands getConsoleCommands(){
+	public CommandsDelegatorI getConsoleCommands(){
 		return this.cc;
 	}
 	
@@ -1407,7 +1407,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		cc.varSet(cc.CMD_FIX_VISIBLE_ROWS_AMOUNT, ""+iShowRows, true);
 		
 	//	lstbx.getGridPanel().setVisibleSize(iShowRows,1);
-		cc.dumpInfoEntry("fLstbxEntryHeight="+Misc.i().fmtFloat(fLstbxEntryHeight)+", "+"iShowRows="+iShowRows);
+		cc.dumpInfoEntry("fLstbxEntryHeight="+MiscI.i().fmtFloat(fLstbxEntryHeight)+", "+"iShowRows="+iShowRows);
 		
 		iVisibleRowsAdjustRequest=null;
 		
@@ -1667,7 +1667,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 				strCompletedCmd=""+cc.getCommandPrefix()+strCmd;
 				
 				ArrayList<String> astr = strPartToComplete==null ? astrOptList :
-					AutoComplete.i().autoComplete(strPartToComplete, astrOptList, bMatchContains);
+					AutoCompleteI.i().autoComplete(strPartToComplete, astrOptList, bMatchContains);
 				if(astr.size()==1){
 					strCompletedCmd+=astr.get(0);
 				}else{
@@ -1710,7 +1710,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 //		if(!strCmdPart.matches("["+strValidCmdCharsRegex+"]*"))
 			return strCmdPartOriginal;
 		
-		ArrayList<String> astr = AutoComplete.i().autoComplete(strCmdPart, cc.getBaseCommands(), bMatchContains);
+		ArrayList<String> astr = AutoCompleteI.i().autoComplete(strCmdPart, cc.getBaseCommands(), bMatchContains);
 		String strFirst=astr.get(0); //the actual stored command may come with comments appended
 		String strAppendSpace = "";
 		if(astr.size()==1 && cc.validateBaseCommand(strFirst)){
@@ -1893,7 +1893,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		ReflexFillCfg rfcfg = null;
 		
-		if(rfcv.getClass().isAssignableFrom(StringFieldCmd.class)){
+		if(rfcv.getClass().isAssignableFrom(StringCmdField.class)){
 			if(strFinalFieldInputCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
 				rfcfg.strCommandPrefix = "CONSOLEGUISTATE_";
@@ -1922,7 +1922,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	}
 
 	@Override
-	public ECmdReturnStatus executePreparedCommand(ConsoleCommands	cc){
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI	cc){
 		boolean bCommandWorked = false;
 		
 		if(cc.checkCmdValidity(this,CMD_CLOSE_CONSOLE,"like the bound key to do it")){
@@ -1954,22 +1954,22 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	@Override
 	public void dumpAllStats() {
 		cc.dumpEntry(true, cc.btgShowDeveloperInfo.get(), false,	
-			Misc.i().getSimpleTime(cc.btgShowMiliseconds.get())
+			MiscI.i().getSimpleTime(cc.btgShowMiliseconds.get())
 				+cc.getDevInfoEntryPrefix()+"Console stats (Dev): "+"\n"
 			
-			+"Console Height = "+Misc.i().fmtFloat(ctnrConsole.getSize().y)+"\n"
+			+"Console Height = "+MiscI.i().fmtFloat(ctnrConsole.getSize().y)+"\n"
 			+"Visible Rows = "+lstbxDumpArea.getGridPanel().getVisibleRows()+"\n"
 			+"Line Wrap At = "+cc.getCurrentFixedLineWrapAtColumn()+"\n"
-			+"ListBox Height = "+Misc.i().fmtFloat(lstbxDumpArea.getSize().y)+"\n"
-			+"ListBox Entry Height = "+Misc.i().fmtFloat(fLstbxEntryHeight)+"\n"
+			+"ListBox Height = "+MiscI.i().fmtFloat(lstbxDumpArea.getSize().y)+"\n"
+			+"ListBox Entry Height = "+MiscI.i().fmtFloat(fLstbxEntryHeight)+"\n"
 			
-			+"Stats Text Field Height = "+Misc.i().fmtFloat(fStatsHeight)+"\n"
-			+"Stats Container Height = "+Misc.i().fmtFloat(ctnrStatsAndControls.getSize().y)+"\n"
+			+"Stats Text Field Height = "+MiscI.i().fmtFloat(fStatsHeight)+"\n"
+			+"Stats Container Height = "+MiscI.i().fmtFloat(ctnrStatsAndControls.getSize().y)+"\n"
 			
-			+"Input Field Height = "+Misc.i().fmtFloat(fInputHeight)+"\n"
-			+"Input Field Final Height = "+Misc.i().fmtFloat(tfInput.getSize().y)+"\n"
+			+"Input Field Height = "+MiscI.i().fmtFloat(fInputHeight)+"\n"
+			+"Input Field Final Height = "+MiscI.i().fmtFloat(tfInput.getSize().y)+"\n"
 			
-			+"Slider Value = "+Misc.i().fmtFloat(getScrollDumpAreaFlindex())+"\n"
+			+"Slider Value = "+MiscI.i().fmtFloat(getScrollDumpAreaFlindex())+"\n"
 			
 			+"Slider Scroll request max retry attempts = "+iScrollRetryAttemptsMaxDBG);
 	}
@@ -2177,7 +2177,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		
 		String str = cc.prepareStatsFieldText();
 		
-		if(Debug.i().isKeyEnabled(Debug.EKey.StatsText))str+=cc.strDebugTest;
+		if(DebugI.i().isKeyEnabled(DebugI.EKey.StatsText))str+=cc.strDebugTest;
 		
 		lblStats.setText(str);
 		
@@ -2203,7 +2203,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 			if(strInputTextPrevious.equals(strInputText))return;
 		}
 		
-		ArrayList<String> astr = AutoComplete.i().autoComplete(
+		ArrayList<String> astr = AutoCompleteI.i().autoComplete(
 			strInputText, cc.getBaseCommandsWithComment(), bKeyControlIsPressed);
 		
 		boolean bShowHint = false;
@@ -2275,8 +2275,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 		int iMaxSliderIndex=getDumpEntries().size()-lstbxDumpArea.getGridPanel().getVisibleRows();
 		
 		return "Sl"
-				+Misc.i().fmtFloat(getScrollDumpAreaFlindex(),0)+"/"+iMaxSliderIndex+"+"+lstbxDumpArea.getGridPanel().getVisibleRows()
-				+"("+Misc.i().fmtFloat(100.0f -lstbxDumpArea.getSlider().getModel().getPercent()*100f,0)+"%)"
+				+MiscI.i().fmtFloat(getScrollDumpAreaFlindex(),0)+"/"+iMaxSliderIndex+"+"+lstbxDumpArea.getGridPanel().getVisibleRows()
+				+"("+MiscI.i().fmtFloat(100.0f -lstbxDumpArea.getSlider().getModel().getPercent()*100f,0)+"%)"
 				+";";
 
 	}
@@ -2328,7 +2328,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFill.IReflex
 	 * This is MUCH slower than using a mono spaced font and having a fixed linewrap column...
 	 */
 	@Override
-	public ArrayList<String> wrapLineDynamically(DumpEntry de) {
+	public ArrayList<String> wrapLineDynamically(DumpEntryData de) {
 		ArrayList<String> astrToDump = new ArrayList<String>();
 		
 		String[] astr = de.getLineBaking().split("\n");

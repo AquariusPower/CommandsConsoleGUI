@@ -25,13 +25,13 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console;
+package com.github.commandsconsolegui.cmd;
 
-import com.github.commandsconsolegui.misc.BoolTogglerCmd;
-import com.github.commandsconsolegui.misc.ReflexFill;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.misc.ReflexFill.ReflexFillCfg;
+import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppState;
@@ -46,15 +46,15 @@ import com.jme3.renderer.RenderManager;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleCommandsBackgroundState implements AppState, IReflexFillCfg{
-	private static ConsoleCommandsBackgroundState instance = new ConsoleCommandsBackgroundState();
-	public static ConsoleCommandsBackgroundState i(){return instance;}
+public class CommandsBackgroundState implements AppState, IReflexFillCfg{
+	private static CommandsBackgroundState instance = new CommandsBackgroundState();
+	public static CommandsBackgroundState i(){return instance;}
 	
-	protected BoolTogglerCmd	btgExecCommandsInBackground=new BoolTogglerCmd(this, false, BoolTogglerCmd.strTogglerCodePrefix,
+	protected BoolTogglerCmdField	btgExecCommandsInBackground=new BoolTogglerCmdField(this, false, BoolTogglerCmdField.strTogglerCodePrefix,
 		"Will continue running console commands even if console is closed.");
 	
 	private IConsoleUI	cgsaGraphicalConsoleUI;
-	private ConsoleCommands	ccCommandsPipe;
+	private CommandsDelegatorI	ccCommandsPipe;
 	private boolean	bEnabled;
 	private boolean	bInitialized;
 
@@ -62,7 +62,7 @@ public class ConsoleCommandsBackgroundState implements AppState, IReflexFillCfg{
 
 	private boolean	bConfigured;
 
-	public void configure(SimpleApplication sapp, IConsoleUI cgsa, ConsoleCommands cc){
+	public void configure(SimpleApplication sapp, IConsoleUI cgsa, CommandsDelegatorI cc){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 		
 		this.sapp=sapp;
@@ -75,7 +75,7 @@ public class ConsoleCommandsBackgroundState implements AppState, IReflexFillCfg{
 //		btgExecCommandsInBackground=new BoolToggler(this, false, ConsoleCommands.strTogglerCodePrefix,
 //			"Will continue running console commands even if console is closed.");
 		
-		ReflexFill.i().assertReflexFillFieldsForOwner(this);
+		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 		
 		bConfigured=true;
 	}

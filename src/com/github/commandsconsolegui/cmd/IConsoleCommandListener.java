@@ -25,17 +25,20 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console;
+package com.github.commandsconsolegui.cmd;
+
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConditionalNested{
-	public ConditionalNested(boolean bCondition){
-		this.bCondition=bCondition;
-	}
-	Boolean bCondition = null;
-	Boolean	bIfEndIsRequired = false;
+public interface IConsoleCommandListener{
+	/**
+	 * Any class can implement commands.
+	 * The main requirement is that the listener is registered with:
+	 * {@link CommandsDelegatorI#addConsoleCommandListener(IConsoleCommandListener)}
+	 */
+	public abstract ECmdReturnStatus execConsoleCommand(CommandsDelegatorI ccRequester);
 }

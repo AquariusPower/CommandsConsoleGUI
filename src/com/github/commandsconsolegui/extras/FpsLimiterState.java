@@ -25,9 +25,9 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.jmestates;
+package com.github.commandsconsolegui.extras;
 
-import com.github.commandsconsolegui.console.ConsoleCommands;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppState;
@@ -57,7 +57,7 @@ public class FpsLimiterState implements AppState{
 	private boolean	bEnabled;
 	private boolean	bInitialized;
 	private SimpleApplication	sapp;
-	private ConsoleCommands	cc;
+	private CommandsDelegatorI	cc;
 	private boolean	bConfigured;
 	
 	public FpsLimiterState(){
@@ -167,7 +167,7 @@ public class FpsLimiterState implements AppState{
 		return iMaxFPS;
 	}
 
-	public void configureBeforeInitializing(SimpleApplication sapp, ConsoleCommands cc){
+	public void configureBeforeInitializing(SimpleApplication sapp, CommandsDelegatorI cc){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 		this.sapp=sapp;
 		this.cc=cc;

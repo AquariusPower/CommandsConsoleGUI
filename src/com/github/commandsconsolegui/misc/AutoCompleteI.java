@@ -36,9 +36,9 @@ import java.util.Collections;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class AutoComplete {
-	public static AutoComplete instance = new AutoComplete();
-	public static AutoComplete i(){return instance;}
+public class AutoCompleteI {
+	public static AutoCompleteI instance = new AutoCompleteI();
+	public static AutoCompleteI i(){return instance;}
 	
 	/**
 	 * Matching is case insensitive.

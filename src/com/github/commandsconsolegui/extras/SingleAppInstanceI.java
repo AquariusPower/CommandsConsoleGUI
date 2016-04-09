@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.jmestates;
+package com.github.commandsconsolegui.extras;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -33,9 +33,9 @@ import java.io.IOException;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.console.ConsoleCommands;
-import com.github.commandsconsolegui.misc.Debug;
-import com.github.commandsconsolegui.misc.Misc;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
+import com.github.commandsconsolegui.misc.DebugI;
+import com.github.commandsconsolegui.misc.MiscI;
 
 /**
  * Locks have a short timeout.
@@ -43,14 +43,14 @@ import com.github.commandsconsolegui.misc.Misc;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class SingleInstance { //implements IReflexFillCfg{
+public class SingleAppInstanceI { //implements IReflexFillCfg{
 //	public final BoolTogglerCmd	btgSingleInstaceMode = new BoolTogglerCmd(this,true,BoolTogglerCmd.strTogglerCodePrefix,
 //		"better keep this enabled, other instances may conflict during files access.");
 	private boolean bDevModeExitIfThereIsANewerInstance = true; //true if in debug mode
 //	public final BoolToggler	btgSingleInstaceOverrideOlder = new BoolToggler(this,false,ConsoleCommands.strTogglerCodePrefix,
 //		"If true, any older instance will exit and this will keep running."
 //		+"If false, the oldest instance will keep running and this one will exit.");
-	String strPrefix=SingleInstance.class.getSimpleName()+"-";
+	String strPrefix=SingleAppInstanceI.class.getSimpleName()+"-";
 	String strSuffix=".lock";
 	String strId;
 	private File	flSelfLock;
@@ -66,8 +66,8 @@ public class SingleInstance { //implements IReflexFillCfg{
 	private boolean	bExitApplicationTD;
 	public long	lCheckTotalDelay;
 	
-	private static SingleInstance instance = new SingleInstance();
-	public static SingleInstance i(){return instance;}
+	private static SingleAppInstanceI instance = new SingleAppInstanceI();
+	public static SingleAppInstanceI i(){return instance;}
 	
 	private File[] getAllLocksTD(){
 		return flFolder.listFiles(fnf);
@@ -96,7 +96,7 @@ public class SingleInstance { //implements IReflexFillCfg{
 		for(File fl:getAllLocksTD()){
 			if(cmpSelfWithTD(fl))continue;
 			
-			BasicFileAttributes attr = Misc.i().fileAttributesTS(fl);
+			BasicFileAttributes attr = MiscI.i().fileAttributesTS(fl);
 			if(attr==null)continue;
 			
 			long lTimeLimit = System.currentTimeMillis() - (lLockUpdateTargetDelayMilis*2);
@@ -240,7 +240,7 @@ public class SingleInstance { //implements IReflexFillCfg{
 			
 			outputTD("Checked times: "+lCheckCountsTD);
 			outputTD("Checked total delay (milis): "+lCheckTotalDelay);
-			outputTD("Lasted for "+Misc.i().fmtFloat(lDelayMilis/1000f,3)+"s");
+			outputTD("Lasted for "+MiscI.i().fmtFloat(lDelayMilis/1000f,3)+"s");
 			
 			System.exit(0);
 		}
@@ -258,7 +258,7 @@ public class SingleInstance { //implements IReflexFillCfg{
 	private boolean	bAllowCfgOutOfMainMethod = false;
 	
 	private Long getCreationTimeOfTD(File fl){
-		ArrayList<String> astr = Misc.i().fileLoad(fl);
+		ArrayList<String> astr = MiscI.i().fileLoad(fl);
 		Long l = null;
 		if(astr.size()>0){
 			// line 1
@@ -280,7 +280,7 @@ public class SingleInstance { //implements IReflexFillCfg{
 	 * @return
 	 */
 	private ERunMode getLockRunModeOfTD(File fl){
-		ArrayList<String> astr = Misc.i().fileLoad(fl);
+		ArrayList<String> astr = MiscI.i().fileLoad(fl);
 		try{return ERunMode.valueOf(astr.get(1));}catch(IllegalArgumentException|IndexOutOfBoundsException e){}
 		return ERunMode.Undefined;
 	}
@@ -318,9 +318,9 @@ public class SingleInstance { //implements IReflexFillCfg{
 			// line 2
 			astr.add(getSelfMode(false));
 			
-			Misc.i().fileAppendListTS(flSelfLock, astr);
+			MiscI.i().fileAppendListTS(flSelfLock, astr);
 			
-			attrSelfLock = Misc.i().fileAttributesTS(flSelfLock);
+			attrSelfLock = MiscI.i().fileAttributesTS(flSelfLock);
 			
 			outputTD("Created lock: "+flSelfLock.getName()+" "+getSelfMode(true));
 			
@@ -335,7 +335,7 @@ public class SingleInstance { //implements IReflexFillCfg{
 	 * at main()
 	 * 
 	 * This will allow for a very fast exit avoiding resources allocation.
-	 * The {@link #configureRequiredAtApplicationInitialization(ConsoleCommands)} call is still required!
+	 * The {@link #configureRequiredAtApplicationInitialization(CommandsDelegatorI)} call is still required!
 	 */
 	public void configureOptionalAtMainMethod(){
 		configureAndInitialize(true);
@@ -362,12 +362,12 @@ public class SingleInstance { //implements IReflexFillCfg{
 //		this.cc=cc;
 //		this.threadMain=threadMain;
 		
-		bSelfIsDebugMode = Debug.i().isInIDEdebugMode();
+		bSelfIsDebugMode = DebugI.i().isInIDEdebugMode();
 		
 //		if(Debug.i().isInIDEdebugMode())strPrefix="DebugMode-"+strPrefix;
 		
 		lSelfLockCreationTime = System.currentTimeMillis();
-		strId=strPrefix+Misc.i().getDateTimeForFilename(lSelfLockCreationTime,true)+strSuffix;
+		strId=strPrefix+MiscI.i().getDateTimeForFilename(lSelfLockCreationTime,true)+strSuffix;
 		flSelfLock = new File(strId);
 		
 		flFolder = new File("./");
@@ -464,8 +464,8 @@ public class SingleInstance { //implements IReflexFillCfg{
 	
 	private void outputTD(String str){
 		System.err.println(""
-			+"["+SingleInstance.class.getSimpleName()+"]"
-			+Misc.i().getSimpleTime(true)
+			+"["+SingleAppInstanceI.class.getSimpleName()+"]"
+			+MiscI.i().getSimpleTime(true)
 			+": "
 			+str.replace("\n", "\n\t"));
 	}

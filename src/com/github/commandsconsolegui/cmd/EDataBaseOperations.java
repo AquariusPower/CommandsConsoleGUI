@@ -25,63 +25,45 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console;
+package com.github.commandsconsolegui.cmd;
 
-import java.util.Comparator;
+import java.util.ArrayList;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class Command {
-	String strBaseCmd;
-	String strComment;
-	IConsoleCommandListener icclOwner;
+public enum EDataBaseOperations{
+	/** saving also will shrink the DB */
+	save,
 	
+	load,
 	
+	show,
 	
-	public String getBaseCmd() {
-		return strBaseCmd;
-	}
-	public void setBaseCmd(String strBaseCmd) {
-		this.strBaseCmd = strBaseCmd;
-	}
-	public String getComment() {
-		return strComment;
-	}
-	public void setComment(String strComment) {
-		this.strComment = strComment;
-	}
-	public IConsoleCommandListener getOwner() {
-		return icclOwner;
-	}
-	public void setOwner(IConsoleCommandListener icclOwner) {
-		this.icclOwner = icclOwner;
-	}
+	/** A backup is made of the existing file. */
+	backup,
 	
-	public Command(IConsoleCommandListener icclOwner, String strBaseCmd, String strComment) {
-		super();
-		this.icclOwner = icclOwner;
-		this.strBaseCmd = strBaseCmd;
-		this.strComment = strComment;
-	}
-	
-	public static CommandComparator comparator(){
-		return cmp;
-	}
-	
-	private static CommandComparator cmp = new CommandComparator();
-	private static class CommandComparator implements Comparator<Command>{
-		@Override
-		public int compare(Command c1, Command c2){
-			return c1.strBaseCmd.compareToIgnoreCase(c2.strBaseCmd);
+	;
+	public static String help(){
+		String str = null;
+		for(EDataBaseOperations e:values()){
+			if(str!=null){
+				str+="|";
+			}else{
+				str="";
+			}
+			str+=e.toString();
 		}
+		return "["+str+"] aliases and variables, plain text file";
 	}
-	public String asHelp() {
-		return strBaseCmd+" "
-			+strComment+" "
-			+"("+(icclOwner!=null ? icclOwner.getClass().getSimpleName() : "Root")+")";
+
+	public static ArrayList<String> getValuesAsArrayList() {
+		ArrayList<String> astr = new ArrayList<String>();
+		for(EDataBaseOperations e:values()){
+			astr.add(e.toString());
+		}
+		return astr;
 	}
-	
 }

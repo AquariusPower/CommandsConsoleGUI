@@ -25,45 +25,36 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console;
-
-import java.util.ArrayList;
+package com.github.commandsconsolegui.cmd;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public enum EDataBaseOperations{
-	/** saving also will shrink the DB */
-	save,
+public class VarIdValueOwnerData {
+	public static interface IVarIdValueOwner{
+		public abstract void setObjectValue(Object objValue);
+		public abstract String getReport();
+		public abstract String getVarId();
+		public abstract Object getValueRaw();
+		public abstract void setConsoleVarLink(VarIdValueOwnerData vivo);
+	}
 	
-	load,
+	String strId;
+	Object objValue;
+	IVarIdValueOwner owner;
 	
-	show,
-	
-	/** A backup is made of the existing file. */
-	backup,
-	
-	;
-	public static String help(){
-		String str = null;
-		for(EDataBaseOperations e:values()){
-			if(str!=null){
-				str+="|";
-			}else{
-				str="";
-			}
-			str+=e.toString();
-		}
-		return "["+str+"] aliases and variables, plain text file";
+	public VarIdValueOwnerData(String strId, Object objValue,	IVarIdValueOwner vivoOwner) {
+		super();
+		this.strId = strId;
+		this.objValue = objValue;
+		this.owner = vivoOwner;
 	}
 
-	public static ArrayList<String> getValuesAsArrayList() {
-		ArrayList<String> astr = new ArrayList<String>();
-		for(EDataBaseOperations e:values()){
-			astr.add(e.toString());
-		}
-		return astr;
+	public void setObjectValue(Object objValue) {
+		this.objValue=objValue;
 	}
+	
+	
 }

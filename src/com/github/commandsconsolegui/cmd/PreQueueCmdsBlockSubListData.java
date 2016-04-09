@@ -25,63 +25,28 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console;
+package com.github.commandsconsolegui.cmd;
+
+import java.util.ArrayList;
+
+import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.misc.MiscI;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class Alias{
-	String strAliasId;
-	String strCmdLine; // may contain ending comment too
-	boolean	bBlocked;
-	ConsoleCommands cc;
+public class PreQueueCmdsBlockSubListData{
+	protected TimedDelayVarField tdSleep = null;
+	protected String strUId = MiscI.i().getNextUniqueId();
+	protected ArrayList<String> astrCmdList = new ArrayList<String>();
+	protected boolean	bPrepend = false;
+	protected boolean bForceFailBlockExecution = false;
+	protected boolean	bInfoSleepBegin = false;
+	protected String	strBlockInfo;
 	
-	public Alias(ConsoleCommands cc){
-		this.cc=cc;
-	}
-	
-	@Override
-	public String toString() {
-		return cc.getCommandPrefix()+"alias "
-			+(bBlocked?cc.getAliasBlockedToken():"")
-			+strAliasId+" "+strCmdLine;
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Alias other = (Alias) obj;
-		if (bBlocked != other.bBlocked)
-			return false;
-		if (strAliasId == null) {
-			if (other.strAliasId != null)
-				return false;
-		} else if (!strAliasId.equals(other.strAliasId))
-			return false;
-		if (strCmdLine == null) {
-			if (other.strCmdLine != null)
-				return false;
-		} else if (!strCmdLine.equals(other.strCmdLine))
-			return false;
-		return true;
-	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (bBlocked ? 1231 : 1237);
-		result = prime * result
-				+ ((strAliasId == null) ? 0 : strAliasId.hashCode());
-		result = prime * result
-				+ ((strCmdLine == null) ? 0 : strCmdLine.hashCode());
-		return result;
+	protected String getUniqueInfo(){
+		return "UId=\""+strUId+"\","+strBlockInfo;
 	}
 }

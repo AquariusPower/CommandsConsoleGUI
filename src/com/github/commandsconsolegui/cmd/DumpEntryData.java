@@ -25,21 +25,59 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console;
-
-import com.github.commandsconsolegui.console.ConsoleCommands.ECmdReturnStatus;
+package com.github.commandsconsolegui.cmd;
 
 /**
+ * dump strings will always be logged to file even if disabled.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
- *
+ * 
  */
-public interface IConsoleCommandListener{
+public class DumpEntryData{
 	/**
-	 * Any class can implement commands, you just need to add them with:
-	 * {@link ConsoleCommands#addConsoleCommandListener(IConsoleCommandListener)}
-	 * 
-	 * TODO rename to execCmdFromConsoleRequest();
+	 * Beware, better do NOT change these defaults,
+	 * as many usages of DumpEntry may depend on it.
+	 * Maybe extend this class to have other defaults.
 	 */
-	public abstract ECmdReturnStatus executePreparedCommand(ConsoleCommands cc);
+	boolean bApplyNewLineRequests = false; //this is a special behavior, disabled by default
+	boolean bDumpToConsole = true;
+	boolean bUseSlowQueue = false;
+	String strLineOriginal = null;
+	private String strLineBaking = null;
+	
+	public boolean isApplyNewLineRequests() {
+		return bApplyNewLineRequests;
+	}
+	public DumpEntryData setApplyNewLineRequests(boolean bApplyNewLineRequests) {
+		this.bApplyNewLineRequests = bApplyNewLineRequests;
+		return this;
+	}
+	public boolean isDump() {
+		return bDumpToConsole;
+	}
+	public DumpEntryData setDumpToConsole(boolean bDump) {
+		this.bDumpToConsole = bDump;
+		return this;
+	}
+	public boolean isUseQueue() {
+		return bUseSlowQueue;
+	}
+	public DumpEntryData setUseSlowQueue(boolean bUseQueue) {
+		this.bUseSlowQueue = bUseQueue;
+		return this;
+	}
+	public String getLineOriginal() {
+		return strLineOriginal;
+	}
+	public DumpEntryData setLineOriginal(String strLineOriginal) {
+		this.strLineOriginal = strLineOriginal;
+		return this;
+	}
+	public String getLineBaking() {
+		return strLineBaking;
+	}
+	public void setLineBaking(String strLineBaking) {
+		this.strLineBaking = strLineBaking;
+	}
+	
 }

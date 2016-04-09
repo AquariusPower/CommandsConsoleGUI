@@ -27,15 +27,15 @@
 
 package com.github.commandsconsolegui.console.test;
 
-import com.github.commandsconsolegui.console.ConsoleCommands;
-import com.github.commandsconsolegui.console.ConsoleCommands.ECmdReturnStatus;
-import com.github.commandsconsolegui.console.IConsoleCommandListener;
-import com.github.commandsconsolegui.jmestates.SingleInstance;
-import com.github.commandsconsolegui.misc.ReflexFill;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.misc.ReflexFill.ReflexFillCfg;
-import com.github.commandsconsolegui.misc.StringFieldCmd;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
+import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
+import com.github.commandsconsolegui.extras.SingleAppInstanceI;
+import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.app.SimpleApplication;
 import com.jme3.system.AppSettings;
 
@@ -44,27 +44,35 @@ import com.jme3.system.AppSettings;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommandListener, IReflexFillCfg{
-	private static ConsoleGuiTest instance = new ConsoleGuiTest();
-	public static ConsoleGuiTest i(){return instance;}
+public class ConsoleGuiTestI extends SimpleApplication implements IConsoleCommandListener, IReflexFillCfg{
+	private static ConsoleGuiTestI instance = new ConsoleGuiTestI();
+	public static ConsoleGuiTestI i(){return instance;}
 	
-	protected ConsoleCustomCommands	cc;	
+	protected CustomCommandsI	cc;	
 	protected boolean bHideSettings=true; 
 	
 	//private final String strFinalFieldCodePrefix="CMD_";
 	private final String strFieldCodePrefix="sf";
 	private final String strFieldCodePrefixLess = "VariantAsPrefixLess";
 	
-	public final StringFieldCmd CMD_END_USER_COMMAND_TEST = new StringFieldCmd(this,cc.strFinalCmdCodePrefix);
-	private StringFieldCmd sfTestCommandAutoFillVariant1 = new StringFieldCmd(this,strFieldCodePrefix);
-	private StringFieldCmd testCommandAutoFillPrefixLessVariant2 = new StringFieldCmd(this,strFieldCodePrefixLess);
-	private StringFieldCmd testCommandAutoFillPrefixLessVariantDefaulted3 = new StringFieldCmd(this,null);
+	public final StringCmdField CMD_END_USER_COMMAND_TEST = new StringCmdField(this,CustomCommandsI.strFinalCmdCodePrefix);
+	
+	/**
+	 * these below were not implemented as commands here, 
+	 * are just to exemplify how the auto-fill works.
+	 */
+	private StringCmdField sfTestCommandAutoFillVariant1 = new StringCmdField(this,strFieldCodePrefix);
+	private StringCmdField testCommandAutoFillPrefixLessVariant2 = new StringCmdField(this,strFieldCodePrefixLess);
+	private StringCmdField testCommandAutoFillPrefixLessVariantDefaulted3 = new StringCmdField(this,null);
+	private StringCmdField CMD_TRADITIONAL_PRETTYFIED_0 = new StringCmdField(this,CustomCommandsI.strFinalCmdCodePrefix);
 	
 	public boolean endUserCustomMethod(Integer i){
 		cc.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
+		
+		cc.dumpSubEntry("CommandTest0: "+CMD_TRADITIONAL_PRETTYFIED_0);
 		cc.dumpSubEntry("CommandTest1: "+sfTestCommandAutoFillVariant1);
 		cc.dumpSubEntry("CommandTest2: "+testCommandAutoFillPrefixLessVariant2);
-		if(ReflexFill.i().isbUseDefaultCfgIfMissing()){
+		if(ReflexFillI.i().isbUseDefaultCfgIfMissing()){
 			cc.dumpSubEntry("CommandTest3: "+testCommandAutoFillPrefixLessVariantDefaulted3);
 		}
 		return true;
@@ -72,11 +80,11 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 	
 	@Override
 	public void simpleInitApp() {
-		cc = new ConsoleCustomCommands(this);
+		cc = new CustomCommandsI(this);
 		cc.addConsoleCommandListener(this);
 		
 //		SingleInstanceState.i().configureBeforeInitializing(this,true);
-		SingleInstance.i().configureRequiredAtApplicationInitialization();//cc);
+		SingleAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);
 	}
 	
 	@Override
@@ -85,7 +93,7 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 	}
 	
 	public static void main( String... args ) {
-		ConsoleGuiTest main = ConsoleGuiTest.i();
+		ConsoleGuiTestI main = ConsoleGuiTestI.i();
 		main.configure();
 		
 		if(main.bHideSettings){
@@ -98,17 +106,17 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 			main.setShowSettings(false);
 		}
 		
-		SingleInstance.i().configureOptionalAtMainMethod();
+		SingleAppInstanceI.i().configureOptionalAtMainMethod();
 		
 		main.start();
 	}
 
 	private void configure() {
-		ReflexFill.i().assertReflexFillFieldsForOwner(this);
+		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 	}
 
 	@Override
-	public ECmdReturnStatus executePreparedCommand(ConsoleCommands	cc) {
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI	cc) {
 		boolean bCommandWorked = false;
 		
 		if(cc.checkCmdValidity(this,CMD_END_USER_COMMAND_TEST,"[iHowMany] users working?")){
@@ -125,7 +133,7 @@ public class ConsoleGuiTest extends SimpleApplication implements IConsoleCommand
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		ReflexFillCfg rfcfg = null;
 		
-		if(rfcv.getClass().isAssignableFrom(StringFieldCmd.class)){
+		if(rfcv.getClass().isAssignableFrom(StringCmdField.class)){
 			if(strFieldCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
 				rfcfg.strCommandPrefix = "Niceprefix";

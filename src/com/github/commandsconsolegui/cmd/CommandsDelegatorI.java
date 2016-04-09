@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console;
+package com.github.commandsconsolegui.cmd;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,21 +36,21 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.github.commandsconsolegui.console.VarIdValueOwner.IVarIdValueOwner;
-import com.github.commandsconsolegui.misc.BoolTogglerCmd;
-import com.github.commandsconsolegui.misc.Debug;
-import com.github.commandsconsolegui.misc.FloatDoubleVar;
+import com.github.commandsconsolegui.cmd.VarIdValueOwnerData.IVarIdValueOwner;
+import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
+import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
+import com.github.commandsconsolegui.cmd.varfield.StringVarField;
+import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
-import com.github.commandsconsolegui.misc.IntLongVar;
-import com.github.commandsconsolegui.misc.Misc;
-import com.github.commandsconsolegui.misc.ReflexFill;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.misc.ReflexFill.ReflexFillCfg;
+import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexHacks;
-import com.github.commandsconsolegui.misc.StringFieldCmd;
-import com.github.commandsconsolegui.misc.StringVar;
-import com.github.commandsconsolegui.misc.TimedDelayVar;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.jme3.app.SimpleApplication;
@@ -65,7 +65,7 @@ import com.jme3.app.SimpleApplication;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
+public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 //	public static final T instance;
 	
 	
@@ -87,19 +87,19 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 */
 //	public final BoolToggler	btgAcceptExternalExitRequests = new BoolToggler(this,false,strTogglerCodePrefix, 
 //		"if a ");
-	public final BoolTogglerCmd	btgDbAutoBkp = new BoolTogglerCmd(this,false,BoolTogglerCmd.strTogglerCodePrefix, 
+	public final BoolTogglerCmdField	btgDbAutoBkp = new BoolTogglerCmdField(this,false,BoolTogglerCmdField.strTogglerCodePrefix, 
 		"whenever a save happens, if the DB was modified, a backup will be created of the old file");
-	public final BoolTogglerCmd	btgShowWarn = new BoolTogglerCmd(this,true);
-	public final BoolTogglerCmd	btgShowInfo = new BoolTogglerCmd(this,true);
-	public final BoolTogglerCmd	btgShowException = new BoolTogglerCmd(this,true);
-	public final BoolTogglerCmd	btgEngineStatsView = new BoolTogglerCmd(this,false);
-	public final BoolTogglerCmd	btgEngineStatsFps = new BoolTogglerCmd(this,false);
-	public final BoolTogglerCmd	btgShowMiliseconds=new BoolTogglerCmd(this,false);
-	public final BoolTogglerCmd	btgFpsLimit=new BoolTogglerCmd(this,false);
-	public final BoolTogglerCmd	btgConsoleCpuRest=new BoolTogglerCmd(this,false,BoolTogglerCmd.strTogglerCodePrefix,
+	public final BoolTogglerCmdField	btgShowWarn = new BoolTogglerCmdField(this,true);
+	public final BoolTogglerCmdField	btgShowInfo = new BoolTogglerCmdField(this,true);
+	public final BoolTogglerCmdField	btgShowException = new BoolTogglerCmdField(this,true);
+	public final BoolTogglerCmdField	btgEngineStatsView = new BoolTogglerCmdField(this,false);
+	public final BoolTogglerCmdField	btgEngineStatsFps = new BoolTogglerCmdField(this,false);
+	public final BoolTogglerCmdField	btgShowMiliseconds=new BoolTogglerCmdField(this,false);
+	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
+	public final BoolTogglerCmdField	btgConsoleCpuRest=new BoolTogglerCmdField(this,false,BoolTogglerCmdField.strTogglerCodePrefix,
 		"Console update steps will be skipped if this is enabled.");
-	public final BoolTogglerCmd	btgAutoScroll=new BoolTogglerCmd(this,true);
-	public final BoolTogglerCmd	btgUseFixedLineWrapModeForAllFonts=new BoolTogglerCmd(this,false,BoolTogglerCmd.strTogglerCodePrefix,
+	public final BoolTogglerCmdField	btgAutoScroll=new BoolTogglerCmdField(this,true);
+	public final BoolTogglerCmdField	btgUseFixedLineWrapModeForAllFonts=new BoolTogglerCmdField(this,false,BoolTogglerCmdField.strTogglerCodePrefix,
 		"If enabled, this will use a fixed line wrap column even for non mono spaced fonts, "
 		+"based on the width of the 'W' character. Otherwise it will dynamically guess the best "
 		+"fitting string size.");
@@ -108,22 +108,22 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 * Developer vars, keep together!
 	 * Initialy true, the default init will disable them.
 	 */
-	public final BoolTogglerCmd	btgShowDebugEntries=new BoolTogglerCmd(this,true);
-	public final BoolTogglerCmd	btgShowDeveloperInfo=new BoolTogglerCmd(this,true);
-	public final BoolTogglerCmd	btgShowDeveloperWarn=new BoolTogglerCmd(this,true);
-	public final BoolTogglerCmd	btgShowExecQueuedInfo=new BoolTogglerCmd(this,true);
+	public final BoolTogglerCmdField	btgShowDebugEntries=new BoolTogglerCmdField(this,true);
+	public final BoolTogglerCmdField	btgShowDeveloperInfo=new BoolTogglerCmdField(this,true);
+	public final BoolTogglerCmdField	btgShowDeveloperWarn=new BoolTogglerCmdField(this,true);
+	public final BoolTogglerCmdField	btgShowExecQueuedInfo=new BoolTogglerCmdField(this,true);
 	
 	/**
 	 * keep delayers together!
 	 */
-	protected TimedDelayVar tdLetCpuRest = new TimedDelayVar(this,0.1f);
-	protected TimedDelayVar tdDumpQueuedEntry = new TimedDelayVar(this,1f/5f); // per second
-	protected TimedDelayVar tdSpareGpuFan = new TimedDelayVar(this,1.0f/60f); // like 60 FPS
+	protected TimedDelayVarField tdLetCpuRest = new TimedDelayVarField(this,0.1f);
+	protected TimedDelayVarField tdDumpQueuedEntry = new TimedDelayVarField(this,1f/5f); // per second
+	protected TimedDelayVarField tdSpareGpuFan = new TimedDelayVarField(this,1.0f/60f); // like 60 FPS
 	
 	/**
 	 * used to hold a reference to the identified/typed user command
 	 */
-	protected BoolTogglerCmd	btgReferenceMatched;
+	protected BoolTogglerCmdField	btgReferenceMatched;
 	
 	/**
 	 * user can type these below at console (the actual commands are prepared by reflex)
@@ -133,18 +133,18 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //	public final StringField CMD_CONSOLE_HEIGHT = new StringField(this,strFinalCmdCodePrefix);
 //	public final StringField CMD_CONSOLE_SCROLL_BOTTOM = new StringField(this,strFinalCmdCodePrefix);
 //	public final StringField CMD_CONSOLE_STYLE = new StringField(this,strFinalCmdCodePrefix);
-	public final StringFieldCmd CMD_CONSOLE_SCROLL_BOTTOM = new StringFieldCmd(this,strFinalCmdCodePrefix);
-	public final StringFieldCmd CMD_DB = new StringFieldCmd(this,strFinalCmdCodePrefix);
-	public final StringFieldCmd CMD_ECHO = new StringFieldCmd(this,strFinalCmdCodePrefix);
-	public final StringFieldCmd CMD_FIX_LINE_WRAP = new StringFieldCmd(this,strFinalCmdCodePrefix);
-	public final StringFieldCmd CMD_FIX_VISIBLE_ROWS_AMOUNT = new StringFieldCmd(this,strFinalCmdCodePrefix);
-	public final StringFieldCmd CMD_HELP = new StringFieldCmd(this,strFinalCmdCodePrefix);
-	public final StringFieldCmd CMD_HISTORY = new StringFieldCmd(this,strFinalCmdCodePrefix);
-	public final StringFieldCmd CMD_HK_TOGGLE = new StringFieldCmd(this,strFinalCmdCodePrefix);
-	public final StringFieldCmd CMD_LINE_WRAP_AT = new StringFieldCmd(this,strFinalCmdCodePrefix);
-	public final StringFieldCmd CMD_MESSAGE_REVIEW = new StringFieldCmd(this,strFinalCmdCodePrefix);
-	public final StringFieldCmd CMD_VAR_SET = new StringFieldCmd(this,strFinalCmdCodePrefix);
-	public final StringFieldCmd CMD_SLEEP = new StringFieldCmd(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_CONSOLE_SCROLL_BOTTOM = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_DB = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_ECHO = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_FIX_LINE_WRAP = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_FIX_VISIBLE_ROWS_AMOUNT = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_HELP = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_HISTORY = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_HK_TOGGLE = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_LINE_WRAP_AT = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_MESSAGE_REVIEW = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_VAR_SET = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_SLEEP = new StringCmdField(this,strFinalCmdCodePrefix);
 	
 	/**
 	 * this char indicates something that users (non developers) 
@@ -152,10 +152,10 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 */
 	public final Character	RESTRICTED_TOKEN	= '&';
 	public final String strFinalFieldRestrictedCmdCodePrefix="RESTRICTED_CMD_";
-	public final StringFieldCmd	RESTRICTED_CMD_SKIP_CURRENT_COMMAND	= new StringFieldCmd(this,strFinalFieldRestrictedCmdCodePrefix);
-	public final StringFieldCmd	RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE	= new StringFieldCmd(this,strFinalFieldRestrictedCmdCodePrefix);
-	public final StringFieldCmd	RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS	= new StringFieldCmd(this,strFinalFieldRestrictedCmdCodePrefix);
-	public final StringFieldCmd	RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS	= new StringFieldCmd(this,strFinalFieldRestrictedCmdCodePrefix);
+	public final StringCmdField	RESTRICTED_CMD_SKIP_CURRENT_COMMAND	= new StringCmdField(this,strFinalFieldRestrictedCmdCodePrefix);
+	public final StringCmdField	RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE	= new StringCmdField(this,strFinalFieldRestrictedCmdCodePrefix);
+	public final StringCmdField	RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS	= new StringCmdField(this,strFinalFieldRestrictedCmdCodePrefix);
+	public final StringCmdField	RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS	= new StringCmdField(this,strFinalFieldRestrictedCmdCodePrefix);
 	
 	/**
 	 * more tokens
@@ -178,8 +178,8 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	protected String	strTypeCmd="Cmd";
 	
 	/** 0 is auto wrap, -1 will trunc big lines */
-	protected IntLongVar ilvConsoleMaxWidthInCharsForLineWrap = new IntLongVar(this,0);
-	protected IntLongVar ilvCurrentFixedLineWrapAtColumn = new IntLongVar(this,0);
+	protected IntLongVarField ilvConsoleMaxWidthInCharsForLineWrap = new IntLongVarField(this,0);
+	protected IntLongVarField ilvCurrentFixedLineWrapAtColumn = new IntLongVarField(this,0);
 	
 	protected boolean	bAddEmptyLineAfterCommand = true;
 	protected IConsoleUI	icui;
@@ -202,23 +202,23 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	protected String	strFileInitConsCmds = strFilePrefix+"-Init";
 	protected String	strFileSetup = strFilePrefix+"-Setup";
 	protected String	strFileDatabase = strFilePrefix+"-DB";
-	protected IntLongVar ilvMaxCmdHistSize = new IntLongVar(this,1000);
-	protected IntLongVar ilvMaxDumpEntriesAmount = new IntLongVar(this,100000);
+	protected IntLongVarField ilvMaxCmdHistSize = new IntLongVarField(this,1000);
+	protected IntLongVarField ilvMaxDumpEntriesAmount = new IntLongVarField(this,100000);
 	protected ArrayList<String>	astrCmdAndParams = new ArrayList<String>();
-	protected ArrayList<ImportantMsg>	astrImportantMsgBufferList = new ArrayList<ImportantMsg>();
+	protected ArrayList<ImportantMsgData>	astrImportantMsgBufferList = new ArrayList<ImportantMsgData>();
 	protected ArrayList<String>	astrExecConsoleCmdsQueue = new ArrayList<String>();
-	protected ArrayList<PreQueueCmdsBlockSubList>	astrExecConsoleCmdsPreQueue = new ArrayList<PreQueueCmdsBlockSubList>();
+	protected ArrayList<PreQueueCmdsBlockSubListData>	astrExecConsoleCmdsPreQueue = new ArrayList<PreQueueCmdsBlockSubListData>();
 	protected String	strCmdLinePrepared = "";
-	protected TreeMap<String,VarIdValueOwner> tmUserVariables = 
-		new TreeMap<String, VarIdValueOwner>(String.CASE_INSENSITIVE_ORDER);
-	protected TreeMap<String,VarIdValueOwner> tmRestrictedVariables =
-		new TreeMap<String, VarIdValueOwner>(String.CASE_INSENSITIVE_ORDER);
+	protected TreeMap<String,VarIdValueOwnerData> tmUserVariables = 
+		new TreeMap<String, VarIdValueOwnerData>(String.CASE_INSENSITIVE_ORDER);
+	protected TreeMap<String,VarIdValueOwnerData> tmRestrictedVariables =
+		new TreeMap<String, VarIdValueOwnerData>(String.CASE_INSENSITIVE_ORDER);
 	protected File	flCmdHist;
 	protected File	flLastDump;
 	protected File	flInit;
 	protected File	flDB;
 	protected File	flSetup;
-	protected ArrayList<DumpEntry> adeDumpEntryFastQueue = new ArrayList<DumpEntry>();
+	protected ArrayList<DumpEntryData> adeDumpEntryFastQueue = new ArrayList<DumpEntryData>();
 	protected String	strInfoEntryPrefix			=". ";
 	protected String	strWarnEntryPrefix			="?Warn: ";
 	protected String	strErrorEntryPrefix			="!ERROR: ";
@@ -227,26 +227,26 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	protected String	strDevInfoEntryPrefix=". DevInfo: ";
 	protected String	strSubEntryPrefix="\t";
 	protected Boolean	bIfConditionExecCommands;
-	protected ArrayList<ConditionalNested> aIfConditionNestedList = new ArrayList<ConditionalNested>();
+	protected ArrayList<ConditionalNestedData> aIfConditionNestedList = new ArrayList<ConditionalNestedData>();
 	protected Boolean	bIfConditionIsValid;
 	protected String	strCmdLineOriginal;
 	protected ArrayList<String> astrCmdHistory = new ArrayList<String>();
 //	protected ArrayList<String> astrCmdWithCmtValidList = new ArrayList<String>();
 //	protected ArrayList<String> astrBaseCmdValidList = new ArrayList<String>();
-	protected ArrayList<Alias> aAliasList = new ArrayList<Alias>();
-	protected ArrayList<Command> acmdList = new ArrayList<Command>();
+	protected ArrayList<AliasData> aAliasList = new ArrayList<AliasData>();
+	protected ArrayList<CommandData> acmdList = new ArrayList<CommandData>();
 	
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		ReflexFillCfg rfcfg = null;
 		
-		if(rfcv.getClass().isAssignableFrom(BoolTogglerCmd.class)){
-			if(BoolTogglerCmd.strTogglerCodePrefix.equals(rfcv.getCodePrefixVariant())){
+		if(rfcv.getClass().isAssignableFrom(BoolTogglerCmdField.class)){
+			if(BoolTogglerCmdField.strTogglerCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
 				rfcfg.strCommandSuffix="Toggle";
 			}
 		}else
-		if(rfcv.getClass().isAssignableFrom(StringFieldCmd.class)){
+		if(rfcv.getClass().isAssignableFrom(StringCmdField.class)){
 			if(strFinalCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
 			}else
@@ -265,42 +265,42 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	public String getCommandDelimiterStr() {
 		return ""+chCommandDelimiter;
 	}
-	protected ConsoleCommands setCommandDelimiter(Character chCommandDelimiter) {
+	protected CommandsDelegatorI setCommandDelimiter(Character chCommandDelimiter) {
 		this.chCommandDelimiter = chCommandDelimiter;
 		return this;
 	}
 	public Character getAliasPrefix() {
 		return chAliasPrefix;
 	}
-	protected ConsoleCommands setAliasPrefix(Character chAliasPrefix) {
+	protected CommandsDelegatorI setAliasPrefix(Character chAliasPrefix) {
 		this.chAliasPrefix = chAliasPrefix;
 		return this;
 	}
 	public Character getVariableExpandPrefix() {
 		return chVariableExpandPrefix;
 	}
-	protected ConsoleCommands setVariableExpandPrefix(Character chVariableExpandPrefix) {
+	protected CommandsDelegatorI setVariableExpandPrefix(Character chVariableExpandPrefix) {
 		this.chVariableExpandPrefix = chVariableExpandPrefix;
 		return this;
 	}
 	public Character getFilterToken() {
 		return chFilterToken;
 	}
-	protected ConsoleCommands setFilterToken(Character chFilterToken) {
+	protected CommandsDelegatorI setFilterToken(Character chFilterToken) {
 		this.chFilterToken = chFilterToken;
 		return this;
 	}
 	public Character getAliasBlockedToken() {
 		return chAliasBlockedToken;
 	}
-	protected ConsoleCommands setAliasBlockedToken(Character chAliasBlockedToken) {
+	protected CommandsDelegatorI setAliasBlockedToken(Character chAliasBlockedToken) {
 		this.chAliasBlockedToken = chAliasBlockedToken;
 		return this;
 	}
 	public Character getAliasAllowedToken() {
 		return chAliasAllowedToken;
 	}
-	protected ConsoleCommands setAliasAllowedToken(Character chAliasAllowedToken) {
+	protected CommandsDelegatorI setAliasAllowedToken(Character chAliasAllowedToken) {
 		this.chAliasAllowedToken = chAliasAllowedToken;
 		return this;
 	}
@@ -310,21 +310,21 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	public String getVarDeleteTokenStr() {
 		return ""+chVarDeleteToken;
 	}
-	protected ConsoleCommands setVarDeleteToken(Character chVarDeleteToken) {
+	protected CommandsDelegatorI setVarDeleteToken(Character chVarDeleteToken) {
 		this.chVarDeleteToken = chVarDeleteToken;
 		return this;
 	}
 	public Character getCommentPrefix() {
 		return chCommentPrefix;
 	}
-	protected ConsoleCommands setCommentPrefix(Character chCommentPrefix) {
+	protected CommandsDelegatorI setCommentPrefix(Character chCommentPrefix) {
 		this.chCommentPrefix = chCommentPrefix;
 		return this;
 	}
 	public Character getCommandPrefix() {
 		return chCommandPrefix;
 	}
-	protected ConsoleCommands setCommandPrefix(Character chCommandPrefix) {
+	protected CommandsDelegatorI setCommandPrefix(Character chCommandPrefix) {
 		this.chCommandPrefix = chCommandPrefix;
 		return this;
 	}
@@ -350,7 +350,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	
 	protected boolean checkCmdValidityBoolTogglers(){
 		btgReferenceMatched=null;
-		for(BoolTogglerCmd btg : BoolTogglerCmd.getListCopy()){
+		for(BoolTogglerCmdField btg : BoolTogglerCmdField.getListCopy()){
 			if(checkCmdValidity(btg.getOwnerAsCmdListener(), btg.getCmdId(), "[bEnable] "+btg.getHelp(), true)){
 				btgReferenceMatched = btg;
 				break;
@@ -362,7 +362,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strValidCmd){
 		return checkCmdValidity(iccl, strValidCmd, null);
 	}
-	public boolean checkCmdValidity(IConsoleCommandListener iccl, StringFieldCmd strfValidCmd, String strComment){
+	public boolean checkCmdValidity(IConsoleCommandListener iccl, StringCmdField strfValidCmd, String strComment){
 		return checkCmdValidity(iccl, strfValidCmd.toString(), strComment);
 	}
 	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strValidCmd, String strComment){
@@ -425,7 +425,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	
 	protected void assertConfigured(){
 		if(bConfigured)return;
-		throw new NullPointerException(ConsoleCommands.class.getName()+" was not configured!");
+		throw new NullPointerException(CommandsDelegatorI.class.getName()+" was not configured!");
 	}
 	
 	/**
@@ -501,7 +501,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		if(checkCmdValidity(null,"execBatchCmdsFromFile ","<strFileName>")){
 			String strFile = paramString(1);
 			if(strFile!=null){
-				addCmdListOneByOneToQueue(Misc.i().fileLoad(strFile),false,false);
+				addCmdListOneByOneToQueue(MiscI.i().fileLoad(strFile),false,false);
 //				astrExecConsoleCmdsQueue.addAll(Misc.i().fileLoad(strFile));
 				bCmdWorked=true;
 			}
@@ -529,7 +529,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				}
 				
 				if(fl.exists()){
-					for(String str : Misc.i().fileLoad(fl)){
+					for(String str : MiscI.i().fileLoad(fl)){
 						dumpSubEntry(str);
 					}
 				}else{
@@ -600,7 +600,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			for(int i=0;i<astrImportantMsgBufferList.size();i++){
 				if(iIndex!=null && iIndex.intValue()!=i)continue;
 				
-				ImportantMsg imsg = astrImportantMsgBufferList.get(i);
+				ImportantMsgData imsg = astrImportantMsgBufferList.get(i);
 				if(iIndex==null && strFilter!=null && !imsg.strMsg.toLowerCase().contains(strFilter.toLowerCase()))continue;
 				
 				dumpSubEntry(""+i+": "+imsg.strMsg);
@@ -635,7 +635,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(null,"showSetup","show restricted variables")){
-			for(String str:Misc.i().fileLoad(flSetup)){
+			for(String str:MiscI.i().fileLoad(flSetup)){
 				dumpSubEntry(str);
 			}
 			bCmdWorked=true;
@@ -718,7 +718,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		}else
 		{
 			for(IConsoleCommandListener icc:aConsoleCommandListenerList){
-				ECmdReturnStatus ecrs = icc.executePreparedCommand(this);
+				ECmdReturnStatus ecrs = icc.execConsoleCommand(this);
 				switch(ecrs){
 					case NotFound:
 					case Skip:
@@ -753,7 +753,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			/**
 			 * create
 			 */
-			Alias alias = new Alias(this);
+			AliasData alias = new AliasData(this);
 			
 			String[] astr = strCmdLine.split(" ");
 			if(astr.length>=3){
@@ -765,11 +765,11 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				
 				alias.strCmdLine=String.join(" ", Arrays.copyOfRange(astr, 2, astr.length));
 				
-				Alias aliasFound=getAlias(alias.strAliasId);
+				AliasData aliasFound=getAlias(alias.strAliasId);
 				if(aliasFound!=null)aAliasList.remove(aliasFound);
 				
 				aAliasList.add(alias);
-				Misc.i().fileAppendLine(flDB, alias.toString());
+				MiscI.i().fileAppendLine(flDB, alias.toString());
 				dumpSubEntry(alias.toString());
 				
 				bLastAliasCreatedSuccessfuly = true;
@@ -789,7 +789,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				.split(" ")[0]
 				.substring(strExecAliasPrefix.length())
 				.toLowerCase();
-			Alias alias = getAlias(strAliasId);
+			AliasData alias = getAlias(strAliasId);
 			if(alias!=null){
 				if(alias.bBlocked){
 					dumpWarnEntry(alias.toString()); //will show the blocked status
@@ -819,7 +819,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 * @param bDumpToConsole if false, will only log to file
 	 * @param strLineOriginal
 	 */
-	protected void dumpEntry(DumpEntry de){
+	protected void dumpEntry(DumpEntryData de){
 		dumpSave(de);
 		
 		if(!icui.isInitialized()){
@@ -939,7 +939,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public void dumpInfoEntry(String str){
-		dumpEntry(false, btgShowInfo.get(), false, Misc.i().getSimpleTime(btgShowMiliseconds.get())+strInfoEntryPrefix+str);
+		dumpEntry(false, btgShowInfo.get(), false, MiscI.i().getSimpleTime(btgShowMiliseconds.get())+strInfoEntryPrefix+str);
 	}
 	
 	public void dumpWarnEntry(String str){
@@ -947,16 +947,16 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		Exception ex = new Exception("(This is just a "+strType+" stacktrace) "+str);
 		ex.setStackTrace(Thread.currentThread().getStackTrace());
 		addImportantMsgToBuffer(strType,str,ex);
-		dumpEntry(false, btgShowWarn.get(), false, Misc.i().getSimpleTime(btgShowMiliseconds.get())+strWarnEntryPrefix+str);
+		dumpEntry(false, btgShowWarn.get(), false, MiscI.i().getSimpleTime(btgShowMiliseconds.get())+strWarnEntryPrefix+str);
 	}
 	
 	private void addImportantMsgToBuffer(String strMsgType,String strMsgKey,Exception ex){
-		addImportantMsgToBuffer(strMsgType, new ImportantMsg(strMsgKey,ex,ex.getStackTrace()));
+		addImportantMsgToBuffer(strMsgType, new ImportantMsgData(strMsgKey,ex,ex.getStackTrace()));
 	}
 //	private void addImportantMsgToBuffer(String strMsgType,String strMsgKey,StackTraceElement[] aste){
 //		addImportantMsgToBuffer(strMsgType, new ImportantMsg(strMsgKey,null,aste));
 //	}
-	private void addImportantMsgToBuffer(String strMsgType,ImportantMsg imsg){
+	private void addImportantMsgToBuffer(String strMsgType,ImportantMsgData imsg){
 		String str="["+strMsgType+"] "+imsg.strMsg;
 		if(astrImportantMsgBufferList.contains(imsg)){ //that object overriden hashcode/equals is used at contains() 
 			/**
@@ -975,9 +975,9 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		Exception ex = new Exception("(This is just a "+strType+" stacktrace) "+str);
 		ex.setStackTrace(Thread.currentThread().getStackTrace());
 		addImportantMsgToBuffer(strType,str,ex);
-		dumpEntry(new DumpEntry()
+		dumpEntry(new DumpEntryData()
 			.setDumpToConsole(btgShowWarn.get())
-			.setLineOriginal(Misc.i().getSimpleTime(btgShowMiliseconds.get())+strErrorEntryPrefix+str)
+			.setLineOriginal(MiscI.i().getSimpleTime(btgShowMiliseconds.get())+strErrorEntryPrefix+str)
 		);
 //		dumpEntry(false, btgShowWarn.get(), false, Misc.i().getSimpleTime(btgShowMiliseconds.get())+strErrorEntryPrefix+str);
 	}
@@ -992,26 +992,26 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		ex.setStackTrace(Thread.currentThread().getStackTrace());
 		addImportantMsgToBuffer(strType,str,ex);
 		dumpEntry(false, btgShowDeveloperWarn.get(), false, 
-				Misc.i().getSimpleTime(btgShowMiliseconds.get())+strDevWarnEntryPrefix+str);
+				MiscI.i().getSimpleTime(btgShowMiliseconds.get())+strDevWarnEntryPrefix+str);
 	}
 	
 	public void dumpDebugEntry(String str){
-		dumpEntry(new DumpEntry()
+		dumpEntry(new DumpEntryData()
 			.setDumpToConsole(btgShowDebugEntries.get())
 			.setLineOriginal("[DBG]"+str)
 		);
 	}
 	
 	public void dumpDevInfoEntry(String str){
-		dumpEntry(new DumpEntry()
+		dumpEntry(new DumpEntryData()
 			.setDumpToConsole(btgShowDeveloperInfo.get())
-			.setLineOriginal(Misc.i().getSimpleTime(btgShowMiliseconds.get())+strDevInfoEntryPrefix+str)
+			.setLineOriginal(MiscI.i().getSimpleTime(btgShowMiliseconds.get())+strDevInfoEntryPrefix+str)
 		);
 //		dumpEntry(false, btgShowDeveloperInfo.get(), false, 
 //			Misc.i().getSimpleTime(btgShowMiliseconds.get())+strDevInfoEntryPrefix+str);
 	}
 	
-	protected void dumpExceptionEntry(ImportantMsg imsg, Integer iShowStackElementsCount) {
+	protected void dumpExceptionEntry(ImportantMsgData imsg, Integer iShowStackElementsCount) {
 		dumpExceptionEntry(imsg.ex, imsg.aste, iShowStackElementsCount, false);
 	}
 	public void dumpExceptionEntry(Exception ex){
@@ -1027,7 +1027,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	protected void dumpExceptionEntry(Exception ex, StackTraceElement[] aste, Integer iShowStackElementsCount, boolean bAddToMsgBuffer){
 		String strTime="";
 		if(bAddToMsgBuffer){
-			strTime=Misc.i().getSimpleTime(btgShowMiliseconds.get());
+			strTime=MiscI.i().getSimpleTime(btgShowMiliseconds.get());
 			addImportantMsgToBuffer("Exception",ex.toString(),ex);
 		}
 		
@@ -1067,7 +1067,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			/**
 			 * conflict check
 			 */
-			for(Command cmd:acmdList){
+			for(CommandData cmd:acmdList){
 //			for(String strBase:astrBaseCmdValidList){
 				if(cmd.getBaseCmd().equalsIgnoreCase(strBaseCmdNew)){
 					strConflict="";
@@ -1087,7 +1087,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			}
 			
 			if(strConflict==null){
-				acmdList.add(new Command(iccl, strBaseCmdNew, strComment));
+				acmdList.add(new CommandData(iccl, strBaseCmdNew, strComment));
 //				astrBaseCmdValidList.add(strBaseCmdNew);
 //				astrCmdWithCmtValidList.add(strNew);
 				
@@ -1212,11 +1212,11 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		}else
 		if(strCmp.equals("||")){
 			return varSet(strVarId, ""+
-				(Misc.i().parseBoolean(strValueLeft) || Misc.i().parseBoolean(strValueRight)), true);
+				(MiscI.i().parseBoolean(strValueLeft) || MiscI.i().parseBoolean(strValueRight)), true);
 		}else
 		if(strCmp.equals("&&")){
 			return varSet(strVarId, ""+
-				(Misc.i().parseBoolean(strValueLeft) && Misc.i().parseBoolean(strValueRight)), true);
+				(MiscI.i().parseBoolean(strValueLeft) && MiscI.i().parseBoolean(strValueRight)), true);
 		}else
 		if(strCmp.equals(">")){
 			return varSet(strVarId, ""+
@@ -1248,13 +1248,13 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			astr.add(varReportPrepare(strVarId));
 		}
 		
-		for(Alias alias:aAliasList){
+		for(AliasData alias:aAliasList){
 			astr.add(alias.toString());
 		}
 		
 		flDB.delete();
-		Misc.i().fileAppendLine(flDB, getCommentPrefix()+" DO NOT MODIFY! auto generated. Set overrides at user init file!");
-		Misc.i().fileAppendListTS(flDB, astr);
+		MiscI.i().fileAppendLine(flDB, getCommentPrefix()+" DO NOT MODIFY! auto generated. Set overrides at user init file!");
+		MiscI.i().fileAppendListTS(flDB, astr);
 		
 		dumpInfoEntry("Database saved: "
 			+astrVarList.size()+" vars, "
@@ -1275,7 +1275,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				 * prepend on the queue is important mainly at the initialization
 				 */
 				dumpInfoEntry("Loading Console Database:");
-				addCmdListOneByOneToQueue(Misc.i().fileLoad(flDB),true,false);
+				addCmdListOneByOneToQueue(MiscI.i().fileLoad(flDB),true,false);
 				return true;
 			case backup:
 				return databaseBackup();
@@ -1288,7 +1288,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				
 				return databaseSave();
 			case show:
-				for(String str:Misc.i().fileLoad(flDB)){
+				for(String str:MiscI.i().fileLoad(flDB)){
 					dumpSubEntry(str);
 				}
 				return true;
@@ -1361,7 +1361,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				/**
 				 * will list all aliases (or filtered)
 				 */
-				for(Alias alias:aAliasList){
+				for(AliasData alias:aAliasList){
 					if(strFilter!=null && !alias.toString().toLowerCase().contains(strFilter.toLowerCase()))continue;
 					dumpSubEntry(alias.toString());
 				}
@@ -1411,9 +1411,9 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		return false;
 	}
 
-	protected Alias getAlias(String strAliasId){
-		Alias aliasFound=null;
-		for(Alias aliasCheck : aAliasList){
+	protected AliasData getAlias(String strAliasId){
+		AliasData aliasFound=null;
+		for(AliasData aliasCheck : aAliasList){
 			if(aliasCheck.strAliasId.toLowerCase().equals(strAliasId.toLowerCase())){
 				aliasFound = aliasCheck;
 				break;
@@ -1426,7 +1426,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		return getVar(strVarId)!=null;
 	}
 	
-	protected VarIdValueOwner getVar(String strVarId){
+	protected VarIdValueOwnerData getVar(String strVarId){
 		return selectVarSource(strVarId).get(strVarId);
 	}
 
@@ -1434,7 +1434,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 * 
 	 * @return false if toggle failed
 	 */
-	protected boolean toggle(BoolTogglerCmd btg){
+	protected boolean toggle(BoolTogglerCmdField btg){
 		if(paramBooleanCheckForToggle(1)){
 			Boolean bEnable = paramBoolean(1);
 			btg.set(bEnable==null ? !btg.get() : bEnable); //overrider
@@ -1681,7 +1681,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 
 	protected boolean cmdVarAdd(String strVarId, String strValueAdd, boolean bSave, boolean bOverwrite){
-		return cmdVarAdd(getVar(strVarId), new VarIdValueOwner(strVarId, strValueAdd, null), bSave, bOverwrite);
+		return cmdVarAdd(getVar(strVarId), new VarIdValueOwnerData(strVarId, strValueAdd, null), bSave, bOverwrite);
 	}
 	/**
 	 * In case variable exists will be this method.
@@ -1690,11 +1690,11 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 * @param bOverwrite
 	 * @return
 	 */
-	protected boolean cmdVarAdd(VarIdValueOwner vivoExisting, VarIdValueOwner vivoAdd, boolean bSave, boolean bOverwrite){
+	protected boolean cmdVarAdd(VarIdValueOwnerData vivoExisting, VarIdValueOwnerData vivoAdd, boolean bSave, boolean bOverwrite){
 		if(isRestrictedAndDoesNotExist(vivoExisting.strId))return false;
 		
 		Object objValueNew = null;
-		VarIdValueOwner vivoCurrent = selectVarSource(vivoExisting.strId).get(vivoExisting.strId);
+		VarIdValueOwnerData vivoCurrent = selectVarSource(vivoExisting.strId).get(vivoExisting.strId);
 		
 		if(vivoCurrent.objValue==null){
 			dumpExceptionEntry(new NullPointerException("value is null for var "+vivoExisting.strId));
@@ -1705,7 +1705,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //		if(vivoCurrent.objValue!=null){
 			if(Boolean.class.isAssignableFrom(vivoCurrent.objValue.getClass())){
 				// boolean is always overwrite
-				objValueNew = Misc.i().parseBoolean(strValueAdd);
+				objValueNew = MiscI.i().parseBoolean(strValueAdd);
 			}else
 			if(Long.class.isAssignableFrom(vivoCurrent.objValue.getClass())){
 				Long lValueCurrent = (Long)vivoCurrent.objValue;
@@ -1758,7 +1758,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //	protected void setVarValue(String strVarId, VarIdValueOwner vivo){
 //		selectVarSource(strVarId).put(strVarId,vivo);
 //	}
-	protected TreeMap<String, VarIdValueOwner> selectVarSource(String strVarId){
+	protected TreeMap<String, VarIdValueOwnerData> selectVarSource(String strVarId){
 		if(isRestricted(strVarId)){
 			return tmRestrictedVariables;
 		}else{
@@ -1793,10 +1793,10 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			}
 		}
 		
-		Misc.i().fileAppendLine(getVarFile(strVarId), strCommentOut+varReportPrepare(strVarId)+strReadOnlyComment);
+		MiscI.i().fileAppendLine(getVarFile(strVarId), strCommentOut+varReportPrepare(strVarId)+strReadOnlyComment);
 	}
 	
-	protected boolean varApply(VarIdValueOwner vivo, boolean bSave){
+	protected boolean varApply(VarIdValueOwnerData vivo, boolean bSave){
 		/**
 		 * creates the console variable
 		 */
@@ -1816,7 +1816,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public String varReportPrepare(String strVarId) {
-		VarIdValueOwner vivo = selectVarSource(strVarId).get(strVarId);
+		VarIdValueOwnerData vivo = selectVarSource(strVarId).get(strVarId);
 		String str="";
 		
 		str+=getCommandPrefix();
@@ -1841,7 +1841,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public void varReport(String strVarId) {
-		VarIdValueOwner vivo=selectVarSource(strVarId).get(strVarId);
+		VarIdValueOwnerData vivo=selectVarSource(strVarId).get(strVarId);
 		if(vivo!=null){
 			dumpSubEntry(varReportPrepare(strVarId));
 		}else{
@@ -1849,7 +1849,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		}
 	}
 	
-	public boolean varSet(StringFieldCmd sfId, String strValue, boolean bSave) {
+	public boolean varSet(StringCmdField sfId, String strValue, boolean bSave) {
 		return varSet(
 			RESTRICTED_TOKEN+sfId.toString(),
 			strValue,
@@ -1873,7 +1873,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //	}
 	
 	private boolean varRestoreTo(IVarIdValueOwner owner){
-		VarIdValueOwner vivo = getVar(RESTRICTED_TOKEN+owner.getVarId());
+		VarIdValueOwnerData vivo = getVar(RESTRICTED_TOKEN+owner.getVarId());
 		if(vivo==null)return false;
 		owner.setObjectValue(vivo.objValue);
 		dumpSubEntry(owner.getReport());
@@ -1933,7 +1933,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		}
 		
 		return varSet(
-			new VarIdValueOwner(
+			new VarIdValueOwnerData(
 				RESTRICTED_TOKEN+owner.getVarId(),
 				owner.getValueRaw(),
 				owner),
@@ -1948,10 +1948,10 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 * @return
 	 */
 	public boolean varSet(String strVarId, String strValue, boolean bSave) {
-		boolean bOk=varSet(new VarIdValueOwner(strVarId, strValue, null), bSave);
+		boolean bOk=varSet(new VarIdValueOwnerData(strVarId, strValue, null), bSave);
 		
 		if(bOk){
-			VarIdValueOwner vivo = getVar(strVarId);
+			VarIdValueOwnerData vivo = getVar(strVarId);
 			if(vivo.owner instanceof IVarIdValueOwner){
 				varRestoreTo(vivo.owner);
 			}else
@@ -1982,7 +1982,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	 * @param strValue
 	 * @return
 	 */
-	public boolean varSet(VarIdValueOwner vivo, boolean bSave) {
+	public boolean varSet(VarIdValueOwnerData vivo, boolean bSave) {
 		if(getAlias(vivo.strId)!=null){
 			dumpErrorEntry("Variable identifier '"+vivo.strId+"' conflicts with existing alias!");
 			return false;
@@ -1990,7 +1990,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		
 		if(vivo.objValue==null)return false; //strValue=""; //just creates the var
 		
-		VarIdValueOwner vivoExisting = getVar(vivo.strId);
+		VarIdValueOwnerData vivoExisting = getVar(vivo.strId);
 		if(vivoExisting!=null){
 //			if(vivoExisting.owner instanceof BoolToggler){
 //				int i=0;
@@ -2007,7 +2007,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			String strValue = ""+vivo.objValue;
 			if(!bOk)try{vivo.objValue=Long  .parseLong     (strValue);bOk=varApply(vivo,bSave);}catch(NumberFormatException e){}// accepted exception!
 			if(!bOk)try{vivo.objValue=Double.parseDouble   (strValue);bOk=varApply(vivo,bSave);}catch(NumberFormatException e){}// accepted exception!
-			if(!bOk)try{vivo.objValue=Misc.i().parseBoolean(strValue);bOk=varApply(vivo,bSave);}catch(NumberFormatException e){}// accepted exception!
+			if(!bOk)try{vivo.objValue=MiscI.i().parseBoolean(strValue);bOk=varApply(vivo,bSave);}catch(NumberFormatException e){}// accepted exception!
 			if(!bOk){vivo.objValue=strValue;bOk=varApply(vivo,bSave);}
 			
 			return bOk;
@@ -2033,7 +2033,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 //	}
 	
 	protected boolean aliasBlock(String strAliasId, boolean bBlock) {
-		for(Alias alias : aAliasList){
+		for(AliasData alias : aAliasList){
 			if(alias.strAliasId.toLowerCase().equals(strAliasId.toLowerCase())){
 				dumpInfoEntry((bBlock?"Blocking":"Unblocking")+" alias "+alias.strAliasId);
 				alias.bBlocked=bBlock;
@@ -2049,8 +2049,8 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			dumpInfoEntry("Help for '"+strFilter+"':");
 		}
 		
-		Collections.sort(acmdList, Command.comparator());
-		for(Command cmd:acmdList){
+		Collections.sort(acmdList, CommandData.comparator());
+		for(CommandData cmd:acmdList){
 //			if(strFilter!=null && !cmd.getBaseCmd().toLowerCase().contains(strFilter.toLowerCase()))continue;
 			if(strFilter!=null && !cmd.asHelp().toLowerCase().contains(strFilter.toLowerCase()))continue;
 			dumpSubEntry(getCommandPrefix()+cmd.asHelp());
@@ -2060,7 +2060,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	public ArrayList<String> getBaseCommandsWithComment() {
 		if(astrBaseCmdCmtCacheList.size()!=acmdList.size()){
 			astrBaseCmdCmtCacheList.clear();
-			for(Command cmd:acmdList){
+			for(CommandData cmd:acmdList){
 				astrBaseCmdCmtCacheList.add(cmd.getBaseCmd()+" "+cmd.getComment());
 				Collections.sort(astrBaseCmdCmtCacheList);
 			}
@@ -2071,7 +2071,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	public ArrayList<String> getBaseCommands(){
 		if(astrBaseCmdCacheList.size()!=acmdList.size()){
 			astrBaseCmdCacheList.clear();
-			for(Command cmd:acmdList){
+			for(CommandData cmd:acmdList){
 				astrBaseCmdCacheList.add(cmd.getBaseCmd());
 				Collections.sort(astrBaseCmdCacheList);
 			}
@@ -2155,7 +2155,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public void dumpEntry(boolean bApplyNewLineRequests, boolean bDump, boolean bUseSlowQueue, String strLineOriginal){
-		DumpEntry de = new DumpEntry()
+		DumpEntryData de = new DumpEntryData()
 			.setApplyNewLineRequests(bApplyNewLineRequests)
 			.setDumpToConsole(bDump)
 			.setUseSlowQueue(bUseSlowQueue)
@@ -2199,7 +2199,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	protected void addCmdsBlockToPreQueue(ArrayList<String> astrCmdList, boolean bPrepend, boolean bShowExecIndex, String strBlockInfo){
-		PreQueueCmdsBlockSubList pqe = new PreQueueCmdsBlockSubList();
+		PreQueueCmdsBlockSubListData pqe = new PreQueueCmdsBlockSubListData();
 		pqe.strBlockInfo=strBlockInfo;
 		pqe.bPrepend=bPrepend;
 		pqe.astrCmdList = new ArrayList<String>(astrCmdList);
@@ -2228,7 +2228,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	protected void updateExecPreQueuedCmdsBlockDispatcher(){
-		for(PreQueueCmdsBlockSubList pqe:astrExecConsoleCmdsPreQueue.toArray(new PreQueueCmdsBlockSubList[0])){
+		for(PreQueueCmdsBlockSubListData pqe:astrExecConsoleCmdsPreQueue.toArray(new PreQueueCmdsBlockSubListData[0])){
 			if(pqe.tdSleep!=null){
 				if(pqe.tdSleep.isReady()){
 					if(doesCmdQueueStillHasUId(commentToAppend(pqe.getUniqueInfo()))){
@@ -2243,7 +2243,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 				}else{
 					if(!pqe.bInfoSleepBegin){
 						dumpDevInfoEntry("Sleeping for "
-							+Misc.i().fmtFloat(pqe.tdSleep.getDelayLimitSeconds())+"s: "
+							+MiscI.i().fmtFloat(pqe.tdSleep.getDelayLimitSeconds())+"s: "
 							+commentToAppend(pqe.getUniqueInfo()));
 						pqe.bInfoSleepBegin =true;
 					}
@@ -2270,7 +2270,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 							pqe.bForceFailBlockExecution=true;
 							break;
 						}
-						pqe.tdSleep = new TimedDelayVar(fDelay);
+						pqe.tdSleep = new TimedDelayVarField(fDelay);
 						pqe.tdSleep.updateTime();
 //						dumpDevInfoEntry(strCmd);
 						break;
@@ -2295,7 +2295,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			}
 		}
 	}
-	public void addCmdToQueue(StringFieldCmd sfFullCmdLine){
+	public void addCmdToQueue(StringCmdField sfFullCmdLine){
 		addCmdToQueue(sfFullCmdLine.toString());
 	}
 	public void addCmdToQueue(String strFullCmdLine){
@@ -2348,12 +2348,12 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		}
 	}
 	protected void cmdHistLoad() {
-		astrCmdHistory.addAll(Misc.i().fileLoad(flCmdHist));
+		astrCmdHistory.addAll(MiscI.i().fileLoad(flCmdHist));
 	}
 	
-	protected void dumpSave(DumpEntry de) {
+	protected void dumpSave(DumpEntryData de) {
 //		if(de.isSavedToLogFile())return;
-		Misc.i().fileAppendLine(flLastDump,de.getLineOriginal());
+		MiscI.i().fileAppendLine(flLastDump,de.getLineOriginal());
 	}
 	/**
 	 * These variables can be loaded from the setup file!
@@ -2371,14 +2371,14 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		/**
 		 * comments for user
 		 */
-		Misc.i().fileAppendLine(flSetup, getCommentPrefix()+" DO NOT EDIT!");
-		Misc.i().fileAppendLine(flSetup, getCommentPrefix()
+		MiscI.i().fileAppendLine(flSetup, getCommentPrefix()+" DO NOT EDIT!");
+		MiscI.i().fileAppendLine(flSetup, getCommentPrefix()
 			+" This file will be overwritten by the application!");
-		Misc.i().fileAppendLine(flSetup, getCommentPrefix()
+		MiscI.i().fileAppendLine(flSetup, getCommentPrefix()
 			+" To set overrides use the user init config file.");
-		Misc.i().fileAppendLine(flSetup, getCommentPrefix()
+		MiscI.i().fileAppendLine(flSetup, getCommentPrefix()
 			+" For command's values, the commands usage are required, the variable is just an info about their setup value.");
-		Misc.i().fileAppendLine(flSetup, getCommentPrefix()
+		MiscI.i().fileAppendLine(flSetup, getCommentPrefix()
 			+" Some values will be read tho to provide restricted functionalities not accessible to users.");
 		
 		setupVars(true);
@@ -2393,23 +2393,23 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			""+aAliasList.hashCode(),
 			false);
 		
-		for(BoolTogglerCmd btg:BoolTogglerCmd.getListCopy()){
+		for(BoolTogglerCmdField btg:BoolTogglerCmdField.getListCopy()){
 			varSet(btg,false);
 		}
 		
-		for(TimedDelayVar td:TimedDelayVar.getListCopy()){
+		for(TimedDelayVarField td:TimedDelayVarField.getListCopy()){
 			varSet(td,false);
 		}
 		
-		for(FloatDoubleVar fdv:FloatDoubleVar.getListCopy()){
+		for(FloatDoubleVarField fdv:FloatDoubleVarField.getListCopy()){
 			varSet(fdv,false);
 		}
 		
-		for(IntLongVar ilv:IntLongVar.getListCopy()){
+		for(IntLongVarField ilv:IntLongVarField.getListCopy()){
 			varSet(ilv,false);
 		}
 		
-		for(StringVar sv:StringVar.getListCopy()){
+		for(StringVarField sv:StringVarField.getListCopy()){
 			varSet(sv,false);
 		}
 		
@@ -2449,7 +2449,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		
 //		dumpSubEntry("Previous Second FPS  = "+lPreviousSecondFPS);
 		
-		for(BoolTogglerCmd btg : BoolTogglerCmd.getListCopy()){
+		for(BoolTogglerCmdField btg : BoolTogglerCmdField.getListCopy()){
 			dumpSubEntry(btg.getReport());
 		}
 		
@@ -2557,7 +2557,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	protected void cmdHistSave(String strCmd) {
-		Misc.i().fileAppendLine(flCmdHist,strCmd);
+		MiscI.i().fileAppendLine(flCmdHist,strCmd);
 	}
 	
 	/**
@@ -2569,15 +2569,15 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		if(bConfigured)throw new NullPointerException("already configured.");		// KEEP ON TOP
 		
 //		Init.i().initialize(sapp, this);
-		TimedDelayVar.configure(this);
-		BoolTogglerCmd.configure(this);
-		ReflexFill.i().assertReflexFillFieldsForOwner(this);
-		Debug.i().configure(this);
-		Misc.i().configure(this);
+		TimedDelayVarField.configure(this);
+		BoolTogglerCmdField.configure(this);
+		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
+		DebugI.i().configure(this);
+		MiscI.i().configure(this);
 		ReflexHacks.i().configure(sapp, this, this);
 //		SingleInstanceState.i().initialize(sapp, this);
 		
-		ConsoleCommandsBackgroundState.i().configure(sapp, icui, this);
+		CommandsBackgroundState.i().configure(sapp, icui, this);
 		
 		this.icui=icui;
 		this.sapp=sapp;
@@ -2600,7 +2600,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		setupVars(false);
 		flSetup = new File(fileNamePrepareCfg(strFileSetup,false));
 		if(flSetup.exists()){
-			addCmdListOneByOneToQueue(Misc.i().fileLoad(flSetup), false, false);
+			addCmdListOneByOneToQueue(MiscI.i().fileLoad(flSetup), false, false);
 		}
 		
 		// before user init file
@@ -2618,13 +2618,13 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		// init user cfg
 		flInit = new File(fileNamePrepareCfg(strFileInitConsCmds,false));
 		if(flInit.exists()){
-			addCmdListOneByOneToQueue(Misc.i().fileLoad(flInit), false, false);
+			addCmdListOneByOneToQueue(MiscI.i().fileLoad(flInit), false, false);
 		}else{
-			Misc.i().fileAppendLine(flInit, getCommentPrefix()+" User console commands here will be executed at startup.");
+			MiscI.i().fileAppendLine(flInit, getCommentPrefix()+" User console commands here will be executed at startup.");
 		}
 		
 		// for debug mode, auto show messages
-		if(Debug.i().isInIDEdebugMode())addCmdToQueue(CMD_MESSAGE_REVIEW);
+		if(DebugI.i().isInIDEdebugMode())addCmdToQueue(CMD_MESSAGE_REVIEW);
 		
 		// init valid cmd list
 		executeCommand(null); //to populate the array with available commands
@@ -2678,7 +2678,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 		showClipboard(true);
 	}
 	public void showClipboard(boolean bShowNL){
-		String strClipboard=Misc.i().retrieveClipboardString();
+		String strClipboard=MiscI.i().retrieveClipboardString();
 	//	dumpInfoEntry("Clipboard contents, size="+strClipboard.length()+" ( each line enclosed with \\"+strLineEncloseChar+" ):");
 		dumpInfoEntry("Clipboard contents, size="+strClipboard.length()+":");
 		String[] astrLines = strClipboard.split("\n");
@@ -2699,7 +2699,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 
 	protected String fileNamePrepare(String strFileBaseName, String strFileType, boolean bAddDateTime){
 		return strFileBaseName
-				+(bAddDateTime?"-"+Misc.i().getDateTimeForFilename():"")
+				+(bAddDateTime?"-"+MiscI.i().getDateTimeForFilename():"")
 				+"."+strFileType;
 	}
 	protected String fileNamePrepareCfg(String strFileBaseName, boolean bAddDateTime){
@@ -2864,7 +2864,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			}
 			
 			if(!bJustCollectText){
-				Misc.i().putStringToClipboard(strTextToCopy);
+				MiscI.i().putStringToClipboard(strTextToCopy);
 				
 				icui.clearDumpAreaSelection();
 //				lstbxDumpArea.getSelectionModel().setSelection(-1); //clear selection
@@ -2875,7 +2875,7 @@ public class ConsoleCommands implements IReflexFillCfg, IHandleExceptions{
 			 * use text input field as source
 			 */
 			String str = icui.getInputText();
-			if(!str.trim().equals(""+chCommandPrefix))Misc.i().putStringToClipboard(str);
+			if(!str.trim().equals(""+chCommandPrefix))MiscI.i().putStringToClipboard(str);
 		}
 		
 		if(!bJustCollectText){

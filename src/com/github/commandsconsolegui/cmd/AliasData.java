@@ -25,53 +25,28 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console;
-
-import java.util.Arrays;
+package com.github.commandsconsolegui.cmd;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ImportantMsg{
-	String strMsg;
-	Exception ex;
-	StackTraceElement[] aste;
+public class AliasData{
+	String strAliasId;
+	String strCmdLine; // may contain ending comment too
+	boolean	bBlocked;
+	CommandsDelegatorI cc;
 	
-//	/**
-//	 * for warnings
-//	 * @param str
-//	 * @param aste
-//	 */
-//	public ImportantMsg(String str, StackTraceElement[] aste) {
-//		this(str, null, aste);
-//	}
-//	/**
-//	 * for exceptions
-//	 * @param str
-//	 * @param ex
-//	 */
-//	public ImportantMsg(String str, Exception ex) {
-//		this(str, ex, ex.getStackTrace());
-//	}
-	public ImportantMsg(String str, Exception ex, StackTraceElement[] aste) {
-		this.strMsg=str;
-//		if(ex==null){
-//			ex=new Exception("(no real exception, just the stack trace)");
-//			ex.setStackTrace(aste);
-//		}
-		this.ex=ex;
-		this.aste=aste;
+	public AliasData(CommandsDelegatorI cc){
+		this.cc=cc;
 	}
 	
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + Arrays.hashCode(aste);
-		result = prime * result + ((strMsg == null) ? 0 : strMsg.hashCode());
-		return result;
+	public String toString() {
+		return cc.getCommandPrefix()+"alias "
+			+(bBlocked?cc.getAliasBlockedToken():"")
+			+strAliasId+" "+strCmdLine;
 	}
 	
 	@Override
@@ -82,15 +57,31 @@ public class ImportantMsg{
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ImportantMsg other = (ImportantMsg) obj;
-		if (!Arrays.equals(aste, other.aste))
+		AliasData other = (AliasData) obj;
+		if (bBlocked != other.bBlocked)
 			return false;
-		if (strMsg == null) {
-			if (other.strMsg != null)
+		if (strAliasId == null) {
+			if (other.strAliasId != null)
 				return false;
-		} else if (!strMsg.equals(other.strMsg))
+		} else if (!strAliasId.equals(other.strAliasId))
+			return false;
+		if (strCmdLine == null) {
+			if (other.strCmdLine != null)
+				return false;
+		} else if (!strCmdLine.equals(other.strCmdLine))
 			return false;
 		return true;
 	}
 	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (bBlocked ? 1231 : 1237);
+		result = prime * result
+				+ ((strAliasId == null) ? 0 : strAliasId.hashCode());
+		result = prime * result
+				+ ((strCmdLine == null) ? 0 : strCmdLine.hashCode());
+		return result;
+	}
 }

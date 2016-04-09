@@ -27,7 +27,7 @@
 
 package com.github.commandsconsolegui.console.gui.lemur;
 
-import com.github.commandsconsolegui.console.ConsoleCommands;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.console.gui.ConsoleGuiStateAbs;
 import com.jme3.app.SimpleApplication;
 import com.jme3.scene.Spatial;
@@ -44,10 +44,10 @@ import com.simsilica.lemur.event.DefaultCursorListener;
 public class ConsoleCursorListener extends DefaultCursorListener {
 	ConsoleGuiStateAbs csa;
 	private SimpleApplication	sapp;
-	private ConsoleCommands	cc;
+	private CommandsDelegatorI	cc;
 	private ConsoleGuiStateAbs	cgui;
 	
-	public void configure(SimpleApplication sapp, ConsoleCommands cc, ConsoleGuiStateAbs cgui){
+	public void configure(SimpleApplication sapp, CommandsDelegatorI cc, ConsoleGuiStateAbs cgui){
 		this.sapp=sapp;
 		this.cc=cc;
 		this.cgui=cgui;

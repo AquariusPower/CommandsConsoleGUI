@@ -25,10 +25,11 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.misc;
+package com.github.commandsconsolegui.cmd.varfield;
 
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 
 /**
  * Represents a class field.
@@ -37,7 +38,7 @@ import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfgVariant;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class StringFieldCmd implements IReflexFillCfgVariant{
+public class StringCmdField implements IReflexFillCfgVariant{
 //	String str = "ERROR: NOT SET"; // hashcode depends on it not being null
 	protected String strValue = null;
 	protected IReflexFillCfg rfcfgOwner;
@@ -62,7 +63,7 @@ public class StringFieldCmd implements IReflexFillCfgVariant{
 	 * as it has not returned yet, so it's object owner will not have 
 	 * a valid field (will still be null).
 	 */
-	public StringFieldCmd(IReflexFillCfg rfcfgOwner, String strReflexFillCfgCodePrefixVariant){ // int iReflexFillCfgVariant){
+	public StringCmdField(IReflexFillCfg rfcfgOwner, String strReflexFillCfgCodePrefixVariant){ // int iReflexFillCfgVariant){
 //		this.iReflexFillCfgVariant=iReflexFillCfgVariant;
 		this.strReflexFillCfgCodePrefixVariant = strReflexFillCfgCodePrefixVariant;
 		
@@ -74,7 +75,7 @@ public class StringFieldCmd implements IReflexFillCfgVariant{
 			throw new NullPointerException("cant be null for: "+IReflexFillCfg.class.getName());
 		}
 	}
-	public StringFieldCmd(String strValue){
+	public StringCmdField(String strValue){
 		this.strValue=strValue;
 	}
 	
@@ -93,12 +94,12 @@ public class StringFieldCmd implements IReflexFillCfgVariant{
 		 * if this is called at reflex fill method.
 		 */
 		strValue=errorMessage();
-		this.strValue = ReflexFill.i().createIdentifierWithFieldName(this.rfcfgOwner, this);
+		this.strValue = ReflexFillI.i().createIdentifierWithFieldName(this.rfcfgOwner, this);
 //		throw new NullPointerException("not initialized properly: "+this);
 	}
 	
 	private String errorMessage(){
-		return "ERROR: "+StringFieldCmd.class.getName()+" not yet properly initialized!";
+		return "ERROR: "+StringCmdField.class.getName()+" not yet properly initialized!";
 	}
 	
 	@Override

@@ -25,14 +25,14 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console;
+package com.github.commandsconsolegui.cmd;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.TreeMap;
 
-import com.github.commandsconsolegui.misc.Misc;
-import com.github.commandsconsolegui.misc.StringFieldCmd;
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
+import com.github.commandsconsolegui.misc.MiscI;
 import com.google.common.collect.Lists;
 
 /**
@@ -44,17 +44,17 @@ import com.google.common.collect.Lists;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleScriptCommands extends ConsoleCommands{
-	public final StringFieldCmd CMD_FUNCTION = new StringFieldCmd(this,strFinalCmdCodePrefix);
-	public final StringFieldCmd CMD_FUNCTION_CALL = new StringFieldCmd(this,strFinalCmdCodePrefix);
-	public final StringFieldCmd CMD_FUNCTION_END = new StringFieldCmd(this,strFinalCmdCodePrefix);
+public class ScriptingCommandsDelegatorI extends CommandsDelegatorI{
+	public final StringCmdField CMD_FUNCTION = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_FUNCTION_CALL = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_FUNCTION_END = new StringCmdField(this,strFinalCmdCodePrefix);
 	/**
 	 * conditional user coding
 	 */
-	public final StringFieldCmd CMD_IF = new StringFieldCmd(this,strFinalCmdCodePrefix);
-	public final StringFieldCmd CMD_ELSE_IF = new StringFieldCmd(this,strFinalCmdCodePrefix);
-	public final StringFieldCmd CMD_ELSE = new StringFieldCmd(this,strFinalCmdCodePrefix);
-	public final StringFieldCmd CMD_IF_END = new StringFieldCmd(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_IF = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_ELSE_IF = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_ELSE = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_IF_END = new StringCmdField(this,strFinalCmdCodePrefix);
 
 	public String	strPrepareFunctionBlockForId;
 	public boolean	bFuncCmdLineRunning;
@@ -336,7 +336,7 @@ public class ConsoleScriptCommands extends ConsoleCommands{
 		}
 		
 		Boolean bCondition = null;
-		try{bCondition = Misc.i().parseBoolean(strCondition);}catch(NumberFormatException e){};//accepted exception
+		try{bCondition = MiscI.i().parseBoolean(strCondition);}catch(NumberFormatException e){};//accepted exception
 		
 		if(bNegate)bCondition=!bCondition;
 		
@@ -350,10 +350,10 @@ public class ConsoleScriptCommands extends ConsoleCommands{
 		strCmds.trim();
 		if(strCmds.isEmpty() || strCmds.startsWith(getCommentPrefixStr())){
 			if(bSkipNesting){
-				ConditionalNested cn = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
+				ConditionalNestedData cn = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
 				cn.bCondition = bCondition;
 			}else{
-				aIfConditionNestedList.add(new ConditionalNested(bCondition));
+				aIfConditionNestedList.add(new ConditionalNestedData(bCondition));
 			}
 			
 			bIfConditionExecCommands=bCondition;
@@ -370,7 +370,7 @@ public class ConsoleScriptCommands extends ConsoleCommands{
 	
 	public boolean cmdElse(){
 //		bIfConditionExecCommands=!aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
-		ConditionalNested cn = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
+		ConditionalNestedData cn = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
 		bIfConditionExecCommands = !cn.bCondition;
 		cn.bIfEndIsRequired = true;
 		
@@ -378,7 +378,7 @@ public class ConsoleScriptCommands extends ConsoleCommands{
 	}
 	
 	public boolean cmdElseIf(){
-		ConditionalNested cn = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
+		ConditionalNestedData cn = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
 		if(cn.bIfEndIsRequired){
 			dumpExceptionEntry(new NullPointerException("command "+CMD_ELSE_IF.toString()
 				+" is missplaced, ignoring"));
@@ -408,7 +408,7 @@ public class ConsoleScriptCommands extends ConsoleCommands{
 				bIfConditionExecCommands=null;
 //				bIfEndIsRequired = false;
 			}else{
-				ConditionalNested cn = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
+				ConditionalNestedData cn = aIfConditionNestedList.get(aIfConditionNestedList.size()-1);
 				bIfConditionExecCommands = cn.bCondition;
 			}
 		}else{

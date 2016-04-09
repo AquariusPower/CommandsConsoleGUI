@@ -25,14 +25,18 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.misc;
+package com.github.commandsconsolegui.cmd.varfield;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.console.VarIdValueOwner;
-import com.github.commandsconsolegui.console.VarIdValueOwner.IVarIdValueOwner;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
+import com.github.commandsconsolegui.cmd.VarIdValueOwnerData.IVarIdValueOwner;
+import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
+import com.github.commandsconsolegui.misc.IHandleExceptions;
+import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 
 /**
  * This class is intended to be used only as class field variables.
@@ -40,33 +44,33 @@ import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfgVariant;
  *
  * @author AquariusPower <https://github.com/AquariusPower>
  */
-public class FloatDoubleVar implements IReflexFillCfgVariant, IVarIdValueOwner{
+public class FloatDoubleVarField implements IReflexFillCfgVariant, IVarIdValueOwner{
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	private static String	strCodePrefixVariant = "fdv";
-	private static ArrayList<FloatDoubleVar> afdvList = new ArrayList<FloatDoubleVar>();
+	private static ArrayList<FloatDoubleVarField> afdvList = new ArrayList<FloatDoubleVarField>();
 	Double dValue;
 	private IReflexFillCfg	rfcfgOwner;
 	private String	strVarId;
-	private VarIdValueOwner	vivo;
+	private VarIdValueOwnerData	vivo;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		FloatDoubleVar.ihe=ihe;
+		FloatDoubleVarField.ihe=ihe;
 		bConfigured=true;
 	}
 	
-	public FloatDoubleVar(IReflexFillCfg rfcfgOwnerUseThis, FloatDoubleVar fdv) {
+	public FloatDoubleVarField(IReflexFillCfg rfcfgOwnerUseThis, FloatDoubleVarField fdv) {
 		this(rfcfgOwnerUseThis, fdv.dValue);
 	}
-	public FloatDoubleVar(IReflexFillCfg rfcfgOwnerUseThis, Float fInitialValue) {
+	public FloatDoubleVarField(IReflexFillCfg rfcfgOwnerUseThis, Float fInitialValue) {
 		this(rfcfgOwnerUseThis, fInitialValue==null?null:fInitialValue.doubleValue());
 	}
 	/**
 	 * @param rfcfgOwnerUseThis use null if this is not a class field, but a local variable
 	 * @param dInitialValue if null, the variable will be removed from console vars.
 	 */
-	public FloatDoubleVar(IReflexFillCfg rfcfgOwnerUseThis, Double dInitialValue) {
+	public FloatDoubleVarField(IReflexFillCfg rfcfgOwnerUseThis, Double dInitialValue) {
 		if(rfcfgOwnerUseThis!=null)afdvList.add(this); //only fields allowed
 		this.rfcfgOwner=rfcfgOwnerUseThis;
 		this.dValue=dInitialValue;
@@ -77,8 +81,8 @@ public class FloatDoubleVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 		if(objValue instanceof Double){
 			dValue = ((Double)objValue);
 		}else
-		if(objValue instanceof FloatDoubleVar){
-			dValue = ((FloatDoubleVar)objValue).dValue;
+		if(objValue instanceof FloatDoubleVarField){
+			dValue = ((FloatDoubleVarField)objValue).dValue;
 		}else
 		{
 			dValue = ((Float)objValue).doubleValue();
@@ -89,7 +93,7 @@ public class FloatDoubleVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 
 	@Override
 	public String getCodePrefixVariant() {
-		return FloatDoubleVar.strCodePrefixVariant ;
+		return FloatDoubleVarField.strCodePrefixVariant ;
 	}
 
 	@Override
@@ -111,19 +115,19 @@ public class FloatDoubleVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 		return dValue.doubleValue();
 	}
 	
-	public static ArrayList<FloatDoubleVar> getListCopy(){
-		return new ArrayList<FloatDoubleVar>(afdvList);
+	public static ArrayList<FloatDoubleVarField> getListCopy(){
+		return new ArrayList<FloatDoubleVarField>(afdvList);
 	}
 	
 	@Override
 	public String getVarId() {
-		if(strVarId==null)strVarId=ReflexFill.i().getVarId(rfcfgOwner, strCodePrefixVariant, this);
+		if(strVarId==null)strVarId=ReflexFillI.i().getVarId(rfcfgOwner, strCodePrefixVariant, this);
 		return strVarId;
 	}
 
 	@Override
 	public String getReport() {
-		return getVarId()+" = "+Misc.i().fmtFloat(getDouble(),3);
+		return getVarId()+" = "+MiscI.i().fmtFloat(getDouble(),3);
 	}
 
 	@Override
@@ -132,13 +136,13 @@ public class FloatDoubleVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 	}
 
 	@Override
-	public void setConsoleVarLink(VarIdValueOwner vivo) {
+	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
 		this.vivo=vivo;
 	}
 	
 	@Override
 	public String toString() {
 		if(dValue==null)return null;
-		return Misc.i().fmtFloat(dValue,3);
+		return MiscI.i().fmtFloat(dValue,3);
 	}
 }

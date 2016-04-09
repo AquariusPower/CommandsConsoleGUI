@@ -54,7 +54,7 @@ import javax.naming.directory.BasicAttributes;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class Misc {
+public class MiscI {
 //	public long lLastUniqueId = 0;
 	private IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	private String	strLastUid = "0";
@@ -66,8 +66,8 @@ public class Misc {
 		bConfigured=true;
 	}
 	
-	private static Misc instance = new Misc();
-	public static Misc i(){return instance;}
+	private static MiscI instance = new MiscI();
+	public static MiscI i(){return instance;}
 	
 	public Boolean parseBoolean(String strValue){
 		if(strValue.equalsIgnoreCase("true"))return new Boolean(true);

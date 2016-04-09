@@ -34,9 +34,9 @@ import java.lang.reflect.Field;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ReflexFill{ //implements IConsoleCommandListener{
-	private static ReflexFill instance = new ReflexFill();
-	public static ReflexFill i(){return instance;}
+public class ReflexFillI{ //implements IConsoleCommandListener{
+	private static ReflexFillI instance = new ReflexFillI();
+	public static ReflexFillI i(){return instance;}
 //	private static IHandleExceptions	ihe;
 	
 	private boolean bUseDefaultCfgIfMissing=false;
@@ -237,7 +237,7 @@ public class ReflexFill{ //implements IConsoleCommandListener{
 			}
 			
 			if(bMakePretty){
-				strCommand=Misc.i().makePretty(strCommand, rfcfg.bFirstLetterUpperCase);
+				strCommand=MiscI.i().makePretty(strCommand, rfcfg.bFirstLetterUpperCase);
 //				/**
 //				 * upper case with underscores
 //				 */
@@ -258,7 +258,7 @@ public class ReflexFill{ //implements IConsoleCommandListener{
 				/**
 				 * Already nice to read field name.
 				 */
-				strCommand=Misc.i().firstLetter(strCommand,rfcfg.bFirstLetterUpperCase);
+				strCommand=MiscI.i().firstLetter(strCommand,rfcfg.bFirstLetterUpperCase);
 			}
 		}
 		strCommand=rfcfg.strCommandPrefix+strCommand+rfcfg.strCommandSuffix;
@@ -372,9 +372,9 @@ public class ReflexFill{ //implements IConsoleCommandListener{
 		}
 		
 		String strVarId = strCodePrefixVariant
-			+Misc.i().makePretty(rfcfgOwner.getClass(),false)
-			+Misc.i().firstLetter(
-				ReflexFill.i().createIdentifierWithFieldName(rfcfgOwner,irfcv),
+			+MiscI.i().makePretty(rfcfgOwner.getClass(),false)
+			+MiscI.i().firstLetter(
+				ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,irfcv),
 				true);
 		
 		return strVarId;

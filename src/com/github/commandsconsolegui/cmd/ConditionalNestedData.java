@@ -25,70 +25,17 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console;
-
-import java.util.AbstractList;
-import java.util.ArrayList;
-
-import com.jme3.math.Vector3f;
+package com.github.commandsconsolegui.cmd;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public interface IConsoleUI {
-	public abstract void dumpAllStats();
-
-//	public abstract void setConsoleMaxWidthInCharsForLineWrap(Integer paramInt);
-
-//	public abstract Integer getConsoleMaxWidthInCharsForLineWrap();
-
-	public abstract AbstractList<String> getDumpEntriesSlowedQueue();
-
-	public abstract AbstractList<String> getDumpEntries();
-
-	public abstract AbstractList<String> getAutoCompleteHint();
-
-	public abstract String getInputText();
-
-	public abstract void setInputField(String str);
-
-	public abstract void scrollToBottomRequest();
-
-	public abstract String getDumpAreaSliderStatInfo();
-
-//	public abstract int getCmdHistoryCurrentIndex();
-
-	public abstract int getLineWrapAt();
-
-	public abstract ArrayList<String> wrapLineDynamically(DumpEntry de);
-
-	public abstract void clearDumpAreaSelection();
-
-	public abstract void clearInputTextField();
-	
-	public abstract void updateEngineStats();
-	
-	public abstract void cmdLineWrapDisableDumpArea();
-
-	public abstract boolean cmdEditCopyOrCut(boolean b);
-
-	public abstract void setVisibleRowsAdjustRequest(Integer paramInt);
-
-	public abstract boolean isVisibleRowsAdjustRequested();
-
-	public abstract boolean statsFieldToggle();
-
-	public abstract boolean isInitialized();
-
-	public abstract void resetConsoleGui();
-
-	public abstract boolean isEnabled();
-//
-//	public abstract void setEnabled(boolean b);
-//
-//	public abstract void cleanup();
-
-//	public abstract void setHKenabled(Boolean bEnable);
+public class ConditionalNestedData{
+	public ConditionalNestedData(boolean bCondition){
+		this.bCondition=bCondition;
+	}
+	Boolean bCondition = null;
+	Boolean	bIfEndIsRequired = false;
 }

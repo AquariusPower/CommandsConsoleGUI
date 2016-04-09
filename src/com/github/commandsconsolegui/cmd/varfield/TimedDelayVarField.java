@@ -25,14 +25,18 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.misc;
+package com.github.commandsconsolegui.cmd.varfield;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.console.VarIdValueOwner;
-import com.github.commandsconsolegui.console.VarIdValueOwner.IVarIdValueOwner;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
+import com.github.commandsconsolegui.cmd.VarIdValueOwnerData.IVarIdValueOwner;
+import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
+import com.github.commandsconsolegui.misc.IHandleExceptions;
+import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 
 /**
  * Use this class to avoid running code on every loop.
@@ -45,9 +49,9 @@ import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfgVariant;
  *
  */
 
-public class TimedDelayVar implements IReflexFillCfgVariant, IVarIdValueOwner{
+public class TimedDelayVarField implements IReflexFillCfgVariant, IVarIdValueOwner{
 	private static IHandleExceptions ihe = HandleExceptionsRaw.i();
-	protected static ArrayList<TimedDelayVar> atdList = new ArrayList<TimedDelayVar>();
+	protected static ArrayList<TimedDelayVarField> atdList = new ArrayList<TimedDelayVarField>();
 	
 	protected static Long lCurrentTimeNano;
 	private static boolean	bConfigured;
@@ -62,13 +66,13 @@ public class TimedDelayVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 	private String strVarId;
 
 	private IReflexFillCfg	rfcfgOwner;
-	private VarIdValueOwner	vivo;
+	private VarIdValueOwnerData	vivo;
 
 	public static final String	strCodePrefixVariant = "td";
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		TimedDelayVar.ihe=ihe;
+		TimedDelayVarField.ihe=ihe;
 		bConfigured=true;
 	}
 	
@@ -77,7 +81,7 @@ public class TimedDelayVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 	 * @param lCurrentTimeNano if null, will use realtime
 	 */
 	public static void setCurrentTimeNano(Long lCurrentTimeNano){
-		TimedDelayVar.lCurrentTimeNano = lCurrentTimeNano;
+		TimedDelayVarField.lCurrentTimeNano = lCurrentTimeNano;
 	}
 	
 	public static long getCurrentTimeNano(){
@@ -90,7 +94,7 @@ public class TimedDelayVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 	 * @param rfcfgOwnerUseThis
 	 * @param fDelay
 	 */
-	public TimedDelayVar(float fDelay) {
+	public TimedDelayVarField(float fDelay) {
 		this(null,fDelay);
 	}
 	/**
@@ -98,7 +102,7 @@ public class TimedDelayVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 	 * @param rfcfgOwnerUseThis use null if this is not a class field, but a local variable
 	 * @param fDelay
 	 */
-	public TimedDelayVar(IReflexFillCfg rfcfgOwnerUseThis, float fDelay) {
+	public TimedDelayVarField(IReflexFillCfg rfcfgOwnerUseThis, float fDelay) {
 		if(rfcfgOwnerUseThis!=null)atdList.add(this); //only fields allowed
 		this.rfcfgOwner=rfcfgOwnerUseThis;
 		setDelayLimitSeconds(fDelay);
@@ -291,12 +295,12 @@ public class TimedDelayVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 //		}
 //	}
 	
-	public static ArrayList<TimedDelayVar> getListCopy(){
-		return new ArrayList<TimedDelayVar>(atdList);
+	public static ArrayList<TimedDelayVarField> getListCopy(){
+		return new ArrayList<TimedDelayVarField>(atdList);
 	}
 
 	public String getVarId() {
-		if(strVarId==null)strVarId=ReflexFill.i().getVarId(rfcfgOwner, strCodePrefixVariant, this);
+		if(strVarId==null)strVarId=ReflexFillI.i().getVarId(rfcfgOwner, strCodePrefixVariant, this);
 		return strVarId;
 //		if(strVarId!=null)return strVarId;
 //		if(rfcfgOwner==null){
@@ -345,13 +349,13 @@ public class TimedDelayVar implements IReflexFillCfgVariant, IVarIdValueOwner{
 	}
 
 	@Override
-	public void setConsoleVarLink(VarIdValueOwner vivo) {
+	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
 		this.vivo=vivo;
 	}
 	
 	@Override
 	public String toString() {
 //		if(getValueRaw()==null)return null;
-		return Misc.i().fmtFloat(getDelayLimitSeconds(),3);
+		return MiscI.i().fmtFloat(getDelayLimitSeconds(),3);
 	}
 }

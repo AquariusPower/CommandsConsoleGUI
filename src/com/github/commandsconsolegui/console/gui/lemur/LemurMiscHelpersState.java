@@ -27,17 +27,17 @@
 
 package com.github.commandsconsolegui.console.gui.lemur;
 
-import com.github.commandsconsolegui.console.ConsoleCommands;
-import com.github.commandsconsolegui.console.ConsoleCommands.ECmdReturnStatus;
-import com.github.commandsconsolegui.console.IConsoleCommandListener;
-import com.github.commandsconsolegui.misc.BoolTogglerCmd;
-import com.github.commandsconsolegui.misc.ReflexFill;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.misc.ReflexFill.ReflexFillCfg;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
+import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
+import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexHacks;
-import com.github.commandsconsolegui.misc.StringFieldCmd;
-import com.github.commandsconsolegui.misc.TimedDelayVar;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppState;
@@ -62,9 +62,9 @@ import com.simsilica.lemur.focus.FocusManagerState;
  *
  */
 public class LemurMiscHelpersState implements AppState, IConsoleCommandListener, IReflexFillCfg{
-	public final BoolTogglerCmd	btgTextCursorPulseFadeBlinkMode = new BoolTogglerCmd(this,true);
-	public final BoolTogglerCmd	btgTextCursorLarge = new BoolTogglerCmd(this,true);
-	public final StringFieldCmd CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringFieldCmd(this, ConsoleCommands.strFinalCmdCodePrefix);
+	public final BoolTogglerCmdField	btgTextCursorPulseFadeBlinkMode = new BoolTogglerCmdField(this,true);
+	public final BoolTogglerCmdField	btgTextCursorLarge = new BoolTogglerCmdField(this,true);
+	public final StringCmdField CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringCmdField(this, CommandsDelegatorI.strFinalCmdCodePrefix);
 	
 	private static LemurMiscHelpersState instance = new LemurMiscHelpersState(); 
 	public static LemurMiscHelpersState i(){return instance;}
@@ -75,7 +75,7 @@ public class LemurMiscHelpersState implements AppState, IConsoleCommandListener,
 //		this.sapp = sapp;
 //	}
 	
-	protected TimedDelayVar tdTextCursorBlink = new TimedDelayVar(this,1f);
+	protected TimedDelayVarField tdTextCursorBlink = new TimedDelayVarField(this,1f);
 	private boolean	bBlinkingTextCursor = true;
 	private FocusManagerState	focusState;
 	private TextField	tfToBlinkCursor;
@@ -84,7 +84,7 @@ public class LemurMiscHelpersState implements AppState, IConsoleCommandListener,
 
 	private boolean	bEnabled = true;
 
-	private ConsoleCommands	cc;
+	private CommandsDelegatorI	cc;
 
 	private boolean	bFixInvisibleTextInputCursor;
 
@@ -331,7 +331,7 @@ public class LemurMiscHelpersState implements AppState, IConsoleCommandListener,
 	}
 
 	@Override
-	public ECmdReturnStatus executePreparedCommand(ConsoleCommands	cc) {
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI	cc) {
 		boolean bCmdEndedGracefully = false;
 		
 		if(cc.checkCmdValidity(this,CMD_FIX_INVISIBLE_TEXT_CURSOR ,"in case text cursor is invisible")){
@@ -346,11 +346,11 @@ public class LemurMiscHelpersState implements AppState, IConsoleCommandListener,
 		return cc.cmdFoundReturnStatus(bCmdEndedGracefully);
 	}
 
-	public void configure(SimpleApplication sapp, ConsoleCommands cc) {
+	public void configure(SimpleApplication sapp, CommandsDelegatorI cc) {
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 		this.sapp=sapp;
 		this.cc=cc;
-		ReflexFill.i().assertReflexFillFieldsForOwner(this);
+		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 		cc.addConsoleCommandListener(this);
 		bConfigured=true;
 	}

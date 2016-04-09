@@ -31,12 +31,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import com.github.commandsconsolegui.console.ConsoleCommands;
-import com.github.commandsconsolegui.console.ConsoleCommands.ECmdReturnStatus;
-import com.github.commandsconsolegui.console.IConsoleCommandListener;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFill.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.misc.ReflexFill.ReflexFillCfg;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
+import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.app.SimpleApplication;
 
 /**
@@ -64,8 +65,8 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 	private static ReflexHacks instance = new ReflexHacks();
 	public static ReflexHacks i(){return instance;}
 	
-	private ConsoleCommands cc;
-	public final BoolTogglerCmd	btgAllowHacks = new BoolTogglerCmd(this,false,BoolTogglerCmd.strTogglerCodePrefix,
+	private CommandsDelegatorI cc;
+	public final BoolTogglerCmdField	btgAllowHacks = new BoolTogglerCmdField(this,false,BoolTogglerCmdField.strTogglerCodePrefix,
 		"Hacks allows for otherwise impossible features, but they may break if targeted classes are updated.");
 
 	private IHandleExceptions	ihe = HandleExceptionsRaw.i();
@@ -129,7 +130,7 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 		return objReturn;
 	}
 	
-	public void configure(SimpleApplication sapp, ConsoleCommands cc, IHandleExceptions ihe){
+	public void configure(SimpleApplication sapp, CommandsDelegatorI cc, IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 		this.sapp = sapp;
 		this.cc=cc;
@@ -147,7 +148,7 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 	 * fields to be indicated as owned by this class. 
 	 */
 	@Override
-	public ECmdReturnStatus executePreparedCommand(ConsoleCommands cc) {
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI cc) {
 		return ECmdReturnStatus.NotFound;
 //		/**
 //		 * remove this below if something else is actually implemented here...
