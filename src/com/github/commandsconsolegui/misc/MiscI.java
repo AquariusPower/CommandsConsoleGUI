@@ -36,10 +36,13 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigInteger;
+import java.nio.BufferUnderflowException;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
@@ -47,7 +50,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-import javax.naming.directory.BasicAttributes;
+import com.jme3.system.JmeSystem;
 
 /**
  * 
@@ -298,6 +301,30 @@ public class MiscI {
 //		}
 		
 		return null;
+	}
+	
+	public void saveImageToFile(com.jme3.texture.Image img, String strFileNameWithoutExt) {
+		if(!img.getData(0).isReadOnly()){
+			img = img.clone();
+			img.setData(0, img.getData(0).asReadOnlyBuffer());
+		}
+		img.getData(0).rewind();
+		
+		File fl = new File(strFileNameWithoutExt+".png");
+		OutputStream os=null;
+		try {            
+			os = new FileOutputStream(fl);
+			JmeSystem.writeImageFile(
+				os,
+				"png", // to allow transparency
+				img.getData(0),
+				img.getWidth(),
+				img.getHeight()); 
+		} catch(IOException|BufferUnderflowException ex){
+			ihe.handleExceptionThreaded(ex);
+		} finally {
+			if(os!=null)try {os.close();} catch (IOException ex) {ihe.handleExceptionThreaded(ex);}
+		}             
 	}
 	
 }

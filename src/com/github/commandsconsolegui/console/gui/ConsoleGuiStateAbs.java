@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.console.gui;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
@@ -54,6 +55,7 @@ import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 //import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersState;
 import com.github.commandsconsolegui.misc.AutoCompleteI;
 import com.github.commandsconsolegui.misc.DebugI;
+import com.github.commandsconsolegui.misc.DebugI.EDbgKey;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -83,6 +85,8 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
+import com.jme3.scene.VertexBuffer.Format;
+import com.jme3.texture.Image;
 import com.jme3.texture.Texture2D;
 
 /**
@@ -116,10 +120,13 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	public final StringCmdField CMD_CLOSE_CONSOLE = new StringCmdField(this,CommandsDelegatorI.strFinalCmdCodePrefix);
 	public final StringCmdField CMD_CONSOLE_HEIGHT = new StringCmdField(this,CommandsDelegatorI.strFinalCmdCodePrefix);
 	public final StringCmdField CMD_CONSOLE_STYLE = new StringCmdField(this,CommandsDelegatorI.strFinalCmdCodePrefix);
+	public final StringCmdField CMD_DEFAULT = new StringCmdField(this,CommandsDelegatorI.strFinalCmdCodePrefix);
 	public final StringCmdField CMD_FONT_LIST = new StringCmdField(this,CommandsDelegatorI.strFinalCmdCodePrefix);
 	
-	protected StringVarField	svUserFontOption = new StringVarField(this, "DroidSansMono");
-	protected IntLongVarField ilvFontSize = new IntLongVarField(this, 12);
+	protected String strDefaultFont = "DroidSansMono";
+	protected StringVarField	svUserFontOption = new StringVarField(this, strDefaultFont);
+	protected int iDefaultFontSize = 12;
+	protected IntLongVarField ilvFontSize = new IntLongVarField(this, iDefaultFontSize);
 	
 	/**
 	 * keep "initialized" vars together!
@@ -303,6 +310,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	protected String	strConsoleDefaultFontName = "Console";
 	protected int	iMargin;
 	protected Node	sliderDumpArea;
+	protected BitmapFont	fontConsoleExtraDefault;
 
 //	protected boolean	bUsePreQueue = false; 
 	
@@ -438,6 +446,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 //		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
 		
 		fontConsoleDefault = sapp.getAssetManager().loadFont("Interface/Fonts/Console.fnt");
+		fontConsoleExtraDefault = sapp.getAssetManager().loadFont("Interface/Fonts/DroidSansMono.fnt");
 		sapp.getAssetManager().registerLoader(TrueTypeLoader.class, "ttf");
 		
 //		cc.configure(this,sapp);
@@ -1953,6 +1962,12 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 			if(strStyle==null)strStyle="";
 			bCommandWorked=cmdStyleApply(strStyle);
 		}else
+		if(cc.checkCmdValidity(this,CMD_DEFAULT,"will revert to default values/config/setup (use if something goes wrong)")){
+			//TODO apply all basic settings here, like font size etc
+			svUserFontOption.setObjectValue(strDefaultFont);
+			ilvFontSize.setObjectValue(iDefaultFontSize);
+			bCommandWorked=cmdStyleApply(STYLE_CONSOLE);
+		}else
 		if(cc.checkCmdValidity(this,CMD_FONT_LIST,"[strFilter] use 'all' as filter to show all, otherwise only monospaced will be the default filter")){
 			String strFilter = cc.paramString(1);
 			if(strFilter==null){
@@ -2198,7 +2213,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		
 		String str = cc.prepareStatsFieldText();
 		
-		if(DebugI.i().isKeyEnabled(DebugI.EKey.StatsText))str+=cc.strDebugTest;
+		if(DebugI.i().isKeyEnabled(DebugI.EDbgKey.StatsText))str+=cc.strDebugTest;
 		
 		setStatsText(str);
 		
@@ -2426,7 +2441,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	}
 	
 	/**
-	 * TODO WIP, not working yet...
+	 * TODO WIP, not working yet... may be it is not possible to convert at all yet?
 	 * @param ttf
 	 * @return
 	 */
@@ -2441,13 +2456,17 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 			BitmapCharacter bc = new BitmapCharacter();
 			char ch = ttbg.getCharacter().charAt(0);
 			bc.setChar(ttbg.getCharacter().charAt(0));
-			bc.setHeight(ttbg.h);
+			
 			bc.setWidth(ttbg.w);
+			bc.setHeight(ttbg.h);
+			
 			bc.setX(ttbg.x);
+			bc.setY(ttbg.y);
+			
 			bc.setXAdvance(ttbg.xAdvance);
 			bc.setXOffset(ttbg.getHeightOffset());
-			bc.setY(ttbg.y);
 			bc.setYOffset(ttbg.y);
+			
 			bcs.addCharacter(ch, bc);
 			
 			if(bc.getHeight()>iMaxHeight)iMaxHeight=bc.getHeight();
@@ -2456,8 +2475,19 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		font.setCharSet(bcs);
 		
 		Texture2D t2d = ttf.getAtlas();
+//		Image imgAtlas = t2d.getImage();
+//		Image imgTmp = imgAtlas.clone();
+//		imgTmp.getData(0).rewind();
+//		imgTmp.setData(0, imgTmp.getData(0).asReadOnlyBuffer());
+//		MiscI.i().saveImageToFile(imgTmp,"temp"+ttf.getFont().getName().replace(" ",""));
+		if(DebugI.i().isKeyEnabled(EDbgKey.DumpFontImg)){ //EDbgKey.values()
+			//TODO why image file ends empty??
+			MiscI.i().saveImageToFile(t2d.getImage(),
+				EDbgKey.DumpFontImg.toString()+ttf.getFont().getName().replace(" ",""));
+		}
 		
-		bcs.setBase(iMaxHeight); //TODO what is this!?!?!? 
+		bcs.setBase(iMaxHeight); //TODO what is this!?
+//		bcs.setBase(ttf.getFont().getSize()); 
 		bcs.setHeight(t2d.getImage().getHeight());
 		bcs.setLineHeight(iMaxHeight);
 		bcs.setWidth(t2d.getImage().getWidth());
@@ -2470,7 +2500,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		 */
 //		font.setPages(new Material[]{fontConsoleDefault.getPage(0)});
 //		Material mat = ttf.getBitmapGeom(strGlyphs, ColorRGBA.White).getMaterial();
-		Material mat = fontConsoleDefault.getPage(0).clone();
+//		Material mat = fontConsoleDefault.getPage(0).clone();
+		Material mat = fontConsoleExtraDefault.getPage(0).clone();
 		mat.setTexture("ColorMap", t2d); //TODO wow, weird results from this...
 //		mat.setTexture("ColorMap", ttf.getAtlas());
 //		mat.setParam("ColorMap", VarType.Texture2D, ttf.getAtlas());
@@ -2504,13 +2535,24 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		return font;
 	}
 	
+	/**
+	 * TODO this is probably not to be used...
+	 */
 	public static class TrueTypeFontFromSystem extends TrueTypeFont{
 		public TrueTypeFontFromSystem(AssetManager assetManager, Font font, int pointSize, int outline) {
     	super(assetManager, font, pointSize, outline);
     }
 	}
 	
+	/**
+	 * TODO this is not working
+	 * @param strFontID
+	 * @param iFontSize
+	 * @return
+	 */
 	protected BitmapFont fontFromTTF(String strFontID, int iFontSize){
+		if(true)return null; //TODO dummified
+		
 		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		Font fntFound=null;
 		for(Font fnt:ge.getAllFonts()){
@@ -2522,12 +2564,22 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		
 		if(fntFound==null)return null;
 		
+		cc.dumpInfoEntry("System font: "+strFontID);
+		
+		//TODO this is probably wrong...
+		TrueTypeKey ttk = new TrueTypeKey(strFontID,0,iFontSize,1);
+		fntFound = fntFound.deriveFont(ttk.getStyle(), ttk.getPointSize());
+		
+		/**
+		 * TODO how to directly get a system Font and create a TrueTypeFont without loading it with the file? 
+		 */
 		return convertTTFtoBitmapFont(
 			new TrueTypeFontFromSystem(
 				sapp.getAssetManager(), 
-				fntFound, 
-				iFontSize, 
-				0));
+				fntFound,
+				ttk.getPointSize(),
+				ttk.getOutline()
+			));
 	}
 	
 	protected BitmapFont fontFromTTFFile(String strFilePath, int iFontSize){
@@ -2542,7 +2594,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		TrueTypeFont ttf=null;
 		try{
 			ttf = (TrueTypeFont)sapp.getAssetManager().loadAsset(ttk);
-		}catch(AssetNotFoundException ex){
+		}catch(AssetNotFoundException|IllegalArgumentException ex){
 			// missing file
 			cc.dumpExceptionEntry(ex);
 		}
@@ -2550,6 +2602,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		sapp.getAssetManager().unregisterLocator(fontFile.getParent(), FileLocator.class);
 		
 		if(ttf==null)return null;
+		
+		cc.dumpInfoEntry("Font from file: "+strFilePath);
 		
 		return convertTTFtoBitmapFont(ttf);
 	}
@@ -2586,11 +2640,13 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 			
 			if(font==null){ //bundled fonts
 				strFontName=strFontName.replace(" ","");
-				font = sapp.getAssetManager().loadFont("Interface/Fonts/"+strFontName+".fnt");
+				String strFile = "Interface/Fonts/"+strFontName+".fnt";
+				font = sapp.getAssetManager().loadFont(strFile);
+				if(font!=null)cc.dumpInfoEntry("Bundled font: "+strFile);
 			}
 		}catch(AssetNotFoundException ex){
 			cc.dumpExceptionEntry(ex);
-			font = fontConsoleDefault;
+			font = fontConsoleDefault; //fontConsoleExtraDefault
 //			strFontName="Console";
 //			font = sapp.getAssetManager().loadFont("Interface/Fonts/"+strFontName+".fnt");
 //		svUserFontOption.setObjectValue(strFontName);

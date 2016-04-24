@@ -44,8 +44,9 @@ public class DebugI implements IConsoleCommandListener{
 	/**
 	 * when enabled, these keys are used to perform debug tests
 	 */
-	public static enum EKey{
+	public static enum EDbgKey{
 		StatsText,
+		DumpFontImg,
 		;
 		boolean b;
 	}
@@ -71,7 +72,7 @@ public class DebugI implements IConsoleCommandListener{
 //		this.cc=cc;
 //	}
 //	
-	public boolean isKeyEnabled(EKey ek){
+	public boolean isKeyEnabled(EDbgKey ek){
 		return ek.b;
 	}
 
@@ -79,16 +80,21 @@ public class DebugI implements IConsoleCommandListener{
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI	cc) {
 		boolean bCmdWorked=false;
 		
-		if(cc.checkCmdValidity(this,"debug","[optionToToggle] empty for a list")){
+		if(cc.checkCmdValidity(this,"debug","[optionToToggle] [force:true|false] empty for a list")){
 			String str = cc.paramString(1);
+			Boolean bForce = cc.paramBoolean(2);
 			if(str==null){
-				for(EKey ek:EKey.values()){
+				for(EDbgKey ek:EDbgKey.values()){
 					cc.dumpSubEntry(""+ek+" "+ek.b);
 				}
 			}else{
 				try{
-					EKey ek = EKey.valueOf(str);
-					ek.b=!ek.b;
+					EDbgKey ek = EDbgKey.valueOf(str);
+					if(bForce!=null){
+						ek.b=bForce;
+					}else{
+						ek.b=!ek.b; //toggle mode
+					}
 					bCmdWorked=true;
 				}catch(IllegalArgumentException ex){
 					cc.dumpExceptionEntry(ex);
