@@ -51,7 +51,7 @@ import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
-import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersState;
+//import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersState;
 import com.github.commandsconsolegui.misc.AutoCompleteI;
 import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -83,17 +83,6 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
-import com.simsilica.lemur.Button;
-import com.simsilica.lemur.GuiGlobals;
-import com.simsilica.lemur.Label;
-import com.simsilica.lemur.Panel;
-import com.simsilica.lemur.component.BorderLayout;
-import com.simsilica.lemur.component.TextEntryComponent;
-import com.simsilica.lemur.core.VersionedList;
-import com.simsilica.lemur.event.KeyAction;
-import com.simsilica.lemur.focus.FocusManagerState;
-import com.simsilica.lemur.style.BaseStyles;
-import com.simsilica.lemur.style.Styles;
 
 /**
  * A graphical console where developers and users can issue application commands.
@@ -101,8 +90,6 @@ import com.simsilica.lemur.style.Styles;
  * It must contain the base for the GUI to work.
  * 
  * Project at: https://github.com/AquariusPower/CommandsConsoleGUI
- * 
- * TODO complete lemur specifics migration
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
@@ -177,8 +164,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 //	protected TextField tfAutoCompleteHint;
 	protected SimpleApplication	sapp;
 	protected boolean	bEnabled;
-	protected VersionedList<String>	vlstrDumpEntriesSlowedQueue = new VersionedList<String>();;
-	protected VersionedList<String>	vlstrDumpEntries = new VersionedList<String>();;
+	protected AbstractList<String> vlstrDumpEntriesSlowedQueue;
+	protected AbstractList<String> vlstrDumpEntries;
 	protected AbstractList<String> vlstrAutoCompleteHint;
 	protected Node lstbxAutoCompleteHint;
 	protected int	iShowRows = 1;
@@ -199,9 +186,9 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	protected ArrayList<String> astrStyleList = new ArrayList<String>();
 //	protected int	iCmdHistoryCurrentIndex = 0;
 	protected	String	strNotSubmitedCmd=null; //null is a marker here
-	protected Panel	pnlTest;
+//	protected Panel	pnlTest;
 //	protected String	strTypeCmd="Cmd";
-	protected Label	lblStats;
+//	protected Label	lblStats;
 	protected Float	fLstbxEntryHeight;
 	protected Float	fStatsHeight;
 	protected Float	fInputHeight;
@@ -237,7 +224,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	protected int	iSelectionIndexPreviousForFill = -1;
 	protected Double	dMouseMaxScrollBy = null; //max scroll if set
 //	protected boolean bShowLineIndex = true;
-	protected String strStyle = BaseStyles.GLASS;
+//	protected String strStyle = BaseStyles.GLASS;
+	protected String strStyle = STYLE_CONSOLE;
 //	protected String strStyle = Styles.ROOT_STYLE;
 	protected String	strInputTextPrevious = "";
 	protected AnalogListener	alConsoleScroll;
@@ -247,7 +235,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 //	protected String	strStatsLast = "";
 	protected Node	ctnrStatsAndControls;
 	protected Vector3f	v3fStatsAndControlsSize;
-	protected Button	btnClipboardShow;
+//	protected Button	btnClipboardShow;
 	protected boolean	bConsoleStyleCreated;
 //	protected boolean	bUseDumbWrap = true;
 //	protected Integer	iConsoleMaxWidthInCharsForLineWrap = 0;
@@ -258,8 +246,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 //	protected GridPanel	gpListboxDumpArea;
 //	protected int	iCopyFrom = -1;
 //	protected int	iCopyTo = -1;
-	protected Button	btnCopy;
-	protected Button	btnPaste;
+//	protected Button	btnCopy;
+//	protected Button	btnPaste;
 //	protected boolean	bAddEmptyLineAfterCommand = true;
 //	protected String	strLineEncloseChar = "'";
 //	protected String	strCmdLinePrepared = "";
@@ -290,7 +278,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 //	protected long	lNanoFpsLimiterTime;
 //	protected Boolean	bIfConditionIsValid;
 //	protected ArrayList<DumpEntry> adeDumpEntryFastQueue = new ArrayList<DumpEntry>();
-	protected Button	btnCut;
+//	protected Button	btnCut;
 //	protected ArrayList<ConditionalNested> aIfConditionNestedList = new ArrayList<ConditionalNested>();
 //	protected Boolean	bIfConditionExecCommands;
 //	protected String	strPrepareFunctionBlockForId;
@@ -304,7 +292,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	protected Integer	iStatsTextSafeLength = null;
 	protected boolean	bExceptionOnce = true;
 	protected boolean	bKeepInitiallyInvisibleUntilFirstClosed = false;
-	protected FocusManagerState	focusState;
+//	protected FocusManagerState	focusState;
 	protected Spatial	sptPreviousFocus;
 	protected boolean	bRestorePreviousFocus;
 	protected boolean	bInitializeOnlyTheUI;
@@ -321,6 +309,10 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	 * USER MUST IMPLEMENT THESE METHODS,
 	 * keep them together for easy review
 	 */
+	protected abstract Object getFocus();
+	protected abstract float fontWidth(String strChars, String strStyle, boolean bAveraged);
+	protected abstract void setStatsText(String str);
+	protected abstract String getStatsText();
 	protected abstract void updateVisibleRowsAmount(); 
 	protected abstract void clearHintSelection();
 	protected abstract Integer getHintIndex();
@@ -341,6 +333,11 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 //	protected abstract Vector3f getStatsAndControlsSize();
 //	protected abstract Vector3f getInputFieldSize();
 	/**
+	 * @param obj if null, is to remove focus from everything
+	 * @return
+	 */
+	protected abstract boolean setFocus(Object obj);
+	/**
 	 * @param dIndex if -1, means max index (bottom)
 	 */
 	protected abstract void scrollDumpArea(double dIndex);
@@ -354,7 +351,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	 * @param pnlChild
 	 * @param p
 	 */
-	public abstract void addRemoveContainerConsoleChild(boolean bAdd, Node pnlChild, BorderLayout.Position p);
+	public abstract void addRemoveContainerConsoleChild(boolean bAdd, Node pnlChild);
 	
 //	protected static ConsoleGuiStateAbs instance;
 //	protected static ConsoleGuiStateAbs i(){
@@ -419,9 +416,16 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 //		return fileNamePrepare(strFileBaseName, strFileTypeLog, bAddDateTime);
 //	}
 	
-	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
+	public void initializePre(){
 		if(isInitialized())throw new NullPointerException("already initialized...");
+		
+		astrStyleList.clear();
+		astrStyleList.add(STYLE_CONSOLE);
+	}
+	
+	@Override
+	public void initialize(AppStateManager stateManager, Application appDummyCfgBeforeHere) {
+		initializePre();
 		
 //		sapp = (SimpleApplication)app;
 //		cc.sapp = sapp;
@@ -429,8 +433,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 //		sapp.getStateManager().attach(fpslState);
 		tdStatsRefresh.updateTime();
 		
-		GuiGlobals.initialize(sapp);
-		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
+//		GuiGlobals.initialize(sapp);
+//		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
 		
 		fontConsoleDefault = sapp.getAssetManager().loadFont("Interface/Fonts/Console.fnt");
 		sapp.getAssetManager().registerLoader(TrueTypeLoader.class, "ttf");
@@ -490,9 +494,9 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 			cc.addCmdToQueue(CMD_CLOSE_CONSOLE);
 		}
 		
-		astrStyleList.add(BaseStyles.GLASS);
-		astrStyleList.add(Styles.ROOT_STYLE);
-		astrStyleList.add(STYLE_CONSOLE);
+//		astrStyleList.add(BaseStyles.GLASS);
+//		astrStyleList.add(Styles.ROOT_STYLE);
+//		astrStyleList.add(STYLE_CONSOLE);
 		
 		stateStats = sapp.getStateManager().getState(StatsAppState.class);
 		updateEngineStats();
@@ -855,30 +859,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 //		
 //	}	
 	
-	/**
-	 * DO NOT USE!
-	 * overlapping problem, doesnt work well...
-	 * keep this method as reference! 
-	 */
-	protected void tweakDefaultFontToBecomeFixedSize(){
-		fntMakeFixedWidth = sapp.getAssetManager().loadFont("Interface/Fonts/Default.fnt");
-		BitmapCharacterSet cs = fntMakeFixedWidth.getCharSet();
-		for(int i=0;i<256;i++){ //is there more than 256?
-			BitmapCharacter bc = cs.getCharacter(i);
-			if(bc!=null){
-				bc.setXAdvance(15); 
-			}
-		}
-		GuiGlobals.getInstance().getStyles().setDefault(fntMakeFixedWidth);
-	}
-	
 	protected float fontWidth(String strChars){
 		return fontWidth(strChars, strStyle, true);
-	}
-	protected float fontWidth(String strChars, String strStyle, boolean bAveraged){
-		float f = retrieveBitmapTextFor(new Label(strChars,strStyle)).getLineWidth();
-		if(bAveraged)f/=strChars.length();
-		return f;
 	}
 	
 //	protected void mapKeysForInputField(){
@@ -1144,7 +1126,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	}
 	
 	protected void updateOverrideInputFocus(){
-		Spatial sptWithFocus = LemurMiscHelpersState.i().getFocusManagerState().getFocus();
+		Spatial sptWithFocus = (Spatial) getFocus();
 		
 		if(isEnabled()){
 			if(tfInput!=sptWithFocus){
@@ -1153,7 +1135,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 					bRestorePreviousFocus=true;
 				}
 				
-				LemurMiscHelpersState.i().requestFocus(tfInput);
+				setFocus(tfInput);
 			}
 		}else{
 			/**
@@ -1175,7 +1157,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 					}
 				}
 				
-				LemurMiscHelpersState.i().requestFocus(sptPreviousFocus);
+				setFocus(sptPreviousFocus);
 //				GuiGlobals.getInstance().requestFocus(sptPreviousFocus);
 				sptPreviousFocus = null;
 				bRestorePreviousFocus=false;
@@ -1766,12 +1748,12 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 			
 			if(bSetVisible){
 				if(!bIsVisible){
-					addRemoveContainerConsoleChild(true,ctnrStatsAndControls,BorderLayout.Position.North);
+					addRemoveContainerConsoleChild(true,ctnrStatsAndControls);
 //					ctnrConsole.addChild(ctnrStatsAndControls,BorderLayout.Position.North);
 				}
 			}else{
 				if(bIsVisible){
-					addRemoveContainerConsoleChild(false,ctnrStatsAndControls,null);
+					addRemoveContainerConsoleChild(false,ctnrStatsAndControls);
 //					ctnrConsole.removeChild(ctnrStatsAndControls);
 				}
 			}
@@ -2071,9 +2053,9 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		Down,
 	}
 	
-	protected void navigateCmdHistOrHintBox(TextEntryComponent source, KeyAction key) {
+	protected void navigateCmdHistOrHintBox(Object source, int iKeyCode) {
 		ENav enav = null;
-		switch(key.getKeyCode()){
+		switch(iKeyCode){
 			case KeyInput.KEY_UP	:
 				enav=ENav.Up;
 				break;
@@ -2166,7 +2148,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		
 		boolean bFailed=false;
 		while(true){
-			String str=lblStats.getText();
+			String str=getStatsText();
 			if(str.isEmpty())break;
 			
 			boolean bCheckAlways=true; //safer
@@ -2174,7 +2156,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 				if(iStatsTextSafeLength!=null){
 					if(str.length()>iStatsTextSafeLength){
 						str=str.substring(0,iStatsTextSafeLength);
-						lblStats.setText(str);
+						setStatsText(str);
 					}
 					break;
 				}
@@ -2200,7 +2182,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 				}
 				
 				str=str.substring(0,str.length()-1);
-				lblStats.setText(str);
+				setStatsText(str);
 				
 				bRetry = true;
 				bFailed = true;
@@ -2217,7 +2199,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		
 		if(DebugI.i().isKeyEnabled(DebugI.EKey.StatsText))str+=cc.strDebugTest;
 		
-		lblStats.setText(str);
+		setStatsText(str);
 		
 		bugfixStatsLabelTextSize();
 	}	
@@ -2442,6 +2424,11 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		});
 	}
 	
+	/**
+	 * TODO WIP, not working yet...
+	 * @param ttf
+	 * @return
+	 */
 	protected BitmapFont convertTTFtoBitmapFont(TrueTypeFont ttf){
 		String strGlyphs="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789./*-+?\\;\"!@#$*()&^%";
 		TrueTypeBitmapGlyph attbg[] = ttf.getBitmapGlyphs(strGlyphs);

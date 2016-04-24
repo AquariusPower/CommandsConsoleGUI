@@ -27,12 +27,15 @@
 
 package com.github.commandsconsolegui.console.gui.lemur;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.console.gui.ConsoleGuiStateAbs;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.app.SimpleApplication;
+import com.jme3.font.BitmapCharacter;
+import com.jme3.font.BitmapCharacterSet;
 import com.jme3.font.LineWrapMode;
 import com.jme3.input.KeyInput;
 import com.jme3.math.ColorRGBA;
@@ -58,6 +61,7 @@ import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.event.KeyAction;
 import com.simsilica.lemur.event.KeyActionListener;
 import com.simsilica.lemur.style.Attributes;
+import com.simsilica.lemur.style.BaseStyles;
 import com.simsilica.lemur.style.Styles;
 
 /**
@@ -72,6 +76,11 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 	protected static ConsoleGUILemurState instance;
 	
 	protected ConsoleCursorListener consoleCursorListener;
+	protected Button	btnCopy;
+	protected Button	btnPaste;
+	protected Button	btnClipboardShow;
+	protected Button	btnCut;
+	protected Label	lblStats;
 	
 //	public static void setInstance(ConsoleGUILemurState gui){
 //		if(ConsoleGUILemurState.instance!=null){
@@ -84,7 +93,12 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		if(instance==null)instance=new ConsoleGUILemurState();
 		return instance;
 	}
-
+	
+	public ConsoleGUILemurState(){
+		vlstrDumpEntriesSlowedQueue = new VersionedList<String>();
+		vlstrDumpEntries = new VersionedList<String>();
+	}
+	
 	@Override
 	public void configureBeforeInitializing(SimpleApplication sapp, CommandsDelegatorI cc, int iToggleConsoleKey) {
 		super.configureBeforeInitializing(sapp, cc, iToggleConsoleKey);
@@ -235,7 +249,7 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		 */
 		if(vlstrDumpEntries.isEmpty())vlstrDumpEntries.add(""+cc.getCommentPrefix()+" Initializing console.");
 		
-		getDumpArea().setModel(vlstrDumpEntries);
+		getDumpArea().setModel((VersionedList<String>)vlstrDumpEntries);
 		getDumpArea().setVisibleItems(iShowRows);
 //		lstbx.getGridPanel().setVisibleSize(iShowRows,1);
 		getContainerConsole().addChild(getDumpArea(), BorderLayout.Position.Center);
@@ -416,7 +430,7 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		KeyActionListener actCmdHistoryEntrySelectAction = new KeyActionListener() {
 			@Override
 			public void keyAction(TextEntryComponent source, KeyAction key) {
-				navigateCmdHistOrHintBox(source,key);
+				navigateCmdHistOrHintBox(source,key.getKeyCode());
 			}
 		};
 		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_UP), actCmdHistoryEntrySelectAction);
@@ -632,8 +646,10 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		getContainerConsole().setPreferredSize(v3f);
 	}
 	@Override
-	public void addRemoveContainerConsoleChild(boolean bAdd, Node pnlChild, BorderLayout.Position p){
+	public void addRemoveContainerConsoleChild(boolean bAdd, Node pnlChild){
 		if(bAdd){
+			BorderLayout.Position p = null;
+			if(pnlChild.equals(getContainerStatsAndControls()))p=BorderLayout.Position.North;
 			getContainerConsole().addChild(pnlChild,p);
 		}else{
 			getContainerConsole().removeChild(pnlChild);
@@ -654,5 +670,59 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 	@Override
 	protected Vector3f getSizeOf(Node node) {
 		return ((Panel)node).getSize();
+	}
+
+	/**
+	 * DO NOT USE!
+	 * overlapping problem, doesnt work well...
+	 * keep this method as reference! 
+	 */
+	@Deprecated
+	protected void tweakDefaultFontToBecomeFixedSize(){
+		fntMakeFixedWidth = sapp.getAssetManager().loadFont("Interface/Fonts/Default.fnt");
+		BitmapCharacterSet cs = fntMakeFixedWidth.getCharSet();
+		for(int i=0;i<256;i++){ //is there more than 256?
+			BitmapCharacter bc = cs.getCharacter(i);
+			if(bc!=null){
+				bc.setXAdvance(15); 
+			}
+		}
+		GuiGlobals.getInstance().getStyles().setDefault(fntMakeFixedWidth);
+	}
+	
+	@Override
+	public void initializePre() {
+		super.initializePre();
+		
+		GuiGlobals.initialize(sapp);
+		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
+		
+		astrStyleList.add(BaseStyles.GLASS);
+		astrStyleList.add(Styles.ROOT_STYLE);
+	}
+	
+	@Override
+	protected float fontWidth(String strChars, String strStyle, boolean bAveraged){
+		float f = retrieveBitmapTextFor(new Label(strChars,strStyle)).getLineWidth();
+		if(bAveraged)f/=strChars.length();
+		return f;
+	}
+	
+	@Override
+	protected void setStatsText(String str) {
+		lblStats.setText(str);
+	}
+	@Override
+	protected String getStatsText() {
+		return lblStats.getText();
+	}
+	@Override
+	public Object getFocus(){
+		return LemurMiscHelpersState.i().getFocusManagerState().getFocus();
+	}
+	@Override
+	public boolean setFocus(Object obj){
+		LemurMiscHelpersState.i().requestFocus((Spatial) obj);
+		return obj==null?true:obj.equals(getFocus());
 	}
 }
