@@ -83,6 +83,7 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
+import com.jme3.texture.Texture2D;
 
 /**
  * A graphical console where developers and users can issue application commands.
@@ -2454,10 +2455,12 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		}
 		font.setCharSet(bcs);
 		
+		Texture2D t2d = ttf.getAtlas();
+		
 		bcs.setBase(iMaxHeight); //TODO what is this!?!?!? 
-		bcs.setHeight(256); //TODO max chars?
+		bcs.setHeight(t2d.getImage().getHeight());
 		bcs.setLineHeight(iMaxHeight);
-		bcs.setWidth(256); //TODO max chars?
+		bcs.setWidth(t2d.getImage().getWidth());
 		bcs.setRenderedSize(iMaxHeight);
 //		bcs.setStyle(style);
 		
@@ -2468,7 +2471,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 //		font.setPages(new Material[]{fontConsoleDefault.getPage(0)});
 //		Material mat = ttf.getBitmapGeom(strGlyphs, ColorRGBA.White).getMaterial();
 		Material mat = fontConsoleDefault.getPage(0).clone();
-		mat.setTexture("ColorMap", ttf.getAtlas()); //TODO wow, weird results from this...
+		mat.setTexture("ColorMap", t2d); //TODO wow, weird results from this...
 //		mat.setTexture("ColorMap", ttf.getAtlas());
 //		mat.setParam("ColorMap", VarType.Texture2D, ttf.getAtlas());
 		font.setPages(new Material[]{mat});
