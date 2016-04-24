@@ -27,22 +27,30 @@
 
 package com.github.commandsconsolegui.console.gui;
 
+import java.awt.Font;
+import java.awt.GraphicsEnvironment;
+import java.io.File;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
+import truetypefontlite.TrueTypeBitmapGlyph;
+import truetypefontlite.TrueTypeFont;
+import truetypefontlite.TrueTypeKey;
+import truetypefontlite.TrueTypeLoader;
+
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.DumpEntryData;
 import com.github.commandsconsolegui.cmd.EDataBaseOperations;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.IConsoleUI;
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
+import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
-import com.github.commandsconsolegui.console.gui.lemur.ConsoleCursorListener;
 import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersState;
 import com.github.commandsconsolegui.misc.AutoCompleteI;
 import com.github.commandsconsolegui.misc.DebugI;
@@ -55,6 +63,9 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
 import com.jme3.app.state.AppState;
 import com.jme3.app.state.AppStateManager;
+import com.jme3.asset.AssetManager;
+import com.jme3.asset.AssetNotFoundException;
+import com.jme3.asset.plugins.FileLocator;
 import com.jme3.font.BitmapCharacter;
 import com.jme3.font.BitmapCharacterSet;
 import com.jme3.font.BitmapFont;
@@ -66,27 +77,20 @@ import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.Trigger;
-import com.jme3.math.ColorRGBA;
+import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
 import com.simsilica.lemur.Button;
-import com.simsilica.lemur.Command;
-import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
-import com.simsilica.lemur.HAlignment;
 import com.simsilica.lemur.Label;
-import com.simsilica.lemur.ListBox;
 import com.simsilica.lemur.Panel;
-import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.TextEntryComponent;
 import com.simsilica.lemur.core.VersionedList;
-import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.event.KeyAction;
-import com.simsilica.lemur.event.KeyActionListener;
 import com.simsilica.lemur.focus.FocusManagerState;
 import com.simsilica.lemur.style.BaseStyles;
 import com.simsilica.lemur.style.Styles;
@@ -124,8 +128,10 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	public final StringCmdField CMD_CLOSE_CONSOLE = new StringCmdField(this,CommandsDelegatorI.strFinalCmdCodePrefix);
 	public final StringCmdField CMD_CONSOLE_HEIGHT = new StringCmdField(this,CommandsDelegatorI.strFinalCmdCodePrefix);
 	public final StringCmdField CMD_CONSOLE_STYLE = new StringCmdField(this,CommandsDelegatorI.strFinalCmdCodePrefix);
+	public final StringCmdField CMD_FONT_LIST = new StringCmdField(this,CommandsDelegatorI.strFinalCmdCodePrefix);
 	
 	protected StringVarField	svUserFontOption = new StringVarField(this, "DroidSansMono");
+	protected IntLongVarField ilvFontSize = new IntLongVarField(this, 12);
 	
 	/**
 	 * keep "initialized" vars together!
@@ -165,9 +171,9 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	/**
 	 * other vars!
 	 */
-	protected Container	ctnrConsole;
-	protected ListBox<String>	lstbxDumpArea;
-	protected TextField	tfInput;
+	protected Node	ctnrConsole;
+	protected Node	lstbxDumpArea;
+	protected Node	tfInput;
 //	protected TextField tfAutoCompleteHint;
 	protected SimpleApplication	sapp;
 	protected boolean	bEnabled;
@@ -239,7 +245,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 //	protected String	strValidCmdCharsRegex = "A-Za-z0-9_-"+"\\"+strCommandPrefixChar;
 //	protected String	strValidCmdCharsRegex = "a-zA-Z0-9_"; // better not allow "-" as has other uses like negate number and commands functionalities
 //	protected String	strStatsLast = "";
-	protected Container	ctnrStatsAndControls;
+	protected Node	ctnrStatsAndControls;
 	protected Vector3f	v3fStatsAndControlsSize;
 	protected Button	btnClipboardShow;
 	protected boolean	bConsoleStyleCreated;
@@ -292,7 +298,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 //	protected boolean	bFuncCmdLineSkipTilEnd;
 //	protected long lLastUniqueId = 0;
 
-	protected ConsoleCursorListener consoleCursorListener;
+//	protected ConsoleCursorListener consoleCursorListener;
 
 	protected Spatial	sptScrollTarget;
 	protected Integer	iStatsTextSafeLength = null;
@@ -303,6 +309,11 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	protected boolean	bRestorePreviousFocus;
 	protected boolean	bInitializeOnlyTheUI;
 	protected boolean	bConfigured;
+	protected BitmapFont	font;
+	protected BitmapFont	fontConsoleDefault;
+	protected String	strConsoleDefaultFontName = "Console";
+	protected int	iMargin;
+	protected Node	sliderDumpArea;
 
 //	protected boolean	bUsePreQueue = false; 
 	
@@ -310,12 +321,40 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	 * USER MUST IMPLEMENT THESE METHODS,
 	 * keep them together for easy review
 	 */
+	protected abstract void updateVisibleRowsAmount(); 
 	protected abstract void clearHintSelection();
 	protected abstract Integer getHintIndex();
 	protected abstract ConsoleGuiStateAbs setHintIndex(Integer i);
 	protected abstract ConsoleGuiStateAbs setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines);
 	protected abstract void scrollHintToIndex(int i);
 	protected abstract void lineWrapDisableForChildrenOf(Node gp);
+	protected abstract void mapKeysForInputField();
+	protected abstract int getVisibleRows();
+	protected abstract Vector3f getSizeOf(Node node);
+	//public abstract Vector3f getDumpAreaSliderSize();
+	protected abstract Vector3f getContainerConsolePreferredSize();
+	protected abstract void setContainerConsolePreferredSize(Vector3f v3f);
+	protected abstract void updateDumpAreaSelectedIndex();
+	protected abstract Double getDumpAreaSliderPercent();
+	protected abstract Integer getInputFieldCaratPosition();
+//	protected abstract Vector3f getDumpAreaSize();
+//	protected abstract Vector3f getStatsAndControlsSize();
+//	protected abstract Vector3f getInputFieldSize();
+	/**
+	 * @param dIndex if -1, means max index (bottom)
+	 */
+	protected abstract void scrollDumpArea(double dIndex);
+	/**
+	 * @return a "floating point index" (Dlindex)
+	 */
+	protected abstract double getScrollDumpAreaFlindex();
+	/**
+	 * 
+	 * @param bAdd if false will remove
+	 * @param pnlChild
+	 * @param p
+	 */
+	public abstract void addRemoveContainerConsoleChild(boolean bAdd, Node pnlChild, BorderLayout.Position p);
 	
 //	protected static ConsoleGuiStateAbs instance;
 //	protected static ConsoleGuiStateAbs i(){
@@ -393,6 +432,9 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		GuiGlobals.initialize(sapp);
 		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
 		
+		fontConsoleDefault = sapp.getAssetManager().loadFont("Interface/Fonts/Console.fnt");
+		sapp.getAssetManager().registerLoader(TrueTypeLoader.class, "ttf");
+		
 //		cc.configure(this,sapp);
 		cc.initialize();
 		
@@ -456,6 +498,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		updateEngineStats();
 		
 		// instantiations initializer
+		initializeOnlyTheUIpreInit();
 		initializeOnlyTheUI();
 		
 		bInitiallyClosedOnce=false; // to not interfere on reinitializing after a cleanup
@@ -504,18 +547,35 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		}
 	}
 	
-	/**
-	 * this can be used after a cleanup() too
-	 */
-	protected void initializeOnlyTheUI(){
+	protected void initializeOnlyTheUIpreInit(){
 		if(bInitializeOnlyTheUI)throw new NullPointerException("already configured!");
 		
 		if(sapp==null)throw new NullPointerException("base initialization required");
 		
-		consoleCursorListener = new ConsoleCursorListener();
-		consoleCursorListener.configure(sapp, cc, this);
-		CursorEventControl.addListenersToSpatial(lstbxAutoCompleteHint, consoleCursorListener);
+		v3fApplicationWindowSize = new Vector3f(
+				sapp.getContext().getSettings().getWidth(),
+				sapp.getContext().getSettings().getHeight(),
+				0);
+		
+		iMargin=2;
+		v3fConsoleSize = new Vector3f(
+			v3fApplicationWindowSize.x -(iMargin*2),
+			(v3fApplicationWindowSize.y * fConsoleHeightPerc) -iMargin,
+			0); //TODO why Z shouldnt be 0? changed to 0.1 and 1, but made no difference.
+	}
+	
+	/**
+	 * this can be used after a cleanup() too
+	 */
+	protected void initializeOnlyTheUI(){
+//		consoleCursorListener = new ConsoleCursorListener();
+//		consoleCursorListener.configure(sapp, cc, this);
+//		CursorEventControl.addListenersToSpatial(lstbxAutoCompleteHint, consoleCursorListener);
 		lstbxAutoCompleteHint.setName("ConsoleHints");
+		lstbxDumpArea.setName("ConsoleDumpArea");
+		tfInput.setName("ConsoleInput");
+		ctnrConsole.setName("ConsoleContainer");
+		ctnrStatsAndControls.setName("ConsoleStats");
 		
 //		tdLetCpuRest.updateTime();
 //		tdStatsRefresh.updateTime();
@@ -523,97 +583,91 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		
 //		createMonoSpaceFixedFontStyle();
 		
-		v3fApplicationWindowSize = new Vector3f(
-			sapp.getContext().getSettings().getWidth(),
-			sapp.getContext().getSettings().getHeight(),
-			0);
-		
 		// main container
-		ctnrConsole = new Container(new BorderLayout(), strStyle);
-		ctnrConsole.setName("ConsoleContainer");
-		int iMargin=2;
-		v3fConsoleSize = new Vector3f(
-			v3fApplicationWindowSize.x -(iMargin*2),
-			(v3fApplicationWindowSize.y * fConsoleHeightPerc) -iMargin,
-			0); //TODO why Z shouldnt be 0? changed to 0.1 and 1, but made no difference.
-		ctnrConsole.setPreferredSize(v3fConsoleSize); //setSize() does not work well..
-//		ctnrConsole.setSize(v3fConsoleSize);
+//		ctnrConsole = new Container(new BorderLayout(), strStyle);
+////		int iMargin=2;
+////		v3fConsoleSize = new Vector3f(
+////			v3fApplicationWindowSize.x -(iMargin*2),
+////			(v3fApplicationWindowSize.y * fConsoleHeightPerc) -iMargin,
+////			0); //TODO why Z shouldnt be 0? changed to 0.1 and 1, but made no difference.
+//		ctnrConsole.setPreferredSize(v3fConsoleSize); //setSize() does not work well..
+////		ctnrConsole.setSize(v3fConsoleSize);
 		sapp.getGuiNode().attachChild(ctnrConsole);
 		ctnrConsole.setLocalTranslation(
 			iMargin, 
 			sapp.getContext().getSettings().getHeight()-iMargin, 
 			0);
 		
-		/**
-		 * TOP ELEMENT =================================================================
-		 */
-		ctnrStatsAndControls = new Container(strStyle);
-		ctnrStatsAndControls.setName("ConsoleStats");
-		ctnrConsole.addChild(ctnrStatsAndControls, BorderLayout.Position.North);
+//		/**
+//		 * TOP ELEMENT =================================================================
+//		 */
+//		ctnrStatsAndControls = new Container(strStyle);
+////		ctnrStatsAndControls.setName("ConsoleStats");
+//		ctnrConsole.addChild(ctnrStatsAndControls, BorderLayout.Position.North);
+//		
+//		// console stats
+//		lblStats = new Label("Console stats.",strStyle);
+//		lblStats.setColor(new ColorRGBA(1,1,0.5f,1));
+//		lblStats.setPreferredSize(new Vector3f(v3fConsoleSize.x*0.75f,1,0));
+//		fStatsHeight = retrieveBitmapTextFor(lblStats).getLineHeight();
+//		ctnrStatsAndControls.addChild(lblStats,0,0);
+//		
+//		// buttons
+//		ArrayList<Button> abu = new ArrayList<Button>();
+//		int iButtonIndex=0;
+//		btnClipboardShow = new Button("ShwClpbrd",strStyle);
+//		abu.add(btnClipboardShow);
+//		
+//		btnCopy = new Button("Copy",strStyle);
+//		abu.add(btnCopy);
+//		
+//		btnPaste = new Button("Paste",strStyle);
+//		abu.add(btnPaste);
+//		
+//		btnCut = new Button("Cut",strStyle);
+//		abu.add(btnCut);
+//		
+//		for(Button btn:abu){
+//			btn.setTextHAlignment(HAlignment.Center);
+//			//BUG buttons do not obbey this: btn.setPreferredSize(new Vector3f(50,1,0));
+//			btn.addClickCommands(new ButtonClick());
+//			ctnrStatsAndControls.addChild(btn,0,++iButtonIndex);
+//		}
 		
-		// console stats
-		lblStats = new Label("Console stats.",strStyle);
-		lblStats.setColor(new ColorRGBA(1,1,0.5f,1));
-		lblStats.setPreferredSize(new Vector3f(v3fConsoleSize.x*0.75f,1,0));
-		fStatsHeight = retrieveBitmapTextFor(lblStats).getLineHeight();
-		ctnrStatsAndControls.addChild(lblStats,0,0);
-		
-		// buttons
-		ArrayList<Button> abu = new ArrayList<Button>();
-		int iButtonIndex=0;
-		btnClipboardShow = new Button("ShwClpbrd",strStyle);
-		abu.add(btnClipboardShow);
-		
-		btnCopy = new Button("Copy",strStyle);
-		abu.add(btnCopy);
-		
-		btnPaste = new Button("Paste",strStyle);
-		abu.add(btnPaste);
-		
-		btnCut = new Button("Cut",strStyle);
-		abu.add(btnCut);
-		
-		for(Button btn:abu){
-			btn.setTextHAlignment(HAlignment.Center);
-			//BUG buttons do not obbey this: btn.setPreferredSize(new Vector3f(50,1,0));
-			btn.addClickCommands(new ButtonClick());
-			ctnrStatsAndControls.addChild(btn,0,++iButtonIndex);
-		}
-		
-		/**
-		 * CENTER ELEMENT (dump entries area) ===========================================
-		 */
-		lstbxDumpArea = new ListBox<String>(new VersionedList<String>(),strStyle);
-		lstbxDumpArea.setName("ConsoleDumpArea");
-    CursorEventControl.addListenersToSpatial(lstbxDumpArea, consoleCursorListener);
-		Vector3f v3fLstbxSize = v3fConsoleSize.clone();
-//		v3fLstbxSize.x/=2;
-//		v3fLstbxSize.y/=2;
-		lstbxDumpArea.setSize(v3fLstbxSize); // no need to update fLstbxHeight, will be automatic
-		//TODO not working? lstbx.getSelectionModel().setSelectionMode(SelectionMode.Multi);
-		
-		/**
-		 * The existance of at least one entry is very important to help on initialization.
-		 * Actually to determine the listbox entry height.
-		 */
-		if(vlstrDumpEntries.isEmpty())vlstrDumpEntries.add(""+cc.getCommentPrefix()+" Initializing console.");
-		
-		lstbxDumpArea.setModel(vlstrDumpEntries);
-		lstbxDumpArea.setVisibleItems(iShowRows);
-//		lstbx.getGridPanel().setVisibleSize(iShowRows,1);
-		ctnrConsole.addChild(lstbxDumpArea, BorderLayout.Position.Center);
+//		/**
+//		 * CENTER ELEMENT (dump entries area) ===========================================
+//		 */
+//		lstbxDumpArea = new ListBox<String>(new VersionedList<String>(),strStyle);
+//		lstbxDumpArea.setName("ConsoleDumpArea");
+//    CursorEventControl.addListenersToSpatial(lstbxDumpArea, consoleCursorListener);
+//		Vector3f v3fLstbxSize = v3fConsoleSize.clone();
+////		v3fLstbxSize.x/=2;
+////		v3fLstbxSize.y/=2;
+//		lstbxDumpArea.setSize(v3fLstbxSize); // no need to update fLstbxHeight, will be automatic
+//		//TODO not working? lstbx.getSelectionModel().setSelectionMode(SelectionMode.Multi);
+//		
+//		/**
+//		 * The existance of at least one entry is very important to help on initialization.
+//		 * Actually to determine the listbox entry height.
+//		 */
+//		if(vlstrDumpEntries.isEmpty())vlstrDumpEntries.add(""+cc.getCommentPrefix()+" Initializing console.");
+//		
+//		lstbxDumpArea.setModel(vlstrDumpEntries);
+//		lstbxDumpArea.setVisibleItems(iShowRows);
+////		lstbx.getGridPanel().setVisibleSize(iShowRows,1);
+//		ctnrConsole.addChild(lstbxDumpArea, BorderLayout.Position.Center);
 		
 //		gpListboxDumpArea = lstbx.getGridPanel();
 		
-		/**
-		 * BOTTOM ELEMENT =================================================================
-		 */
-		// input
-		tfInput = new TextField(""+cc.getCommandPrefix(),strStyle);
-		tfInput.setName("ConsoleInput");
-    CursorEventControl.addListenersToSpatial(tfInput, consoleCursorListener);
-		fInputHeight = retrieveBitmapTextFor(tfInput).getLineHeight();
-		ctnrConsole.addChild( tfInput, BorderLayout.Position.South );
+//		/**
+//		 * BOTTOM ELEMENT =================================================================
+//		 */
+//		// input
+//		tfInput = new TextField(""+cc.getCommandPrefix(),strStyle);
+//		tfInput.setName("ConsoleInput");
+//    CursorEventControl.addListenersToSpatial(tfInput, consoleCursorListener);
+//		fInputHeight = retrieveBitmapTextFor(tfInput).getLineHeight();
+//		ctnrConsole.addChild( tfInput, BorderLayout.Position.South );
 		
 		mapKeys();
 		
@@ -659,23 +713,23 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 //		scrollToBottomRequest();
 //	}
 	
-	protected class ButtonClick implements Command<Button>{
-		@Override
-		public void execute(Button source) {
-			if(source.equals(btnClipboardShow)){
-				cc.showClipboard();
-			}else
-			if(source.equals(btnCopy)){
-				cc.editCopyOrCut(false,false,false);
-			}else
-			if(source.equals(btnCut)){
-				cc.editCopyOrCut(false,true,false);
-			}else
-			if(source.equals(btnPaste)){
-				editPaste();
-			}
-		}
-	}
+//	protected class ButtonClick implements Command<Button>{
+//		@Override
+//		public void execute(Button source) {
+//			if(source.equals(btnClipboardShow)){
+//				cc.showClipboard();
+//			}else
+//			if(source.equals(btnCopy)){
+//				cc.editCopyOrCut(false,false,false);
+//			}else
+//			if(source.equals(btnCut)){
+//				cc.editCopyOrCut(false,true,false);
+//			}else
+//			if(source.equals(btnPaste)){
+//				editPaste();
+//			}
+//		}
+//	}
 	
 	@Override
 	public boolean cmdEditCopyOrCut(boolean bCut) {
@@ -690,27 +744,27 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		return true;
 	}
 	
+	protected String prepareToPaste(String strPasted, String strCurrent){
+		if(isInputTextFieldEmpty() && strPasted.trim().startsWith(""+cc.getCommandPrefix())){
+			/**
+			 * replaces currently input field "empty" line 
+			 * with the command (can be invalid in this case, user may complete it properly)
+			 */
+			strCurrent = strPasted.trim(); 
+		}else{
+			strCurrent+=strPasted; //simple append if there is no carat position reference
+		}
+		
+		return strCurrent;
+	}
+	
 	protected void editPaste() {
 		String strPasted = MiscI.i().retrieveClipboardString(true);
 		if(strPasted.endsWith("\\n"))strPasted=strPasted.substring(0, strPasted.length()-2);
 		
 		String strCurrent = getInputText();
-//		if(checkInputEmpty() && validateBaseCommand(strPasted)){
-		if(isInputTextFieldEmpty() && strPasted.trim().startsWith(""+cc.getCommandPrefix())){
-			strCurrent = strPasted.trim(); //replace "empty" line with command (can be invalid in this case, user may complete it properly)
-		}else{
-			strCurrent = LemurMiscHelpersState.i().prepareStringToPasteAtCaratPosition(tfInput, strCurrent, strPasted);
-//			if(efHK!=null){
-//				strCurrent = efHK.pasteAtCaratPositionHK(strCurrent,strPasted);
-//			}else{
-//				strCurrent+=strPasted;
-//			}
-		}
-		
+		strCurrent = prepareToPaste(strPasted, strCurrent);
 		setInputField(strCurrent); 
-		
-		LemurMiscHelpersState.i().positionCaratProperly(tfInput);//, iMoveCaratTo);
-//		if(efHK!=null)efHK.positionCaratProperlyHK();
 	}
 	
 //	protected void cmdHistSave(String strCmd) {
@@ -827,107 +881,107 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		return f;
 	}
 	
-	protected void mapKeysForInputField(){
-		// simple actions
-		KeyActionListener actSimpleActions = new KeyActionListener() {
-			@Override
-			public void keyAction(TextEntryComponent source, KeyAction key) {
-				boolean bControl = key.hasModifier(KeyAction.CONTROL_DOWN); //0x1
-//				boolean bShift = key.hasModifier(0x01);
-//				boolean bAlt = key.hasModifier(0x001);
-//				case KeyInput.KEY_INSERT: //shift+ins paste
-					//TODO ? case KeyInput.KEY_INSERT: //ctrl+ins copy
-					//TODO ? case KeyInput.KEY_DELETE: //shift+del cut
-				
-				switch(key.getKeyCode()){
-//					case KeyInput.KEY_B: 
-//						if(bControl)cc.iCopyFrom = getDumpAreaSelectedIndex();
+//	protected void mapKeysForInputField(){
+//		// simple actions
+//		KeyActionListener actSimpleActions = new KeyActionListener() {
+//			@Override
+//			public void keyAction(TextEntryComponent source, KeyAction key) {
+//				boolean bControl = key.hasModifier(KeyAction.CONTROL_DOWN); //0x1
+////				boolean bShift = key.hasModifier(0x01);
+////				boolean bAlt = key.hasModifier(0x001);
+////				case KeyInput.KEY_INSERT: //shift+ins paste
+//					//TODO ? case KeyInput.KEY_INSERT: //ctrl+ins copy
+//					//TODO ? case KeyInput.KEY_DELETE: //shift+del cut
+//				
+//				switch(key.getKeyCode()){
+////					case KeyInput.KEY_B: 
+////						if(bControl)cc.iCopyFrom = getDumpAreaSelectedIndex();
+////						break;
+//					case KeyInput.KEY_C: 
+//						if(bControl)cc.editCopyOrCut(false,false,false);
 //						break;
-					case KeyInput.KEY_C: 
-						if(bControl)cc.editCopyOrCut(false,false,false);
-						break;
-					case KeyInput.KEY_ESCAPE: 
-						setEnabled(false);
-						break;
-					case KeyInput.KEY_V: 
-						if(bKeyShiftIsPressed){
-							if(bControl)cc.showClipboard();
-						}else{
-							if(bControl)editPaste();
-						}
-						break;
-					case KeyInput.KEY_X: 
-						if(bControl)cc.editCopyOrCut(false,true,false);
-						break;
-					case KeyInput.KEY_NUMPADENTER:
-					case KeyInput.KEY_RETURN:
-						actionSubmit(getInputText());
-						break;
-					case KeyInput.KEY_TAB:
-						autoCompleteInputField(bControl);
-						break;
-					case KeyInput.KEY_DELETE:
-						if(bControl)clearInputTextField();
-						break;
-					case KeyInput.KEY_SLASH:
-						if(bControl)cc.toggleLineCommentOrCommand();
-						break;
-				}
-			}
-		};
-		
-		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_TAB), actSimpleActions);
-		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_TAB,KeyAction.CONTROL_DOWN), actSimpleActions);
-		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_RETURN), actSimpleActions);
-		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_NUMPADENTER), actSimpleActions);
-		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_B,KeyAction.CONTROL_DOWN), actSimpleActions);
-		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_C,KeyAction.CONTROL_DOWN), actSimpleActions);
-		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_V,KeyAction.CONTROL_DOWN), actSimpleActions);
-		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_X,KeyAction.CONTROL_DOWN), actSimpleActions);
-		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_DELETE,KeyAction.CONTROL_DOWN), actSimpleActions);
-		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_SLASH,KeyAction.CONTROL_DOWN), actSimpleActions);
-		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_ESCAPE), actSimpleActions);
-		
-		// cmd history select action
-		KeyActionListener actCmdHistoryEntrySelectAction = new KeyActionListener() {
-			@Override
-			public void keyAction(TextEntryComponent source, KeyAction key) {
-				navigateCmdHistOrHintBox(source,key);
-			}
-		};
-		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_UP), actCmdHistoryEntrySelectAction);
-		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_DOWN), actCmdHistoryEntrySelectAction);
-		
-		// scroll actions
-		KeyActionListener actDumpNavigate = new KeyActionListener() {
-			@Override
-			public void keyAction(TextEntryComponent source, KeyAction key) {
-				boolean bControl = key.hasModifier(KeyAction.CONTROL_DOWN); //0x1
-				double dCurrent = getScrollDumpAreaFlindex();
-				double dAdd = 0;
-				switch(key.getKeyCode()){
-					case KeyInput.KEY_PGUP:
-						dAdd = -iShowRows;
-						break;
-					case KeyInput.KEY_PGDN:
-						dAdd = +iShowRows;
-						break;
-					case KeyInput.KEY_HOME:
-						if(bControl)dAdd = -dCurrent;
-						break;
-					case KeyInput.KEY_END:
-						if(bControl)dAdd = vlstrDumpEntries.size();
-						break;
-				}
-				scrollDumpArea(dCurrent + dAdd);
-				scrollToBottomRequestSuspend();
-			}
-		};
-		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_PGUP), actDumpNavigate);
-		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_PGDN), actDumpNavigate);
-		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_HOME, KeyAction.CONTROL_DOWN), actDumpNavigate);
-		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_END, KeyAction.CONTROL_DOWN), actDumpNavigate);
-	}
+//					case KeyInput.KEY_ESCAPE: 
+//						setEnabled(false);
+//						break;
+//					case KeyInput.KEY_V: 
+//						if(bKeyShiftIsPressed){
+//							if(bControl)cc.showClipboard();
+//						}else{
+//							if(bControl)editPaste();
+//						}
+//						break;
+//					case KeyInput.KEY_X: 
+//						if(bControl)cc.editCopyOrCut(false,true,false);
+//						break;
+//					case KeyInput.KEY_NUMPADENTER:
+//					case KeyInput.KEY_RETURN:
+//						actionSubmit(getInputText());
+//						break;
+//					case KeyInput.KEY_TAB:
+//						autoCompleteInputField(bControl);
+//						break;
+//					case KeyInput.KEY_DELETE:
+//						if(bControl)clearInputTextField();
+//						break;
+//					case KeyInput.KEY_SLASH:
+//						if(bControl)cc.toggleLineCommentOrCommand();
+//						break;
+//				}
+//			}
+//		};
+//		
+//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_TAB), actSimpleActions);
+//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_TAB,KeyAction.CONTROL_DOWN), actSimpleActions);
+//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_RETURN), actSimpleActions);
+//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_NUMPADENTER), actSimpleActions);
+//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_B,KeyAction.CONTROL_DOWN), actSimpleActions);
+//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_C,KeyAction.CONTROL_DOWN), actSimpleActions);
+//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_V,KeyAction.CONTROL_DOWN), actSimpleActions);
+//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_X,KeyAction.CONTROL_DOWN), actSimpleActions);
+//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_DELETE,KeyAction.CONTROL_DOWN), actSimpleActions);
+//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_SLASH,KeyAction.CONTROL_DOWN), actSimpleActions);
+//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_ESCAPE), actSimpleActions);
+//		
+//		// cmd history select action
+//		KeyActionListener actCmdHistoryEntrySelectAction = new KeyActionListener() {
+//			@Override
+//			public void keyAction(TextEntryComponent source, KeyAction key) {
+//				navigateCmdHistOrHintBox(source,key);
+//			}
+//		};
+//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_UP), actCmdHistoryEntrySelectAction);
+//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_DOWN), actCmdHistoryEntrySelectAction);
+//		
+//		// scroll actions
+//		KeyActionListener actDumpNavigate = new KeyActionListener() {
+//			@Override
+//			public void keyAction(TextEntryComponent source, KeyAction key) {
+//				boolean bControl = key.hasModifier(KeyAction.CONTROL_DOWN); //0x1
+//				double dCurrent = getScrollDumpAreaFlindex();
+//				double dAdd = 0;
+//				switch(key.getKeyCode()){
+//					case KeyInput.KEY_PGUP:
+//						dAdd = -iShowRows;
+//						break;
+//					case KeyInput.KEY_PGDN:
+//						dAdd = +iShowRows;
+//						break;
+//					case KeyInput.KEY_HOME:
+//						if(bControl)dAdd = -dCurrent;
+//						break;
+//					case KeyInput.KEY_END:
+//						if(bControl)dAdd = vlstrDumpEntries.size();
+//						break;
+//				}
+//				scrollDumpArea(dCurrent + dAdd);
+//				scrollToBottomRequestSuspend();
+//			}
+//		};
+//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_PGUP), actDumpNavigate);
+//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_PGDN), actDumpNavigate);
+//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_HOME, KeyAction.CONTROL_DOWN), actDumpNavigate);
+//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_END, KeyAction.CONTROL_DOWN), actDumpNavigate);
+//	}
 	
 	protected boolean isHintActive(){
 		return lstbxAutoCompleteHint.getParent()!=null;
@@ -1216,7 +1270,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 //		return checkInputEmptyDumpIfNot(false);
 //	}
 	/**
-	 * after trim(), if empty or have only the command prefix char, 
+	 * after trim(), if empty or have only the command prefix char (pseudo empty), 
 	 * will return true.
 	 * @return
 	 */
@@ -1274,15 +1328,6 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		}
 	}
 	
-	@Override
-	public void setInputField(String str){
-		/**
-		 * do NOT trim() the string, it may be being auto completed and 
-		 * an space being appended to help on typing new parameters.
-		 */
-		tfInput.setText(fixStringToInputField(str));
-	}
-	
 	protected String clearCommentsFromMultiline(String str){
 		/**
 		 * this will remove any in-between comments
@@ -1328,33 +1373,12 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		return this.cc;
 	}
 	
-	protected void updateDumpAreaSelectedIndex(){
-		Integer i = lstbxDumpArea.getSelectionModel().getSelection();
-		iSelectionIndex = i==null ? -1 : i;
-	}
-	
 	protected int getDumpAreaSelectedIndex(){
 		return iSelectionIndex;
 	}
 	
 	protected void updateCopyFrom(){
 		cc.updateCopyFrom(getDumpAreaSelectedIndex(), bKeyShiftIsPressed);
-//		int iSelected = getDumpAreaSelectedIndex();
-//		boolean bMultiLineMode = bKeyShiftIsPressed;
-//		if(iSelected>=0){
-//			if(bMultiLineMode){
-//				if(cc.iCopyTo==-1){
-//					cc.iCopyFrom = iSelected;
-//					cc.iCopyTo = iSelected;
-//				}else{
-//					cc.iCopyFrom = cc.iCopyTo;
-//					cc.iCopyTo = iSelected;
-//				}
-//			}else{
-//				cc.iCopyFrom = iSelected;
-//				cc.iCopyTo = iSelected;
-//			}
-//		}
 	}
 	
 	/**
@@ -1365,54 +1389,54 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		lineWrapDisableForChildrenOf(lstbxDumpArea);
 	}
 	
-	protected void updateVisibleRowsAmount(){
-		if(fLstbxHeight != lstbxDumpArea.getSize().y){
-			iVisibleRowsAdjustRequest = 0; //dynamic
-		}
-		
-		if(iVisibleRowsAdjustRequest==null)return;
-		
-		Integer iForceAmount = iVisibleRowsAdjustRequest;
-		if(iForceAmount>0){
-			iShowRows=iForceAmount;
-//			lstbx.setVisibleItems(iShowRows);
-//			lstbx.getGridPanel().setVisibleSize(iShowRows,1);
-		}else{
-			if(lstbxDumpArea.getGridPanel().getChildren().isEmpty())return;
-			
-			Button	btnFixVisibleRowsHelper = null;
-			for(Spatial spt:lstbxDumpArea.getGridPanel().getChildren()){
-				if(spt instanceof Button){
-					btnFixVisibleRowsHelper = (Button)spt;
-					break;
-				}
-			}
-			if(btnFixVisibleRowsHelper==null)return;
-			
-			fLstbxEntryHeight = retrieveBitmapTextFor(btnFixVisibleRowsHelper).getLineHeight();
-			if(fLstbxEntryHeight==null)return;
-			
-			fLstbxHeight = lstbxDumpArea.getSize().y;
-			
-			float fHeightAvailable = fLstbxHeight;
-//				float fHeightAvailable = fLstbxHeight -fInputHeight;
-//				if(ctnrConsole.hasChild(lblStats)){
-//					fHeightAvailable-=fStatsHeight;
+//	protected void updateVisibleRowsAmount(){
+//		if(fLstbxHeight != getDumpAreaSize().y){
+//			iVisibleRowsAdjustRequest = 0; //dynamic
+//		}
+//		
+//		if(iVisibleRowsAdjustRequest==null)return;
+//		
+//		Integer iForceAmount = iVisibleRowsAdjustRequest;
+//		if(iForceAmount>0){
+//			iShowRows=iForceAmount;
+////			lstbx.setVisibleItems(iShowRows);
+////			lstbx.getGridPanel().setVisibleSize(iShowRows,1);
+//		}else{
+//			if(lstbxDumpArea.getGridPanel().getChildren().isEmpty())return;
+//			
+//			Button	btnFixVisibleRowsHelper = null;
+//			for(Spatial spt:lstbxDumpArea.getGridPanel().getChildren()){
+//				if(spt instanceof Button){
+//					btnFixVisibleRowsHelper = (Button)spt;
+//					break;
 //				}
-			iShowRows = (int) (fHeightAvailable / fLstbxEntryHeight);
-		}
-		
-		lstbxDumpArea.setVisibleItems(iShowRows);
-		
-		cc.varSet(cc.CMD_FIX_VISIBLE_ROWS_AMOUNT, ""+iShowRows, true);
-		
-	//	lstbx.getGridPanel().setVisibleSize(iShowRows,1);
-		cc.dumpInfoEntry("fLstbxEntryHeight="+MiscI.i().fmtFloat(fLstbxEntryHeight)+", "+"iShowRows="+iShowRows);
-		
-		iVisibleRowsAdjustRequest=null;
-		
-		cmdLineWrapDisableDumpArea();
-	}
+//			}
+//			if(btnFixVisibleRowsHelper==null)return;
+//			
+//			fLstbxEntryHeight = retrieveBitmapTextFor(btnFixVisibleRowsHelper).getLineHeight();
+//			if(fLstbxEntryHeight==null)return;
+//			
+//			fLstbxHeight = getDumpAreaSize().y;
+//			
+//			float fHeightAvailable = fLstbxHeight;
+////				float fHeightAvailable = fLstbxHeight -fInputHeight;
+////				if(ctnrConsole.hasChild(lblStats)){
+////					fHeightAvailable-=fStatsHeight;
+////				}
+//			iShowRows = (int) (fHeightAvailable / fLstbxEntryHeight);
+//		}
+//		
+//		lstbxDumpArea.setVisibleItems(iShowRows);
+//		
+//		cc.varSet(cc.CMD_FIX_VISIBLE_ROWS_AMOUNT, ""+iShowRows, true);
+//		
+//	//	lstbx.getGridPanel().setVisibleSize(iShowRows,1);
+//		cc.dumpInfoEntry("fLstbxEntryHeight="+MiscI.i().fmtFloat(fLstbxEntryHeight)+", "+"iShowRows="+iShowRows);
+//		
+//		iVisibleRowsAdjustRequest=null;
+//		
+//		cmdLineWrapDisableDumpArea();
+//	}
 	
 	protected BitmapText retrieveBitmapTextFor(Node pnl){
 		for(Spatial c : pnl.getChildren()){
@@ -1457,11 +1481,6 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	@Override
 	public void clearInputTextField() {
 		setInputField(""+cc.getCommandPrefix());
-	}
-	
-	@Override
-	public String getInputText() {
-		return tfInput.getText();
 	}
 	
 //	protected boolean actionSubmitCommand(final String strCmd){
@@ -1561,7 +1580,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		 * like a cooldown time to make sure the slider accepted the command.
 		 */
 		if(tdScrollToBottomRequestAndSuspend.isReady()){
-			if(Double.compare(lstbxDumpArea.getSlider().getModel().getPercent(), 0.0)==0){
+			if(Double.compare(getDumpAreaSliderPercent(), 0.0)==0){
 				scrollToBottomRequestSuspend();
 				return;
 			}
@@ -1572,44 +1591,44 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		iScrollRetryAttemptsDBG++;
 	}	
 	
-	/**
-	 * 
-	 * @param dIndex if -1, means max index (bottom)
-	 */
-	protected void scrollDumpArea(double dIndex){
-		/**
-		 * the index is actually inverted
-		 */
-		double dMax = lstbxDumpArea.getSlider().getModel().getMaximum();
-		if(dIndex==-1)dIndex=dMax;
-		dIndex = dMax-dIndex;
-		double dPerc = dIndex/dMax;
-		
-		lstbxDumpArea.getSlider().getModel().setPercent(dPerc);
-		lstbxDumpArea.getSlider().getModel().setValue(dIndex);
-	}
+//	/**
+//	 * 
+//	 * @param dIndex if -1, means max index (bottom)
+//	 */
+//	protected void scrollDumpArea(double dIndex){
+//		/**
+//		 * the index is actually inverted
+//		 */
+//		double dMax = lstbxDumpArea.getSlider().getModel().getMaximum();
+//		if(dIndex==-1)dIndex=dMax;
+//		dIndex = dMax-dIndex;
+//		double dPerc = dIndex/dMax;
+//		
+//		lstbxDumpArea.getSlider().getModel().setPercent(dPerc);
+//		lstbxDumpArea.getSlider().getModel().setValue(dIndex);
+//	}
 	
-	/**
-	 * 
-	 * @return a "floating point index" (Dlindex)
-	 */
-	protected double getScrollDumpAreaFlindex(){
-		return lstbxDumpArea.getSlider().getModel().getMaximum()
-				-lstbxDumpArea.getSlider().getModel().getValue();
-	}
+//	/**
+//	 * 
+//	 * @return a "floating point index" (Dlindex)
+//	 */
+//	protected double getScrollDumpAreaFlindex(){
+//		return lstbxDumpArea.getSlider().getModel().getMaximum()
+//				-lstbxDumpArea.getSlider().getModel().getValue();
+//	}
 	
-	protected void autoCompleteInputField(){
-		autoCompleteInputField(false);
+	protected String autoCompleteInputField(){
+		return autoCompleteInputField(false);
 	}
-	protected void autoCompleteInputField(boolean bMatchContains){
+	protected String autoCompleteInputField(boolean bMatchContains){
 		String strCmdPart = getInputText();
 		String strCmdAfterCarat="";
 		
 //		Integer iCaratPositionHK = efHK==null?null:efHK.getInputFieldCaratPosition();
-		Integer iCaratPositionHK = tfInput.getDocumentModel().getCarat();
-		if(iCaratPositionHK!=null){
-			strCmdAfterCarat = strCmdPart.substring(iCaratPositionHK);
-			strCmdPart = strCmdPart.substring(0, iCaratPositionHK);
+		Integer iCaratPosition = getInputFieldCaratPosition();
+		if(iCaratPosition!=null){
+			strCmdAfterCarat = strCmdPart.substring(iCaratPosition);
+			strCmdPart = strCmdPart.substring(0, iCaratPosition);
 		}
 		
 		String strCompletedCmd = autoCompleteWork(strCmdPart,bMatchContains);
@@ -1689,10 +1708,12 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		
 		if(strCompletedCmd.trim().isEmpty())strCompletedCmd=""+cc.getCommandPrefix();
 		setInputField(strCompletedCmd+strCmdAfterCarat);
-		LemurMiscHelpersState.i().setCaratPosition(tfInput, strCompletedCmd.length());
+//		LemurMiscHelpersState.i().setCaratPosition(tfInput, strCompletedCmd.length());
 //		if(efHK!=null)efHK.setCaratPosition(strCompletedCmd.length());
 		
 		scrollToBottomRequest();
+		
+		return strCompletedCmd;
 	}
 	
 	protected String autoCompleteWork(String strCmdPart, boolean bMatchContains){
@@ -1745,11 +1766,13 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 			
 			if(bSetVisible){
 				if(!bIsVisible){
-					ctnrConsole.addChild(ctnrStatsAndControls,BorderLayout.Position.North);
+					addRemoveContainerConsoleChild(true,ctnrStatsAndControls,BorderLayout.Position.North);
+//					ctnrConsole.addChild(ctnrStatsAndControls,BorderLayout.Position.North);
 				}
 			}else{
 				if(bIsVisible){
-					ctnrConsole.removeChild(ctnrStatsAndControls);
+					addRemoveContainerConsoleChild(false,ctnrStatsAndControls,null);
+//					ctnrConsole.removeChild(ctnrStatsAndControls);
 				}
 			}
 			
@@ -1760,13 +1783,12 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		
 		return false;
 	}
-
+	
 	/**
-	 * 
 	 * @param fNewHeightPercent null to use the default
 	 */
 	protected void modifyConsoleHeight(Float fNewHeightPercent) {
-		Vector3f v3fNew = ctnrConsole.getPreferredSize(); //getSize() does not work well..
+		Vector3f v3fNew = getContainerConsolePreferredSize(); //getSize() does not work well..
 		if(!v3fNew.equals(v3fConsoleSize)){
 			cc.dumpDevWarnEntry("sizes should be equal: "+v3fNew+v3fConsoleSize);
 		}
@@ -1781,7 +1803,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		
 		if(v3fNew.y<fMin)v3fNew.y=fMin;
 		
-		ctnrConsole.setPreferredSize(v3fNew); //setSize() does not work well..
+		setContainerConsolePreferredSize(v3fNew); //setSize() does not work well..
 //		ctnrConsole.setSize(v3fNew); //setSize() does not work well..
 		v3fConsoleSize.set(v3fNew);
 		
@@ -1836,12 +1858,12 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	}
 	
 	protected float widthForListbox(){
-		return lstbxDumpArea.getSize().x;
+		return getSizeOf(lstbxDumpArea).x;
 	}
 	
 	protected float widthForDumpEntryField(){
 		//TODO does slider and the safety margin are necessary? slider is inside list box right?
-		return widthForListbox() -lstbxDumpArea.getSlider().getSize().x -fSafetyMarginGUESSED;
+		return widthForListbox() -getSizeOf(sliderDumpArea).x -fSafetyMarginGUESSED;
 //		return widthForListbox();
 	}
 	
@@ -1860,7 +1882,11 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 //		tdScrollToBottomRetry.reset();
 //		tdTextCursorBlinkHK.reset();
 		
-		ctnrConsole.clearChildren();
+		if(ctnrConsole.getChildren().size()>0){
+			System.err.println("WARN: console container should have been cleaned using specific gui methods by overriding cleanup().");
+			ctnrConsole.detachAllChildren();
+		}
+//		ctnrConsole.clearChildren();
 //		tfAutoCompleteHint.removeFromParent();
 		lstbxAutoCompleteHint.removeFromParent();
 		ctnrConsole.removeFromParent();
@@ -1944,6 +1970,18 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 			if(strStyle==null)strStyle="";
 			bCommandWorked=cmdStyleApply(strStyle);
 		}else
+		if(cc.checkCmdValidity(this,CMD_FONT_LIST,"[strFilter] use 'all' as filter to show all, otherwise only monospaced will be the default filter")){
+			String strFilter = cc.paramString(1);
+			if(strFilter==null){
+				strFilter="mono";
+			}else{
+				if(strFilter.equalsIgnoreCase("all")){
+					strFilter=null;
+				}
+			}
+			for(String str:getSystemFontList(strFilter))cc.dumpSubEntry(str);
+			bCommandWorked=true;
+		}else
 		{
 			return ECmdReturnStatus.NotFound;
 		}
@@ -1957,17 +1995,17 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 			MiscI.i().getSimpleTime(cc.btgShowMiliseconds.get())
 				+cc.getDevInfoEntryPrefix()+"Console stats (Dev): "+"\n"
 			
-			+"Console Height = "+MiscI.i().fmtFloat(ctnrConsole.getSize().y)+"\n"
-			+"Visible Rows = "+lstbxDumpArea.getGridPanel().getVisibleRows()+"\n"
+			+"Console Height = "+MiscI.i().fmtFloat(getSizeOf(ctnrConsole).y)+"\n"
+			+"Visible Rows = "+getVisibleRows()+"\n"
 			+"Line Wrap At = "+cc.getCurrentFixedLineWrapAtColumn()+"\n"
-			+"ListBox Height = "+MiscI.i().fmtFloat(lstbxDumpArea.getSize().y)+"\n"
+			+"ListBox Height = "+MiscI.i().fmtFloat(getSizeOf(lstbxDumpArea).y)+"\n"
 			+"ListBox Entry Height = "+MiscI.i().fmtFloat(fLstbxEntryHeight)+"\n"
 			
 			+"Stats Text Field Height = "+MiscI.i().fmtFloat(fStatsHeight)+"\n"
-			+"Stats Container Height = "+MiscI.i().fmtFloat(ctnrStatsAndControls.getSize().y)+"\n"
+			+"Stats Container Height = "+MiscI.i().fmtFloat(getSizeOf(ctnrStatsAndControls).y)+"\n"
 			
 			+"Input Field Height = "+MiscI.i().fmtFloat(fInputHeight)+"\n"
-			+"Input Field Final Height = "+MiscI.i().fmtFloat(tfInput.getSize().y)+"\n"
+			+"Input Field Final Height = "+MiscI.i().fmtFloat(getSizeOf(tfInput).y)+"\n"
 			
 			+"Slider Value = "+MiscI.i().fmtFloat(getScrollDumpAreaFlindex())+"\n"
 			
@@ -2238,7 +2276,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 			
 			//lstbxAutoCompleteHint.setLocalTranslation(new Vector3f(0, -fInputHeight, 0));
 			Vector3f v3f = tfInput.getWorldTranslation().clone();
-			v3f.y -= tfInput.getSize().y;
+			v3f.y -= getSizeOf(tfInput).y;
 			lstbxAutoCompleteHint.setLocalTranslation(v3f);
 			
 			float fEntryHeightGUESSED = fInputHeight; //TODO should be the listbox entry height
@@ -2272,11 +2310,11 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	@Override
 	public String getDumpAreaSliderStatInfo() {
 		// this value is the top entry index
-		int iMaxSliderIndex=getDumpEntries().size()-lstbxDumpArea.getGridPanel().getVisibleRows();
+		int iMaxSliderIndex=getDumpEntries().size()-getVisibleRows();
 		
 		return "Sl"
-				+MiscI.i().fmtFloat(getScrollDumpAreaFlindex(),0)+"/"+iMaxSliderIndex+"+"+lstbxDumpArea.getGridPanel().getVisibleRows()
-				+"("+MiscI.i().fmtFloat(100.0f -lstbxDumpArea.getSlider().getModel().getPercent()*100f,0)+"%)"
+				+MiscI.i().fmtFloat(getScrollDumpAreaFlindex(),0)+"/"+iMaxSliderIndex+"+"+getVisibleRows()
+				+"("+MiscI.i().fmtFloat(100.0f -getDumpAreaSliderPercent()*100f,0)+"%)"
 				+";";
 
 	}
@@ -2356,10 +2394,6 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		return astrToDump;
 	}
 	
-	@Override
-	public void clearDumpAreaSelection() {
-		lstbxDumpArea.getSelectionModel().setSelection(-1); //clear selection
-	}
 	public boolean isHintBox(Spatial target) {
 		return target==lstbxAutoCompleteHint;
 	}
@@ -2406,6 +2440,173 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 				return null;
 			}
 		});
+	}
+	
+	protected BitmapFont convertTTFtoBitmapFont(TrueTypeFont ttf){
+		String strGlyphs="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789./*-+?\\;\"!@#$*()&^%";
+		TrueTypeBitmapGlyph attbg[] = ttf.getBitmapGlyphs(strGlyphs);
+		BitmapFont font = new BitmapFont();
+		BitmapCharacterSet bcs = new BitmapCharacterSet();
+		int iMaxHeight = -1;
+		int iMaxWidth = -1;
+		for(TrueTypeBitmapGlyph ttbg : attbg){
+			BitmapCharacter bc = new BitmapCharacter();
+			char ch = ttbg.getCharacter().charAt(0);
+			bc.setChar(ttbg.getCharacter().charAt(0));
+			bc.setHeight(ttbg.h);
+			bc.setWidth(ttbg.w);
+			bc.setX(ttbg.x);
+			bc.setXAdvance(ttbg.xAdvance);
+			bc.setXOffset(ttbg.getHeightOffset());
+			bc.setY(ttbg.y);
+			bc.setYOffset(ttbg.y);
+			bcs.addCharacter(ch, bc);
+			
+			if(bc.getHeight()>iMaxHeight)iMaxHeight=bc.getHeight();
+			if(bc.getWidth()>iMaxWidth)iMaxWidth=bc.getWidth();
+		}
+		font.setCharSet(bcs);
+		
+		bcs.setBase(iMaxHeight); //TODO what is this!?!?!? 
+		bcs.setHeight(256); //TODO max chars?
+		bcs.setLineHeight(iMaxHeight);
+		bcs.setWidth(256); //TODO max chars?
+		bcs.setRenderedSize(iMaxHeight);
+//		bcs.setStyle(style);
+		
+		/**
+		 * TODO why this fails? missing material's "colorMap" ...
+		font.setPages(new Material[]{ttf.getBitmapGeom("A", ColorRGBA.White).getMaterial()});
+		 */
+//		font.setPages(new Material[]{fontConsoleDefault.getPage(0)});
+//		Material mat = ttf.getBitmapGeom(strGlyphs, ColorRGBA.White).getMaterial();
+		Material mat = fontConsoleDefault.getPage(0).clone();
+		mat.setTexture("ColorMap", ttf.getAtlas()); //TODO wow, weird results from this...
+//		mat.setTexture("ColorMap", ttf.getAtlas());
+//		mat.setParam("ColorMap", VarType.Texture2D, ttf.getAtlas());
+		font.setPages(new Material[]{mat});
+		
+//		Material m = new Material();
+//		m.setp
+		
+//		font.getCharSet().getCharacter(33);
+//		fontConsoleDefault.getCharSet().getCharacter(35).getChar();
+		
+//		Material[] amat = new Material[fontConsoleDefault.getPageSize()];
+		
+//	ttf.getAtlas();
+		
+		/**
+		 * 
+		 * check for missing glyphs?
+		protected boolean hasContours(String character) {
+	    GlyphVector gv = font.createGlyphVector(frc, character);
+	    GeneralPath path = (GeneralPath)gv.getOutline();
+	    PathIterator pi = path.getPathIterator(null);
+	    if (pi.isDone())
+	        return false;
+	    
+	    return true;
+		}
+		 */
+		
+		//sapp.getAssetManager().unregisterLocator(fontFile.getParent(), FileLocator.class);
+		return font;
+	}
+	
+	public static class TrueTypeFontFromSystem extends TrueTypeFont{
+		public TrueTypeFontFromSystem(AssetManager assetManager, Font font, int pointSize, int outline) {
+    	super(assetManager, font, pointSize, outline);
+    }
+	}
+	
+	protected BitmapFont fontFromTTF(String strFontID, int iFontSize){
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		Font fntFound=null;
+		for(Font fnt:ge.getAllFonts()){
+			if(fnt.getFontName().toLowerCase().equalsIgnoreCase(strFontID)){
+				fntFound=fnt;
+				break;
+			}
+		}
+		
+		if(fntFound==null)return null;
+		
+		return convertTTFtoBitmapFont(
+			new TrueTypeFontFromSystem(
+				sapp.getAssetManager(), 
+				fntFound, 
+				iFontSize, 
+				0));
+	}
+	
+	protected BitmapFont fontFromTTFFile(String strFilePath, int iFontSize){
+		File fontFile = new File(strFilePath);
+		
+		if(fontFile.getParent()==null)return null; //not a file with path
+		
+		sapp.getAssetManager().registerLocator(fontFile.getParent(), FileLocator.class);
+		
+		TrueTypeKey ttk = new TrueTypeKey(strFilePath, java.awt.Font.PLAIN, iFontSize);
+		
+		TrueTypeFont ttf=null;
+		try{
+			ttf = (TrueTypeFont)sapp.getAssetManager().loadAsset(ttk);
+		}catch(AssetNotFoundException ex){
+			// missing file
+			cc.dumpExceptionEntry(ex);
+		}
+		
+		sapp.getAssetManager().unregisterLocator(fontFile.getParent(), FileLocator.class);
+		
+		if(ttf==null)return null;
+		
+		return convertTTFtoBitmapFont(ttf);
+	}
+	
+	/**
+	 * 
+	 * @param strFilter can be null
+	 * @return
+	 */
+	public ArrayList<String> getSystemFontList(String strFilter){
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		ArrayList<String> astr = new ArrayList<String>();
+		for(Font fnt:ge.getAllFonts()){
+			if(strFilter==null || fnt.getFontName().toLowerCase().contains(strFilter)){
+				astr.add(fnt.getFontName());
+			}
+		}
+		return astr;
+	}
+	
+	public void prepareStyle() {
+		String strFontName=svUserFontOption.getStringValue();
+	//	if(bConsoleStyleCreated)return;
+		
+		font=null;
+		try{
+			if(font==null){ //system font object
+				font = fontFromTTF(strFontName,ilvFontSize.intValue());
+			}
+			
+			if(font==null){ //custom font file
+				font = fontFromTTFFile(strFontName,ilvFontSize.intValue());
+			}
+			
+			if(font==null){ //bundled fonts
+				strFontName=strFontName.replace(" ","");
+				font = sapp.getAssetManager().loadFont("Interface/Fonts/"+strFontName+".fnt");
+			}
+		}catch(AssetNotFoundException ex){
+			cc.dumpExceptionEntry(ex);
+			font = fontConsoleDefault;
+//			strFontName="Console";
+//			font = sapp.getAssetManager().loadFont("Interface/Fonts/"+strFontName+".fnt");
+//		svUserFontOption.setObjectValue(strFontName);
+			svUserFontOption.setObjectValue(strConsoleDefaultFontName );
+		}
+	//	BitmapFont font = sapp.getAssetManager().loadFont("Interface/Fonts/Console512x.fnt");
 	}
 }
 

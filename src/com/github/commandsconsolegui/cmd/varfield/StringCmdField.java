@@ -40,7 +40,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
  */
 public class StringCmdField implements IReflexFillCfgVariant{
 //	String str = "ERROR: NOT SET"; // hashcode depends on it not being null
-	protected String strValue = null;
+	protected String strCmdIdentifier = null;
 	protected IReflexFillCfg rfcfgOwner;
 //	protected int	iReflexFillCfgVariant;
 	protected String	strReflexFillCfgCodePrefixVariant;
@@ -75,8 +75,8 @@ public class StringCmdField implements IReflexFillCfgVariant{
 			throw new NullPointerException("cant be null for: "+IReflexFillCfg.class.getName());
 		}
 	}
-	public StringCmdField(String strValue){
-		this.strValue=strValue;
+	public StringCmdField(String strCmdIdentifier){
+		this.strCmdIdentifier=strCmdIdentifier;
 	}
 	
 	/**
@@ -84,8 +84,8 @@ public class StringCmdField implements IReflexFillCfgVariant{
 	 */
 	@Override
 	public String toString() {
-		if(strValue==null)initialize();
-		return this.strValue;
+		if(strCmdIdentifier==null)initialize();
+		return this.strCmdIdentifier;
 	}
 	
 	protected void initialize(){
@@ -93,8 +93,8 @@ public class StringCmdField implements IReflexFillCfgVariant{
 		 * This basically prevents recursive infinite loop,
 		 * if this is called at reflex fill method.
 		 */
-		strValue=errorMessage();
-		this.strValue = ReflexFillI.i().createIdentifierWithFieldName(this.rfcfgOwner, this);
+		strCmdIdentifier=errorMessage();
+		this.strCmdIdentifier = ReflexFillI.i().createIdentifierWithFieldName(this.rfcfgOwner, this);
 //		throw new NullPointerException("not initialized properly: "+this);
 	}
 	
@@ -104,20 +104,20 @@ public class StringCmdField implements IReflexFillCfgVariant{
 	
 	@Override
 	public boolean equals(Object obj) {
-//		if(strValue==null)throw new NullPointerException(errorMessage());
-		if(strValue==null)initialize();
+//		if(strCmdIdentifier==null)throw new NullPointerException(errorMessage());
+		if(strCmdIdentifier==null)initialize();
 		if(bIgnoreCaseOnComparison){
-			return this.strValue.equalsIgnoreCase(""+obj);
+			return this.strCmdIdentifier.equalsIgnoreCase(""+obj);
 		}else{
-			return this.strValue.equals(obj);
+			return this.strCmdIdentifier.equals(obj);
 		}
 	}
 	
 	@Override
 	public int hashCode() {
-//		if(strValue==null)throw new NullPointerException(errorMessage());
-		if(strValue==null)initialize();
-		return strValue.hashCode();
+//		if(strCmdIdentifier==null)throw new NullPointerException(errorMessage());
+		if(strCmdIdentifier==null)initialize();
+		return strCmdIdentifier.hashCode();
 	}
 	
 //	@Override

@@ -27,24 +27,36 @@
 
 package com.github.commandsconsolegui.console.gui.lemur;
 
+import java.util.ArrayList;
+
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.console.gui.ConsoleGuiStateAbs;
+import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.app.SimpleApplication;
-import com.jme3.asset.AssetNotFoundException;
-import com.jme3.font.BitmapFont;
 import com.jme3.font.LineWrapMode;
+import com.jme3.input.KeyInput;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
+import com.simsilica.lemur.Command;
+import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GridPanel;
 import com.simsilica.lemur.GuiGlobals;
+import com.simsilica.lemur.HAlignment;
+import com.simsilica.lemur.Label;
 import com.simsilica.lemur.ListBox;
+import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.RangedValueModel;
 import com.simsilica.lemur.TextField;
+import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
+import com.simsilica.lemur.component.TextEntryComponent;
 import com.simsilica.lemur.core.VersionedList;
+import com.simsilica.lemur.event.CursorEventControl;
+import com.simsilica.lemur.event.KeyAction;
+import com.simsilica.lemur.event.KeyActionListener;
 import com.simsilica.lemur.style.Attributes;
 import com.simsilica.lemur.style.Styles;
 
@@ -58,6 +70,9 @@ import com.simsilica.lemur.style.Styles;
  */
 public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 	protected static ConsoleGUILemurState instance;
+	
+	protected ConsoleCursorListener consoleCursorListener;
+	
 //	public static void setInstance(ConsoleGUILemurState gui){
 //		if(ConsoleGUILemurState.instance!=null){
 //			throw new NullPointerException("instance already set to: "
@@ -91,22 +106,9 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 //		app.getStateManager().attach(LemurGuiMisc.i());
 //	}
 	
-	public void createMonoSpaceFixedFontStyle(){
-		String strFontName=svUserFontOption.getStringValue();
-//		if(bConsoleStyleCreated)return;
-		
-		strFontName=strFontName.replace(" ","");
-		
-		BitmapFont font=null;
-		try{
-			font = sapp.getAssetManager().loadFont("Interface/Fonts/"+strFontName+".fnt");
-		}catch(AssetNotFoundException ex){
-			cc.dumpExceptionEntry(ex);
-			strFontName="Console";
-			font = sapp.getAssetManager().loadFont("Interface/Fonts/"+strFontName+".fnt");
-			svUserFontOption.setObjectValue(strFontName);
-		}
-//		BitmapFont font = sapp.getAssetManager().loadFont("Interface/Fonts/Console512x.fnt");
+	@Override
+	public void prepareStyle(){
+		super.prepareStyle();
 		
 		Styles styles = GuiGlobals.getInstance().getStyles();
 		
@@ -158,12 +160,96 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 	
 	@Override
 	public void initializeOnlyTheUI() {
-		createMonoSpaceFixedFontStyle();
+		prepareStyle();
+		
+		consoleCursorListener = new ConsoleCursorListener();
+		consoleCursorListener.configure(sapp, cc, this);
 		
 		// auto complete hint
 		super.vlstrAutoCompleteHint = new VersionedList<String>();
 		super.lstbxAutoCompleteHint = new ListBox<String>(new VersionedList<String>(),strStyle);
 		getHintBox().setModel(getHintList());
+		CursorEventControl.addListenersToSpatial(getHintBox(), consoleCursorListener);
+		
+		// main container
+		ctnrConsole = new Container(new BorderLayout(), strStyle);
+//		int iMargin=2;
+//		v3fConsoleSize = new Vector3f(
+//			v3fApplicationWindowSize.x -(iMargin*2),
+//			(v3fApplicationWindowSize.y * fConsoleHeightPerc) -iMargin,
+//			0); //TODO why Z shouldnt be 0? changed to 0.1 and 1, but made no difference.
+		getContainerConsole().setPreferredSize(v3fConsoleSize); //setSize() does not work well..
+//		getContainerConsole().setSize(v3fConsoleSize);
+
+		/**
+		 * TOP ELEMENT =================================================================
+		 */
+		ctnrStatsAndControls = new Container(strStyle);
+//		getContainerStatsAndControls().setName("ConsoleStats");
+		getContainerConsole().addChild(getContainerStatsAndControls(), BorderLayout.Position.North);
+		
+		// console stats
+		lblStats = new Label("Console stats.",strStyle);
+		lblStats.setColor(new ColorRGBA(1,1,0.5f,1));
+		lblStats.setPreferredSize(new Vector3f(v3fConsoleSize.x*0.75f,1,0));
+		fStatsHeight = retrieveBitmapTextFor(lblStats).getLineHeight();
+		getContainerStatsAndControls().addChild(lblStats,0,0);
+		
+		// buttons
+		ArrayList<Button> abu = new ArrayList<Button>();
+		int iButtonIndex=0;
+		btnClipboardShow = new Button("ShwClpbrd",strStyle);
+		abu.add(btnClipboardShow);
+		
+		btnCopy = new Button("Copy",strStyle);
+		abu.add(btnCopy);
+		
+		btnPaste = new Button("Paste",strStyle);
+		abu.add(btnPaste);
+		
+		btnCut = new Button("Cut",strStyle);
+		abu.add(btnCut);
+		
+		for(Button btn:abu){
+			btn.setTextHAlignment(HAlignment.Center);
+			//BUG buttons do not obbey this: btn.setPreferredSize(new Vector3f(50,1,0));
+			btn.addClickCommands(new ButtonClick());
+			getContainerStatsAndControls().addChild(btn,0,++iButtonIndex);
+		}
+		
+		
+		/**
+		 * CENTER ELEMENT (dump entries area) ===========================================
+		 */
+		lstbxDumpArea = new ListBox<String>(new VersionedList<String>(),strStyle);
+    CursorEventControl.addListenersToSpatial(getDumpArea(), consoleCursorListener);
+		Vector3f v3fLstbxSize = v3fConsoleSize.clone();
+//		v3fLstbxSize.x/=2;
+//		v3fLstbxSize.y/=2;
+		getDumpArea().setSize(v3fLstbxSize); // no need to update fLstbxHeight, will be automatic
+		//TODO not working? lstbx.getSelectionModel().setSelectionMode(SelectionMode.Multi);
+		
+		/**
+		 * The existance of at least one entry is very important to help on initialization.
+		 * Actually to determine the listbox entry height.
+		 */
+		if(vlstrDumpEntries.isEmpty())vlstrDumpEntries.add(""+cc.getCommentPrefix()+" Initializing console.");
+		
+		getDumpArea().setModel(vlstrDumpEntries);
+		getDumpArea().setVisibleItems(iShowRows);
+//		lstbx.getGridPanel().setVisibleSize(iShowRows,1);
+		getContainerConsole().addChild(getDumpArea(), BorderLayout.Position.Center);
+		
+		super.sliderDumpArea = getDumpArea().getSlider();
+		
+		/**
+		 * BOTTOM ELEMENT =================================================================
+		 */
+		// input
+		super.tfInput = new TextField(""+cc.getCommandPrefix(),strStyle);
+    CursorEventControl.addListenersToSpatial(getInputField(), consoleCursorListener);
+		fInputHeight = retrieveBitmapTextFor(getInputField()).getLineHeight();
+		getContainerConsole().addChild( getInputField(), BorderLayout.Position.South );
 		
 		super.initializeOnlyTheUI();
 	}
@@ -177,10 +263,10 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		super.setEnabled(bEnabled);
 		
 		if(this.bEnabled){
-			sapp.getGuiNode().attachChild(ctnrConsole);
-//			GuiGlobals.getInstance().requestFocus(tfInput);
+			sapp.getGuiNode().attachChild(getContainerConsole());
+//			GuiGlobals.getInstance().requestFocus(getInputField());
 		}else{
-			ctnrConsole.removeFromParent();
+			getContainerConsole().removeFromParent();
 			closeHint();
 //			GuiGlobals.getInstance().requestFocus(null);
 		}
@@ -219,7 +305,15 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 	public ListBox<String> getHintBox() {
 		return (ListBox<String>)super.lstbxAutoCompleteHint;
 	}
-
+	
+	public ListBox<String> getDumpArea() {
+		return (ListBox<String>)super.lstbxDumpArea;
+	}
+	
+	public TextField getInputField(){
+		return (TextField)super.tfInput;
+	}
+	
 	@Override
 	public void clearHintSelection() {
 		getHintBox().getSelectionModel().setSelection(-1);
@@ -256,4 +350,309 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		return this;
 	}
 
+	@Override
+	protected void mapKeysForInputField(){
+		// simple actions
+		KeyActionListener actSimpleActions = new KeyActionListener() {
+			@Override
+			public void keyAction(TextEntryComponent source, KeyAction key) {
+				boolean bControl = key.hasModifier(KeyAction.CONTROL_DOWN); //0x1
+//				boolean bShift = key.hasModifier(0x01);
+//				boolean bAlt = key.hasModifier(0x001);
+//				case KeyInput.KEY_INSERT: //shift+ins paste
+					//TODO ? case KeyInput.KEY_INSERT: //ctrl+ins copy
+					//TODO ? case KeyInput.KEY_DELETE: //shift+del cut
+				
+				switch(key.getKeyCode()){
+//					case KeyInput.KEY_B: 
+//						if(bControl)cc.iCopyFrom = getDumpAreaSelectedIndex();
+//						break;
+					case KeyInput.KEY_C: 
+						if(bControl)cc.editCopyOrCut(false,false,false);
+						break;
+					case KeyInput.KEY_ESCAPE: 
+						setEnabled(false);
+						break;
+					case KeyInput.KEY_V: 
+						if(bKeyShiftIsPressed){
+							if(bControl)cc.showClipboard();
+						}else{
+							if(bControl)editPaste();
+						}
+						break;
+					case KeyInput.KEY_X: 
+						if(bControl)cc.editCopyOrCut(false,true,false);
+						break;
+					case KeyInput.KEY_NUMPADENTER:
+					case KeyInput.KEY_RETURN:
+						actionSubmit(getInputText());
+						break;
+					case KeyInput.KEY_TAB:
+						autoCompleteInputField(bControl);
+						break;
+					case KeyInput.KEY_DELETE:
+						if(bControl)clearInputTextField();
+						break;
+					case KeyInput.KEY_SLASH:
+						if(bControl)cc.toggleLineCommentOrCommand();
+						break;
+				}
+			}
+		};
+		
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_TAB), actSimpleActions);
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_TAB,KeyAction.CONTROL_DOWN), actSimpleActions);
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_RETURN), actSimpleActions);
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_NUMPADENTER), actSimpleActions);
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_B,KeyAction.CONTROL_DOWN), actSimpleActions);
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_C,KeyAction.CONTROL_DOWN), actSimpleActions);
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_V,KeyAction.CONTROL_DOWN), actSimpleActions);
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_X,KeyAction.CONTROL_DOWN), actSimpleActions);
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_DELETE,KeyAction.CONTROL_DOWN), actSimpleActions);
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_SLASH,KeyAction.CONTROL_DOWN), actSimpleActions);
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_ESCAPE), actSimpleActions);
+		
+		// cmd history select action
+		KeyActionListener actCmdHistoryEntrySelectAction = new KeyActionListener() {
+			@Override
+			public void keyAction(TextEntryComponent source, KeyAction key) {
+				navigateCmdHistOrHintBox(source,key);
+			}
+		};
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_UP), actCmdHistoryEntrySelectAction);
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_DOWN), actCmdHistoryEntrySelectAction);
+		
+		// scroll actions
+		KeyActionListener actDumpNavigate = new KeyActionListener() {
+			@Override
+			public void keyAction(TextEntryComponent source, KeyAction key) {
+				boolean bControl = key.hasModifier(KeyAction.CONTROL_DOWN); //0x1
+				double dCurrent = getScrollDumpAreaFlindex();
+				double dAdd = 0;
+				switch(key.getKeyCode()){
+					case KeyInput.KEY_PGUP:
+						dAdd = -iShowRows;
+						break;
+					case KeyInput.KEY_PGDN:
+						dAdd = +iShowRows;
+						break;
+					case KeyInput.KEY_HOME:
+						if(bControl)dAdd = -dCurrent;
+						break;
+					case KeyInput.KEY_END:
+						if(bControl)dAdd = vlstrDumpEntries.size();
+						break;
+				}
+				scrollDumpArea(dCurrent + dAdd);
+				scrollToBottomRequestSuspend();
+			}
+		};
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_PGUP), actDumpNavigate);
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_PGDN), actDumpNavigate);
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_HOME, KeyAction.CONTROL_DOWN), actDumpNavigate);
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_END, KeyAction.CONTROL_DOWN), actDumpNavigate);
+	}
+
+	@Override
+	protected void scrollDumpArea(double dIndex){
+		/**
+		 * the index is actually inverted
+		 */
+		double dMax = getDumpArea().getSlider().getModel().getMaximum();
+		if(dIndex==-1)dIndex=dMax;
+		dIndex = dMax-dIndex;
+		double dPerc = dIndex/dMax;
+		
+		getDumpArea().getSlider().getModel().setPercent(dPerc);
+		getDumpArea().getSlider().getModel().setValue(dIndex);
+	}
+	
+	@Override
+	protected double getScrollDumpAreaFlindex(){
+		return getDumpArea().getSlider().getModel().getMaximum()
+				-getDumpArea().getSlider().getModel().getValue();
+	}
+
+	@Override
+	protected void updateVisibleRowsAmount(){
+		if(fLstbxHeight != getDumpArea().getSize().y){
+			iVisibleRowsAdjustRequest = 0; //dynamic
+		}
+		
+		if(iVisibleRowsAdjustRequest==null)return;
+		
+		Integer iForceAmount = iVisibleRowsAdjustRequest;
+		if(iForceAmount>0){
+			iShowRows=iForceAmount;
+//			lstbx.setVisibleItems(iShowRows);
+//			lstbx.getGridPanel().setVisibleSize(iShowRows,1);
+		}else{
+			if(getDumpArea().getGridPanel().getChildren().isEmpty())return;
+			
+			Button	btnFixVisibleRowsHelper = null;
+			for(Spatial spt:getDumpArea().getGridPanel().getChildren()){
+				if(spt instanceof Button){
+					btnFixVisibleRowsHelper = (Button)spt;
+					break;
+				}
+			}
+			if(btnFixVisibleRowsHelper==null)return;
+			
+			fLstbxEntryHeight = retrieveBitmapTextFor(btnFixVisibleRowsHelper).getLineHeight();
+			if(fLstbxEntryHeight==null)return;
+			
+			fLstbxHeight = getDumpArea().getSize().y;
+			
+			float fHeightAvailable = fLstbxHeight;
+//				float fHeightAvailable = fLstbxHeight -fInputHeight;
+//				if(getContainerConsole().hasChild(lblStats)){
+//					fHeightAvailable-=fStatsHeight;
+//				}
+			iShowRows = (int) (fHeightAvailable / fLstbxEntryHeight);
+		}
+		
+		getDumpArea().setVisibleItems(iShowRows);
+		
+		cc.varSet(cc.CMD_FIX_VISIBLE_ROWS_AMOUNT, ""+iShowRows, true);
+		
+	//	lstbx.getGridPanel().setVisibleSize(iShowRows,1);
+		cc.dumpInfoEntry("fLstbxEntryHeight="+MiscI.i().fmtFloat(fLstbxEntryHeight)+", "+"iShowRows="+iShowRows);
+		
+		iVisibleRowsAdjustRequest=null;
+		
+		cmdLineWrapDisableDumpArea();
+	}
+	
+	@Override
+	public int getVisibleRows(){
+		return getDumpArea().getGridPanel().getVisibleRows();
+	}
+//	@Override
+//	public Vector3f getDumpAreaSize(){
+//		return getDumpArea().getSize();
+//	}
+//	@Override
+//	public Vector3f getInputFieldSize(){
+//		return getInputField().getSize();
+//	}
+	
+	@Override
+	public String getInputText() {
+		return getInputField().getText();
+	}
+	
+	@Override
+	public void setInputField(String str){
+		/**
+		 * do NOT trim() the string, it may be being auto completed and 
+		 * an space being appended to help on typing new parameters.
+		 */
+		getInputField().setText(fixStringToInputField(str));
+	}
+	
+	@Override
+	protected void editPaste() {
+		super.editPaste();
+		LemurMiscHelpersState.i().positionCaratProperly(getInputField());
+	}
+	
+	@Override
+	protected String prepareToPaste(String strPasted, String strCurrent) {
+		if(!isInputTextFieldEmpty()){
+			strCurrent = LemurMiscHelpersState.i().prepareStringToPasteAtCaratPosition(
+				getInputField(), strCurrent, strPasted);
+		}else{
+			return super.prepareToPaste(strPasted, strCurrent);
+		}
+		
+		return strCurrent;
+	}
+	@Override
+	protected void updateDumpAreaSelectedIndex(){
+		Integer i = getDumpArea().getSelectionModel().getSelection();
+		iSelectionIndex = i==null ? -1 : i;
+	}
+	@Override
+	public void clearDumpAreaSelection() {
+		getDumpArea().getSelectionModel().setSelection(-1); //clear selection
+	}
+	@Override
+	protected Double getDumpAreaSliderPercent(){
+		return getDumpArea().getSlider().getModel().getPercent();
+	}
+	@Override
+	protected Integer getInputFieldCaratPosition(){
+		return getInputField().getDocumentModel().getCarat();
+	}
+	
+	@Override
+	protected String autoCompleteInputField(boolean bMatchContains) {
+		String strCompletedCmd = super.autoCompleteInputField(bMatchContains);
+		LemurMiscHelpersState.i().setCaratPosition(getInputField(), strCompletedCmd.length());
+		return strCompletedCmd;
+	}
+//	@Override
+//	public Vector3f getDumpAreaSliderSize(){
+//		return getDumpArea().getSlider().getSize();
+//	}
+	
+	public Container getContainerConsole(){
+		return (Container)ctnrConsole;
+	}
+	
+	public Container getContainerStatsAndControls(){
+		return (Container)ctnrStatsAndControls;
+	}
+	
+	protected class ButtonClick implements Command<Button>{
+		@Override
+		public void execute(Button source) {
+			if(source.equals(btnClipboardShow)){
+				cc.showClipboard();
+			}else
+			if(source.equals(btnCopy)){
+				cc.editCopyOrCut(false,false,false);
+			}else
+			if(source.equals(btnCut)){
+				cc.editCopyOrCut(false,true,false);
+			}else
+			if(source.equals(btnPaste)){
+				editPaste();
+			}
+		}
+	}
+	
+	@Override
+	public Vector3f getContainerConsolePreferredSize(){
+		return getContainerConsole().getPreferredSize();
+	}
+	
+	@Override
+	public void setContainerConsolePreferredSize(Vector3f v3f) {
+		getContainerConsole().setPreferredSize(v3f);
+	}
+	@Override
+	public void addRemoveContainerConsoleChild(boolean bAdd, Node pnlChild, BorderLayout.Position p){
+		if(bAdd){
+			getContainerConsole().addChild(pnlChild,p);
+		}else{
+			getContainerConsole().removeChild(pnlChild);
+		}
+	}
+	
+	@Override
+	public void cleanup() {
+		getContainerConsole().clearChildren();
+		super.cleanup();
+	}
+	
+//	@Override
+//	protected Vector3f getStatsAndControlsSize() {
+//		return getContainerStatsAndControls().getSize();
+//	}
+	
+	@Override
+	protected Vector3f getSizeOf(Node node) {
+		return ((Panel)node).getSize();
+	}
 }

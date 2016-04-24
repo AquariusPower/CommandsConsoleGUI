@@ -11,5 +11,6 @@
 	<classpathentry kind="lib" path="lib/slf4j-simple-1.7.5.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jme31"/>
 	<classpathentry kind="lib" path="lib/guava-19.0.jar"/>
+	<classpathentry kind="lib" path="lib/jME-TrueTypeFontLite.jar" sourcepath="lib/jME-TrueTypeFontLite-sources.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
