@@ -2,15 +2,15 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="lib/groovy-all-2.1.9.jar"/>
-	<classpathentry kind="lib" path="lib/lemur-1.6.1.jar" sourcepath="lib/lemur-1.6.1-sources.jar"/>
-	<classpathentry kind="lib" path="lib/lemur-proto-1.5.1.jar" sourcepath="lib/lemur-proto-1.5.1-sources.jar"/>
-	<classpathentry kind="lib" path="lib/log4j-1.2.12.jar"/>
-	<classpathentry kind="lib" path="lib/slf4j-api-1.7.5.jar"/>
-	<classpathentry kind="lib" path="lib/slf4j-log4j12-1.7.5.jar"/>
-	<classpathentry kind="lib" path="lib/slf4j-simple-1.7.5.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/jme31"/>
-	<classpathentry kind="lib" path="lib/guava-19.0.jar"/>
-	<classpathentry kind="lib" path="lib/jME-TrueTypeFontLite.jar" sourcepath="lib/jME-TrueTypeFontLite-sources.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/groovy-all-2.1.9.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/log4j-1.2.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-1.7.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/slf4j-log4j12-1.7.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/slf4j-simple-1.7.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/guava-19.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jME-TrueTypeFontLite.jar" sourcepath="lib/jME-TrueTypeFontLite-sources.zip"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jme3libs"/>
+	<classpathentry exported="true" kind="lib" path="lib/lemur-1.8.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lemur-proto-1.6.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
