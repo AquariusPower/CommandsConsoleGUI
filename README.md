@@ -8,4 +8,4 @@ ConsoleCommands
 |_(could be another 3D or 2D UI or even simple text UI)  
 
 - Automatic commands and user accessible console variables, by simply instantiating proper classes.
-- Any class can implement its own set of console commands.
+- Any class can be a listener and implement its own set of console commands.
