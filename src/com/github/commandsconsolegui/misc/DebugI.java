@@ -46,7 +46,8 @@ public class DebugI implements IConsoleCommandListener{
 	 */
 	public static enum EDbgKey{
 		StatsText,
-		DumpFontImg,
+		DumpFontImg, 
+		NewDayInfo,
 		;
 		boolean b;
 	}
@@ -74,6 +75,10 @@ public class DebugI implements IConsoleCommandListener{
 //	
 	public boolean isKeyEnabled(EDbgKey ek){
 		return ek.b;
+	}
+	
+	public void disableKey(EDbgKey ek){
+		ek.b=false;
 	}
 
 	@Override

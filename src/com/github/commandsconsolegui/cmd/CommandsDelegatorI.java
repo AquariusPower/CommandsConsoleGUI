@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.cmd;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,6 +45,7 @@ import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.misc.DebugI;
+import com.github.commandsconsolegui.misc.DebugI.EDbgKey;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -92,6 +94,8 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	public final BoolTogglerCmdField	btgShowWarn = new BoolTogglerCmdField(this,true);
 	public final BoolTogglerCmdField	btgShowInfo = new BoolTogglerCmdField(this,true);
 	public final BoolTogglerCmdField	btgShowException = new BoolTogglerCmdField(this,true);
+	public final BoolTogglerCmdField	btgDumpToTerminal = new BoolTogglerCmdField(this,true,BoolTogglerCmdField.strTogglerCodePrefix,
+		"The system terminal where the application is being run, will also receive "+CommandsDelegatorI.class.getSimpleName()+" output.");
 	public final BoolTogglerCmdField	btgEngineStatsView = new BoolTogglerCmdField(this,false);
 	public final BoolTogglerCmdField	btgEngineStatsFps = new BoolTogglerCmdField(this,false);
 	public final BoolTogglerCmdField	btgShowMiliseconds=new BoolTogglerCmdField(this,false);
@@ -419,6 +423,8 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	private String	strLastTypedUserCommand;
 
 	private ArrayList<Exception>	aExceptionList = new ArrayList<Exception>();
+
+	private String	strCurrentDay;
 
 
 //	private ECmdReturnStatus	ecrsCurrentCommandReturnStatus;
@@ -822,6 +828,11 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	protected void dumpEntry(DumpEntryData de){
 		dumpSave(de);
 		
+//		PrintStream output = System.out;
+//		if(de.isStderr())output = System.err;
+//		output.println("CONS: "+de.getLineOriginal());
+		if(btgDumpToTerminal.b())de.sendToPrintStream("[CCUI]"+de.getLineOriginal());
+		
 		if(!icui.isInitialized()){
 			adeDumpEntryFastQueue.add(de);
 			return;
@@ -976,6 +987,7 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 		ex.setStackTrace(Thread.currentThread().getStackTrace());
 		addImportantMsgToBuffer(strType,str,ex);
 		dumpEntry(new DumpEntryData()
+			.setPrintStream(System.err)
 			.setDumpToConsole(btgShowWarn.get())
 			.setLineOriginal(MiscI.i().getSimpleTime(btgShowMiliseconds.get())+strErrorEntryPrefix+str)
 		);
@@ -1012,6 +1024,9 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	protected void dumpExceptionEntry(ImportantMsgData imsg, Integer iShowStackElementsCount) {
+		/**
+		 * it is coming from the message buffer, so will not readd it...
+		 */
 		dumpExceptionEntry(imsg.ex, imsg.aste, iShowStackElementsCount, false);
 	}
 	public void dumpExceptionEntry(Exception ex){
@@ -1020,28 +1035,50 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	/**
 	 * 
 	 * @param ex
-	 * @param aste if null will use the exception one
+	 * @param asteStackOverride if null will use the exception one
 	 * @param iShowStackElementsCount if null, will show nothing. If 0, will show all.
 	 * @param bAddToMsgBuffer
 	 */
-	protected void dumpExceptionEntry(Exception ex, StackTraceElement[] aste, Integer iShowStackElementsCount, boolean bAddToMsgBuffer){
+	protected void dumpExceptionEntry(Exception ex, StackTraceElement[] asteStackOverride, Integer iShowStackElementsCount, boolean bAddToMsgBuffer){
 		String strTime="";
-		if(bAddToMsgBuffer){
+		PrintStream psStack = System.err;
+		PrintStream psInfo = System.err;
+		if(bAddToMsgBuffer){ //the exception is happening right now
 			strTime=MiscI.i().getSimpleTime(btgShowMiliseconds.get());
 			addImportantMsgToBuffer("Exception",ex.toString(),ex);
+			ex.printStackTrace();
+			psStack = null; //avoiding dup: already dumped to terminal, above
+		}else{
+			/**
+			 * if it is not being added to buffer, means it is being reviewed by developer/user
+			 * so will use stdout, as the exception is not happening right now.
+			 */
+			psInfo = psStack = System.out;
 		}
 		
-		dumpEntry(false, btgShowException.get(), false, 
-			strTime+strExceptionEntryPrefix+ex.toString());
+//		dumpEntry(false, btgShowException.get(), false, 
+//			strTime+strExceptionEntryPrefix+ex.toString());
+		dumpEntry(new DumpEntryData()
+			.setPrintStream(psInfo) //this is good to show the time at terminal
+			.setApplyNewLineRequests(false)
+			.setDumpToConsole(btgShowException.get())
+			.setUseSlowQueue(false)
+			.setLineOriginal(strTime+strExceptionEntryPrefix+ex.toString()));
+		
 		if(iShowStackElementsCount!=null){
-			if(aste==null)aste=ex.getStackTrace();
-			for(int i=0;i<aste.length;i++){
-				StackTraceElement ste = aste[i]; 
+			if(asteStackOverride==null)asteStackOverride=ex.getStackTrace();
+			
+			for(int i=0;i<asteStackOverride.length;i++){
+				StackTraceElement ste = asteStackOverride[i]; 
 				if(iShowStackElementsCount>0 && i>=iShowStackElementsCount)break;
-				dumpSubEntry(ste.toString());
+				dumpEntry(new DumpEntryData()
+					.setPrintStream(psStack) 
+					.setApplyNewLineRequests(true)
+					.setDumpToConsole(true)
+					.setUseSlowQueue(false)
+					.setLineOriginal(strSubEntryPrefix+ste.toString()));
 			}
 		}
-		if(ex!=null)ex.printStackTrace();
 	}
 	
 	/**
@@ -2176,12 +2213,23 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 		this.fTPF = tpf;
 		if(tdLetCpuRest.isActive() && !tdLetCpuRest.isReady(true))return;
 		
+		updateNewDay();
 		updateToggles();
 		updateExecPreQueuedCmdsBlockDispatcher(); //before exec queue 
 		updateExecConsoleCmdQueue(); // after pre queue
 		updateDumpQueueEntry();
 		updateHandleException();
 	}
+	
+	protected void updateNewDay() {
+		String str = MiscI.i().getSimpleDate();
+		if(!str.equalsIgnoreCase(strCurrentDay) || DebugI.i().isKeyEnabled(EDbgKey.NewDayInfo)){
+			strCurrentDay=str;
+			dumpInfoEntry("Welcome to a new day "+strCurrentDay+"!");
+			DebugI.i().disableKey(EDbgKey.NewDayInfo);
+		}
+	}
+
 	protected void updateToggles() {
 		if(btgEngineStatsView.checkChangedAndUpdate())icui.updateEngineStats();
 		if(btgEngineStatsFps.checkChangedAndUpdate())icui.updateEngineStats();

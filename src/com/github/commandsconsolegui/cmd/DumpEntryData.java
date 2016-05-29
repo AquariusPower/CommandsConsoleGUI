@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.cmd;
 
+import java.io.PrintStream;
+
 /**
  * dump strings will always be logged to file even if disabled.
  * 
@@ -44,6 +46,7 @@ public class DumpEntryData{
 	boolean bUseSlowQueue = false;
 	String strLineOriginal = null;
 	private String strLineBaking = null;
+	private PrintStream	ps = System.out;
 	
 	public boolean isApplyNewLineRequests() {
 		return bApplyNewLineRequests;
@@ -79,5 +82,18 @@ public class DumpEntryData{
 	public void setLineBaking(String strLineBaking) {
 		this.strLineBaking = strLineBaking;
 	}
+	/**
+	 * 
+	 * @param ps set to null to skip terminal printing, can be set to System.err too.
+	 * @return
+	 */
+	public DumpEntryData setPrintStream(PrintStream ps) {
+		this.ps=ps;
+		return this;
+	}
+	public void sendToPrintStream(String strOutput){
+		if(this.ps!=null)this.ps.println(strOutput);
+	}
 	
 }
+

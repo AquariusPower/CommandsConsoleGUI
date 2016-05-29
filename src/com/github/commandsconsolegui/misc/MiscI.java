@@ -98,6 +98,9 @@ public class MiscI {
 			.format(new Date(lTimeMilis));
 //			.format(Calendar.getInstance().getTime());
 	}
+	public String getSimpleDate() {
+		return new SimpleDateFormat("yyyyMMdd").format(Calendar.getInstance().getTime());
+	}
 	
 	public String fmtFloat(double d){
 		return fmtFloat(d,-1);
@@ -326,5 +329,5 @@ public class MiscI {
 			if(os!=null)try {os.close();} catch (IOException ex) {ihe.handleExceptionThreaded(ex);}
 		}             
 	}
-	
+
 }
