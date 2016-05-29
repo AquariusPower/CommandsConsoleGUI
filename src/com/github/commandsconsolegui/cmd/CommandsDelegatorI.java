@@ -831,7 +831,7 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 //		PrintStream output = System.out;
 //		if(de.isStderr())output = System.err;
 //		output.println("CONS: "+de.getLineOriginal());
-		if(btgDumpToTerminal.b())de.sendToPrintStream("[CCUI]"+de.getLineOriginal());
+		if(btgDumpToTerminal.b())de.sendToPrintStream("[CCUI]"+de.getLineOriginal().replace("\t","  ")); //remove tabs for better compatibility 
 		
 		if(!icui.isInitialized()){
 			adeDumpEntryFastQueue.add(de);
@@ -3061,6 +3061,7 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 
 	public void repeatLastUserTypedCommand() {
 		dumpInfoEntry("Repeating: "+strLastTypedUserCommand);
+		if(strLastTypedUserCommand==null)return;
 		addCmdToQueue(strLastTypedUserCommand, true);
 	}
 
