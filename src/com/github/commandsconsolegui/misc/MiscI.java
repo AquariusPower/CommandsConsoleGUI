@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapText;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -65,10 +66,12 @@ public class MiscI {
 	private IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	private String	strLastUid = "0";
 	private boolean	bConfigured;
+	private SimpleApplication	sapp;
 	
-	public void configure(IHandleExceptions ihe){
+	public void configure(SimpleApplication sapp,IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 		this.ihe=ihe;
+		this.sapp=sapp;
 		bConfigured=true;
 	}
 	
@@ -340,5 +343,20 @@ public class MiscI {
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * 
+	 * @param sptStart
+	 * @return parentest spatial, least top nodes
+	 */
+	public Spatial getParentestFrom(Spatial sptStart){
+		Spatial sptParentest = sptStart;
+		while(sptParentest.getParent()!=null){
+			if(sapp.getGuiNode().equals(sptParentest.getParent()))break;
+			if(sapp.getRootNode().equals(sptParentest.getParent()))break;
+			sptParentest=sptParentest.getParent();
+		}
+		return sptParentest;
 	}
 }

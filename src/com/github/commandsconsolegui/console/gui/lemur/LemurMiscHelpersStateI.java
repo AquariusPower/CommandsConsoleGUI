@@ -132,11 +132,6 @@ public class LemurMiscHelpersStateI implements AppState, IConsoleCommandListener
 		this.tfToBlinkCursor = tf;
 	}
 	
-	public FocusManagerState getFocusManagerState(){
-		if(focusState==null)focusState = sapp.getStateManager().getState(FocusManagerState.class);
-		return focusState;
-	}
-	
 	private void bugfixInvisibleCursor(TextField tf){
 		if(!bFixInvisibleTextInputCursor)return;
 		
@@ -203,7 +198,7 @@ public class LemurMiscHelpersStateI implements AppState, IConsoleCommandListener
 	
 	private void updateBlinkInputFieldTextCursor(TextField tf) {
 		if(!bBlinkingTextCursor)return;
-		if(!tf.equals(getFocusManagerState().getFocus()))return;
+		if(!tf.equals(LemurFocusHelperI.i().getFocused()))return;
 		
 //		tdTextCursorBlink.updateTime();
 		
@@ -338,14 +333,6 @@ public class LemurMiscHelpersStateI implements AppState, IConsoleCommandListener
 
 	@Override
 	public void cleanup() {
-	}
-
-	public void requestFocus(Spatial spt) {
-		if(spt instanceof TextField){
-			setTextFieldInputToBlinkCursor((TextField) spt);
-		}
-		
-		GuiGlobals.getInstance().requestFocus(spt);
 	}
 
 	@Override

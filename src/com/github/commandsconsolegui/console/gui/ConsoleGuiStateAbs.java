@@ -30,7 +30,6 @@ package com.github.commandsconsolegui.console.gui;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
-import java.nio.ByteBuffer;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
@@ -71,7 +70,6 @@ import com.jme3.asset.plugins.FileLocator;
 import com.jme3.font.BitmapCharacter;
 import com.jme3.font.BitmapCharacterSet;
 import com.jme3.font.BitmapFont;
-import com.jme3.font.BitmapText;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
@@ -85,10 +83,7 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
-import com.jme3.scene.VertexBuffer.Format;
-import com.jme3.texture.Image;
 import com.jme3.texture.Texture2D;
-import com.simsilica.lemur.GuiGlobals;
 
 /**
  * A graphical console where developers and users can issue application commands.
@@ -315,11 +310,20 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 
 //	protected boolean	bUsePreQueue = false; 
 	
-	/**
+	/**********************************************
 	 * USER MUST IMPLEMENT THESE METHODS,
 	 * keep them together for easy review
 	 */
+	
+	/** This method is GUI independent */
 	protected abstract Object getFocus();
+	/**
+	 * This method is GUI independent
+	 * @param obj if null, is to remove focus from everything
+	 */
+	protected abstract boolean setFocus(Object obj);
+	/** This method is GUI independent */
+	protected abstract void removeFocus(Object obj);
 	protected abstract float fontWidth(String strChars, String strStyle, boolean bAveraged);
 	protected abstract void setStatsText(String str);
 	protected abstract String getStatsText();
@@ -342,11 +346,6 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 //	protected abstract Vector3f getDumpAreaSize();
 //	protected abstract Vector3f getStatsAndControlsSize();
 //	protected abstract Vector3f getInputFieldSize();
-	/**
-	 * @param obj if null, is to remove focus from everything
-	 * @return
-	 */
-	protected abstract boolean setFocus(Object obj);
 	/**
 	 * @param dIndex if -1, means max index (bottom)
 	 */
@@ -609,7 +608,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		ctnrConsole.setLocalTranslation(
 			iMargin, 
 			sapp.getContext().getSettings().getHeight()-iMargin, 
-			0);
+			0); // Z translation controls what will be shown above+/below- others, will be automatically set by FocusChangeListenerI
 		
 		mapKeys();
 		
@@ -1064,44 +1063,52 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	}
 	
 	protected void updateOverrideInputFocus(){
-		Spatial sptWithFocus = (Spatial) getFocus();
-		
 		if(isEnabled()){
-			if(tfInput!=sptWithFocus){
-				if(sptPreviousFocus==null){
-					sptPreviousFocus = sptWithFocus;
-					bRestorePreviousFocus=true;
-				}
-				
-				setFocus(tfInput);
-			}
+			setFocus(tfInput);
 		}else{
-			/**
-			 * this shall happen only once on console closing...
-			 */
-			if(bRestorePreviousFocus){
-				if(sptPreviousFocus!=null){
-					if(
-							!sptPreviousFocus.hasAncestor(sapp.getGuiNode())
-							&&
-							!sptPreviousFocus.hasAncestor(sapp.getRootNode()) //TODO can it be at root node?
-					){
-						/**
-						 * if it is not in one of the rendering nodes,
-						 * simply removes the focus, to give it back to 
-						 * other parts of the application.
-						 */
-						sptPreviousFocus = null;
-					}
-				}
-				
-				setFocus(sptPreviousFocus);
-//				GuiGlobals.getInstance().requestFocus(sptPreviousFocus);
-				sptPreviousFocus = null;
-				bRestorePreviousFocus=false;
-			}
+			removeFocus(tfInput);
 		}
 	}
+	
+//	protected void updateOverrideInputFocus(){
+//		Spatial sptWithFocus = (Spatial) getFocus();
+//		
+//		if(isEnabled()){
+//			if(tfInput!=sptWithFocus){
+//				if(sptPreviousFocus==null){
+//					sptPreviousFocus = sptWithFocus;
+//					bRestorePreviousFocus=true;
+//				}
+//				
+//				setFocus(tfInput);
+//			}
+//		}else{
+//			/**
+//			 * this shall happen only once on console closing...
+//			 */
+//			if(bRestorePreviousFocus){
+//				if(sptPreviousFocus!=null){
+//					if(
+//							!sptPreviousFocus.hasAncestor(sapp.getGuiNode())
+//							&&
+//							!sptPreviousFocus.hasAncestor(sapp.getRootNode()) //TODO can it be at root node?
+//					){
+//						/**
+//						 * if it is not in one of the rendering nodes,
+//						 * simply removes the focus, to give it back to 
+//						 * other parts of the application.
+//						 */
+//						sptPreviousFocus = null;
+//					}
+//				}
+//				
+//				setFocus(sptPreviousFocus);
+////				GuiGlobals.getInstance().requestFocus(sptPreviousFocus);
+//				sptPreviousFocus = null;
+//				bRestorePreviousFocus=false;
+//			}
+//		}
+//	}
 	
 //	/**
 //	 * TODO use base 36 (max alphanum chars amount)

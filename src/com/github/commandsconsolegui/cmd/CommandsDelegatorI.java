@@ -63,7 +63,8 @@ import com.jme3.app.SimpleApplication;
  * Here are all base command related methods.
  * 
  * No instance for this, the user must create such instance to use anyplace needed,
- * so specialized methods will be recognized properly.
+ * so specialized methods will be recognized properly. Class name ends with I to 
+ * indicate that!
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
@@ -2376,7 +2377,7 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	public void addCmdToQueue(String strFullCmdLine){
 		addCmdToQueue(strFullCmdLine,false);
 	}
-	protected void addCmdToQueue(String strFullCmdLine, boolean bPrepend){
+	public void addCmdToQueue(String strFullCmdLine, boolean bPrepend){
 		strFullCmdLine=strFullCmdLine.trim();
 		
 		if(strFullCmdLine.startsWith(""+getCommentPrefix()))return;
@@ -2648,7 +2649,7 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 		BoolTogglerCmdField.configure(this);
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 		DebugI.i().configure(this);
-		MiscI.i().configure(this);
+		MiscI.i().configure(sapp,this);
 		ReflexHacks.i().configure(sapp, this, this);
 //		SingleInstanceState.i().initialize(sapp, this);
 		

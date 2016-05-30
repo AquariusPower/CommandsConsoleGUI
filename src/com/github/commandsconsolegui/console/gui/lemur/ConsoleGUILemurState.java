@@ -110,6 +110,7 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		LemurMiscHelpersStateI.i().configure(sapp, cc);
 		LemurMiscHelpersStateI.i().initialize(sapp.getStateManager(), sapp);
 		if(!sapp.getStateManager().attach(LemurMiscHelpersStateI.i()))throw new NullPointerException("already attached state "+LemurMiscHelpersStateI.class.getName());
+		LemurFocusHelperI.i().configure(sapp,cc);
 	}
 	
 //	public void ConsoleGUILemurState(int iOpenConsoleHotKey, ConsoleCommands cc, Application app) {
@@ -133,7 +134,7 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		if(colorConsoleStyleBackground==null){
 			colorConsoleStyleBackground = ColorRGBA.Blue.clone();
 			colorConsoleStyleBackground.b=0.25f;
-			colorConsoleStyleBackground.a=0.75f;
+			colorConsoleStyleBackground.a=1f; //0.75f;
 		}
 		
 		if(svfBackgroundHexaColorRGBA.getStringValue().isEmpty()){
@@ -211,6 +212,7 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		
 		// main container
 		ctnrConsole = new Container(new BorderLayout(), strStyle);
+//		LemurFocusHelperI.i().addFocusChangeListener(ctnrConsole);
 //		int iMargin=2;
 //		v3fConsoleSize = new Vector3f(
 //			v3fApplicationWindowSize.x -(iMargin*2),
@@ -286,6 +288,7 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		// input
 		super.tfInput = new TextField(""+cc.getCommandPrefix(),strStyle);
     CursorEventControl.addListenersToSpatial(getInputField(), consoleCursorListener);
+		LemurFocusHelperI.i().addFocusChangeListener(getInputField());
 		fInputHeight = MiscI.i().retrieveBitmapTextFor(getInputField()).getLineHeight();
 		getContainerConsole().addChild( getInputField(), BorderLayout.Position.South );
 		
@@ -743,11 +746,21 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 	}
 	@Override
 	public Object getFocus(){
-		return LemurMiscHelpersStateI.i().getFocusManagerState().getFocus();
+		return LemurFocusHelperI.i().getFocused();
 	}
 	@Override
 	public boolean setFocus(Object obj){
-		LemurMiscHelpersStateI.i().requestFocus((Spatial) obj);
+		if(obj==null){
+			LemurFocusHelperI.i().removeAllFocus();
+		}else{
+			LemurFocusHelperI.i().requestFocus((Spatial) obj);
+		}
+		
 		return obj==null?true:obj.equals(getFocus());
+	}
+
+	@Override
+	protected void removeFocus(Object obj) {
+		LemurFocusHelperI.i().removeFocusableFromList((Spatial) obj);
 	}
 }
