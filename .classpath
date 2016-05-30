@@ -10,7 +10,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/guava-19.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jME-TrueTypeFontLite.jar" sourcepath="lib/jME-TrueTypeFontLite-sources.zip"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jme3libs"/>
-	<classpathentry exported="true" kind="lib" path="lib/lemur-1.8.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lemur-1.8.1.jar" sourcepath="lib/lemur-1.8.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/lemur-proto-1.6.1.jar" sourcepath="lib/lemur-proto-1.6.1-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

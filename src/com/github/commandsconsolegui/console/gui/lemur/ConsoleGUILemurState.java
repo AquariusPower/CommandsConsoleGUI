@@ -27,10 +27,10 @@
 
 package com.github.commandsconsolegui.console.gui.lemur;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
+import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.console.gui.ConsoleGuiStateAbs;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.app.SimpleApplication;
@@ -75,12 +75,15 @@ import com.simsilica.lemur.style.Styles;
 public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 	protected static ConsoleGUILemurState instance;
 	
+	StringVarField svfBackgroundHexaColorRGBA = new StringVarField(this,"");
 	protected ConsoleCursorListener consoleCursorListener;
 	protected Button	btnCopy;
 	protected Button	btnPaste;
 	protected Button	btnClipboardShow;
 	protected Button	btnCut;
 	protected Label	lblStats;
+
+	private ColorRGBA	colorConsoleStyleBackground;
 	
 //	public static void setInstance(ConsoleGUILemurState gui){
 //		if(ConsoleGUILemurState.instance!=null){
@@ -127,13 +130,33 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		
 		Styles styles = GuiGlobals.getInstance().getStyles();
 		
+		if(colorConsoleStyleBackground==null){
+			colorConsoleStyleBackground = ColorRGBA.Blue.clone();
+			colorConsoleStyleBackground.b=0.25f;
+			colorConsoleStyleBackground.a=0.75f;
+		}
+		
+		if(svfBackgroundHexaColorRGBA.getStringValue().isEmpty()){
+			String strHexa = Integer.toHexString(colorConsoleStyleBackground.asIntRGBA());
+			strHexa = String.format("%8s", strHexa).replace(" ", "0").toUpperCase();
+			svfBackgroundHexaColorRGBA.setObjectValue(strHexa);
+		}else{
+			try{
+				int i = Integer.parseInt(svfBackgroundHexaColorRGBA.getStringValue(),16);//hexa string
+				colorConsoleStyleBackground.fromIntRGBA(i);
+			}catch(IllegalArgumentException ex){
+				cc.dumpExceptionEntry(ex);
+			}
+		}
+		
 		ColorRGBA clBg;
 		
 		Attributes attrs;
 		attrs = styles.getSelector(STYLE_CONSOLE); // this also creates the style
 		attrs.set("fontSize", 16);
 		attrs.set("color", ColorRGBA.White.clone());
-		clBg = ColorRGBA.Blue.clone();clBg.b=0.25f;clBg.a=0.75f;
+//		clBg = ColorRGBA.Blue.clone();clBg.b=0.25f;clBg.a=0.75f;
+		clBg = colorConsoleStyleBackground;
 		attrs.set("background", new QuadBackgroundComponent(clBg));
 		attrs.set("font", font);
 		
@@ -699,8 +722,8 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		GuiGlobals.initialize(sapp);
 		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
 		
-		astrStyleList.add(BaseStyles.GLASS);
-		astrStyleList.add(Styles.ROOT_STYLE);
+		addStyle(BaseStyles.GLASS);
+		addStyle(Styles.ROOT_STYLE);
 	}
 	
 	@Override

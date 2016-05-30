@@ -88,6 +88,7 @@ import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.VertexBuffer.Format;
 import com.jme3.texture.Image;
 import com.jme3.texture.Texture2D;
+import com.simsilica.lemur.GuiGlobals;
 
 /**
  * A graphical console where developers and users can issue application commands.
@@ -428,8 +429,14 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	public void initializePre(){
 		if(isInitialized())throw new NullPointerException("already initialized...");
 		
-		astrStyleList.clear();
-		astrStyleList.add(STYLE_CONSOLE);
+//		astrStyleList.clear();
+		addStyle(STYLE_CONSOLE);
+	}
+	
+	protected void addStyle(String strStyleId){
+		if(!astrStyleList.contains(strStyleId)){
+			astrStyleList.add(strStyleId);
+		}
 	}
 	
 	@Override
@@ -1559,7 +1566,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 			boolean bIsVarCompletion=false;
 			if(CMD_CONSOLE_STYLE.equals(strBaseCmd)){
 				strCmd=CMD_CONSOLE_STYLE+" ";
-				astrOptList=astrStyleList;
+				astrOptList=getStyleListClone();
 				strPartToComplete=strParam1;
 			}else
 			if(cc.CMD_DB.equals(strBaseCmd)){
@@ -1604,7 +1611,8 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 					strCompletedCmd+=astr.get(0);
 				}else{
 					cc.dumpInfoEntry("Param autocomplete:");
-					String strFirst = astr.remove(0);
+					String strFirst = null;
+					if(strPartToComplete!=null)strFirst = astr.remove(0);
 					for(String str:astr){
 //						if(strPartToComplete!=null && str.equals(astr.get(0)))continue;
 						if(bIsVarCompletion)str=cc.varReportPrepare(str);
@@ -1629,6 +1637,9 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		return strCompletedCmd;
 	}
 	
+	protected ArrayList<String> getStyleListClone() {
+		return new ArrayList<String>(astrStyleList);
+	}
 	protected String autoCompleteWork(String strCmdPart, boolean bMatchContains){
 		String strCmdPartOriginal = strCmdPart;
 		strCmdPart=strCmdPart.trim();
@@ -1744,6 +1755,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	}
 	protected void styleHelp(){
 		cc.dumpInfoEntry("Available styles:");
+		//There is still no way to collect styles from: GuiGlobals.getInstance().getStyles()
 		for(String str:astrStyleList){
 			cc.dumpSubEntry(str);
 		}
