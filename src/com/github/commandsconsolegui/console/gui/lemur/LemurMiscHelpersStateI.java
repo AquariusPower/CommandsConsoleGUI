@@ -445,7 +445,7 @@ public class LemurMiscHelpersStateI implements AppState, IConsoleCommandListener
 		ReflexHacks.i().callMethodHK(tec,"resetCursorPosition");
 	}
 
-	protected Float guessEntryHeight(ListBox<String> listBox){
+	public Float guessEntryHeight(ListBox<String> listBox){
 		if(listBox.getGridPanel().getChildren().isEmpty())return null;
 		
 		Button	btnFixVisibleRowsHelper = null;
