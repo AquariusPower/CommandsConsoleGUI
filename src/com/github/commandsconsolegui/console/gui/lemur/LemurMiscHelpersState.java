@@ -266,12 +266,21 @@ public class LemurMiscHelpersState implements AppState, IConsoleCommandListener,
 		tf.setUserData(EKey.CursorLargeMode.toString(), b?true:null);
 	}
 	
+	public void configure(SimpleApplication sapp, CommandsDelegatorI cc) {
+		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
+		this.sapp=sapp;
+		this.cc=cc;
+		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
+		cc.addConsoleCommandListener(this);
+		bConfigured=true;
+	}
+	
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
 		this.sapp = (SimpleApplication) app;
 		tdTextCursorBlink.updateTime();
 		
-		cc.addConsoleCommandListener(this);
+//		cc.addConsoleCommandListener(this);
 //		ReflexFill.assertReflexFillFieldsForOwner(this);
 		
 		bInitialized=true;
@@ -344,15 +353,6 @@ public class LemurMiscHelpersState implements AppState, IConsoleCommandListener,
 		}
 		
 		return cc.cmdFoundReturnStatus(bCmdEndedGracefully);
-	}
-
-	public void configure(SimpleApplication sapp, CommandsDelegatorI cc) {
-		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		this.sapp=sapp;
-		this.cc=cc;
-		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
-		cc.addConsoleCommandListener(this);
-		bConfigured=true;
 	}
 
 	@Override

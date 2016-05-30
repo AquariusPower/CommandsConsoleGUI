@@ -598,90 +598,11 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 //		createMonoSpaceFixedFontStyle();
 		
 		// main container
-//		ctnrConsole = new Container(new BorderLayout(), strStyle);
-////		int iMargin=2;
-////		v3fConsoleSize = new Vector3f(
-////			v3fApplicationWindowSize.x -(iMargin*2),
-////			(v3fApplicationWindowSize.y * fConsoleHeightPerc) -iMargin,
-////			0); //TODO why Z shouldnt be 0? changed to 0.1 and 1, but made no difference.
-//		ctnrConsole.setPreferredSize(v3fConsoleSize); //setSize() does not work well..
-////		ctnrConsole.setSize(v3fConsoleSize);
 		sapp.getGuiNode().attachChild(ctnrConsole);
 		ctnrConsole.setLocalTranslation(
 			iMargin, 
 			sapp.getContext().getSettings().getHeight()-iMargin, 
 			0);
-		
-//		/**
-//		 * TOP ELEMENT =================================================================
-//		 */
-//		ctnrStatsAndControls = new Container(strStyle);
-////		ctnrStatsAndControls.setName("ConsoleStats");
-//		ctnrConsole.addChild(ctnrStatsAndControls, BorderLayout.Position.North);
-//		
-//		// console stats
-//		lblStats = new Label("Console stats.",strStyle);
-//		lblStats.setColor(new ColorRGBA(1,1,0.5f,1));
-//		lblStats.setPreferredSize(new Vector3f(v3fConsoleSize.x*0.75f,1,0));
-//		fStatsHeight = retrieveBitmapTextFor(lblStats).getLineHeight();
-//		ctnrStatsAndControls.addChild(lblStats,0,0);
-//		
-//		// buttons
-//		ArrayList<Button> abu = new ArrayList<Button>();
-//		int iButtonIndex=0;
-//		btnClipboardShow = new Button("ShwClpbrd",strStyle);
-//		abu.add(btnClipboardShow);
-//		
-//		btnCopy = new Button("Copy",strStyle);
-//		abu.add(btnCopy);
-//		
-//		btnPaste = new Button("Paste",strStyle);
-//		abu.add(btnPaste);
-//		
-//		btnCut = new Button("Cut",strStyle);
-//		abu.add(btnCut);
-//		
-//		for(Button btn:abu){
-//			btn.setTextHAlignment(HAlignment.Center);
-//			//BUG buttons do not obbey this: btn.setPreferredSize(new Vector3f(50,1,0));
-//			btn.addClickCommands(new ButtonClick());
-//			ctnrStatsAndControls.addChild(btn,0,++iButtonIndex);
-//		}
-		
-//		/**
-//		 * CENTER ELEMENT (dump entries area) ===========================================
-//		 */
-//		lstbxDumpArea = new ListBox<String>(new VersionedList<String>(),strStyle);
-//		lstbxDumpArea.setName("ConsoleDumpArea");
-//    CursorEventControl.addListenersToSpatial(lstbxDumpArea, consoleCursorListener);
-//		Vector3f v3fLstbxSize = v3fConsoleSize.clone();
-////		v3fLstbxSize.x/=2;
-////		v3fLstbxSize.y/=2;
-//		lstbxDumpArea.setSize(v3fLstbxSize); // no need to update fLstbxHeight, will be automatic
-//		//TODO not working? lstbx.getSelectionModel().setSelectionMode(SelectionMode.Multi);
-//		
-//		/**
-//		 * The existance of at least one entry is very important to help on initialization.
-//		 * Actually to determine the listbox entry height.
-//		 */
-//		if(vlstrDumpEntries.isEmpty())vlstrDumpEntries.add(""+cc.getCommentPrefix()+" Initializing console.");
-//		
-//		lstbxDumpArea.setModel(vlstrDumpEntries);
-//		lstbxDumpArea.setVisibleItems(iShowRows);
-////		lstbx.getGridPanel().setVisibleSize(iShowRows,1);
-//		ctnrConsole.addChild(lstbxDumpArea, BorderLayout.Position.Center);
-		
-//		gpListboxDumpArea = lstbx.getGridPanel();
-		
-//		/**
-//		 * BOTTOM ELEMENT =================================================================
-//		 */
-//		// input
-//		tfInput = new TextField(""+cc.getCommandPrefix(),strStyle);
-//		tfInput.setName("ConsoleInput");
-//    CursorEventControl.addListenersToSpatial(tfInput, consoleCursorListener);
-//		fInputHeight = retrieveBitmapTextFor(tfInput).getLineHeight();
-//		ctnrConsole.addChild( tfInput, BorderLayout.Position.South );
 		
 		mapKeys();
 		

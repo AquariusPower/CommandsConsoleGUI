@@ -33,6 +33,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -184,6 +185,7 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	/** 0 is auto wrap, -1 will trunc big lines */
 	protected IntLongVarField ilvConsoleMaxWidthInCharsForLineWrap = new IntLongVarField(this,0);
 	protected IntLongVarField ilvCurrentFixedLineWrapAtColumn = new IntLongVarField(this,0);
+	protected HashMap<IConsoleCommandListener,StackTraceElement[]> hmDebugListenerAddedStack = new HashMap<IConsoleCommandListener,StackTraceElement[]>();
 	
 	protected boolean	bAddEmptyLineAfterCommand = true;
 	protected IConsoleUI	icui;
@@ -373,7 +375,8 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 		return checkCmdValidity(iccl, strValidCmd, strComment, false);
 	}
 	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strValidCmd, String strComment, boolean bSkipSortCheck){
-		if(strCmdLinePrepared==null){
+//		if(strCmdLinePrepared==null){
+		if(bFillCommandList){
 			if(strComment!=null){
 				strValidCmd+=commentToAppend(strComment);
 			}
@@ -424,7 +427,9 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 
 	private ArrayList<Exception>	aExceptionList = new ArrayList<Exception>();
 
-	private String	strCurrentDay;
+	protected String	strCurrentDay;
+
+	private boolean	bFillCommandList;
 
 
 //	private ECmdReturnStatus	ecrsCurrentCommandReturnStatus;
@@ -440,7 +445,20 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	 */
 	public void addConsoleCommandListener(IConsoleCommandListener icc){
 		if(icc==null)throw new NullPointerException("invalid null commands listener.");
+		if(aConsoleCommandListenerList.contains(icc)){
+			NullPointerException ex = new NullPointerException("listener already added: "+icc.getClass().getName());
+			Throwable tw = new Throwable("Listener added at:");
+			tw.setStackTrace(hmDebugListenerAddedStack.get(icc));
+			ex.initCause(tw);
+			throw ex;
+		}
+		hmDebugListenerAddedStack.put(icc,Thread.currentThread().getStackTrace());
 		aConsoleCommandListenerList.add(icc);
+		
+		//this will let it fill the commands list for this listener
+		bFillCommandList=true;
+		icc.execConsoleCommand(this); 
+		bFillCommandList=false;
 	}
 	
 	public static enum ECmdReturnStatus{
@@ -723,16 +741,17 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 			// keep this as reference
 		}else
 		{
-			for(IConsoleCommandListener icc:aConsoleCommandListenerList){
-				ECmdReturnStatus ecrs = icc.execConsoleCommand(this);
-				switch(ecrs){
-					case NotFound:
-					case Skip:
-						continue; //try next cmd listener
-					default:
-						return ecrs;
+			if(!bFillCommandList){ //when each listener is added, they already fill the list!
+				for(IConsoleCommandListener icc:aConsoleCommandListenerList){
+					ECmdReturnStatus ecrs = icc.execConsoleCommand(this);
+					switch(ecrs){
+						case NotFound:
+						case Skip:
+							continue; //try next cmd listener
+						default:
+							return ecrs;
+					}
 				}
-				
 			}
 		}
 		
@@ -1143,8 +1162,7 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 //		}
 		
 		if(strConflict!=null){
-			dumpExceptionEntry(
-					new NullPointerException("ConflictCmdId: "+strConflict));
+			dumpExceptionEntry(new NullPointerException("ConflictCmdId: "+strConflict));
 		}
 	}
 	
@@ -2684,7 +2702,10 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 		if(DebugI.i().isInIDEdebugMode())addCmdToQueue(CMD_MESSAGE_REVIEW);
 		
 		// init valid cmd list
-		executeCommand(null); //to populate the array with available commands
+		bFillCommandList=true;
+		executePreparedCommandRoot();
+		bFillCommandList=false;
+//		executeCommand(null); //to populate the array with available commands
 	}
 	
 	enum ETest{
