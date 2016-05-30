@@ -104,8 +104,9 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		super.configureBeforeInitializing(sapp, cc, iToggleConsoleKey);
 		
 		// misc cfg
-		LemurMiscHelpersState.i().configure(sapp, cc);
-		if(!sapp.getStateManager().attach(LemurMiscHelpersState.i()))throw new NullPointerException("already attached state "+LemurMiscHelpersState.class.getName());
+		LemurMiscHelpersStateI.i().configure(sapp, cc);
+		LemurMiscHelpersStateI.i().initialize(sapp.getStateManager(), sapp);
+		if(!sapp.getStateManager().attach(LemurMiscHelpersStateI.i()))throw new NullPointerException("already attached state "+LemurMiscHelpersStateI.class.getName());
 	}
 	
 //	public void ConsoleGUILemurState(int iOpenConsoleHotKey, ConsoleCommands cc, Application app) {
@@ -206,7 +207,7 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		lblStats = new Label("Console stats.",strStyle);
 		lblStats.setColor(new ColorRGBA(1,1,0.5f,1));
 		lblStats.setPreferredSize(new Vector3f(v3fConsoleSize.x*0.75f,1,0));
-		fStatsHeight = retrieveBitmapTextFor(lblStats).getLineHeight();
+		fStatsHeight = MiscI.i().retrieveBitmapTextFor(lblStats).getLineHeight();
 		getContainerStatsAndControls().addChild(lblStats,0,0);
 		
 		// buttons
@@ -262,7 +263,7 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		// input
 		super.tfInput = new TextField(""+cc.getCommandPrefix(),strStyle);
     CursorEventControl.addListenersToSpatial(getInputField(), consoleCursorListener);
-		fInputHeight = retrieveBitmapTextFor(getInputField()).getLineHeight();
+		fInputHeight = MiscI.i().retrieveBitmapTextFor(getInputField()).getLineHeight();
 		getContainerConsole().addChild( getInputField(), BorderLayout.Position.South );
 		
 		super.initializeOnlyTheUI();
@@ -352,7 +353,7 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		GridPanel gp = lstbx.getGridPanel();
 		for(Spatial spt:gp.getChildren()){
 			if(spt instanceof Button){
-				retrieveBitmapTextFor((Button)spt).setLineWrapMode(LineWrapMode.NoWrap);
+				MiscI.i().retrieveBitmapTextFor((Button)spt).setLineWrapMode(LineWrapMode.NoWrap);
 			}
 		}
 	}
@@ -486,7 +487,7 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 		return getDumpArea().getSlider().getModel().getMaximum()
 				-getDumpArea().getSlider().getModel().getValue();
 	}
-
+	
 	@Override
 	protected void updateVisibleRowsAmount(){
 		if(fLstbxHeight != getDumpArea().getSize().y){
@@ -501,18 +502,19 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 //			lstbx.setVisibleItems(iShowRows);
 //			lstbx.getGridPanel().setVisibleSize(iShowRows,1);
 		}else{
-			if(getDumpArea().getGridPanel().getChildren().isEmpty())return;
-			
-			Button	btnFixVisibleRowsHelper = null;
-			for(Spatial spt:getDumpArea().getGridPanel().getChildren()){
-				if(spt instanceof Button){
-					btnFixVisibleRowsHelper = (Button)spt;
-					break;
-				}
-			}
-			if(btnFixVisibleRowsHelper==null)return;
-			
-			fLstbxEntryHeight = retrieveBitmapTextFor(btnFixVisibleRowsHelper).getLineHeight();
+//			if(getDumpArea().getGridPanel().getChildren().isEmpty())return;
+//			
+//			Button	btnFixVisibleRowsHelper = null;
+//			for(Spatial spt:getDumpArea().getGridPanel().getChildren()){
+//				if(spt instanceof Button){
+//					btnFixVisibleRowsHelper = (Button)spt;
+//					break;
+//				}
+//			}
+//			if(btnFixVisibleRowsHelper==null)return;
+//			
+//			fLstbxEntryHeight = retrieveBitmapTextFor(btnFixVisibleRowsHelper).getLineHeight();
+			fLstbxEntryHeight = LemurMiscHelpersStateI.i().guessEntryHeight(getDumpArea());
 			if(fLstbxEntryHeight==null)return;
 			
 			fLstbxHeight = getDumpArea().getSize().y;
@@ -567,13 +569,13 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 	@Override
 	protected void editPaste() {
 		super.editPaste();
-		LemurMiscHelpersState.i().positionCaratProperly(getInputField());
+		LemurMiscHelpersStateI.i().positionCaratProperly(getInputField());
 	}
 	
 	@Override
 	protected String prepareToPaste(String strPasted, String strCurrent) {
 		if(!isInputTextFieldEmpty()){
-			strCurrent = LemurMiscHelpersState.i().prepareStringToPasteAtCaratPosition(
+			strCurrent = LemurMiscHelpersStateI.i().prepareStringToPasteAtCaratPosition(
 				getInputField(), strCurrent, strPasted);
 		}else{
 			return super.prepareToPaste(strPasted, strCurrent);
@@ -602,7 +604,7 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 	@Override
 	protected String autoCompleteInputField(boolean bMatchContains) {
 		String strCompletedCmd = super.autoCompleteInputField(bMatchContains);
-		LemurMiscHelpersState.i().setCaratPosition(getInputField(), strCompletedCmd.length());
+		LemurMiscHelpersStateI.i().setCaratPosition(getInputField(), strCompletedCmd.length());
 		return strCompletedCmd;
 	}
 //	@Override
@@ -703,7 +705,7 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 	
 	@Override
 	protected float fontWidth(String strChars, String strStyle, boolean bAveraged){
-		float f = retrieveBitmapTextFor(new Label(strChars,strStyle)).getLineWidth();
+		float f = MiscI.i().retrieveBitmapTextFor(new Label(strChars,strStyle)).getLineWidth();
 		if(bAveraged)f/=strChars.length();
 		return f;
 	}
@@ -718,11 +720,11 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 	}
 	@Override
 	public Object getFocus(){
-		return LemurMiscHelpersState.i().getFocusManagerState().getFocus();
+		return LemurMiscHelpersStateI.i().getFocusManagerState().getFocus();
 	}
 	@Override
 	public boolean setFocus(Object obj){
-		LemurMiscHelpersState.i().requestFocus((Spatial) obj);
+		LemurMiscHelpersStateI.i().requestFocus((Spatial) obj);
 		return obj==null?true:obj.equals(getFocus());
 	}
 }

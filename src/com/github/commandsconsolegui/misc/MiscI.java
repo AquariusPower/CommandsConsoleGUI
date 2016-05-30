@@ -50,6 +50,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.jme3.font.BitmapText;
+import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.system.JmeSystem;
 
 /**
@@ -330,4 +333,12 @@ public class MiscI {
 		}             
 	}
 
+	public BitmapText retrieveBitmapTextFor(Node pnl){
+		for(Spatial c : pnl.getChildren()){
+			if(c instanceof BitmapText){
+				return (BitmapText)c;
+			}
+		}
+		return null;
+	}
 }

@@ -33,6 +33,7 @@ import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -50,24 +51,27 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
+import com.simsilica.lemur.Button;
 import com.simsilica.lemur.DocumentModel;
 import com.simsilica.lemur.GuiGlobals;
+import com.simsilica.lemur.ListBox;
 import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.component.TextEntryComponent;
 import com.simsilica.lemur.focus.FocusManagerState;
 
 /**
+ * Is an app state because of the text blinking cursor.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class LemurMiscHelpersState implements AppState, IConsoleCommandListener, IReflexFillCfg{
+public class LemurMiscHelpersStateI implements AppState, IConsoleCommandListener, IReflexFillCfg{
 	public final BoolTogglerCmdField	btgTextCursorPulseFadeBlinkMode = new BoolTogglerCmdField(this,true);
 	public final BoolTogglerCmdField	btgTextCursorLarge = new BoolTogglerCmdField(this,true);
 	public final StringCmdField CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringCmdField(this, CommandsDelegatorI.strFinalCmdCodePrefix);
 	
-	private static LemurMiscHelpersState instance = new LemurMiscHelpersState(); 
-	public static LemurMiscHelpersState i(){return instance;}
+	private static LemurMiscHelpersStateI instance = new LemurMiscHelpersStateI(); 
+	public static LemurMiscHelpersStateI i(){return instance;}
 
 	private SimpleApplication	sapp;
 	
@@ -285,7 +289,12 @@ public class LemurMiscHelpersState implements AppState, IConsoleCommandListener,
 		
 		bInitialized=true;
 	}
-
+	
+//	public void initialize(){
+//		tdTextCursorBlink.updateTime();
+//		bInitialized=true;
+//	}
+	
 	@Override
 	public boolean isInitialized() {
 		return bInitialized;
@@ -295,7 +304,7 @@ public class LemurMiscHelpersState implements AppState, IConsoleCommandListener,
 	public void setEnabled(boolean active) {
 		this.bEnabled=active;
 	}
-
+	
 	@Override
 	public boolean isEnabled() {
 		return bEnabled ;
@@ -435,4 +444,20 @@ public class LemurMiscHelpersState implements AppState, IConsoleCommandListener,
 		TextEntryComponent tec = ((TextEntryComponent)ReflexHacks.i().getFieldValueHK(tf, "text"));
 		ReflexHacks.i().callMethodHK(tec,"resetCursorPosition");
 	}
+
+	protected Float guessEntryHeight(ListBox<String> listBox){
+		if(listBox.getGridPanel().getChildren().isEmpty())return null;
+		
+		Button	btnFixVisibleRowsHelper = null;
+		for(Spatial spt:listBox.getGridPanel().getChildren()){
+			if(spt instanceof Button){
+				btnFixVisibleRowsHelper = (Button)spt;
+				break;
+			}
+		}
+		if(btnFixVisibleRowsHelper==null)return null;
+		
+		return MiscI.i().retrieveBitmapTextFor(btnFixVisibleRowsHelper).getLineHeight();
+	}
+
 }

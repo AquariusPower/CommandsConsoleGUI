@@ -1351,14 +1351,14 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 //		cmdLineWrapDisableDumpArea();
 //	}
 	
-	protected BitmapText retrieveBitmapTextFor(Node pnl){
-		for(Spatial c : pnl.getChildren()){
-			if(c instanceof BitmapText){
-				return (BitmapText)c;
-			}
-		}
-		return null;
-	}
+//	protected BitmapText retrieveBitmapTextFor(Node pnl){
+//		for(Spatial c : pnl.getChildren()){
+//			if(c instanceof BitmapText){
+//				return (BitmapText)c;
+//			}
+//		}
+//		return null;
+//	}
 
 	/**
 	 * This is what happens when Enter key is pressed.
