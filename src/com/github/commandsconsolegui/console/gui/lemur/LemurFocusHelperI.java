@@ -62,11 +62,19 @@ public class LemurFocusHelperI implements FocusChangeListener,IConsoleCommandLis
 	private FocusManagerState focusState;
 	private SimpleApplication	sapp;
 	private CommandsDelegatorI	cc;
+	private Float	fBaseZ = 0f;
 	
 	public void configure(SimpleApplication sapp, CommandsDelegatorI cc){
 		this.sapp=sapp;
 		this.cc=cc;
 		cc.addConsoleCommandListener(this);
+	}
+	/**
+	 * The initial Z value from where the dialogs will be sorted/ordered.
+	 * So if you have other gui elements, this can be changed to show dialogs above or under them.
+	 */
+	public void configureBaseZ(float fBaseZ){
+		this.fBaseZ = fBaseZ;
 	}
 	
 	public ArrayList<String> debugReport(){
@@ -154,7 +162,7 @@ public class LemurFocusHelperI implements FocusChangeListener,IConsoleCommandLis
 		for(int i=aftZOrderList.size()-1;i>=0;i--){
 			FocusTarget ft = aftZOrderList.get(i);
 //			if(ftSorting instanceof GuiControl){
-				float fZ = (i*fDisplacement)+fDisplacement; //so will always be above all other GUI elements that are expectedly at 0
+				float fZ = fBaseZ + (i*fDisplacement)+fDisplacement; //so will always be above all other GUI elements that are expectedly at 0
 				
 				GuiControl gct = (GuiControl)ft;
 				Spatial spt = MiscI.i().getParentestFrom(gct.getSpatial());

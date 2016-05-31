@@ -39,7 +39,8 @@ import com.google.common.collect.Lists;
  *	This class holds all commands that allows users to create
  *	scripts that will run in the console.
  *	
- *	To prevent users using these scripts, extend from {@link #ConsoleCommands()} instead.
+ *	To prevent users using these scripting capabilities,
+ *	extend from {@link #ConsoleCommands()} instead.
  *
  * @author AquariusPower <https://github.com/AquariusPower>
  *
