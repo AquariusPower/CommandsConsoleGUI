@@ -29,16 +29,12 @@ package com.github.commandsconsolegui.extras.gui.lemur;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.console.gui.lemur.ConsoleGUILemurState;
 import com.github.commandsconsolegui.console.gui.lemur.LemurFocusHelperI;
 import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersStateI;
 import com.github.commandsconsolegui.extras.gui.BaseUIStateAbs;
 import com.github.commandsconsolegui.misc.MiscI;
-import com.jme3.app.Application;
-import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
@@ -62,52 +58,21 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> implemen
 	protected ListBox<String>	lstbxEntriesToSelect;
 	protected VersionedList<String>	vlstrEntriesList = new VersionedList<String>();
 	
-	public LemurBaseUIStateAbs(String strUIId){
+	public LemurBaseUIStateAbs(String strUIId) {
 		super(strUIId);
-		this.strCmd="toggleUI"+strUIId;
 	}
 	
-	public String getCommand(){
-		return strCmd;
+	protected Container getTopContainer(){
+		return (Container)ctnrTop;
 	}
 	
-	public void configure(CommandsDelegatorI cc){
-		this.cc=cc;
-	}
-	
-	/**
-	 * Activate, Start, Begin, Initiate.
-	 * This will setup and activate everything to make it actually start working.
-	 */
-	@Override
-	public void initialize(Application app) {
-		asteInitDebug = Thread.currentThread().getStackTrace();
-		
-		this.sapp = (SimpleApplication)app;
-		
-		initGUI();
-		initKeyMappings();
-		
-		setEnabled(false);
-		
-		cc.addConsoleCommandListener(this);
-	}
-	
-	/**
-	 * mainly to configure/call {@link #initGUI(float, float, float)}
-	 */
 	@Override
 	protected void initGUI(){
 		initGUI(0.75f, 0.25f);
 	}
 	
-	@Override
 	protected void initGUI(float fDialogPerc, float fInfoPerc){
 		initGUI(fDialogPerc, fInfoPerc,null);
-	}
-	
-	protected Container getTopContainer(){
-		return (Container)ctnrTop;
 	}
 	
 	/**
@@ -115,7 +80,6 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> implemen
 	 * @param fDialogPerc the percentual width/height to cover the application screen/window 
 	 * @param fInfoPerc the percentual height to show informational text, the list and input field will properly use the remaining space
 	 */
-	@Override
 	protected void initGUI(float fDialogPerc, float fInfoPerc, Integer iEntryHeightPixels){
 		String strStyle = ConsoleGUILemurState.i().STYLE_CONSOLE;//BaseStyles.GLASS;
 		
@@ -182,12 +146,9 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> implemen
 		sapp.getGuiNode().attachChild(getTopContainer());
 	}
 	
+	@Override
 	public void clearSelection() {
 		lstbxEntriesToSelect.getSelectionModel().setSelection(-1); //clear selection
-	}
-	
-	public void toggle() {
-		setEnabled(!isEnabled());
 	}
 	
 	@Override
@@ -198,8 +159,6 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> implemen
 	@Override
 	public void onDisable() {
 		super.onDisable();
-		
-		ctnrTop.removeFromParent();
 		
 		if(getInputField().equals(LemurFocusHelperI.i().getFocused())){
 			LemurFocusHelperI.i().removeFocusableFromList(getInputField());
@@ -219,26 +178,24 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> implemen
 		return (TextField)tfInputText;
 	}
 	
+	@Override
 	protected Integer getSelectedIndex(){
 		Integer iSel = lstbxEntriesToSelect.getSelectionModel().getSelection();
 		if(iSel==null)return null;
 		return iSel;
 	}
+	@Override
 	protected String getSelectedKey(){
 		Integer i = getSelectedIndex();
 		if(i==null)return null;
 		if(i>=vlstrEntriesList.size())return null;
 		return vlstrEntriesList.get(i);
 	}
-	protected V getSelectedValue() {
-		return hmKeyValue.get(getSelectedKey());
-	}
 	
 	/**
-	 * mainly to call {@link #updateList(ArrayList)}
+	 * this must be called by overriden {@link #updateList()} at your extending class
+	 * @param aValueList
 	 */
-	protected abstract void updateList();
-	
 	protected void updateList(ArrayList<V> aValueList){
 		hmKeyValue.clear();
 		vlstrEntriesList.clear();
@@ -264,6 +221,7 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> implemen
 	/**
 	 * default is the class name, will look like the dialog title
 	 */
+	@Override
 	protected void updateTextInfo(){
 		lblTextInfo.setText("DIALOG for "+this.getClass().getSimpleName());
 	}
@@ -278,19 +236,7 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> implemen
 		setMouseKeepUngrabbed(isEnabled());
 	}
 	
-	public abstract void setMouseKeepUngrabbed(boolean b);
-	
-	/**
-	 * What will be shown at each entry on the list.
-	 * Default is to return the default string about the object.
-	 * 
-	 * @param val
-	 * @return
-	 */
-	public String formatEntryKey(V val){
-		return val.toString();
-	}
-	
+	@Override
 	protected void initKeyMappings(){
 		KeyActionListener actSimpleActions = new KeyActionListener() {
 			@Override
@@ -333,36 +279,8 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> implemen
 		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_DOWN), actSimpleActions);
 	}
 	
-	/**
-	 * what happens when pressing ENTER keys
-	 * default is to update the list filter
-	 */
-	protected void actionSubmit(){
-		strLastFilter=getInputField().getText();
-		updateList();
-	}
-	
 	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI cc) {
-		boolean bCommandWorked = false;
-		
-		if(cc.checkCmdValidity(this,strCmd,"[bEnabledForce]")){
-			Boolean bEnabledForce = cc.paramBoolean(1);
-			if(bEnabledForce!=null){
-				setEnabled(bEnabledForce);
-			}else{
-				toggle();
-			}
-			bCommandWorked = true;
-		}else
-		{
-			return ECmdReturnStatus.NotFound;
-		}
-		
-		return cc.cmdFoundReturnStatus(bCommandWorked);
-	}
-	
-	@Override
-	protected void cleanup(Application app) {
+	protected String getInputText() {
+		return getInputField().getText();
 	}
 }

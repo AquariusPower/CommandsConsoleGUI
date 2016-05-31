@@ -27,34 +27,16 @@
 
 package com.github.commandsconsolegui.extras.gui;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
-//import com.github.commandsconsolegui.console.gui.lemur.ConsoleGUILemurState;
-//import com.github.commandsconsolegui.console.gui.lemur.LemurFocusHelperI;
-//import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersStateI;
-import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
-import com.jme3.input.KeyInput;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.simsilica.lemur.component.TextEntryComponent;
-import com.simsilica.lemur.event.KeyAction;
-import com.simsilica.lemur.event.KeyActionListener;
-//import com.simsilica.lemur.Container;
-//import com.simsilica.lemur.Label;
-//import com.simsilica.lemur.ListBox;
-//import com.simsilica.lemur.TextField;
-//import com.simsilica.lemur.component.BorderLayout;
-//import com.simsilica.lemur.component.TextEntryComponent;
-//import com.simsilica.lemur.core.VersionedList;
-//import com.simsilica.lemur.event.KeyAction;
-//import com.simsilica.lemur.event.KeyActionListener;
 
 /**
  * 
@@ -104,23 +86,7 @@ public abstract class BaseUIStateAbs <V> extends BaseAppState implements IConsol
 		cc.addConsoleCommandListener(this);
 	}
 	
-	/**
-	 * mainly to configure/call {@link #initGUI(float, float, float)}
-	 */
-	protected void initGUI(){
-		initGUI(0.75f, 0.25f);
-	}
-	
-	protected void initGUI(float fDialogPerc, float fInfoPerc){
-		initGUI(fDialogPerc, fInfoPerc,null);
-	}
-	
-	/**
-	 * The input field will not require height, will be small on south edge.
-	 * @param fDialogPerc the percentual width/height to cover the application screen/window 
-	 * @param fInfoPerc the percentual height to show informational text, the list and input field will properly use the remaining space
-	 */
-	protected abstract void initGUI(float fDialogPerc, float fInfoPerc, Integer iEntryHeightPixels);
+	protected abstract void initGUI();
 	
 	public abstract void clearSelection();
 	
@@ -145,6 +111,8 @@ public abstract class BaseUIStateAbs <V> extends BaseAppState implements IConsol
 	
 	@Override
 	public void onDisable() {
+		ctnrTop.removeFromParent();
+		
 		setMouseKeepUngrabbed(isEnabled());
 	}
 	
@@ -162,12 +130,7 @@ public abstract class BaseUIStateAbs <V> extends BaseAppState implements IConsol
 		return hmKeyValue.get(getSelectedKey());
 	}
 	
-	/**
-	 * mainly to call {@link #updateList(ArrayList)}
-	 */
 	protected abstract void updateList();
-	
-	protected abstract void updateList(ArrayList<V> aValueList);
 	
 	protected abstract void updateTextInfo();
 	
