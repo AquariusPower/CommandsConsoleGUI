@@ -9,3 +9,7 @@ ConsoleCommands
 
 - Automatic commands and user accessible console variables, by simply instantiating proper classes.
 - Any class can be a listener and implement its own set of console commands.
+
+## Extras
+- FPS limiter
+- Single Application Instance
