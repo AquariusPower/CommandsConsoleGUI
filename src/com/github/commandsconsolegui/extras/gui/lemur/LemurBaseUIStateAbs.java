@@ -162,7 +162,7 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> implemen
 		sapp.getGuiNode().attachChild(getTopContainer());
 	}
 	
-	private Container getNorthContainer() {
+	protected Container getNorthContainer() {
 		return (Container)cntrNorth;
 	}
 
