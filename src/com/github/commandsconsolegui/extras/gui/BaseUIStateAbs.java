@@ -45,8 +45,9 @@ import com.jme3.scene.Spatial;
  */
 public abstract class BaseUIStateAbs <V> extends BaseAppState implements IConsoleCommandListener{
 	protected SimpleApplication	sapp;
-	protected Node	tfInputText;
 	protected Node	ctnrTop;
+	protected Node cntrNorth;
+	protected Node	tfInputText;
 	protected String	strLastFilter = "";
 	protected HashMap<String,V> hmKeyValue = new HashMap<String,V>();
 	protected String	strLastSelectedKey;
@@ -54,10 +55,12 @@ public abstract class BaseUIStateAbs <V> extends BaseAppState implements IConsol
 	protected String	strCmd;
 	protected StackTraceElement[] asteInitDebug = null;
 	protected CommandsDelegatorI	cc;
+	protected String	strTitle;
 	
 	public BaseUIStateAbs(String strUIId){
 		this.strUIId=strUIId;
 		this.strCmd="toggleUI"+strUIId;
+		this.strTitle = "Dialog: "+strUIId;
 	}
 	
 	public String getCommand(){
@@ -95,6 +98,10 @@ public abstract class BaseUIStateAbs <V> extends BaseAppState implements IConsol
 	}
 	
 	public abstract void requestFocus(Spatial spt);
+	
+	public void setTitle(String str){
+		this.strTitle = str;
+	}
 	
 	@Override
 	public void onEnable() {

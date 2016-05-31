@@ -36,11 +36,13 @@ import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersStateI;
 import com.github.commandsconsolegui.extras.gui.BaseUIStateAbs;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.input.KeyInput;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.ListBox;
+import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.TextEntryComponent;
@@ -54,6 +56,7 @@ import com.simsilica.lemur.event.KeyActionListener;
 *
 */
 public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> implements IConsoleCommandListener{
+	protected Label	lblTitle;
 	protected Label	lblTextInfo;
 	protected ListBox<String>	lstbxEntriesToSelect;
 	protected VersionedList<String>	vlstrEntriesList = new VersionedList<String>();
@@ -94,15 +97,27 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> implemen
 		Vector3f v3fDiagWindowSize = v3fApplicationWindowSize.mult(fDialogPerc);
 		getTopContainer().setPreferredSize(v3fDiagWindowSize);
 		
+		///////////////////////// NORTH
+		cntrNorth = new Container(new BorderLayout(), strStyle);
+		Vector3f v3fNorthSize = v3fDiagWindowSize.clone();
+		v3fNorthSize.y *= fInfoPerc;
+		getNorthContainer().setPreferredSize(v3fNorthSize);
+		
+		//title 
+		lblTitle = new Label(strTitle,strStyle);
+		lblTitle.setName(strUIId+"_Title");
+		lblTitle.setColor(ColorRGBA.Green); //TODO make it custom
+		getNorthContainer().addChild(lblTitle, BorderLayout.Position.North);
+		
 		// simple info
 		lblTextInfo = new Label("",strStyle);
 		lblTextInfo.setName(strUIId+"_TxtInfo");
-		Vector3f v3fInfoSize = v3fDiagWindowSize.clone();
-		v3fInfoSize.y *= fInfoPerc;
-		lblTextInfo.setPreferredSize(v3fInfoSize);
-		getTopContainer().addChild(lblTextInfo, BorderLayout.Position.North);
+		getNorthContainer().addChild(lblTextInfo, BorderLayout.Position.Center);
 		
-		// list area
+		getTopContainer().addChild(getNorthContainer(), BorderLayout.Position.North);
+		
+		//////////////////////////// CENTER
+		// list
 		float fListPerc = 1.0f - fInfoPerc;
 		Vector3f v3fEntryListSize = v3fDiagWindowSize.clone();
 		v3fEntryListSize.y *= fListPerc;
@@ -130,6 +145,7 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> implemen
 		}
 		lstbxEntriesToSelect.setVisibleItems((int) (v3fEntryListSize.y/iEntryHeightPixels));
 		
+		//////////////////////////////// SOUTH
 		// filter
 		tfInputText = new TextField("",strStyle);
 		getInputField().setName(strUIId+"_InputField");
@@ -146,6 +162,10 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> implemen
 		sapp.getGuiNode().attachChild(getTopContainer());
 	}
 	
+	private Container getNorthContainer() {
+		return (Container)cntrNorth;
+	}
+
 	@Override
 	public void clearSelection() {
 		lstbxEntriesToSelect.getSelectionModel().setSelection(-1); //clear selection
@@ -223,7 +243,14 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> implemen
 	 */
 	@Override
 	protected void updateTextInfo(){
-		lblTextInfo.setText("DIALOG for "+this.getClass().getSimpleName());
+//		lblTextInfo.setText("DIALOG for "+this.getClass().getSimpleName());
+		lblTextInfo.setText("Info:");
+	}
+	
+	@Override
+	public void setTitle(String str) {
+		super.setTitle(str);
+		lblTitle.setText(str);
 	}
 	
 	@Override
