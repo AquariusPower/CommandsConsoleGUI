@@ -30,8 +30,8 @@ package com.github.commandsconsolegui.extras;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.AppState;
 import com.jme3.app.state.AppStateManager;
+import com.jme3.app.state.BaseAppState;
 import com.jme3.renderer.RenderManager;
 
 /**
@@ -40,7 +40,7 @@ import com.jme3.renderer.RenderManager;
  * @author AquariusPower <https://github.com/AquariusPower>
  * 
  */
-public class FpsLimiterState implements AppState{
+public class FpsLimiterState extends BaseAppState{
 	private static FpsLimiterState instance = new FpsLimiterState();
 	public static FpsLimiterState i(){return instance;}
 	
@@ -54,8 +54,8 @@ public class FpsLimiterState implements AppState{
 	private long	lNanoThreadSleep;
 	private long	lNanoDelayLimit;
 	private int	iMaxFPS;
-	private boolean	bEnabled;
-	private boolean	bInitialized;
+//	private boolean	bEnabled;
+//	private boolean	bInitialized;
 	private SimpleApplication	sapp;
 	private CommandsDelegatorI	cc;
 	private boolean	bConfigured;
@@ -123,45 +123,45 @@ public class FpsLimiterState implements AppState{
 		return lNanoFrameDelayByCpuUsage/1000000L;
 	}
 
-	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		bInitialized=true;
-	}
-
-	@Override
-	public boolean isInitialized() {
-		return bInitialized;
-	}
-
-	@Override
-	public void setEnabled(boolean active) {
-		this.bEnabled=active;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return bEnabled;
-	}
-
-	@Override
-	public void stateAttached(AppStateManager stateManager) {
-	}
-
-	@Override
-	public void stateDetached(AppStateManager stateManager) {
-	}
-
-	@Override
-	public void render(RenderManager rm) {
-	}
-
-	@Override
-	public void postRender() {
-	}
-
-	@Override
-	public void cleanup() {
-	}
+//	@Override
+//	public void initialize(AppStateManager stateManager, Application app) {
+//		bInitialized=true;
+//	}
+//
+//	@Override
+//	public boolean isInitialized() {
+//		return bInitialized;
+//	}
+//
+//	@Override
+//	public void setEnabled(boolean active) {
+//		this.bEnabled=active;
+//	}
+//
+//	@Override
+//	public boolean isEnabled() {
+//		return bEnabled;
+//	}
+//
+//	@Override
+//	public void stateAttached(AppStateManager stateManager) {
+//	}
+//
+//	@Override
+//	public void stateDetached(AppStateManager stateManager) {
+//	}
+//
+//	@Override
+//	public void render(RenderManager rm) {
+//	}
+//
+//	@Override
+//	public void postRender() {
+//	}
+//
+//	@Override
+//	public void cleanup() {
+//	}
 	
 	public int getFpsLimit() {
 		return iMaxFPS;
@@ -173,5 +173,29 @@ public class FpsLimiterState implements AppState{
 		this.cc=cc;
 		if(!sapp.getStateManager().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
 		bConfigured=true;
+	}
+
+	@Override
+	protected void initialize(Application app) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void cleanup(Application app) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onEnable() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onDisable() {
+		// TODO Auto-generated method stub
+		
 	}
 }
