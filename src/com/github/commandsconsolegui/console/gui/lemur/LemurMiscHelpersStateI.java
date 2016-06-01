@@ -28,8 +28,8 @@
 package com.github.commandsconsolegui.console.gui.lemur;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
@@ -41,8 +41,8 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexHacks;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.AppState;
 import com.jme3.app.state.AppStateManager;
+import com.jme3.app.state.BaseAppState;
 import com.jme3.font.BitmapText;
 import com.jme3.material.MatParam;
 import com.jme3.material.Material;
@@ -53,7 +53,6 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.DocumentModel;
-import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.ListBox;
 import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.component.TextEntryComponent;
@@ -65,7 +64,7 @@ import com.simsilica.lemur.focus.FocusManagerState;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class LemurMiscHelpersStateI implements AppState, IConsoleCommandListener, IReflexFillCfg{
+public class LemurMiscHelpersStateI extends BaseAppState implements IConsoleCommandListener, IReflexFillCfg{
 	public final BoolTogglerCmdField	btgTextCursorPulseFadeBlinkMode = new BoolTogglerCmdField(this,true);
 	public final BoolTogglerCmdField	btgTextCursorLarge = new BoolTogglerCmdField(this,true);
 	public final StringCmdField CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringCmdField(this, CommandsDelegatorI.strFinalCmdCodePrefix);
@@ -84,9 +83,8 @@ public class LemurMiscHelpersStateI implements AppState, IConsoleCommandListener
 	private FocusManagerState	focusState;
 	private TextField	tfToBlinkCursor;
 
-	private boolean	bInitialized;
-
-	private boolean	bEnabled = true;
+//	private boolean	bInitialized;
+//	private boolean	bEnabled = true;
 
 	private CommandsDelegatorI	cc;
 
@@ -274,44 +272,33 @@ public class LemurMiscHelpersStateI implements AppState, IConsoleCommandListener
 		bConfigured=true;
 	}
 	
-	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		this.sapp = (SimpleApplication) app;
-		tdTextCursorBlink.updateTime();
-		
-//		cc.addConsoleCommandListener(this);
-//		ReflexFill.assertReflexFillFieldsForOwner(this);
-		
-		bInitialized=true;
-	}
-	
 //	public void initialize(){
 //		tdTextCursorBlink.updateTime();
 //		bInitialized=true;
 //	}
 	
-	@Override
-	public boolean isInitialized() {
-		return bInitialized;
-	}
-
-	@Override
-	public void setEnabled(boolean active) {
-		this.bEnabled=active;
-	}
-	
-	@Override
-	public boolean isEnabled() {
-		return bEnabled ;
-	}
-
-	@Override
-	public void stateAttached(AppStateManager stateManager) {
-	}
-
-	@Override
-	public void stateDetached(AppStateManager stateManager) {
-	}
+//	@Override
+//	public boolean isInitialized() {
+//		return bInitialized;
+//	}
+//
+//	@Override
+//	public void setEnabled(boolean active) {
+//		this.bEnabled=active;
+//	}
+//	
+//	@Override
+//	public boolean isEnabled() {
+//		return bEnabled ;
+//	}
+//
+//	@Override
+//	public void stateAttached(AppStateManager stateManager) {
+//	}
+//
+//	@Override
+//	public void stateDetached(AppStateManager stateManager) {
+//	}
 
 	@Override
 	public void update(float tpf) {
@@ -323,17 +310,17 @@ public class LemurMiscHelpersStateI implements AppState, IConsoleCommandListener
 		}
 	}
 
-	@Override
-	public void render(RenderManager rm) {
-	}
-
-	@Override
-	public void postRender() {
-	}
-
-	@Override
-	public void cleanup() {
-	}
+//	@Override
+//	public void render(RenderManager rm) {
+//	}
+//
+//	@Override
+//	public void postRender() {
+//	}
+//
+//	@Override
+//	public void cleanup() {
+//	}
 
 	@Override
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI	cc) {
@@ -445,6 +432,41 @@ public class LemurMiscHelpersStateI implements AppState, IConsoleCommandListener
 		if(btnFixVisibleRowsHelper==null)return null;
 		
 		return MiscI.i().retrieveBitmapTextFor(btnFixVisibleRowsHelper).getLineHeight();
+	}
+
+//	@Override
+//	public void initialize(AppStateManager stateManager, Application app) {
+//		this.sapp = (SimpleApplication) app;
+//		tdTextCursorBlink.updateTime();
+//		
+////		cc.addConsoleCommandListener(this);
+////		ReflexFill.assertReflexFillFieldsForOwner(this);
+//		
+//		bInitialized=true;
+//	}
+
+	@Override
+	protected void initialize(Application app) {
+		this.sapp = (SimpleApplication) app;
+		tdTextCursorBlink.updateTime();
+	}
+
+	@Override
+	protected void cleanup(Application app) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onEnable() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onDisable() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

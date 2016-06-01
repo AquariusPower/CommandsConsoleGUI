@@ -30,7 +30,7 @@ package com.github.commandsconsolegui.extras.gui.lemur;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
-import com.github.commandsconsolegui.console.gui.lemur.ConsoleGUILemurState;
+import com.github.commandsconsolegui.console.gui.lemur.ConsoleGUILemurStateI;
 import com.github.commandsconsolegui.console.gui.lemur.LemurFocusHelperI;
 import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersStateI;
 import com.github.commandsconsolegui.extras.gui.BaseUIStateAbs;
@@ -52,10 +52,12 @@ import com.simsilica.lemur.event.KeyActionListener;
 
 /**
 * 
+* More info at {@link BaseUIStateAbs}
+* 
 * @author AquariusPower <https://github.com/AquariusPower>
 *
 */
-public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> implements IConsoleCommandListener{
+public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> {
 	protected Label	lblTitle;
 	protected Label	lblTextInfo;
 	protected ListBox<String>	lstbxEntriesToSelect;
@@ -84,7 +86,7 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> implemen
 	 * @param fInfoPerc the percentual height to show informational text, the list and input field will properly use the remaining space
 	 */
 	protected void initGUI(float fDialogPerc, float fInfoPerc, Integer iEntryHeightPixels){
-		String strStyle = ConsoleGUILemurState.i().STYLE_CONSOLE;//BaseStyles.GLASS;
+		String strStyle = ConsoleGUILemurStateI.i().STYLE_CONSOLE;//BaseStyles.GLASS;
 		
 		Vector3f v3fApplicationWindowSize = new Vector3f(
 			sapp.getContext().getSettings().getWidth(),
@@ -213,9 +215,11 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> implemen
 	}
 	
 	/**
-	 * this must be called by overriden {@link #updateList()} at your extending class
-	 * @param aValueList
+	 * call {@link #updateList(ArrayList)} from this overriden method.
 	 */
+	@Override
+	protected abstract void updateList();
+	
 	protected void updateList(ArrayList<V> aValueList){
 		hmKeyValue.clear();
 		vlstrEntriesList.clear();

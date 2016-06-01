@@ -28,7 +28,7 @@
 package com.github.commandsconsolegui.console.test;
 
 import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegatorI;
-import com.github.commandsconsolegui.console.gui.lemur.ConsoleGUILemurState;
+import com.github.commandsconsolegui.console.gui.lemur.ConsoleGUILemurStateI;
 import com.github.commandsconsolegui.extras.FpsLimiterState;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -45,7 +45,7 @@ public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleC
 	public CustomCommandsI(ConsoleGuiTestI sapp){
 		super();
 		
-		ConsoleGUILemurState.i().configureBeforeInitializing(sapp, this, KeyInput.KEY_F10);
+		ConsoleGUILemurStateI.i().configureBeforeInitializing(sapp, this, KeyInput.KEY_F10);
 		FpsLimiterState.i().configureBeforeInitializing(sapp, this);
 		
 		/**

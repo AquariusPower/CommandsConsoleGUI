@@ -32,6 +32,10 @@ import java.util.HashMap;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
@@ -39,11 +43,13 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 /**
+ * A console command will be automatically created based on the configured {@link #strUIId}.<br>
+ * See it at {@link #BaseUIStateAbs(String)}.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class BaseUIStateAbs <V> extends BaseAppState implements IConsoleCommandListener{
+public abstract class BaseUIStateAbs <V> extends BaseAppState implements IConsoleCommandListener, IReflexFillCfg{
 	protected SimpleApplication	sapp;
 	protected Node	ctnrTop;
 	protected Node cntrNorth;
@@ -56,19 +62,27 @@ public abstract class BaseUIStateAbs <V> extends BaseAppState implements IConsol
 	protected StackTraceElement[] asteInitDebug = null;
 	protected CommandsDelegatorI	cc;
 	protected String	strTitle;
+//	BoolTogglerCmdField btgShowDialog = new BoolTogglerCmdField(this,false);
+	protected String	strCmdPrefix = "toggleUI";
+	protected String	strCmdSuffix = "";
 	
 	public BaseUIStateAbs(String strUIId){
 		this.strUIId=strUIId;
-		this.strCmd="toggleUI"+strUIId;
+		this.strCmd=strCmdPrefix+strUIId+strCmdSuffix;
 		this.strTitle = "Dialog: "+strUIId;
+//		btgShowDialog.setCustomCmdId(this.strCmd);
 	}
 	
 	public String getCommand(){
 		return strCmd;
 	}
 	
-	public void configure(CommandsDelegatorI cc){
+	public void configure(Application app, CommandsDelegatorI cc){
+		this.sapp = (SimpleApplication)app;
+		this.sapp.getStateManager().attach(this);
+		
 		this.cc=cc;
+		this.cc.addConsoleCommandListener(this);
 	}
 	
 	/**
@@ -79,14 +93,12 @@ public abstract class BaseUIStateAbs <V> extends BaseAppState implements IConsol
 	public void initialize(Application app) {
 		asteInitDebug = Thread.currentThread().getStackTrace();
 		
-		this.sapp = (SimpleApplication)app;
-		
 		initGUI();
 		initKeyMappings();
 		
 		setEnabled(false);
 		
-		cc.addConsoleCommandListener(this);
+//		cc.addConsoleCommandListener(this);
 	}
 	
 	protected abstract void initGUI();
@@ -137,6 +149,9 @@ public abstract class BaseUIStateAbs <V> extends BaseAppState implements IConsol
 		return hmKeyValue.get(getSelectedKey());
 	}
 	
+	/**
+	 * 
+	 */
 	protected abstract void updateList();
 	
 	protected abstract void updateTextInfo();
@@ -199,5 +214,10 @@ public abstract class BaseUIStateAbs <V> extends BaseAppState implements IConsol
 	
 	@Override
 	protected void cleanup(Application app) {
+	}
+
+	@Override
+	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+		return cc.getReflexFillCfg(rfcv);
 	}
 }

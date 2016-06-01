@@ -39,8 +39,11 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 
 /**
- * This class can provide automatic boolean console command options to toggle.
- * You just need to create the variable properly and it will be automatically recognized.
+ * This class can provide automatic boolean console command options to be toggled.<br>
+ * You just need to create the variable properly and it will be automatically recognized.<br>
+ * 
+ * It is intended to change internal states, not to ex. toggle user interfaces, for that use
+ * a normal command.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
@@ -112,7 +115,7 @@ public class BoolTogglerCmdField implements IReflexFillCfgVariant, IVarIdValueOw
 	 * sets the command identifier that user will type in the console
 	 * @param strCmd
 	 */
-	protected void setCustomCmdId(String strCmd) {
+	public void setCustomCmdId(String strCmd) {
 		/**
 		 * must be an exception as it can have already been read/collected with automatic value.
 		 */

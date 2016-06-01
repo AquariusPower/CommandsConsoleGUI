@@ -28,8 +28,8 @@
 package com.github.commandsconsolegui.console.test;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.extras.SingleAppInstanceI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -65,6 +65,7 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 	private StringCmdField testCommandAutoFillPrefixLessVariant2 = new StringCmdField(this,strFieldCodePrefixLess);
 	private StringCmdField testCommandAutoFillPrefixLessVariantDefaulted3 = new StringCmdField(this,null);
 	private StringCmdField CMD_TRADITIONAL_PRETTYFIED_0 = new StringCmdField(this,CustomCommandsI.strFinalCmdCodePrefix);
+	private CustomGenericDialog	diag;
 	
 	public boolean endUserCustomMethod(Integer i){
 		cc.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
@@ -82,6 +83,9 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 	public void simpleInitApp() {
 		cc = new CustomCommandsI(this);
 		cc.addConsoleCommandListener(this);
+		
+		diag = new CustomGenericDialog("TestDialog");
+		diag.configure(this,cc);
 		
 //		SingleInstanceState.i().configureBeforeInitializing(this,true);
 		SingleAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);

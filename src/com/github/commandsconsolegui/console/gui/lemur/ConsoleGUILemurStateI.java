@@ -72,8 +72,8 @@ import com.simsilica.lemur.style.Styles;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
-	protected static ConsoleGUILemurState instance;
+public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
+	protected static ConsoleGUILemurStateI instance;
 	
 	StringVarField svfBackgroundHexaColorRGBA = new StringVarField(this,"");
 	protected ConsoleCursorListener consoleCursorListener;
@@ -92,12 +92,12 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 //		}
 //		ConsoleGUILemurState.instance=gui;
 //	}
-	public static ConsoleGUILemurState i(){
-		if(instance==null)instance=new ConsoleGUILemurState();
+	public static ConsoleGUILemurStateI i(){
+		if(instance==null)instance=new ConsoleGUILemurStateI();
 		return instance;
 	}
 	
-	public ConsoleGUILemurState(){
+	public ConsoleGUILemurStateI(){
 		vlstrDumpEntriesSlowedQueue = new VersionedList<String>();
 		vlstrDumpEntries = new VersionedList<String>();
 	}
@@ -366,7 +366,7 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 	}
 
 	@Override
-	public ConsoleGUILemurState setHintIndex(Integer i) {
+	public ConsoleGUILemurStateI setHintIndex(Integer i) {
 		getHintBox().getSelectionModel().setSelection(i);
 		return this;
 	}
@@ -385,7 +385,7 @@ public class ConsoleGUILemurState extends ConsoleGuiStateAbs{
 	}
 
 	@Override
-	public ConsoleGUILemurState setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines) {
+	public ConsoleGUILemurStateI setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines) {
 		getHintBox().setPreferredSize(v3fBoxSizeXY);
 		getHintBox().setVisibleItems(iVisibleLines);
 		return this;
