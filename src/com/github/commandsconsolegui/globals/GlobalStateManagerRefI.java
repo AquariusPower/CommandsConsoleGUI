@@ -27,32 +27,12 @@
 
 package com.github.commandsconsolegui.globals;
 
-import com.jme3.app.Application;
-
-//public class GlobalAppRef extends Global{
-//	private SimpleApplication	sapp;
-//	private Application	app;
-//	
-//	public Application getApp(){return app;}
-//	public SimpleApplication getSapp(){return sapp;}
-//	
-//	public void set(Application app){this.app=assertNotSet(app);}
-//	public void set(SimpleApplication app){this.app=assertNotSet(app);}
-//}
+import com.jme3.app.state.AppStateManager;
 
 /**
- * 
  * @author AquariusPower <https://github.com/AquariusPower>
- *
  */
-public class GlobalAppRefI extends Global<Application>{
-	private static GlobalAppRefI instance = new GlobalAppRefI();
-	public static GlobalAppRefI i(){return instance;}
-	
-	@Override
-	public Application set(Application obj) {
-		GlobalStateManagerRefI.i().set(obj.getStateManager());
-		return super.set(obj);
-	}
+public class GlobalStateManagerRefI extends Global<AppStateManager> {
+	private static GlobalStateManagerRefI instance = new GlobalStateManagerRefI();
+	public static GlobalStateManagerRefI i(){return instance;}
 }
-

@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.extras.jmegui;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.BasePlusAppState;
 import com.jme3.app.Application;
 
@@ -60,10 +61,14 @@ public class UngrabMouseStateI extends BasePlusAppState {
 	 * @param lSlowMachineDelayToUngrabMilis null to use default
 	 * @param bKeepUngrabbedOnSlowdown null to use default
 	 */
-	public void configure(Application app, Long lSlowMachineDelayToUngrabMilis, Boolean bKeepUngrabbedOnSlowdown){
-		app.getStateManager().attach(this);
+	public void configureSimple(Long lSlowMachineDelayToUngrabMilis, Boolean bKeepUngrabbedOnSlowdown){
 		if(lSlowMachineDelayToUngrabMilis!=null)this.lDelayToUngrabMilis=lSlowMachineDelayToUngrabMilis;
 		if(bKeepUngrabbedOnSlowdown!=null)this.bKeepUngrabbedOnSlowDown=bKeepUngrabbedOnSlowdown;
+		configure();
+	}
+	@Override
+	public void configure(Object... aobj) {
+		GlobalSappRefI.i().get().getStateManager().attach(this);
 	}
 	
 	/**

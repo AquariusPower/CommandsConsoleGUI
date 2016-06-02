@@ -48,9 +48,9 @@ public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleC
 	public CustomCommandsI(){
 		super();
 		
-		ConsoleGUILemurStateI.i().configureBeforeInitializing(GlobalSappRefI.i().get(), this, KeyInput.KEY_F10);
-		FpsLimiterStateI.i().configureBeforeInitializing();
-		UngrabMouseStateI.i().configure(GlobalSappRefI.i().get(),null,true);
+//		ConsoleGUILemurStateI.i().configureSimple(KeyInput.KEY_F10);
+//		FpsLimiterStateI.i().configure();
+//		UngrabMouseStateI.i().configureSimple(null,true);
 		
 		/**
 		 *  This allows test3 at endUserCustomMethod() to work.
@@ -114,11 +114,11 @@ public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleC
 		super.cmdExit();
 	}
 	
-	@Override
-	public void configure(IConsoleUI icui) {
-		super.configure(icui);
-		
-		CommandsBackgroundState.i().configure(GlobalSappRefI.i().get(), icui, this);
-		MiscJmeI.i().configure(GlobalSappRefI.i().get(), this);
-	}
+//	@Override
+//	public void configure(IConsoleUI icui) {
+//		super.configure(icui);
+//		
+////		CommandsBackgroundState.i().configure(GlobalSappRefI.i().get(), icui, this);
+////		MiscJmeI.i().configure(GlobalSappRefI.i().get(), this);
+//	}
 }

@@ -119,5 +119,11 @@ public class RecreateConsoleState extends BasePlusAppState {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void configure(Object... aobj) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

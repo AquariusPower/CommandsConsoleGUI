@@ -39,13 +39,13 @@ public class GlobalSappRefI extends Global<SimpleApplication> {
 	public static GlobalSappRefI i(){return instance;}
 	
 	@Override
-	protected void setAssertingNotAlreadySet(SimpleApplication obj) {
+	public SimpleApplication set(SimpleApplication obj) {
 		GlobalAppRefI.i().set(obj);
-//		if(GlobalAppRef.i().get()==null){
-//		}
-//		if(super.obj!=null && !super.obj.equals(obj)){
-//			throw new NullPointerException(SimpleApplication.class.getName()+" and "+Application.class.getName()+" must be the same object!");
-//		}
-		super.setAssertingNotAlreadySet(obj);
+		return super.set(obj);
 	}
+//	@Override
+//	protected void setAssertingNotAlreadySet(SimpleApplication obj) {
+//		GlobalAppRefI.i().set(obj);
+//		super.setAssertingNotAlreadySet(obj);
+//	}
 }

@@ -43,10 +43,52 @@ public class CheckInitAndCleanupI {
 	
 	static CheckInitAndCleanupI instance = new CheckInitAndCleanupI();
 	public static CheckInitAndCleanupI i(){return instance;}
-	HashMap<Object,InitializedInfo> hm = new HashMap<Object,InitializedInfo>();
 	
+	HashMap<Object,InitializedInfo> hmDebugTrace = new HashMap<Object,InitializedInfo>();
 	private class InitializedInfo{
 		private StackTraceElement[] asteInitDebug;
+		public InitializedInfo(StackTraceElement[] asteInitDebug) {
+			super();
+			this.asteInitDebug = asteInitDebug;
+		}
+	}
+	
+	/**
+	 * Useful to globals.
+	 * 
+	 * @param objCheck
+	 * @param objNew
+	 * @return
+	 */
+	public <T> T getNewAssertingCheckIsNull(T objCheck, T objNew){
+		if(objNew==null)throw new NullPointerException("new object is null...");
+		
+		if(objCheck==null){
+			InitializedInfo icc = new InitializedInfo(Thread.currentThread().getStackTrace());
+			hmDebugTrace.put(objNew, icc);
+			return objNew;
+		}else{
+			InitializedInfo icc = hmDebugTrace.get(objCheck);
+			if(icc==null){
+				throw new NullPointerException(
+					"checking is not null, and there is no debug stack: "+objInfo(objCheck));
+			}else{
+				throw prepareNPEWithCause(icc,objCheck);
+			}
+		}
+	}
+	
+	private String objInfo(Object obj){
+		return obj.getClass().getName()+"; "+obj;
+	}
+	
+	private NullPointerException prepareNPEWithCause(InitializedInfo icc, Object obj){
+		NullPointerException npe = new NullPointerException(
+				"already initialized, cannot be double initialized: "+objInfo(obj));
+		Throwable trw = new Throwable("already initialized at");
+		trw.setStackTrace(icc.asteInitDebug);
+		npe.initCause(trw);
+		return npe;
 	}
 	
 	/**
@@ -54,19 +96,21 @@ public class CheckInitAndCleanupI {
 	 * @param objKey use 'this'
 	 */
 	public void assertNotAlreadyInitializedAtInitializer(Object objKey){
-		InitializedInfo icc = hm.get(objKey);
-		if(icc==null){
-			icc = new InitializedInfo();
-			hm.put(objKey, icc);
-		}else{
-			NullPointerException npe = new NullPointerException("already initialized, cannot be double initialized: "+objKey);
-			Throwable trw = new Throwable("already initialized at");
-			trw.setStackTrace(icc.asteInitDebug);
-			npe.initCause(trw);
-			throw npe;
-		}
+		if(objKey==null)throw new NullPointerException("key is null...");
 		
-		icc.asteInitDebug = Thread.currentThread().getStackTrace();
+		InitializedInfo icc = hmDebugTrace.get(objKey);
+		if(icc==null){
+			icc = new InitializedInfo(Thread.currentThread().getStackTrace());
+			hmDebugTrace.put(objKey, icc);
+		}else{
+			throw prepareNPEWithCause(icc,objKey);
+//			NullPointerException npe = new NullPointerException(
+//				"already initialized, cannot be double initialized: "+objKey);
+//			Throwable trw = new Throwable("already initialized at");
+//			trw.setStackTrace(icc.asteInitDebug);
+//			npe.initCause(trw);
+//			throw npe;
+		}
 	}
 	
 	/**
@@ -74,11 +118,11 @@ public class CheckInitAndCleanupI {
 	 * @param objKey use 'this'
 	 */
 	public void assertInitializedAtCleanup(Object objKey){
-		InitializedInfo icc = hm.get(objKey);
+		InitializedInfo icc = hmDebugTrace.get(objKey);
 		if(icc==null){
 			throw new NullPointerException("cannot be cleaned as was not initialized: "+objKey);
 		}
 		
-		hm.remove(objKey);
+		hmDebugTrace.remove(objKey);
 	}
 }

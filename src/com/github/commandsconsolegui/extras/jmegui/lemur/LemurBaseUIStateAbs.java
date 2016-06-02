@@ -137,10 +137,10 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> {
 					Float fEntryHeight = LemurMiscHelpersStateI.i().guessEntryHeight(lstbxEntriesToSelect);
 					if(fEntryHeight!=null){
 						iEntryHeightPixels=fEntryHeight.intValue(); //calc based on entry (or font) height and listbox height
-						cc.dumpInfoEntry("entry height "+iEntryHeightPixels);
+						cd.dumpInfoEntry("entry height "+iEntryHeightPixels);
 					}else{
 						iEntryHeightPixels=20; //blind placeholder
-						cc.dumpWarnEntry("blind entry height "+iEntryHeightPixels);
+						cd.dumpWarnEntry("blind entry height "+iEntryHeightPixels);
 					}
 				}
 			}

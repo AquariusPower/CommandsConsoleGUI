@@ -33,6 +33,8 @@ import java.util.Collections;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.jme3.app.SimpleApplication;
 import com.jme3.scene.Node;
@@ -64,17 +66,19 @@ public class LemurFocusHelperI implements FocusChangeListener,IConsoleCommandLis
 	private CommandsDelegatorI	cc;
 	private Float	fBaseZ = 0f;
 	
-	public void configure(SimpleApplication sapp, CommandsDelegatorI cc){
-		this.sapp=sapp;
-		this.cc=cc;
+	public void configure(){
+		this.sapp=GlobalSappRefI.i().get();
+		this.cc=GlobalCommandsDelegatorI.i().get();
+		
 		cc.addConsoleCommandListener(this);
 	}
 	/**
 	 * The initial Z value from where the dialogs will be sorted/ordered.
 	 * So if you have other gui elements, this can be changed to show dialogs above or under them.
 	 */
-	public void configureBaseZ(float fBaseZ){
-		this.fBaseZ = fBaseZ;
+	public void configureSimple(Float fBaseZ){
+		if(fBaseZ!=null)this.fBaseZ = fBaseZ;
+		configure();
 	}
 	
 	public ArrayList<String> debugReport(){

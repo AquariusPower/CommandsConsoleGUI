@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.BufferUnderflowException;
 
+import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapText;
@@ -51,10 +52,10 @@ public class MiscJmeI {
 	private IHandleExceptions	ihe;
 	private boolean	bConfigured;
 	
-	public void configure(SimpleApplication app, IHandleExceptions ihe){
+	public void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 		this.ihe=ihe;
-		this.sapp=app;
+		this.sapp=GlobalSappRefI.i().get();
 		bConfigured=true;
 	}
 	

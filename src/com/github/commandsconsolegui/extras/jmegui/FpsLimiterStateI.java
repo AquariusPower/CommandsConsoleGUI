@@ -28,6 +28,7 @@
 package com.github.commandsconsolegui.extras.jmegui;
 
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
+import com.github.commandsconsolegui.globals.GlobalStateManagerRefI;
 import com.github.commandsconsolegui.jmegui.BasePlusAppState;
 
 /**
@@ -118,10 +119,11 @@ public class FpsLimiterStateI extends BasePlusAppState{
 	public int getFpsLimit() {
 		return iMaxFPS;
 	}
-
-	public void configureBeforeInitializing(){
+	
+	@Override
+	public void configure(Object... aobj) {
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		if(!GlobalSappRefI.i().get().getStateManager().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
+		if(!GlobalStateManagerRefI.i().get().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
 		bConfigured=true;
 	}
 

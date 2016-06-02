@@ -30,15 +30,21 @@ package com.github.commandsconsolegui.console.jmegui.lemur.test;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.cmd.jmegui.CommandsBackgroundState;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
+import com.github.commandsconsolegui.console.jmegui.lemur.ConsoleGUILemurStateI;
 import com.github.commandsconsolegui.extras.SingleAppInstanceI;
+import com.github.commandsconsolegui.extras.jmegui.FpsLimiterStateI;
+import com.github.commandsconsolegui.extras.jmegui.UngrabMouseStateI;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
+import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.app.SimpleApplication;
+import com.jme3.input.KeyInput;
 import com.jme3.system.AppSettings;
 
 /**
@@ -67,26 +73,35 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 	private StringCmdField testCommandAutoFillPrefixLessVariantDefaulted3 = new StringCmdField(this,null);
 	private StringCmdField CMD_TRADITIONAL_PRETTYFIED_0 = new StringCmdField(this,CustomCommandsI.strFinalCmdCodePrefix);
 	private CustomDialogState	diag;
+
+	private CommandsDelegatorI	cd;
 	
 	public boolean endUserCustomMethod(Integer i){
-		GlobalCommandsDelegatorI.i().get().dumpSubEntry("Shhh.. "+i+" end user(s) working!");
+		cd.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
 		
-		GlobalCommandsDelegatorI.i().get().dumpSubEntry("CommandTest0: "+CMD_TRADITIONAL_PRETTYFIED_0);
-		GlobalCommandsDelegatorI.i().get().dumpSubEntry("CommandTest1: "+sfTestCommandAutoFillVariant1);
-		GlobalCommandsDelegatorI.i().get().dumpSubEntry("CommandTest2: "+testCommandAutoFillPrefixLessVariant2);
+		cd.dumpSubEntry("CommandTest0: "+CMD_TRADITIONAL_PRETTYFIED_0);
+		cd.dumpSubEntry("CommandTest1: "+sfTestCommandAutoFillVariant1);
+		cd.dumpSubEntry("CommandTest2: "+testCommandAutoFillPrefixLessVariant2);
 		if(ReflexFillI.i().isbUseDefaultCfgIfMissing()){
-			GlobalCommandsDelegatorI.i().get().dumpSubEntry("CommandTest3: "+testCommandAutoFillPrefixLessVariantDefaulted3);
+			cd.dumpSubEntry("CommandTest3: "+testCommandAutoFillPrefixLessVariantDefaulted3);
 		}
 		return true;
 	}
 	
 	@Override
 	public void simpleInitApp() {
-		GlobalCommandsDelegatorI.i().set(new CustomCommandsI());
-		GlobalCommandsDelegatorI.i().get().addConsoleCommandListener(this);
+		cd = GlobalCommandsDelegatorI.i().set(new CustomCommandsI());
+		MiscJmeI.i().configure(cd);
+		
+		ConsoleGUILemurStateI.i().configureSimple(KeyInput.KEY_F10);
+		CommandsBackgroundState.i().configure(ConsoleGUILemurStateI.i());
+		FpsLimiterStateI.i().configure();
+		UngrabMouseStateI.i().configureSimple(null,true);
+
+		cd.addConsoleCommandListener(this);
 		
 		diag = new CustomDialogState("TestDialog");
-		diag.configure(this,GlobalCommandsDelegatorI.i().get());
+		diag.configure(this,cd);
 		
 //		SingleInstanceState.i().configureBeforeInitializing(this,true);
 		SingleAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);
@@ -158,7 +173,7 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 		 * Remember to set the same variant!
 		 */
 //		if(rfcfg==null)rfcfg = getReflexFillCfg(rfcv);
-		if(rfcfg==null)rfcfg = GlobalCommandsDelegatorI.i().get().getReflexFillCfg(rfcv);
+		if(rfcfg==null)rfcfg = cd.getReflexFillCfg(rfcv);
 		
 		return rfcfg;
 	}

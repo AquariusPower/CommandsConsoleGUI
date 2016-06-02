@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.globals;
 
+import com.github.commandsconsolegui.misc.CheckInitAndCleanupI;
+
 /**
  * "centralizing" objects to easy coding.
  * @author AquariusPower <https://github.com/AquariusPower>
@@ -36,12 +38,17 @@ package com.github.commandsconsolegui.globals;
 public class Global<T> {
 	T obj;
 	
-	protected void setAssertingNotAlreadySet(T obj){
-		if(this.obj!=null)throw new NullPointerException("already set: "+obj);
-		this.obj=obj;
+	protected void setAssertingNotAlreadySet(T objNew){
+//		if(this.obj!=null){
+		this.obj = CheckInitAndCleanupI.i().getNewAssertingCheckIsNull(this.obj, objNew);
+//			this.obj = InitTraceI.i().getAssertValidatingIsNull(this.obj, obj);
+//			throw new NullPointerException("already set: "+obj);
+//		}
+//		this.obj=obj;
 	}
 	
 	public T get(){
+		if(obj==null)throw new NullPointerException("global not set yet...");
 		return obj;
 	}
 	

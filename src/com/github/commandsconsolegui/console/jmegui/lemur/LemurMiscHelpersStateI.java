@@ -33,6 +33,8 @@ import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.BasePlusAppState;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
@@ -85,7 +87,7 @@ public class LemurMiscHelpersStateI extends BasePlusAppState implements IConsole
 //	private boolean	bInitialized;
 //	private boolean	bEnabled = true;
 
-	private CommandsDelegatorI	cc;
+	private CommandsDelegatorI	cd;
 
 	private boolean	bFixInvisibleTextInputCursor;
 
@@ -224,43 +226,20 @@ public class LemurMiscHelpersStateI extends BasePlusAppState implements IConsole
 		tf.setUserData(EKey.CursorLargeMode.toString(), b?true:null);
 	}
 	
-	public void configure(SimpleApplication sapp, CommandsDelegatorI cc) {
+	@Override
+	public void configure(Object... aobj) {
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		this.sapp=sapp;
-		this.cc=cc;
+		
+		this.sapp=GlobalSappRefI.i().get();
+		this.cd=GlobalCommandsDelegatorI.i().get();
+		
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
-		cc.addConsoleCommandListener(this);
+		
+		cd.addConsoleCommandListener(this);
+		
 		bConfigured=true;
 	}
 	
-//	public void initialize(){
-//		tdTextCursorBlink.updateTime();
-//		bInitialized=true;
-//	}
-	
-//	@Override
-//	public boolean isInitialized() {
-//		return bInitialized;
-//	}
-//
-//	@Override
-//	public void setEnabled(boolean active) {
-//		this.bEnabled=active;
-//	}
-//	
-//	@Override
-//	public boolean isEnabled() {
-//		return bEnabled ;
-//	}
-//
-//	@Override
-//	public void stateAttached(AppStateManager stateManager) {
-//	}
-//
-//	@Override
-//	public void stateDetached(AppStateManager stateManager) {
-//	}
-
 	@Override
 	public void update(float tpf) {
 		if(isEnabled()){
@@ -270,18 +249,6 @@ public class LemurMiscHelpersStateI extends BasePlusAppState implements IConsole
 			}
 		}
 	}
-
-//	@Override
-//	public void render(RenderManager rm) {
-//	}
-//
-//	@Override
-//	public void postRender() {
-//	}
-//
-//	@Override
-//	public void cleanup() {
-//	}
 
 	@Override
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI	cc) {
@@ -301,7 +268,7 @@ public class LemurMiscHelpersStateI extends BasePlusAppState implements IConsole
 
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
-		return cc.getReflexFillCfg(rfcv);
+		return cd.getReflexFillCfg(rfcv);
 	}
 	
 	private String strCaratNewPosition = "CaratNewPosition";
@@ -337,7 +304,7 @@ public class LemurMiscHelpersStateI extends BasePlusAppState implements IConsole
 	public void positionCaratProperly(TextField tf) {
 		Object objUD = tf.getUserData(strCaratNewPosition);
 		if(objUD==null){
-			cc.dumpExceptionEntry(new NullPointerException("missing carat new position user data"));
+			cd.dumpExceptionEntry(new NullPointerException("missing carat new position user data"));
 		}else{
 			int iMoveCaratTo = (int)objUD;
 			setCaratPosition(tf, iMoveCaratTo);

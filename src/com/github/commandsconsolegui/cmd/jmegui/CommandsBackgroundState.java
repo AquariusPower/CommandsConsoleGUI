@@ -30,12 +30,13 @@ package com.github.commandsconsolegui.cmd.jmegui;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.IConsoleUI;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.BasePlusAppState;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 
 /**
@@ -55,20 +56,31 @@ public class CommandsBackgroundState extends BasePlusAppState implements IReflex
 	
 	private IConsoleUI	cgsaGraphicalConsoleUI;
 	private CommandsDelegatorI	ccCommandsPipe;
-	private boolean	bEnabled;
-	private boolean	bInitialized;
 
 	private SimpleApplication	sapp;
 
 	private boolean	bConfigured;
-
-	public void configure(SimpleApplication sapp, IConsoleUI cgsa, CommandsDelegatorI cc){
+	
+	/**
+	 * expected params:
+	 * {@link IConsoleUI}
+	 */
+	@Override
+	public void configure(Object... aobj) {
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 		
-		this.sapp=sapp;
-		this.bEnabled=true; //just to let it be initialized at startup by state manager
-		this.cgsaGraphicalConsoleUI = cgsa;
-		this.ccCommandsPipe=cc;
+		for(Object obj:aobj){
+			if(obj instanceof IConsoleUI){
+				this.cgsaGraphicalConsoleUI = (IConsoleUI)obj;
+			}else{
+				throw new NullPointerException("invalid/unexpected object class, not supported: "+obj.getClass().getName());
+			}
+		}
+		
+		this.sapp=GlobalSappRefI.i().get();
+		this.ccCommandsPipe=GlobalCommandsDelegatorI.i().get();
+		
+//		this.bEnabled=true; //just to let it be initialized at startup by state manager
 		
 		if(!sapp.getStateManager().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
 		

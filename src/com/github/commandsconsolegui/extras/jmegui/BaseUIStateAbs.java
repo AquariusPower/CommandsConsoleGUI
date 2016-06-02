@@ -32,6 +32,8 @@ import java.util.HashMap;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.BasePlusAppState;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -59,7 +61,7 @@ public abstract class BaseUIStateAbs <V> extends BasePlusAppState implements ICo
 	protected String strUIId = null;
 	protected String	strCmd;
 //	protected StackTraceElement[] asteInitDebug = null;
-	protected CommandsDelegatorI	cc;
+	protected CommandsDelegatorI	cd;
 	protected String	strTitle;
 //	BoolTogglerCmdField btgShowDialog = new BoolTogglerCmdField(this,false);
 	protected String	strCmdPrefix = "toggleUI";
@@ -76,12 +78,13 @@ public abstract class BaseUIStateAbs <V> extends BasePlusAppState implements ICo
 		return strCmd;
 	}
 	
-	public void configure(Application app, CommandsDelegatorI cc){
-		this.sapp = (SimpleApplication)app;
+	@Override
+	public void configure(Object... aobj) {
+		this.sapp = GlobalSappRefI.i().get();
 		this.sapp.getStateManager().attach(this);
 		
-		this.cc=cc;
-		this.cc.addConsoleCommandListener(this);
+		this.cd = GlobalCommandsDelegatorI.i().get();
+		this.cd.addConsoleCommandListener(this);
 	}
 	
 	/**
@@ -219,6 +222,6 @@ public abstract class BaseUIStateAbs <V> extends BasePlusAppState implements ICo
 	
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
-		return cc.getReflexFillCfg(rfcv);
+		return cd.getReflexFillCfg(rfcv);
 	}
 }

@@ -51,6 +51,8 @@ import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.BasePlusAppState;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 //import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersState;
@@ -375,12 +377,12 @@ public abstract class ConsoleGuiStateAbs extends BasePlusAppState implements Ref
 	 * @param cc
 	 * @param iToggleConsoleKey
 	 */
-	public void configureBeforeInitializing(SimpleApplication sapp, CommandsDelegatorI cc, int iToggleConsoleKey){
+	public void configureSimple(int iToggleConsoleKey){
 		if(bConfigured)throw new NullPointerException("already configured.");		// KEEP ON TOP
 		
-		this.sapp=sapp;
+		this.sapp=GlobalSappRefI.i().get();
+		this.cc=GlobalCommandsDelegatorI.i().get();
 		
-		this.cc = cc;
 		if(cc==null)throw new NullPointerException("Missing "+CommandsDelegatorI.class.getName()+" instance (or a more specialized, like the scripting one)");
 		cc.configure(this);//,sapp);
 		cc.addConsoleCommandListener(this);

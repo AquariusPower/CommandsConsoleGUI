@@ -105,14 +105,19 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 	}
 	
 	@Override
-	public void configureBeforeInitializing(SimpleApplication sapp, CommandsDelegatorI cc, int iToggleConsoleKey) {
-		super.configureBeforeInitializing(sapp, cc, iToggleConsoleKey);
-		
+	public void configureSimple(int iToggleConsoleKey) {
+		super.configureSimple(iToggleConsoleKey);
+		configure();
+	}
+	@Override
+	public void configure(Object... aobj) {
 		// misc cfg
-		LemurMiscHelpersStateI.i().configure(sapp, cc);
+		LemurMiscHelpersStateI.i().configure();
 //		LemurMiscHelpersStateI.i().initialize(sapp.getStateManager(), sapp);
-		if(!sapp.getStateManager().attach(LemurMiscHelpersStateI.i()))throw new NullPointerException("already attached state "+LemurMiscHelpersStateI.class.getName());
-		LemurFocusHelperI.i().configure(sapp,cc);
+		if(!sapp.getStateManager().attach(LemurMiscHelpersStateI.i())){
+			throw new NullPointerException("already attached state "+LemurMiscHelpersStateI.class.getName());
+		}
+		LemurFocusHelperI.i().configureSimple(null);
 	}
 	
 //	public void ConsoleGUILemurState(int iOpenConsoleHotKey, ConsoleCommands cc, Application app) {

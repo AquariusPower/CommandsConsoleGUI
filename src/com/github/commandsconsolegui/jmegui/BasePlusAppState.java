@@ -51,9 +51,8 @@ public abstract class BasePlusAppState extends BaseAppState implements ICheckIni
 	
 	TimedDelayVarField tdDebugMessageDelay = new TimedDelayVarField(this,3.0f);
 	TimedDelayVarField tdInitDelayLimit = new TimedDelayVarField(this,5.0f);
-
-	public void configure(){
-	}
+	
+	public abstract void configure(Object... aobj);
 	
 	@Override
 	protected void initialize(Application app) {
