@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console.gui.lemur;
+package com.github.commandsconsolegui.console.jmegui.lemur;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
@@ -33,7 +33,8 @@ import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
-import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.jmegui.MiscJmeI;
+import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -41,13 +42,11 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexHacks;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.AppStateManager;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.font.BitmapText;
 import com.jme3.material.MatParam;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
-import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
@@ -64,7 +63,7 @@ import com.simsilica.lemur.focus.FocusManagerState;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class LemurMiscHelpersStateI extends BaseAppState implements IConsoleCommandListener, IReflexFillCfg{
+public class LemurMiscHelpersStateI extends BaseAppState implements IConsoleCommandListener, IReflexFillCfg, IWorkAroundBugFix{
 	public final BoolTogglerCmdField	btgTextCursorPulseFadeBlinkMode = new BoolTogglerCmdField(this,true);
 	public final BoolTogglerCmdField	btgTextCursorLarge = new BoolTogglerCmdField(this,true);
 	public final StringCmdField CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringCmdField(this, CommandsDelegatorI.strFinalCmdCodePrefix);
@@ -128,44 +127,6 @@ public class LemurMiscHelpersStateI extends BaseAppState implements IConsoleComm
 	
 	public void setTextFieldInputToBlinkCursor(TextField tf){
 		this.tfToBlinkCursor = tf;
-	}
-	
-	private void bugfixInvisibleCursor(TextField tf){
-		if(!bFixInvisibleTextInputCursor)return;
-		
-		String strInvisibleCursorFixed="InvisibleCursorFixed";
-		if(tf.getUserData(strInvisibleCursorFixed)!=null)return;
-		
-		BitmapText bmt = getBitmapTextFrom(tf);
-		
-		/**
-		 * The BitmapText base alpha is set to an invalid value -1.
-		 * That value seems to be used as a marker/indicator of "invalidity?".
-		 * But the problem is, it is used as a normal value and never verified/validadted 
-		 * towards its invalidity of -1.
-		 * Wouldnt have been better if it was used 'null' as indicator of invalidity?
-		 * 
-		 * This flow will fix that base alpha to fully visible.
-		 * -> BitmapText.letters.setBaseAlpha(alpha);
-		 */
-		bmt.setAlpha(1f); // alpha need to be fixed, it was -1; -1 is an invalid value used as a merker/indicator, woulndt be better it be a null marker?
-		
-		/**
-		 * This flow will apply the base alpha of BitmapText to the text cursor.
-		 * -> TextField.text.setColor(color)->resetCursorColor()
-		 */
-		tf.setColor(tf.getColor());
-		
-		tf.setUserData(strInvisibleCursorFixed,true);
-	}
-	/**
-	 * To the point, but unnecessary.
-	 * see {@link TextEntryComponent#resetCursorColor()}
-	 */
-	private void bugfixInvisibleCursor(Geometry geomCursor){
-		if(!bFixInvisibleTextInputCursor)return;
-//	getBitmapTextFrom(tf).setAlpha(1f); //this is a fix to let text cursor be visible.
-		geomCursor.getMaterial().setColor("Color",ColorRGBA.White.clone());
 	}
 	
 	private void checkAndPrepareExclusiveCursorMaterialFor(TextField tf, Geometry geomCursor){
@@ -234,7 +195,7 @@ public class LemurMiscHelpersStateI extends BaseAppState implements IConsoleComm
 				if(geomCursor.getCullHint().compareTo(CullHint.Always)!=0){
 					geomCursor.setCullHint(CullHint.Always);
 				}else{
-					bugfixInvisibleCursor(tf);
+					bugFix(EBugFix.InvisibleCursor,tf);
 //					fixInvisibleCursor(geomCursor);
 					geomCursor.setCullHint(CullHint.Inherit);
 				}
@@ -431,7 +392,7 @@ public class LemurMiscHelpersStateI extends BaseAppState implements IConsoleComm
 		}
 		if(btnFixVisibleRowsHelper==null)return null;
 		
-		return MiscI.i().retrieveBitmapTextFor(btnFixVisibleRowsHelper).getLineHeight();
+		return MiscJmeI.i().retrieveBitmapTextFor(btnFixVisibleRowsHelper).getLineHeight();
 	}
 
 //	@Override
@@ -451,6 +412,59 @@ public class LemurMiscHelpersStateI extends BaseAppState implements IConsoleComm
 		tdTextCursorBlink.updateTime();
 	}
 
+	enum EBugFix{
+		InvisibleCursor,
+	}
+	@Override
+	public Object bugFix(Object... aobj) {
+		switch((EBugFix)aobj[0]){
+			case InvisibleCursor:{
+				/**
+				 * To the point, but unnecessary.
+				 * see {@link TextEntryComponent#resetCursorColor()}
+				 */
+				if(aobj[1] instanceof Geometry){
+					Geometry geomCursor = (Geometry) aobj[1];
+					if(!bFixInvisibleTextInputCursor)return null;
+//				getBitmapTextFrom(tf).setAlpha(1f); //this is a fix to let text cursor be visible.
+					geomCursor.getMaterial().setColor("Color",ColorRGBA.White.clone());
+				}else
+				if(aobj[1] instanceof TextField){
+					TextField tf = (TextField) aobj[1];
+					
+					if(!bFixInvisibleTextInputCursor)return null;
+					
+					String strInvisibleCursorFixed="InvisibleCursorFixed";
+					if(tf.getUserData(strInvisibleCursorFixed)!=null)return null;
+					
+					BitmapText bmt = getBitmapTextFrom(tf);
+					
+					/**
+					 * The BitmapText base alpha is set to an invalid value -1.
+					 * That value seems to be used as a marker/indicator of "invalidity?".
+					 * But the problem is, it is used as a normal value and never verified/validadted 
+					 * towards its invalidity of -1.
+					 * Wouldnt have been better if it was used 'null' as indicator of invalidity?
+					 * 
+					 * This flow will fix that base alpha to fully visible.
+					 * -> BitmapText.letters.setBaseAlpha(alpha);
+					 */
+					bmt.setAlpha(1f); // alpha need to be fixed, it was -1; -1 is an invalid value used as a merker/indicator, woulndt be better it be a null marker?
+					
+					/**
+					 * This flow will apply the base alpha of BitmapText to the text cursor.
+					 * -> TextField.text.setColor(color)->resetCursorColor()
+					 */
+					tf.setColor(tf.getColor());
+					
+					tf.setUserData(strInvisibleCursorFixed,true);
+				}
+				
+			}break;
+		}
+		return null;
+	}
+
 	@Override
 	protected void cleanup(Application app) {
 		// TODO Auto-generated method stub
@@ -468,5 +482,4 @@ public class LemurMiscHelpersStateI extends BaseAppState implements IConsoleComm
 		// TODO Auto-generated method stub
 		
 	}
-
 }

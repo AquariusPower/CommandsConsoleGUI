@@ -25,11 +25,14 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console.test;
+package com.github.commandsconsolegui.console.jmegui.lemur.test;
 
+import com.github.commandsconsolegui.cmd.IConsoleUI;
 import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegatorI;
-import com.github.commandsconsolegui.console.gui.lemur.ConsoleGUILemurStateI;
-import com.github.commandsconsolegui.extras.FpsLimiterState;
+import com.github.commandsconsolegui.cmd.jmegui.CommandsBackgroundState;
+import com.github.commandsconsolegui.console.jmegui.lemur.ConsoleGUILemurStateI;
+import com.github.commandsconsolegui.extras.jmegui.FpsLimiterState;
+import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.jme3.input.KeyInput;
@@ -42,8 +45,12 @@ import com.jme3.input.KeyInput;
 public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleCommands to prevent scripts usage
 //	public FpsLimiterState fpslState = new FpsLimiterState();
 	
+	private ConsoleGuiTestI	sapp;
+
 	public CustomCommandsI(ConsoleGuiTestI sapp){
 		super();
+		
+		this.sapp=sapp;
 		
 		ConsoleGUILemurStateI.i().configureBeforeInitializing(sapp, this, KeyInput.KEY_F10);
 		FpsLimiterState.i().configureBeforeInitializing(sapp, this);
@@ -83,6 +90,15 @@ public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleC
 	public String prepareStatsFieldText() {
 		String strStatsLast = super.prepareStatsFieldText();
 		
+		if(EStats.MousePosition.b()){
+			strStatsLast+=
+					"xy"
+						+(int)sapp.getInputManager().getCursorPosition().x
+						+","
+						+(int)sapp.getInputManager().getCursorPosition().y
+						+";";
+		}
+		
 		if(EStats.TimePerFrame.b()){
 			strStatsLast+=
 					"Tpf"+(FpsLimiterState.i().isEnabled() ? (int)(fTPF*1000.0f) : MiscI.i().fmtFloat(fTPF,6)+"s")
@@ -95,4 +111,17 @@ public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleC
 		return strStatsLast; 
 	}
 	
+	@Override
+	public void cmdExit() {
+		sapp.stop();
+		super.cmdExit();
+	}
+	
+	@Override
+	public void configure(IConsoleUI icui) {
+		super.configure(icui);
+		
+		CommandsBackgroundState.i().configure(sapp, icui, this);
+		MiscJmeI.i().configure(sapp, this);
+	}
 }

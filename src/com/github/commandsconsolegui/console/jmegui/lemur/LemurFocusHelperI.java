@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console.gui.lemur;
+package com.github.commandsconsolegui.console.jmegui.lemur;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +33,7 @@ import java.util.Collections;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
-import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.jme3.app.SimpleApplication;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -90,7 +90,7 @@ public class LemurFocusHelperI implements FocusChangeListener,IConsoleCommandLis
 		Collections.reverse(aftRev);
 		for(FocusTarget ft:aftRev){
 			GuiControl gct = (GuiControl)ft;
-			Spatial spt = MiscI.i().getParentestFrom(gct.getSpatial());
+			Spatial spt = MiscJmeI.i().getParentestFrom(gct.getSpatial());
 			astr.add("ZOrder:"+spt.getName()+",Z="+spt.getLocalTranslation().z);
 		}
 		
@@ -150,7 +150,7 @@ public class LemurFocusHelperI implements FocusChangeListener,IConsoleCommandLis
 		 */
 		for(FocusTarget ft:new ArrayList<FocusTarget>(aftZOrderList)){
 			GuiControl gct = (GuiControl)ft;
-			if(MiscI.i().getParentestFrom(gct.getSpatial()).getParent()==null){
+			if(MiscJmeI.i().getParentestFrom(gct.getSpatial()).getParent()==null){
 				aftZOrderList.remove(ft);
 			}
 		}
@@ -165,7 +165,7 @@ public class LemurFocusHelperI implements FocusChangeListener,IConsoleCommandLis
 				float fZ = fBaseZ + (i*fDisplacement)+fDisplacement; //so will always be above all other GUI elements that are expectedly at 0
 				
 				GuiControl gct = (GuiControl)ft;
-				Spatial spt = MiscI.i().getParentestFrom(gct.getSpatial());
+				Spatial spt = MiscJmeI.i().getParentestFrom(gct.getSpatial());
 				
 				/**
 				 * must be re-added to work...

@@ -56,7 +56,6 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexHacks;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
-import com.jme3.app.SimpleApplication;
 
 /**
  * All methods starting with "cmd" are directly accessible by user console commands.
@@ -78,7 +77,7 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	 */
 //	public ConsoleGuiStateAbs csaTmp = null;
 	
-	protected SimpleApplication	sapp;
+//	protected SimpleApplication	sapp;
 	
 	// not protected... development token... 
 	public final String	TOKEN_CMD_NOT_WORKING_YET = "[NOTWORKINGYET]";
@@ -351,7 +350,7 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public void cmdExit(){
-		sapp.stop();
+//		sapp.stop();
 		System.exit(0);
 	}
 	
@@ -564,15 +563,6 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 			
 			bCmdWorked=true;
 		}else
-//		if(checkCmdValidity(null,CMD_FIX_CURSOR ,"in case cursor is invisible")){
-//			if(csaTmp.getLemurHK()==null){
-//				dumpWarnEntry("requires command: "+CMD_HK_TOGGLE);
-//			}else{
-//				dumpInfoEntry("requesting: "+CMD_FIX_CURSOR);
-//				csaTmp.getLemurHK().bFixInvisibleTextInputCursorHK=true;
-//			}
-//			bCmdEndedGracefully = true;
-//		}else
 		if(checkCmdValidity(null,CMD_FIX_LINE_WRAP ,"in case words are overlapping")){
 			icui.cmdLineWrapDisableDumpArea();
 			bCmdWorked = true;
@@ -715,7 +705,6 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 		}else
 		if(checkCmdValidity(null,"test","[...] temporary developer tests")){
 			cmdTest();
-//			if(csaTmp.getLemurHK()!=null)csaTmp.getLemurHK().test();
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(null,"varAdd","<varId> <[-]value>")){
@@ -2620,15 +2609,6 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 //						+";";
 //		}
 						
-		if(EStats.MousePosition.b){
-			strStatsLast+=
-					"xy"
-						+(int)sapp.getInputManager().getCursorPosition().x
-						+","
-						+(int)sapp.getInputManager().getCursorPosition().y
-						+";";
-		}
-		
 		return strStatsLast;
 	}
 	
@@ -2641,7 +2621,7 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	 * @param icui
 	 * @param sapp
 	 */
-	public void configure(IConsoleUI icui, SimpleApplication sapp){
+	public void configure(IConsoleUI icui){//, SimpleApplication sapp){
 		if(bConfigured)throw new NullPointerException("already configured.");		// KEEP ON TOP
 		
 //		Init.i().initialize(sapp, this);
@@ -2649,14 +2629,14 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 		BoolTogglerCmdField.configure(this);
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 		DebugI.i().configure(this);
-		MiscI.i().configure(sapp,this);
-		ReflexHacks.i().configure(sapp, this, this);
+		MiscI.i().configure(this);
+		ReflexHacks.i().configure(this, this);
 //		SingleInstanceState.i().initialize(sapp, this);
 		
-		CommandsBackgroundState.i().configure(sapp, icui, this);
+//		CommandsBackgroundState.i().configure(sapp, icui, this);
 		
 		this.icui=icui;
-		this.sapp=sapp;
+//		this.sapp=sapp;
 		
 		bConfigured=true;
 	}

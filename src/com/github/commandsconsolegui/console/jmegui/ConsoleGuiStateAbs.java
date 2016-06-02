@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console.gui;
+package com.github.commandsconsolegui.console.jmegui;
 
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
@@ -51,10 +51,12 @@ import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.jmegui.MiscJmeI;
 //import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersState;
 import com.github.commandsconsolegui.misc.AutoCompleteI;
 import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDbgKey;
+import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -62,8 +64,8 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
-import com.jme3.app.state.AppState;
 import com.jme3.app.state.AppStateManager;
+import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.AssetNotFoundException;
 import com.jme3.asset.plugins.FileLocator;
@@ -95,7 +97,7 @@ import com.jme3.texture.Texture2D;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IReflexFillCfg, IConsoleCommandListener, IConsoleUI{
+public abstract class ConsoleGuiStateAbs extends BaseAppState implements ReflexFillI.IReflexFillCfg, IConsoleCommandListener, IConsoleUI, IWorkAroundBugFix{
 //	protected FpsLimiterState fpslState = new FpsLimiterState();
 	
 //	protected final String strInputIMCPREFIX = "CONSOLEGUISTATE_";
@@ -381,7 +383,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		
 		this.cc = cc;
 		if(cc==null)throw new NullPointerException("Missing "+CommandsDelegatorI.class.getName()+" instance (or a more specialized, like the scripting one)");
-		cc.configure(this,sapp);
+		cc.configure(this);//,sapp);
 		cc.addConsoleCommandListener(this);
 		
 		this.bEnabled=true; //just to let it be initialized at startup by state manager
@@ -439,7 +441,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	}
 	
 	@Override
-	public void initialize(AppStateManager stateManager, Application appDummyCfgBeforeHere) {
+	public void initialize(Application appDummyCfgBeforeHere) {
 		initializePre();
 		
 //		sapp = (SimpleApplication)app;
@@ -530,32 +532,43 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		bInitialized=true;
 	}
 	
-	@Override
-	public boolean isInitialized() {
-		return bInitialized;
-	}
+//	@Override
+//	public boolean isInitialized() {
+//		return bInitialized;
+//	}
 
 	@Override
-	public void setEnabled(boolean bEnabled) {
+	protected void onEnable() {
 		if(!bInitializeOnlyTheUI){
 			initializeOnlyTheUI();
 		}
-		
-		this.bEnabled=bEnabled;
 	}
-
+	
 	@Override
-	public boolean isEnabled() {
-		return bEnabled;
+	protected void onDisable() {
 	}
-
-	@Override
-	public void stateAttached(AppStateManager stateManager) {
-	}
-
-	@Override
-	public void stateDetached(AppStateManager stateManager) {
-	}
+	
+//	@Override
+//	public void setEnabled(boolean bEnabled) {
+//		if(!bInitializeOnlyTheUI){
+//			initializeOnlyTheUI();
+//		}
+//		
+//		this.bEnabled=bEnabled;
+//	}
+//
+//	@Override
+//	public boolean isEnabled() {
+//		return bEnabled;
+//	}
+//
+//	@Override
+//	public void stateAttached(AppStateManager stateManager) {
+//	}
+//
+//	@Override
+//	public void stateDetached(AppStateManager stateManager) {
+//	}
 	
 	protected void setVisible(boolean b){
 		if(b){
@@ -799,108 +812,6 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	protected float fontWidth(String strChars){
 		return fontWidth(strChars, strStyle, true);
 	}
-	
-//	protected void mapKeysForInputField(){
-//		// simple actions
-//		KeyActionListener actSimpleActions = new KeyActionListener() {
-//			@Override
-//			public void keyAction(TextEntryComponent source, KeyAction key) {
-//				boolean bControl = key.hasModifier(KeyAction.CONTROL_DOWN); //0x1
-////				boolean bShift = key.hasModifier(0x01);
-////				boolean bAlt = key.hasModifier(0x001);
-////				case KeyInput.KEY_INSERT: //shift+ins paste
-//					//TODO ? case KeyInput.KEY_INSERT: //ctrl+ins copy
-//					//TODO ? case KeyInput.KEY_DELETE: //shift+del cut
-//				
-//				switch(key.getKeyCode()){
-////					case KeyInput.KEY_B: 
-////						if(bControl)cc.iCopyFrom = getDumpAreaSelectedIndex();
-////						break;
-//					case KeyInput.KEY_C: 
-//						if(bControl)cc.editCopyOrCut(false,false,false);
-//						break;
-//					case KeyInput.KEY_ESCAPE: 
-//						setEnabled(false);
-//						break;
-//					case KeyInput.KEY_V: 
-//						if(bKeyShiftIsPressed){
-//							if(bControl)cc.showClipboard();
-//						}else{
-//							if(bControl)editPaste();
-//						}
-//						break;
-//					case KeyInput.KEY_X: 
-//						if(bControl)cc.editCopyOrCut(false,true,false);
-//						break;
-//					case KeyInput.KEY_NUMPADENTER:
-//					case KeyInput.KEY_RETURN:
-//						actionSubmit(getInputText());
-//						break;
-//					case KeyInput.KEY_TAB:
-//						autoCompleteInputField(bControl);
-//						break;
-//					case KeyInput.KEY_DELETE:
-//						if(bControl)clearInputTextField();
-//						break;
-//					case KeyInput.KEY_SLASH:
-//						if(bControl)cc.toggleLineCommentOrCommand();
-//						break;
-//				}
-//			}
-//		};
-//		
-//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_TAB), actSimpleActions);
-//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_TAB,KeyAction.CONTROL_DOWN), actSimpleActions);
-//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_RETURN), actSimpleActions);
-//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_NUMPADENTER), actSimpleActions);
-//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_B,KeyAction.CONTROL_DOWN), actSimpleActions);
-//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_C,KeyAction.CONTROL_DOWN), actSimpleActions);
-//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_V,KeyAction.CONTROL_DOWN), actSimpleActions);
-//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_X,KeyAction.CONTROL_DOWN), actSimpleActions);
-//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_DELETE,KeyAction.CONTROL_DOWN), actSimpleActions);
-//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_SLASH,KeyAction.CONTROL_DOWN), actSimpleActions);
-//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_ESCAPE), actSimpleActions);
-//		
-//		// cmd history select action
-//		KeyActionListener actCmdHistoryEntrySelectAction = new KeyActionListener() {
-//			@Override
-//			public void keyAction(TextEntryComponent source, KeyAction key) {
-//				navigateCmdHistOrHintBox(source,key);
-//			}
-//		};
-//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_UP), actCmdHistoryEntrySelectAction);
-//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_DOWN), actCmdHistoryEntrySelectAction);
-//		
-//		// scroll actions
-//		KeyActionListener actDumpNavigate = new KeyActionListener() {
-//			@Override
-//			public void keyAction(TextEntryComponent source, KeyAction key) {
-//				boolean bControl = key.hasModifier(KeyAction.CONTROL_DOWN); //0x1
-//				double dCurrent = getScrollDumpAreaFlindex();
-//				double dAdd = 0;
-//				switch(key.getKeyCode()){
-//					case KeyInput.KEY_PGUP:
-//						dAdd = -iShowRows;
-//						break;
-//					case KeyInput.KEY_PGDN:
-//						dAdd = +iShowRows;
-//						break;
-//					case KeyInput.KEY_HOME:
-//						if(bControl)dAdd = -dCurrent;
-//						break;
-//					case KeyInput.KEY_END:
-//						if(bControl)dAdd = vlstrDumpEntries.size();
-//						break;
-//				}
-//				scrollDumpArea(dCurrent + dAdd);
-//				scrollToBottomRequestSuspend();
-//			}
-//		};
-//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_PGUP), actDumpNavigate);
-//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_PGDN), actDumpNavigate);
-//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_HOME, KeyAction.CONTROL_DOWN), actDumpNavigate);
-//		tfInput.getActionMap().put(new KeyAction(KeyInput.KEY_END, KeyAction.CONTROL_DOWN), actDumpNavigate);
-//	}
 	
 	protected boolean isHintActive(){
 		return lstbxAutoCompleteHint.getParent()!=null;
@@ -1808,7 +1719,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 	}
 
 	@Override
-	public void cleanup() {
+	public void cleanup(Application app) {
 //		tdLetCpuRest.reset();
 //		tdScrollToBottomRequestAndSuspend.reset();
 //		tdScrollToBottomRetry.reset();
@@ -2063,89 +1974,70 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		}
 	}
 	
-//	/**
-//	 * TODO: find a way to properly limit the chars length, or show it in a safer way?
-//	 * If the string is too long, it will shrink the right side buttons until
-//	 * their width becomes negative and application will crash...
-//	 * 
-//	 */
-//	protected String fixStatsWidth(String str){
-//		int iMax=50;
-//		if(str.length()<iMax)return str;
-//		return str.substring(0, iMax);
-//	}
-//	
-//	protected void updateStats(){
-//		if(!cc.tdStatsRefresh.isReady(true))return;
-//		String str = cc.prepareStatsFieldText();
-////		if(str.length()>wrap)
-////		str+="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-//		str+=cc.strTest;
-//		
-//		lblStats.setText(str);
-//		
-//		try{
-//			ctnrConsole.updateLogicalState(0.05f);
-//		}catch(Exception ex){
-//			cc.dumpExceptionEntry(ex);
-//			lblStats.setText(fixStatsWidth(str));
-//		}
-//	}
-	
-	/**
-	 * BugFix: because the related crash should/could be prevented/preventable.
-	 * 
-	 * Buttons get smashed, shrinking to less than 0, they seem to not accept preferred size constraint.
-	 * 
-	 * By fixating the size of the label, this crash preventer is not that necesary anymore.
-	 */
-	protected void bugfixStatsLabelTextSize(){
-		boolean bEnableThisCrashPreventer=false;if(!bEnableThisCrashPreventer)return;
-		
-		boolean bFailed=false;
-		while(true){
-			String str=getStatsText();
-			if(str.isEmpty())break;
-			
-			boolean bCheckAlways=true; //safer
-			if(!bCheckAlways){
-				if(iStatsTextSafeLength!=null){
-					if(str.length()>iStatsTextSafeLength){
-						str=str.substring(0,iStatsTextSafeLength);
-						setStatsText(str);
-					}
-					break;
-				}
-			}
-			
-			boolean bRetry=false;
-			try{
+	enum EBugFix{
+		StatsLabelTextSize,
+	}
+	@Override
+	public Object bugFix(Object... aobj) {
+		switch((EBugFix)aobj[0]){
+			case StatsLabelTextSize:{
 				/**
-				 * this is when crashes outside of here
+				 * BugFix: because the related crash should/could be prevented/preventable.
+				 * 
+				 * Buttons get smashed, shrinking to less than 0, they seem to not accept preferred size constraint.
+				 * 
+				 * By fixating the size of the label, this crash preventer is not that necesary anymore.
 				 */
-				ctnrConsole.updateLogicalState(0.05f);
+				boolean bEnableThisCrashPreventer=false;if(!bEnableThisCrashPreventer)return null;
 				
-				if(bFailed){ //had failed, so look for a safe length
-					if(iStatsTextSafeLength==null || !iStatsTextSafeLength.equals(str.length())){
-						iStatsTextSafeLength=str.length();
-						cc.dumpDebugEntry("StatsTextSafeLength="+str.length());
+				boolean bFailed=false;
+				while(true){
+					String str=getStatsText();
+					if(str.isEmpty())break;
+					
+					boolean bCheckAlways=true; //safer
+					if(!bCheckAlways){
+						if(iStatsTextSafeLength!=null){
+							if(str.length()>iStatsTextSafeLength){
+								str=str.substring(0,iStatsTextSafeLength);
+								setStatsText(str);
+							}
+							break;
+						}
 					}
+					
+					boolean bRetry=false;
+					try{
+						/**
+						 * this is when crashes outside of here
+						 */
+						ctnrConsole.updateLogicalState(0.05f);
+						
+						if(bFailed){ //had failed, so look for a safe length
+							if(iStatsTextSafeLength==null || !iStatsTextSafeLength.equals(str.length())){
+								iStatsTextSafeLength=str.length();
+								cc.dumpDebugEntry("StatsTextSafeLength="+str.length());
+							}
+						}
+					}catch(Exception ex){
+						if(bExceptionOnce){
+							cc.dumpExceptionEntry(ex);
+							bExceptionOnce=false;
+						}
+						
+						str=str.substring(0,str.length()-1);
+						setStatsText(str);
+						
+						bRetry = true;
+						bFailed = true;
+					}
+					
+					if(!bRetry)break;
 				}
-			}catch(Exception ex){
-				if(bExceptionOnce){
-					cc.dumpExceptionEntry(ex);
-					bExceptionOnce=false;
-				}
-				
-				str=str.substring(0,str.length()-1);
-				setStatsText(str);
-				
-				bRetry = true;
-				bFailed = true;
-			}
-			
-			if(!bRetry)break;
+			}break;
 		}
+		
+		return null;
 	}
 	
 	protected void updateStats(){
@@ -2157,7 +2049,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		
 		setStatsText(str);
 		
-		bugfixStatsLabelTextSize();
+		bugFix(EBugFix.StatsLabelTextSize);
 	}	
 	
 	protected void updateAutoCompleteHint() {
@@ -2342,22 +2234,6 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 		this.sptScrollTarget = target;
 	}
 	
-//	@Override
-//	public void setHKenabled(Boolean bEnable) {
-//		if(getLemurHK()==null && (bEnable==null || bEnable)){
-//			initLemurHK();
-//		}
-//		
-//		if(getLemurHK()!=null){
-//			getLemurHK().bAllowHK = bEnable==null ? !getLemurHK().bAllowHK : bEnable; //override
-//			if(getLemurHK().bAllowHK){
-//				cc.dumpWarnEntry("Hacks enabled!");
-//			}else{
-//				cc.dumpWarnEntry("Hacks may not be completely disabled/cleaned!");
-//			}
-//		}
-//	}
-	
 	@Override
 	public void resetConsoleGui() {
 		sapp.enqueue(new Callable<Void>() {
@@ -2422,7 +2298,7 @@ public abstract class ConsoleGuiStateAbs implements AppState, ReflexFillI.IRefle
 //		MiscI.i().saveImageToFile(imgTmp,"temp"+ttf.getFont().getName().replace(" ",""));
 		if(DebugI.i().isKeyEnabled(EDbgKey.DumpFontImg)){ //EDbgKey.values()
 			//TODO why image file ends empty??
-			MiscI.i().saveImageToFile(t2d.getImage(),
+			MiscJmeI.i().saveImageToFile(t2d.getImage(),
 				EDbgKey.DumpFontImg.toString()+ttf.getFont().getName().replace(" ",""));
 		}
 		

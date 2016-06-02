@@ -25,15 +25,15 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.extras.gui.lemur;
+package com.github.commandsconsolegui.extras.jmegui.lemur;
 
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
-import com.github.commandsconsolegui.console.gui.lemur.ConsoleGUILemurStateI;
-import com.github.commandsconsolegui.console.gui.lemur.LemurFocusHelperI;
-import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersStateI;
-import com.github.commandsconsolegui.extras.gui.BaseUIStateAbs;
+import com.github.commandsconsolegui.console.jmegui.lemur.ConsoleGUILemurStateI;
+import com.github.commandsconsolegui.console.jmegui.lemur.LemurFocusHelperI;
+import com.github.commandsconsolegui.console.jmegui.lemur.LemurMiscHelpersStateI;
+import com.github.commandsconsolegui.extras.jmegui.BaseUIStateAbs;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.input.KeyInput;
 import com.jme3.math.ColorRGBA;
@@ -264,7 +264,7 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> {
 		
 		updateTextInfo();
 		
-		setMouseKeepUngrabbed(isEnabled());
+		setMouseCursorKeepUngrabbed(isEnabled());
 	}
 	
 	@Override

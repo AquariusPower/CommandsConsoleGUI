@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.extras;
+package com.github.commandsconsolegui.extras.jmegui;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.jme3.app.Application;

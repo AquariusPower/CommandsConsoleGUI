@@ -206,7 +206,8 @@ public class SingleAppInstanceI { //implements IReflexFillCfg{
 					
 					if(checkExitTD()){
 						outputTD("Other "+strExitReasonOtherInstance+" instance is running, exiting this...");
-						flSelfLock.delete();
+						cleanup();
+//						flSelfLock.delete();
 						break;
 					}
 					
@@ -228,7 +229,7 @@ public class SingleAppInstanceI { //implements IReflexFillCfg{
 					
 				} catch (InterruptedException e) {
 					e.printStackTrace();
-					flSelfLock.delete();
+					flSelfLock.delete(); //do not use cleanup() here as it may clean more than just this file that will just be recreated above...
 				}
 			}
 			

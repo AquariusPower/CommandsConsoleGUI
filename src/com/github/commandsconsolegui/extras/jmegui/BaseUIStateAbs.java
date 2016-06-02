@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.extras.gui;
+package com.github.commandsconsolegui.extras.jmegui;
 
 import java.util.HashMap;
 
@@ -59,7 +59,7 @@ public abstract class BaseUIStateAbs <V> extends BaseAppState implements IConsol
 	protected String	strLastSelectedKey;
 	protected String strUIId = null;
 	protected String	strCmd;
-	protected StackTraceElement[] asteInitDebug = null;
+//	protected StackTraceElement[] asteInitDebug = null;
 	protected CommandsDelegatorI	cc;
 	protected String	strTitle;
 //	BoolTogglerCmdField btgShowDialog = new BoolTogglerCmdField(this,false);
@@ -91,7 +91,7 @@ public abstract class BaseUIStateAbs <V> extends BaseAppState implements IConsol
 	 */
 	@Override
 	public void initialize(Application app) {
-		asteInitDebug = Thread.currentThread().getStackTrace();
+//		asteInitDebug = Thread.currentThread().getStackTrace();
 		
 		initGUI();
 		initKeyMappings();
@@ -125,14 +125,14 @@ public abstract class BaseUIStateAbs <V> extends BaseAppState implements IConsol
 		
 		requestFocus(tfInputText);
 		
-		setMouseKeepUngrabbed(isEnabled());
+		setMouseCursorKeepUngrabbed(isEnabled());
 	}
 	
 	@Override
 	public void onDisable() {
 		ctnrTop.removeFromParent();
 		
-		setMouseKeepUngrabbed(isEnabled());
+		setMouseCursorKeepUngrabbed(isEnabled());
 	}
 	
 	/**
@@ -163,10 +163,15 @@ public abstract class BaseUIStateAbs <V> extends BaseAppState implements IConsol
 		
 		updateTextInfo();
 		
-		setMouseKeepUngrabbed(isEnabled());
+		setMouseCursorKeepUngrabbed(isEnabled());
 	}
 	
-	public abstract void setMouseKeepUngrabbed(boolean b);
+	/**
+	 * This is important to prevent other parts of the application from 
+	 * vanishing with (grabbing) the mouse cursor.
+	 * @param b
+	 */
+	public abstract void setMouseCursorKeepUngrabbed(boolean b);
 	
 	/**
 	 * What will be shown at each entry on the list.
@@ -212,10 +217,6 @@ public abstract class BaseUIStateAbs <V> extends BaseAppState implements IConsol
 		return cc.cmdFoundReturnStatus(bCommandWorked);
 	}
 	
-	@Override
-	protected void cleanup(Application app) {
-	}
-
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		return cc.getReflexFillCfg(rfcv);

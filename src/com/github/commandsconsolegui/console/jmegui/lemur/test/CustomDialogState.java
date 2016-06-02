@@ -25,23 +25,25 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console.test;
+package com.github.commandsconsolegui.console.jmegui.lemur.test;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.extras.gui.lemur.LemurBaseUIStateAbs;
+import com.github.commandsconsolegui.extras.jmegui.lemur.LemurBaseUIStateAbs;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
+import com.jme3.app.Application;
 
 /**
  * @author AquariusPower <https://github.com/AquariusPower>
  */
-public class CustomGenericDialog extends LemurBaseUIStateAbs<String>{
-	ArrayList<String> astr = new ArrayList<String>();
+public class CustomDialogState extends LemurBaseUIStateAbs<String>{
+	ArrayList<String> astr;
 	
-	public CustomGenericDialog(String strUIId) {
+	public CustomDialogState(String strUIId) {
 		super(strUIId);
+		astr = new ArrayList<String>();
 	}
 
 	@Override
@@ -52,8 +54,13 @@ public class CustomGenericDialog extends LemurBaseUIStateAbs<String>{
 	}
 
 	@Override
-	public void setMouseKeepUngrabbed(boolean b) {
-		
+	public void setMouseCursorKeepUngrabbed(boolean b) {
+	}
+
+	@Override
+	protected void cleanup(Application app) {
+		astr.clear();
+		astr=null;
 	}
 	
 }

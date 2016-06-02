@@ -50,12 +50,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-import com.jme3.app.SimpleApplication;
-import com.jme3.font.BitmapText;
-import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
-import com.jme3.system.JmeSystem;
-
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
@@ -66,12 +60,12 @@ public class MiscI {
 	private IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	private String	strLastUid = "0";
 	private boolean	bConfigured;
-	private SimpleApplication	sapp;
+//	private SimpleApplication	sapp;
 	
-	public void configure(SimpleApplication sapp,IHandleExceptions ihe){
+	public void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 		this.ihe=ihe;
-		this.sapp=sapp;
+//		this.sapp=sapp;
 		bConfigured=true;
 	}
 	
@@ -312,51 +306,18 @@ public class MiscI {
 		return null;
 	}
 	
-	public void saveImageToFile(com.jme3.texture.Image img, String strFileNameWithoutExt) {
-		if(!img.getData(0).isReadOnly()){
-			img = img.clone();
-			img.setData(0, img.getData(0).asReadOnlyBuffer());
-		}
-		img.getData(0).rewind();
-		
-		File fl = new File(strFileNameWithoutExt+".png");
-		OutputStream os=null;
-		try {            
-			os = new FileOutputStream(fl);
-			JmeSystem.writeImageFile(
-				os,
-				"png", // to allow transparency
-				img.getData(0),
-				img.getWidth(),
-				img.getHeight()); 
-		} catch(IOException|BufferUnderflowException ex){
-			ihe.handleExceptionThreaded(ex);
-		} finally {
-			if(os!=null)try {os.close();} catch (IOException ex) {ihe.handleExceptionThreaded(ex);}
-		}             
-	}
-
-	public BitmapText retrieveBitmapTextFor(Node pnl){
-		for(Spatial c : pnl.getChildren()){
-			if(c instanceof BitmapText){
-				return (BitmapText)c;
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * 
-	 * @param sptStart
-	 * @return parentest spatial, least top nodes
-	 */
-	public Spatial getParentestFrom(Spatial sptStart){
-		Spatial sptParentest = sptStart;
-		while(sptParentest.getParent()!=null){
-			if(sapp.getGuiNode().equals(sptParentest.getParent()))break;
-			if(sapp.getRootNode().equals(sptParentest.getParent()))break;
-			sptParentest=sptParentest.getParent();
-		}
-		return sptParentest;
-	}
+//	/**
+//	 * 
+//	 * @param sptStart
+//	 * @return parentest spatial, least top nodes
+//	 */
+//	public Spatial getParentestFrom(Spatial sptStart){
+//		Spatial sptParentest = sptStart;
+//		while(sptParentest.getParent()!=null){
+//			if(sapp.getGuiNode().equals(sptParentest.getParent()))break;
+//			if(sapp.getRootNode().equals(sptParentest.getParent()))break;
+//			sptParentest=sptParentest.getParent();
+//		}
+//		return sptParentest;
+//	}
 }

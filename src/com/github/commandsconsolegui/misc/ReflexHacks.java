@@ -32,13 +32,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.jme3.app.SimpleApplication;
 
 /**
  * Use this class sparingly!
@@ -70,7 +69,7 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 		"Hacks allows for otherwise impossible features, but they may break if targeted classes are updated.");
 
 	private IHandleExceptions	ihe = HandleExceptionsRaw.i();
-	private SimpleApplication	sapp;
+//	private SimpleApplication	sapp;
 //	public void setExceptionHandler(IHandleExceptions ihe){
 //		this.ihe=ihe;
 //	}
@@ -130,9 +129,10 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 		return objReturn;
 	}
 	
-	public void configure(SimpleApplication sapp, CommandsDelegatorI cc, IHandleExceptions ihe){
+//	public void configure(SimpleApplication sapp, CommandsDelegatorI cc, IHandleExceptions ihe){
+	public void configure(CommandsDelegatorI cc, IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		this.sapp = sapp;
+//		this.sapp = sapp;
 		this.cc=cc;
 		this.ihe=ihe;
 		bConfigured=true;

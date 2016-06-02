@@ -25,10 +25,10 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console.gui.lemur;
+package com.github.commandsconsolegui.console.jmegui.lemur;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.console.gui.ConsoleGuiStateAbs;
+import com.github.commandsconsolegui.console.jmegui.ConsoleGuiStateAbs;
 import com.jme3.app.SimpleApplication;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Panel;

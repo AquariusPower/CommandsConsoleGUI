@@ -25,14 +25,16 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console.gui.lemur;
+package com.github.commandsconsolegui.console.jmegui.lemur;
 
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
-import com.github.commandsconsolegui.console.gui.ConsoleGuiStateAbs;
+import com.github.commandsconsolegui.console.jmegui.ConsoleGuiStateAbs;
+import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.misc.MiscI;
+import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapCharacter;
 import com.jme3.font.BitmapCharacterSet;
@@ -232,7 +234,7 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 		lblStats = new Label("Console stats.",strStyle);
 		lblStats.setColor(new ColorRGBA(1,1,0.5f,1));
 		lblStats.setPreferredSize(new Vector3f(v3fConsoleSize.x*0.75f,1,0));
-		fStatsHeight = MiscI.i().retrieveBitmapTextFor(lblStats).getLineHeight();
+		fStatsHeight = MiscJmeI.i().retrieveBitmapTextFor(lblStats).getLineHeight();
 		getContainerStatsAndControls().addChild(lblStats,0,0);
 		
 		// buttons
@@ -289,7 +291,7 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 		super.tfInput = new TextField(""+cc.getCommandPrefix(),strStyle);
     CursorEventControl.addListenersToSpatial(getInputField(), consoleCursorListener);
 		LemurFocusHelperI.i().addFocusChangeListener(getInputField());
-		fInputHeight = MiscI.i().retrieveBitmapTextFor(getInputField()).getLineHeight();
+		fInputHeight = MiscJmeI.i().retrieveBitmapTextFor(getInputField()).getLineHeight();
 		getContainerConsole().addChild( getInputField(), BorderLayout.Position.South );
 		
 		super.initializeOnlyTheUI();
@@ -300,22 +302,46 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 	}
 	
 	@Override
-	public void setEnabled(boolean bEnabled) {
-		super.setEnabled(bEnabled);
+	protected void onEnable() {
+		super.onEnable();
 		
-		if(this.bEnabled){
-			sapp.getGuiNode().attachChild(getContainerConsole());
-//			GuiGlobals.getInstance().requestFocus(getInputField());
-		}else{
-			getContainerConsole().removeFromParent();
-			closeHint();
-//			GuiGlobals.getInstance().requestFocus(null);
-		}
+		sapp.getGuiNode().attachChild(getContainerConsole());
 		
+		commonOnEnableDisable();
+	}
+	
+	@Override
+	protected void onDisable() {
+		super.onDisable();
+		
+		getContainerConsole().removeFromParent();
+		closeHint();
+		
+		commonOnEnableDisable();
+	}
+	
+	protected void commonOnEnableDisable(){
 		updateOverrideInputFocus();
-		
 		GuiGlobals.getInstance().setCursorEventsEnabled(this.bEnabled);
 	}
+	
+//	@Override
+//	public void setEnabled(boolean bEnabled) {
+//		super.setEnabled(bEnabled);
+//		
+//		if(this.bEnabled){
+//			sapp.getGuiNode().attachChild(getContainerConsole());
+////			GuiGlobals.getInstance().requestFocus(getInputField());
+//		}else{
+//			getContainerConsole().removeFromParent();
+//			closeHint();
+////			GuiGlobals.getInstance().requestFocus(null);
+//		}
+//		
+//		updateOverrideInputFocus();
+//		
+//		GuiGlobals.getInstance().setCursorEventsEnabled(this.bEnabled);
+//	}
 	
 	@Override
 	public void scrollHintToIndex(int i){
@@ -379,7 +405,7 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 		GridPanel gp = lstbx.getGridPanel();
 		for(Spatial spt:gp.getChildren()){
 			if(spt instanceof Button){
-				MiscI.i().retrieveBitmapTextFor((Button)spt).setLineWrapMode(LineWrapMode.NoWrap);
+				MiscJmeI.i().retrieveBitmapTextFor((Button)spt).setLineWrapMode(LineWrapMode.NoWrap);
 			}
 		}
 	}
@@ -685,9 +711,9 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 	}
 	
 	@Override
-	public void cleanup() {
+	public void cleanup(Application app) {
 		getContainerConsole().clearChildren();
-		super.cleanup();
+		super.cleanup(app);
 	}
 	
 //	@Override
@@ -731,7 +757,7 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 	
 	@Override
 	protected float fontWidth(String strChars, String strStyle, boolean bAveraged){
-		float f = MiscI.i().retrieveBitmapTextFor(new Label(strChars,strStyle)).getLineWidth();
+		float f = MiscJmeI.i().retrieveBitmapTextFor(new Label(strChars,strStyle)).getLineWidth();
 		if(bAveraged)f/=strChars.length();
 		return f;
 	}

@@ -25,8 +25,10 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.cmd;
+package com.github.commandsconsolegui.cmd.jmegui;
 
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
+import com.github.commandsconsolegui.cmd.IConsoleUI;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -34,9 +36,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.AppState;
-import com.jme3.app.state.AppStateManager;
-import com.jme3.renderer.RenderManager;
+import com.jme3.app.state.BaseAppState;
 
 /**
  * This is not a thread.
@@ -46,7 +46,7 @@ import com.jme3.renderer.RenderManager;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class CommandsBackgroundState implements AppState, IReflexFillCfg{
+public class CommandsBackgroundState extends BaseAppState implements IReflexFillCfg{
 	private static CommandsBackgroundState instance = new CommandsBackgroundState();
 	public static CommandsBackgroundState i(){return instance;}
 	
@@ -79,34 +79,6 @@ public class CommandsBackgroundState implements AppState, IReflexFillCfg{
 		
 		bConfigured=true;
 	}
-	
-	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		bInitialized=true;
-	}
-
-	@Override
-	public boolean isInitialized() {
-		return bInitialized;
-	}
-
-	@Override
-	public void setEnabled(boolean b) {
-		this.bEnabled=b;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return bEnabled;
-	}
-
-	@Override
-	public void stateAttached(AppStateManager stateManager) {
-	}
-
-	@Override
-	public void stateDetached(AppStateManager stateManager) {
-	}
 
 	@Override
 	public void update(float tpf) {
@@ -122,20 +94,32 @@ public class CommandsBackgroundState implements AppState, IReflexFillCfg{
 	}
 
 	@Override
-	public void render(RenderManager rm) {
-	}
-
-	@Override
-	public void postRender() {
-	}
-
-	@Override
-	public void cleanup() {
-	}
-
-	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		return ccCommandsPipe.getReflexFillCfg(rfcv);
+	}
+
+	@Override
+	protected void initialize(Application app) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void cleanup(Application app) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onEnable() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onDisable() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

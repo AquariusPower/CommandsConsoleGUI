@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console.test;
+package com.github.commandsconsolegui.console.jmegui.lemur.test;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
@@ -65,7 +65,7 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 	private StringCmdField testCommandAutoFillPrefixLessVariant2 = new StringCmdField(this,strFieldCodePrefixLess);
 	private StringCmdField testCommandAutoFillPrefixLessVariantDefaulted3 = new StringCmdField(this,null);
 	private StringCmdField CMD_TRADITIONAL_PRETTYFIED_0 = new StringCmdField(this,CustomCommandsI.strFinalCmdCodePrefix);
-	private CustomGenericDialog	diag;
+	private CustomDialogState	diag;
 	
 	public boolean endUserCustomMethod(Integer i){
 		cc.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
@@ -84,7 +84,7 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 		cc = new CustomCommandsI(this);
 		cc.addConsoleCommandListener(this);
 		
-		diag = new CustomGenericDialog("TestDialog");
+		diag = new CustomDialogState("TestDialog");
 		diag.configure(this,cc);
 		
 //		SingleInstanceState.i().configureBeforeInitializing(this,true);
