@@ -190,7 +190,7 @@ public class SingleAppInstanceI { //implements IReflexFillCfg{
 		bExitApplicationTD=true;
 	}
 	
-	class RunnableChecker implements Runnable{
+	class SingleAppInstanceRunnableChecker implements Runnable{
 		@Override
 		public void run() {
 			long lStartMilis = System.currentTimeMillis();
@@ -395,8 +395,8 @@ public class SingleAppInstanceI { //implements IReflexFillCfg{
 		 */
 		clearOldLocksTD();
 		createSelfLockFileTD();
-		threadChecker = new Thread(new RunnableChecker());
-		threadChecker.setName(RunnableChecker.class.getSimpleName());
+		threadChecker = new Thread(new SingleAppInstanceRunnableChecker());
+		threadChecker.setName(SingleAppInstanceRunnableChecker.class.getSimpleName());
 		threadChecker.start();
 		
 		/**

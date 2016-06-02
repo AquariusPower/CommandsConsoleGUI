@@ -51,6 +51,7 @@ import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.jmegui.BasePlusAppState;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 //import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersState;
 import com.github.commandsconsolegui.misc.AutoCompleteI;
@@ -64,8 +65,6 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
-import com.jme3.app.state.AppStateManager;
-import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.AssetNotFoundException;
 import com.jme3.asset.plugins.FileLocator;
@@ -97,7 +96,7 @@ import com.jme3.texture.Texture2D;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class ConsoleGuiStateAbs extends BaseAppState implements ReflexFillI.IReflexFillCfg, IConsoleCommandListener, IConsoleUI, IWorkAroundBugFix{
+public abstract class ConsoleGuiStateAbs extends BasePlusAppState implements ReflexFillI.IReflexFillCfg, IConsoleCommandListener, IConsoleUI, IWorkAroundBugFix{
 //	protected FpsLimiterState fpslState = new FpsLimiterState();
 	
 //	protected final String strInputIMCPREFIX = "CONSOLEGUISTATE_";
@@ -126,10 +125,10 @@ public abstract class ConsoleGuiStateAbs extends BaseAppState implements ReflexF
 	protected int iDefaultFontSize = 12;
 	protected IntLongVarField ilvFontSize = new IntLongVarField(this, iDefaultFontSize);
 	
-	/**
-	 * keep "initialized" vars together!
-	 */
-	protected boolean	bInitialized;
+//	/**
+//	 * keep "initialized" vars together!
+//	 */
+//	protected boolean	bInitialized;
 	
 	/**
 	 * keep delayers together!
@@ -427,12 +426,12 @@ public abstract class ConsoleGuiStateAbs extends BaseAppState implements ReflexF
 //		return fileNamePrepare(strFileBaseName, strFileTypeLog, bAddDateTime);
 //	}
 	
-	public void initializePre(){
-		if(isInitialized())throw new NullPointerException("already initialized...");
-		
-//		astrStyleList.clear();
-		addStyle(STYLE_CONSOLE);
-	}
+//	public void initializePre(){
+////		if(isInitialized())throw new NullPointerException("already initialized...");
+//		
+////		astrStyleList.clear();
+//		addStyle(STYLE_CONSOLE);
+//	}
 	
 	protected void addStyle(String strStyleId){
 		if(!astrStyleList.contains(strStyleId)){
@@ -441,8 +440,11 @@ public abstract class ConsoleGuiStateAbs extends BaseAppState implements ReflexF
 	}
 	
 	@Override
-	public void initialize(Application appDummyCfgBeforeHere) {
-		initializePre();
+	public void initialize(Application app) {
+		super.initialize(app);
+		
+//		initializePre();
+		addStyle(STYLE_CONSOLE);
 		
 //		sapp = (SimpleApplication)app;
 //		cc.sapp = sapp;
@@ -459,41 +461,6 @@ public abstract class ConsoleGuiStateAbs extends BaseAppState implements ReflexF
 		
 //		cc.configure(this,sapp);
 		cc.initialize();
-		
-//		// init dump file, MUST BE THE FIRST!
-//		flLastDump = new File(fileNamePrepareLog(strFileLastDump,false));
-//		flLastDump.delete(); //each run will have a new file
-//		
-//		// init cmd history
-//		flCmdHist = new File(fileNamePrepareLog(strFileCmdHistory,false));
-//		cmdHistLoad();
-//		
-//		// init valid cmd list
-//		executeCommand(null); //to populate the array with available commands
-//		
-//		// restricted vars setup
-//		setupVars(false);
-//		flSetup = new File(fileNamePrepareCfg(strFileSetup,false));
-//		if(flSetup.exists()){
-//			addCmdListOneByOneToQueue(fileLoad(flSetup), false, false);
-//		}
-//		
-//		// before user init file
-//		addExecConsoleCommandToQueue(cc.btgShowExecQueuedInfo.getCmdIdAsCommand(false));
-//		addExecConsoleCommandToQueue(cc.btgShowDebugEntries.getCmdIdAsCommand(false));
-//		addExecConsoleCommandToQueue(cc.btgShowDeveloperWarn.getCmdIdAsCommand(false));
-//		addExecConsoleCommandToQueue(cc.btgShowDeveloperInfo.getCmdIdAsCommand(false));
-//		
-//		// init user cfg
-//		flInit = new File(fileNamePrepareCfg(strFileInitConsCmds,false));
-//		if(flInit.exists()){
-//			addCmdListOneByOneToQueue(fileLoad(flInit), false, false);
-//		}else{
-//			fileAppendLine(flInit, cc.getCommentPrefix()+" User console commands here will be executed at startup.");
-//		}
-//		
-//		// init DB
-//		flDB = new File(fileNamePrepareCfg(strFileDatabase,false));
 		
 		// other inits
 		cc.addCmdToQueue(cc.CMD_FIX_LINE_WRAP);
@@ -529,7 +496,7 @@ public abstract class ConsoleGuiStateAbs extends BaseAppState implements ReflexF
 //		ConsoleCommandsBackgroundState.i().configure(sapp,this,cc);
 //		if(!sapp.getStateManager().attach(ccbs))throw new NullPointerException("already attached state "+ccbs.getClass().getName());
 		
-		bInitialized=true;
+//		bInitialized=true;
 	}
 	
 //	@Override
@@ -1720,6 +1687,8 @@ public abstract class ConsoleGuiStateAbs extends BaseAppState implements ReflexF
 
 	@Override
 	public void cleanup(Application app) {
+		super.cleanup(app);
+		
 //		tdLetCpuRest.reset();
 //		tdScrollToBottomRequestAndSuspend.reset();
 //		tdScrollToBottomRetry.reset();
@@ -2235,25 +2204,42 @@ public abstract class ConsoleGuiStateAbs extends BaseAppState implements ReflexF
 	}
 	
 	@Override
-	public void resetConsoleGui() {
-		sapp.enqueue(new Callable<Void>() {
+	public void recreateConsoleGui() {
+		if(RecreateConsoleState.i().isProcessingRequest()){
+			System.err.println("Console recreation request is already being processed...");
+			return;
+		}
+		
+		Callable<Void> detach = new Callable<Void>() {
 			@Override
 			public Void call() throws Exception {
-//				AppState as = (AppState)icui;
-				
-				final boolean bWasEnabled=isEnabled();
-				setEnabled(false);
-				cleanup();
-				
+				sapp.getStateManager().detach(ConsoleGuiStateAbs.this);
+				return null;
+			}
+		};
+		
+		final boolean bWasEnabled=isEnabled();
+		Callable<Void> attach = new Callable<Void>() {
+			@Override
+			public Void call() throws Exception {
+				sapp.getStateManager().attach(ConsoleGuiStateAbs.this);
 				if(bWasEnabled){
 					setEnabled(true);
 				}
-				modifyConsoleHeight(fConsoleHeightPerc);
-				scrollToBottomRequest();
-				
 				return null;
 			}
-		});
+		};
+		
+		Callable<Void> postInitialization = new Callable<Void>() {
+			@Override
+			public Void call() throws Exception {
+				modifyConsoleHeight(fConsoleHeightPerc);
+				scrollToBottomRequest();
+				return null;
+			}
+		};
+		
+		RecreateConsoleState.i().request(detach,attach,postInitialization);
 	}
 	
 	/**

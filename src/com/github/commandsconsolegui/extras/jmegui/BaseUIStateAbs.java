@@ -32,13 +32,12 @@ import java.util.HashMap;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
-import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.jmegui.BasePlusAppState;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.BaseAppState;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
@@ -49,7 +48,7 @@ import com.jme3.scene.Spatial;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class BaseUIStateAbs <V> extends BaseAppState implements IConsoleCommandListener, IReflexFillCfg{
+public abstract class BaseUIStateAbs <V> extends BasePlusAppState implements IConsoleCommandListener, IReflexFillCfg{
 	protected SimpleApplication	sapp;
 	protected Node	ctnrTop;
 	protected Node cntrNorth;
@@ -91,6 +90,7 @@ public abstract class BaseUIStateAbs <V> extends BaseAppState implements IConsol
 	 */
 	@Override
 	public void initialize(Application app) {
+		super.initialize(app);
 //		asteInitDebug = Thread.currentThread().getStackTrace();
 		
 		initGUI();

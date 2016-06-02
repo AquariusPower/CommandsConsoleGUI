@@ -25,64 +25,60 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.cmd;
+package com.github.commandsconsolegui.misc;
 
-import java.util.AbstractList;
-import java.util.ArrayList;
-
-import com.github.commandsconsolegui.misc.CheckInitAndCleanupI.ICheckInitAndCleanupI;
+import java.util.HashMap;
 
 /**
  * 
- * This is a "functionality requester" general class for UI.
- * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
+ * TODO validate enable/disable too? can only enable if disabled; can only disable if enabled.
  */
-public interface IConsoleUI extends ICheckInitAndCleanupI{
-	public abstract void dumpAllStats();
-
-//	public abstract void setConsoleMaxWidthInCharsForLineWrap(Integer paramInt);
-
-//	public abstract Integer getConsoleMaxWidthInCharsForLineWrap();
-
-	public abstract AbstractList<String> getDumpEntriesSlowedQueue();
-
-	public abstract AbstractList<String> getDumpEntries();
-
-	public abstract AbstractList<String> getAutoCompleteHint();
-
-	public abstract String getInputText();
-
-	public abstract void setInputField(String str);
-
-	public abstract void scrollToBottomRequest();
-
-	public abstract String getDumpAreaSliderStatInfo();
-
-//	public abstract int getCmdHistoryCurrentIndex();
-
-	public abstract int getLineWrapAt();
-
-	public abstract ArrayList<String> wrapLineDynamically(DumpEntryData de);
-
-	public abstract void clearDumpAreaSelection();
-
-	public abstract void clearInputTextField();
+public class CheckInitAndCleanupI {
+	public static interface ICheckInitAndCleanupI{
+		public abstract void initializationCompleted();
+		public abstract boolean isInitializationCompleted();
+	}; 
 	
-	public abstract void updateEngineStats();
+	static CheckInitAndCleanupI instance = new CheckInitAndCleanupI();
+	public static CheckInitAndCleanupI i(){return instance;}
+	HashMap<Object,InitializedInfo> hm = new HashMap<Object,InitializedInfo>();
 	
-	public abstract void cmdLineWrapDisableDumpArea();
-
-	public abstract boolean cmdEditCopyOrCut(boolean b);
-
-	public abstract void setVisibleRowsAdjustRequest(Integer paramInt);
-
-	public abstract boolean isVisibleRowsAdjustRequested();
-
-	public abstract boolean statsFieldToggle();
-
-	public abstract void recreateConsoleGui();
-
-	public abstract boolean isEnabled();
+	private class InitializedInfo{
+		private StackTraceElement[] asteInitDebug;
+	}
+	
+	/**
+	 * to be used on initializers
+	 * @param objKey use 'this'
+	 */
+	public void assertNotAlreadyInitializedAtInitializer(Object objKey){
+		InitializedInfo icc = hm.get(objKey);
+		if(icc==null){
+			icc = new InitializedInfo();
+			hm.put(objKey, icc);
+		}else{
+			NullPointerException npe = new NullPointerException("already initialized, cannot be double initialized: "+objKey);
+			Throwable trw = new Throwable("already initialized at");
+			trw.setStackTrace(icc.asteInitDebug);
+			npe.initCause(trw);
+			throw npe;
+		}
+		
+		icc.asteInitDebug = Thread.currentThread().getStackTrace();
+	}
+	
+	/**
+	 * to be used on cleanupers
+	 * @param objKey use 'this'
+	 */
+	public void assertInitializedAtCleanup(Object objKey){
+		InitializedInfo icc = hm.get(objKey);
+		if(icc==null){
+			throw new NullPointerException("cannot be cleaned as was not initialized: "+objKey);
+		}
+		
+		hm.remove(objKey);
+	}
 }

@@ -32,6 +32,8 @@ import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.extras.SingleAppInstanceI;
+import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -48,7 +50,6 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 	private static ConsoleGuiTestI instance = new ConsoleGuiTestI();
 	public static ConsoleGuiTestI i(){return instance;}
 	
-	protected CustomCommandsI	cc;	
 	protected boolean bHideSettings=true; 
 	
 	//private final String strFinalFieldCodePrefix="CMD_";
@@ -68,24 +69,24 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 	private CustomDialogState	diag;
 	
 	public boolean endUserCustomMethod(Integer i){
-		cc.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
+		GlobalCommandsDelegatorI.i().get().dumpSubEntry("Shhh.. "+i+" end user(s) working!");
 		
-		cc.dumpSubEntry("CommandTest0: "+CMD_TRADITIONAL_PRETTYFIED_0);
-		cc.dumpSubEntry("CommandTest1: "+sfTestCommandAutoFillVariant1);
-		cc.dumpSubEntry("CommandTest2: "+testCommandAutoFillPrefixLessVariant2);
+		GlobalCommandsDelegatorI.i().get().dumpSubEntry("CommandTest0: "+CMD_TRADITIONAL_PRETTYFIED_0);
+		GlobalCommandsDelegatorI.i().get().dumpSubEntry("CommandTest1: "+sfTestCommandAutoFillVariant1);
+		GlobalCommandsDelegatorI.i().get().dumpSubEntry("CommandTest2: "+testCommandAutoFillPrefixLessVariant2);
 		if(ReflexFillI.i().isbUseDefaultCfgIfMissing()){
-			cc.dumpSubEntry("CommandTest3: "+testCommandAutoFillPrefixLessVariantDefaulted3);
+			GlobalCommandsDelegatorI.i().get().dumpSubEntry("CommandTest3: "+testCommandAutoFillPrefixLessVariantDefaulted3);
 		}
 		return true;
 	}
 	
 	@Override
 	public void simpleInitApp() {
-		cc = new CustomCommandsI(this);
-		cc.addConsoleCommandListener(this);
+		GlobalCommandsDelegatorI.i().set(new CustomCommandsI());
+		GlobalCommandsDelegatorI.i().get().addConsoleCommandListener(this);
 		
 		diag = new CustomDialogState("TestDialog");
-		diag.configure(this,cc);
+		diag.configure(this,GlobalCommandsDelegatorI.i().get());
 		
 //		SingleInstanceState.i().configureBeforeInitializing(this,true);
 		SingleAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);
@@ -97,7 +98,7 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 	}
 	
 	public static void main( String... args ) {
-		ConsoleGuiTestI main = ConsoleGuiTestI.i();
+		ConsoleGuiTestI main = (ConsoleGuiTestI) GlobalSappRefI.i().set(ConsoleGuiTestI.i());
 		main.configure();
 		
 		if(main.bHideSettings){
@@ -157,7 +158,7 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 		 * Remember to set the same variant!
 		 */
 //		if(rfcfg==null)rfcfg = getReflexFillCfg(rfcv);
-		if(rfcfg==null)rfcfg = cc.getReflexFillCfg(rfcv);
+		if(rfcfg==null)rfcfg = GlobalCommandsDelegatorI.i().get().getReflexFillCfg(rfcv);
 		
 		return rfcfg;
 	}

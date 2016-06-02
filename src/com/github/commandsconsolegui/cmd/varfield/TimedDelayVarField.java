@@ -90,7 +90,9 @@ public class TimedDelayVarField implements IReflexFillCfgVariant, IVarIdValueOwn
 	}
 	
 	/**
-	 * this constructor is exclusively for local variables
+	 * This constructor is exclusively for methods local variables.
+	 * Such variables will not be stored neither easily accessible at console.
+	 * 
 	 * @param rfcfgOwnerUseThis
 	 * @param fDelay
 	 */
@@ -98,7 +100,9 @@ public class TimedDelayVarField implements IReflexFillCfgVariant, IVarIdValueOwn
 		this(null,fDelay);
 	}
 	/**
-	 * this constructor is for field variables
+	 * This constructor is for field variables.
+	 * Such variables will be stored easily accessible and configurable at console!
+	 * 
 	 * @param rfcfgOwnerUseThis use null if this is not a class field, but a local variable
 	 * @param fDelay
 	 */
@@ -182,6 +186,11 @@ public class TimedDelayVarField implements IReflexFillCfgVariant, IVarIdValueOwn
 	public boolean isActive() {
 		return lLastUpdateReferenceTimeNano!=null;
 	}
+	
+	/**
+	 * can be called many subsequent times without updating the reference time
+	 * @param b
+	 */
 	public void setActive(boolean b){
 		if(b){
 			if(!isActive())updateTime();

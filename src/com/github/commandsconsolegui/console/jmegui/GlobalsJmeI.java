@@ -25,64 +25,54 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.cmd;
+package com.github.commandsconsolegui.console.jmegui;
 
-import java.util.AbstractList;
-import java.util.ArrayList;
-
-import com.github.commandsconsolegui.misc.CheckInitAndCleanupI.ICheckInitAndCleanupI;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
+import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 
 /**
- * 
- * This is a "functionality requester" general class for UI.
+ * TODO can this make classes that shouldnt know others, be forced to know about? sure right?
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public interface IConsoleUI extends ICheckInitAndCleanupI{
-	public abstract void dumpAllStats();
+@Deprecated
+public class GlobalsJmeI {
+	private static GlobalsJmeI instance = new GlobalsJmeI();
+	public static GlobalsJmeI i(){return instance;}
 
-//	public abstract void setConsoleMaxWidthInCharsForLineWrap(Integer paramInt);
-
-//	public abstract Integer getConsoleMaxWidthInCharsForLineWrap();
-
-	public abstract AbstractList<String> getDumpEntriesSlowedQueue();
-
-	public abstract AbstractList<String> getDumpEntries();
-
-	public abstract AbstractList<String> getAutoCompleteHint();
-
-	public abstract String getInputText();
-
-	public abstract void setInputField(String str);
-
-	public abstract void scrollToBottomRequest();
-
-	public abstract String getDumpAreaSliderStatInfo();
-
-//	public abstract int getCmdHistoryCurrentIndex();
-
-	public abstract int getLineWrapAt();
-
-	public abstract ArrayList<String> wrapLineDynamically(DumpEntryData de);
-
-	public abstract void clearDumpAreaSelection();
-
-	public abstract void clearInputTextField();
+	private Application	app;
+	private SimpleApplication	sapp; //TODO will simple application vanish one day?
+	private CommandsDelegatorI cd;
 	
-	public abstract void updateEngineStats();
+	public Application getApp(){
+		return app;
+	}
 	
-	public abstract void cmdLineWrapDisableDumpArea();
-
-	public abstract boolean cmdEditCopyOrCut(boolean b);
-
-	public abstract void setVisibleRowsAdjustRequest(Integer paramInt);
-
-	public abstract boolean isVisibleRowsAdjustRequested();
-
-	public abstract boolean statsFieldToggle();
-
-	public abstract void recreateConsoleGui();
-
-	public abstract boolean isEnabled();
+	public Application getSapp(){
+		return sapp;
+	}
+	
+	public CommandsDelegatorI getCmdDelegator(){
+		return cd;
+	}
+	
+	public void configure(Object... aobj){
+		for(Object obj:aobj){
+			if(obj instanceof Application){
+				app=(Application) obj;
+				if(obj instanceof SimpleApplication){
+					sapp=(SimpleApplication) obj;
+				}
+			}else
+			if(obj instanceof CommandsDelegatorI){
+				cd = (CommandsDelegatorI)obj;
+			}else
+			{
+				throw new UnsupportedOperationException("for: "+obj.getClass().getName());
+			}
+		}
+	}
+	
 }

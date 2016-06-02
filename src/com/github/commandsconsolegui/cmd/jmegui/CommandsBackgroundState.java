@@ -30,13 +30,13 @@ package com.github.commandsconsolegui.cmd.jmegui;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.IConsoleUI;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.jmegui.BasePlusAppState;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.BaseAppState;
 
 /**
  * This is not a thread.
@@ -46,7 +46,7 @@ import com.jme3.app.state.BaseAppState;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class CommandsBackgroundState extends BaseAppState implements IReflexFillCfg{
+public class CommandsBackgroundState extends BasePlusAppState implements IReflexFillCfg{
 	private static CommandsBackgroundState instance = new CommandsBackgroundState();
 	public static CommandsBackgroundState i(){return instance;}
 	
@@ -96,18 +96,6 @@ public class CommandsBackgroundState extends BaseAppState implements IReflexFill
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		return ccCommandsPipe.getReflexFillCfg(rfcv);
-	}
-
-	@Override
-	protected void initialize(Application app) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void cleanup(Application app) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override

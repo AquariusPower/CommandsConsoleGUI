@@ -25,64 +25,28 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.cmd;
-
-import java.util.AbstractList;
-import java.util.ArrayList;
-
-import com.github.commandsconsolegui.misc.CheckInitAndCleanupI.ICheckInitAndCleanupI;
+package com.github.commandsconsolegui.globals;
 
 /**
- * 
- * This is a "functionality requester" general class for UI.
- * 
+ * "centralizing" objects to easy coding.
  * @author AquariusPower <https://github.com/AquariusPower>
- *
+ * 
+ * @param <T>
  */
-public interface IConsoleUI extends ICheckInitAndCleanupI{
-	public abstract void dumpAllStats();
-
-//	public abstract void setConsoleMaxWidthInCharsForLineWrap(Integer paramInt);
-
-//	public abstract Integer getConsoleMaxWidthInCharsForLineWrap();
-
-	public abstract AbstractList<String> getDumpEntriesSlowedQueue();
-
-	public abstract AbstractList<String> getDumpEntries();
-
-	public abstract AbstractList<String> getAutoCompleteHint();
-
-	public abstract String getInputText();
-
-	public abstract void setInputField(String str);
-
-	public abstract void scrollToBottomRequest();
-
-	public abstract String getDumpAreaSliderStatInfo();
-
-//	public abstract int getCmdHistoryCurrentIndex();
-
-	public abstract int getLineWrapAt();
-
-	public abstract ArrayList<String> wrapLineDynamically(DumpEntryData de);
-
-	public abstract void clearDumpAreaSelection();
-
-	public abstract void clearInputTextField();
+public class Global<T> {
+	T obj;
 	
-	public abstract void updateEngineStats();
+	protected void setAssertingNotAlreadySet(T obj){
+		if(this.obj!=null)throw new NullPointerException("already set: "+obj);
+		this.obj=obj;
+	}
 	
-	public abstract void cmdLineWrapDisableDumpArea();
-
-	public abstract boolean cmdEditCopyOrCut(boolean b);
-
-	public abstract void setVisibleRowsAdjustRequest(Integer paramInt);
-
-	public abstract boolean isVisibleRowsAdjustRequested();
-
-	public abstract boolean statsFieldToggle();
-
-	public abstract void recreateConsoleGui();
-
-	public abstract boolean isEnabled();
+	public T get(){
+		return obj;
+	}
+	
+	public T set(T obj){
+		setAssertingNotAlreadySet(obj);
+		return this.obj; //easy chain
+	} 
 }

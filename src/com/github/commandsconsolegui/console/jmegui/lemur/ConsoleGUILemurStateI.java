@@ -110,7 +110,7 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 		
 		// misc cfg
 		LemurMiscHelpersStateI.i().configure(sapp, cc);
-		LemurMiscHelpersStateI.i().initialize(sapp.getStateManager(), sapp);
+//		LemurMiscHelpersStateI.i().initialize(sapp.getStateManager(), sapp);
 		if(!sapp.getStateManager().attach(LemurMiscHelpersStateI.i()))throw new NullPointerException("already attached state "+LemurMiscHelpersStateI.class.getName());
 		LemurFocusHelperI.i().configure(sapp,cc);
 	}
@@ -745,15 +745,28 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 	}
 	
 	@Override
-	public void initializePre() {
-		super.initializePre();
-		
+	public void initialize(Application app) {
 		GuiGlobals.initialize(sapp);
 		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
 		
 		addStyle(BaseStyles.GLASS);
 		addStyle(Styles.ROOT_STYLE);
+		
+		super.initialize(app);
+		
+		initializationCompleted();
 	}
+	
+//	@Override
+//	public void initializePre() {
+//		super.initializePre();
+//		
+//		GuiGlobals.initialize(sapp);
+//		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
+//		
+//		addStyle(BaseStyles.GLASS);
+//		addStyle(Styles.ROOT_STYLE);
+//	}
 	
 	@Override
 	protected float fontWidth(String strChars, String strStyle, boolean bAveraged){
@@ -789,4 +802,5 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 	protected void removeFocus(Object obj) {
 		LemurFocusHelperI.i().removeFocusableFromList((Spatial) obj);
 	}
+
 }

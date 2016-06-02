@@ -33,6 +33,7 @@ import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.jmegui.BasePlusAppState;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -42,7 +43,6 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexHacks;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.BaseAppState;
 import com.jme3.font.BitmapText;
 import com.jme3.material.MatParam;
 import com.jme3.material.Material;
@@ -63,7 +63,7 @@ import com.simsilica.lemur.focus.FocusManagerState;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class LemurMiscHelpersStateI extends BaseAppState implements IConsoleCommandListener, IReflexFillCfg, IWorkAroundBugFix{
+public class LemurMiscHelpersStateI extends BasePlusAppState implements IConsoleCommandListener, IReflexFillCfg, IWorkAroundBugFix{
 	public final BoolTogglerCmdField	btgTextCursorPulseFadeBlinkMode = new BoolTogglerCmdField(this,true);
 	public final BoolTogglerCmdField	btgTextCursorLarge = new BoolTogglerCmdField(this,true);
 	public final StringCmdField CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringCmdField(this, CommandsDelegatorI.strFinalCmdCodePrefix);
@@ -408,6 +408,7 @@ public class LemurMiscHelpersStateI extends BaseAppState implements IConsoleComm
 
 	@Override
 	protected void initialize(Application app) {
+		super.initialize(app);
 		this.sapp = (SimpleApplication) app;
 		tdTextCursorBlink.updateTime();
 	}
@@ -463,12 +464,6 @@ public class LemurMiscHelpersStateI extends BaseAppState implements IConsoleComm
 			}break;
 		}
 		return null;
-	}
-
-	@Override
-	protected void cleanup(Application app) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override

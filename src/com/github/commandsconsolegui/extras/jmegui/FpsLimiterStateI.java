@@ -27,12 +27,8 @@
 
 package com.github.commandsconsolegui.extras.jmegui;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.jme3.app.Application;
-import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.AppStateManager;
-import com.jme3.app.state.BaseAppState;
-import com.jme3.renderer.RenderManager;
+import com.github.commandsconsolegui.globals.GlobalSappRefI;
+import com.github.commandsconsolegui.jmegui.BasePlusAppState;
 
 /**
  * Spare GPU fan!
@@ -40,9 +36,9 @@ import com.jme3.renderer.RenderManager;
  * @author AquariusPower <https://github.com/AquariusPower>
  * 
  */
-public class FpsLimiterState extends BaseAppState{
-	private static FpsLimiterState instance = new FpsLimiterState();
-	public static FpsLimiterState i(){return instance;}
+public class FpsLimiterStateI extends BasePlusAppState{
+	private static FpsLimiterStateI instance = new FpsLimiterStateI();
+	public static FpsLimiterStateI i(){return instance;}
 	
 	public static final long lNanoOneSecond = 1000000000L; // 1s in nano time
 	public static final float fNanoToSeconds = 1f/lNanoOneSecond; //multiply nano by it to get in seconds
@@ -54,13 +50,9 @@ public class FpsLimiterState extends BaseAppState{
 	private long	lNanoThreadSleep;
 	private long	lNanoDelayLimit;
 	private int	iMaxFPS;
-//	private boolean	bEnabled;
-//	private boolean	bInitialized;
-	private SimpleApplication	sapp;
-	private CommandsDelegatorI	cc;
 	private boolean	bConfigured;
 	
-	public FpsLimiterState(){
+	public FpsLimiterStateI(){
 		setMaxFps(60);
 	}
 //	public FpsLimiterState(int iMaxFPS){
@@ -68,7 +60,7 @@ public class FpsLimiterState extends BaseAppState{
 //		setMaxFps(iMaxFPS);
 //	}
 	
-	public FpsLimiterState setMaxFps(int iMaxFPS){
+	public FpsLimiterStateI setMaxFps(int iMaxFPS){
 		this.iMaxFPS=iMaxFPS;
 		if(this.iMaxFPS<1)this.iMaxFPS=1;
 		lNanoDelayLimit = (long) ((1.0f/this.iMaxFPS)*lNanoOneSecond);
@@ -123,79 +115,23 @@ public class FpsLimiterState extends BaseAppState{
 		return lNanoFrameDelayByCpuUsage/1000000L;
 	}
 
-//	@Override
-//	public void initialize(AppStateManager stateManager, Application app) {
-//		bInitialized=true;
-//	}
-//
-//	@Override
-//	public boolean isInitialized() {
-//		return bInitialized;
-//	}
-//
-//	@Override
-//	public void setEnabled(boolean active) {
-//		this.bEnabled=active;
-//	}
-//
-//	@Override
-//	public boolean isEnabled() {
-//		return bEnabled;
-//	}
-//
-//	@Override
-//	public void stateAttached(AppStateManager stateManager) {
-//	}
-//
-//	@Override
-//	public void stateDetached(AppStateManager stateManager) {
-//	}
-//
-//	@Override
-//	public void render(RenderManager rm) {
-//	}
-//
-//	@Override
-//	public void postRender() {
-//	}
-//
-//	@Override
-//	public void cleanup() {
-//	}
-	
 	public int getFpsLimit() {
 		return iMaxFPS;
 	}
 
-	public void configureBeforeInitializing(SimpleApplication sapp, CommandsDelegatorI cc){
+	public void configureBeforeInitializing(){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		this.sapp=sapp;
-		this.cc=cc;
-		if(!sapp.getStateManager().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
+		if(!GlobalSappRefI.i().get().getStateManager().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
 		bConfigured=true;
-	}
-
-	@Override
-	protected void initialize(Application app) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void cleanup(Application app) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	protected void onEnable() {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	protected void onDisable() {
 		// TODO Auto-generated method stub
-		
 	}
 }

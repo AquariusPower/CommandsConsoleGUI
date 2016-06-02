@@ -754,7 +754,7 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public void cmdResetConsole() {
-		icui.resetConsoleGui();
+		icui.recreateConsoleGui();
 	}
 
 	protected ECmdReturnStatus cmdRawLineCheckAlias(){
@@ -842,7 +842,7 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 //		output.println("CONS: "+de.getLineOriginal());
 		if(btgDumpToTerminal.b())de.sendToPrintStream("[CCUI]"+de.getLineOriginal().replace("\t","  ")); //remove tabs for better compatibility 
 		
-		if(!icui.isInitialized()){
+		if(!icui.isInitializationCompleted()){
 			adeDumpEntryFastQueue.add(de);
 			return;
 		}
@@ -2217,9 +2217,12 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 		
 		dumpEntry(de);
 	}
+	
 	public void update(float tpf) {
 		this.fTPF = tpf;
 		if(tdLetCpuRest.isActive() && !tdLetCpuRest.isReady(true))return;
+		
+		if(!icui.isInitializationCompleted())return;
 		
 		updateNewDay();
 		updateToggles();

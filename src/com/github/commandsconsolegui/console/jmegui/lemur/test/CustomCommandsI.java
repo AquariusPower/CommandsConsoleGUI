@@ -31,7 +31,9 @@ import com.github.commandsconsolegui.cmd.IConsoleUI;
 import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.jmegui.CommandsBackgroundState;
 import com.github.commandsconsolegui.console.jmegui.lemur.ConsoleGUILemurStateI;
-import com.github.commandsconsolegui.extras.jmegui.FpsLimiterState;
+import com.github.commandsconsolegui.extras.jmegui.FpsLimiterStateI;
+import com.github.commandsconsolegui.extras.jmegui.UngrabMouseStateI;
+import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -43,17 +45,12 @@ import com.jme3.input.KeyInput;
  *
  */
 public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleCommands to prevent scripts usage
-//	public FpsLimiterState fpslState = new FpsLimiterState();
-	
-	private ConsoleGuiTestI	sapp;
-
-	public CustomCommandsI(ConsoleGuiTestI sapp){
+	public CustomCommandsI(){
 		super();
 		
-		this.sapp=sapp;
-		
-		ConsoleGUILemurStateI.i().configureBeforeInitializing(sapp, this, KeyInput.KEY_F10);
-		FpsLimiterState.i().configureBeforeInitializing(sapp, this);
+		ConsoleGUILemurStateI.i().configureBeforeInitializing(GlobalSappRefI.i().get(), this, KeyInput.KEY_F10);
+		FpsLimiterStateI.i().configureBeforeInitializing();
+		UngrabMouseStateI.i().configure(GlobalSappRefI.i().get(),null,true);
 		
 		/**
 		 *  This allows test3 at endUserCustomMethod() to work.
@@ -68,10 +65,10 @@ public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleC
 		if(checkCmdValidity(null,"fpsLimit","[iMaxFps]")){
 			Integer iMaxFps = paramInt(1);
 			if(iMaxFps!=null){
-				FpsLimiterState.i().setMaxFps(iMaxFps);
+				FpsLimiterStateI.i().setMaxFps(iMaxFps);
 				bCommandWorked=true;
 			}
-			dumpSubEntry("FpsLimit = "+FpsLimiterState.i().getFpsLimit());
+			dumpSubEntry("FpsLimit = "+FpsLimiterStateI.i().getFpsLimit());
 		}else
 		{
 			return super.executePreparedCommandRoot();
@@ -82,7 +79,7 @@ public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleC
 	
 	@Override
 	public void updateToggles() {
-		if(btgFpsLimit.checkChangedAndUpdate())FpsLimiterState.i().setEnabled(btgFpsLimit.b());
+		if(btgFpsLimit.checkChangedAndUpdate())FpsLimiterStateI.i().setEnabled(btgFpsLimit.b());
 		super.updateToggles();
 	}
 	
@@ -93,17 +90,17 @@ public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleC
 		if(EStats.MousePosition.b()){
 			strStatsLast+=
 					"xy"
-						+(int)sapp.getInputManager().getCursorPosition().x
+						+(int)GlobalSappRefI.i().get().getInputManager().getCursorPosition().x
 						+","
-						+(int)sapp.getInputManager().getCursorPosition().y
+						+(int)GlobalSappRefI.i().get().getInputManager().getCursorPosition().y
 						+";";
 		}
 		
 		if(EStats.TimePerFrame.b()){
 			strStatsLast+=
-					"Tpf"+(FpsLimiterState.i().isEnabled() ? (int)(fTPF*1000.0f) : MiscI.i().fmtFloat(fTPF,6)+"s")
-						+(FpsLimiterState.i().isEnabled()?
-							"="+FpsLimiterState.i().getFrameDelayByCpuUsageMilis()+"+"+FpsLimiterState.i().getThreadSleepTimeMilis()+"ms"
+					"Tpf"+(FpsLimiterStateI.i().isEnabled() ? (int)(fTPF*1000.0f) : MiscI.i().fmtFloat(fTPF,6)+"s")
+						+(FpsLimiterStateI.i().isEnabled()?
+							"="+FpsLimiterStateI.i().getFrameDelayByCpuUsageMilis()+"+"+FpsLimiterStateI.i().getThreadSleepTimeMilis()+"ms"
 							:"")
 						+";";
 		}
@@ -113,7 +110,7 @@ public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleC
 	
 	@Override
 	public void cmdExit() {
-		sapp.stop();
+		GlobalSappRefI.i().get().stop();
 		super.cmdExit();
 	}
 	
@@ -121,7 +118,7 @@ public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleC
 	public void configure(IConsoleUI icui) {
 		super.configure(icui);
 		
-		CommandsBackgroundState.i().configure(sapp, icui, this);
-		MiscJmeI.i().configure(sapp, this);
+		CommandsBackgroundState.i().configure(GlobalSappRefI.i().get(), icui, this);
+		MiscJmeI.i().configure(GlobalSappRefI.i().get(), this);
 	}
 }

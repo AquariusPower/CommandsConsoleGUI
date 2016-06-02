@@ -25,64 +25,27 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.cmd;
+package com.github.commandsconsolegui.globals;
 
-import java.util.AbstractList;
-import java.util.ArrayList;
-
-import com.github.commandsconsolegui.misc.CheckInitAndCleanupI.ICheckInitAndCleanupI;
+import com.jme3.app.SimpleApplication;
 
 /**
- * 
- * This is a "functionality requester" general class for UI.
- * 
+ * Use this or {@link GlobalAppRefI}
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public interface IConsoleUI extends ICheckInitAndCleanupI{
-	public abstract void dumpAllStats();
-
-//	public abstract void setConsoleMaxWidthInCharsForLineWrap(Integer paramInt);
-
-//	public abstract Integer getConsoleMaxWidthInCharsForLineWrap();
-
-	public abstract AbstractList<String> getDumpEntriesSlowedQueue();
-
-	public abstract AbstractList<String> getDumpEntries();
-
-	public abstract AbstractList<String> getAutoCompleteHint();
-
-	public abstract String getInputText();
-
-	public abstract void setInputField(String str);
-
-	public abstract void scrollToBottomRequest();
-
-	public abstract String getDumpAreaSliderStatInfo();
-
-//	public abstract int getCmdHistoryCurrentIndex();
-
-	public abstract int getLineWrapAt();
-
-	public abstract ArrayList<String> wrapLineDynamically(DumpEntryData de);
-
-	public abstract void clearDumpAreaSelection();
-
-	public abstract void clearInputTextField();
+public class GlobalSappRefI extends Global<SimpleApplication> {
+	private static GlobalSappRefI instance = new GlobalSappRefI();
+	public static GlobalSappRefI i(){return instance;}
 	
-	public abstract void updateEngineStats();
-	
-	public abstract void cmdLineWrapDisableDumpArea();
-
-	public abstract boolean cmdEditCopyOrCut(boolean b);
-
-	public abstract void setVisibleRowsAdjustRequest(Integer paramInt);
-
-	public abstract boolean isVisibleRowsAdjustRequested();
-
-	public abstract boolean statsFieldToggle();
-
-	public abstract void recreateConsoleGui();
-
-	public abstract boolean isEnabled();
+	@Override
+	protected void setAssertingNotAlreadySet(SimpleApplication obj) {
+		GlobalAppRefI.i().set(obj);
+//		if(GlobalAppRef.i().get()==null){
+//		}
+//		if(super.obj!=null && !super.obj.equals(obj)){
+//			throw new NullPointerException(SimpleApplication.class.getName()+" and "+Application.class.getName()+" must be the same object!");
+//		}
+		super.setAssertingNotAlreadySet(obj);
+	}
 }

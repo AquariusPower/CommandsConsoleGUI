@@ -59,6 +59,7 @@ public class CustomDialogState extends LemurBaseUIStateAbs<String>{
 
 	@Override
 	protected void cleanup(Application app) {
+		super.cleanup(app);
 		astr.clear();
 		astr=null;
 	}
