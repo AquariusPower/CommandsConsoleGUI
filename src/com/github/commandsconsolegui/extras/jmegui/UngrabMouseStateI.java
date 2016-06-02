@@ -30,7 +30,7 @@ package com.github.commandsconsolegui.extras.jmegui;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.jmegui.BasePlusAppState;
+import com.github.commandsconsolegui.jmegui.ImprovedAppState;
 import com.jme3.app.Application;
 
 /**
@@ -38,7 +38,7 @@ import com.jme3.app.Application;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class UngrabMouseStateI extends BasePlusAppState {
+public class UngrabMouseStateI extends ImprovedAppState {
 	private static UngrabMouseStateI instance = new UngrabMouseStateI();
 	public static UngrabMouseStateI i(){return instance;}
 	
@@ -130,13 +130,15 @@ public class UngrabMouseStateI extends BasePlusAppState {
 		boolean bIsSlow = lCurrentTimeMilis > (lTimeLastUpdateMilis+lDelayToUngrabMilis);
 		lTimeLastUpdateMilis=lCurrentTimeMilis;
 		
-		boolean bIsGrabbed = org.lwjgl.input.Mouse.isGrabbed();
+//		boolean bIsGrabbed = org.lwjgl.input.Mouse.isGrabbed();
+		boolean bIsGrabbed = !GlobalSappRefI.i().get().getInputManager().isCursorVisible();
 		boolean bKeepUngrabbedRequested = aobjKeepUngrabbedRequesterList.size()>0;
 		
 		if(bIsGrabbed){
 			if(bIsSlow || bKeepUngrabbedRequested){
 				bWasUnGrabbedDuringSlowdown=true;
-				org.lwjgl.input.Mouse.setGrabbed(false);
+//				org.lwjgl.input.Mouse.setGrabbed(false);
+				GlobalSappRefI.i().get().getInputManager().setCursorVisible(true);
 			}
 		}else{
 			if(bKeepUngrabbedOnSlowDown){}else
@@ -147,7 +149,8 @@ public class UngrabMouseStateI extends BasePlusAppState {
 				 */
 				if(!bIsSlow){
 					if(bWasUnGrabbedDuringSlowdown || !bKeepUngrabbedRequested){
-						org.lwjgl.input.Mouse.setGrabbed(true);
+//						org.lwjgl.input.Mouse.setGrabbed(true);
+						GlobalSappRefI.i().get().getInputManager().setCursorVisible(false);
 					}
 				}
 			}

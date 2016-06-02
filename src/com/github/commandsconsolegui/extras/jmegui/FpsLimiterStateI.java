@@ -29,7 +29,7 @@ package com.github.commandsconsolegui.extras.jmegui;
 
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.globals.GlobalStateManagerRefI;
-import com.github.commandsconsolegui.jmegui.BasePlusAppState;
+import com.github.commandsconsolegui.jmegui.ImprovedAppState;
 
 /**
  * Spare GPU fan!
@@ -37,7 +37,7 @@ import com.github.commandsconsolegui.jmegui.BasePlusAppState;
  * @author AquariusPower <https://github.com/AquariusPower>
  * 
  */
-public class FpsLimiterStateI extends BasePlusAppState{
+public class FpsLimiterStateI extends ImprovedAppState{
 	private static FpsLimiterStateI instance = new FpsLimiterStateI();
 	public static FpsLimiterStateI i(){return instance;}
 	

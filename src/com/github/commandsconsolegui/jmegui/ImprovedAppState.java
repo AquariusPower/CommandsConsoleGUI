@@ -42,7 +42,7 @@ import com.jme3.app.state.BaseAppState;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class BasePlusAppState extends BaseAppState implements ICheckInitAndCleanupI, IReflexFillCfg{
+public abstract class ImprovedAppState extends BaseAppState implements ICheckInitAndCleanupI, IReflexFillCfg{
 	Long	lInitializationCompletedMilis;
 //	long	lInitializationStartedMilis;
 //	long	lInitializationMaxDelayMilis=1000;

@@ -30,7 +30,7 @@ package com.github.commandsconsolegui.console.jmegui;
 import java.util.concurrent.Callable;
 
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.jmegui.BasePlusAppState;
+import com.github.commandsconsolegui.jmegui.ImprovedAppState;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppStateManager;
@@ -40,7 +40,7 @@ import com.jme3.app.state.AppStateManager;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class RecreateConsoleState extends BasePlusAppState {
+public class RecreateConsoleState extends ImprovedAppState {
 	private static RecreateConsoleState instance = new RecreateConsoleState();
 	public static RecreateConsoleState i(){return instance;}
 	

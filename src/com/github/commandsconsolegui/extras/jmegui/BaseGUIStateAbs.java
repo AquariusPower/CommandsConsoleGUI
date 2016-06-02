@@ -27,15 +27,12 @@
 
 package com.github.commandsconsolegui.extras.jmegui;
 
-import java.util.HashMap;
-
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
-import com.github.commandsconsolegui.console.jmegui.lemur.LemurFocusHelperI;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.jmegui.BasePlusAppState;
+import com.github.commandsconsolegui.jmegui.ImprovedAppState;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -45,47 +42,30 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 /**
- * A console command will be automatically created based on the configured {@link #strUIId}.<br>
- * See it at {@link #BaseUIStateAbs(String)}.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class BaseUIStateAbs <V> extends BasePlusAppState implements IConsoleCommandListener, IReflexFillCfg{
+public abstract class BaseGUIStateAbs extends ImprovedAppState implements IConsoleCommandListener, IReflexFillCfg{
 	protected SimpleApplication	sapp;
-	protected Node	ctnrDialog;
-	protected Node cntrNorth;
-	protected Node	intputText;
-	protected String	strLastFilter = "";
-	protected HashMap<String,V> hmKeyValue = new HashMap<String,V>();
-	protected String	strLastSelectedKey;
+	protected CommandsDelegatorI	cd;
+	
+	protected Node	ctnrMainTopSubWindow;
+	protected Node	intputField;
+	
 	protected String strUIId = null;
 	protected String	strCmd;
 //	protected StackTraceElement[] asteInitDebug = null;
-	protected CommandsDelegatorI	cd;
 	protected String	strTitle;
 //	BoolTogglerCmdField btgShowDialog = new BoolTogglerCmdField(this,false);
 	protected String	strCmdPrefix = "toggleUI";
 	protected String	strCmdSuffix = "";
 	
-	public BaseUIStateAbs(String strUIId){
+	public BaseGUIStateAbs(String strUIId){
 		this.strUIId=strUIId;
 		this.strCmd=strCmdPrefix+strUIId+strCmdSuffix;
 		this.strTitle = "Dialog: "+strUIId;
 //		btgShowDialog.setCustomCmdId(this.strCmd);
-	}
-	
-	public String getCommand(){
-		return strCmd;
-	}
-	
-	@Override
-	public void configure(Object... aobj) {
-		this.sapp = GlobalSappRefI.i().get();
-		this.sapp.getStateManager().attach(this);
-		
-		this.cd = GlobalCommandsDelegatorI.i().get();
-		this.cd.addConsoleCommandListener(this);
 	}
 	
 	/**
@@ -105,71 +85,35 @@ public abstract class BaseUIStateAbs <V> extends BasePlusAppState implements ICo
 //		cc.addConsoleCommandListener(this);
 	}
 	
-	protected abstract void initGUI();
-	
-	public abstract void clearSelection();
-	
-	public void toggle() {
-		setEnabled(!isEnabled());
+	public String getCommand(){
+		return strCmd;
 	}
 	
 	public abstract void requestFocus(Spatial spt);
 	
-	public void setTitle(String str){
-		this.strTitle = str;
+	@Override
+	public void configure(Object... aobj) {
+		this.sapp = GlobalSappRefI.i().get();
+		this.sapp.getStateManager().attach(this);
+		
+		this.cd = GlobalCommandsDelegatorI.i().get();
+		this.cd.addConsoleCommandListener(this);
 	}
 	
 	@Override
 	public void onEnable() {
-		sapp.getGuiNode().attachChild(ctnrDialog);
+		sapp.getGuiNode().attachChild(ctnrMainTopSubWindow);
 		
-		updateTextInfo();
-		updateList();
-		updateInputField();
-		
-		requestFocus(intputText);
+		requestFocus(intputField);
 		
 		setMouseCursorKeepUngrabbed(true);
 	}
 	
 	@Override
 	public void onDisable() {
-		ctnrDialog.removeFromParent();
+		ctnrMainTopSubWindow.removeFromParent();
 		
 		setMouseCursorKeepUngrabbed(false);
-	}
-	
-	/**
-	 * when dialog is enabled,
-	 * default is to fill with the last filter
-	 */
-	protected abstract void updateInputField();
-
-	protected abstract Integer getSelectedIndex();
-	
-	protected abstract String getSelectedKey();
-	
-	protected V getSelectedValue() {
-		return hmKeyValue.get(getSelectedKey());
-	}
-	
-	/**
-	 * 
-	 */
-	protected abstract void updateList();
-	
-	protected abstract void updateTextInfo();
-	
-	@Override
-	public void update(float tpf) {
-		String str = getSelectedKey();
-		if(str!=null)strLastSelectedKey=str;
-		
-		updateTextInfo();
-		
-		//requestFocus(intputText); //keep focus at input as it shall have all listeners.
-		
-		setMouseCursorKeepUngrabbed(isEnabled());
 	}
 	
 	/**
@@ -178,31 +122,27 @@ public abstract class BaseUIStateAbs <V> extends BasePlusAppState implements ICo
 	 * @param b
 	 */
 	public abstract void setMouseCursorKeepUngrabbed(boolean b);
+
+	protected abstract void initGUI();
 	
-	/**
-	 * What will be shown at each entry on the list.
-	 * Default is to return the default string about the object.
-	 * 
-	 * @param val
-	 * @return
-	 */
-	public String formatEntryKey(V val){
-		return val.toString();
+	public void toggle() {
+		setEnabled(!isEnabled());
 	}
 	
+	public void setTitle(String str){
+		this.strTitle = str;
+	}
+
 	protected abstract void initKeyMappings();
 	
 	/**
 	 * what happens when pressing ENTER keys
 	 * default is to update the list filter
 	 */
-	protected void actionSubmit(){
-		strLastFilter=getInputText();
-		updateList();
-	}
-
+	protected abstract void actionSubmit();
+	
 	protected abstract String getInputText();
-
+	
 	@Override
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI cc) {
 		boolean bCommandWorked = false;

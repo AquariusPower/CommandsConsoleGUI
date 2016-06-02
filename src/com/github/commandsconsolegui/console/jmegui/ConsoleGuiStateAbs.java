@@ -53,7 +53,7 @@ import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.jmegui.BasePlusAppState;
+import com.github.commandsconsolegui.jmegui.ImprovedAppState;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 //import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersState;
 import com.github.commandsconsolegui.misc.AutoCompleteI;
@@ -98,7 +98,7 @@ import com.jme3.texture.Texture2D;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class ConsoleGuiStateAbs extends BasePlusAppState implements ReflexFillI.IReflexFillCfg, IConsoleCommandListener, IConsoleUI, IWorkAroundBugFix{
+public abstract class ConsoleGuiStateAbs extends ImprovedAppState implements ReflexFillI.IReflexFillCfg, IConsoleCommandListener, IConsoleUI, IWorkAroundBugFix{
 //	protected FpsLimiterState fpslState = new FpsLimiterState();
 	
 //	protected final String strInputIMCPREFIX = "CONSOLEGUISTATE_";
@@ -511,10 +511,12 @@ public abstract class ConsoleGuiStateAbs extends BasePlusAppState implements Ref
 		if(!bInitializeOnlyTheUI){
 			initializeOnlyTheUI();
 		}
+//		setMouseCursorKeepUngrabbed(true);
 	}
 	
 	@Override
 	protected void onDisable() {
+//		setMouseCursorKeepUngrabbed(false);
 	}
 	
 //	@Override

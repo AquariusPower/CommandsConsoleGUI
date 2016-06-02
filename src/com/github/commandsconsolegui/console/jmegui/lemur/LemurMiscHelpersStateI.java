@@ -35,7 +35,7 @@ import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.jmegui.BasePlusAppState;
+import com.github.commandsconsolegui.jmegui.ImprovedAppState;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -65,7 +65,7 @@ import com.simsilica.lemur.focus.FocusManagerState;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class LemurMiscHelpersStateI extends BasePlusAppState implements IConsoleCommandListener, IReflexFillCfg, IWorkAroundBugFix{
+public class LemurMiscHelpersStateI extends ImprovedAppState implements IConsoleCommandListener, IReflexFillCfg, IWorkAroundBugFix{
 	public final BoolTogglerCmdField	btgTextCursorPulseFadeBlinkMode = new BoolTogglerCmdField(this,true);
 	public final BoolTogglerCmdField	btgTextCursorLarge = new BoolTogglerCmdField(this,true);
 	public final StringCmdField CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringCmdField(this, CommandsDelegatorI.strFinalCmdCodePrefix);

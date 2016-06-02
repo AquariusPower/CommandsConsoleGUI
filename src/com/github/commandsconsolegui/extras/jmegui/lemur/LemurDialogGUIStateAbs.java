@@ -35,7 +35,7 @@ import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.console.jmegui.lemur.ConsoleGUILemurStateI;
 import com.github.commandsconsolegui.console.jmegui.lemur.LemurFocusHelperI;
 import com.github.commandsconsolegui.console.jmegui.lemur.LemurMiscHelpersStateI;
-import com.github.commandsconsolegui.extras.jmegui.BaseUIStateAbs;
+import com.github.commandsconsolegui.extras.jmegui.DialogGUIStateAbs;
 import com.github.commandsconsolegui.extras.jmegui.UngrabMouseStateI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.input.KeyInput;
@@ -55,24 +55,24 @@ import com.simsilica.lemur.event.KeyActionListener;
 
 /**
 * 
-* More info at {@link BaseUIStateAbs}
+* More info at {@link DialogGUIStateAbs}
 * 
 * @author AquariusPower <https://github.com/AquariusPower>
 *
 */
-public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> {
+public abstract class LemurDialogGUIStateAbs <V> extends DialogGUIStateAbs<V> {
 	protected Label	lblTitle;
 	protected Label	lblTextInfo;
 	protected ListBox<String>	lstbxEntriesToSelect;
 	protected VersionedList<String>	vlstrEntriesList = new VersionedList<String>();
 	protected int	iVisibleRows;
 	
-	public LemurBaseUIStateAbs(String strUIId) {
+	public LemurDialogGUIStateAbs(String strUIId) {
 		super(strUIId);
 	}
 	
 	protected Container getTopContainer(){
-		return (Container)ctnrDialog;
+		return (Container)ctnrMainTopSubWindow;
 	}
 	
 	@Override
@@ -97,7 +97,7 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> {
 			sapp.getContext().getSettings().getHeight(),
 			0);
 			
-		ctnrDialog = new Container(new BorderLayout(), strStyle);
+		ctnrMainTopSubWindow = new Container(new BorderLayout(), strStyle);
 		getTopContainer().setName(strUIId+"_Dialog");
 		
 		Vector3f v3fDiagWindowSize = v3fApplicationWindowSize.mult(fDialogPerc);
@@ -155,7 +155,7 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> {
 		
 		//////////////////////////////// SOUTH
 		// filter
-		intputText = new TextField("",strStyle);
+		intputField = new TextField("",strStyle);
 		getInputField().setName(strUIId+"_InputField");
 		LemurFocusHelperI.i().addFocusChangeListener(getInputField());
 		getTopContainer().addChild(getInputField(), BorderLayout.Position.South);
@@ -203,7 +203,7 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> {
 	}
 	
 	protected TextField getInputField(){
-		return (TextField)intputText;
+		return (TextField)intputField;
 	}
 	
 	@Override
@@ -382,6 +382,6 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> {
 
 	@Override
 	public void setMouseCursorKeepUngrabbed(boolean b) {
-		UngrabMouseStateI.i().setKeepUngrabbedRequester(this,true);
+		UngrabMouseStateI.i().setKeepUngrabbedRequester(this,b);
 	}
 }

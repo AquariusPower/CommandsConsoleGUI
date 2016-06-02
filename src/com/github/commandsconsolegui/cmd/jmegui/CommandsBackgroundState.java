@@ -32,7 +32,7 @@ import com.github.commandsconsolegui.cmd.IConsoleUI;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.jmegui.BasePlusAppState;
+import com.github.commandsconsolegui.jmegui.ImprovedAppState;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -47,7 +47,7 @@ import com.jme3.app.SimpleApplication;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class CommandsBackgroundState extends BasePlusAppState implements IReflexFillCfg{
+public class CommandsBackgroundState extends ImprovedAppState implements IReflexFillCfg{
 	private static CommandsBackgroundState instance = new CommandsBackgroundState();
 	public static CommandsBackgroundState i(){return instance;}
 	

@@ -30,7 +30,7 @@ package com.github.commandsconsolegui.console.jmegui.lemur.test;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.extras.jmegui.UngrabMouseStateI;
-import com.github.commandsconsolegui.extras.jmegui.lemur.LemurBaseUIStateAbs;
+import com.github.commandsconsolegui.extras.jmegui.lemur.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -39,10 +39,10 @@ import com.jme3.app.Application;
 /**
  * @author AquariusPower <https://github.com/AquariusPower>
  */
-public class CustomDialogState extends LemurBaseUIStateAbs<String>{
+public class CustomDialogGUIState extends LemurDialogGUIStateAbs<String>{
 	ArrayList<String> astr;
 	
-	public CustomDialogState(String strUIId) {
+	public CustomDialogGUIState(String strUIId) {
 		super(strUIId);
 		astr = new ArrayList<String>();
 	}

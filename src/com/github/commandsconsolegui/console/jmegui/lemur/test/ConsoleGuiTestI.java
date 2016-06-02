@@ -73,7 +73,7 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 	private StringCmdField testCommandAutoFillPrefixLessVariant2 = new StringCmdField(this,strFieldCodePrefixLess);
 	private StringCmdField testCommandAutoFillPrefixLessVariantDefaulted3 = new StringCmdField(this,null);
 	private StringCmdField CMD_TRADITIONAL_PRETTYFIED_0 = new StringCmdField(this,CustomCommandsI.strFinalCmdCodePrefix);
-	private CustomDialogState	diag;
+	private CustomDialogGUIState	diag;
 
 	private CommandsDelegatorI	cd;
 	
@@ -98,11 +98,11 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 		ConsoleGUILemurStateI.i().configureSimple(KeyInput.KEY_F10);
 		CommandsBackgroundState.i().configure(ConsoleGUILemurStateI.i());
 		FpsLimiterStateI.i().configure();
-		UngrabMouseStateI.i().configureSimple(null,true);
+		UngrabMouseStateI.i().configureSimple(null,null);
 
 		cd.addConsoleCommandListener(this);
 		
-		diag = new CustomDialogState("TestDialog");
+		diag = new CustomDialogGUIState("TestDialog");
 		diag.configure(this,cd);
 		
 //		SingleInstanceState.i().configureBeforeInitializing(this,true);
