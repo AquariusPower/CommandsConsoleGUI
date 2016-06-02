@@ -145,6 +145,11 @@ public class LemurFocusHelperI implements FocusChangeListener,IConsoleCommandLis
 		GuiGlobals.getInstance().requestFocus(spt);
 	}
 	
+	public Spatial getCurrentFocusRequester(){
+		if(asptFocusRequestList.size()==0)return null;
+		return asptFocusRequestList.get(asptFocusRequestList.size()-1);
+	}
+	
 	private void zSortLatest(FocusTarget ftLatest, boolean bJustRemove){
 		aftZOrderList.remove(ftLatest); //remove to update priority
 		if(!bJustRemove)aftZOrderList.add(ftLatest);
@@ -205,11 +210,11 @@ public class LemurFocusHelperI implements FocusChangeListener,IConsoleCommandLis
 	public void focusLost(FocusChangeEvent event) {
 //		zSortLatest(event.getSource(),true);
 	}
-
-	public void addFocusChangeListener(Spatial spt) {
-		spt.getControl(GuiControl.class).addFocusChangeListener(this);
+	
+	public void addFocusChangeListener(Spatial sptTarget) {
+		sptTarget.getControl(GuiControl.class).addFocusChangeListener(this);
 	}
-
+	
 	@Override
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI cc) {
 		boolean bCmdEndedGracefully = false;
@@ -223,6 +228,11 @@ public class LemurFocusHelperI implements FocusChangeListener,IConsoleCommandLis
 		}
 		
 		return cc.cmdFoundReturnStatus(bCmdEndedGracefully);
+	}
+	
+	public void update(float tpf) {
+		Spatial spt = getCurrentFocusRequester();
+		GuiGlobals.getInstance().requestFocus(spt);
 	}
 	
 }

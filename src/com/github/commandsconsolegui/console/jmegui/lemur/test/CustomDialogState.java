@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.console.jmegui.lemur.test;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.extras.jmegui.UngrabMouseStateI;
 import com.github.commandsconsolegui.extras.jmegui.lemur.LemurBaseUIStateAbs;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -45,16 +46,18 @@ public class CustomDialogState extends LemurBaseUIStateAbs<String>{
 		super(strUIId);
 		astr = new ArrayList<String>();
 	}
-
+	
+	@Override
+	protected void updateTextInfo() {
+		lblTextInfo.setText("Info: Type a list filter at input text area and hit Enter.");
+//		super.updateTextInfo();
+	}
+	
 	@Override
 	protected void updateList() {
 		astr.add("New test entry: "+MiscI.i().getDateTimeForFilename(true));
 		if(astr.size()>100)astr.remove(0);
 		updateList(astr);
-	}
-
-	@Override
-	public void setMouseCursorKeepUngrabbed(boolean b) {
 	}
 
 	@Override

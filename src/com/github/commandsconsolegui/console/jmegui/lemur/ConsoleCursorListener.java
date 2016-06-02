@@ -29,6 +29,9 @@ package com.github.commandsconsolegui.console.jmegui.lemur;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.console.jmegui.ConsoleGuiStateAbs;
+import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.GlobalConsoleGuiI;
+import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.jme3.app.SimpleApplication;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Panel;
@@ -47,10 +50,10 @@ public class ConsoleCursorListener extends DefaultCursorListener {
 	private CommandsDelegatorI	cc;
 	private ConsoleGuiStateAbs	cgui;
 	
-	public void configure(SimpleApplication sapp, CommandsDelegatorI cc, ConsoleGuiStateAbs cgui){
-		this.sapp=sapp;
-		this.cc=cc;
-		this.cgui=cgui;
+	public void configure(){
+		this.sapp=GlobalSappRefI.i().get();
+		this.cc=GlobalCommandsDelegatorI.i().get();
+		this.cgui=GlobalConsoleGuiI.i().get();
 	}
 
 	protected String debugPart(Panel pnl){

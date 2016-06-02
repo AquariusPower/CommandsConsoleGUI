@@ -37,6 +37,7 @@ import com.github.commandsconsolegui.extras.SingleAppInstanceI;
 import com.github.commandsconsolegui.extras.jmegui.FpsLimiterStateI;
 import com.github.commandsconsolegui.extras.jmegui.UngrabMouseStateI;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.GlobalConsoleGuiI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -93,6 +94,7 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 		cd = GlobalCommandsDelegatorI.i().set(new CustomCommandsI());
 		MiscJmeI.i().configure(cd);
 		
+		GlobalConsoleGuiI.i().set(ConsoleGUILemurStateI.i());
 		ConsoleGUILemurStateI.i().configureSimple(KeyInput.KEY_F10);
 		CommandsBackgroundState.i().configure(ConsoleGUILemurStateI.i());
 		FpsLimiterStateI.i().configure();

@@ -57,7 +57,7 @@ public abstract class BasePlusAppState extends BaseAppState implements ICheckIni
 	@Override
 	protected void initialize(Application app) {
 		tdInitDelayLimit.setActive(true);
-		CheckInitAndCleanupI.i().assertNotAlreadyInitializedAtInitializer(this);
+		CheckInitAndCleanupI.i().assertStateNotAlreadyInitializedAtInitializer(this);
 	}
 	
 	/**
@@ -65,7 +65,7 @@ public abstract class BasePlusAppState extends BaseAppState implements ICheckIni
 	 */
 	@Override
 	protected void cleanup(Application app) {
-		CheckInitAndCleanupI.i().assertInitializedAtCleanup(this);
+		CheckInitAndCleanupI.i().assertStateIsInitializedAtCleanup(this);
 	}
 	
 	/**

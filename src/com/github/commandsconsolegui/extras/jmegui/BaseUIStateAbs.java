@@ -32,6 +32,7 @@ import java.util.HashMap;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.console.jmegui.lemur.LemurFocusHelperI;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.BasePlusAppState;
@@ -52,9 +53,9 @@ import com.jme3.scene.Spatial;
  */
 public abstract class BaseUIStateAbs <V> extends BasePlusAppState implements IConsoleCommandListener, IReflexFillCfg{
 	protected SimpleApplication	sapp;
-	protected Node	ctnrTop;
+	protected Node	ctnrDialog;
 	protected Node cntrNorth;
-	protected Node	tfInputText;
+	protected Node	intputText;
 	protected String	strLastFilter = "";
 	protected HashMap<String,V> hmKeyValue = new HashMap<String,V>();
 	protected String	strLastSelectedKey;
@@ -120,22 +121,22 @@ public abstract class BaseUIStateAbs <V> extends BasePlusAppState implements ICo
 	
 	@Override
 	public void onEnable() {
-		sapp.getGuiNode().attachChild(ctnrTop);
+		sapp.getGuiNode().attachChild(ctnrDialog);
 		
 		updateTextInfo();
 		updateList();
 		updateInputField();
 		
-		requestFocus(tfInputText);
+		requestFocus(intputText);
 		
-		setMouseCursorKeepUngrabbed(isEnabled());
+		setMouseCursorKeepUngrabbed(true);
 	}
 	
 	@Override
 	public void onDisable() {
-		ctnrTop.removeFromParent();
+		ctnrDialog.removeFromParent();
 		
-		setMouseCursorKeepUngrabbed(isEnabled());
+		setMouseCursorKeepUngrabbed(false);
 	}
 	
 	/**
@@ -165,6 +166,8 @@ public abstract class BaseUIStateAbs <V> extends BasePlusAppState implements ICo
 		if(str!=null)strLastSelectedKey=str;
 		
 		updateTextInfo();
+		
+		//requestFocus(intputText); //keep focus at input as it shall have all listeners.
 		
 		setMouseCursorKeepUngrabbed(isEnabled());
 	}

@@ -75,7 +75,8 @@ import com.simsilica.lemur.style.Styles;
  *
  */
 public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
-	protected static ConsoleGUILemurStateI instance;
+	protected static ConsoleGUILemurStateI instance=new ConsoleGUILemurStateI();
+	public static ConsoleGUILemurStateI i(){return instance;}
 	
 	StringVarField svfBackgroundHexaColorRGBA = new StringVarField(this,"");
 	protected ConsoleCursorListener consoleCursorListener;
@@ -86,18 +87,6 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 	protected Label	lblStats;
 
 	private ColorRGBA	colorConsoleStyleBackground;
-	
-//	public static void setInstance(ConsoleGUILemurState gui){
-//		if(ConsoleGUILemurState.instance!=null){
-//			throw new NullPointerException("instance already set to: "
-//				+ConsoleGUILemurState.instance.getClass().getName());
-//		}
-//		ConsoleGUILemurState.instance=gui;
-//	}
-	public static ConsoleGUILemurStateI i(){
-		if(instance==null)instance=new ConsoleGUILemurStateI();
-		return instance;
-	}
 	
 	public ConsoleGUILemurStateI(){
 		vlstrDumpEntriesSlowedQueue = new VersionedList<String>();
@@ -209,7 +198,7 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 		prepareStyle();
 		
 		consoleCursorListener = new ConsoleCursorListener();
-		consoleCursorListener.configure(sapp, cc, this);
+		consoleCursorListener.configure();
 		
 		// auto complete hint
 		super.vlstrAutoCompleteHint = new VersionedList<String>();

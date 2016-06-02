@@ -44,72 +44,61 @@ public class CheckInitAndCleanupI {
 	static CheckInitAndCleanupI instance = new CheckInitAndCleanupI();
 	public static CheckInitAndCleanupI i(){return instance;}
 	
-	HashMap<Object,InitializedInfo> hmDebugTrace = new HashMap<Object,InitializedInfo>();
-	private class InitializedInfo{
-		private StackTraceElement[] asteInitDebug;
-		public InitializedInfo(StackTraceElement[] asteInitDebug) {
-			super();
-			this.asteInitDebug = asteInitDebug;
-		}
+	HashMap<String,StackTraceElement[]> hmDebugTrace = new HashMap<String,StackTraceElement[]>();
+	
+	enum EInitMode{
+		Global,
+		State,
+	}
+	
+	private String asKey(EInitMode eim, Object obj){
+		return ""+eim+":"+obj.getClass().getName()+":"+obj.hashCode();
 	}
 	
 	/**
 	 * Useful to globals.
 	 * 
-	 * @param objCheck
+	 * @param objGlobal
 	 * @param objNew
 	 * @return
 	 */
-	public <T> T getNewAssertingCheckIsNull(T objCheck, T objNew){
+	public <T> T assertGlobalIsNull(T objGlobal, T objNew){
 		if(objNew==null)throw new NullPointerException("new object is null...");
 		
-		if(objCheck==null){
-			InitializedInfo icc = new InitializedInfo(Thread.currentThread().getStackTrace());
-			hmDebugTrace.put(objNew, icc);
+		if(objGlobal==null){
+			put(EInitMode.Global,objNew);
 			return objNew;
 		}else{
-			InitializedInfo icc = hmDebugTrace.get(objCheck);
-			if(icc==null){
+			StackTraceElement[] ste = get(EInitMode.Global,objGlobal);
+			if(ste==null){
 				throw new NullPointerException(
-					"checking is not null, and there is no debug stack: "+objInfo(objCheck));
+					"checking is not null, and there is no debug stack: "+objInfo(objGlobal));
 			}else{
-				throw prepareNPEWithCause(icc,objCheck);
+				throw prepareNPEWithCause(ste,objGlobal);
 			}
 		}
 	}
 	
-	private String objInfo(Object obj){
-		return obj.getClass().getName()+"; "+obj;
+	private void put(EInitMode eim, Object obj){
+		hmDebugTrace.put(asKey(eim,obj), Thread.currentThread().getStackTrace());
 	}
 	
-	private NullPointerException prepareNPEWithCause(InitializedInfo icc, Object obj){
-		NullPointerException npe = new NullPointerException(
-				"already initialized, cannot be double initialized: "+objInfo(obj));
-		Throwable trw = new Throwable("already initialized at");
-		trw.setStackTrace(icc.asteInitDebug);
-		npe.initCause(trw);
-		return npe;
+	private StackTraceElement[] get(EInitMode eim, Object obj){
+		return hmDebugTrace.get(asKey(eim,obj));
 	}
 	
 	/**
 	 * to be used on initializers
 	 * @param objKey use 'this'
 	 */
-	public void assertNotAlreadyInitializedAtInitializer(Object objKey){
+	public void assertStateNotAlreadyInitializedAtInitializer(Object objKey){
 		if(objKey==null)throw new NullPointerException("key is null...");
 		
-		InitializedInfo icc = hmDebugTrace.get(objKey);
-		if(icc==null){
-			icc = new InitializedInfo(Thread.currentThread().getStackTrace());
-			hmDebugTrace.put(objKey, icc);
+		StackTraceElement[] ste = get(EInitMode.State,objKey);
+		if(ste==null){
+			put(EInitMode.State,objKey);
 		}else{
-			throw prepareNPEWithCause(icc,objKey);
-//			NullPointerException npe = new NullPointerException(
-//				"already initialized, cannot be double initialized: "+objKey);
-//			Throwable trw = new Throwable("already initialized at");
-//			trw.setStackTrace(icc.asteInitDebug);
-//			npe.initCause(trw);
-//			throw npe;
+			throw prepareNPEWithCause(ste,objKey);
 		}
 	}
 	
@@ -117,12 +106,25 @@ public class CheckInitAndCleanupI {
 	 * to be used on cleanupers
 	 * @param objKey use 'this'
 	 */
-	public void assertInitializedAtCleanup(Object objKey){
-		InitializedInfo icc = hmDebugTrace.get(objKey);
-		if(icc==null){
+	public void assertStateIsInitializedAtCleanup(Object objKey){
+		StackTraceElement[] ste = get(EInitMode.State,objKey);
+		if(ste==null){
 			throw new NullPointerException("cannot be cleaned as was not initialized: "+objKey);
 		}
 		
 		hmDebugTrace.remove(objKey);
+	}
+
+	private String objInfo(Object obj){
+		return obj.getClass().getName()+"; "+obj;
+	}
+	
+	private NullPointerException prepareNPEWithCause(StackTraceElement[] ste, Object obj){
+		NullPointerException npe = new NullPointerException(
+				"already initialized, cannot be double initialized: "+objInfo(obj));
+		Throwable trw = new Throwable("already initialized at");
+		trw.setStackTrace(ste);
+		npe.initCause(trw);
+		return npe;
 	}
 }

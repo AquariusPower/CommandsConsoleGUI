@@ -29,11 +29,14 @@ package com.github.commandsconsolegui.extras.jmegui.lemur;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.console.jmegui.lemur.ConsoleGUILemurStateI;
 import com.github.commandsconsolegui.console.jmegui.lemur.LemurFocusHelperI;
 import com.github.commandsconsolegui.console.jmegui.lemur.LemurMiscHelpersStateI;
 import com.github.commandsconsolegui.extras.jmegui.BaseUIStateAbs;
+import com.github.commandsconsolegui.extras.jmegui.UngrabMouseStateI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.input.KeyInput;
 import com.jme3.math.ColorRGBA;
@@ -62,13 +65,14 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> {
 	protected Label	lblTextInfo;
 	protected ListBox<String>	lstbxEntriesToSelect;
 	protected VersionedList<String>	vlstrEntriesList = new VersionedList<String>();
+	protected int	iVisibleRows;
 	
 	public LemurBaseUIStateAbs(String strUIId) {
 		super(strUIId);
 	}
 	
 	protected Container getTopContainer(){
-		return (Container)ctnrTop;
+		return (Container)ctnrDialog;
 	}
 	
 	@Override
@@ -93,14 +97,15 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> {
 			sapp.getContext().getSettings().getHeight(),
 			0);
 			
-		ctnrTop = new Container(new BorderLayout(), strStyle);
-		getTopContainer().setName(strUIId+"_TopDiag");
+		ctnrDialog = new Container(new BorderLayout(), strStyle);
+		getTopContainer().setName(strUIId+"_Dialog");
 		
 		Vector3f v3fDiagWindowSize = v3fApplicationWindowSize.mult(fDialogPerc);
 		getTopContainer().setPreferredSize(v3fDiagWindowSize);
 		
 		///////////////////////// NORTH
 		cntrNorth = new Container(new BorderLayout(), strStyle);
+		getNorthContainer().setName(strUIId+"_NorthContainer");
 		Vector3f v3fNorthSize = v3fDiagWindowSize.clone();
 		v3fNorthSize.y *= fInfoPerc;
 		getNorthContainer().setPreferredSize(v3fNorthSize);
@@ -145,11 +150,12 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> {
 				}
 			}
 		}
-		lstbxEntriesToSelect.setVisibleItems((int) (v3fEntryListSize.y/iEntryHeightPixels));
+		iVisibleRows = (int) (v3fEntryListSize.y/iEntryHeightPixels);
+		lstbxEntriesToSelect.setVisibleItems(iVisibleRows);
 		
 		//////////////////////////////// SOUTH
 		// filter
-		tfInputText = new TextField("",strStyle);
+		intputText = new TextField("",strStyle);
 		getInputField().setName(strUIId+"_InputField");
 		LemurFocusHelperI.i().addFocusChangeListener(getInputField());
 		getTopContainer().addChild(getInputField(), BorderLayout.Position.South);
@@ -197,7 +203,7 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> {
 	}
 	
 	protected TextField getInputField(){
-		return (TextField)tfInputText;
+		return (TextField)intputText;
 	}
 	
 	@Override
@@ -257,14 +263,50 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> {
 		lblTitle.setText(str);
 	}
 	
+	protected int getMaxIndex(){
+		return (int)lstbxEntriesToSelect.getSlider().getModel().getMaximum()-1;
+	}
+	
+	protected int getTopEntryIndex(){
+		int iTopEntryIndex = (int)(
+			getMaxIndex()-lstbxEntriesToSelect.getSlider().getModel().getValue());
+		return iTopEntryIndex;
+	}
+	
+	protected int getBottomEntryIndex(){
+		return getTopEntryIndex()+iVisibleRows;
+	}
+	
+	protected void scrollTo(int iIndex){
+		lstbxEntriesToSelect.getSlider().getModel().setValue(getMaxIndex()-iIndex);
+	}
+	
 	@Override
 	public void update(float tpf) {
-		String str = getSelectedKey();
-		if(str!=null)strLastSelectedKey=str;
+		super.update(tpf);
 		
-		updateTextInfo();
+		Integer iSelected = getSelectedIndex();
+		if(iSelected!=null){
+			int iTopEntryIndex = getTopEntryIndex();
+			int iBottomItemIndex = getBottomEntryIndex();
+			Integer iScrollTo=null;
+			if(iSelected>=iBottomItemIndex){
+				iScrollTo=iSelected-iBottomItemIndex+iTopEntryIndex;
+			}else
+			if(iSelected<=iTopEntryIndex){
+				iScrollTo=iSelected-1;
+			}
+			if(iScrollTo!=null){
+				scrollTo(iScrollTo);
+			}
+		}
 		
-		setMouseCursorKeepUngrabbed(isEnabled());
+//		String str = getSelectedKey();
+//		if(str!=null)strLastSelectedKey=str;
+//		
+//		updateTextInfo();
+//		
+//		setMouseCursorKeepUngrabbed(isEnabled());
 	}
 	
 	@Override
@@ -276,17 +318,24 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> {
 	//		boolean bShift = key.hasModifier(0x01);
 				
 				Integer iSel = lstbxEntriesToSelect.getSelectionModel().getSelection();
-				if(iSel==null)iSel=-1;
+				int iMax = getMaxIndex();
+				if(iSel==null){
+					if(iMax>0){
+						iSel=0;
+					}else{
+						iSel=-1;
+					}
+				}
 					
 				switch(key.getKeyCode()){
 					case KeyInput.KEY_ESCAPE:
 						setEnabled(false);
 						break;
 					case KeyInput.KEY_UP:
-						lstbxEntriesToSelect.getSelectionModel().setSelection(iSel-1);
+						if(iSel>0)lstbxEntriesToSelect.getSelectionModel().setSelection(iSel-1);
 						break;
 					case KeyInput.KEY_DOWN:
-						lstbxEntriesToSelect.getSelectionModel().setSelection(iSel+1);
+						if(iSel<iMax)lstbxEntriesToSelect.getSelectionModel().setSelection(iSel+1);
 						break;
 					case KeyInput.KEY_NUMPADENTER:
 					case KeyInput.KEY_RETURN:
@@ -311,7 +360,28 @@ public abstract class LemurBaseUIStateAbs <V> extends BaseUIStateAbs<V> {
 	}
 	
 	@Override
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI cc) {
+		boolean bCommandWorked = false;
+		
+		if(cc.checkCmdValidity(this,"showDialogKeyBinds","")){
+			cc.dumpSubEntry("ESC - close; Up/Down - nav. list entry; Enter - accept/submit choice;");
+			bCommandWorked = true;
+		}else
+		{
+			return super.execConsoleCommand(cc);
+//			return ECmdReturnStatus.NotFound;
+		}
+		
+		return cc.cmdFoundReturnStatus(bCommandWorked);
+	}
+	
+	@Override
 	protected String getInputText() {
 		return getInputField().getText();
+	}
+
+	@Override
+	public void setMouseCursorKeepUngrabbed(boolean b) {
+		UngrabMouseStateI.i().setKeepUngrabbedRequester(this,true);
 	}
 }

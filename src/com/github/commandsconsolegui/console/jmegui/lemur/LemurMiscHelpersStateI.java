@@ -243,6 +243,8 @@ public class LemurMiscHelpersStateI extends BasePlusAppState implements IConsole
 	@Override
 	public void update(float tpf) {
 		if(isEnabled()){
+			LemurFocusHelperI.i().update(tpf);
+			
 			if(tfToBlinkCursor!=null){
 				updateBlinkInputFieldTextCursor(tfToBlinkCursor);
 				updateLargeTextCursorMode(tfToBlinkCursor);

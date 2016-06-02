@@ -53,7 +53,7 @@ public class UngrabMouseStateI extends BasePlusAppState {
 	/**
 	 * let end developer decide when it will re-grab
 	 */
-	private boolean	bKeepUngrabbedOnSlowDown = true;
+	private boolean	bKeepUngrabbedOnSlowDown = false;
 	
 	/**
 	 * 

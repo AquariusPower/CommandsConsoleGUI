@@ -27,33 +27,14 @@
 
 package com.github.commandsconsolegui.globals;
 
-import com.github.commandsconsolegui.misc.CheckInitAndCleanupI;
+import com.github.commandsconsolegui.console.jmegui.ConsoleGuiStateAbs;
 
 /**
- * "centralizing" objects to easy coding.
- * @author AquariusPower <https://github.com/AquariusPower>
  * 
- * @param <T>
+ * @author AquariusPower <https://github.com/AquariusPower>
+ *
  */
-public class Global<T> {
-	T obj;
-	
-	protected void setAssertingNotAlreadySet(T objNew){
-//		if(this.obj!=null){
-		this.obj = CheckInitAndCleanupI.i().assertGlobalIsNull(this.obj, objNew);
-//			this.obj = InitTraceI.i().getAssertValidatingIsNull(this.obj, obj);
-//			throw new NullPointerException("already set: "+obj);
-//		}
-//		this.obj=obj;
-	}
-	
-	public T get(){
-		if(obj==null)throw new NullPointerException("global not set yet...");
-		return obj;
-	}
-	
-	public T set(T obj){
-		setAssertingNotAlreadySet(obj);
-		return this.obj; //easy chain
-	} 
+public class GlobalConsoleGuiI extends Global<ConsoleGuiStateAbs>{
+	private static GlobalConsoleGuiI instance = new GlobalConsoleGuiI();
+	public static GlobalConsoleGuiI i(){return instance;}
 }
