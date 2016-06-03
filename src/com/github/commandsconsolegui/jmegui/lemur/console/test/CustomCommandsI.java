@@ -25,19 +25,13 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console.jmegui.lemur.test;
+package com.github.commandsconsolegui.jmegui.lemur.console.test;
 
-import com.github.commandsconsolegui.cmd.IConsoleUI;
 import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegatorI;
-import com.github.commandsconsolegui.cmd.jmegui.CommandsBackgroundState;
-import com.github.commandsconsolegui.console.jmegui.lemur.ConsoleGUILemurStateI;
-import com.github.commandsconsolegui.extras.jmegui.FpsLimiterStateI;
-import com.github.commandsconsolegui.extras.jmegui.UngrabMouseStateI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.jmegui.MiscJmeI;
+import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
-import com.jme3.input.KeyInput;
 
 /**
  * 
@@ -58,24 +52,24 @@ public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleC
 		ReflexFillI.i().setUseDefaultCfgIfMissing(true);
 	}
 	
-	@Override
-	public ECmdReturnStatus executePreparedCommandRoot() {
-		boolean bCommandWorked = false;
-		
-		if(checkCmdValidity(null,"fpsLimit","[iMaxFps]")){
-			Integer iMaxFps = paramInt(1);
-			if(iMaxFps!=null){
-				FpsLimiterStateI.i().setMaxFps(iMaxFps);
-				bCommandWorked=true;
-			}
-			dumpSubEntry("FpsLimit = "+FpsLimiterStateI.i().getFpsLimit());
-		}else
-		{
-			return super.executePreparedCommandRoot();
-		}
-		
-		return cmdFoundReturnStatus(bCommandWorked);
-	}
+//	@Override
+//	public ECmdReturnStatus executePreparedCommandRoot() {
+//		boolean bCommandWorked = false;
+//		
+//		if(checkCmdValidity(null,"fpsLimit","[iMaxFps]")){
+//			Integer iMaxFps = paramInt(1);
+//			if(iMaxFps!=null){
+//				FpsLimiterStateI.i().setMaxFps(iMaxFps);
+//				bCommandWorked=true;
+//			}
+//			dumpSubEntry("FpsLimit = "+FpsLimiterStateI.i().getFpsLimit());
+//		}else
+//		{
+//			return super.executePreparedCommandRoot();
+//		}
+//		
+//		return cmdFoundReturnStatus(bCommandWorked);
+//	}
 	
 	@Override
 	public void updateToggles() {

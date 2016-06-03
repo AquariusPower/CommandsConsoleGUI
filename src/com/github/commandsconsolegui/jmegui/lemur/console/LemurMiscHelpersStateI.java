@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console.jmegui.lemur;
+package com.github.commandsconsolegui.jmegui.lemur.console;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
@@ -35,7 +35,7 @@ import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.jmegui.ImprovedAppState;
+import com.github.commandsconsolegui.jmegui.ConditionalAppStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -65,7 +65,7 @@ import com.simsilica.lemur.focus.FocusManagerState;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class LemurMiscHelpersStateI extends ImprovedAppState implements IConsoleCommandListener, IReflexFillCfg, IWorkAroundBugFix{
+public class LemurMiscHelpersStateI extends ConditionalAppStateAbs implements IConsoleCommandListener, IReflexFillCfg, IWorkAroundBugFix{
 	public final BoolTogglerCmdField	btgTextCursorPulseFadeBlinkMode = new BoolTogglerCmdField(this,true);
 	public final BoolTogglerCmdField	btgTextCursorLarge = new BoolTogglerCmdField(this,true);
 	public final StringCmdField CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringCmdField(this, CommandsDelegatorI.strFinalCmdCodePrefix);
@@ -73,7 +73,7 @@ public class LemurMiscHelpersStateI extends ImprovedAppState implements IConsole
 	private static LemurMiscHelpersStateI instance = new LemurMiscHelpersStateI(); 
 	public static LemurMiscHelpersStateI i(){return instance;}
 
-	private SimpleApplication	sapp;
+//	private SimpleApplication	sapp;
 	
 //	public void initialize(SimpleApplication sapp){
 //		this.sapp = sapp;
@@ -87,11 +87,10 @@ public class LemurMiscHelpersStateI extends ImprovedAppState implements IConsole
 //	private boolean	bInitialized;
 //	private boolean	bEnabled = true;
 
-	private CommandsDelegatorI	cd;
+//	private CommandsDelegatorI	cd;
 
 	private boolean	bFixInvisibleTextInputCursor;
 
-	private boolean	bConfigured;
 	private boolean	bBlinkFadeInAndOut =true;
 
 	private enum EKey{
@@ -227,17 +226,15 @@ public class LemurMiscHelpersStateI extends ImprovedAppState implements IConsole
 	}
 	
 	@Override
-	public void configure(Object... aobj) {
-		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
+	public void configure() {
+		super.configure();
 		
-		this.sapp=GlobalSappRefI.i().get();
-		this.cd=GlobalCommandsDelegatorI.i().get();
+//		this.sapp=GlobalSappRefI.i().get();
+//		this.cd=GlobalCommandsDelegatorI.i().get();
 		
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 		
-		cd.addConsoleCommandListener(this);
-		
-		bConfigured=true;
+//		cd.addConsoleCommandListener(this);
 	}
 	
 	@Override

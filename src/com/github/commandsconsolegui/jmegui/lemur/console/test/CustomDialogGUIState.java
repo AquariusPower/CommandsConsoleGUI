@@ -25,54 +25,46 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console.jmegui;
+package com.github.commandsconsolegui.jmegui.lemur.console.test;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
+import java.util.ArrayList;
+
+import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
+import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
+import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.app.Application;
-import com.jme3.app.SimpleApplication;
 
 /**
- * TODO can this make classes that shouldnt know others, be forced to know about? sure right?
- * 
  * @author AquariusPower <https://github.com/AquariusPower>
- *
  */
-@Deprecated
-public class GlobalsJmeI {
-	private static GlobalsJmeI instance = new GlobalsJmeI();
-	public static GlobalsJmeI i(){return instance;}
+public class CustomDialogGUIState extends LemurDialogGUIStateAbs<String>{
+	ArrayList<String> astr;
+	
+	public CustomDialogGUIState(String strUIId) {
+		super(strUIId);
+		astr = new ArrayList<String>();
+	}
+	
+	@Override
+	protected void updateTextInfo() {
+		lblTextInfo.setText("Info: Type a list filter at input text area and hit Enter.");
+//		super.updateTextInfo();
+	}
+	
+	@Override
+	protected void updateList() {
+		astr.add("New test entry: "+MiscI.i().getDateTimeForFilename(true));
+		if(astr.size()>100)astr.remove(0);
+		updateList(astr);
+	}
 
-	private Application	app;
-	private SimpleApplication	sapp; //TODO will simple application vanish one day?
-	private CommandsDelegatorI cd;
-	
-	public Application getApp(){
-		return app;
-	}
-	
-	public Application getSapp(){
-		return sapp;
-	}
-	
-	public CommandsDelegatorI getCmdDelegator(){
-		return cd;
-	}
-	
-	public void configure(Object... aobj){
-		for(Object obj:aobj){
-			if(obj instanceof Application){
-				app=(Application) obj;
-				if(obj instanceof SimpleApplication){
-					sapp=(SimpleApplication) obj;
-				}
-			}else
-			if(obj instanceof CommandsDelegatorI){
-				cd = (CommandsDelegatorI)obj;
-			}else
-			{
-				throw new UnsupportedOperationException("for: "+obj.getClass().getName());
-			}
-		}
+	@Override
+	protected void cleanup(Application app) {
+		super.cleanup(app);
+		astr.clear();
+		astr=null;
 	}
 	
 }

@@ -45,7 +45,7 @@ import com.google.common.collect.Lists;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ScriptingCommandsDelegatorI extends CommandsDelegatorI{
+public class ScriptingCommandsDelegatorI extends CommandsDelegatorI {
 	public final StringCmdField CMD_FUNCTION = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_FUNCTION_CALL = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_FUNCTION_END = new StringCmdField(this,strFinalCmdCodePrefix);
@@ -176,8 +176,9 @@ public class ScriptingCommandsDelegatorI extends CommandsDelegatorI{
 		return true;
 	}
 	
+	
 	@Override
-	public ECmdReturnStatus executePreparedCommandRoot() {
+	public ECmdReturnStatus executePreparedCommandRoot(){
 		boolean bCommandWorked = false;
 		
 		ECmdReturnStatus ecrs = super.executePreparedCommandRoot();
@@ -419,4 +420,5 @@ public class ScriptingCommandsDelegatorI extends CommandsDelegatorI{
 		
 		return true;
 	}
+	
 }

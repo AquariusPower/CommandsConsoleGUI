@@ -27,14 +27,14 @@
 
 package com.github.commandsconsolegui.globals;
 
-import com.github.commandsconsolegui.console.jmegui.ConsoleGuiStateAbs;
+import com.github.commandsconsolegui.jmegui.console.ConsoleJmeStateAbs;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class GlobalConsoleGuiI extends Global<ConsoleGuiStateAbs>{
+public class GlobalConsoleGuiI extends Global<ConsoleJmeStateAbs>{
 	private static GlobalConsoleGuiI instance = new GlobalConsoleGuiI();
 	public static GlobalConsoleGuiI i(){return instance;}
 }

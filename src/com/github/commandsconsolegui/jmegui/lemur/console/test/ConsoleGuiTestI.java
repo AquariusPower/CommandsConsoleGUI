@@ -25,21 +25,21 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console.jmegui.lemur.test;
+package com.github.commandsconsolegui.jmegui.lemur.console.test;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
-import com.github.commandsconsolegui.cmd.jmegui.CommandsBackgroundState;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
-import com.github.commandsconsolegui.console.jmegui.lemur.ConsoleGUILemurStateI;
 import com.github.commandsconsolegui.extras.SingleAppInstanceI;
-import com.github.commandsconsolegui.extras.jmegui.FpsLimiterStateI;
-import com.github.commandsconsolegui.extras.jmegui.UngrabMouseStateI;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalConsoleGuiI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
+import com.github.commandsconsolegui.jmegui.cmd.CommandsBackgroundState;
+import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
+import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
+import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -94,16 +94,17 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 		cd = GlobalCommandsDelegatorI.i().set(new CustomCommandsI());
 		MiscJmeI.i().configure(cd);
 		
-		GlobalConsoleGuiI.i().set(ConsoleGUILemurStateI.i());
-		ConsoleGUILemurStateI.i().configureSimple(KeyInput.KEY_F10);
-		CommandsBackgroundState.i().configure(ConsoleGUILemurStateI.i());
+		GlobalConsoleGuiI.i().set(ConsoleLemurStateI.i());
+		ConsoleLemurStateI.i().configureSimple(KeyInput.KEY_F10);
+		CommandsBackgroundState.i().configureSimple(ConsoleLemurStateI.i());
+		CommandsBackgroundState.i().configure();
 		FpsLimiterStateI.i().configure();
 		UngrabMouseStateI.i().configureSimple(null,null);
 
 		cd.addConsoleCommandListener(this);
 		
 		diag = new CustomDialogGUIState("TestDialog");
-		diag.configure(this,cd);
+		diag.configure();
 		
 //		SingleInstanceState.i().configureBeforeInitializing(this,true);
 		SingleAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);

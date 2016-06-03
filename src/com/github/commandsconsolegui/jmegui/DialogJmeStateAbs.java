@@ -25,18 +25,17 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.extras.jmegui;
+package com.github.commandsconsolegui.jmegui;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.jmegui.ImprovedAppState;
+import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalAppStateAbs;
+import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
+import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -46,9 +45,9 @@ import com.jme3.scene.Spatial;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class BaseGUIStateAbs extends ImprovedAppState implements IConsoleCommandListener, IReflexFillCfg{
-	protected SimpleApplication	sapp;
-	protected CommandsDelegatorI	cd;
+public abstract class DialogJmeStateAbs extends CmdConditionalAppStateAbs implements IWorkAroundBugFix, IReflexFillCfg{
+//	protected SimpleApplication	sapp;
+//	protected CommandsDelegatorI	cd;
 	
 	protected Node	ctnrMainTopSubWindow;
 	protected Node	intputField;
@@ -60,8 +59,10 @@ public abstract class BaseGUIStateAbs extends ImprovedAppState implements IConso
 //	BoolTogglerCmdField btgShowDialog = new BoolTogglerCmdField(this,false);
 	protected String	strCmdPrefix = "toggleUI";
 	protected String	strCmdSuffix = "";
+	private CommandsDelegatorI	cd;
+	private SimpleApplication	sapp;
 	
-	public BaseGUIStateAbs(String strUIId){
+	public DialogJmeStateAbs(String strUIId){
 		this.strUIId=strUIId;
 		this.strCmd=strCmdPrefix+strUIId+strCmdSuffix;
 		this.strTitle = "Dialog: "+strUIId;
@@ -70,19 +71,13 @@ public abstract class BaseGUIStateAbs extends ImprovedAppState implements IConso
 	
 	/**
 	 * Activate, Start, Begin, Initiate.
-	 * This will setup and activate everything to make it actually start working.
+	 * This will setup and instantiate everything to make it actually be able to work.
 	 */
 	@Override
-	public void initialize(Application app) {
-		super.initialize(app);
-//		asteInitDebug = Thread.currentThread().getStackTrace();
-		
-		initGUI();
+	protected boolean initializeProperly() {
+		initGUI(); //isEnabled()
 		initKeyMappings();
-		
-		setEnabled(false);
-		
-//		cc.addConsoleCommandListener(this);
+		return true;
 	}
 	
 	public String getCommand(){
@@ -91,29 +86,36 @@ public abstract class BaseGUIStateAbs extends ImprovedAppState implements IConso
 	
 	public abstract void requestFocus(Spatial spt);
 	
-	@Override
-	public void configure(Object... aobj) {
-		this.sapp = GlobalSappRefI.i().get();
-		this.sapp.getStateManager().attach(this);
-		
+	public void configure() {
+		super.configure(GlobalSappRefI.i().get());
+		sapp=GlobalSappRefI.i().get();
 		this.cd = GlobalCommandsDelegatorI.i().get();
-		this.cd.addConsoleCommandListener(this);
+		
+		/**
+		 * Sub windows dialogs must be initially disabled because they are 
+		 * enabled on user demand.
+		 */
+		bEnabled=false; 
 	}
 	
 	@Override
-	public void onEnable() {
+	protected boolean doEnableProperly() {
 		sapp.getGuiNode().attachChild(ctnrMainTopSubWindow);
 		
 		requestFocus(intputField);
 		
 		setMouseCursorKeepUngrabbed(true);
+		
+		return true;
 	}
 	
 	@Override
-	public void onDisable() {
+	protected boolean doDisableProperly() {
 		ctnrMainTopSubWindow.removeFromParent();
 		
 		setMouseCursorKeepUngrabbed(false);
+		
+		return true;
 	}
 	
 	/**
@@ -121,13 +123,11 @@ public abstract class BaseGUIStateAbs extends ImprovedAppState implements IConso
 	 * vanishing with (grabbing) the mouse cursor.
 	 * @param b
 	 */
-	public abstract void setMouseCursorKeepUngrabbed(boolean b);
+	public void setMouseCursorKeepUngrabbed(boolean b) {
+		UngrabMouseStateI.i().setKeepUngrabbedRequester(this,b);
+	}
 
 	protected abstract void initGUI();
-	
-	public void toggle() {
-		setEnabled(!isEnabled());
-	}
 	
 	public void setTitle(String str){
 		this.strTitle = str;
@@ -142,26 +142,6 @@ public abstract class BaseGUIStateAbs extends ImprovedAppState implements IConso
 	protected abstract void actionSubmit();
 	
 	protected abstract String getInputText();
-	
-	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI cc) {
-		boolean bCommandWorked = false;
-		
-		if(cc.checkCmdValidity(this,strCmd,"[bEnabledForce]")){
-			Boolean bEnabledForce = cc.paramBoolean(1);
-			if(bEnabledForce!=null){
-				setEnabled(bEnabledForce);
-			}else{
-				toggle();
-			}
-			bCommandWorked = true;
-		}else
-		{
-			return ECmdReturnStatus.NotFound;
-		}
-		
-		return cc.cmdFoundReturnStatus(bCommandWorked);
-	}
 	
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {

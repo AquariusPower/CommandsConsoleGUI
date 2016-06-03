@@ -25,17 +25,15 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console.jmegui.lemur;
+package com.github.commandsconsolegui.jmegui.lemur.console;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
-import com.github.commandsconsolegui.console.jmegui.ConsoleGuiStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
+import com.github.commandsconsolegui.jmegui.console.ConsoleJmeStateAbs;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.app.Application;
-import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapCharacter;
 import com.jme3.font.BitmapCharacterSet;
 import com.jme3.font.LineWrapMode;
@@ -74,9 +72,9 @@ import com.simsilica.lemur.style.Styles;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
-	protected static ConsoleGUILemurStateI instance=new ConsoleGUILemurStateI();
-	public static ConsoleGUILemurStateI i(){return instance;}
+public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
+	protected static ConsoleLemurStateI instance=new ConsoleLemurStateI();
+	public static ConsoleLemurStateI i(){return instance;}
 	
 	StringVarField svfBackgroundHexaColorRGBA = new StringVarField(this,"");
 	protected ConsoleCursorListener consoleCursorListener;
@@ -88,18 +86,39 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 
 	private ColorRGBA	colorConsoleStyleBackground;
 	
-	public ConsoleGUILemurStateI(){
+	public ConsoleLemurStateI(){
 		vlstrDumpEntriesSlowedQueue = new VersionedList<String>();
 		vlstrDumpEntries = new VersionedList<String>();
 	}
 	
+//	@Override
+//	public void initializePre() {
+//		super.initializePre();
+//		
+//		GuiGlobals.initialize(sapp);
+//		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
+//		
+//		addStyle(BaseStyles.GLASS);
+//		addStyle(Styles.ROOT_STYLE);
+//	}
+	
 	@Override
-	public void configureSimple(int iToggleConsoleKey) {
-		super.configureSimple(iToggleConsoleKey);
-		configure();
+	public void initialize(Application app) {
+		GuiGlobals.initialize(sapp);
+		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
+		
+		addStyle(BaseStyles.GLASS);
+		addStyle(Styles.ROOT_STYLE);
+		
+		super.initialize(app);
+		
+		initializationCompleted();
 	}
+	
 	@Override
-	public void configure(Object... aobj) {
+	public void configure() {
+		super.configure();
+		
 		// misc cfg
 		LemurMiscHelpersStateI.i().configure();
 //		LemurMiscHelpersStateI.i().initialize(sapp.getStateManager(), sapp);
@@ -142,7 +161,7 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 				int i = Integer.parseInt(svfBackgroundHexaColorRGBA.getStringValue(),16);//hexa string
 				colorConsoleStyleBackground.fromIntRGBA(i);
 			}catch(IllegalArgumentException ex){
-				cc.dumpExceptionEntry(ex);
+				cd.dumpExceptionEntry(ex);
 			}
 		}
 		
@@ -207,7 +226,7 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 		CursorEventControl.addListenersToSpatial(getHintBox(), consoleCursorListener);
 		
 		// main container
-		ctnrConsole = new Container(new BorderLayout(), strStyle);
+		ctnrMainTopSubWindow = new Container(new BorderLayout(), strStyle);
 //		LemurFocusHelperI.i().addFocusChangeListener(ctnrConsole);
 //		int iMargin=2;
 //		v3fConsoleSize = new Vector3f(
@@ -269,7 +288,7 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 		 * The existance of at least one entry is very important to help on initialization.
 		 * Actually to determine the listbox entry height.
 		 */
-		if(vlstrDumpEntries.isEmpty())vlstrDumpEntries.add(""+cc.getCommentPrefix()+" Initializing console.");
+		if(vlstrDumpEntries.isEmpty())vlstrDumpEntries.add(""+cd.getCommentPrefix()+" Initializing console.");
 		
 		getDumpArea().setModel((VersionedList<String>)vlstrDumpEntries);
 		getDumpArea().setVisibleItems(iShowRows);
@@ -282,7 +301,7 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 		 * BOTTOM ELEMENT =================================================================
 		 */
 		// input
-		super.tfInput = new TextField(""+cc.getCommandPrefix(),strStyle);
+		super.intputField = new TextField(""+cd.getCommandPrefix(),strStyle);
     CursorEventControl.addListenersToSpatial(getInputField(), consoleCursorListener);
 		LemurFocusHelperI.i().addFocusChangeListener(getInputField());
 		fInputHeight = MiscJmeI.i().retrieveBitmapTextFor(getInputField()).getLineHeight();
@@ -296,19 +315,19 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 	}
 	
 	@Override
-	protected void onEnable() {
+	public void onEnable() {
 		super.onEnable();
 		
-		sapp.getGuiNode().attachChild(getContainerConsole());
+//		sapp.getGuiNode().attachChild(getContainerConsole());
 		
 		commonOnEnableDisable();
 	}
 	
 	@Override
-	protected void onDisable() {
+	public void onDisable() {
 		super.onDisable();
 		
-		getContainerConsole().removeFromParent();
+//		getContainerConsole().removeFromParent();
 		closeHint();
 		
 		commonOnEnableDisable();
@@ -372,7 +391,7 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 	}
 	
 	public TextField getInputField(){
-		return (TextField)super.tfInput;
+		return (TextField)super.intputField;
 	}
 	
 	@Override
@@ -386,7 +405,7 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 	}
 
 	@Override
-	public ConsoleGUILemurStateI setHintIndex(Integer i) {
+	public ConsoleLemurStateI setHintIndex(Integer i) {
 		getHintBox().getSelectionModel().setSelection(i);
 		return this;
 	}
@@ -405,7 +424,7 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 	}
 
 	@Override
-	public ConsoleGUILemurStateI setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines) {
+	public ConsoleLemurStateI setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines) {
 		getHintBox().setPreferredSize(v3fBoxSizeXY);
 		getHintBox().setVisibleItems(iVisibleLines);
 		return this;
@@ -429,20 +448,20 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 //						if(bControl)cc.iCopyFrom = getDumpAreaSelectedIndex();
 //						break;
 					case KeyInput.KEY_C: 
-						if(bControl)cc.editCopyOrCut(false,false,false);
+						if(bControl)cd.editCopyOrCut(false,false,false);
 						break;
 					case KeyInput.KEY_ESCAPE: 
 						setEnabled(false);
 						break;
 					case KeyInput.KEY_V: 
 						if(bKeyShiftIsPressed){
-							if(bControl)cc.showClipboard();
+							if(bControl)cd.showClipboard();
 						}else{
 							if(bControl)editPaste();
 						}
 						break;
 					case KeyInput.KEY_X: 
-						if(bControl)cc.editCopyOrCut(false,true,false);
+						if(bControl)cd.editCopyOrCut(false,true,false);
 						break;
 					case KeyInput.KEY_NUMPADENTER:
 					case KeyInput.KEY_RETURN:
@@ -455,7 +474,7 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 						if(bControl)clearInputTextField();
 						break;
 					case KeyInput.KEY_SLASH:
-						if(bControl)cc.toggleLineCommentOrCommand();
+						if(bControl)cd.toggleLineCommentOrCommand();
 						break;
 				}
 			}
@@ -575,10 +594,10 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 		
 		getDumpArea().setVisibleItems(iShowRows);
 		
-		cc.varSet(cc.CMD_FIX_VISIBLE_ROWS_AMOUNT, ""+iShowRows, true);
+		cd.varSet(cd.CMD_FIX_VISIBLE_ROWS_AMOUNT, ""+iShowRows, true);
 		
 	//	lstbx.getGridPanel().setVisibleSize(iShowRows,1);
-		cc.dumpInfoEntry("fLstbxEntryHeight="+MiscI.i().fmtFloat(fLstbxEntryHeight)+", "+"iShowRows="+iShowRows);
+		cd.dumpInfoEntry("fLstbxEntryHeight="+MiscI.i().fmtFloat(fLstbxEntryHeight)+", "+"iShowRows="+iShowRows);
 		
 		iVisibleRowsAdjustRequest=null;
 		
@@ -659,7 +678,7 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 //	}
 	
 	public Container getContainerConsole(){
-		return (Container)ctnrConsole;
+		return (Container)ctnrMainTopSubWindow;
 	}
 	
 	public Container getContainerStatsAndControls(){
@@ -670,13 +689,13 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 		@Override
 		public void execute(Button source) {
 			if(source.equals(btnClipboardShow)){
-				cc.showClipboard();
+				cd.showClipboard();
 			}else
 			if(source.equals(btnCopy)){
-				cc.editCopyOrCut(false,false,false);
+				cd.editCopyOrCut(false,false,false);
 			}else
 			if(source.equals(btnCut)){
-				cc.editCopyOrCut(false,true,false);
+				cd.editCopyOrCut(false,true,false);
 			}else
 			if(source.equals(btnPaste)){
 				editPaste();
@@ -739,30 +758,6 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 	}
 	
 	@Override
-	public void initialize(Application app) {
-		GuiGlobals.initialize(sapp);
-		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
-		
-		addStyle(BaseStyles.GLASS);
-		addStyle(Styles.ROOT_STYLE);
-		
-		super.initialize(app);
-		
-		initializationCompleted();
-	}
-	
-//	@Override
-//	public void initializePre() {
-//		super.initializePre();
-//		
-//		GuiGlobals.initialize(sapp);
-//		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
-//		
-//		addStyle(BaseStyles.GLASS);
-//		addStyle(Styles.ROOT_STYLE);
-//	}
-	
-	@Override
 	protected float fontWidth(String strChars, String strStyle, boolean bAveraged){
 		float f = MiscJmeI.i().retrieveBitmapTextFor(new Label(strChars,strStyle)).getLineWidth();
 		if(bAveraged)f/=strChars.length();
@@ -795,6 +790,30 @@ public class ConsoleGUILemurStateI extends ConsoleGuiStateAbs{
 	@Override
 	protected void removeFocus(Object obj) {
 		LemurFocusHelperI.i().removeFocusableFromList((Spatial) obj);
+	}
+
+	@Override
+	public void requestFocus(Spatial spt) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void initGUI() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void initKeyMappings() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void actionSubmit() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

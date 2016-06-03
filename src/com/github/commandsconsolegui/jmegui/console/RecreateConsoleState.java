@@ -25,12 +25,14 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console.jmegui;
+package com.github.commandsconsolegui.jmegui.console;
 
 import java.util.concurrent.Callable;
 
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.jmegui.ImprovedAppState;
+import com.github.commandsconsolegui.jmegui.ConditionalAppStateAbs;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppStateManager;
@@ -40,7 +42,7 @@ import com.jme3.app.state.AppStateManager;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class RecreateConsoleState extends ImprovedAppState {
+public class RecreateConsoleState extends ConditionalAppStateAbs {
 	private static RecreateConsoleState instance = new RecreateConsoleState();
 	public static RecreateConsoleState i(){return instance;}
 	
@@ -121,9 +123,9 @@ public class RecreateConsoleState extends ImprovedAppState {
 	}
 
 	@Override
-	public void configure(Object... aobj) {
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI ccRequester) {
 		// TODO Auto-generated method stub
-		
+		return null;
 	}
-	
+
 }

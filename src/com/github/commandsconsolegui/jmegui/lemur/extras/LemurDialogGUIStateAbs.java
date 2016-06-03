@@ -25,18 +25,18 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.extras.jmegui.lemur;
+package com.github.commandsconsolegui.jmegui.lemur.extras;
 
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
-import com.github.commandsconsolegui.console.jmegui.lemur.ConsoleGUILemurStateI;
-import com.github.commandsconsolegui.console.jmegui.lemur.LemurFocusHelperI;
-import com.github.commandsconsolegui.console.jmegui.lemur.LemurMiscHelpersStateI;
-import com.github.commandsconsolegui.extras.jmegui.DialogGUIStateAbs;
-import com.github.commandsconsolegui.extras.jmegui.UngrabMouseStateI;
+import com.github.commandsconsolegui.jmegui.extras.DialogGUIStateAbs;
+import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
+import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
+import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperI;
+import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.input.KeyInput;
 import com.jme3.math.ColorRGBA;
@@ -90,7 +90,7 @@ public abstract class LemurDialogGUIStateAbs <V> extends DialogGUIStateAbs<V> {
 	 * @param fInfoPerc the percentual height to show informational text, the list and input field will properly use the remaining space
 	 */
 	protected void initGUI(float fDialogPerc, float fInfoPerc, Integer iEntryHeightPixels){
-		String strStyle = ConsoleGUILemurStateI.i().STYLE_CONSOLE;//BaseStyles.GLASS;
+		String strStyle = ConsoleLemurStateI.i().STYLE_CONSOLE;//BaseStyles.GLASS;
 		
 		Vector3f v3fApplicationWindowSize = new Vector3f(
 			sapp.getContext().getSettings().getWidth(),
@@ -380,8 +380,4 @@ public abstract class LemurDialogGUIStateAbs <V> extends DialogGUIStateAbs<V> {
 		return getInputField().getText();
 	}
 
-	@Override
-	public void setMouseCursorKeepUngrabbed(boolean b) {
-		UngrabMouseStateI.i().setKeepUngrabbedRequester(this,b);
-	}
 }

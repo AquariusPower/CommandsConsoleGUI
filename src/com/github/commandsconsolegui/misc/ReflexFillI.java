@@ -94,7 +94,9 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	
 	/**
 	 * Cannot be used at field constructor because that object is not ready yet 
-	 * and so its class owner does not have yet such field set to a 'this'...
+	 * and so its class owner does not have yet such field set to 'this'... 
+	 * self is still null at constructor.
+	 * 
 	 * @param objClassOwningField
 	 * @param objFieldValue if null, will validate if fields of type {@link IReflexFillCfgVariant#} are owned by the specified owner
 	 * @return

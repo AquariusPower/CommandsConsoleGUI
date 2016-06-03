@@ -471,6 +471,9 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	/**
+	 * This is the delegator, shall not be overriden.
+	 * TODO set to final, make scripting commands a simple plugin...
+	 * 
 	 * TODO rename to execCmdFromConsoleRequestRoot()
 	 * @return
 	 */
@@ -2645,6 +2648,7 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public void initialize(){
+		if(!bConfigured)throw new NullPointerException("not configured yet");
 		tdDumpQueuedEntry.updateTime();
 		
 		// init dump file, MUST BE THE FIRST!

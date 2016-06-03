@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console.jmegui.lemur;
+package com.github.commandsconsolegui.jmegui.lemur.console;
 
 import java.util.ArrayList;
 import java.util.Collections;

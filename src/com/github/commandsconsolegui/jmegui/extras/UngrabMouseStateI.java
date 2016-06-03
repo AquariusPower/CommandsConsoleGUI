@@ -25,12 +25,14 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.extras.jmegui;
+package com.github.commandsconsolegui.jmegui.extras;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.jmegui.ImprovedAppState;
+import com.github.commandsconsolegui.jmegui.ConditionalAppStateAbs;
 import com.jme3.app.Application;
 
 /**
@@ -38,7 +40,7 @@ import com.jme3.app.Application;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class UngrabMouseStateI extends ImprovedAppState {
+public class UngrabMouseStateI extends ConditionalAppStateAbs {
 	private static UngrabMouseStateI instance = new UngrabMouseStateI();
 	public static UngrabMouseStateI i(){return instance;}
 	
@@ -64,10 +66,10 @@ public class UngrabMouseStateI extends ImprovedAppState {
 	public void configureSimple(Long lSlowMachineDelayToUngrabMilis, Boolean bKeepUngrabbedOnSlowdown){
 		if(lSlowMachineDelayToUngrabMilis!=null)this.lDelayToUngrabMilis=lSlowMachineDelayToUngrabMilis;
 		if(bKeepUngrabbedOnSlowdown!=null)this.bKeepUngrabbedOnSlowDown=bKeepUngrabbedOnSlowdown;
-		configure();
 	}
 	@Override
-	public void configure(Object... aobj) {
+	public void configure() {
+		super.configure();
 		GlobalSappRefI.i().get().getStateManager().attach(this);
 	}
 	
@@ -171,6 +173,11 @@ public class UngrabMouseStateI extends ImprovedAppState {
 	protected void cleanup(Application app) {
 		super.cleanup(app);
 		bCleaningUp=true;
+	}
+	@Override
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI ccRequester) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

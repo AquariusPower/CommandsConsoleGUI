@@ -25,46 +25,13 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console.jmegui.lemur.test;
-
-import java.util.ArrayList;
-
-import com.github.commandsconsolegui.extras.jmegui.UngrabMouseStateI;
-import com.github.commandsconsolegui.extras.jmegui.lemur.LemurDialogGUIStateAbs;
-import com.github.commandsconsolegui.misc.MiscI;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.jme3.app.Application;
+package com.github.commandsconsolegui.misc;
 
 /**
+ * 
  * @author AquariusPower <https://github.com/AquariusPower>
+ *
  */
-public class CustomDialogGUIState extends LemurDialogGUIStateAbs<String>{
-	ArrayList<String> astr;
-	
-	public CustomDialogGUIState(String strUIId) {
-		super(strUIId);
-		astr = new ArrayList<String>();
-	}
-	
-	@Override
-	protected void updateTextInfo() {
-		lblTextInfo.setText("Info: Type a list filter at input text area and hit Enter.");
-//		super.updateTextInfo();
-	}
-	
-	@Override
-	protected void updateList() {
-		astr.add("New test entry: "+MiscI.i().getDateTimeForFilename(true));
-		if(astr.size()>100)astr.remove(0);
-		updateList(astr);
-	}
-
-	@Override
-	protected void cleanup(Application app) {
-		super.cleanup(app);
-		astr.clear();
-		astr=null;
-	}
+public class SimulationTimeReference {
 	
 }

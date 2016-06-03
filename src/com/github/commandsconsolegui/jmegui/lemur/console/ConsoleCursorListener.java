@@ -25,13 +25,13 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.console.jmegui.lemur;
+package com.github.commandsconsolegui.jmegui.lemur.console;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.console.jmegui.ConsoleGuiStateAbs;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalConsoleGuiI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
+import com.github.commandsconsolegui.jmegui.console.ConsoleJmeStateAbs;
 import com.jme3.app.SimpleApplication;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Panel;
@@ -45,10 +45,10 @@ import com.simsilica.lemur.event.DefaultCursorListener;
  *
  */
 public class ConsoleCursorListener extends DefaultCursorListener {
-	ConsoleGuiStateAbs csa;
+	ConsoleJmeStateAbs csa;
 	private SimpleApplication	sapp;
 	private CommandsDelegatorI	cc;
-	private ConsoleGuiStateAbs	cgui;
+	private ConsoleJmeStateAbs	cgui;
 	
 	public void configure(){
 		this.sapp=GlobalSappRefI.i().get();

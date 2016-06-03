@@ -3,6 +3,7 @@ Console-*
 *.java.todo
 *.java.secrfbkp
 *.bkp
+*.old
 /bin/
 /tmp/
 !lib/**/*.jar

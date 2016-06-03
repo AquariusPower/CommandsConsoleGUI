@@ -25,17 +25,19 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.extras.jmegui;
+package com.github.commandsconsolegui.jmegui.extras;
 
 import java.util.HashMap;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
-import com.github.commandsconsolegui.console.jmegui.lemur.LemurFocusHelperI;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.jmegui.ImprovedAppState;
+import com.github.commandsconsolegui.jmegui.JmeCmdAppState;
+import com.github.commandsconsolegui.jmegui.JmeGUIStateAbs;
+import com.github.commandsconsolegui.jmegui.ConditionalAppStateAbs;
+import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -51,7 +53,7 @@ import com.jme3.scene.Spatial;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class DialogGUIStateAbs <V> extends BaseGUIStateAbs{
+public abstract class DialogGUIStateAbs <V> extends JmeCmdAppState{
 	protected Node cntrNorth;
 	protected String	strLastFilter = "";
 	protected HashMap<String,V> hmKeyValue = new HashMap<String,V>();

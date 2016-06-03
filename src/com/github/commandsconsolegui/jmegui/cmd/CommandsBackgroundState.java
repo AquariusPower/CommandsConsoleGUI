@@ -25,19 +25,15 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.cmd.jmegui;
+package com.github.commandsconsolegui.jmegui.cmd;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.IConsoleUI;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
-import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.jmegui.ImprovedAppState;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.jme3.app.SimpleApplication;
 
 /**
  * This is not a thread.
@@ -47,7 +43,7 @@ import com.jme3.app.SimpleApplication;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class CommandsBackgroundState extends ImprovedAppState implements IReflexFillCfg{
+public class CommandsBackgroundState extends CmdConditionalAppStateAbs {
 	private static CommandsBackgroundState instance = new CommandsBackgroundState();
 	public static CommandsBackgroundState i(){return instance;}
 	
@@ -55,71 +51,50 @@ public class CommandsBackgroundState extends ImprovedAppState implements IReflex
 		"Will continue running console commands even if console is closed.");
 	
 	private IConsoleUI	cgsaGraphicalConsoleUI;
-	private CommandsDelegatorI	ccCommandsPipe;
-
-	private SimpleApplication	sapp;
-
-	private boolean	bConfigured;
 	
-	/**
-	 * expected params:
-	 * {@link IConsoleUI}
-	 */
+	public void configureSimple(IConsoleUI icui){
+		super.configure("KeepRunningCommandsInBackground");
+		
+		this.cgsaGraphicalConsoleUI = icui;
+	}
+	
 	@Override
-	public void configure(Object... aobj) {
-		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		
-		for(Object obj:aobj){
-			if(obj instanceof IConsoleUI){
-				this.cgsaGraphicalConsoleUI = (IConsoleUI)obj;
-			}else{
-				throw new NullPointerException("invalid/unexpected object class, not supported: "+obj.getClass().getName());
-			}
-		}
-		
-		this.sapp=GlobalSappRefI.i().get();
-		this.ccCommandsPipe=GlobalCommandsDelegatorI.i().get();
-		
-//		this.bEnabled=true; //just to let it be initialized at startup by state manager
-		
-		if(!sapp.getStateManager().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
-		
-//		btgExecCommandsInBackground=new BoolToggler(this, false, ConsoleCommands.strTogglerCodePrefix,
-//			"Will continue running console commands even if console is closed.");
-		
-		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
-		
-		bConfigured=true;
+	protected boolean checkInitPrerequisites() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	@Override
-	public void update(float tpf) {
-		if(cgsaGraphicalConsoleUI.isEnabled())return; //foreground execution
+	protected boolean initializeProperly() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	protected boolean updateProperly(float tpf) {
+		if(!btgExecCommandsInBackground.b())return false;
 		
-		if(!btgExecCommandsInBackground.b())return;
+		if(cgsaGraphicalConsoleUI.isEnabled())return false; //will be foreground execution
 		
 		/**
-		 * This way, being controlled by JME, the commands will happen in the same 
-		 * rate they would with the other state.
+		 * This way, being controlled by JME state update, the commands will happen in the same 
+		 * rate they would with the console foreground state.
 		 */
-		ccCommandsPipe.update(tpf);
-	}
-
-	@Override
-	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
-		return ccCommandsPipe.getReflexFillCfg(rfcv);
-	}
-
-	@Override
-	protected void onEnable() {
-		// TODO Auto-generated method stub
+		cd.update(tpf);
 		
+		return true;
 	}
 
 	@Override
-	protected void onDisable() {
+	protected boolean doEnableProperly() {
 		// TODO Auto-generated method stub
-		
+		return false;
 	}
-	
+
+	@Override
+	protected boolean doDisableProperly() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

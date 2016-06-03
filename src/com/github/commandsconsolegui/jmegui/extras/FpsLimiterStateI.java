@@ -25,11 +25,11 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.extras.jmegui;
+package com.github.commandsconsolegui.jmegui.extras;
 
-import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.globals.GlobalStateManagerRefI;
-import com.github.commandsconsolegui.jmegui.ImprovedAppState;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
+import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
+import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalAppStateAbs;
 
 /**
  * Spare GPU fan!
@@ -37,7 +37,7 @@ import com.github.commandsconsolegui.jmegui.ImprovedAppState;
  * @author AquariusPower <https://github.com/AquariusPower>
  * 
  */
-public class FpsLimiterStateI extends ImprovedAppState{
+public class FpsLimiterStateI extends CmdConditionalAppStateAbs{
 	private static FpsLimiterStateI instance = new FpsLimiterStateI();
 	public static FpsLimiterStateI i(){return instance;}
 	
@@ -51,7 +51,6 @@ public class FpsLimiterStateI extends ImprovedAppState{
 	private long	lNanoThreadSleep;
 	private long	lNanoDelayLimit;
 	private int	iMaxFPS;
-	private boolean	bConfigured;
 	
 	public FpsLimiterStateI(){
 		setMaxFps(60);
@@ -121,19 +120,52 @@ public class FpsLimiterStateI extends ImprovedAppState{
 	}
 	
 	@Override
-	public void configure(Object... aobj) {
-		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		if(!GlobalStateManagerRefI.i().get().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
-		bConfigured=true;
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI cc) {
+		boolean bCommandWorked = false;
+		
+		if(cc.checkCmdValidity(null,"fpsLimit","[iMaxFps]")){
+			Integer iMaxFps = cc.paramInt(1);
+			if(iMaxFps!=null){
+				FpsLimiterStateI.i().setMaxFps(iMaxFps);
+				bCommandWorked=true;
+			}
+			cc.dumpSubEntry("FpsLimit = "+FpsLimiterStateI.i().getFpsLimit());
+		}else
+		{
+//			return cc.executePreparedCommandRoot();
+			return ECmdReturnStatus.NotFound;
+		}
+		
+		return cc.cmdFoundReturnStatus(bCommandWorked);
 	}
 
 	@Override
-	protected void onEnable() {
+	protected boolean checkInitPrerequisites() {
 		// TODO Auto-generated method stub
+		return false;
 	}
 
 	@Override
-	protected void onDisable() {
+	protected boolean initializeProperly() {
 		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	protected boolean updateProperly(float tpf) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	protected boolean doEnableProperly() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	protected boolean doDisableProperly() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }
