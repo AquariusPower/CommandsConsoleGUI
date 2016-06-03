@@ -29,74 +29,83 @@ package com.github.commandsconsolegui.jmegui.console;
 
 import java.util.concurrent.Callable;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.ConditionalAppStateAbs;
-import com.jme3.app.Application;
+import com.github.commandsconsolegui.jmegui.console.ReattachSafelyState.ReattachSafelyValidateSteps;
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.AppStateManager;
+import com.jme3.app.state.AppState;
 
 /**
+ * Reattaches other states safely, one step per call to this state update. 
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class RecreateConsoleState extends ConditionalAppStateAbs {
-	private static RecreateConsoleState instance = new RecreateConsoleState();
-	public static RecreateConsoleState i(){return instance;}
+public class ReattachSafelyState <S extends ReattachSafelyValidateSteps> extends ConditionalAppStateAbs<SimpleApplication> {
+//	private static ReattachOtherStateSafelyStateI instance = new ReattachOtherStateSafelyStateI();
+//	public static ReattachOtherStateSafelyStateI i(){return instance;}
+	
+	public static interface ReattachSafelyValidateSteps extends AppState{
+		public abstract boolean reattachValidateStep(ERecreateConsoleSteps ercs);
+	}
 	
 	enum ERecreateConsoleSteps{
-		Detach_0,
-		Attach_1,
-		PostInitialization_2,
+		Step0Detach,
+		Step1Attach,
+		Step2PostInitialization,
 	}
 	
 	ERecreateConsoleSteps ercCurrentStep = null;
 	
-	private AppStateManager	sm;
-	private SimpleApplication	sapp;
-
 	private Callable<Void>	detach;
-
 	private Callable<Void>	attach;
-
 	private Callable<Void>	postInitialization;
+
+	private S	stateTarget;
 	
-	@Override
-	protected void initialize(Application app) {
-		super.initialize(app);
-		sapp = GlobalSappRefI.i().get();
-		sm = GlobalSappRefI.i().get().getStateManager();
+	public ReattachSafelyState(S stateTarget){
+		this.stateTarget=stateTarget;
+			
+		configureValidating();
+	}
+	
+	protected boolean configureValidating() {
+		if(this.stateTarget==null)throw new NullPointerException("target state is null");
+		
+		return super.configureValidating(GlobalSappRefI.i().get());
 	}
 	
 	@Override
-	public void update(float tpf) {
-		super.update(tpf);
+	public boolean updateValidating(float tpf) {
+		if(ercCurrentStep==null)return false;
 		
-		if(ercCurrentStep==null)return;
+		if(stateTarget.reattachValidateStep(ercCurrentStep))return false;
 		
 		switch(ercCurrentStep){
-			case Detach_0:
-				if(sm.getState(this.getClass())!=null){
-					sapp.enqueue(detach);
-					ercCurrentStep=ERecreateConsoleSteps.Attach_1;
+			case Step0Detach:
+				if(getApp().getStateManager().getState(stateTarget.getClass())!=null){
+					getApp().enqueue(detach);
+					ercCurrentStep=ERecreateConsoleSteps.Step1Attach;
+					return true;
 				}
 				break;
-			case Attach_1:
-				if(sm.getState(this.getClass())==null){
-					sapp.enqueue(attach);
-					ercCurrentStep=ERecreateConsoleSteps.PostInitialization_2;
+			case Step1Attach:
+				if(getApp().getStateManager().getState(stateTarget.getClass())==null){
+					getApp().enqueue(attach);
+					ercCurrentStep=ERecreateConsoleSteps.Step2PostInitialization;
+					return true;
 				}
 				break;
-			case PostInitialization_2:
-				if(isInitialized()){
-					sapp.enqueue(postInitialization);
+			case Step2PostInitialization:
+				if(isInitializedProperly()){
+					getApp().enqueue(postInitialization);
 					ercCurrentStep=null;
+					return true;
 				}
 				break;
 		}
 		
+		return false;
 	}
 	
 	public boolean isProcessingRequest(){
@@ -107,25 +116,31 @@ public class RecreateConsoleState extends ConditionalAppStateAbs {
 		this.detach = detach;
 		this.attach = attach;
 		this.postInitialization = postInitialization;
-		ercCurrentStep=ERecreateConsoleSteps.Detach_0;
-	}
-	
-	@Override
-	protected void onEnable() {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	@Override
-	protected void onDisable() {
-		// TODO Auto-generated method stub
-		
+		ercCurrentStep=ERecreateConsoleSteps.Step0Detach;
 	}
 
 	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI ccRequester) {
+	protected boolean checkInitPrerequisites() {
 		// TODO Auto-generated method stub
-		return null;
+		return false;
 	}
 
+	@Override
+	protected boolean initializeValidating() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	protected boolean enableValidating() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	protected boolean disableValidating() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
 }

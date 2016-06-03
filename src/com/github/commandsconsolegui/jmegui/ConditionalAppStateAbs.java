@@ -41,13 +41,15 @@ import com.jme3.renderer.RenderManager;
  * This is an adaptation to the way {@link #AppState} is managed.
  * 
  * The concept of initialization is overriden by proper/conditional initialization.
- * The initialization will actually happen during {@link #update(float)},
+ * The initialization will actually happen during {@link #updateProperly(float)},
  * where it will be properly validated and retried at specified time interval.
+ * 
+ * Keep this depending solely in JME!
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class ConditionalAppStateAbs implements AppState {
+public abstract class ConditionalAppStateAbs <A extends Application> implements AppState {
 	
 	// CONFIGURE 
 	private boolean bConfigured;
@@ -78,7 +80,7 @@ public abstract class ConditionalAppStateAbs implements AppState {
 	protected boolean bHoldProperInitialization = false;
 	
 	/** you can skip configure() by setting this one*/
-	protected Application	app;
+	private A app;
 	
 	private boolean	bLastUpdateSuccessful;
 	private boolean	bHoldUpdates;
@@ -99,18 +101,26 @@ public abstract class ConditionalAppStateAbs implements AppState {
 	
 	/**
 	 * Configure simple references assignments and variable values.
-	 * Put here only things that will not change on {@link #cleanup()} !
+	 * Put here only things that will not change on {@link #cleanupProperly()} !
 	 * 
 	 * @param app
+	 * @return helps on implementing a retry to configure in case of non critical failures
 	 */
-	public void configure(Application app){
+	public <A2 extends A> boolean configureValidating(A2 app){
 		// internal configurations
 		this.app=app;
+		if(this.app==null)throw new NullPointerException("app is null");
 		
 		// configs above
 		this.bConfigured=true;
 		
 		preInitRequest();
+		
+		return isConfigured();
+	}
+	
+	public boolean isConfigured(){
+		return bConfigured;
 	}
 	
 	/**
@@ -126,14 +136,22 @@ public abstract class ConditionalAppStateAbs implements AppState {
 		return lTimeReferenceMilis==null ? System.currentTimeMillis() : lTimeReferenceMilis;
 	}
 	
+	public A getApp(){
+		return app();
+	}
+	public A app(){
+		return app;
+	}
+	
+	
 	/**
 	 * This will self configure/add to state manager.
-	 * This is to be called after a {@link #cleanup()}.
+	 * This is to be called after a {@link #cleanupProperly()}.
 	 * 
 	 * @return
 	 */
 	protected boolean preInitRequest() {
-		if(!bConfigured)throw new NullPointerException("not configured yet!");
+		assertIsConfigured();
 		
 		if(bPreInitialized)return true;
 		
@@ -148,6 +166,14 @@ public abstract class ConditionalAppStateAbs implements AppState {
 		return false;
 	}
 	
+	private void assertIsConfigured() {
+		if(!isConfigured())throw new NullPointerException("not configured yet!");
+	}
+	
+	private void assertIsPreInitialized() {
+		if(!bPreInitialized)throw new NullPointerException("not pre-initialized yet!");
+	}
+
 	public boolean isPreInitHold() {
 		return bPreInitHold;
 	}
@@ -156,23 +182,28 @@ public abstract class ConditionalAppStateAbs implements AppState {
 		this.bPreInitHold = bPreInitHold;
 	}
 	
+	/**
+	 * dummified<br>
+	 * implement {@link #initializeValidating()} instead<br>
+	 * the initialization will actually happen at {@link #updateProperly(float)}<br>
+	 */
+	@Deprecated
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
-		/**
-		 * dummified
-		 */
+		// KEEP EMPTY! dummified!
 	};
 	
+	@Deprecated
 	@Override
 	public boolean isInitialized() {
-		return isProperlyInitialized();
+		return isInitializedProperly();
 	}
 	
 	public boolean isPreInitialized(){
 		return bPreInitialized;
 	}
 	
-	public boolean isProperlyInitialized(){
+	public boolean isInitializedProperly(){
 		return bProperlyInitialized;
 	}
 	
@@ -217,84 +248,93 @@ public abstract class ConditionalAppStateAbs implements AppState {
 	}
 	
 	protected abstract boolean checkInitPrerequisites();
-	protected abstract boolean initializeProperly();
-	protected abstract boolean updateProperly(float tpf);
-	protected abstract boolean doEnableProperly();
-	protected abstract boolean doDisableProperly();
+	protected abstract boolean initializeValidating();
+	protected abstract boolean updateValidating(float tpf);
+	protected abstract boolean enableValidating();
+	protected abstract boolean disableValidating();
 	
 	/**
-	 * better not override, use {@link #updateProperly(float)} instead!
-	 * TODO make it final?
+	 * 
 	 */
+	@Deprecated
 	@Override
 	public void update(float tpf) {
-		if(!bConfigured)throw new NullPointerException("not configured yet!");
-		
-		if(!bPreInitialized)throw new NullPointerException("not pre-initialized yet!");
-//		if(bPreInitHold)return;
-//		if(!bPreInitialized){
-//			preInitRequest();
-//			return; //basically to let state manager have time to initialize it
-////				throw new NullPointerException("not pre-initialized yet!");
-//		}
+		/**
+		 * this code is implemented here to keep compatibility to calls made to {@link AppState}
+		 */
+		updateProperly(tpf);
+	}
+	
+	/**
+	 * Better not override, just use {@link #updateValidating(float)} instead!<br>
+	 * 
+	 * TODO make it final? would provide less flexibility to developers tho...
+	 */
+	public boolean updateProperly(float tpf) {
+		assertIsConfigured();
+		assertIsPreInitialized();
 		
 		if(!bProperlyInitialized){
-			if(bHoldProperInitialization)return;
+			if(bHoldProperInitialization)return false;
 			
 			if(updateTime() < (lInitRetryStartMilis+lInitRetryDelayMilis)){
-				return;
+				return false;
 			}
 			
-			if(!checkInitPrerequisites() && !initializeProperly()){
+			if(!checkInitPrerequisites() && !initializeValidating()){
 				lInitRetryStartMilis=updateTime();
-				return;
+				return false;
 			}
 			
 			bProperlyInitialized=true;
 		}
 		
 		if(bEnabledRequested && !bEnabled){
-			if(bHoldEnable)return;
-			bEnableSuccessful=doEnableProperly();
+			if(bHoldEnable)return false;
+			bEnableSuccessful=enableValidating();
 			bEnabled=bEnableSuccessful;
 		}else
 		if(bDisabledRequested && bEnabled){
-			if(bHoldDisable)return;
-			bDisableSuccessful=doDisableProperly();
+			if(bHoldDisable)return false;
+			bDisableSuccessful=disableValidating();
 			bEnabled=!bDisableSuccessful;
 		}
 		
 		if(bEnabled){
-			if(bHoldUpdates)return;
+			if(bHoldUpdates)return false;
 			
-			bLastUpdateSuccessful = updateProperly(tpf);
-			if(!bLastUpdateSuccessful)return;
+			bLastUpdateSuccessful = updateValidating(tpf);
+			if(!bLastUpdateSuccessful)return bLastUpdateSuccessful;
 			/**
 			 * SelfNote: More code can go only here.
 			 */
 		}
+		
+		return false;
 	};
 	
 	public void toggleRequest(){
-		if(!isPreInitialized())throw new NullPointerException("not pre-initialized!");
-//		boolean bNewState = !isEnabled();
-//		
-//		if(!isInitialized()){
-//			if(bNewState)return false;
-//			return true;
-//		}
-//		
-//		setEnabled(bNewState);
-		setEnabled(!isEnabled());
-//		
-//		return true;
+		assertIsPreInitialized();
+		setEnabledRequest(!isEnabled());
+	}
+	
+	@Deprecated
+	@Override
+	public void setEnabled(boolean bEnabledRequested) {
+		/**
+		 * this code is implemented here to keep compatibility to calls made to {@link AppState}
+		 */
+		setEnabledRequest(bEnabledRequested);
 	}
 	
 	/**
+	 * use {@link #requestEnable()} or {@link #requestDisable()} instead
+	 * 
 	 * @param bEnabledRequested if false, will be a Disable Request.
 	 */
-	@Override
-	public void setEnabled(boolean bEnabledRequested) {
+	protected void setEnabledRequest(boolean bEnabledRequested) {
+		assertIsPreInitialized();
+		
 		if(bEnabledRequested){
 			this.bEnabledRequested = true;
 			this.bDisabledRequested = false;
@@ -304,14 +344,30 @@ public abstract class ConditionalAppStateAbs implements AppState {
 		}
 //		lEnableDisableRequestTimeMilis=updateTime();
 	};
+
+	public void requestEnable(){
+		setEnabled(true);
+	}
+	
+	public void requestDisable(){
+		setEnabled(false);
+	}
 	
 	@Override
 	public boolean isEnabled() {
 		return bEnabled;
 	}
 	
+	@Deprecated
 	@Override 
 	public void cleanup() {
+		/**
+		 * this code is implemented here to keep compatibility to calls made to {@link AppState}
+		 */
+		cleanupProperly();
+	}
+	
+	public void cleanupProperly() {
 		if(!bProperlyInitialized)return;
 		
 		if(bEnabled){
@@ -320,7 +376,7 @@ public abstract class ConditionalAppStateAbs implements AppState {
 			if(updateTime() < (lCleanupRequestMilis+lCleanupRetryDelayMilis)){
 				bReAddToQueue=true;
 			}else{
-				bReAddToQueue=!doDisableProperly();
+				bReAddToQueue=!disableValidating();
 				if(bReAddToQueue){ //failed, retry
 					lCleanupRequestMilis=updateTime();
 				}
@@ -330,7 +386,7 @@ public abstract class ConditionalAppStateAbs implements AppState {
 				app.enqueue(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
-						cleanup(); // stackless "recursiveness"
+						cleanupProperly(); // stackless "recursiveness"
 						return null;
 					}
 				});

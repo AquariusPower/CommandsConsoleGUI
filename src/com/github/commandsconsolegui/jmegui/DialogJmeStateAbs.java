@@ -74,7 +74,7 @@ public abstract class DialogJmeStateAbs extends CmdConditionalAppStateAbs implem
 	 * This will setup and instantiate everything to make it actually be able to work.
 	 */
 	@Override
-	protected boolean initializeProperly() {
+	protected boolean initializeValidating() {
 		initGUI(); //isEnabled()
 		initKeyMappings();
 		return true;
@@ -99,7 +99,7 @@ public abstract class DialogJmeStateAbs extends CmdConditionalAppStateAbs implem
 	}
 	
 	@Override
-	protected boolean doEnableProperly() {
+	protected boolean enableValidating() {
 		sapp.getGuiNode().attachChild(ctnrMainTopSubWindow);
 		
 		requestFocus(intputField);
@@ -110,7 +110,7 @@ public abstract class DialogJmeStateAbs extends CmdConditionalAppStateAbs implem
 	}
 	
 	@Override
-	protected boolean doDisableProperly() {
+	protected boolean disableValidating() {
 		ctnrMainTopSubWindow.removeFromParent();
 		
 		setMouseCursorKeepUngrabbed(false);

@@ -37,6 +37,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
+import com.jme3.app.SimpleApplication;
 
 /**
  * basic state console commands control
@@ -44,21 +45,32 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class CmdConditionalAppStateAbs extends ConditionalAppStateAbs implements IConsoleCommandListener, IReflexFillCfg {
-	CommandsDelegatorI cd;
+public abstract class CmdConditionalAppStateAbs extends ConditionalAppStateAbs<SimpleApplication> implements IConsoleCommandListener, IReflexFillCfg {
+	private CommandsDelegatorI cd;
+	
 	private String	strCmdIdentifier;
 	protected String strCmdPrefix="toggle";
 	protected String strCmdSuffix="State";
 	
-	public void configure(String strCmdIdentifier) {
-		super.configure(GlobalSappRefI.i().get());
-		cd=GlobalCommandsDelegatorI.i().get();
+	public CommandsDelegatorI getCmdDelegator(){
+		return cd();
+	}
+	public CommandsDelegatorI cd(){
+		return cd;
+	}
+	
+	public boolean configureValidating(String strCmdIdentifier) {
+		if(super.configureValidating(GlobalSappRefI.i().get())){
+			cd=GlobalCommandsDelegatorI.i().get();
+			
+			this.strCmdIdentifier=strCmdPrefix+strCmdIdentifier+strCmdSuffix;
+			
+			cd.addConsoleCommandListener(this);
+			
+			ReflexFillI.i().assertReflexFillFieldsForOwner(this);
+		}
 		
-		this.strCmdIdentifier=strCmdPrefix+strCmdIdentifier+strCmdSuffix;
-		
-		cd.addConsoleCommandListener(this);
-		
-		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
+		return isConfigured();
 	}
 	
 	@Override
@@ -74,7 +86,7 @@ public abstract class CmdConditionalAppStateAbs extends ConditionalAppStateAbs i
 			}
 			
 			if(bEnabledForce!=null){
-				setEnabled(bEnabledForce);
+				setEnabledRequest(bEnabledForce);
 			}else{
 				toggleRequest();
 			}

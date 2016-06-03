@@ -65,13 +65,13 @@ public class CommandsBackgroundState extends CmdConditionalAppStateAbs {
 	}
 
 	@Override
-	protected boolean initializeProperly() {
+	protected boolean initializeValidating() {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	protected boolean updateProperly(float tpf) {
+	protected boolean updateValidating(float tpf) {
 		if(!btgExecCommandsInBackground.b())return false;
 		
 		if(cgsaGraphicalConsoleUI.isEnabled())return false; //will be foreground execution
@@ -86,13 +86,13 @@ public class CommandsBackgroundState extends CmdConditionalAppStateAbs {
 	}
 
 	@Override
-	protected boolean doEnableProperly() {
+	protected boolean enableValidating() {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	protected boolean doDisableProperly() {
+	protected boolean disableValidating() {
 		// TODO Auto-generated method stub
 		return false;
 	}

@@ -54,6 +54,8 @@ import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.DialogJmeStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
+import com.github.commandsconsolegui.jmegui.console.ReattachSafelyState.ERecreateConsoleSteps;
+import com.github.commandsconsolegui.jmegui.console.ReattachSafelyState.ReattachSafelyValidateSteps;
 //import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersState;
 import com.github.commandsconsolegui.misc.AutoCompleteI;
 import com.github.commandsconsolegui.misc.DebugI;
@@ -95,13 +97,20 @@ import com.jme3.texture.Texture2D;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IConsoleUI {
+public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IConsoleUI, ReattachSafelyValidateSteps {
 //	protected FpsLimiterState fpslState = new FpsLimiterState();
 	
 	public ConsoleJmeStateAbs() {
 		super("Console");
 	}
-
+	
+	ReattachSafelyState rss = new ReattachSafelyState(this);
+	
+	@Override
+	public boolean reattachValidateStep(ERecreateConsoleSteps ercs){
+		return true;
+	}
+	
 	//	protected final String strInputIMCPREFIX = "CONSOLEGUISTATE_";
 	public final String strFinalFieldInputCodePrefix="INPUT_MAPPING_CONSOLE_";
 	public final StringCmdField INPUT_MAPPING_CONSOLE_TOGGLE = new StringCmdField(this,strFinalFieldInputCodePrefix);
@@ -2220,7 +2229,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	
 	@Override
 	public void recreateConsoleGui() {
-		if(RecreateConsoleState.i().isProcessingRequest()){
+		if(rss.isProcessingRequest()){
 			System.err.println("Console recreation request is already being processed...");
 			return;
 		}
@@ -2254,7 +2263,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 			}
 		};
 		
-		RecreateConsoleState.i().request(detach,attach,postInitialization);
+		ReattachSafelyState.i().request(detach,attach,postInitialization);
 	}
 	
 	/**

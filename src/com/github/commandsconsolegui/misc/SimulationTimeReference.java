@@ -27,11 +27,49 @@
 
 package com.github.commandsconsolegui.misc;
 
+
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
 public class SimulationTimeReference {
+	/**
+	 * instantiate with private/protected constructor on a private/protected field to 
+	 * forbid other classes from updating the time
+	 */
+	public static interface ISimulationTimeKey{}
 	
+	Long lTimeMilis = null;
+	private ISimulationTimeKey	istk;
+	
+	public long getTimeMilis(){
+		return lTimeMilis==null ? System.currentTimeMillis() : lTimeMilis;
+	}
+	
+	public SimulationTimeReference update(Long lTimeMilis){
+		return update(lTimeMilis,null); //no key
+	}
+	
+	/**
+	 * 
+	 * @param lTimeMilis
+	 * @param istk the class instantiating this can be the sole class allowed to call this method
+	 * @return
+	 */
+	public SimulationTimeReference update(Long lTimeMilis, ISimulationTimeKey istk){
+		if(this.istk==null){
+			this.istk=istk;
+		}else{
+			/**
+			 * key access restriction
+			 */
+			if(!this.istk.equals(istk)){
+				throw new NullPointerException("invalid key "+istk+", expected "+this.istk);
+			}
+		}
+		
+		this.lTimeMilis=lTimeMilis;
+		return this;
+	}
 }
