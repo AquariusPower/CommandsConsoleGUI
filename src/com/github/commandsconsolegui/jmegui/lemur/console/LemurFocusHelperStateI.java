@@ -32,10 +32,10 @@ import java.util.Collections;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
-import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
+import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalAppStateAbs;
 import com.jme3.app.SimpleApplication;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -52,33 +52,32 @@ import com.simsilica.lemur.focus.FocusTarget;
  * @author AquariusPower <https://github.com/AquariusPower>
  * 
  */
-public class LemurFocusHelperI implements FocusChangeListener,IConsoleCommandListener{
-	private static LemurFocusHelperI	instance;
-	public static LemurFocusHelperI i(){
-		if(instance==null)instance=new LemurFocusHelperI();
-		return instance;
-	}
+public class LemurFocusHelperStateI extends CmdConditionalAppStateAbs implements FocusChangeListener {
+	private static LemurFocusHelperStateI	instance=new LemurFocusHelperStateI();
+	public static LemurFocusHelperStateI i(){return instance;}
 	
 	ArrayList<FocusTarget> aftZOrderList = new ArrayList<FocusTarget>();
 	ArrayList<Spatial> asptFocusRequestList = new ArrayList<Spatial>();
 	private FocusManagerState focusState;
-	private SimpleApplication	sapp;
-	private CommandsDelegatorI	cc;
+//	private SimpleApplication	sapp;
+//	private CommandsDelegatorI	cc;
 	private Float	fBaseZ = 0f;
 	
-	public void configure(){
-		this.sapp=GlobalSappRefI.i().get();
-		this.cc=GlobalCommandsDelegatorI.i().get();
-		
-		cc.addConsoleCommandListener(this);
-	}
+//	public void configure(){
+//		this.sapp=GlobalSappRefI.i().get();
+//		this.cc=GlobalCommandsDelegatorI.i().get();
+//		
+//		cc.addConsoleCommandListener(this);
+//	}
+	
 	/**
 	 * The initial Z value from where the dialogs will be sorted/ordered.
 	 * So if you have other gui elements, this can be changed to show dialogs above or under them.
 	 */
 	public void configureSimple(Float fBaseZ){
 		if(fBaseZ!=null)this.fBaseZ = fBaseZ;
-		configure();
+		super.configureValidating(LemurFocusHelperStateI.class.getSimpleName(), false);
+//		configure();
 	}
 	
 	public ArrayList<String> debugReport(){
@@ -110,7 +109,7 @@ public class LemurFocusHelperI implements FocusChangeListener,IConsoleCommandLis
 	 * @return
 	 */
 	private FocusManagerState getFocusManagerState(){
-		if(focusState==null)focusState = sapp.getStateManager().getState(FocusManagerState.class);
+		if(focusState==null)focusState = app().getStateManager().getState(FocusManagerState.class);
 		return focusState;
 	}
 	
@@ -230,9 +229,41 @@ public class LemurFocusHelperI implements FocusChangeListener,IConsoleCommandLis
 		return cc.cmdFoundReturnStatus(bCmdEndedGracefully);
 	}
 	
-	public void update(float tpf) {
+	@Override
+	protected boolean updateValidating(float tpf) {
 		Spatial spt = getCurrentFocusRequester();
-		GuiGlobals.getInstance().requestFocus(spt);
+		GuiGlobals.getInstance().requestFocus(spt); //TODO timed delay?
+		return true;
+	}
+
+	@Override
+	protected boolean checkInitPrerequisites() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	protected boolean initializeValidating() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	protected boolean enableValidating() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	protected boolean disableValidating() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	protected boolean cleanupValidating() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 	
 }

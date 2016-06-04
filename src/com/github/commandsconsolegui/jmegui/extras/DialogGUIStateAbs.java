@@ -29,22 +29,8 @@ package com.github.commandsconsolegui.jmegui.extras;
 
 import java.util.HashMap;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
-import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
-import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.jmegui.JmeCmdAppState;
-import com.github.commandsconsolegui.jmegui.JmeGUIStateAbs;
-import com.github.commandsconsolegui.jmegui.ConditionalAppStateAbs;
-import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperI;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.jme3.app.Application;
-import com.jme3.app.SimpleApplication;
+import com.github.commandsconsolegui.jmegui.DialogJmeStateAbs;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 
 /**
  * A console command will be automatically created based on the configured {@link #strUIId}.<br>
@@ -53,25 +39,21 @@ import com.jme3.scene.Spatial;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class DialogGUIStateAbs <V> extends JmeCmdAppState{
+public abstract class DialogGUIStateAbs <V> extends DialogJmeStateAbs{
 	protected Node cntrNorth;
 	protected String	strLastFilter = "";
 	protected HashMap<String,V> hmKeyValue = new HashMap<String,V>();
 	protected String	strLastSelectedKey;
 	
-	public DialogGUIStateAbs(String strUIId) {
-		super(strUIId);
-	}
-	
 	public abstract void clearSelection();
 	
 	@Override
-	public void onEnable() {
-		super.onEnable();
-		
+	protected boolean enableValidating() {
 		updateTextInfo();
 		updateList();
 		updateInputField();
+		
+		return super.enableValidating();
 	}
 	
 	/**
@@ -96,9 +78,7 @@ public abstract class DialogGUIStateAbs <V> extends JmeCmdAppState{
 	protected abstract void updateTextInfo();
 	
 	@Override
-	public void update(float tpf) {
-		super.update(tpf);
-		
+	protected boolean updateValidating(float tpf) {
 		String str = getSelectedKey();
 		if(str!=null)strLastSelectedKey=str;
 		
@@ -107,6 +87,7 @@ public abstract class DialogGUIStateAbs <V> extends JmeCmdAppState{
 		//requestFocus(intputText); //keep focus at input as it shall have all listeners.
 		
 //		setMouseCursorKeepUngrabbed(isEnabled());
+		return true;
 	}
 	
 	/**

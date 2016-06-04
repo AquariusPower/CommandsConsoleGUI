@@ -35,12 +35,9 @@ import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalAppStateAbs;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
-import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexHacks;
-import com.jme3.app.Application;
-import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapText;
 import com.jme3.material.MatParam;
 import com.jme3.material.Material;
@@ -154,7 +151,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalAppStateAbs implements
 	
 	private void updateBlinkInputFieldTextCursor(TextField tf) {
 		if(!bBlinkingTextCursor)return;
-		if(!tf.equals(LemurFocusHelperI.i().getFocused()))return;
+		if(!tf.equals(LemurFocusHelperStateI.i().getFocused()))return;
 		
 //		tdTextCursorBlink.updateTime();
 		
@@ -412,7 +409,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalAppStateAbs implements
 
 	@Override
 	protected boolean updateValidating(float tpf) {
-		LemurFocusHelperI.i().update(tpf);
+//		LemurFocusHelperStateI.i().update(tpf);
 		
 		if(tfToBlinkCursor!=null){
 			updateBlinkInputFieldTextCursor(tfToBlinkCursor);
@@ -435,6 +432,12 @@ public class LemurMiscHelpersStateI extends CmdConditionalAppStateAbs implements
 	}
 	
 	public boolean configureValidating() {
-		return super.configureValidating(LemurMiscHelpersStateI.class.getSimpleName());
+		return super.configureValidating(LemurMiscHelpersStateI.class.getSimpleName(), false);
+	}
+
+	@Override
+	protected boolean cleanupValidating() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

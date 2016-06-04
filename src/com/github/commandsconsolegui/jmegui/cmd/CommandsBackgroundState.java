@@ -52,10 +52,9 @@ public class CommandsBackgroundState extends CmdConditionalAppStateAbs {
 	
 	private IConsoleUI	cgsaGraphicalConsoleUI;
 	
-	public void configureSimple(IConsoleUI icui){
-		super.configureValidating("KeepRunningCommandsInBackground");
-		
+	public boolean configureValidating(IConsoleUI icui){
 		this.cgsaGraphicalConsoleUI = icui;
+		return super.configureValidating(CommandsBackgroundState.class.getSimpleName(),true);
 	}
 	
 	@Override
@@ -93,6 +92,12 @@ public class CommandsBackgroundState extends CmdConditionalAppStateAbs {
 
 	@Override
 	protected boolean disableValidating() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	protected boolean cleanupValidating() {
 		// TODO Auto-generated method stub
 		return false;
 	}

@@ -95,16 +95,16 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 		MiscJmeI.i().configure(cd);
 		
 		GlobalConsoleGuiI.i().set(ConsoleLemurStateI.i());
-		ConsoleLemurStateI.i().configureSimple(KeyInput.KEY_F10);
-		CommandsBackgroundState.i().configureSimple(ConsoleLemurStateI.i());
-		CommandsBackgroundState.i().configure();
-		FpsLimiterStateI.i().configure();
-		UngrabMouseStateI.i().configureSimple(null,null);
+		
+		ConsoleLemurStateI.i().configureValidating(ConsoleGuiTestI.class.getSimpleName(), false, KeyInput.KEY_F10);
+		CommandsBackgroundState.i().configureValidating(ConsoleLemurStateI.i());
+		FpsLimiterStateI.i().configureValidating();
+		UngrabMouseStateI.i().configureValidating(null,null);
 
 		cd.addConsoleCommandListener(this);
 		
-		diag = new CustomDialogGUIState("TestDialog");
-		diag.configure();
+		diag = new CustomDialogGUIState();
+		diag.configureValidating("TestDialog",false);
 		
 //		SingleInstanceState.i().configureBeforeInitializing(this,true);
 		SingleAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);

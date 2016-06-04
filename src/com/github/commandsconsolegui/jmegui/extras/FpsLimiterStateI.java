@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.jmegui.extras;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalAppStateAbs;
+import com.jme3.app.Application;
 
 /**
  * Spare GPU fan!
@@ -52,13 +53,10 @@ public class FpsLimiterStateI extends CmdConditionalAppStateAbs{
 	private long	lNanoDelayLimit;
 	private int	iMaxFPS;
 	
-	public FpsLimiterStateI(){
+	public boolean configureValidating() {
 		setMaxFps(60);
+		return super.configureValidating(FpsLimiterStateI.class.getSimpleName(),false);
 	}
-//	public FpsLimiterState(int iMaxFPS){
-//		this();
-//		setMaxFps(iMaxFPS);
-//	}
 	
 	public FpsLimiterStateI setMaxFps(int iMaxFPS){
 		this.iMaxFPS=iMaxFPS;
@@ -165,6 +163,12 @@ public class FpsLimiterStateI extends CmdConditionalAppStateAbs{
 
 	@Override
 	protected boolean disableValidating() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	protected boolean cleanupValidating() {
 		// TODO Auto-generated method stub
 		return false;
 	}

@@ -42,9 +42,10 @@ import com.jme3.app.Application;
 public class CustomDialogGUIState extends LemurDialogGUIStateAbs<String>{
 	ArrayList<String> astr;
 	
-	public CustomDialogGUIState(String strUIId) {
-		super(strUIId);
+	@Override
+	public boolean configureValidating(String strUIId, boolean bIgnorePrefixAndSuffix) {
 		astr = new ArrayList<String>();
+		return super.configureValidating(strUIId, bIgnorePrefixAndSuffix);
 	}
 	
 	@Override
@@ -61,10 +62,16 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs<String>{
 	}
 
 	@Override
-	protected void cleanup(Application app) {
-		super.cleanup(app);
+	protected boolean cleanupValidating() {
 		astr.clear();
 		astr=null;
+		return true;
+	}
+
+	@Override
+	protected boolean checkInitPrerequisites() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 	
 }

@@ -37,7 +37,6 @@ import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.jme3.app.SimpleApplication;
 
 /**
  * basic state console commands control
@@ -45,7 +44,7 @@ import com.jme3.app.SimpleApplication;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class CmdConditionalAppStateAbs extends ConditionalAppStateAbs<SimpleApplication> implements IConsoleCommandListener, IReflexFillCfg {
+public abstract class CmdConditionalAppStateAbs extends ConditionalAppStateAbs implements IConsoleCommandListener, IReflexFillCfg {
 	private CommandsDelegatorI cd;
 	
 	private String	strCmdIdentifier;
@@ -59,11 +58,18 @@ public abstract class CmdConditionalAppStateAbs extends ConditionalAppStateAbs<S
 		return cd;
 	}
 	
-	public boolean configureValidating(String strCmdIdentifier) {
+	public String getCmd(){
+		return strCmdIdentifier;
+	}
+	
+	public boolean configureValidating(String strCmdIdentifier,boolean bIgnorePrefixAndSuffix) {
 		if(super.configureValidating(GlobalSappRefI.i().get())){
 			cd=GlobalCommandsDelegatorI.i().get();
 			
-			this.strCmdIdentifier=strCmdPrefix+strCmdIdentifier+strCmdSuffix;
+			this.strCmdIdentifier="";
+			if(!bIgnorePrefixAndSuffix)this.strCmdIdentifier+=strCmdPrefix;
+			this.strCmdIdentifier+=strCmdPrefix;
+			if(!bIgnorePrefixAndSuffix)this.strCmdIdentifier+=strCmdSuffix;
 			
 			cd.addConsoleCommandListener(this);
 			
@@ -79,7 +85,7 @@ public abstract class CmdConditionalAppStateAbs extends ConditionalAppStateAbs<S
 		
 		if(cc.checkCmdValidity(this,strCmdIdentifier,"[bEnabledForce]")){
 			Boolean bEnabledForce = cc.paramBoolean(1);
-			if(!isInitialized() && bEnabledForce){
+			if(!isInitializedProperly() && bEnabledForce){
 				if(!preInitRequest()){
 					cc.dumpWarnEntry("unable to initialize "+strCmdIdentifier);
 				}

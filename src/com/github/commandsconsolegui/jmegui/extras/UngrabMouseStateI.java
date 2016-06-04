@@ -41,7 +41,7 @@ import com.jme3.app.SimpleApplication;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class UngrabMouseStateI extends ConditionalAppStateAbs<SimpleApplication> {
+public class UngrabMouseStateI extends ConditionalAppStateAbs {
 	private static UngrabMouseStateI instance = new UngrabMouseStateI();
 	public static UngrabMouseStateI i(){return instance;}
 	
@@ -62,7 +62,7 @@ public class UngrabMouseStateI extends ConditionalAppStateAbs<SimpleApplication>
 	 * @param lSlowMachineDelayToUngrabMilis null to use default
 	 * @param bKeepUngrabbedOnSlowdown null to use default
 	 */
-	public void configure(Long lSlowMachineDelayToUngrabMilis, Boolean bKeepUngrabbedOnSlowdown) {
+	public void configureValidating(Long lSlowMachineDelayToUngrabMilis, Boolean bKeepUngrabbedOnSlowdown) {
 		super.configureValidating(GlobalSappRefI.i().get());
 		
 		if(lSlowMachineDelayToUngrabMilis!=null)this.lDelayToUngrabMilis=lSlowMachineDelayToUngrabMilis;
@@ -177,6 +177,12 @@ public class UngrabMouseStateI extends ConditionalAppStateAbs<SimpleApplication>
 
 	@Override
 	protected boolean disableValidating() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	protected boolean cleanupValidating() {
 		// TODO Auto-generated method stub
 		return false;
 	}

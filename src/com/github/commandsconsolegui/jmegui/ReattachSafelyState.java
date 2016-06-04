@@ -25,14 +25,11 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.jmegui.console;
+package com.github.commandsconsolegui.jmegui;
 
 import java.util.concurrent.Callable;
 
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.jmegui.ConditionalAppStateAbs;
-import com.github.commandsconsolegui.jmegui.console.ReattachSafelyState.ReattachSafelyValidateSteps;
-import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppState;
 
 /**
@@ -41,7 +38,7 @@ import com.jme3.app.state.AppState;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ReattachSafelyState <S extends ReattachSafelyValidateSteps> extends ConditionalAppStateAbs<SimpleApplication> {
+public class ReattachSafelyState extends ConditionalAppStateAbs{
 //	private static ReattachOtherStateSafelyStateI instance = new ReattachOtherStateSafelyStateI();
 //	public static ReattachOtherStateSafelyStateI i(){return instance;}
 	
@@ -61,9 +58,9 @@ public class ReattachSafelyState <S extends ReattachSafelyValidateSteps> extends
 	private Callable<Void>	attach;
 	private Callable<Void>	postInitialization;
 
-	private S	stateTarget;
+	private ConditionalAppStateAbs stateTarget;
 	
-	public ReattachSafelyState(S stateTarget){
+	public ReattachSafelyState(ConditionalAppStateAbs stateTarget){
 		this.stateTarget=stateTarget;
 			
 		configureValidating();
@@ -81,23 +78,25 @@ public class ReattachSafelyState <S extends ReattachSafelyValidateSteps> extends
 		
 		if(stateTarget.reattachValidateStep(ercCurrentStep))return false;
 		
+		boolean bIsAttached = stateTarget.isAttachedToAStateManager();
+		
 		switch(ercCurrentStep){
 			case Step0Detach:
-				if(getApp().getStateManager().getState(stateTarget.getClass())!=null){
+				if(bIsAttached){
 					getApp().enqueue(detach);
 					ercCurrentStep=ERecreateConsoleSteps.Step1Attach;
 					return true;
 				}
 				break;
 			case Step1Attach:
-				if(getApp().getStateManager().getState(stateTarget.getClass())==null){
+				if(!bIsAttached){
 					getApp().enqueue(attach);
 					ercCurrentStep=ERecreateConsoleSteps.Step2PostInitialization;
 					return true;
 				}
 				break;
 			case Step2PostInitialization:
-				if(isInitializedProperly()){
+				if(stateTarget.isInitializedProperly()){
 					getApp().enqueue(postInitialization);
 					ercCurrentStep=null;
 					return true;
@@ -139,6 +138,12 @@ public class ReattachSafelyState <S extends ReattachSafelyValidateSteps> extends
 
 	@Override
 	protected boolean disableValidating() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	protected boolean cleanupValidating() {
 		// TODO Auto-generated method stub
 		return false;
 	}

@@ -27,8 +27,6 @@
 
 package com.github.commandsconsolegui.misc;
 
-
-
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
@@ -71,7 +69,8 @@ public class SimulationTime {
 		}else
 		if(Double.compare(this.dTimeResolution,1000000000.0)==0){ //nano
 		}else{
-			System.err.println("Warning: Time resolution should be milis, micro or nano.");
+			System.err.println("Warning: "+SimulationTime.class.getName()
+				+"Time resolution should be milis, micro or nano. ");
 			Thread.dumpStack();
 		}
 	}

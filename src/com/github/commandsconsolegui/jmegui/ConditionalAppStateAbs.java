@@ -29,27 +29,34 @@ package com.github.commandsconsolegui.jmegui;
 
 import java.util.concurrent.Callable;
 
+import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ERecreateConsoleSteps;
+import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ReattachSafelyValidateSteps;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.renderer.RenderManager;
+import com.jme3.scene.Node;
 
 /**
- * Conditionally enable/disable states.
- * You can validate and hold when each procedure step will be allowed.
- * 
- * This is an adaptation to the way {@link #AppState} is managed.
- * 
- * The concept of initialization is overriden by proper/conditional initialization.
- * The initialization will actually happen during {@link #updateProperly(float)},
- * where it will be properly validated and retried at specified time interval.
- * 
- * Keep this depending solely in JME!
+ * Life cycle steps: configure, pre-initialize, initialize, enable, disable, cleanup<br>
+ * <br>
+ * Every step can be validated and delayed until proper conditions are met.<br>
+ * WARNING: a step not completed must self clean/undo before such method returns!<br>
+ * <br>
+ * This class modifies the way {@link #AppState} is managed.<br>
+ * This basically means that, after each step request, you must verify if it succeeded
+ * before making new decisions.<br>
+ * <br>
+ * Most important steps will actually happen during {@link #updateProperly(float)},
+ * where they will be properly validated and retried at specified time interval (default 0).<br>
+ * <br>
+ * SELFNOTE: Keep this class depending solely in JME!<br>
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class ConditionalAppStateAbs <A extends Application> implements AppState {
+public abstract class ConditionalAppStateAbs implements AppState, ReattachSafelyValidateSteps {
+	protected Node nodeGUI;
 	
 	// CONFIGURE 
 	private boolean bConfigured;
@@ -80,7 +87,7 @@ public abstract class ConditionalAppStateAbs <A extends Application> implements 
 	protected boolean bHoldProperInitialization = false;
 	
 	/** you can skip configure() by setting this one*/
-	private A app;
+	private Application app;
 	
 	private boolean	bLastUpdateSuccessful;
 	private boolean	bHoldUpdates;
@@ -92,6 +99,7 @@ public abstract class ConditionalAppStateAbs <A extends Application> implements 
 	private boolean	bHoldDisable;
 	
 	private boolean	bCleaningUp;
+	private AppStateManager	asmCurrent;
 	
 //	public static class TimedDelay{
 //		long lTimeStart;
@@ -103,12 +111,13 @@ public abstract class ConditionalAppStateAbs <A extends Application> implements 
 	
 	/**
 	 * Configure simple references assignments and variable values.
+	 * Must be used before initialization.
 	 * Put here only things that will not change on {@link #cleanupProperly()} !
 	 * 
 	 * @param app
 	 * @return helps on implementing a retry to configure in case of non critical failures
 	 */
-	public <A2 extends A> boolean configureValidating(A2 app){
+	public boolean configureValidating(Application app){
 		if(this.bConfigured)throw new NullPointerException("already configured");
 		
 		// internal configurations
@@ -140,10 +149,10 @@ public abstract class ConditionalAppStateAbs <A extends Application> implements 
 		return lTimeReferenceMilis==null ? System.currentTimeMillis() : lTimeReferenceMilis;
 	}
 	
-	public A getApp(){
+	public Application getApp(){
 		return app();
 	}
-	public A app(){
+	public Application app(){
 		return app;
 	}
 	
@@ -160,7 +169,9 @@ public abstract class ConditionalAppStateAbs <A extends Application> implements 
 		if(bPreInitialized)return true;
 		
 		if(!bPreInitHold){
-			app.getStateManager().attach(this); //TODO log warn if already attached, would be interesting if a stack about where/when it was attached
+			if(!app.getStateManager().attach(this)){
+				throw new NullPointerException("state already attached: "+this.getClass().getName()+"; "+this);
+			}
 			
 			bPreInitialized=true;
 			
@@ -197,6 +208,9 @@ public abstract class ConditionalAppStateAbs <A extends Application> implements 
 		// KEEP EMPTY! dummified!
 	};
 	
+	/**
+	 * use {@link #isInitializedProperly()} instead
+	 */
 	@Deprecated
 	@Override
 	public boolean isInitialized() {
@@ -318,7 +332,7 @@ public abstract class ConditionalAppStateAbs <A extends Application> implements 
 	};
 	
 	public void toggleRequest(){
-		assertIsPreInitialized();
+//		assertIsPreInitialized();
 		setEnabledRequest(!isEnabled());
 	}
 	
@@ -336,7 +350,7 @@ public abstract class ConditionalAppStateAbs <A extends Application> implements 
 	 * 
 	 * @param bEnabledRequested if false, will be a Disable Request.
 	 */
-	protected void setEnabledRequest(boolean bEnabledRequested) {
+	public void setEnabledRequest(boolean bEnabledRequested) {
 		assertIsPreInitialized();
 		
 		if(bEnabledRequested){
@@ -439,11 +453,30 @@ public abstract class ConditionalAppStateAbs <A extends Application> implements 
 		bCleaningUp=false;
 	}
 	
-	////////////////////// easy skippers below
-	@Override public void stateAttached(AppStateManager stateManager) {}
-	@Override public void stateDetached(AppStateManager stateManager) {}
+	@Override public void stateAttached(AppStateManager stateManager) {
+		if(asmCurrent!=null)throw new NullPointerException("already attached to "+asmCurrent+"; requested attach to "+stateManager);
+		asmCurrent = stateManager;
+	}
+	
+	@Override public void stateDetached(AppStateManager stateManager) {
+		if(asmCurrent==null)throw new NullPointerException("not attached but still requested detach from "+stateManager+"?");
+		if(!asmCurrent.equals(stateManager))throw new NullPointerException("attached to another "+asmCurrent+" and being detached from "+stateManager+"?");
+		asmCurrent = null;
+	}
+	
+	public boolean isAttachedToAStateManager(){
+		return asmCurrent!=null;
+	}
+	
+	public AppStateManager getStateManagingThis(){
+		return asmCurrent;
+	}
+	
+	// EASY SKIPPERS
 	@Override public void render(RenderManager rm) {}
 	@Override public void postRender(){}
+	@Override public boolean reattachValidateStep(ERecreateConsoleSteps ercs) {return true;}
+
 
 //	Long	lInitializationCompletedMilis;
 ////	long	lInitializationStartedMilis;
@@ -537,5 +570,5 @@ public abstract class ConditionalAppStateAbs <A extends Application> implements 
 //	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 //		return GlobalCommandsDelegatorI.i().get().getReflexFillCfg(rfcv);
 //	}
-
+	
 }

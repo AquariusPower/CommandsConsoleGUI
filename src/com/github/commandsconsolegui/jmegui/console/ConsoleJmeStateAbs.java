@@ -50,21 +50,18 @@ import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
-import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.DialogJmeStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
-import com.github.commandsconsolegui.jmegui.console.ReattachSafelyState.ERecreateConsoleSteps;
-import com.github.commandsconsolegui.jmegui.console.ReattachSafelyState.ReattachSafelyValidateSteps;
+import com.github.commandsconsolegui.jmegui.ReattachSafelyState;
+import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ReattachSafelyValidateSteps;
 //import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersState;
 import com.github.commandsconsolegui.misc.AutoCompleteI;
 import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDbgKey;
+import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.MiscI;
-import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.jme3.app.Application;
 import com.jme3.app.StatsAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.AssetNotFoundException;
@@ -97,19 +94,10 @@ import com.jme3.texture.Texture2D;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IConsoleUI, ReattachSafelyValidateSteps {
+public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IConsoleUI, ReattachSafelyValidateSteps, IWorkAroundBugFix {
 //	protected FpsLimiterState fpslState = new FpsLimiterState();
 	
-	public ConsoleJmeStateAbs(String strUIId) {
-		super(strUIId);
-	}
-
 	ReattachSafelyState rss = new ReattachSafelyState(this);
-	
-	@Override
-	public boolean reattachValidateStep(ERecreateConsoleSteps ercs){
-		return true;
-	}
 	
 	//	protected final String strInputIMCPREFIX = "CONSOLEGUISTATE_";
 	public final String strFinalFieldInputCodePrefix="INPUT_MAPPING_CONSOLE_";
@@ -348,7 +336,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	protected abstract ConsoleJmeStateAbs setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines);
 	protected abstract void scrollHintToIndex(int i);
 	protected abstract void lineWrapDisableForChildrenOf(Node gp);
-	protected abstract void mapKeysForInputField();
+	protected abstract boolean mapKeysForInputField();
 	protected abstract int getVisibleRows();
 	protected abstract Vector3f getSizeOf(Node node);
 	//public abstract Vector3f getDumpAreaSliderSize();
@@ -388,21 +376,14 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 //		bConfigureSimpleCompleted = true;
 //	}
 	
-	/**
-	 * configure must happen before initialization
-	 */
-	public boolean configureValidating(int iToggleConsoleKey) {
-//		if(bConfigured)throw new NullPointerException("already configured.");		// KEEP ON TOP
-//		if(!bConfigureSimpleCompleted)throw new NullPointerException("configure simple required.");
-		super.configureValidating("Console");
+	public boolean configureValidating(String strUIId,boolean bIgnorePrefixAndSuffix,int iToggleConsoleKey) {
+		super.configureValidating(strUIId, bIgnorePrefixAndSuffix);
 		
 //		if(cd==null)throw new NullPointerException("Missing "+CommandsDelegatorI.class.getName()+" instance (or a more specialized, like the scripting one)");
 		cd().configure(this);//,sapp);
 //		cd().addConsoleCommandListener(this);
-		
 //		this.bEnabled=true; //just to let it be initialized at startup by state manager
-		
-		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
+//		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 		
 		if(!app().getStateManager().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
 		
@@ -509,27 +490,37 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 //		if(!app().getStateManager().attach(ccbs))throw new NullPointerException("already attached state "+ccbs.getClass().getName());
 		
 //		bInitialized=true;
+		return true;
 	}
 	
 //	@Override
 //	public boolean isInitialized() {
 //		return bInitialized;
 //	}
-
+	
 	@Override
-	public void onEnable() {
-		super.onEnable();
-		
+	protected boolean enableValidating() {
 		if(!bInitializeOnlyTheUI){
 			initializeOnlyTheUI();
 		}
+		
+		return super.enableValidating();
 	}
 	
+//	@Override
+//	public void onEnable() {
+//		super.onEnable();
+//		
+//		if(!bInitializeOnlyTheUI){
+//			initializeOnlyTheUI();
+//		}
+//	}
+//	
 //	@Override
 //	public void onDisable() {
 //		super.onDisable();
 //	}
-	
+//	
 //	@Override
 //	public void setEnabled(boolean bEnabled) {
 //		if(!bInitializeOnlyTheUI){
@@ -552,7 +543,11 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 //	public void stateDetached(AppStateManager stateManager) {
 //	}
 	
-	protected void setVisible(boolean b){
+	/**
+	 * to be used only during initialization to "look good"
+	 * @param b
+	 */
+	protected void setInitializationVisibility(boolean b){
 		if(b){
 			ctnrMainTopSubWindow.setCullHint(CullHint.Inherit); //TODO use bkp with: Never ?
 			lstbxAutoCompleteHint.setCullHint(CullHint.Inherit); //TODO use bkp with: Dynamic ?
@@ -564,8 +559,6 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	
 	protected void initializeOnlyTheUIpreInit(){
 		if(bInitializeOnlyTheUI)throw new NullPointerException("already configured!");
-		
-		if(sapp==null)throw new NullPointerException("base initialization required");
 		
 		v3fApplicationWindowSize = new Vector3f(
 				app().getContext().getSettings().getWidth(),
@@ -599,7 +592,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 //		createMonoSpaceFixedFontStyle();
 		
 		// main container
-		app().getGuiNode().attachChild(ctnrMainTopSubWindow);
+		nodeGUI.attachChild(ctnrMainTopSubWindow);
 		ctnrMainTopSubWindow.setLocalTranslation(
 			iMargin, 
 			app().getContext().getSettings().getHeight()-iMargin, 
@@ -616,7 +609,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 //		dumpInfoEntry("Hit F10 to toggle console.");
 		
 		if(bInitiallyClosedOnce){
-			setVisible(false);
+			setInitializationVisibility(false);
 		}
 		
 		/**
@@ -783,13 +776,14 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 //							if(!isInitialized()){
 //								initialize();
 //							}
-							setEnabled(!isEnabled());
+							toggleRequest();
+//							setEnabledRequest(!isEnabled());
 							
 							/**
 							 * as it is initially invisible, from the 1st time user opens the console on, 
 							 * it must be visible.
 							 */
-							setVisible(true);
+							setInitializationVisibility(true);
 						}
 					}
 				};
@@ -892,9 +886,9 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	@Override
 	synchronized public void update(float tpf) {
 		if(bKeepInitiallyInvisibleUntilFirstClosed){
-			setVisible(false);
+			setInitializationVisibility(false);
 		}else{
-			setVisible(isEnabled());
+			setInitializationVisibility(isEnabled());
 		}
 		
 		if(!isEnabled())return; //one update may actually happen after being disabled...
@@ -1664,9 +1658,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	}
 	
 	@Override
-	public void cleanup(Application app) {
-		super.cleanup(app);
-		
+	protected boolean cleanupValidating() {
 //		tdLetCpuRest.reset();
 //		tdScrollToBottomRequestAndSuspend.reset();
 //		tdScrollToBottomRetry.reset();
@@ -1696,6 +1688,8 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 //    if(efHK!=null)efHK.cleanupHK();
     bInitializeOnlyTheUI=false;
 //    bInitialized=false;
+    
+    return true;
 	}
 	
 //	protected boolean isInitiallyClosed() {
@@ -1742,7 +1736,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		boolean bCommandWorked = false;
 		
 		if(cc.checkCmdValidity(this,CMD_CLOSE_CONSOLE,"like the bound key to do it")){
-			setEnabled(false);
+			setEnabledRequest(false);
 			bKeepInitiallyInvisibleUntilFirstClosed =false;
 			bCommandWorked=true;
 		}else
@@ -2046,7 +2040,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 			getAutoCompleteHint().addAll(astr);
 			clearHintSelection();
 			
-			Node nodeParent = app().getGuiNode();
+			Node nodeParent = nodeGUI;
 			if(!nodeParent.hasChild(lstbxAutoCompleteHint)){
 				nodeParent.attachChild(lstbxAutoCompleteHint);
 			}
@@ -2184,7 +2178,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	@Override
 	public void recreateConsoleGui() {
 		if(rss.isProcessingRequest()){
-			System.err.println("Console recreation request is already being processed...");
+			cd().dumpWarnEntry("Console recreation request is already being processed...");
 			return;
 		}
 		
@@ -2202,7 +2196,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 			public Void call() throws Exception {
 				app().getStateManager().attach(ConsoleJmeStateAbs.this);
 				if(bWasEnabled){
-					setEnabled(true);
+					setEnabledRequest(true);
 				}
 				return null;
 			}
@@ -2217,7 +2211,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 			}
 		};
 		
-		ReattachSafelyState.i().request(detach,attach,postInitialization);
+		rss.request(detach,attach,postInitialization);
 	}
 	
 	/**

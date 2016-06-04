@@ -73,7 +73,7 @@ public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleC
 	
 	@Override
 	public void updateToggles() {
-		if(btgFpsLimit.checkChangedAndUpdate())FpsLimiterStateI.i().setEnabled(btgFpsLimit.b());
+		if(btgFpsLimit.checkChangedAndUpdate())FpsLimiterStateI.i().setEnabledRequest(btgFpsLimit.b());
 		super.updateToggles();
 	}
 	

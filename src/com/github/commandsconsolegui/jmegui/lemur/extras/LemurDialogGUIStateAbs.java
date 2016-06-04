@@ -30,12 +30,10 @@ package com.github.commandsconsolegui.jmegui.lemur.extras;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.jmegui.extras.DialogGUIStateAbs;
-import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
-import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperI;
+import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.input.KeyInput;
@@ -45,7 +43,6 @@ import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.ListBox;
-import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.TextEntryComponent;
@@ -67,21 +64,17 @@ public abstract class LemurDialogGUIStateAbs <V> extends DialogGUIStateAbs<V> {
 	protected VersionedList<String>	vlstrEntriesList = new VersionedList<String>();
 	protected int	iVisibleRows;
 	
-	public LemurDialogGUIStateAbs(String strUIId) {
-		super(strUIId);
-	}
-	
 	protected Container getTopContainer(){
 		return (Container)ctnrMainTopSubWindow;
 	}
 	
 	@Override
-	protected void initGUI(){
-		initGUI(0.75f, 0.25f);
+	protected boolean initGUI(){
+		return initGUI(0.75f, 0.25f);
 	}
 	
-	protected void initGUI(float fDialogPerc, float fInfoPerc){
-		initGUI(fDialogPerc, fInfoPerc,null);
+	protected boolean initGUI(float fDialogPerc, float fInfoPerc){
+		return initGUI(fDialogPerc, fInfoPerc,null);
 	}
 	
 	/**
@@ -89,12 +82,12 @@ public abstract class LemurDialogGUIStateAbs <V> extends DialogGUIStateAbs<V> {
 	 * @param fDialogPerc the percentual width/height to cover the application screen/window 
 	 * @param fInfoPerc the percentual height to show informational text, the list and input field will properly use the remaining space
 	 */
-	protected void initGUI(float fDialogPerc, float fInfoPerc, Integer iEntryHeightPixels){
+	protected boolean initGUI(float fDialogPerc, float fInfoPerc, Integer iEntryHeightPixels){
 		String strStyle = ConsoleLemurStateI.i().STYLE_CONSOLE;//BaseStyles.GLASS;
 		
 		Vector3f v3fApplicationWindowSize = new Vector3f(
-			sapp.getContext().getSettings().getWidth(),
-			sapp.getContext().getSettings().getHeight(),
+			app().getContext().getSettings().getWidth(),
+			app().getContext().getSettings().getHeight(),
 			0);
 			
 		ctnrMainTopSubWindow = new Container(new BorderLayout(), strStyle);
@@ -142,10 +135,10 @@ public abstract class LemurDialogGUIStateAbs <V> extends DialogGUIStateAbs<V> {
 					Float fEntryHeight = LemurMiscHelpersStateI.i().guessEntryHeight(lstbxEntriesToSelect);
 					if(fEntryHeight!=null){
 						iEntryHeightPixels=fEntryHeight.intValue(); //calc based on entry (or font) height and listbox height
-						cd.dumpInfoEntry("entry height "+iEntryHeightPixels);
+						cd().dumpInfoEntry("entry height "+iEntryHeightPixels);
 					}else{
 						iEntryHeightPixels=20; //blind placeholder
-						cd.dumpWarnEntry("blind entry height "+iEntryHeightPixels);
+						cd().dumpWarnEntry("blind entry height "+iEntryHeightPixels);
 					}
 				}
 			}
@@ -157,7 +150,7 @@ public abstract class LemurDialogGUIStateAbs <V> extends DialogGUIStateAbs<V> {
 		// filter
 		intputField = new TextField("",strStyle);
 		getInputField().setName(strUIId+"_InputField");
-		LemurFocusHelperI.i().addFocusChangeListener(getInputField());
+		LemurFocusHelperStateI.i().addFocusChangeListener(getInputField());
 		getTopContainer().addChild(getInputField(), BorderLayout.Position.South);
 		
 		Vector3f v3fPos = new Vector3f(
@@ -167,7 +160,9 @@ public abstract class LemurDialogGUIStateAbs <V> extends DialogGUIStateAbs<V> {
 		);
 		getTopContainer().setLocalTranslation(v3fPos);
 		
-		sapp.getGuiNode().attachChild(getTopContainer());
+		nodeGUI.attachChild(getTopContainer());
+		
+		return true;
 	}
 	
 	protected Container getNorthContainer() {
@@ -181,16 +176,16 @@ public abstract class LemurDialogGUIStateAbs <V> extends DialogGUIStateAbs<V> {
 	
 	@Override
 	public void requestFocus(Spatial spt) {
-		LemurFocusHelperI.i().requestFocus(spt);
+		LemurFocusHelperStateI.i().requestFocus(spt);
 	}
 	
 	@Override
-	public void onDisable() {
-		super.onDisable();
-		
-		if(getInputField().equals(LemurFocusHelperI.i().getFocused())){
-			LemurFocusHelperI.i().removeFocusableFromList(getInputField());
+	protected boolean disableValidating() {
+		if(getInputField().equals(LemurFocusHelperStateI.i().getFocused())){
+			LemurFocusHelperStateI.i().removeFocusableFromList(getInputField());
 		}
+		
+		return super.disableValidating();
 	}
 	
 	/**
@@ -282,9 +277,7 @@ public abstract class LemurDialogGUIStateAbs <V> extends DialogGUIStateAbs<V> {
 	}
 	
 	@Override
-	public void update(float tpf) {
-		super.update(tpf);
-		
+	public boolean updateProperly(float tpf) {
 		Integer iSelected = getSelectedIndex();
 		if(iSelected!=null){
 			int iTopEntryIndex = getTopEntryIndex();
@@ -307,10 +300,11 @@ public abstract class LemurDialogGUIStateAbs <V> extends DialogGUIStateAbs<V> {
 //		updateTextInfo();
 //		
 //		setMouseCursorKeepUngrabbed(isEnabled());
+		return super.updateProperly(tpf);
 	}
 	
 	@Override
-	protected void initKeyMappings(){
+	protected boolean initKeyMappings(){
 		KeyActionListener actSimpleActions = new KeyActionListener() {
 			@Override
 			public void keyAction(TextEntryComponent source, KeyAction key) {
@@ -329,7 +323,7 @@ public abstract class LemurDialogGUIStateAbs <V> extends DialogGUIStateAbs<V> {
 					
 				switch(key.getKeyCode()){
 					case KeyInput.KEY_ESCAPE:
-						setEnabled(false);
+						setEnabledRequest(false);
 						break;
 					case KeyInput.KEY_UP:
 						if(iSel>0)lstbxEntriesToSelect.getSelectionModel().setSelection(iSel-1);
@@ -357,6 +351,8 @@ public abstract class LemurDialogGUIStateAbs <V> extends DialogGUIStateAbs<V> {
 		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_ESCAPE), actSimpleActions);
 		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_UP), actSimpleActions);
 		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_DOWN), actSimpleActions);
+		
+		return true;
 	}
 	
 	@Override
@@ -376,7 +372,7 @@ public abstract class LemurDialogGUIStateAbs <V> extends DialogGUIStateAbs<V> {
 	}
 	
 	@Override
-	protected String getInputText() {
+	public String getInputText() {
 		return getInputField().getText();
 	}
 

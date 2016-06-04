@@ -41,7 +41,7 @@ import com.jme3.scene.Spatial;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class DialogJmeStateAbs extends CmdConditionalAppStateAbs implements IWorkAroundBugFix, IReflexFillCfg{
+public abstract class DialogJmeStateAbs extends CmdConditionalAppStateAbs implements IReflexFillCfg{
 //	protected SimpleApplication	sapp;
 //	protected CommandsDelegatorI	cd;
 	
@@ -49,18 +49,21 @@ public abstract class DialogJmeStateAbs extends CmdConditionalAppStateAbs implem
 	protected Node	intputField;
 	
 	protected String strUIId = null;
-	protected String	strCmd;
+//	protected String	strCmd;
 //	protected StackTraceElement[] asteInitDebug = null;
 	protected String	strTitle;
 //	BoolTogglerCmdField btgShowDialog = new BoolTogglerCmdField(this,false);
-	protected String	strCmdPrefix = "toggleUI";
-	protected String	strCmdSuffix = "";
 	
-	public DialogJmeStateAbs(String strUIId){
+	@Override
+	public boolean configureValidating(String strUIId,boolean bIgnorePrefixAndSuffix) {
+		strCmdPrefix = "toggleUI";
+		strCmdSuffix = "";
 		this.strUIId=strUIId;
-		this.strCmd=strCmdPrefix+strUIId+strCmdSuffix;
+//		this.strCmd=strCmdPrefix+strUIId+strCmdSuffix;
 		this.strTitle = "Dialog: "+strUIId;
 //		btgShowDialog.setCustomCmdId(this.strCmd);
+		
+		return super.configureValidating(strUIId, bIgnorePrefixAndSuffix);
 	}
 	
 	/**
@@ -76,30 +79,29 @@ public abstract class DialogJmeStateAbs extends CmdConditionalAppStateAbs implem
 	
 	protected abstract boolean initGUI();
 	protected abstract boolean initKeyMappings();
-	
-	public String getCommand(){
-		return strCmd;
-	}
-	
+	public abstract String getInputText();
 	public abstract void requestFocus(Spatial spt);
 	
-	public boolean configureValidating() {
-		boolean b = super.configureValidating(strCmd);
-		
-		if(!b)return false;
+	/**
+	 * what happens when pressing ENTER keys
+	 * default is to update the list filter
+	 */
+	protected abstract void actionSubmit();
+	
+	public boolean configureValidating(Node nodeGUI) {
+		super.nodeGUI=nodeGUI;
 		
 		/**
-		 * Sub windows dialogs must be initially disabled because they are 
-		 * enabled on user demand.
+		 * Dialogs must be initially disabled because they are enabled on user demand.
 		 */
 		bEnabled=false;
 		
-		return true;
+		return super.configureValidating(strUIId,false);
 	}
 	
 	@Override
 	protected boolean enableValidating() {
-		app().getGuiNode().attachChild(ctnrMainTopSubWindow);
+		nodeGUI.attachChild(ctnrMainTopSubWindow);
 		
 		requestFocus(intputField);
 		
@@ -129,14 +131,6 @@ public abstract class DialogJmeStateAbs extends CmdConditionalAppStateAbs implem
 	public void setTitle(String str){
 		this.strTitle = str;
 	}
-	
-	/**
-	 * what happens when pressing ENTER keys
-	 * default is to update the list filter
-	 */
-	protected abstract void actionSubmit();
-	
-	protected abstract String getInputText();
 	
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {

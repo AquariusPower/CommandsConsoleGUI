@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.jmegui.lemur.console;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
+import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.console.ConsoleJmeStateAbs;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -103,29 +104,30 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 //	}
 	
 	@Override
-	public void initialize(Application app) {
-		GuiGlobals.initialize(sapp);
+	protected boolean initializeValidating() {
+		GuiGlobals.initialize(GlobalSappRefI.i().get());
 		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
 		
 		addStyle(BaseStyles.GLASS);
 		addStyle(Styles.ROOT_STYLE);
 		
-		super.initialize(app);
-		
 		initializationCompleted();
+		
+		return super.initializeValidating();
 	}
 	
 	@Override
-	public void configure() {
-		super.configure();
-		
+	public boolean configureValidating(String strUIId, boolean bIgnorePrefixAndSuffix, int iToggleConsoleKey) {
 		// misc cfg
-		LemurMiscHelpersStateI.i().configure();
-//		LemurMiscHelpersStateI.i().initialize(sapp.getStateManager(), sapp);
-		if(!sapp.getStateManager().attach(LemurMiscHelpersStateI.i())){
-			throw new NullPointerException("already attached state "+LemurMiscHelpersStateI.class.getName());
-		}
-		LemurFocusHelperI.i().configureSimple(null);
+		if(!LemurMiscHelpersStateI.i().configureValidating())return false;
+		
+//		LemurMiscHelpersStateI.i().initialize(app().getStateManager(), sapp);
+//		if(!app().getStateManager().attach(LemurMiscHelpersStateI.i())){
+//			throw new NullPointerException("already attached state "+LemurMiscHelpersStateI.class.getName());
+//		}
+		LemurFocusHelperStateI.i().configureSimple(null);
+		
+		return super.configureValidating(strUIId, bIgnorePrefixAndSuffix, iToggleConsoleKey);
 	}
 	
 //	public void ConsoleGUILemurState(int iOpenConsoleHotKey, ConsoleCommands cc, Application app) {
@@ -161,7 +163,7 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 				int i = Integer.parseInt(svfBackgroundHexaColorRGBA.getStringValue(),16);//hexa string
 				colorConsoleStyleBackground.fromIntRGBA(i);
 			}catch(IllegalArgumentException ex){
-				cd.dumpExceptionEntry(ex);
+				cd().dumpExceptionEntry(ex);
 			}
 		}
 		
@@ -288,7 +290,7 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 		 * The existance of at least one entry is very important to help on initialization.
 		 * Actually to determine the listbox entry height.
 		 */
-		if(vlstrDumpEntries.isEmpty())vlstrDumpEntries.add(""+cd.getCommentPrefix()+" Initializing console.");
+		if(vlstrDumpEntries.isEmpty())vlstrDumpEntries.add(""+cd().getCommentPrefix()+" Initializing console.");
 		
 		getDumpArea().setModel((VersionedList<String>)vlstrDumpEntries);
 		getDumpArea().setVisibleItems(iShowRows);
@@ -301,9 +303,9 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 		 * BOTTOM ELEMENT =================================================================
 		 */
 		// input
-		super.intputField = new TextField(""+cd.getCommandPrefix(),strStyle);
+		super.intputField = new TextField(""+cd().getCommandPrefix(),strStyle);
     CursorEventControl.addListenersToSpatial(getInputField(), consoleCursorListener);
-		LemurFocusHelperI.i().addFocusChangeListener(getInputField());
+		LemurFocusHelperStateI.i().addFocusChangeListener(getInputField());
 		fInputHeight = MiscJmeI.i().retrieveBitmapTextFor(getInputField()).getLineHeight();
 		getContainerConsole().addChild( getInputField(), BorderLayout.Position.South );
 		
@@ -315,23 +317,27 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 	}
 	
 	@Override
-	public void onEnable() {
-		super.onEnable();
-		
-//		sapp.getGuiNode().attachChild(getContainerConsole());
-		
+	protected boolean enableValidating() {
 		commonOnEnableDisable();
+		return super.enableValidating();
 	}
 	
 	@Override
-	public void onDisable() {
-		super.onDisable();
-		
-//		getContainerConsole().removeFromParent();
+	protected boolean disableValidating() {
 		closeHint();
-		
 		commonOnEnableDisable();
-	}
+		return super.disableValidating();
+	};
+	
+//	@Override
+//	public void onDisable() {
+//		super.onDisable();
+//		
+////		getContainerConsole().removeFromParent();
+//		closeHint();
+//		
+//		commonOnEnableDisable();
+//	}
 	
 	protected void commonOnEnableDisable(){
 		updateOverrideInputFocus();
@@ -343,7 +349,7 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 //		super.setEnabled(bEnabled);
 //		
 //		if(this.bEnabled){
-//			sapp.getGuiNode().attachChild(getContainerConsole());
+//			app().getGuiNode().attachChild(getContainerConsole());
 ////			GuiGlobals.getInstance().requestFocus(getInputField());
 //		}else{
 //			getContainerConsole().removeFromParent();
@@ -431,7 +437,7 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 	}
 
 	@Override
-	protected void mapKeysForInputField(){
+	protected boolean mapKeysForInputField(){
 		// simple actions
 		KeyActionListener actSimpleActions = new KeyActionListener() {
 			@Override
@@ -448,20 +454,20 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 //						if(bControl)cc.iCopyFrom = getDumpAreaSelectedIndex();
 //						break;
 					case KeyInput.KEY_C: 
-						if(bControl)cd.editCopyOrCut(false,false,false);
+						if(bControl)cd().editCopyOrCut(false,false,false);
 						break;
 					case KeyInput.KEY_ESCAPE: 
-						setEnabled(false);
+						setEnabledRequest(false);
 						break;
 					case KeyInput.KEY_V: 
 						if(bKeyShiftIsPressed){
-							if(bControl)cd.showClipboard();
+							if(bControl)cd().showClipboard();
 						}else{
 							if(bControl)editPaste();
 						}
 						break;
 					case KeyInput.KEY_X: 
-						if(bControl)cd.editCopyOrCut(false,true,false);
+						if(bControl)cd().editCopyOrCut(false,true,false);
 						break;
 					case KeyInput.KEY_NUMPADENTER:
 					case KeyInput.KEY_RETURN:
@@ -474,7 +480,7 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 						if(bControl)clearInputTextField();
 						break;
 					case KeyInput.KEY_SLASH:
-						if(bControl)cd.toggleLineCommentOrCommand();
+						if(bControl)cd().toggleLineCommentOrCommand();
 						break;
 				}
 			}
@@ -531,6 +537,8 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_PGDN), actDumpNavigate);
 		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_HOME, KeyAction.CONTROL_DOWN), actDumpNavigate);
 		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_END, KeyAction.CONTROL_DOWN), actDumpNavigate);
+		
+		return true;
 	}
 
 	@Override
@@ -594,10 +602,10 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 		
 		getDumpArea().setVisibleItems(iShowRows);
 		
-		cd.varSet(cd.CMD_FIX_VISIBLE_ROWS_AMOUNT, ""+iShowRows, true);
+		cd().varSet(cd().CMD_FIX_VISIBLE_ROWS_AMOUNT, ""+iShowRows, true);
 		
 	//	lstbx.getGridPanel().setVisibleSize(iShowRows,1);
-		cd.dumpInfoEntry("fLstbxEntryHeight="+MiscI.i().fmtFloat(fLstbxEntryHeight)+", "+"iShowRows="+iShowRows);
+		cd().dumpInfoEntry("fLstbxEntryHeight="+MiscI.i().fmtFloat(fLstbxEntryHeight)+", "+"iShowRows="+iShowRows);
 		
 		iVisibleRowsAdjustRequest=null;
 		
@@ -689,13 +697,13 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 		@Override
 		public void execute(Button source) {
 			if(source.equals(btnClipboardShow)){
-				cd.showClipboard();
+				cd().showClipboard();
 			}else
 			if(source.equals(btnCopy)){
-				cd.editCopyOrCut(false,false,false);
+				cd().editCopyOrCut(false,false,false);
 			}else
 			if(source.equals(btnCut)){
-				cd.editCopyOrCut(false,true,false);
+				cd().editCopyOrCut(false,true,false);
 			}else
 			if(source.equals(btnPaste)){
 				editPaste();
@@ -723,12 +731,6 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 		}
 	}
 	
-	@Override
-	public void cleanup(Application app) {
-		getContainerConsole().clearChildren();
-		super.cleanup(app);
-	}
-	
 //	@Override
 //	protected Vector3f getStatsAndControlsSize() {
 //		return getContainerStatsAndControls().getSize();
@@ -746,7 +748,7 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 	 */
 	@Deprecated
 	protected void tweakDefaultFontToBecomeFixedSize(){
-		fntMakeFixedWidth = sapp.getAssetManager().loadFont("Interface/Fonts/Default.fnt");
+		fntMakeFixedWidth = app().getAssetManager().loadFont("Interface/Fonts/Default.fnt");
 		BitmapCharacterSet cs = fntMakeFixedWidth.getCharSet();
 		for(int i=0;i<256;i++){ //is there more than 256?
 			BitmapCharacter bc = cs.getCharacter(i);
@@ -774,14 +776,14 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 	}
 	@Override
 	public Object getFocus(){
-		return LemurFocusHelperI.i().getFocused();
+		return LemurFocusHelperStateI.i().getFocused();
 	}
 	@Override
 	public boolean setFocus(Object obj){
 		if(obj==null){
-			LemurFocusHelperI.i().removeAllFocus();
+			LemurFocusHelperStateI.i().removeAllFocus();
 		}else{
-			LemurFocusHelperI.i().requestFocus((Spatial) obj);
+			LemurFocusHelperStateI.i().requestFocus((Spatial) obj);
 		}
 		
 		return obj==null?true:obj.equals(getFocus());
@@ -789,23 +791,23 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 
 	@Override
 	protected void removeFocus(Object obj) {
-		LemurFocusHelperI.i().removeFocusableFromList((Spatial) obj);
+		LemurFocusHelperStateI.i().removeFocusableFromList((Spatial) obj);
+	}
+
+	@Override
+	public void initializationCompleted() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean isInitializationCompleted() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	@Override
 	public void requestFocus(Spatial spt) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void initGUI() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void initKeyMappings() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -816,4 +818,22 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 		
 	}
 
+	@Override
+	protected boolean checkInitPrerequisites() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	protected boolean updateValidating(float tpf) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	
+	@Override
+	protected boolean cleanupValidating() {
+		getContainerConsole().clearChildren();
+		return super.cleanupValidating();
+	}
 }
