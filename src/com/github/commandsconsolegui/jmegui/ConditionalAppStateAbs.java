@@ -149,7 +149,7 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 	 * 
 	 * @param cp
 	 */
-	protected void configure(ICfgParm icfg){
+	public void configure(ICfgParm icfg){
 		CfgParm cfg = (CfgParm)icfg;
 		
 //	protected void configure(Application app){

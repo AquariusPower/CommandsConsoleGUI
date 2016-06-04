@@ -78,7 +78,7 @@ public abstract class CmdConditionalAppStateAbs extends ConditionalAppStateAbs i
 		}
 	}
 	@Override
-	protected void configure(ICfgParm icfg) {
+	public void configure(ICfgParm icfg) {
 //	protected void configure(String strCmdIdentifier,boolean bIgnorePrefixAndSuffix) {
 		CfgParm cfg = (CfgParm)icfg;
 		

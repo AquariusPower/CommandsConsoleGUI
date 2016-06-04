@@ -396,7 +396,7 @@ public abstract class ConsoleJmeStateAbs extends BaseDialogJmeStateAbs implement
 		}
 	}
 	@Override
-	protected void configure(ICfgParm icfg) {
+	public void configure(ICfgParm icfg) {
 //	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,int iToggleConsoleKey, Node nodeGUI) {
 		CfgParm cfg = (CfgParm)icfg;
 		super.configure(new BaseDialogJmeStateAbs.CfgParm(cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.nodeGUI));

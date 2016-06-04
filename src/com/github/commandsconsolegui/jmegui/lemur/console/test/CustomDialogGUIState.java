@@ -52,7 +52,7 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs<String>{
 		}
 	}
 	@Override
-	protected void configure(ICfgParm icfg) {
+	public void configure(ICfgParm icfg) {
 //	public void configure(String strUIId, boolean bIgnorePrefixAndSuffix) {
 		CfgParm cfg = (CfgParm)icfg;
 		astr = new ArrayList<String>();

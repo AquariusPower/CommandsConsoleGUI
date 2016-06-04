@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.jmegui.extras;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
+import com.github.commandsconsolegui.jmegui.ConditionalAppStateAbs.ICfgParm;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalAppStateAbs;
 import com.jme3.app.Application;
 
@@ -53,9 +54,12 @@ public class FpsLimiterStateI extends CmdConditionalAppStateAbs{
 	private long	lNanoDelayLimit;
 	private int	iMaxFPS;
 	
-	public void configure() {
+	public static class CfgParm implements ICfgParm{} //look at super class
+	@Override
+	public void configure(ICfgParm icfg) {
 		setMaxFps(60);
-		super.configure(FpsLimiterStateI.class.getSimpleName(),false);
+		super.configure(new CmdConditionalAppStateAbs.CfgParm(
+			FpsLimiterStateI.class.getSimpleName(),false));
 	}
 	
 	public FpsLimiterStateI setMaxFps(int iMaxFPS){

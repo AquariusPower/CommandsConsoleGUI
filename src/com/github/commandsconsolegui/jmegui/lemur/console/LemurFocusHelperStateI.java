@@ -82,7 +82,7 @@ public class LemurFocusHelperStateI extends CmdConditionalAppStateAbs implements
 	 * So if you have other gui elements, this can be changed to show dialogs above or under them.
 	 */
 	@Override
-	protected void configure(ICfgParm icfg) {
+	public void configure(ICfgParm icfg) {
 //	public void configure(Float fBaseZ){
 		CfgParm cfg = (CfgParm)icfg;
 		if(cfg.fBaseZ!=null)this.fBaseZ = cfg.fBaseZ;

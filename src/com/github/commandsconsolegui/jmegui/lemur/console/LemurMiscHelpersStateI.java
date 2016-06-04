@@ -415,10 +415,9 @@ public class LemurMiscHelpersStateI extends CmdConditionalAppStateAbs implements
 		return super.updateValidating(tpf);
 	}
 	
-	public static class CfgParm implements ICfgParm{
-	}
+	public static class CfgParm implements ICfgParm{} //look at super class
 	@Override
-	protected void configure(ICfgParm icfg) {
+	public void configure(ICfgParm icfg) {
 //	public void configure() {
 		CfgParm cfg = (CfgParm)icfg;
 		super.configure(new CmdConditionalAppStateAbs.CfgParm(

@@ -73,7 +73,7 @@ public class UngrabMouseStateI extends ConditionalAppStateAbs {
 	 * @param bKeepUngrabbedOnSlowdown null to use default
 	 */
 	@Override
-	protected void configure(ICfgParm icfg) {
+	public void configure(ICfgParm icfg) {
 //	public void configure(Long lSlowMachineDelayToUngrabMilis, Boolean bKeepUngrabbedOnSlowdown) {
 		CfgParm cfg = (CfgParm)icfg;
 		super.configure(new ConditionalAppStateAbs.CfgParm(

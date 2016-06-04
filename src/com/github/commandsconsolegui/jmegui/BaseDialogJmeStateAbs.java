@@ -75,7 +75,7 @@ public abstract class BaseDialogJmeStateAbs extends CmdConditionalAppStateAbs im
 		}
 	}
 	@Override
-	protected void configure(ICfgParm icfg) {
+	public void configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
 //	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
 		/**

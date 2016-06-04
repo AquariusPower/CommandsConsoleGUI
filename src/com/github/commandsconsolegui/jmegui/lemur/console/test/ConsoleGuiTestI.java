@@ -107,7 +107,8 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 		cd.addConsoleCommandListener(this);
 		
 		diag = new CustomDialogGUIState();
-		diag.configure("TestDialog",false);
+		diag.configure(new CustomDialogGUIState.CfgParm(
+				"TestDialog", false, getGuiNode()));
 		
 //		SingleInstanceState.i().configureBeforeInitializing(this,true);
 		SingleAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);

@@ -138,13 +138,15 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 		GuiGlobals.initialize(GlobalSappRefI.i().get());
 		
 		// misc cfg
-		LemurMiscHelpersStateI.i().configure();
+		LemurMiscHelpersStateI.i().configure(new LemurMiscHelpersStateI.CfgParm(
+			));
 		
 //		LemurMiscHelpersStateI.i().initialize(app().getStateManager(), sapp);
 //		if(!app().getStateManager().attach(LemurMiscHelpersStateI.i())){
 //			throw new NullPointerException("already attached state "+LemurMiscHelpersStateI.class.getName());
 //		}
-		LemurFocusHelperStateI.i().configure(null);
+		LemurFocusHelperStateI.i().configure(new LemurFocusHelperStateI.CfgParm(
+			null));
 		
 //		return true;
 	}
