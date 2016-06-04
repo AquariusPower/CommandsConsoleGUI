@@ -96,10 +96,13 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 		
 		GlobalConsoleGuiI.i().set(ConsoleLemurStateI.i());
 		
-		ConsoleLemurStateI.i().configure(ConsoleGuiTestI.class.getSimpleName(), false, KeyInput.KEY_F10, getGuiNode());
-		CommandsBackgroundState.i().configure(ConsoleLemurStateI.i());
-		FpsLimiterStateI.i().configure();
-		UngrabMouseStateI.i().configure(null,null);
+		ConsoleLemurStateI.i().configure(new ConsoleLemurStateI.CfgParm(
+				ConsoleGuiTestI.class.getSimpleName(), false, KeyInput.KEY_F10, getGuiNode()));
+		CommandsBackgroundState.i().configure(new CommandsBackgroundState.CfgParm(
+				ConsoleLemurStateI.i()));
+		FpsLimiterStateI.i().configure(null);
+		UngrabMouseStateI.i().configure(new UngrabMouseStateI.CfgParm(
+			null,null));
 
 		cd.addConsoleCommandListener(this);
 		

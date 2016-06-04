@@ -376,15 +376,38 @@ public abstract class ConsoleJmeStateAbs extends BaseDialogJmeStateAbs implement
 //		bConfigureSimpleCompleted = true;
 //	}
 	
-	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,int iToggleConsoleKey, Node nodeGUI) {
-		super.configure(strUIId, bIgnorePrefixAndSuffix, nodeGUI);
+//	@Deprecated
+//	@Override
+//	protected void configure(String strCmdIdentifier,	boolean bIgnorePrefixAndSuffix) {
+//		throw new NullPointerException("deprecated!!!");
+//	}
+	public static class CfgParm implements ICfgParm{
+		String strUIId;
+		boolean bIgnorePrefixAndSuffix;
+		int iToggleConsoleKey;
+		Node nodeGUI;
+		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix,
+				int iToggleConsoleKey, Node nodeGUI) {
+			super();
+			this.strUIId = strUIId;
+			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
+			this.iToggleConsoleKey = iToggleConsoleKey;
+			this.nodeGUI = nodeGUI;
+		}
+	}
+	@Override
+	protected void configure(ICfgParm icfg) {
+//	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,int iToggleConsoleKey, Node nodeGUI) {
+		CfgParm cfg = (CfgParm)icfg;
+		super.configure(new BaseDialogJmeStateAbs.CfgParm(cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.nodeGUI));
 		
 		rss = new ReattachSafelyState();
-		rss.configure(this);
+		rss.configure(new ReattachSafelyState.CfgParm(this));
 		
-		this.iToggleConsoleKey=iToggleConsoleKey;
+		this.iToggleConsoleKey=cfg.iToggleConsoleKey;
 //		if(cd==null)throw new NullPointerException("Missing "+CommandsDelegatorI.class.getName()+" instance (or a more specialized, like the scripting one)");
 		cd().configure(this);//,sapp);
+		cd().initialize();
 //		cd().addConsoleCommandListener(this);
 //		this.bEnabled=true; //just to let it be initialized at startup by state manager
 //		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
@@ -457,7 +480,7 @@ public abstract class ConsoleJmeStateAbs extends BaseDialogJmeStateAbs implement
 		app().getAssetManager().registerLoader(TrueTypeLoader.class, "ttf");
 		
 //		cc.configure(this,sapp);
-		cd().initialize();
+//		cd().initialize();
 		
 		// other inits
 		cd().addCmdToQueue(cd().CMD_FIX_LINE_WRAP);
@@ -633,7 +656,13 @@ public abstract class ConsoleJmeStateAbs extends BaseDialogJmeStateAbs implement
 				case "-d":bUseCommandDelimiterInsteadOfNewLine=true;break;
 			}
 		}
+		
+		/**
+		 * the string is sent to clipboard, no need to collect here...
+		 * TODO log it may be?
+		 */
 		String str = cd().editCopyOrCut(false, bCut, bUseCommandDelimiterInsteadOfNewLine);
+		
 		return true;
 	}
 	

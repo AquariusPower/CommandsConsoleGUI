@@ -25,65 +25,31 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.jmegui.lemur.console.test;
+package com.github.commandsconsolegui.misc;
 
-import java.util.ArrayList;
-
-import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
-import com.github.commandsconsolegui.misc.MiscI;
-import com.jme3.scene.Node;
-import com.simsilica.lemur.GuiGlobals;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
+ * 
  * @author AquariusPower <https://github.com/AquariusPower>
+ *
  */
-public class CustomDialogGUIState extends LemurDialogGUIStateAbs<String>{
-	ArrayList<String> astr;
+public class MsgI {
+	private static MsgI instance = new MsgI();
+	public static MsgI i(){return instance;}
 	
-	public static class CfgParm implements ICfgParm{
-		String strUIId;
-		boolean bIgnorePrefixAndSuffix;
-		Node nodeGUI;
-		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
-			super();
-			this.strUIId = strUIId;
-			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
-			this.nodeGUI =nodeGUI;
+	public void msgDbg(String str, boolean bSuccess, Object objOwner){
+		if(!bSuccess){
+			int i,i2=0;
+			i=i2;i2=i;
 		}
-	}
-	@Override
-	protected void configure(ICfgParm icfg) {
-//	public void configure(String strUIId, boolean bIgnorePrefixAndSuffix) {
-		CfgParm cfg = (CfgParm)icfg;
-		astr = new ArrayList<String>();
-		super.configure(new LemurDialogGUIStateAbs.CfgParm(
-			cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.nodeGUI));
-	}
-	
-	@Override
-	protected void updateTextInfo() {
-		lblTextInfo.setText("Info: Type a list filter at input text area and hit Enter.");
-//		super.updateTextInfo();
-	}
-	
-	@Override
-	protected void updateList() {
-		astr.add("New test entry: "+MiscI.i().getDateTimeForFilename(true));
-		if(astr.size()>100)astr.remove(0);
-		updateList(astr);
-	}
-
-	@Override
-	protected boolean cleanupValidating() {
-		astr.clear();
-		astr=null;
-		return super.cleanupValidating();
-	}
-
-	@Override
-	protected boolean initCheckPrerequisites() {
-		if(GuiGlobals.getInstance()==null)return false;
-		return super.initCheckPrerequisites();
+		
+		System.err.println("DBG: "
+			+new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()))+": "
+			+objOwner.getClass().getName()+": "
+			+(bSuccess?"ok":"FAIL")+": "
+			+str);
 	}
 	
 }

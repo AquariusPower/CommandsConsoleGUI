@@ -39,6 +39,7 @@ import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.input.KeyInput;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
@@ -76,6 +77,12 @@ public abstract class LemurDialogGUIStateAbs <V> extends DialogStateAbs<V> {
 	
 	protected boolean initGUI(float fDialogPerc, float fInfoPerc){
 		return initGUI(fDialogPerc, fInfoPerc,null);
+	}
+	
+	public static class CfgParm extends DialogStateAbs.CfgParm{
+		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI) {
+			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI);
+		}
 	}
 	
 	/**

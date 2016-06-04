@@ -62,16 +62,35 @@ public abstract class CmdConditionalAppStateAbs extends ConditionalAppStateAbs i
 		return strCmdIdentifier;
 	}
 	
-	protected void configure(String strCmdIdentifier,boolean bIgnorePrefixAndSuffix) {
-		super.configure(GlobalSappRefI.i().get());
+//	@Deprecated
+//	@Override
+//	protected void configure(Application app) {
+//		throw new NullPointerException("deprecated!!!");
+//	}
+	
+	public static class CfgParm implements ICfgParm{
+		String strCmdIdentifier;
+		boolean bIgnorePrefixAndSuffix;
+		public CfgParm(String strCmdIdentifier, boolean bIgnorePrefixAndSuffix) {
+			super();
+			this.strCmdIdentifier = strCmdIdentifier;
+			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
+		}
+	}
+	@Override
+	protected void configure(ICfgParm icfg) {
+//	protected void configure(String strCmdIdentifier,boolean bIgnorePrefixAndSuffix) {
+		CfgParm cfg = (CfgParm)icfg;
+		
+		super.configure(new ConditionalAppStateAbs.CfgParm(GlobalSappRefI.i().get()));
 		
 			cd=GlobalCommandsDelegatorI.i().get();
 			
-			if(strCmdIdentifier==null || strCmdIdentifier.isEmpty())throw new NullPointerException("invalid cmd id");
+			if(cfg.strCmdIdentifier==null || cfg.strCmdIdentifier.isEmpty())throw new NullPointerException("invalid cmd id");
 			this.strCmdIdentifier="";
-			if(!bIgnorePrefixAndSuffix)this.strCmdIdentifier+=strCmdPrefix;
-			this.strCmdIdentifier+=strCmdIdentifier;
-			if(!bIgnorePrefixAndSuffix)this.strCmdIdentifier+=strCmdSuffix;
+			if(!cfg.bIgnorePrefixAndSuffix)this.strCmdIdentifier+=strCmdPrefix;
+			this.strCmdIdentifier+=cfg.strCmdIdentifier;
+			if(!cfg.bIgnorePrefixAndSuffix)this.strCmdIdentifier+=strCmdSuffix;
 			
 			cd.addConsoleCommandListener(this);
 			

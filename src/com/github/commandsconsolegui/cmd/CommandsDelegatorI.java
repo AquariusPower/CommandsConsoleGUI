@@ -49,6 +49,7 @@ import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDbgKey;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -3089,10 +3090,12 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	}
 
 	public boolean isConfigured() {
+		if(!bConfigured)MsgI.i().msgDbg("is cfg", false, this);
 		return bConfigured;
 	}
 
 	public boolean isInitialized() {
+		if(!bInitialized)MsgI.i().msgDbg("is ini", false, this);
 		return bInitialized;
 	}
 }

@@ -56,6 +56,12 @@ public abstract class DialogStateAbs <V> extends BaseDialogJmeStateAbs{
 		return super.enableValidating();
 	}
 	
+	public static class CfgParm extends BaseDialogJmeStateAbs.CfgParm{
+		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI) {
+			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI);
+		}
+	}
+	
 	/**
 	 * when dialog is enabled,
 	 * default is to fill with the last filter

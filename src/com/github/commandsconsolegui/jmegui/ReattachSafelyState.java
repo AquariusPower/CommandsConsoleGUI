@@ -30,7 +30,6 @@ package com.github.commandsconsolegui.jmegui;
 import java.util.concurrent.Callable;
 
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.jmegui.console.ConsoleJmeStateAbs;
 import com.jme3.app.state.AppState;
 
 /**
@@ -63,11 +62,28 @@ public class ReattachSafelyState extends ConditionalAppStateAbs{
 
 	private boolean	bWasEnabled;
 	
-	public void configure(ConditionalAppStateAbs stateTarget) {
-		if(stateTarget==null)throw new NullPointerException("target state is null");
-		this.stateTarget=stateTarget;
+//	@Deprecated
+//	@Override
+//	protected void configure(Application app) {
+//		throw new NullPointerException("deprecated!!!");
+//	}
+	public static class CfgParm implements ICfgParm{
+		ConditionalAppStateAbs stateTarget;
+		public CfgParm(ConditionalAppStateAbs stateTarget) {
+			super();
+			this.stateTarget = stateTarget;
+		}
+	}
+	@Override
+	public void configure(ICfgParm icfg) {
+//	public void configure(ConditionalAppStateAbs stateTarget) {
+		CfgParm cfg = (CfgParm)icfg;
 		
-		super.configure(GlobalSappRefI.i().get());
+		if(cfg.stateTarget==null)throw new NullPointerException("target state is null");
+		this.stateTarget=cfg.stateTarget;
+		
+		super.configure(new ConditionalAppStateAbs.CfgParm(
+			GlobalSappRefI.i().get()));
 	}
 	
 	@Override

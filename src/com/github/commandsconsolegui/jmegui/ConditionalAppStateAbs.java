@@ -27,12 +27,11 @@
 
 package com.github.commandsconsolegui.jmegui;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.Callable;
 
 import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ERecreateConsoleSteps;
 import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ReattachSafelyValidateSteps;
+import com.github.commandsconsolegui.misc.MsgI;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppState;
 import com.jme3.app.state.AppStateManager;
@@ -58,6 +57,8 @@ import com.jme3.scene.Node;
  *
  */
 public abstract class ConditionalAppStateAbs implements AppState, ReattachSafelyValidateSteps {
+//	public static interface ICfgParm{}
+	
 	private Node nodeGUI;
 	
 	// CONFIGURE 
@@ -110,23 +111,53 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 //			
 //		}
 //	}
+///**
+//* This method, and all similar configure() ones, are to be kept protected until the
+//* last sub class that will be instantiated, then it can be made public.
+//* 
+//* If the configure() signature is changed, it must be: Overriden, deprecated and
+//* throw exception if used by a sub class!
+//* 
+//* Configure simple references assignments and variable values.
+//* Must be used before initialization.
+//* Put here only things that will not change on {@link #cleanupProperly()} !
+//* 
+//* @param app
+//*/
+	
+	
 	
 	/**
-	 * This method, and all similar configure() ones, are to be kept protected until the
-	 * last sub class that will be instantiated, then it can be made public.
-	 * 
+	 * Each subclass can have the same name "CfgParm".
+	 * Just reference the CfgParm of the superclass directly ex.: 
+	 * 	new ConditionalAppStateAbs.CfgParm()
+	 */
+	public static interface ICfgParm{}
+	
+	public static class CfgParm implements ICfgParm{
+		Application app;
+		public CfgParm(Application app) {
+			super();
+			this.app = app;
+		}
+	}
+	
+	/**
 	 * Configure simple references assignments and variable values.
 	 * Must be used before initialization.
 	 * Put here only things that will not change on {@link #cleanupProperly()} !
 	 * 
-	 * @param app
+	 * @param cp
 	 */
-	protected void configure(Application app){
+	protected void configure(ICfgParm icfg){
+		CfgParm cfg = (CfgParm)icfg;
+		
+//	protected void configure(Application app){
 		if(this.bConfigured)throw new NullPointerException("already configured");
 		
 		// internal configurations
-		if(app==null)throw new NullPointerException("app is null");
-		this.app=app;
+		if(cfg.app==null)throw new NullPointerException("app is null");
+		this.app=cfg.app;
 		
 		// configs above
 		this.bConfigured=true;
@@ -135,22 +166,15 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 		preInitRequest();
 	}
 	
-	public void msgDbg(String str, boolean bSuccess){
-		if(!bSuccess){
-			int i,i2=0;
-			i=i2;i2=i;
-		}
-		
-		System.err.println("DBG: "
-			+new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()))+": "
-			+this.getClass().getName()+": "
-			+(bSuccess?"ok":"FAIL")+": "
-			+str);
+	protected void msgDbg(String str, boolean bSuccess) {
+		MsgI.i().msgDbg(str, bSuccess, this);
 	}
-	
+
 	public boolean isConfigured(){
 		return bConfigured;
 	}
+	
+	
 	
 	/**
 	 * This can be used to override system time with your simulation time.

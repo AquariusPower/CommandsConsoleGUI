@@ -63,25 +63,39 @@ public abstract class BaseDialogJmeStateAbs extends CmdConditionalAppStateAbs im
 		return this;
 	}
 	
-	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
+	public static class CfgParm implements ICfgParm{
+		String strUIId;
+		boolean bIgnorePrefixAndSuffix;
+		Node nodeGUI;
+		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI) {
+			super();
+			this.strUIId = strUIId;
+			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
+			this.nodeGUI = nodeGUI;
+		}
+	}
+	@Override
+	protected void configure(ICfgParm icfg) {
+		CfgParm cfg = (CfgParm)icfg;
+//	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
 		/**
 		 * Dialogs must be initially disabled because they are enabled on user demand.
 		 */
 		bEnabled=false;
 		
-		super.setNodeGUI(nodeGUI);
+		super.setNodeGUI(cfg.nodeGUI);//getNodeGUI()
 
 		strCmdPrefix = "toggleUI";
 		strCmdSuffix = "";
 		
-		if(strUIId==null || strUIId.isEmpty())throw new NullPointerException("invalid UI identifier");
-		this.strUIId=strUIId;
+		if(cfg.strUIId==null || cfg.strUIId.isEmpty())throw new NullPointerException("invalid UI identifier");
+		this.strUIId=cfg.strUIId;
 		
 //		this.strCmd=strCmdPrefix+strUIId+strCmdSuffix;
-		this.strTitle = "Dialog: "+strUIId;
+		this.strTitle = "Dialog: "+cfg.strUIId;
 //		btgShowDialog.setCustomCmdId(this.strCmd);
 		
-		super.configure(strUIId, bIgnorePrefixAndSuffix);
+		super.configure(new CmdConditionalAppStateAbs.CfgParm(cfg.strUIId, cfg.bIgnorePrefixAndSuffix));
 	}
 	
 	/**

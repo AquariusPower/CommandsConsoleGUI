@@ -34,7 +34,6 @@ import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.console.ConsoleJmeStateAbs;
 import com.github.commandsconsolegui.misc.MiscI;
-import com.jme3.app.Application;
 import com.jme3.font.BitmapCharacter;
 import com.jme3.font.BitmapCharacterSet;
 import com.jme3.font.LineWrapMode;
@@ -115,9 +114,26 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 		return super.initializeValidating();
 	}
 	
+	public static class CfgParm implements ICfgParm{
+		String strUIId;
+		boolean bIgnorePrefixAndSuffix;
+		int iToggleConsoleKey;
+		Node nodeGUI;
+		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix,
+				int iToggleConsoleKey, Node nodeGUI) {
+			super();
+			this.strUIId = strUIId;
+			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
+			this.iToggleConsoleKey = iToggleConsoleKey;
+			this.nodeGUI = nodeGUI;
+		}
+	}
 	@Override
-	public void configure(String strUIId, boolean bIgnorePrefixAndSuffix, int iToggleConsoleKey, Node nodeGUI) {
-		super.configure(strUIId, bIgnorePrefixAndSuffix, iToggleConsoleKey, nodeGUI);
+	public void configure(ICfgParm icfg) {
+//	public void configure(String strUIId, boolean bIgnorePrefixAndSuffix, int iToggleConsoleKey, Node nodeGUI) {
+		CfgParm cfg = (CfgParm)icfg;
+		super.configure(new ConsoleJmeStateAbs.CfgParm(
+			cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.iToggleConsoleKey, cfg.nodeGUI));
 		
 		GuiGlobals.initialize(GlobalSappRefI.i().get());
 		

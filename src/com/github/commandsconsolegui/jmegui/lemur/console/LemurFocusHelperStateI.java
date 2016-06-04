@@ -70,13 +70,24 @@ public class LemurFocusHelperStateI extends CmdConditionalAppStateAbs implements
 //		cc.addConsoleCommandListener(this);
 //	}
 	
+	public static class CfgParm implements ICfgParm{
+		Float fBaseZ;
+		public CfgParm(Float fBaseZ) {
+			super();
+			this.fBaseZ = fBaseZ;
+		}
+	}
 	/**
 	 * The initial Z value from where the dialogs will be sorted/ordered.
 	 * So if you have other gui elements, this can be changed to show dialogs above or under them.
 	 */
-	public void configure(Float fBaseZ){
-		if(fBaseZ!=null)this.fBaseZ = fBaseZ;
-		super.configure(LemurFocusHelperStateI.class.getSimpleName(), false);
+	@Override
+	protected void configure(ICfgParm icfg) {
+//	public void configure(Float fBaseZ){
+		CfgParm cfg = (CfgParm)icfg;
+		if(cfg.fBaseZ!=null)this.fBaseZ = cfg.fBaseZ;
+		super.configure(new CmdConditionalAppStateAbs.CfgParm(
+			LemurFocusHelperStateI.class.getSimpleName(), false));
 //		configure();
 	}
 	

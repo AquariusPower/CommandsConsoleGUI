@@ -52,10 +52,20 @@ public class CommandsBackgroundState extends CmdConditionalAppStateAbs {
 	
 	private IConsoleUI	cgsaGraphicalConsoleUI;
 	
-	public void configure(IConsoleUI icui){
-		if(icui==null)throw new NullPointerException("invalid instance for "+IConsoleUI.class.getName());
-		this.cgsaGraphicalConsoleUI = icui;
-		super.configure(CommandsBackgroundState.class.getSimpleName(),true);
+	public static class CfgParm implements ICfgParm{
+		IConsoleUI icui;
+		public CfgParm(IConsoleUI icui) {
+			super();
+			this.icui = icui;
+		}
+	}
+	@Override
+	public void configure(ICfgParm icfg){
+		CfgParm cfg = (CfgParm)icfg;
+		if(cfg.icui==null)throw new NullPointerException("invalid instance for "+IConsoleUI.class.getName());
+		this.cgsaGraphicalConsoleUI = cfg.icui;
+		super.configure(new CmdConditionalAppStateAbs.CfgParm(
+			CommandsBackgroundState.class.getSimpleName(), true));
 	}
 	
 	@Override

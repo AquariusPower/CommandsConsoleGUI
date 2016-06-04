@@ -33,6 +33,8 @@ import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
+import com.github.commandsconsolegui.jmegui.ConditionalAppStateAbs.ICfgParm;
+import com.github.commandsconsolegui.jmegui.ReattachSafelyState.CfgParm;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalAppStateAbs;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -412,9 +414,15 @@ public class LemurMiscHelpersStateI extends CmdConditionalAppStateAbs implements
 		
 		return super.updateValidating(tpf);
 	}
-
-	public void configure() {
-		super.configure(LemurMiscHelpersStateI.class.getSimpleName(), false);
+	
+	public static class CfgParm implements ICfgParm{
+	}
+	@Override
+	protected void configure(ICfgParm icfg) {
+//	public void configure() {
+		CfgParm cfg = (CfgParm)icfg;
+		super.configure(new CmdConditionalAppStateAbs.CfgParm(
+			LemurMiscHelpersStateI.class.getSimpleName(), false));
 	}
 
 }

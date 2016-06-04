@@ -58,18 +58,37 @@ public class UngrabMouseStateI extends ConditionalAppStateAbs {
 	 */
 	private boolean	bKeepUngrabbedOnSlowDown = false;
 	
+	public static class CfgParm implements ICfgParm{
+		Long lSlowMachineDelayToUngrabMilis;
+		Boolean bKeepUngrabbedOnSlowdown;
+		public CfgParm(Long lSlowMachineDelayToUngrabMilis,
+				Boolean bKeepUngrabbedOnSlowdown) {
+			super();
+			this.lSlowMachineDelayToUngrabMilis = lSlowMachineDelayToUngrabMilis;
+			this.bKeepUngrabbedOnSlowdown = bKeepUngrabbedOnSlowdown;
+		}
+	}
 	/**
 	 * @param lSlowMachineDelayToUngrabMilis null to use default
 	 * @param bKeepUngrabbedOnSlowdown null to use default
 	 */
-	public void configure(Long lSlowMachineDelayToUngrabMilis, Boolean bKeepUngrabbedOnSlowdown) {
-		super.configure(GlobalSappRefI.i().get());
+	@Override
+	protected void configure(ICfgParm icfg) {
+//	public void configure(Long lSlowMachineDelayToUngrabMilis, Boolean bKeepUngrabbedOnSlowdown) {
+		CfgParm cfg = (CfgParm)icfg;
+		super.configure(new ConditionalAppStateAbs.CfgParm(
+				GlobalSappRefI.i().get()));
 		
-		if(lSlowMachineDelayToUngrabMilis!=null)this.lDelayToUngrabMilis=lSlowMachineDelayToUngrabMilis;
-		if(bKeepUngrabbedOnSlowdown!=null)this.bKeepUngrabbedOnSlowDown=bKeepUngrabbedOnSlowdown;
+		if(cfg.lSlowMachineDelayToUngrabMilis!=null)this.lDelayToUngrabMilis=cfg.lSlowMachineDelayToUngrabMilis;
+		if(cfg.bKeepUngrabbedOnSlowdown!=null)this.bKeepUngrabbedOnSlowDown=cfg.bKeepUngrabbedOnSlowdown;
 		
 //		GlobalSappRefI.i().get().getStateManager().attach(this);
 	}
+//	@Deprecated
+//	@Override
+//	protected void configure(Application app) {
+//		throw new NullPointerException("deprecated!!!");
+//	}
 	
 	/**
 	 * this will also instantly ungrab the mouse cursor
