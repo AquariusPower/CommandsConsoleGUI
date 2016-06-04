@@ -399,7 +399,16 @@ public abstract class ConsoleJmeStateAbs extends BaseDialogJmeStateAbs implement
 	public void configure(ICfgParm icfg) {
 //	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,int iToggleConsoleKey, Node nodeGUI) {
 		CfgParm cfg = (CfgParm)icfg;
-		super.configure(new BaseDialogJmeStateAbs.CfgParm(cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.nodeGUI));
+		
+		/**
+		 * The console is a special dialog.
+		 * Many things depend on it.
+		 * Even if initially enabled, for the looks it will be made invisible.
+		 */
+		boolean bConsoleDialogInitiallyEnabled=true;
+		
+		super.configure(new BaseDialogJmeStateAbs.CfgParm(
+			cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.nodeGUI, bConsoleDialogInitiallyEnabled));
 		
 		rss = new ReattachSafelyState();
 		rss.configure(new ReattachSafelyState.CfgParm(this));

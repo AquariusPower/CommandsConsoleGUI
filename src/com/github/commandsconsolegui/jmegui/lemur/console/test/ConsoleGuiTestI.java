@@ -36,7 +36,7 @@ import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalConsoleGuiI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
-import com.github.commandsconsolegui.jmegui.cmd.CommandsBackgroundState;
+import com.github.commandsconsolegui.jmegui.cmd.CommandsBackgroundStateI;
 import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
@@ -97,9 +97,9 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 		GlobalConsoleGuiI.i().set(ConsoleLemurStateI.i());
 		
 		ConsoleLemurStateI.i().configure(new ConsoleLemurStateI.CfgParm(
-				ConsoleGuiTestI.class.getSimpleName(), false, KeyInput.KEY_F10, getGuiNode()));
-		CommandsBackgroundState.i().configure(new CommandsBackgroundState.CfgParm(
-				ConsoleLemurStateI.i()));
+			ConsoleGuiTestI.class.getSimpleName(), false, KeyInput.KEY_F10, getGuiNode()));
+		CommandsBackgroundStateI.i().configure(new CommandsBackgroundStateI.CfgParm(
+			ConsoleLemurStateI.i()));
 		FpsLimiterStateI.i().configure(null);
 		UngrabMouseStateI.i().configure(new UngrabMouseStateI.CfgParm(
 			null,null));

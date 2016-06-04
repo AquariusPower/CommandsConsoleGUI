@@ -82,19 +82,20 @@ public abstract class CmdConditionalAppStateAbs extends ConditionalAppStateAbs i
 //	protected void configure(String strCmdIdentifier,boolean bIgnorePrefixAndSuffix) {
 		CfgParm cfg = (CfgParm)icfg;
 		
-		super.configure(new ConditionalAppStateAbs.CfgParm(GlobalSappRefI.i().get()));
+		super.configure(new ConditionalAppStateAbs.CfgParm(
+			GlobalSappRefI.i().get()));
 		
-			cd=GlobalCommandsDelegatorI.i().get();
-			
-			if(cfg.strCmdIdentifier==null || cfg.strCmdIdentifier.isEmpty())throw new NullPointerException("invalid cmd id");
-			this.strCmdIdentifier="";
-			if(!cfg.bIgnorePrefixAndSuffix)this.strCmdIdentifier+=strCmdPrefix;
-			this.strCmdIdentifier+=cfg.strCmdIdentifier;
-			if(!cfg.bIgnorePrefixAndSuffix)this.strCmdIdentifier+=strCmdSuffix;
-			
-			cd.addConsoleCommandListener(this);
-			
-			ReflexFillI.i().assertReflexFillFieldsForOwner(this);
+		cd=GlobalCommandsDelegatorI.i().get();
+		
+		if(cfg.strCmdIdentifier==null || cfg.strCmdIdentifier.isEmpty())throw new NullPointerException("invalid cmd id");
+		this.strCmdIdentifier="";
+		if(!cfg.bIgnorePrefixAndSuffix)this.strCmdIdentifier+=strCmdPrefix;
+		this.strCmdIdentifier+=cfg.strCmdIdentifier;
+		if(!cfg.bIgnorePrefixAndSuffix)this.strCmdIdentifier+=strCmdSuffix;
+		
+		cd.addConsoleCommandListener(this);
+		
+		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 		
 //		return isConfigured();
 	}

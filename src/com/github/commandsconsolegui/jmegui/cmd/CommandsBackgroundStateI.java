@@ -43,9 +43,9 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class CommandsBackgroundState extends CmdConditionalAppStateAbs {
-	private static CommandsBackgroundState instance = new CommandsBackgroundState();
-	public static CommandsBackgroundState i(){return instance;}
+public class CommandsBackgroundStateI extends CmdConditionalAppStateAbs {
+	private static CommandsBackgroundStateI instance = new CommandsBackgroundStateI();
+	public static CommandsBackgroundStateI i(){return instance;}
 	
 	protected BoolTogglerCmdField	btgExecCommandsInBackground=new BoolTogglerCmdField(this, true, BoolTogglerCmdField.strTogglerCodePrefix,
 		"Will continue running console commands even if console is closed.");
@@ -65,14 +65,14 @@ public class CommandsBackgroundState extends CmdConditionalAppStateAbs {
 		if(cfg.icui==null)throw new NullPointerException("invalid instance for "+IConsoleUI.class.getName());
 		this.cgsaGraphicalConsoleUI = cfg.icui;
 		super.configure(new CmdConditionalAppStateAbs.CfgParm(
-			CommandsBackgroundState.class.getSimpleName(), true));
+			CommandsBackgroundStateI.class.getSimpleName(), true));
 	}
 	
 	@Override
 	protected boolean updateValidating(float tpf) {
-		if(!btgExecCommandsInBackground.b())return false;
+		if(!btgExecCommandsInBackground.b())return true; //this is an OK state, no failure!
 		
-		if(cgsaGraphicalConsoleUI.isEnabled())return false; //will be foreground execution
+		if(cgsaGraphicalConsoleUI.isEnabled())return true; //will be foreground execution, this is an OK state, no failure!
 		
 		/**
 		 * This way, being controlled by JME state update, the commands will happen in the same 

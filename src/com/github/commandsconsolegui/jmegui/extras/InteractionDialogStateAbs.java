@@ -39,7 +39,7 @@ import com.jme3.scene.Node;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class DialogStateAbs <V> extends BaseDialogJmeStateAbs{
+public abstract class InteractionDialogStateAbs <V> extends BaseDialogJmeStateAbs{
 	protected Node cntrNorth;
 	protected String	strLastFilter = "";
 	protected HashMap<String,V> hmKeyValue = new HashMap<String,V>();
@@ -58,7 +58,9 @@ public abstract class DialogStateAbs <V> extends BaseDialogJmeStateAbs{
 	
 	public static class CfgParm extends BaseDialogJmeStateAbs.CfgParm{
 		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI) {
-			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI);
+			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI, 
+					false /** Dialogs must be initially disabled because they are enabled on user demand. */
+				);
 		}
 	}
 	

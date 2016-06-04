@@ -31,7 +31,7 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
-import com.github.commandsconsolegui.jmegui.extras.DialogStateAbs;
+import com.github.commandsconsolegui.jmegui.extras.InteractionDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
@@ -53,12 +53,12 @@ import com.simsilica.lemur.event.KeyActionListener;
 
 /**
 * 
-* More info at {@link DialogStateAbs}
+* More info at {@link InteractionDialogStateAbs}
 * 
 * @author AquariusPower <https://github.com/AquariusPower>
 *
 */
-public abstract class LemurDialogGUIStateAbs <V> extends DialogStateAbs<V> {
+public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateAbs<V> {
 	protected Label	lblTitle;
 	protected Label	lblTextInfo;
 	protected ListBox<String>	lstbxEntriesToSelect;
@@ -79,7 +79,7 @@ public abstract class LemurDialogGUIStateAbs <V> extends DialogStateAbs<V> {
 		return initGUI(fDialogPerc, fInfoPerc,null);
 	}
 	
-	public static class CfgParm extends DialogStateAbs.CfgParm{
+	public static class CfgParm extends InteractionDialogStateAbs.CfgParm{
 		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI) {
 			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI);
 		}

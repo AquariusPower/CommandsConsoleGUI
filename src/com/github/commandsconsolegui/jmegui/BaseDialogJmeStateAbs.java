@@ -67,21 +67,21 @@ public abstract class BaseDialogJmeStateAbs extends CmdConditionalAppStateAbs im
 		String strUIId;
 		boolean bIgnorePrefixAndSuffix;
 		Node nodeGUI;
-		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI) {
+		boolean bInitiallyEnabled;
+		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI, boolean bInitiallyEnabled) {
 			super();
 			this.strUIId = strUIId;
 			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
 			this.nodeGUI = nodeGUI;
+			this.bInitiallyEnabled=bInitiallyEnabled;
 		}
 	}
 	@Override
 	public void configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
 //	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
-		/**
-		 * Dialogs must be initially disabled because they are enabled on user demand.
-		 */
-		bEnabled=false;
+		
+		bEnabled=cfg.bInitiallyEnabled;
 		
 		super.setNodeGUI(cfg.nodeGUI);//getNodeGUI()
 
@@ -95,7 +95,8 @@ public abstract class BaseDialogJmeStateAbs extends CmdConditionalAppStateAbs im
 		this.strTitle = "Dialog: "+cfg.strUIId;
 //		btgShowDialog.setCustomCmdId(this.strCmd);
 		
-		super.configure(new CmdConditionalAppStateAbs.CfgParm(cfg.strUIId, cfg.bIgnorePrefixAndSuffix));
+		super.configure(new CmdConditionalAppStateAbs.CfgParm(
+			cfg.strUIId, cfg.bIgnorePrefixAndSuffix));
 	}
 	
 	/**
