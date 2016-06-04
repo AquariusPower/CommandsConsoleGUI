@@ -105,29 +105,32 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 	
 	@Override
 	protected boolean initializeValidating() {
-		GuiGlobals.initialize(GlobalSappRefI.i().get());
 		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
 		
 		addStyle(BaseStyles.GLASS);
 		addStyle(Styles.ROOT_STYLE);
 		
-		initializationCompleted();
+//		initializationCompleted();
 		
 		return super.initializeValidating();
 	}
 	
 	@Override
-	public boolean configureValidating(String strUIId, boolean bIgnorePrefixAndSuffix, int iToggleConsoleKey) {
+	public void configure(String strUIId, boolean bIgnorePrefixAndSuffix, int iToggleConsoleKey, Node nodeGUI) {
+		super.configure(strUIId, bIgnorePrefixAndSuffix, iToggleConsoleKey, nodeGUI);
+		
+		GuiGlobals.initialize(GlobalSappRefI.i().get());
+		
 		// misc cfg
-		if(!LemurMiscHelpersStateI.i().configureValidating())return false;
+		LemurMiscHelpersStateI.i().configure();
 		
 //		LemurMiscHelpersStateI.i().initialize(app().getStateManager(), sapp);
 //		if(!app().getStateManager().attach(LemurMiscHelpersStateI.i())){
 //			throw new NullPointerException("already attached state "+LemurMiscHelpersStateI.class.getName());
 //		}
-		LemurFocusHelperStateI.i().configureSimple(null);
+		LemurFocusHelperStateI.i().configure(null);
 		
-		return super.configureValidating(strUIId, bIgnorePrefixAndSuffix, iToggleConsoleKey);
+//		return true;
 	}
 	
 //	public void ConsoleGUILemurState(int iOpenConsoleHotKey, ConsoleCommands cc, Application app) {
@@ -228,7 +231,7 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 		CursorEventControl.addListenersToSpatial(getHintBox(), consoleCursorListener);
 		
 		// main container
-		ctnrMainTopSubWindow = new Container(new BorderLayout(), strStyle);
+		setContainerMain(new Container(new BorderLayout(), strStyle));
 //		LemurFocusHelperI.i().addFocusChangeListener(ctnrConsole);
 //		int iMargin=2;
 //		v3fConsoleSize = new Vector3f(
@@ -303,7 +306,7 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 		 * BOTTOM ELEMENT =================================================================
 		 */
 		// input
-		super.intputField = new TextField(""+cd().getCommandPrefix(),strStyle);
+		super.setIntputField(new TextField(""+cd().getCommandPrefix(),strStyle));
     CursorEventControl.addListenersToSpatial(getInputField(), consoleCursorListener);
 		LemurFocusHelperStateI.i().addFocusChangeListener(getInputField());
 		fInputHeight = MiscJmeI.i().retrieveBitmapTextFor(getInputField()).getLineHeight();
@@ -397,7 +400,7 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 	}
 	
 	public TextField getInputField(){
-		return (TextField)super.intputField;
+		return (TextField)super.getIntputField();
 	}
 	
 	@Override
@@ -686,7 +689,7 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 //	}
 	
 	public Container getContainerConsole(){
-		return (Container)ctnrMainTopSubWindow;
+		return (Container)getContainerMain();
 	}
 	
 	public Container getContainerStatsAndControls(){
@@ -737,8 +740,8 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 //	}
 	
 	@Override
-	protected Vector3f getSizeOf(Node node) {
-		return ((Panel)node).getSize();
+	protected Vector3f getSizeOf(Spatial spt) {
+		return ((Panel)spt).getSize();
 	}
 
 	/**
@@ -795,15 +798,20 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 	}
 
 	@Override
-	public void initializationCompleted() {
-		// TODO Auto-generated method stub
-		
+	protected boolean cleanupValidating() {
+		getContainerConsole().clearChildren();
+		return super.cleanupValidating();
 	}
+
+//	@Override
+//	public void initializationCompleted() {
+//		// TODO Auto-generated method stub
+//		
+//	}
 
 	@Override
 	public boolean isInitializationCompleted() {
-		// TODO Auto-generated method stub
-		return false;
+		return super.isInitializedProperly();
 	}
 
 	@Override
@@ -816,24 +824,5 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 	protected void actionSubmit() {
 		// TODO Auto-generated method stub
 		
-	}
-
-	@Override
-	protected boolean checkInitPrerequisites() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean updateValidating(float tpf) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	
-	
-	@Override
-	protected boolean cleanupValidating() {
-		getContainerConsole().clearChildren();
-		return super.cleanupValidating();
 	}
 }

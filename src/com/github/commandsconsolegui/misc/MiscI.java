@@ -64,7 +64,10 @@ public class MiscI {
 	
 	public void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
+		
+		if(ihe==null)throw new NullPointerException("invalid instance for "+IHandleExceptions.class.getName());
 		this.ihe=ihe;
+		
 //		this.sapp=sapp;
 		bConfigured=true;
 	}

@@ -72,6 +72,7 @@ public class TimedDelayVarField implements IReflexFillCfgVariant, IVarIdValueOwn
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
+		if(ihe==null)throw new NullPointerException("invalid instance for "+IHandleExceptions.class.getName()); // KEEP ON TOP
 		TimedDelayVarField.ihe=ihe;
 		bConfigured=true;
 	}

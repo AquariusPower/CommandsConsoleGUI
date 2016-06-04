@@ -53,9 +53,9 @@ public class FpsLimiterStateI extends CmdConditionalAppStateAbs{
 	private long	lNanoDelayLimit;
 	private int	iMaxFPS;
 	
-	public boolean configureValidating() {
+	public void configure() {
 		setMaxFps(60);
-		return super.configureValidating(FpsLimiterStateI.class.getSimpleName(),false);
+		super.configure(FpsLimiterStateI.class.getSimpleName(),false);
 	}
 	
 	public FpsLimiterStateI setMaxFps(int iMaxFPS){
@@ -137,39 +137,4 @@ public class FpsLimiterStateI extends CmdConditionalAppStateAbs{
 		return cc.cmdFoundReturnStatus(bCommandWorked);
 	}
 
-	@Override
-	protected boolean checkInitPrerequisites() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean initializeValidating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean updateValidating(float tpf) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean enableValidating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean disableValidating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean cleanupValidating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
 }

@@ -37,7 +37,7 @@ import java.util.HashMap;
  */
 public class CheckInitAndCleanupI {
 	public static interface ICheckInitAndCleanupI{
-		public abstract void initializationCompleted();
+//		public abstract void initializationCompleted();
 		public abstract boolean isInitializationCompleted();
 	}; 
 	

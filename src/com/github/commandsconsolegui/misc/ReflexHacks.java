@@ -133,8 +133,13 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 	public void configure(CommandsDelegatorI cc, IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 //		this.sapp = sapp;
+		
+		if(cc==null)throw  new NullPointerException("invalid instance for "+CommandsDelegatorI.class.getName());
 		this.cc=cc;
+		
+		if(ihe==null)throw  new NullPointerException("invalid instance for "+IHandleExceptions.class.getName());
 		this.ihe=ihe;
+		
 		bConfigured=true;
 	}
 	

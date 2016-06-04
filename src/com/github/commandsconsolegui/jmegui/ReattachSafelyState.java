@@ -63,31 +63,27 @@ public class ReattachSafelyState extends ConditionalAppStateAbs{
 
 	private boolean	bWasEnabled;
 	
-	public ReattachSafelyState(ConditionalAppStateAbs stateTarget){
+	public void configure(ConditionalAppStateAbs stateTarget) {
+		if(stateTarget==null)throw new NullPointerException("target state is null");
 		this.stateTarget=stateTarget;
-			
-		configureValidating();
-	}
-	
-	protected boolean configureValidating() {
-		if(this.stateTarget==null)throw new NullPointerException("target state is null");
 		
-		return super.configureValidating(GlobalSappRefI.i().get());
+		super.configure(GlobalSappRefI.i().get());
 	}
 	
 	@Override
 	public boolean updateValidating(float tpf) {
-		if(ercCurrentStep==null)return false;
+		if(ercCurrentStep==null)return true;
 		
-		if(stateTarget.reattachValidateStep(ercCurrentStep))return false;
+		if(!stateTarget.reattachValidateStep(ercCurrentStep))return false;
 		
 		/**
 		 * Not using: app().getStateManager().getState()
 		 * because I can have several state's instances of the same class,
 		 * like several dialogs currently opened.
 		 */
-		boolean bIsAttached = stateTarget.isAttachedToAStateManager();
+		boolean bIsAttached = stateTarget.isAttachedToStateManager();
 		
+		boolean bStepDone = false;
 		switch(ercCurrentStep){
 			case Step0Detach:
 				if(bIsAttached){
@@ -101,7 +97,7 @@ public class ReattachSafelyState extends ConditionalAppStateAbs{
 					
 					getApp().enqueue(detach);
 					ercCurrentStep=ERecreateConsoleSteps.Step1Attach;
-					return true;
+					bStepDone=true;
 				}
 				break;
 			case Step1Attach:
@@ -119,19 +115,23 @@ public class ReattachSafelyState extends ConditionalAppStateAbs{
 					
 					getApp().enqueue(attach);
 					ercCurrentStep=ERecreateConsoleSteps.Step2PostInitialization;
-					return true;
+					bStepDone=true;
 				}
 				break;
 			case Step2PostInitialization:
 				if(stateTarget.isInitializedProperly()){
 					getApp().enqueue(postInitialization);
 					ercCurrentStep=null;
-					return true;
+					bStepDone=true;
 				}
 				break;
+			default:
+				return false;
 		}
 		
-		return false;
+		if(!bStepDone)return false;
+		
+		return super.updateValidating(tpf);
 	}
 	
 	public boolean isProcessingRequest(){
@@ -147,34 +147,4 @@ public class ReattachSafelyState extends ConditionalAppStateAbs{
 		ercCurrentStep=ERecreateConsoleSteps.Step0Detach;
 	}
 
-	@Override
-	protected boolean checkInitPrerequisites() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean initializeValidating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean enableValidating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean disableValidating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean cleanupValidating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	
 }

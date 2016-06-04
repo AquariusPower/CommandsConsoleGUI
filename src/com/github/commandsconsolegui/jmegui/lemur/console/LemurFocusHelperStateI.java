@@ -74,9 +74,9 @@ public class LemurFocusHelperStateI extends CmdConditionalAppStateAbs implements
 	 * The initial Z value from where the dialogs will be sorted/ordered.
 	 * So if you have other gui elements, this can be changed to show dialogs above or under them.
 	 */
-	public void configureSimple(Float fBaseZ){
+	public void configure(Float fBaseZ){
 		if(fBaseZ!=null)this.fBaseZ = fBaseZ;
-		super.configureValidating(LemurFocusHelperStateI.class.getSimpleName(), false);
+		super.configure(LemurFocusHelperStateI.class.getSimpleName(), false);
 //		configure();
 	}
 	
@@ -230,40 +230,16 @@ public class LemurFocusHelperStateI extends CmdConditionalAppStateAbs implements
 	}
 	
 	@Override
+	protected boolean initCheckPrerequisites() {
+		if(GuiGlobals.getInstance()==null)return false;
+		return super.initCheckPrerequisites();
+	}
+	
+	@Override
 	protected boolean updateValidating(float tpf) {
 		Spatial spt = getCurrentFocusRequester();
 		GuiGlobals.getInstance().requestFocus(spt); //TODO timed delay?
-		return true;
+		return super.updateValidating(tpf);
 	}
 
-	@Override
-	protected boolean checkInitPrerequisites() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean initializeValidating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean enableValidating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean disableValidating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean cleanupValidating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	
 }

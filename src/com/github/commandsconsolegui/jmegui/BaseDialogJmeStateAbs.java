@@ -41,12 +41,12 @@ import com.jme3.scene.Spatial;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class DialogJmeStateAbs extends CmdConditionalAppStateAbs implements IReflexFillCfg{
+public abstract class BaseDialogJmeStateAbs extends CmdConditionalAppStateAbs implements IReflexFillCfg{
 //	protected SimpleApplication	sapp;
 //	protected CommandsDelegatorI	cd;
 	
-	protected Node	ctnrMainTopSubWindow;
-	protected Node	intputField;
+	private Spatial	sptContainerMain;
+	private Spatial	sptIntputField;
 	
 	protected String strUIId = null;
 //	protected String	strCmd;
@@ -54,16 +54,34 @@ public abstract class DialogJmeStateAbs extends CmdConditionalAppStateAbs implem
 	protected String	strTitle;
 //	BoolTogglerCmdField btgShowDialog = new BoolTogglerCmdField(this,false);
 	
-	@Override
-	public boolean configureValidating(String strUIId,boolean bIgnorePrefixAndSuffix) {
+	public Spatial getContainerMain(){
+		return sptContainerMain;
+	}
+	
+	protected BaseDialogJmeStateAbs setContainerMain(Spatial spt){
+		this.sptContainerMain=spt;
+		return this;
+	}
+	
+	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
+		/**
+		 * Dialogs must be initially disabled because they are enabled on user demand.
+		 */
+		bEnabled=false;
+		
+		super.setNodeGUI(nodeGUI);
+
 		strCmdPrefix = "toggleUI";
 		strCmdSuffix = "";
+		
+		if(strUIId==null || strUIId.isEmpty())throw new NullPointerException("invalid UI identifier");
 		this.strUIId=strUIId;
+		
 //		this.strCmd=strCmdPrefix+strUIId+strCmdSuffix;
 		this.strTitle = "Dialog: "+strUIId;
 //		btgShowDialog.setCustomCmdId(this.strCmd);
 		
-		return super.configureValidating(strUIId, bIgnorePrefixAndSuffix);
+		super.configure(strUIId, bIgnorePrefixAndSuffix);
 	}
 	
 	/**
@@ -74,7 +92,7 @@ public abstract class DialogJmeStateAbs extends CmdConditionalAppStateAbs implem
 	protected boolean initializeValidating() {
 		if(!initGUI())return false;
 		if(!initKeyMappings())return false;
-		return true;
+		return super.initializeValidating();
 	}
 	
 	protected abstract boolean initGUI();
@@ -88,35 +106,24 @@ public abstract class DialogJmeStateAbs extends CmdConditionalAppStateAbs implem
 	 */
 	protected abstract void actionSubmit();
 	
-	public boolean configureValidating(Node nodeGUI) {
-		super.nodeGUI=nodeGUI;
-		
-		/**
-		 * Dialogs must be initially disabled because they are enabled on user demand.
-		 */
-		bEnabled=false;
-		
-		return super.configureValidating(strUIId,false);
-	}
-	
 	@Override
 	protected boolean enableValidating() {
-		nodeGUI.attachChild(ctnrMainTopSubWindow);
+		getNodeGUI().attachChild(sptContainerMain);
 		
-		requestFocus(intputField);
+		requestFocus(sptIntputField);
 		
 		setMouseCursorKeepUngrabbed(true);
 		
-		return true;
+		return super.enableValidating();
 	}
 	
 	@Override
 	protected boolean disableValidating() {
-		ctnrMainTopSubWindow.removeFromParent();
+		sptContainerMain.removeFromParent();
 		
 		setMouseCursorKeepUngrabbed(false);
 		
-		return true;
+		return super.disableValidating();
 	}
 	
 	/**
@@ -135,5 +142,14 @@ public abstract class DialogJmeStateAbs extends CmdConditionalAppStateAbs implem
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		return cd().getReflexFillCfg(rfcv);
+	}
+
+	public Spatial getIntputField() {
+		return sptIntputField;
+	}
+
+	protected BaseDialogJmeStateAbs setIntputField(Spatial sptIntputField) {
+		this.sptIntputField = sptIntputField;
+		return this;
 	}
 }

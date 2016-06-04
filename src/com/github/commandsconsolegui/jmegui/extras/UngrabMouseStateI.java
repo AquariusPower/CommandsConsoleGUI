@@ -46,7 +46,7 @@ public class UngrabMouseStateI extends ConditionalAppStateAbs {
 	public static UngrabMouseStateI i(){return instance;}
 	
 	ArrayList<Object> aobjKeepUngrabbedRequesterList = new ArrayList<Object>();
-	long lTimeLastUpdateMilis;
+	long lLastUpdateMilisAtMainThread;
 	long lDelayToUngrabMilis=500;
 	boolean bWasUnGrabbedDuringSlowdown=true;
 	Thread	t;
@@ -62,13 +62,13 @@ public class UngrabMouseStateI extends ConditionalAppStateAbs {
 	 * @param lSlowMachineDelayToUngrabMilis null to use default
 	 * @param bKeepUngrabbedOnSlowdown null to use default
 	 */
-	public void configureValidating(Long lSlowMachineDelayToUngrabMilis, Boolean bKeepUngrabbedOnSlowdown) {
-		super.configureValidating(GlobalSappRefI.i().get());
+	public void configure(Long lSlowMachineDelayToUngrabMilis, Boolean bKeepUngrabbedOnSlowdown) {
+		super.configure(GlobalSappRefI.i().get());
 		
 		if(lSlowMachineDelayToUngrabMilis!=null)this.lDelayToUngrabMilis=lSlowMachineDelayToUngrabMilis;
 		if(bKeepUngrabbedOnSlowdown!=null)this.bKeepUngrabbedOnSlowDown=bKeepUngrabbedOnSlowdown;
 		
-		GlobalSappRefI.i().get().getStateManager().attach(this);
+//		GlobalSappRefI.i().get().getStateManager().attach(this);
 	}
 	
 	/**
@@ -111,7 +111,7 @@ public class UngrabMouseStateI extends ConditionalAppStateAbs {
 		t.start();
 		
 //		initializationCompleted();
-		return true;
+		return super.initializeValidating();
 	}
 	
 //	@Override
@@ -121,13 +121,13 @@ public class UngrabMouseStateI extends ConditionalAppStateAbs {
 //	}
 //	
 	private void updateTimeAtMainThread(){
-		lTimeLastUpdateMilis=System.currentTimeMillis();
+		lLastUpdateMilisAtMainThread=System.currentTimeMillis();
 	}
 	
 	public void updateAtNewThread() {
 		long lCurrentTimeMilis = System.currentTimeMillis();
-		boolean bIsSlow = lCurrentTimeMilis > (lTimeLastUpdateMilis+lDelayToUngrabMilis);
-		lTimeLastUpdateMilis=lCurrentTimeMilis;
+		boolean bIsSlow = lCurrentTimeMilis > (lLastUpdateMilisAtMainThread+lDelayToUngrabMilis);
+//		lTimeLastUpdateMilis=lCurrentTimeMilis;
 		
 //		boolean bIsGrabbed = org.lwjgl.input.Mouse.isGrabbed();
 		boolean bIsGrabbed = !GlobalSappRefI.i().get().getInputManager().isCursorVisible();
@@ -160,37 +160,13 @@ public class UngrabMouseStateI extends ConditionalAppStateAbs {
 	@Override
 	protected boolean enableValidating() {
 		updateTimeAtMainThread();
-		return true;
-	}
-
-	@Override
-	protected boolean checkInitPrerequisites() {
-		// TODO Auto-generated method stub
-		return false;
+		return super.enableValidating();
 	}
 
 	@Override
 	protected boolean updateValidating(float tpf) {
 		updateTimeAtMainThread();
-		return true;
+		return super.updateValidating(tpf);
 	}
-
-	@Override
-	protected boolean disableValidating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean cleanupValidating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	
-//	@Override
-//	protected void cleanup(Application app) {
-//		super.cleanup(app);
-//		bCleaningUp=true;
-//	}
 
 }

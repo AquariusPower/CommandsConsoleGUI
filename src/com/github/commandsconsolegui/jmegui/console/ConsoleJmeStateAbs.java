@@ -50,7 +50,7 @@ import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
-import com.github.commandsconsolegui.jmegui.DialogJmeStateAbs;
+import com.github.commandsconsolegui.jmegui.BaseDialogJmeStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.ReattachSafelyState;
 import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ReattachSafelyValidateSteps;
@@ -94,10 +94,10 @@ import com.jme3.texture.Texture2D;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IConsoleUI, ReattachSafelyValidateSteps, IWorkAroundBugFix {
+public abstract class ConsoleJmeStateAbs extends BaseDialogJmeStateAbs implements IConsoleUI, ReattachSafelyValidateSteps, IWorkAroundBugFix {
 //	protected FpsLimiterState fpslState = new FpsLimiterState();
 	
-	ReattachSafelyState rss = new ReattachSafelyState(this);
+	ReattachSafelyState rss;
 	
 	//	protected final String strInputIMCPREFIX = "CONSOLEGUISTATE_";
 	public final String strFinalFieldInputCodePrefix="INPUT_MAPPING_CONSOLE_";
@@ -338,7 +338,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	protected abstract void lineWrapDisableForChildrenOf(Node gp);
 	protected abstract boolean mapKeysForInputField();
 	protected abstract int getVisibleRows();
-	protected abstract Vector3f getSizeOf(Node node);
+	protected abstract Vector3f getSizeOf(Spatial spt);
 	//public abstract Vector3f getDumpAreaSliderSize();
 	protected abstract Vector3f getContainerConsolePreferredSize();
 	protected abstract void setContainerConsolePreferredSize(Vector3f v3f);
@@ -376,19 +376,23 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 //		bConfigureSimpleCompleted = true;
 //	}
 	
-	public boolean configureValidating(String strUIId,boolean bIgnorePrefixAndSuffix,int iToggleConsoleKey) {
-		super.configureValidating(strUIId, bIgnorePrefixAndSuffix);
+	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,int iToggleConsoleKey, Node nodeGUI) {
+		super.configure(strUIId, bIgnorePrefixAndSuffix, nodeGUI);
 		
+		rss = new ReattachSafelyState();
+		rss.configure(this);
+		
+		this.iToggleConsoleKey=iToggleConsoleKey;
 //		if(cd==null)throw new NullPointerException("Missing "+CommandsDelegatorI.class.getName()+" instance (or a more specialized, like the scripting one)");
 		cd().configure(this);//,sapp);
 //		cd().addConsoleCommandListener(this);
 //		this.bEnabled=true; //just to let it be initialized at startup by state manager
 //		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 		
-		if(!app().getStateManager().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
+//		if(!app().getStateManager().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
 		
 //		bConfigured=true;
-		return true;
+//		return true;
 	}
 	
 //	protected ConsoleGuiStateAbs(ConsoleCommands cc) {
@@ -549,10 +553,10 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	 */
 	protected void setInitializationVisibility(boolean b){
 		if(b){
-			ctnrMainTopSubWindow.setCullHint(CullHint.Inherit); //TODO use bkp with: Never ?
+			getContainerMain().setCullHint(CullHint.Inherit); //TODO use bkp with: Never ?
 			lstbxAutoCompleteHint.setCullHint(CullHint.Inherit); //TODO use bkp with: Dynamic ?
 		}else{
-			ctnrMainTopSubWindow.setCullHint(CullHint.Always); 
+			getContainerMain().setCullHint(CullHint.Always); 
 			lstbxAutoCompleteHint.setCullHint(CullHint.Always);
 		}
 	}
@@ -581,8 +585,8 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 //		CursorEventControl.addListenersToSpatial(lstbxAutoCompleteHint, consoleCursorListener);
 		lstbxAutoCompleteHint.setName("ConsoleHints");
 		lstbxDumpArea.setName("ConsoleDumpArea");
-		intputField.setName("ConsoleInput");
-		ctnrMainTopSubWindow.setName("ConsoleContainer");
+		getIntputField().setName("ConsoleInput");
+		getContainerMain().setName("ConsoleContainer");
 		ctnrStatsAndControls.setName("ConsoleStats");
 		
 //		tdLetCpuRest.updateTime();
@@ -592,8 +596,8 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 //		createMonoSpaceFixedFontStyle();
 		
 		// main container
-		nodeGUI.attachChild(ctnrMainTopSubWindow);
-		ctnrMainTopSubWindow.setLocalTranslation(
+		getNodeGUI().attachChild(getContainerMain());
+		getContainerMain().setLocalTranslation(
 			iMargin, 
 			app().getContext().getSettings().getHeight()-iMargin, 
 			0); // Z translation controls what will be shown above+/below- others, will be automatically set by FocusChangeListenerI
@@ -846,8 +850,8 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 							scrollDumpArea(dScrollCurrentFlindex + dScrollBy);
 						}
 	      	}else
-	      	if(sptScrollTarget.equals(intputField)){
-	      		navigateCmdHistOrHintBox(intputField, bUp?ENav.Up:ENav.Down);
+	      	if(sptScrollTarget.equals(getIntputField())){
+	      		navigateCmdHistOrHintBox(getIntputField(), bUp?ENav.Up:ENav.Down);
 	      	}else
 	      	if(sptScrollTarget.equals(lstbxAutoCompleteHint)){
 	      		navigateCmdHistOrHintBox(lstbxAutoCompleteHint, bUp?ENav.Up:ENav.Down);
@@ -884,14 +888,16 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 //	}
 	
 	@Override
-	synchronized public void update(float tpf) {
+	public boolean updateProperly(float tpf) {
+		if(!super.updateProperly(tpf))return false;
+		
 		if(bKeepInitiallyInvisibleUntilFirstClosed){
 			setInitializationVisibility(false);
 		}else{
 			setInitializationVisibility(isEnabled());
 		}
 		
-		if(!isEnabled())return; //one update may actually happen after being disabled...
+		if(!isEnabled())return true; //one update may actually happen after being disabled...
 		
 		/**
 		 *	Will update only if enabled... //if(!isEnabled())return;
@@ -910,13 +916,15 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 //		if(efHK!=null)efHK.updateHK();
 		
 		updateOverrideInputFocus();
+		
+		return true; 
 	}
 	
 	protected void updateOverrideInputFocus(){
 		if(isEnabled()){
-			setFocus(intputField);
+			setFocus(getIntputField());
 		}else{
-			removeFocus(intputField);
+			removeFocus(getIntputField());
 		}
 	}
 	
@@ -1658,20 +1666,25 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	}
 	
 	@Override
+	public Node getContainerMain(){
+		return (Node)super.getContainerMain();
+	}
+	
+	@Override
 	protected boolean cleanupValidating() {
 //		tdLetCpuRest.reset();
 //		tdScrollToBottomRequestAndSuspend.reset();
 //		tdScrollToBottomRetry.reset();
 //		tdTextCursorBlinkHK.reset();
 		
-		if(ctnrMainTopSubWindow.getChildren().size()>0){
+		if(getContainerMain().getChildren().size()>0){
 			System.err.println("WARN: console container should have been cleaned using specific gui methods by overriding cleanup().");
-			ctnrMainTopSubWindow.detachAllChildren();
+			getContainerMain().detachAllChildren();
 		}
 //		ctnrMainTopSubWindow.clearChildren();
 //		tfAutoCompleteHint.removeFromParent();
 		lstbxAutoCompleteHint.removeFromParent();
-		ctnrMainTopSubWindow.removeFromParent();
+		getContainerMain().removeFromParent();
 		
 		//TODO should keymappings be at setEnabled() ?
     app().getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_SCROLL_UP+"");
@@ -1689,7 +1702,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
     bInitializeOnlyTheUI=false;
 //    bInitialized=false;
     
-    return true;
+    return super.cleanupValidating();
 	}
 	
 //	protected boolean isInitiallyClosed() {
@@ -1785,7 +1798,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 			MiscI.i().getSimpleTime(cd().btgShowMiliseconds.get())
 				+cd().getDevInfoEntryPrefix()+"Console stats (Dev): "+"\n"
 			
-			+"Console Height = "+MiscI.i().fmtFloat(getSizeOf(ctnrMainTopSubWindow).y)+"\n"
+			+"Console Height = "+MiscI.i().fmtFloat(getSizeOf(getContainerMain()).y)+"\n"
 			+"Visible Rows = "+getVisibleRows()+"\n"
 			+"Line Wrap At = "+cd().getCurrentFixedLineWrapAtColumn()+"\n"
 			+"ListBox Height = "+MiscI.i().fmtFloat(getSizeOf(lstbxDumpArea).y)+"\n"
@@ -1795,7 +1808,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 			+"Stats Container Height = "+MiscI.i().fmtFloat(getSizeOf(ctnrStatsAndControls).y)+"\n"
 			
 			+"Input Field Height = "+MiscI.i().fmtFloat(fInputHeight)+"\n"
-			+"Input Field Final Height = "+MiscI.i().fmtFloat(getSizeOf(intputField).y)+"\n"
+			+"Input Field Final Height = "+MiscI.i().fmtFloat(getSizeOf(getIntputField()).y)+"\n"
 			
 			+"Slider Value = "+MiscI.i().fmtFloat(getScrollDumpAreaFlindex())+"\n"
 			
@@ -1879,14 +1892,16 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		if(cd().getCmdHistoryCurrentIndex()<0)cd().setCmdHistoryCurrentIndex(0); //cant underflow
 		if(cd().getCmdHistoryCurrentIndex()>cd().getCmdHistorySize())cd().resetCmdHistoryCursor(); //iCmdHistoryCurrentIndex=getCmdHistorySize(); //can overflow by 1
 		
-		if(objSource!=intputField && objSource!=lstbxAutoCompleteHint)objSource=null;
+		if(!objSource.equals(getIntputField()) && !objSource.equals(lstbxAutoCompleteHint)){
+			objSource=null;
+		}
 		
 		boolean bOk=false;
 		switch(enav){
 			case Up:
 				if(objSource==null || objSource==lstbxAutoCompleteHint)bOk=navigateHint(-1);
 				
-				if((objSource==null && !bOk) || objSource==intputField){
+				if((objSource==null && !bOk) || objSource.equals(getIntputField())){
 					cd().addCmdHistoryCurrentIndex(-1);
 					/**
 					 * to not lose last possibly typed (but not issued) cmd
@@ -1901,7 +1916,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 			case Down:
 				if(objSource==null || objSource==lstbxAutoCompleteHint)bOk=navigateHint(+1);
 				
-				if((objSource==null && !bOk) || objSource==intputField){
+				if((objSource==null && !bOk) || objSource==getIntputField()){
 					cd().addCmdHistoryCurrentIndex(1);
 					if(cd().getCmdHistoryCurrentIndex()>=cd().getCmdHistorySize()){
 						if(strNotSubmitedCmd!=null){
@@ -1952,7 +1967,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 						/**
 						 * this is when crashes outside of here
 						 */
-						ctnrMainTopSubWindow.updateLogicalState(0.05f);
+						getContainerMain().updateLogicalState(0.05f);
 						
 						if(bFailed){ //had failed, so look for a safe length
 							if(iStatsTextSafeLength==null || !iStatsTextSafeLength.equals(str.length())){
@@ -2040,14 +2055,14 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 			getAutoCompleteHint().addAll(astr);
 			clearHintSelection();
 			
-			Node nodeParent = nodeGUI;
+			Node nodeParent = getNodeGUI();
 			if(!nodeParent.hasChild(lstbxAutoCompleteHint)){
 				nodeParent.attachChild(lstbxAutoCompleteHint);
 			}
 			
 			//lstbxAutoCompleteHint.setLocalTranslation(new Vector3f(0, -fInputHeight, 0));
-			Vector3f v3f = intputField.getWorldTranslation().clone();
-			v3f.y -= getSizeOf(intputField).y;
+			Vector3f v3f = getIntputField().getWorldTranslation().clone();
+			v3f.y -= getSizeOf(getIntputField()).y;
 			lstbxAutoCompleteHint.setLocalTranslation(v3f);
 			
 			float fEntryHeightGUESSED = fInputHeight; //TODO should be the listbox entry height

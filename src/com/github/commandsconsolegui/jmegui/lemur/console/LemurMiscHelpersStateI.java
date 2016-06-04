@@ -396,15 +396,9 @@ public class LemurMiscHelpersStateI extends CmdConditionalAppStateAbs implements
 	}
 
 	@Override
-	protected boolean checkInitPrerequisites() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
 	protected boolean initializeValidating() {
 		tdTextCursorBlink.updateTime();
-		return true;
+		return super.initializeValidating();
 	}
 
 	@Override
@@ -416,28 +410,11 @@ public class LemurMiscHelpersStateI extends CmdConditionalAppStateAbs implements
 			updateLargeTextCursorMode(tfToBlinkCursor);
 		}
 		
-		return true;
+		return super.updateValidating(tpf);
 	}
 
-	@Override
-	protected boolean enableValidating() {
-		// TODO Auto-generated method stub
-		return false;
+	public void configure() {
+		super.configure(LemurMiscHelpersStateI.class.getSimpleName(), false);
 	}
 
-	@Override
-	protected boolean disableValidating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	
-	public boolean configureValidating() {
-		return super.configureValidating(LemurMiscHelpersStateI.class.getSimpleName(), false);
-	}
-
-	@Override
-	protected boolean cleanupValidating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
 }

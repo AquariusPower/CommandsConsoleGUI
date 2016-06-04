@@ -52,23 +52,12 @@ public class CommandsBackgroundState extends CmdConditionalAppStateAbs {
 	
 	private IConsoleUI	cgsaGraphicalConsoleUI;
 	
-	public boolean configureValidating(IConsoleUI icui){
+	public void configure(IConsoleUI icui){
+		if(icui==null)throw new NullPointerException("invalid instance for "+IConsoleUI.class.getName());
 		this.cgsaGraphicalConsoleUI = icui;
-		return super.configureValidating(CommandsBackgroundState.class.getSimpleName(),true);
+		super.configure(CommandsBackgroundState.class.getSimpleName(),true);
 	}
 	
-	@Override
-	protected boolean checkInitPrerequisites() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean initializeValidating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 	@Override
 	protected boolean updateValidating(float tpf) {
 		if(!btgExecCommandsInBackground.b())return false;
@@ -81,25 +70,12 @@ public class CommandsBackgroundState extends CmdConditionalAppStateAbs {
 		 */
 		cd().update(tpf);
 		
-		return true;
+		return super.updateValidating(tpf);
 	}
-
+	
 	@Override
-	protected boolean enableValidating() {
-		// TODO Auto-generated method stub
-		return false;
+	protected boolean initCheckPrerequisites() {
+		if(!cd().isInitialized())return false;
+		return super.initCheckPrerequisites();
 	}
-
-	@Override
-	protected boolean disableValidating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean cleanupValidating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 }

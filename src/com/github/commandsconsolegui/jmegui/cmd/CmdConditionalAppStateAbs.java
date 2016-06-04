@@ -62,21 +62,28 @@ public abstract class CmdConditionalAppStateAbs extends ConditionalAppStateAbs i
 		return strCmdIdentifier;
 	}
 	
-	public boolean configureValidating(String strCmdIdentifier,boolean bIgnorePrefixAndSuffix) {
-		if(super.configureValidating(GlobalSappRefI.i().get())){
+	protected void configure(String strCmdIdentifier,boolean bIgnorePrefixAndSuffix) {
+		super.configure(GlobalSappRefI.i().get());
+		
 			cd=GlobalCommandsDelegatorI.i().get();
 			
+			if(strCmdIdentifier==null || strCmdIdentifier.isEmpty())throw new NullPointerException("invalid cmd id");
 			this.strCmdIdentifier="";
 			if(!bIgnorePrefixAndSuffix)this.strCmdIdentifier+=strCmdPrefix;
-			this.strCmdIdentifier+=strCmdPrefix;
+			this.strCmdIdentifier+=strCmdIdentifier;
 			if(!bIgnorePrefixAndSuffix)this.strCmdIdentifier+=strCmdSuffix;
 			
 			cd.addConsoleCommandListener(this);
 			
 			ReflexFillI.i().assertReflexFillFieldsForOwner(this);
-		}
 		
-		return isConfigured();
+//		return isConfigured();
+	}
+	
+	@Override
+	protected boolean initCheckPrerequisites() {
+		if(!cd.isInitialized())return false;
+		return super.initCheckPrerequisites();
 	}
 	
 	@Override

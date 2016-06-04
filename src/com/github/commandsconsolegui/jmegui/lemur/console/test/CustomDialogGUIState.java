@@ -35,6 +35,7 @@ import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.app.Application;
+import com.simsilica.lemur.GuiGlobals;
 
 /**
  * @author AquariusPower <https://github.com/AquariusPower>
@@ -43,9 +44,9 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs<String>{
 	ArrayList<String> astr;
 	
 	@Override
-	public boolean configureValidating(String strUIId, boolean bIgnorePrefixAndSuffix) {
+	public void configure(String strUIId, boolean bIgnorePrefixAndSuffix) {
 		astr = new ArrayList<String>();
-		return super.configureValidating(strUIId, bIgnorePrefixAndSuffix);
+		super.configure(strUIId, bIgnorePrefixAndSuffix);
 	}
 	
 	@Override
@@ -65,13 +66,13 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs<String>{
 	protected boolean cleanupValidating() {
 		astr.clear();
 		astr=null;
-		return true;
+		return super.cleanupValidating();
 	}
 
 	@Override
-	protected boolean checkInitPrerequisites() {
-		// TODO Auto-generated method stub
-		return false;
+	protected boolean initCheckPrerequisites() {
+		if(GuiGlobals.getInstance()==null)return false;
+		return super.initCheckPrerequisites();
 	}
 	
 }

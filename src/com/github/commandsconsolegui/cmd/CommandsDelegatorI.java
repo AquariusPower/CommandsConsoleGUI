@@ -431,6 +431,8 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 
 	private boolean	bFillCommandList;
 
+	private boolean	bInitialized;
+
 
 //	private ECmdReturnStatus	ecrsCurrentCommandReturnStatus;
 	
@@ -2222,6 +2224,9 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public void update(float tpf) {
+		if(!bConfigured)throw new NullPointerException("not configured yet");
+		if(!bInitialized)throw new NullPointerException("not initialized yet");
+		
 		this.fTPF = tpf;
 		if(tdLetCpuRest.isActive() && !tdLetCpuRest.isReady(true))return;
 		
@@ -2634,6 +2639,7 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 		TimedDelayVarField.configure(this);
 		BoolTogglerCmdField.configure(this);
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
+		
 		DebugI.i().configure(this);
 		MiscI.i().configure(this);
 		ReflexHacks.i().configure(this, this);
@@ -2641,6 +2647,7 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 		
 //		CommandsBackgroundState.i().configure(sapp, icui, this);
 		
+		if(icui==null)throw new NullPointerException("invalid "+IConsoleUI.class.getName()+" instance");
 		this.icui=icui;
 //		this.sapp=sapp;
 		
@@ -2649,6 +2656,7 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	
 	public void initialize(){
 		if(!bConfigured)throw new NullPointerException("not configured yet");
+		
 		tdDumpQueuedEntry.updateTime();
 		
 		// init dump file, MUST BE THE FIRST!
@@ -2694,6 +2702,8 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 		executePreparedCommandRoot();
 		bFillCommandList=false;
 //		executeCommand(null); //to populate the array with available commands
+		
+		bInitialized=true;
 	}
 	
 	enum ETest{
@@ -3076,5 +3086,13 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 
 	public ECmdReturnStatus cmdFoundReturnStatus(boolean bCommandWorked) {
 		return bCommandWorked?ECmdReturnStatus.FoundAndWorked:ECmdReturnStatus.FoundAndFailedGracefully;
+	}
+
+	public boolean isConfigured() {
+		return bConfigured;
+	}
+
+	public boolean isInitialized() {
+		return bInitialized;
 	}
 }

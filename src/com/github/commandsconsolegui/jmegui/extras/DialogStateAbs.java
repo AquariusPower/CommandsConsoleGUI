@@ -29,7 +29,7 @@ package com.github.commandsconsolegui.jmegui.extras;
 
 import java.util.HashMap;
 
-import com.github.commandsconsolegui.jmegui.DialogJmeStateAbs;
+import com.github.commandsconsolegui.jmegui.BaseDialogJmeStateAbs;
 import com.jme3.scene.Node;
 
 /**
@@ -39,7 +39,7 @@ import com.jme3.scene.Node;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class DialogGUIStateAbs <V> extends DialogJmeStateAbs{
+public abstract class DialogStateAbs <V> extends BaseDialogJmeStateAbs{
 	protected Node cntrNorth;
 	protected String	strLastFilter = "";
 	protected HashMap<String,V> hmKeyValue = new HashMap<String,V>();
@@ -87,7 +87,7 @@ public abstract class DialogGUIStateAbs <V> extends DialogJmeStateAbs{
 		//requestFocus(intputText); //keep focus at input as it shall have all listeners.
 		
 //		setMouseCursorKeepUngrabbed(isEnabled());
-		return true;
+		return super.updateValidating(tpf);
 	}
 	
 	/**

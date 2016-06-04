@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.jmegui;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.Callable;
 
 import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ERecreateConsoleSteps;
@@ -56,7 +58,7 @@ import com.jme3.scene.Node;
  *
  */
 public abstract class ConditionalAppStateAbs implements AppState, ReattachSafelyValidateSteps {
-	protected Node nodeGUI;
+	private Node nodeGUI;
 	
 	// CONFIGURE 
 	private boolean bConfigured;
@@ -110,26 +112,40 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 //	}
 	
 	/**
+	 * This method, and all similar configure() ones, are to be kept protected until the
+	 * last sub class that will be instantiated, then it can be made public.
+	 * 
 	 * Configure simple references assignments and variable values.
 	 * Must be used before initialization.
 	 * Put here only things that will not change on {@link #cleanupProperly()} !
 	 * 
 	 * @param app
-	 * @return helps on implementing a retry to configure in case of non critical failures
 	 */
-	public boolean configureValidating(Application app){
+	protected void configure(Application app){
 		if(this.bConfigured)throw new NullPointerException("already configured");
 		
 		// internal configurations
+		if(app==null)throw new NullPointerException("app is null");
 		this.app=app;
-		if(this.app==null)throw new NullPointerException("app is null");
 		
 		// configs above
 		this.bConfigured=true;
+		msgDbg("cfg",this.bConfigured);
 		
 		preInitRequest();
+	}
+	
+	public void msgDbg(String str, boolean bSuccess){
+		if(!bSuccess){
+			int i,i2=0;
+			i=i2;i2=i;
+		}
 		
-		return isConfigured();
+		System.err.println("DBG: "
+			+new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()))+": "
+			+this.getClass().getName()+": "
+			+(bSuccess?"ok":"FAIL")+": "
+			+str);
 	}
 	
 	public boolean isConfigured(){
@@ -174,6 +190,8 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 			}
 			
 			bPreInitialized=true;
+			
+			msgDbg("pre-init",bPreInitialized);
 			
 			return bPreInitialized;
 		}
@@ -265,12 +283,12 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 		return bDisableSuccessful;
 	}
 	
-	protected abstract boolean checkInitPrerequisites();
-	protected abstract boolean initializeValidating();
-	protected abstract boolean updateValidating(float tpf);
-	protected abstract boolean enableValidating();
-	protected abstract boolean disableValidating();
-	protected abstract boolean cleanupValidating();
+	protected boolean initCheckPrerequisites(){return true;}
+	protected boolean initializeValidating(){return true;}
+	protected boolean updateValidating(float tpf){return true;}
+	protected boolean enableValidating(){return true;}
+	protected boolean disableValidating(){return true;}
+	protected boolean cleanupValidating(){return true;}
 	
 	/**
 	 * 
@@ -299,22 +317,26 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 				return false;
 			}
 			
-			if(!checkInitPrerequisites() && !initializeValidating()){
+			if(!initCheckPrerequisites() || !initializeValidating()){
 				lInitRetryStartMilis=updateTime();
+				msgDbg("init",false);
 				return false;
 			}
 			
 			bProperlyInitialized=true;
+			msgDbg("init",bProperlyInitialized);
 		}
 		
 		if(bEnabledRequested && !bEnabled){
 			if(bHoldEnable)return false;
 			bEnableSuccessful=enableValidating();
+			msgDbg("enabled",bEnableSuccessful);
 			bEnabled=bEnableSuccessful;
 		}else
 		if(bDisabledRequested && bEnabled){
 			if(bHoldDisable)return false;
 			bDisableSuccessful=disableValidating();
+			msgDbg("disabled",bDisableSuccessful);
 			bEnabled=!bDisableSuccessful;
 		}
 		
@@ -322,7 +344,10 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 			if(bHoldUpdates)return false;
 			
 			bLastUpdateSuccessful = updateValidating(tpf);
-			if(!bLastUpdateSuccessful)return bLastUpdateSuccessful;
+			if(!bLastUpdateSuccessful){
+				msgDbg("update",false); //only on fail!!!
+				return false;
+			}
 			/**
 			 * SelfNote: More code can go only here.
 			 */
@@ -411,6 +436,7 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 			}
 			
 			if(bReAddToQueue){
+				msgDbg("cleanup",false);
 				app.enqueue(new Callable<Void>() {
 					@Override
 					public Void call() throws Exception {
@@ -451,6 +477,7 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 		 */
 		
 		bCleaningUp=false;
+		msgDbg("cleanup",true);
 	}
 	
 	@Override public void stateAttached(AppStateManager stateManager) {
@@ -464,7 +491,7 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 		asmCurrent = null;
 	}
 	
-	public boolean isAttachedToAStateManager(){
+	public boolean isAttachedToStateManager(){
 		return asmCurrent!=null;
 	}
 	
@@ -472,10 +499,14 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 		return asmCurrent;
 	}
 	
-	// EASY SKIPPERS
-	@Override public void render(RenderManager rm) {}
-	@Override public void postRender(){}
-	@Override public boolean reattachValidateStep(ERecreateConsoleSteps ercs) {return true;}
+	public Node getNodeGUI() {
+		return nodeGUI;
+	}
+
+	protected void setNodeGUI(Node nodeGUI) {
+		if(nodeGUI==null)throw new NullPointerException("null node gui");
+		this.nodeGUI = nodeGUI;
+	}
 
 
 //	Long	lInitializationCompletedMilis;
@@ -571,4 +602,8 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 //		return GlobalCommandsDelegatorI.i().get().getReflexFillCfg(rfcv);
 //	}
 	
+	// EASY SKIPPERS
+	@Override public void render(RenderManager rm) {}
+	@Override public void postRender(){}
+	@Override public boolean reattachValidateStep(ERecreateConsoleSteps ercs) {return true;}
 }

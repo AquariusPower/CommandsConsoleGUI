@@ -65,7 +65,9 @@ public class DebugI implements IConsoleCommandListener{
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 		//		if(Debug.instance==null)Debug.instance=this;
 //		this.cc=cc;
+		if(cc==null)throw new NullPointerException("invalid instance for "+CommandsDelegatorI.class.getName()); // KEEP ON TOP
 		cc.addConsoleCommandListener(this);
+		
 		bConfigured=true;
 	}
 	
