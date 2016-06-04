@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.jmegui;
 import java.util.concurrent.Callable;
 
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
+import com.github.commandsconsolegui.jmegui.console.ConsoleJmeStateAbs;
 import com.jme3.app.state.AppState;
 
 /**
@@ -54,11 +55,13 @@ public class ReattachSafelyState extends ConditionalAppStateAbs{
 	
 	ERecreateConsoleSteps ercCurrentStep = null;
 	
-	private Callable<Void>	detach;
-	private Callable<Void>	attach;
+//	private Callable<Void>	detach;
+//	private Callable<Void>	attach;
 	private Callable<Void>	postInitialization;
 
 	private ConditionalAppStateAbs stateTarget;
+
+	private boolean	bWasEnabled;
 	
 	public ReattachSafelyState(ConditionalAppStateAbs stateTarget){
 		this.stateTarget=stateTarget;
@@ -78,11 +81,24 @@ public class ReattachSafelyState extends ConditionalAppStateAbs{
 		
 		if(stateTarget.reattachValidateStep(ercCurrentStep))return false;
 		
+		/**
+		 * Not using: app().getStateManager().getState()
+		 * because I can have several state's instances of the same class,
+		 * like several dialogs currently opened.
+		 */
 		boolean bIsAttached = stateTarget.isAttachedToAStateManager();
 		
 		switch(ercCurrentStep){
 			case Step0Detach:
 				if(bIsAttached){
+					Callable<Void> detach = new Callable<Void>() {
+						@Override
+						public Void call() throws Exception {
+							app().getStateManager().detach(stateTarget);
+							return null;
+						}
+					};
+					
 					getApp().enqueue(detach);
 					ercCurrentStep=ERecreateConsoleSteps.Step1Attach;
 					return true;
@@ -90,6 +106,17 @@ public class ReattachSafelyState extends ConditionalAppStateAbs{
 				break;
 			case Step1Attach:
 				if(!bIsAttached){
+					Callable<Void> attach = new Callable<Void>() {
+						@Override
+						public Void call() throws Exception {
+							app().getStateManager().attach(stateTarget);
+							if(bWasEnabled){
+								setEnabledRequest(true);
+							}
+							return null;
+						}
+					};
+					
 					getApp().enqueue(attach);
 					ercCurrentStep=ERecreateConsoleSteps.Step2PostInitialization;
 					return true;
@@ -111,9 +138,11 @@ public class ReattachSafelyState extends ConditionalAppStateAbs{
 		return ercCurrentStep!=null;
 	}
 	
-	public void request(Callable<Void> detach, Callable<Void> attach,	Callable<Void> postInitialization) {
-		this.detach = detach;
-		this.attach = attach;
+//	public void request(Callable<Void> detach, Callable<Void> attach,	Callable<Void> postInitialization) {
+	public void request(Callable<Void> postInitialization) {
+//		this.detach = detach;
+//		this.attach = attach;
+		bWasEnabled=stateTarget.isEnabled();
 		this.postInitialization = postInitialization;
 		ercCurrentStep=ERecreateConsoleSteps.Step0Detach;
 	}

@@ -2182,25 +2182,25 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 			return;
 		}
 		
-		Callable<Void> detach = new Callable<Void>() {
-			@Override
-			public Void call() throws Exception {
-				app().getStateManager().detach(ConsoleJmeStateAbs.this);
-				return null;
-			}
-		};
-		
-		final boolean bWasEnabled=isEnabled();
-		Callable<Void> attach = new Callable<Void>() {
-			@Override
-			public Void call() throws Exception {
-				app().getStateManager().attach(ConsoleJmeStateAbs.this);
-				if(bWasEnabled){
-					setEnabledRequest(true);
-				}
-				return null;
-			}
-		};
+//		Callable<Void> detach = new Callable<Void>() {
+//			@Override
+//			public Void call() throws Exception {
+//				app().getStateManager().detach(ConsoleJmeStateAbs.this);
+//				return null;
+//			}
+//		};
+//		
+//		final boolean bWasEnabled=isEnabled();
+//		Callable<Void> attach = new Callable<Void>() {
+//			@Override
+//			public Void call() throws Exception {
+//				app().getStateManager().attach(ConsoleJmeStateAbs.this);
+//				if(bWasEnabled){
+//					setEnabledRequest(true);
+//				}
+//				return null;
+//			}
+//		};
 		
 		Callable<Void> postInitialization = new Callable<Void>() {
 			@Override
@@ -2211,7 +2211,8 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 			}
 		};
 		
-		rss.request(detach,attach,postInitialization);
+//		rss.request(detach,attach,postInitialization);
+		rss.request(postInitialization);
 	}
 	
 	/**
