@@ -47,6 +47,10 @@ public class Global<T> {
 //		this.obj=obj;
 	}
 	
+	/**
+	 * validates if referenced object is set
+	 * @return
+	 */
 	public T get(){
 		if(obj==null)throw new NullPointerException("global not set yet...");
 		return obj;

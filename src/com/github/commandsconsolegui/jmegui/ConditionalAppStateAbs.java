@@ -91,6 +91,8 @@ public abstract class ConditionalAppStateAbs <A extends Application> implements 
 	private boolean	bDisableSuccessful;
 	private boolean	bHoldDisable;
 	
+	private boolean	bCleaningUp;
+	
 //	public static class TimedDelay{
 //		long lTimeStart;
 //		long lDelay;
@@ -107,6 +109,8 @@ public abstract class ConditionalAppStateAbs <A extends Application> implements 
 	 * @return helps on implementing a retry to configure in case of non critical failures
 	 */
 	public <A2 extends A> boolean configureValidating(A2 app){
+		if(this.bConfigured)throw new NullPointerException("already configured");
+		
 		// internal configurations
 		this.app=app;
 		if(this.app==null)throw new NullPointerException("app is null");
@@ -166,11 +170,11 @@ public abstract class ConditionalAppStateAbs <A extends Application> implements 
 		return false;
 	}
 	
-	private void assertIsConfigured() {
+	protected void assertIsConfigured() {
 		if(!isConfigured())throw new NullPointerException("not configured yet!");
 	}
 	
-	private void assertIsPreInitialized() {
+	protected void assertIsPreInitialized() {
 		if(!bPreInitialized)throw new NullPointerException("not pre-initialized yet!");
 	}
 
@@ -252,6 +256,7 @@ public abstract class ConditionalAppStateAbs <A extends Application> implements 
 	protected abstract boolean updateValidating(float tpf);
 	protected abstract boolean enableValidating();
 	protected abstract boolean disableValidating();
+	protected abstract boolean cleanupValidating();
 	
 	/**
 	 * 
@@ -267,7 +272,6 @@ public abstract class ConditionalAppStateAbs <A extends Application> implements 
 	
 	/**
 	 * Better not override, just use {@link #updateValidating(float)} instead!<br>
-	 * 
 	 * TODO make it final? would provide less flexibility to developers tho...
 	 */
 	public boolean updateProperly(float tpf) {
@@ -367,8 +371,18 @@ public abstract class ConditionalAppStateAbs <A extends Application> implements 
 		cleanupProperly();
 	}
 	
+	public boolean isCleaningUp() {
+		return bCleaningUp;
+	}
+	
+	/**
+	 * Better not override, just use {@link #cleanupValidating()} instead!<br>
+	 * TODO make it final? would provide less flexibility to developers tho...
+	 */
 	public void cleanupProperly() {
-		if(!bProperlyInitialized)return;
+		if(!bProperlyInitialized)return; //TODO log warn
+		
+		bCleaningUp = true;
 		
 		if(bEnabled){
 			boolean bReAddToQueue=false;
@@ -393,6 +407,8 @@ public abstract class ConditionalAppStateAbs <A extends Application> implements 
 				return;
 			}
 		}
+		
+		cleanupValidating();
 		
 		bEnabled=false;
 		bLastUpdateSuccessful=false;
@@ -419,6 +435,8 @@ public abstract class ConditionalAppStateAbs <A extends Application> implements 
 		 * SKIP THESE!
 		 * {@link #bConfigured}
 		 */
+		
+		bCleaningUp=false;
 	}
 	
 	////////////////////// easy skippers below

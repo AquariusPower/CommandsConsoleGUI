@@ -53,7 +53,7 @@ public class CommandsBackgroundState extends CmdConditionalAppStateAbs {
 	private IConsoleUI	cgsaGraphicalConsoleUI;
 	
 	public void configureSimple(IConsoleUI icui){
-		super.configure("KeepRunningCommandsInBackground");
+		super.configureValidating("KeepRunningCommandsInBackground");
 		
 		this.cgsaGraphicalConsoleUI = icui;
 	}
@@ -80,7 +80,7 @@ public class CommandsBackgroundState extends CmdConditionalAppStateAbs {
 		 * This way, being controlled by JME state update, the commands will happen in the same 
 		 * rate they would with the console foreground state.
 		 */
-		cd.update(tpf);
+		cd().update(tpf);
 		
 		return true;
 	}

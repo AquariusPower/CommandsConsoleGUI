@@ -100,10 +100,10 @@ import com.jme3.texture.Texture2D;
 public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IConsoleUI, ReattachSafelyValidateSteps {
 //	protected FpsLimiterState fpslState = new FpsLimiterState();
 	
-	public ConsoleJmeStateAbs() {
-		super("Console");
+	public ConsoleJmeStateAbs(String strUIId) {
+		super(strUIId);
 	}
-	
+
 	ReattachSafelyState rss = new ReattachSafelyState(this);
 	
 	@Override
@@ -180,7 +180,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 //	protected Node	intputField;
 //	protected TextField tfAutoCompleteHint;
 //	protected SimpleApplication	sapp;
-	protected boolean	bEnabled;
+//	protected boolean	bEnabled;
 	protected AbstractList<String> vlstrDumpEntriesSlowedQueue;
 	protected AbstractList<String> vlstrDumpEntries;
 	protected AbstractList<String> vlstrAutoCompleteHint;
@@ -313,14 +313,14 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	protected Spatial	sptPreviousFocus;
 	protected boolean	bRestorePreviousFocus;
 	protected boolean	bInitializeOnlyTheUI;
-	protected boolean	bConfigured;
+//	protected boolean	bConfigured;
 	protected BitmapFont	font;
 	protected BitmapFont	fontConsoleDefault;
 	protected String	strConsoleDefaultFontName = "Console";
 	protected int	iMargin;
 	protected Node	sliderDumpArea;
 	protected BitmapFont	fontConsoleExtraDefault;
-	private boolean	bConfigureSimpleCompleted;
+//	private boolean	bConfigureSimpleCompleted;
 
 //	protected boolean	bUsePreQueue = false; 
 	
@@ -382,38 +382,32 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 //	}
 //	
 	
-	public void configureSimple(int iToggleConsoleKey){
-		this.iToggleConsoleKey=iToggleConsoleKey;
-		
-		bConfigureSimpleCompleted = true;
-	}
+//	public void configureSimple(int iToggleConsoleKey){
+//		this.iToggleConsoleKey=iToggleConsoleKey;
+//		
+//		bConfigureSimpleCompleted = true;
+//	}
+	
 	/**
 	 * configure must happen before initialization
-	 * @param sapp
-	 * @param cd
-	 * @param iToggleConsoleKey
 	 */
-	@Override
-	public void configure() {
-		if(bConfigured)throw new NullPointerException("already configured.");		// KEEP ON TOP
-		if(!bConfigureSimpleCompleted)throw new NullPointerException("configure simple required.");
+	public boolean configureValidating(int iToggleConsoleKey) {
+//		if(bConfigured)throw new NullPointerException("already configured.");		// KEEP ON TOP
+//		if(!bConfigureSimpleCompleted)throw new NullPointerException("configure simple required.");
+		super.configureValidating("Console");
 		
-		super.configure();
+//		if(cd==null)throw new NullPointerException("Missing "+CommandsDelegatorI.class.getName()+" instance (or a more specialized, like the scripting one)");
+		cd().configure(this);//,sapp);
+//		cd().addConsoleCommandListener(this);
 		
-		this.sapp=GlobalSappRefI.i().get();
-		this.cd=GlobalCommandsDelegatorI.i().get();
-		
-		if(cd==null)throw new NullPointerException("Missing "+CommandsDelegatorI.class.getName()+" instance (or a more specialized, like the scripting one)");
-		cd.configure(this);//,sapp);
-		cd.addConsoleCommandListener(this);
-		
-		this.bEnabled=true; //just to let it be initialized at startup by state manager
+//		this.bEnabled=true; //just to let it be initialized at startup by state manager
 		
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 		
-		if(!sapp.getStateManager().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
+		if(!app().getStateManager().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
 		
-		bConfigured=true;
+//		bConfigured=true;
+		return true;
 	}
 	
 //	protected ConsoleGuiStateAbs(ConsoleCommands cc) {
@@ -460,51 +454,48 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	}
 	
 	@Override
-	public void initialize(Application app) {
-		if(!bConfigured)throw new NullPointerException("configure required");
-		super.initialize(app);
-		
+	protected boolean initGUI() {
 //		initializePre();
 		addStyle(STYLE_CONSOLE);
 		
 //		sapp = (SimpleApplication)app;
 //		cc.sapp = sapp;
 		
-//		sapp.getStateManager().attach(fpslState);
+//		app().getStateManager().attach(fpslState);
 		tdStatsRefresh.updateTime();
 		
 //		GuiGlobals.initialize(sapp);
 //		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
 		
-		fontConsoleDefault = sapp.getAssetManager().loadFont("Interface/Fonts/Console.fnt");
-		fontConsoleExtraDefault = sapp.getAssetManager().loadFont("Interface/Fonts/DroidSansMono.fnt");
-		sapp.getAssetManager().registerLoader(TrueTypeLoader.class, "ttf");
+		fontConsoleDefault = app().getAssetManager().loadFont("Interface/Fonts/Console.fnt");
+		fontConsoleExtraDefault = app().getAssetManager().loadFont("Interface/Fonts/DroidSansMono.fnt");
+		app().getAssetManager().registerLoader(TrueTypeLoader.class, "ttf");
 		
 //		cc.configure(this,sapp);
-		cd.initialize();
+		cd().initialize();
 		
 		// other inits
-		cd.addCmdToQueue(cd.CMD_FIX_LINE_WRAP);
-		cd.addCmdToQueue(cd.CMD_CONSOLE_SCROLL_BOTTOM);
+		cd().addCmdToQueue(cd().CMD_FIX_LINE_WRAP);
+		cd().addCmdToQueue(cd().CMD_CONSOLE_SCROLL_BOTTOM);
 		
 		/**
 		 * KEEP AS LAST queued cmds below!!!
 		 */
 		// must be the last queued command after all init ones!
 		// end of initialization
-		cd.addCmdToQueue(cd.RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE);
+		cd().addCmdToQueue(cd().RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE);
 //		addExecConsoleCommandToQueue(cc.btgPreQueue.getCmdIdAsCommand(true)); //		 TODO temporary workaround, pre-queue cannot be enable from start yet...
 		if(bInitiallyClosedOnce){
 			// after all, close the console
 			bKeepInitiallyInvisibleUntilFirstClosed=true;
-			cd.addCmdToQueue(CMD_CLOSE_CONSOLE);
+			cd().addCmdToQueue(CMD_CLOSE_CONSOLE);
 		}
 		
 //		astrStyleList.add(BaseStyles.GLASS);
 //		astrStyleList.add(Styles.ROOT_STYLE);
 //		astrStyleList.add(STYLE_CONSOLE);
 		
-		stateStats = sapp.getStateManager().getState(StatsAppState.class);
+		stateStats = app().getStateManager().getState(StatsAppState.class);
 		updateEngineStats();
 		
 		// instantiations initializer
@@ -515,7 +506,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		
 //		ConsoleCommandsBackgroundState ccbs = new ConsoleCommandsBackgroundState(this, cc);
 //		ConsoleCommandsBackgroundState.i().configure(sapp,this,cc);
-//		if(!sapp.getStateManager().attach(ccbs))throw new NullPointerException("already attached state "+ccbs.getClass().getName());
+//		if(!app().getStateManager().attach(ccbs))throw new NullPointerException("already attached state "+ccbs.getClass().getName());
 		
 //		bInitialized=true;
 	}
@@ -577,8 +568,8 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		if(sapp==null)throw new NullPointerException("base initialization required");
 		
 		v3fApplicationWindowSize = new Vector3f(
-				sapp.getContext().getSettings().getWidth(),
-				sapp.getContext().getSettings().getHeight(),
+				app().getContext().getSettings().getWidth(),
+				app().getContext().getSettings().getHeight(),
 				0);
 		
 		iMargin=2;
@@ -608,13 +599,13 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 //		createMonoSpaceFixedFontStyle();
 		
 		// main container
-		sapp.getGuiNode().attachChild(ctnrMainTopSubWindow);
+		app().getGuiNode().attachChild(ctnrMainTopSubWindow);
 		ctnrMainTopSubWindow.setLocalTranslation(
 			iMargin, 
-			sapp.getContext().getSettings().getHeight()-iMargin, 
+			app().getContext().getSettings().getHeight()-iMargin, 
 			0); // Z translation controls what will be shown above+/below- others, will be automatically set by FocusChangeListenerI
 		
-		mapKeys();
+//		initKeyMappings(); //		mapKeys();
 		
 //		// focus
 //		GuiGlobals.getInstance().requestFocus(intputField);
@@ -636,61 +627,21 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		bInitializeOnlyTheUI=true;
 	}
 	
-//	protected void showClipboard(){
-//		showClipboard(true);
-//	}
-//	protected void showClipboard(boolean bShowNL){
-//		String strClipboard=retrieveClipboardString();
-//	//	dumpInfoEntry("Clipboard contents, size="+strClipboard.length()+" ( each line enclosed with \\"+strLineEncloseChar+" ):");
-//		cc.dumpInfoEntry("Clipboard contents, size="+strClipboard.length()+":");
-//		String[] astr = strClipboard.split("\n");
-//	//	for(String str:astr)dumpEntry(strLineEncloseChar+str+strLineEncloseChar);
-//	//	dumpEntry(""); // this empty line for clipboard content display is i
-//		cc.dumpEntry(">>> Clipboard BEGIN");
-//		for(int i=0;i<astr.length;i++){
-//			String str=astr[i];
-//			if(bShowNL && i<(astr.length-1))str+="\\n";
-//			cc.dumpEntry(false,true,false,str);
-//		}
-//		cc.dumpEntry("<<< Clipboard END");
-//		if(bAddEmptyLineAfterCommand)cc.dumpEntry("");
-//	//	dumpEntry("");
-//		scrollToBottomRequest();
-//	}
-	
-//	protected class ButtonClick implements Command<Button>{
-//		@Override
-//		public void execute(Button source) {
-//			if(source.equals(btnClipboardShow)){
-//				cc.showClipboard();
-//			}else
-//			if(source.equals(btnCopy)){
-//				cc.editCopyOrCut(false,false,false);
-//			}else
-//			if(source.equals(btnCut)){
-//				cc.editCopyOrCut(false,true,false);
-//			}else
-//			if(source.equals(btnPaste)){
-//				editPaste();
-//			}
-//		}
-//	}
-	
 	@Override
 	public boolean cmdEditCopyOrCut(boolean bCut) {
-		String strParam1 = cd.paramString(1);
+		String strParam1 = cd().paramString(1);
 		boolean bUseCommandDelimiterInsteadOfNewLine=false;
 		if(strParam1!=null){
 			switch(strParam1){
 				case "-d":bUseCommandDelimiterInsteadOfNewLine=true;break;
 			}
 		}
-		String str = cd.editCopyOrCut(false, bCut, bUseCommandDelimiterInsteadOfNewLine);
+		String str = cd().editCopyOrCut(false, bCut, bUseCommandDelimiterInsteadOfNewLine);
 		return true;
 	}
 	
 	protected String prepareToPaste(String strPasted, String strCurrent){
-		if(isInputTextFieldEmpty() && strPasted.trim().startsWith(""+cd.getCommandPrefix())){
+		if(isInputTextFieldEmpty() && strPasted.trim().startsWith(""+cd().getCommandPrefix())){
 			/**
 			 * replaces currently input field "empty" line 
 			 * with the command (can be invalid in this case, user may complete it properly)
@@ -785,7 +736,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 //		String strOption = paramString(1);
 //		
 //		if(strOption.equalsIgnoreCase("fps")){
-////			sapp.setSettings(settings);
+////			app().setSettings(settings);
 //		}else
 //		if(strOption.equalsIgnoreCase("allchars")){
 //			for(char ch=0;ch<256;ch++){
@@ -815,13 +766,14 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		return vlstrAutoCompleteHint.get(i);
 	}
 	
-	protected void mapKeys(){
-		mapKeysForInputField();
+	@Override
+	protected boolean initKeyMappings() {
+		if(!mapKeysForInputField())return false;
 		
 		// console toggle
 //		if(iToggleConsoleKey!=null){
-			if(!sapp.getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_TOGGLE.toString())){
-				sapp.getInputManager().addMapping(INPUT_MAPPING_CONSOLE_TOGGLE.toString(), 
+			if(!app().getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_TOGGLE.toString())){
+				app().getInputManager().addMapping(INPUT_MAPPING_CONSOLE_TOGGLE.toString(), 
 					new KeyTrigger(iToggleConsoleKey));
 					
 				alConsoleToggle = new ActionListener() {
@@ -841,12 +793,12 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 						}
 					}
 				};
-				sapp.getInputManager().addListener(alConsoleToggle, INPUT_MAPPING_CONSOLE_TOGGLE.toString());            
+				app().getInputManager().addListener(alConsoleToggle, INPUT_MAPPING_CONSOLE_TOGGLE.toString());            
 			}
 //		}
 		
-		if(!sapp.getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_CONTROL_PRESSED.toString())){
-			sapp.getInputManager().addMapping(INPUT_MAPPING_CONSOLE_CONTROL_PRESSED.toString(), 
+		if(!app().getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_CONTROL_PRESSED.toString())){
+			app().getInputManager().addMapping(INPUT_MAPPING_CONSOLE_CONTROL_PRESSED.toString(), 
 					new KeyTrigger(KeyInput.KEY_LCONTROL),
 					new KeyTrigger(KeyInput.KEY_RCONTROL));
 			
@@ -856,11 +808,11 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 					bKeyControlIsPressed  = isPressed;
 				}
 			};
-			sapp.getInputManager().addListener(al, INPUT_MAPPING_CONSOLE_CONTROL_PRESSED.toString());            
+			app().getInputManager().addListener(al, INPUT_MAPPING_CONSOLE_CONTROL_PRESSED.toString());            
 		}
 		
-		if(!sapp.getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_SHIFT_PRESSED.toString())){
-			sapp.getInputManager().addMapping(INPUT_MAPPING_CONSOLE_SHIFT_PRESSED.toString(), 
+		if(!app().getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_SHIFT_PRESSED.toString())){
+			app().getInputManager().addMapping(INPUT_MAPPING_CONSOLE_SHIFT_PRESSED.toString(), 
 				new KeyTrigger(KeyInput.KEY_LSHIFT),
 				new KeyTrigger(KeyInput.KEY_RSHIFT));
 				
@@ -870,7 +822,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 					bKeyShiftIsPressed  = isPressed;
 				}
 			};
-			sapp.getInputManager().addListener(al, INPUT_MAPPING_CONSOLE_SHIFT_PRESSED.toString());            
+			app().getInputManager().addListener(al, INPUT_MAPPING_CONSOLE_SHIFT_PRESSED.toString());            
 		}
 		
 		// mouse scroll
@@ -910,15 +862,17 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 			}
 		};
     
-    sapp.getInputManager().addMapping(INPUT_MAPPING_CONSOLE_SCROLL_UP+"", tggScrollUp);
-    sapp.getInputManager().addListener(alConsoleScroll, INPUT_MAPPING_CONSOLE_SCROLL_UP+"");
+		app().getInputManager().addMapping(INPUT_MAPPING_CONSOLE_SCROLL_UP+"", tggScrollUp);
+		app().getInputManager().addListener(alConsoleScroll, INPUT_MAPPING_CONSOLE_SCROLL_UP+"");
     
-    sapp.getInputManager().addMapping(INPUT_MAPPING_CONSOLE_SCROLL_DOWN+"", tggScrollDown);
-    sapp.getInputManager().addListener(alConsoleScroll, INPUT_MAPPING_CONSOLE_SCROLL_DOWN+"");
+		app().getInputManager().addMapping(INPUT_MAPPING_CONSOLE_SCROLL_DOWN+"", tggScrollDown);
+		app().getInputManager().addListener(alConsoleScroll, INPUT_MAPPING_CONSOLE_SCROLL_DOWN+"");
+		
+		return true;
 	}
 	
 	protected void fillInputFieldWithHistoryDataAtIndex(int iIndex){
-		String str = cd.getCmdHistoryAtIndex(iIndex);
+		String str = cd().getCmdHistoryAtIndex(iIndex);
 		if(str==null)return;
 		
 		setInputField(str);
@@ -949,7 +903,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		 *	Will update only if enabled... //if(!isEnabled())return;
 		 */
 		
-		cd.update(tpf);
+		cd().update(tpf);
 		
 		updateInputFieldFillWithSelectedEntry();
 		updateCurrentCmdHistoryEntryReset();
@@ -991,9 +945,9 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 //			if(bRestorePreviousFocus){
 //				if(sptPreviousFocus!=null){
 //					if(
-//							!sptPreviousFocus.hasAncestor(sapp.getGuiNode())
+//							!sptPreviousFocus.hasAncestor(app().getGuiNode())
 //							&&
-//							!sptPreviousFocus.hasAncestor(sapp.getRootNode()) //TODO can it be at root node?
+//							!sptPreviousFocus.hasAncestor(app().getRootNode()) //TODO can it be at root node?
 //					){
 //						/**
 //						 * if it is not in one of the rendering nodes,
@@ -1033,17 +987,17 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	
 	protected void updateCurrentCmdHistoryEntryReset() {
 		String strNewInputValue = getInputText();
-		if((cd.getCmdHistoryCurrentIndex()-iCmdHistoryPreviousIndex)==0){
+		if((cd().getCmdHistoryCurrentIndex()-iCmdHistoryPreviousIndex)==0){
 			if(!strNewInputValue.equals(strPreviousInputValue)){
 				/**
 				 * user has deleted or typed some character
 				 */
-				cd.resetCmdHistoryCursor();
+				cd().resetCmdHistoryCursor();
 			}
 		}
 		
 		strPreviousInputValue=strNewInputValue;
-		iCmdHistoryPreviousIndex=cd.getCmdHistoryCurrentIndex();
+		iCmdHistoryPreviousIndex=cd().getCmdHistoryCurrentIndex();
 	}
 	
 	protected void closeHint(){
@@ -1109,7 +1063,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		
 		if(strCurrentInputText.isEmpty())return true;
 		
-		if(strCurrentInputText.equals(""+cd.getCommandPrefix()))return true;
+		if(strCurrentInputText.equals(""+cd().getCommandPrefix()))return true;
 		
 //		if(bDumpContentsIfNotEmpty){
 //			dumpInfoEntry("Not issued command below:");
@@ -1124,9 +1078,9 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	
 	protected String dumpAndClearInputField(){
 		if(!isInputTextFieldEmpty()){
-			cd.dumpInfoEntry("Not issued command below:");
+			cd().dumpInfoEntry("Not issued command below:");
 			String str = getInputText();
-			cd.dumpEntry(str); //so user will not lose what was typing...
+			cd().dumpEntry(str); //so user will not lose what was typing...
 			clearInputTextField();
 			return str;
 		}
@@ -1139,10 +1093,10 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 			if(iSelectionIndexPreviousForFill!=getDumpAreaSelectedIndex()){ //to let user type things...
 				updateCopyFrom();
 				
-				String strCmdChk = cd.editCopyOrCut(true,false,true); //vlstrDumpEntries.get(getDumpAreaSelectedIndex()).trim();
+				String strCmdChk = cd().editCopyOrCut(true,false,true); //vlstrDumpEntries.get(getDumpAreaSelectedIndex()).trim();
 				strCmdChk=strCmdChk.trim();
-				if(cd.validateBaseCommand(strCmdChk)){
-					if(!strCmdChk.startsWith(""+cd.getCommandPrefix()))strCmdChk=cd.getCommandPrefix()+strCmdChk;
+				if(cd().validateBaseCommand(strCmdChk)){
+					if(!strCmdChk.startsWith(""+cd().getCommandPrefix()))strCmdChk=cd().getCommandPrefix()+strCmdChk;
 					dumpAndClearInputField();
 //					int iCommentBegin = strCmdChk.indexOf(cc.getCommentPrefix());
 //					if(iCommentBegin>=0)strCmdChk=strCmdChk.substring(0,iCommentBegin);
@@ -1162,14 +1116,14 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		 * this will remove any in-between comments
 		 */
 //		str=str.replace("\\n", "\n");
-		String strCommentRegion=Pattern.quote(cd.getCommentPrefixStr())+"[^\n]*\n";
+		String strCommentRegion=Pattern.quote(cd().getCommentPrefixStr())+"[^\n]*\n";
 		String strJoinToken="\n";
 		if(str.matches(".*"+strCommentRegion+".*")){
 			str=String.join(strJoinToken, str.split(strCommentRegion));
 		}
 		
-		strCommentRegion=Pattern.quote(cd.getCommentPrefixStr())+"[^"+cd.getCommandDelimiterStr()+"]*"+cd.getCommandDelimiterStr();
-		strJoinToken=cd.getCommandDelimiterStr();
+		strCommentRegion=Pattern.quote(cd().getCommentPrefixStr())+"[^"+cd().getCommandDelimiterStr()+"]*"+cd().getCommandDelimiterStr();
+		strJoinToken=cd().getCommandDelimiterStr();
 		if(str.matches(".*"+strCommentRegion+".*")){
 			str=String.join(strJoinToken, str.split(strCommentRegion));
 		}
@@ -1189,7 +1143,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		/**
 		 * Lines ending with command delimiter, do not require newline.
 		 */
-		return cd.convertNewLineToCmdDelimiter(str)
+		return cd().convertNewLineToCmdDelimiter(str)
 			/**
 			 * convert special chars to escaped ones
 			 */
@@ -1198,16 +1152,16 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 			.replace("\r", "");
 	}
 	
-	public CommandsDelegatorI getConsoleCommands(){
-		return this.cd;
-	}
+//	public CommandsDelegatorI getConsoleCommands(){
+//		return this.cd;
+//	}
 	
 	protected int getDumpAreaSelectedIndex(){
 		return iSelectionIndex;
 	}
 	
 	protected void updateCopyFrom(){
-		cd.updateCopyFrom(getDumpAreaSelectedIndex(), bKeyShiftIsPressed);
+		cd().updateCopyFrom(getDumpAreaSelectedIndex(), bKeyShiftIsPressed);
 	}
 	
 	/**
@@ -1284,7 +1238,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	protected boolean actionSubmit(final String strCmd){
 		if(checkAndApplyHintAtInputField())return true;
 		
-		return cd.actionSubmitCommand(strCmd);
+		return cd().actionSubmitCommand(strCmd);
 	}
 	
 	public boolean checkAndApplyHintAtInputField(){
@@ -1295,7 +1249,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		if(isHintActive()){
 			String strHintCmd = getSelectedHint();
 			if(strHintCmd!=null){
-				strHintCmd=cd.getCommandPrefix()+cd.extractCommandPart(strHintCmd,0)+" ";
+				strHintCmd=cd().getCommandPrefix()+cd().extractCommandPart(strHintCmd,0)+" ";
 				if(!getInputText().equals(strHintCmd)){
 					setInputField(strHintCmd);
 					return true;
@@ -1309,7 +1263,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	
 	@Override
 	public void clearInputTextField() {
-		setInputField(""+cd.getCommandPrefix());
+		setInputField(""+cd().getCommandPrefix());
 	}
 	
 //	protected boolean actionSubmitCommand(final String strCmd){
@@ -1378,7 +1332,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	
 	@Override
 	public void scrollToBottomRequest(){
-		if(!cd.btgAutoScroll.b())return;
+		if(!cd().btgAutoScroll.b())return;
 		
 		tdScrollToBottomRequestAndSuspend.updateTime();
 		tdScrollToBottomRetry.updateTime();
@@ -1466,8 +1420,8 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		 * parameters completion!
 		 */
 		if(strCompletedCmd.equals(strCmdPart)){
-			String strBaseCmd = cd.extractCommandPart(strCmdPart,0);
-			String strParam1 = cd.extractCommandPart(strCmdPart,1);
+			String strBaseCmd = cd().extractCommandPart(strCmdPart,0);
+			String strParam1 = cd().extractCommandPart(strCmdPart,1);
 			
 			String strCmd=null;
 			String strPartToComplete=null;
@@ -1478,25 +1432,25 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 				astrOptList=getStyleListClone();
 				strPartToComplete=strParam1;
 			}else
-			if(cd.CMD_DB.equals(strBaseCmd)){
-				strCmd=cd.CMD_DB+" ";
+			if(cd().CMD_DB.equals(strBaseCmd)){
+				strCmd=cd().CMD_DB+" ";
 				astrOptList=EDataBaseOperations.getValuesAsArrayList();
 				strPartToComplete=strParam1;
 			}else
-			if(cd.CMD_VAR_SET.equals(strBaseCmd)){
-				strCmd=cd.CMD_VAR_SET+" ";
-				astrOptList=cd.getVariablesIdentifiers(false);
+			if(cd().CMD_VAR_SET.equals(strBaseCmd)){
+				strCmd=cd().CMD_VAR_SET+" ";
+				astrOptList=cd().getVariablesIdentifiers(false);
 				strPartToComplete=strParam1;
 				bIsVarCompletion=true;
 			}else{
 				/**
 				 * complete for variables ids when retrieving variable value 
 				 */
-				String strRegexVarOpen=Pattern.quote(""+cd.getVariableExpandPrefix()+"{");
-				String strRegex=".*"+strRegexVarOpen+"["+cd.strValidCmdCharsRegex+cd.RESTRICTED_TOKEN+"]*$";
+				String strRegexVarOpen=Pattern.quote(""+cd().getVariableExpandPrefix()+"{");
+				String strRegex=".*"+strRegexVarOpen+"["+cd().strValidCmdCharsRegex+cd().RESTRICTED_TOKEN+"]*$";
 				if(strCompletedCmd.matches(strRegex)){
 					strCmd=strCompletedCmd.trim().substring(1); //removes command prefix
-					astrOptList=cd.getVariablesIdentifiers(true);
+					astrOptList=cd().getVariablesIdentifiers(true);
 					
 					/**
 					 * here the variable is being filtered
@@ -1512,20 +1466,20 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 			
 //			if(strParam1!=null){
 			if(astrOptList!=null){
-				strCompletedCmd=""+cd.getCommandPrefix()+strCmd;
+				strCompletedCmd=""+cd().getCommandPrefix()+strCmd;
 				
 				ArrayList<String> astr = strPartToComplete==null ? astrOptList :
 					AutoCompleteI.i().autoComplete(strPartToComplete, astrOptList, bMatchContains);
 				if(astr.size()==1){
 					strCompletedCmd+=astr.get(0);
 				}else{
-					cd.dumpInfoEntry("Param autocomplete:");
+					cd().dumpInfoEntry("Param autocomplete:");
 					String strFirst = null;
 					if(strPartToComplete!=null)strFirst = astr.remove(0);
 					for(String str:astr){
 //						if(strPartToComplete!=null && str.equals(astr.get(0)))continue;
-						if(bIsVarCompletion)str=cd.varReportPrepare(str);
-						cd.dumpSubEntry(str);
+						if(bIsVarCompletion)str=cd().varReportPrepare(str);
+						cd().dumpSubEntry(str);
 					}
 					
 					if(strPartToComplete!=null){
@@ -1536,7 +1490,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 //			}
 		}
 		
-		if(strCompletedCmd.trim().isEmpty())strCompletedCmd=""+cd.getCommandPrefix();
+		if(strCompletedCmd.trim().isEmpty())strCompletedCmd=""+cd().getCommandPrefix();
 		setInputField(strCompletedCmd+strCmdAfterCarat);
 //		LemurMiscHelpersState.i().setCaratPosition(intputField, strCompletedCmd.length());
 //		if(efHK!=null)efHK.setCaratPosition(strCompletedCmd.length());
@@ -1554,20 +1508,20 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		strCmdPart=strCmdPart.trim();
 		
 		// no command typed
-		if(strCmdPart.equalsIgnoreCase(""+cd.getCommandPrefix()) || strCmdPart.isEmpty())
+		if(strCmdPart.equalsIgnoreCase(""+cd().getCommandPrefix()) || strCmdPart.isEmpty())
 			return strCmdPartOriginal;
 		
-		strCmdPart=strCmdPart.replaceFirst("^"+cd.getCommandPrefix(), "");
+		strCmdPart=strCmdPart.replaceFirst("^"+cd().getCommandPrefix(), "");
 		
 		// do not allow invalid chars
-		if(!cd.isValidIdentifierCmdVarAliasFuncString(strCmdPart))
+		if(!cd().isValidIdentifierCmdVarAliasFuncString(strCmdPart))
 //		if(!strCmdPart.matches("["+strValidCmdCharsRegex+"]*"))
 			return strCmdPartOriginal;
 		
-		ArrayList<String> astr = AutoCompleteI.i().autoComplete(strCmdPart, cd.getBaseCommands(), bMatchContains);
+		ArrayList<String> astr = AutoCompleteI.i().autoComplete(strCmdPart, cd().getBaseCommands(), bMatchContains);
 		String strFirst=astr.get(0); //the actual stored command may come with comments appended
 		String strAppendSpace = "";
-		if(astr.size()==1 && cd.validateBaseCommand(strFirst)){
+		if(astr.size()==1 && cd().validateBaseCommand(strFirst)){
 			strAppendSpace=" "; //found an exact command valid match, so add space
 		}
 ////		if(astr.size()==1 && extractCommandPart(strFirst,0).length() > strCmdPart.length()){
@@ -1577,20 +1531,20 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		
 		// many possible matches
 		if(astr.size()>1){
-			cd.dumpInfoEntry("AutoComplete: ");
+			cd().dumpInfoEntry("AutoComplete: ");
 			for(String str:astr){
 				if(str.equals(strFirst))continue; //skip the partial improved match, 1st entry
-				cd.dumpSubEntry(cd.getCommandPrefix()+str);
+				cd().dumpSubEntry(cd().getCommandPrefix()+str);
 			}
 		}
 		
-		return cd.getCommandPrefix()+strFirst.split(" ")[0]+strAppendSpace;
+		return cd().getCommandPrefix()+strFirst.split(" ")[0]+strAppendSpace;
 	}
 	
 	@Override
 	public boolean statsFieldToggle() {
-		if(cd.paramBooleanCheckForToggle(1)){
-			Boolean bEnable = cd.paramBoolean(1);
+		if(cd().paramBooleanCheckForToggle(1)){
+			Boolean bEnable = cd().paramBoolean(1);
 			
 			boolean bIsVisible = ctnrStatsAndControls.getParent()!=null;
 			boolean bSetVisible = !bIsVisible; //toggle
@@ -1623,14 +1577,14 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	protected void modifyConsoleHeight(Float fNewHeightPercent) {
 		Vector3f v3fNew = getContainerConsolePreferredSize(); //getSize() does not work well..
 		if(!v3fNew.equals(v3fConsoleSize)){
-			cd.dumpDevWarnEntry("sizes should be equal: "+v3fNew+v3fConsoleSize);
+			cd().dumpDevWarnEntry("sizes should be equal: "+v3fNew+v3fConsoleSize);
 		}
 		
 		if(fNewHeightPercent==null)fNewHeightPercent=fdvConsoleHeightPercDefault.getFloat();
 		
 		if(fNewHeightPercent>0.95f)fNewHeightPercent=0.95f;
 		
-		v3fNew.y = fNewHeightPercent * sapp.getContext().getSettings().getHeight();
+		v3fNew.y = fNewHeightPercent * app().getContext().getSettings().getHeight();
 		
 		float fMin = fInputHeight +fStatsHeight +fLstbxEntryHeight*3; //will show only 2 rows, the 3 value is a safety margin
 		
@@ -1642,7 +1596,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		
 		fConsoleHeightPerc = (fNewHeightPercent);
 		
-		cd.varSet(CMD_CONSOLE_HEIGHT, ""+fConsoleHeightPerc, true);
+		cd().varSet(CMD_CONSOLE_HEIGHT, ""+fConsoleHeightPerc, true);
 		
 		iVisibleRowsAdjustRequest = 0; //dynamic
 	}
@@ -1659,14 +1613,14 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	
 	@Override
 	public void updateEngineStats() {
-		stateStats.setDisplayStatView(cd.btgEngineStatsView.get());
-		stateStats.setDisplayFps(cd.btgEngineStatsFps.get());
+		stateStats.setDisplayStatView(cd().btgEngineStatsView.get());
+		stateStats.setDisplayFps(cd().btgEngineStatsFps.get());
 	}
 	protected void styleHelp(){
-		cd.dumpInfoEntry("Available styles:");
+		cd().dumpInfoEntry("Available styles:");
 		//There is still no way to collect styles from: GuiGlobals.getInstance().getStyles()
 		for(String str:astrStyleList){
-			cd.dumpSubEntry(str);
+			cd().dumpSubEntry(str);
 		}
 	}
 	protected boolean styleCheck(String strStyle) {
@@ -1678,13 +1632,13 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		if(bOk){
 			strStyle=strStyleNew;
 			
-			cd.varSet(CMD_CONSOLE_STYLE, strStyle, true);
+			cd().varSet(CMD_CONSOLE_STYLE, strStyle, true);
 			
 			updateFontStuff();
 			
-			cd.cmdResetConsole();
+			cd().cmdResetConsole();
 		}else{
-			cd.dumpWarnEntry("invalid style: "+strStyleNew);
+			cd().dumpWarnEntry("invalid style: "+strStyleNew);
 			styleHelp();
 		}
 		
@@ -1708,7 +1662,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	@Override
 	public void postRender() {
 	}
-
+	
 	@Override
 	public void cleanup(Application app) {
 		super.cleanup(app);
@@ -1728,15 +1682,15 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		ctnrMainTopSubWindow.removeFromParent();
 		
 		//TODO should keymappings be at setEnabled() ?
-    sapp.getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_SCROLL_UP+"");
-    sapp.getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_SCROLL_DOWN+"");
-    sapp.getInputManager().removeListener(alConsoleScroll);
+    app().getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_SCROLL_UP+"");
+    app().getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_SCROLL_DOWN+"");
+    app().getInputManager().removeListener(alConsoleScroll);
     
     /**
      * IMPORTANT!!!
      * Toggle console must be kept! Re-initialization depends on it!
-		sapp.getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_TOGGLE);
-    sapp.getInputManager().removeListener(alConsoleToggle);
+		app().getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_TOGGLE);
+    app().getInputManager().removeListener(alConsoleToggle);
      */
     
 //    if(efHK!=null)efHK.cleanupHK();
@@ -1761,9 +1715,9 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 				rfcfg.strCommandPrefix = "CONSOLEGUISTATE_";
 				rfcfg.bFirstLetterUpperCase = true;
 			}else
-			if(cd.strFinalFieldRestrictedCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
+			if(cd().strFinalFieldRestrictedCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
-				rfcfg.strCommandPrefix = ""+cd.RESTRICTED_TOKEN;
+				rfcfg.strCommandPrefix = ""+cd().RESTRICTED_TOKEN;
 				rfcfg.bFirstLetterUpperCase = true;
 			}
 			
@@ -1778,7 +1732,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 //			}
 		}
 		
-		if(rfcfg==null)rfcfg = cd.getReflexFillCfg(rfcv);
+		if(rfcfg==null)rfcfg = cd().getReflexFillCfg(rfcv);
 		
 		return rfcfg;
 	}
@@ -1833,13 +1787,13 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	
 	@Override
 	public void dumpAllStats() {
-		cd.dumpEntry(true, cd.btgShowDeveloperInfo.get(), false,	
-			MiscI.i().getSimpleTime(cd.btgShowMiliseconds.get())
-				+cd.getDevInfoEntryPrefix()+"Console stats (Dev): "+"\n"
+		cd().dumpEntry(true, cd().btgShowDeveloperInfo.get(), false,	
+			MiscI.i().getSimpleTime(cd().btgShowMiliseconds.get())
+				+cd().getDevInfoEntryPrefix()+"Console stats (Dev): "+"\n"
 			
 			+"Console Height = "+MiscI.i().fmtFloat(getSizeOf(ctnrMainTopSubWindow).y)+"\n"
 			+"Visible Rows = "+getVisibleRows()+"\n"
-			+"Line Wrap At = "+cd.getCurrentFixedLineWrapAtColumn()+"\n"
+			+"Line Wrap At = "+cd().getCurrentFixedLineWrapAtColumn()+"\n"
 			+"ListBox Height = "+MiscI.i().fmtFloat(getSizeOf(lstbxDumpArea).y)+"\n"
 			+"ListBox Entry Height = "+MiscI.i().fmtFloat(fLstbxEntryHeight)+"\n"
 			
@@ -1885,7 +1839,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		if(
 				getSelectedHint()!=null
 				||
-				(cd.getCmdHistoryCurrentIndex()+1) >= cd.getCmdHistorySize() // end of cmd history
+				(cd().getCmdHistoryCurrentIndex()+1) >= cd().getCmdHistorySize() // end of cmd history
 		){
 			int iMaxIndex = getAutoCompleteHint().size()-1;
 			if(iMaxIndex<0)return false;
@@ -1928,8 +1882,8 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	}
 	
 	protected void navigateCmdHistOrHintBox(Object objSource, ENav enav) {
-		if(cd.getCmdHistoryCurrentIndex()<0)cd.setCmdHistoryCurrentIndex(0); //cant underflow
-		if(cd.getCmdHistoryCurrentIndex()>cd.getCmdHistorySize())cd.resetCmdHistoryCursor(); //iCmdHistoryCurrentIndex=getCmdHistorySize(); //can overflow by 1
+		if(cd().getCmdHistoryCurrentIndex()<0)cd().setCmdHistoryCurrentIndex(0); //cant underflow
+		if(cd().getCmdHistoryCurrentIndex()>cd().getCmdHistorySize())cd().resetCmdHistoryCursor(); //iCmdHistoryCurrentIndex=getCmdHistorySize(); //can overflow by 1
 		
 		if(objSource!=intputField && objSource!=lstbxAutoCompleteHint)objSource=null;
 		
@@ -1939,14 +1893,14 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 				if(objSource==null || objSource==lstbxAutoCompleteHint)bOk=navigateHint(-1);
 				
 				if((objSource==null && !bOk) || objSource==intputField){
-					cd.addCmdHistoryCurrentIndex(-1);
+					cd().addCmdHistoryCurrentIndex(-1);
 					/**
 					 * to not lose last possibly typed (but not issued) cmd
 					 */
-					if(cd.getCmdHistoryCurrentIndex()==(cd.getCmdHistorySize()-1)){ //requested last entry
+					if(cd().getCmdHistoryCurrentIndex()==(cd().getCmdHistorySize()-1)){ //requested last entry
 						strNotSubmitedCmd = dumpAndClearInputField();
 					}
-					fillInputFieldWithHistoryDataAtIndex(cd.getCmdHistoryCurrentIndex());
+					fillInputFieldWithHistoryDataAtIndex(cd().getCmdHistoryCurrentIndex());
 				}
 				
 				break;
@@ -1954,13 +1908,13 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 				if(objSource==null || objSource==lstbxAutoCompleteHint)bOk=navigateHint(+1);
 				
 				if((objSource==null && !bOk) || objSource==intputField){
-					cd.addCmdHistoryCurrentIndex(1);
-					if(cd.getCmdHistoryCurrentIndex()>=cd.getCmdHistorySize()){
+					cd().addCmdHistoryCurrentIndex(1);
+					if(cd().getCmdHistoryCurrentIndex()>=cd().getCmdHistorySize()){
 						if(strNotSubmitedCmd!=null){
 							setInputField(strNotSubmitedCmd);
 						}
 					}
-					fillInputFieldWithHistoryDataAtIndex(cd.getCmdHistoryCurrentIndex());
+					fillInputFieldWithHistoryDataAtIndex(cd().getCmdHistoryCurrentIndex());
 				}
 				
 				break;
@@ -2009,12 +1963,12 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 						if(bFailed){ //had failed, so look for a safe length
 							if(iStatsTextSafeLength==null || !iStatsTextSafeLength.equals(str.length())){
 								iStatsTextSafeLength=str.length();
-								cd.dumpDebugEntry("StatsTextSafeLength="+str.length());
+								cd().dumpDebugEntry("StatsTextSafeLength="+str.length());
 							}
 						}
 					}catch(Exception ex){
 						if(bExceptionOnce){
-							cd.dumpExceptionEntry(ex);
+							cd().dumpExceptionEntry(ex);
 							bExceptionOnce=false;
 						}
 						
@@ -2036,9 +1990,9 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	protected void updateStats(){
 		if(!tdStatsRefresh.isReady(true))return;
 		
-		String str = cd.prepareStatsFieldText();
+		String str = cd().prepareStatsFieldText();
 		
-		if(DebugI.i().isKeyEnabled(DebugI.EDbgKey.StatsText))str+=cd.strDebugTest;
+		if(DebugI.i().isKeyEnabled(DebugI.EDbgKey.StatsText))str+=cd().strDebugTest;
 		
 		setStatsText(str);
 		
@@ -2048,7 +2002,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	protected void updateAutoCompleteHint() {
 		String strInputText = getInputText();
 		if(strInputText.isEmpty())return;
-		strInputText=cd.extractCommandPart(strInputText,0);
+		strInputText=cd().extractCommandPart(strInputText,0);
 		if(strInputText==null)return; //something invalid was typed...
 		if(bKeyControlIsPressed && bKeyShiftIsPressed){
 			/**
@@ -2065,14 +2019,14 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		}
 		
 		ArrayList<String> astr = AutoCompleteI.i().autoComplete(
-			strInputText, cd.getBaseCommandsWithComment(), bKeyControlIsPressed);
+			strInputText, cd().getBaseCommandsWithComment(), bKeyControlIsPressed);
 		
 		boolean bShowHint = false;
 		
 		if(astr.size()==0){
 			bShowHint=false; // empty string, or simply no matches
 		}else
-		if(astr.size()==1 && strInputText.equals(cd.extractCommandPart(astr.get(0),0))){
+		if(astr.size()==1 && strInputText.equals(cd().extractCommandPart(astr.get(0),0))){
 			// no extra matches found, only what was already typed was returned
 			bShowHint=false;
 		}else{
@@ -2092,7 +2046,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 			getAutoCompleteHint().addAll(astr);
 			clearHintSelection();
 			
-			Node nodeParent = sapp.getGuiNode();
+			Node nodeParent = app().getGuiNode();
 			if(!nodeParent.hasChild(lstbxAutoCompleteHint)){
 				nodeParent.attachChild(lstbxAutoCompleteHint);
 			}
@@ -2109,7 +2063,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 			if(iVisibleItems>getAutoCompleteHint().size())iVisibleItems=getAutoCompleteHint().size();
 			float fHintHeight = fEntryHeightGUESSED*iVisibleItems;
 			if(fHintHeight>fAvailableHeight){
-				cd.dumpDevWarnEntry("fHintHeight="+fHintHeight+",fAvailableHeight="+fAvailableHeight);
+				cd().dumpDevWarnEntry("fHintHeight="+fHintHeight+",fAvailableHeight="+fAvailableHeight);
 				fHintHeight=fAvailableHeight;
 			}
 			int iMinLinesGUESSED = 3; //seems to be required because the slider counts as 3 (up arrow, thumb, down arrow)
@@ -2149,7 +2103,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 	
 	@Override
 	public int getLineWrapAt() {
-		boolean bUseFixedWrapColumn = cd.btgUseFixedLineWrapModeForAllFonts.b();
+		boolean bUseFixedWrapColumn = cd().btgUseFixedLineWrapModeForAllFonts.b();
 		
 		/**
 		 * Mono spaced fonts can always have a fixed linewrap column!
@@ -2237,7 +2191,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		Callable<Void> detach = new Callable<Void>() {
 			@Override
 			public Void call() throws Exception {
-				sapp.getStateManager().detach(ConsoleJmeStateAbs.this);
+				app().getStateManager().detach(ConsoleJmeStateAbs.this);
 				return null;
 			}
 		};
@@ -2246,7 +2200,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		Callable<Void> attach = new Callable<Void>() {
 			@Override
 			public Void call() throws Exception {
-				sapp.getStateManager().attach(ConsoleJmeStateAbs.this);
+				app().getStateManager().attach(ConsoleJmeStateAbs.this);
 				if(bWasEnabled){
 					setEnabled(true);
 				}
@@ -2357,7 +2311,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		}
 		 */
 		
-		//sapp.getAssetManager().unregisterLocator(fontFile.getParent(), FileLocator.class);
+		//app().getAssetManager().unregisterLocator(fontFile.getParent(), FileLocator.class);
 		return font;
 	}
 	
@@ -2390,7 +2344,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		
 		if(fntFound==null)return null;
 		
-		cd.dumpInfoEntry("System font: "+strFontID);
+		cd().dumpInfoEntry("System font: "+strFontID);
 		
 		//TODO this is probably wrong...
 		TrueTypeKey ttk = new TrueTypeKey(strFontID,0,iFontSize,1);
@@ -2401,7 +2355,7 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		 */
 		return convertTTFtoBitmapFont(
 			new TrueTypeFontFromSystem(
-				sapp.getAssetManager(), 
+				app().getAssetManager(), 
 				fntFound,
 				ttk.getPointSize(),
 				ttk.getOutline()
@@ -2413,23 +2367,23 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 		
 		if(fontFile.getParent()==null)return null; //not a file with path
 		
-		sapp.getAssetManager().registerLocator(fontFile.getParent(), FileLocator.class);
+		app().getAssetManager().registerLocator(fontFile.getParent(), FileLocator.class);
 		
 		TrueTypeKey ttk = new TrueTypeKey(strFilePath, java.awt.Font.PLAIN, iFontSize);
 		
 		TrueTypeFont ttf=null;
 		try{
-			ttf = (TrueTypeFont)sapp.getAssetManager().loadAsset(ttk);
+			ttf = (TrueTypeFont)app().getAssetManager().loadAsset(ttk);
 		}catch(AssetNotFoundException|IllegalArgumentException ex){
 			// missing file
-			cd.dumpExceptionEntry(ex);
+			cd().dumpExceptionEntry(ex);
 		}
 		
-		sapp.getAssetManager().unregisterLocator(fontFile.getParent(), FileLocator.class);
+		app().getAssetManager().unregisterLocator(fontFile.getParent(), FileLocator.class);
 		
 		if(ttf==null)return null;
 		
-		cd.dumpInfoEntry("Font from file: "+strFilePath);
+		cd().dumpInfoEntry("Font from file: "+strFilePath);
 		
 		return convertTTFtoBitmapFont(ttf);
 	}
@@ -2467,18 +2421,18 @@ public abstract class ConsoleJmeStateAbs extends DialogJmeStateAbs implements IC
 			if(font==null){ //bundled fonts
 				strFontName=strFontName.replace(" ","");
 				String strFile = "Interface/Fonts/"+strFontName+".fnt";
-				font = sapp.getAssetManager().loadFont(strFile);
-				if(font!=null)cd.dumpInfoEntry("Bundled font: "+strFile);
+				font = app().getAssetManager().loadFont(strFile);
+				if(font!=null)cd().dumpInfoEntry("Bundled font: "+strFile);
 			}
 		}catch(AssetNotFoundException ex){
-			cd.dumpExceptionEntry(ex);
+			cd().dumpExceptionEntry(ex);
 			font = fontConsoleDefault; //fontConsoleExtraDefault
 //			strFontName="Console";
-//			font = sapp.getAssetManager().loadFont("Interface/Fonts/"+strFontName+".fnt");
+//			font = app().getAssetManager().loadFont("Interface/Fonts/"+strFontName+".fnt");
 //		svUserFontOption.setObjectValue(strFontName);
 			svUserFontOption.setObjectValue(strConsoleDefaultFontName );
 		}
-	//	BitmapFont font = sapp.getAssetManager().loadFont("Interface/Fonts/Console512x.fnt");
+	//	BitmapFont font = app().getAssetManager().loadFont("Interface/Fonts/Console512x.fnt");
 	}
 }
 

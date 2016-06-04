@@ -27,16 +27,12 @@
 
 package com.github.commandsconsolegui.jmegui;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalAppStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.jme3.app.SimpleApplication;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
@@ -59,8 +55,6 @@ public abstract class DialogJmeStateAbs extends CmdConditionalAppStateAbs implem
 //	BoolTogglerCmdField btgShowDialog = new BoolTogglerCmdField(this,false);
 	protected String	strCmdPrefix = "toggleUI";
 	protected String	strCmdSuffix = "";
-	private CommandsDelegatorI	cd;
-	private SimpleApplication	sapp;
 	
 	public DialogJmeStateAbs(String strUIId){
 		this.strUIId=strUIId;
@@ -75,10 +69,13 @@ public abstract class DialogJmeStateAbs extends CmdConditionalAppStateAbs implem
 	 */
 	@Override
 	protected boolean initializeValidating() {
-		initGUI(); //isEnabled()
-		initKeyMappings();
+		if(!initGUI())return false;
+		if(!initKeyMappings())return false;
 		return true;
 	}
+	
+	protected abstract boolean initGUI();
+	protected abstract boolean initKeyMappings();
 	
 	public String getCommand(){
 		return strCmd;
@@ -86,21 +83,23 @@ public abstract class DialogJmeStateAbs extends CmdConditionalAppStateAbs implem
 	
 	public abstract void requestFocus(Spatial spt);
 	
-	public void configure() {
-		super.configure(GlobalSappRefI.i().get());
-		sapp=GlobalSappRefI.i().get();
-		this.cd = GlobalCommandsDelegatorI.i().get();
+	public boolean configureValidating() {
+		boolean b = super.configureValidating(strCmd);
+		
+		if(!b)return false;
 		
 		/**
 		 * Sub windows dialogs must be initially disabled because they are 
 		 * enabled on user demand.
 		 */
-		bEnabled=false; 
+		bEnabled=false;
+		
+		return true;
 	}
 	
 	@Override
 	protected boolean enableValidating() {
-		sapp.getGuiNode().attachChild(ctnrMainTopSubWindow);
+		app().getGuiNode().attachChild(ctnrMainTopSubWindow);
 		
 		requestFocus(intputField);
 		
@@ -126,14 +125,10 @@ public abstract class DialogJmeStateAbs extends CmdConditionalAppStateAbs implem
 	public void setMouseCursorKeepUngrabbed(boolean b) {
 		UngrabMouseStateI.i().setKeepUngrabbedRequester(this,b);
 	}
-
-	protected abstract void initGUI();
 	
 	public void setTitle(String str){
 		this.strTitle = str;
 	}
-
-	protected abstract void initKeyMappings();
 	
 	/**
 	 * what happens when pressing ENTER keys
@@ -145,6 +140,6 @@ public abstract class DialogJmeStateAbs extends CmdConditionalAppStateAbs implem
 	
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
-		return cd.getReflexFillCfg(rfcv);
+		return cd().getReflexFillCfg(rfcv);
 	}
 }

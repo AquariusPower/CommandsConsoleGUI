@@ -34,13 +34,14 @@ import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.ConditionalAppStateAbs;
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class UngrabMouseStateI extends ConditionalAppStateAbs {
+public class UngrabMouseStateI extends ConditionalAppStateAbs<SimpleApplication> {
 	private static UngrabMouseStateI instance = new UngrabMouseStateI();
 	public static UngrabMouseStateI i(){return instance;}
 	
@@ -50,7 +51,7 @@ public class UngrabMouseStateI extends ConditionalAppStateAbs {
 	boolean bWasUnGrabbedDuringSlowdown=true;
 	Thread	t;
 	Runnable	r;
-	boolean bCleaningUp=false;
+//	boolean bCleaningUp=false;
 	
 	/**
 	 * let end developer decide when it will re-grab
@@ -58,18 +59,15 @@ public class UngrabMouseStateI extends ConditionalAppStateAbs {
 	private boolean	bKeepUngrabbedOnSlowDown = false;
 	
 	/**
-	 * 
-	 * @param app
 	 * @param lSlowMachineDelayToUngrabMilis null to use default
 	 * @param bKeepUngrabbedOnSlowdown null to use default
 	 */
-	public void configureSimple(Long lSlowMachineDelayToUngrabMilis, Boolean bKeepUngrabbedOnSlowdown){
+	public void configure(Long lSlowMachineDelayToUngrabMilis, Boolean bKeepUngrabbedOnSlowdown) {
+		super.configureValidating(GlobalSappRefI.i().get());
+		
 		if(lSlowMachineDelayToUngrabMilis!=null)this.lDelayToUngrabMilis=lSlowMachineDelayToUngrabMilis;
 		if(bKeepUngrabbedOnSlowdown!=null)this.bKeepUngrabbedOnSlowDown=bKeepUngrabbedOnSlowdown;
-	}
-	@Override
-	public void configure() {
-		super.configure();
+		
 		GlobalSappRefI.i().get().getStateManager().attach(this);
 	}
 	
@@ -91,13 +89,11 @@ public class UngrabMouseStateI extends ConditionalAppStateAbs {
 	}
 	
 	@Override
-	protected void initialize(Application app) {
-		super.initialize(app);
-		
+	protected boolean initializeValidating() {
 		r = new Runnable() {
 			@Override
 			public void run() {
-				while(!bCleaningUp){
+				while(!isCleaningUp()){
 					updateAtNewThread();
 					try {
 						Thread.sleep(lDelayToUngrabMilis);
@@ -114,15 +110,16 @@ public class UngrabMouseStateI extends ConditionalAppStateAbs {
 		updateTimeAtMainThread();
 		t.start();
 		
-		initializationCompleted();
+//		initializationCompleted();
+		return true;
 	}
 	
-	@Override
-	public void update(float tpf) {
-		super.update(tpf);
-		updateTimeAtMainThread();
-	}
-	
+//	@Override
+//	public void update(float tpf) {
+//		super.update(tpf);
+//		updateTimeAtMainThread();
+//	}
+//	
 	private void updateTimeAtMainThread(){
 		lTimeLastUpdateMilis=System.currentTimeMillis();
 	}
@@ -161,23 +158,33 @@ public class UngrabMouseStateI extends ConditionalAppStateAbs {
 	}
 	
 	@Override
-	protected void onEnable() {
+	protected boolean enableValidating() {
 		updateTimeAtMainThread();
+		return true;
 	}
-	
+
 	@Override
-	protected void onDisable() {
-	}
-	
-	@Override
-	protected void cleanup(Application app) {
-		super.cleanup(app);
-		bCleaningUp=true;
-	}
-	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI ccRequester) {
+	protected boolean checkInitPrerequisites() {
 		// TODO Auto-generated method stub
-		return null;
+		return false;
 	}
+
+	@Override
+	protected boolean updateValidating(float tpf) {
+		updateTimeAtMainThread();
+		return true;
+	}
+
+	@Override
+	protected boolean disableValidating() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+//	@Override
+//	protected void cleanup(Application app) {
+//		super.cleanup(app);
+//		bCleaningUp=true;
+//	}
 
 }

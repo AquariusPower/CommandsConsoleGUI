@@ -29,17 +29,13 @@ package com.github.commandsconsolegui.jmegui.lemur.console;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
-import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
-import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.jmegui.ConditionalAppStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
+import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalAppStateAbs;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.ReflexFillI;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexHacks;
@@ -65,13 +61,13 @@ import com.simsilica.lemur.focus.FocusManagerState;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class LemurMiscHelpersStateI extends ConditionalAppStateAbs implements IConsoleCommandListener, IReflexFillCfg, IWorkAroundBugFix{
+public class LemurMiscHelpersStateI extends CmdConditionalAppStateAbs implements IWorkAroundBugFix {
+	private static LemurMiscHelpersStateI instance = new LemurMiscHelpersStateI(); 
+	public static LemurMiscHelpersStateI i(){return instance;}
+	
 	public final BoolTogglerCmdField	btgTextCursorPulseFadeBlinkMode = new BoolTogglerCmdField(this,true);
 	public final BoolTogglerCmdField	btgTextCursorLarge = new BoolTogglerCmdField(this,true);
 	public final StringCmdField CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringCmdField(this, CommandsDelegatorI.strFinalCmdCodePrefix);
-	
-	private static LemurMiscHelpersStateI instance = new LemurMiscHelpersStateI(); 
-	public static LemurMiscHelpersStateI i(){return instance;}
 
 //	private SimpleApplication	sapp;
 	
@@ -225,30 +221,7 @@ public class LemurMiscHelpersStateI extends ConditionalAppStateAbs implements IC
 		tf.setUserData(EKey.CursorLargeMode.toString(), b?true:null);
 	}
 	
-	@Override
-	public void configure() {
-		super.configure();
-		
-//		this.sapp=GlobalSappRefI.i().get();
-//		this.cd=GlobalCommandsDelegatorI.i().get();
-		
-		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
-		
-//		cd.addConsoleCommandListener(this);
-	}
 	
-	@Override
-	public void update(float tpf) {
-		if(isEnabled()){
-			LemurFocusHelperI.i().update(tpf);
-			
-			if(tfToBlinkCursor!=null){
-				updateBlinkInputFieldTextCursor(tfToBlinkCursor);
-				updateLargeTextCursorMode(tfToBlinkCursor);
-			}
-		}
-	}
-
 	@Override
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI	cc) {
 		boolean bCmdEndedGracefully = false;
@@ -267,7 +240,7 @@ public class LemurMiscHelpersStateI extends ConditionalAppStateAbs implements IC
 
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
-		return cd.getReflexFillCfg(rfcv);
+		return cd().getReflexFillCfg(rfcv);
 	}
 	
 	private String strCaratNewPosition = "CaratNewPosition";
@@ -303,7 +276,7 @@ public class LemurMiscHelpersStateI extends ConditionalAppStateAbs implements IC
 	public void positionCaratProperly(TextField tf) {
 		Object objUD = tf.getUserData(strCaratNewPosition);
 		if(objUD==null){
-			cd.dumpExceptionEntry(new NullPointerException("missing carat new position user data"));
+			cd().dumpExceptionEntry(new NullPointerException("missing carat new position user data"));
 		}else{
 			int iMoveCaratTo = (int)objUD;
 			setCaratPosition(tf, iMoveCaratTo);
@@ -371,14 +344,7 @@ public class LemurMiscHelpersStateI extends ConditionalAppStateAbs implements IC
 //		
 //		bInitialized=true;
 //	}
-
-	@Override
-	protected void initialize(Application app) {
-		super.initialize(app);
-		this.sapp = (SimpleApplication) app;
-		tdTextCursorBlink.updateTime();
-	}
-
+	
 	enum EBugFix{
 		InvisibleCursor,
 	}
@@ -433,14 +399,42 @@ public class LemurMiscHelpersStateI extends ConditionalAppStateAbs implements IC
 	}
 
 	@Override
-	protected void onEnable() {
+	protected boolean checkInitPrerequisites() {
 		// TODO Auto-generated method stub
-		
+		return false;
 	}
 
 	@Override
-	protected void onDisable() {
-		// TODO Auto-generated method stub
+	protected boolean initializeValidating() {
+		tdTextCursorBlink.updateTime();
+		return true;
+	}
+
+	@Override
+	protected boolean updateValidating(float tpf) {
+		LemurFocusHelperI.i().update(tpf);
 		
+		if(tfToBlinkCursor!=null){
+			updateBlinkInputFieldTextCursor(tfToBlinkCursor);
+			updateLargeTextCursorMode(tfToBlinkCursor);
+		}
+		
+		return true;
+	}
+
+	@Override
+	protected boolean enableValidating() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	protected boolean disableValidating() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	public boolean configureValidating() {
+		return super.configureValidating(LemurMiscHelpersStateI.class.getSimpleName());
 	}
 }

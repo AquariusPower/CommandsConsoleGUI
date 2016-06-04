@@ -28,38 +28,91 @@
 package com.github.commandsconsolegui.misc;
 
 
+
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class SimulationTimeReference {
+public class SimulationTime {
+	private static SimulationTime instance = new SimulationTime();
+	public static SimulationTime i(){return instance;}
+	
 	/**
-	 * instantiate with private/protected constructor on a private/protected field to 
-	 * forbid other classes from updating the time
+	 * This is a developer coding restriction helper.
+	 * 
+	 * Instantiate with private/protected constructor on a private/protected field to 
+	 * forbid other classes from updating the time.
 	 */
 	public static interface ISimulationTimeKey{}
 	
-	Long lTimeMilis = null;
 	private ISimulationTimeKey	istk;
 	
-	public long getTimeMilis(){
-		return lTimeMilis==null ? System.currentTimeMillis() : lTimeMilis;
-	}
+	long lUnsignedTime;
 	
-	public SimulationTimeReference update(Long lTimeMilis){
-		return update(lTimeMilis,null); //no key
+	double dTimeResolution;
+	
+	public SimulationTime() {
+		lUnsignedTime = Long.parseUnsignedLong("0");
+		dTimeResolution = 1000.0;
 	}
 	
 	/**
-	 * 
-	 * @param lTimeMilis
-	 * @param istk the class instantiating this can be the sole class allowed to call this method
+	 * @param dTimeResolution cannot be changed after set, used for adding floating seconds properly
+	 */
+	public SimulationTime(double dTimeResolution){
+		this();
+		
+		this.dTimeResolution=dTimeResolution;
+		
+		if(Double.compare(this.dTimeResolution,1000.0)==0){ //milis
+		}else
+		if(Double.compare(this.dTimeResolution,1000000.0)==0){ //micro
+		}else
+		if(Double.compare(this.dTimeResolution,1000000000.0)==0){ //nano
+		}else{
+			System.err.println("Warning: Time resolution should be milis, micro or nano.");
+			Thread.dumpStack();
+		}
+	}
+	
+	public long get(){
+		return lUnsignedTime;
+	}
+	
+//	public Double getSeconds(){
+//		return lUnsignedTime / dTimeResolution;
+//	}
+	
+	public SimulationTime add(double dSeconds, ISimulationTimeKey istk){
+		return add((long)(dSeconds*dTimeResolution), istk);
+	}
+	
+	public SimulationTime add(float fSeconds, ISimulationTimeKey istk){
+		return add((long)(fSeconds*dTimeResolution), istk);
+	}
+	
+	/**
+	 * forever deprecated :)
 	 * @return
 	 */
-	public SimulationTimeReference update(Long lTimeMilis, ISimulationTimeKey istk){
+	@Deprecated
+	public double getSeconds(){
+		throw new NullPointerException(
+			"Do not use full time references in float/double variables!"+
+			"Imprecision and lower limit than Long may torment you!");
+	}
+	
+	/**
+	 * When loading a simulation, just add the full time as a start value.
+	 * 
+	 * @param lTime normal long (not unsigned)
+	 * @param istk the first time it is not null will ensure the restrictive access in a normal code
+	 * @return
+	 */
+	public SimulationTime add(long lTime, ISimulationTimeKey istk){
 		if(this.istk==null){
-			this.istk=istk;
+			if(istk!=null)this.istk=istk;
 		}else{
 			/**
 			 * key access restriction
@@ -69,7 +122,9 @@ public class SimulationTimeReference {
 			}
 		}
 		
-		this.lTimeMilis=lTimeMilis;
+		this.lUnsignedTime+=lTime;
+		
 		return this;
 	}
+	
 }
