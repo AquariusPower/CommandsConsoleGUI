@@ -188,12 +188,12 @@ public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateA
 	}
 	
 	@Override
-	protected boolean disableValidating() {
+	protected boolean disableOrUndo() {
 		if(getInputField().equals(LemurFocusHelperStateI.i().getFocused())){
 			LemurFocusHelperStateI.i().removeFocusableFromList(getInputField());
 		}
 		
-		return super.disableValidating();
+		return super.disableOrUndo();
 	}
 	
 	/**
@@ -285,8 +285,8 @@ public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateA
 	}
 	
 	@Override
-	public boolean updateProperly(float tpf) {
-		if(!super.updateProperly(tpf))return false;
+	public boolean doItAllProperly(float tpf) {
+		if(!super.doItAllProperly(tpf))return false;
 		
 		Integer iSelected = getSelectedIndex();
 		if(iSelected!=null){

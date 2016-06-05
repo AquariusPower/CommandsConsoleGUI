@@ -48,12 +48,12 @@ public abstract class InteractionDialogStateAbs <V> extends BaseDialogJmeStateAb
 	public abstract void clearSelection();
 	
 	@Override
-	protected boolean enableValidating() {
+	protected boolean enableOrUndo() {
 		updateTextInfo();
 		updateList();
 		updateInputField();
 		
-		return super.enableValidating();
+		return super.enableOrUndo();
 	}
 	
 	public static class CfgParm extends BaseDialogJmeStateAbs.CfgParm{
@@ -86,7 +86,7 @@ public abstract class InteractionDialogStateAbs <V> extends BaseDialogJmeStateAb
 	protected abstract void updateTextInfo();
 	
 	@Override
-	protected boolean updateValidating(float tpf) {
+	protected boolean updateOrUndo(float tpf) {
 		String str = getSelectedKey();
 		if(str!=null)strLastSelectedKey=str;
 		
@@ -95,7 +95,7 @@ public abstract class InteractionDialogStateAbs <V> extends BaseDialogJmeStateAb
 		//requestFocus(intputText); //keep focus at input as it shall have all listeners.
 		
 //		setMouseCursorKeepUngrabbed(isEnabled());
-		return super.updateValidating(tpf);
+		return super.updateOrUndo(tpf);
 	}
 	
 	/**

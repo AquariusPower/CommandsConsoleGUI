@@ -29,36 +29,30 @@ package com.github.commandsconsolegui.jmegui;
 
 import java.util.concurrent.Callable;
 
-import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.jme3.app.state.AppState;
-
 /**
  * Reattaches other states safely, one step per call to this state update. 
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ReattachSafelyState extends ConditionalAppStateAbs{
+@Deprecated
+public class ReattachSafelyState extends ConditionalStateAbs{
 //	private static ReattachOtherStateSafelyStateI instance = new ReattachOtherStateSafelyStateI();
 //	public static ReattachOtherStateSafelyStateI i(){return instance;}
 	
-	public static interface ReattachSafelyValidateSteps extends AppState{
-		public abstract boolean reattachValidateStep(ERecreateConsoleSteps ercs);
-	}
-	
 	enum ERecreateConsoleSteps{
-		Step0Detach,
-		Step1Attach,
-		Step2PostInitialization,
+		Step0DiscardTarget,
+		Step1AttachNew,
+		Step2PostInitializationOfNew,
 	}
 	
 	ERecreateConsoleSteps ercCurrentStep = null;
 	
-//	private Callable<Void>	detach;
-//	private Callable<Void>	attach;
 	private Callable<Void>	postInitialization;
 
-	private ConditionalAppStateAbs stateTarget;
+	private ConditionalStateAbs casTarget;
+	
+	private ConditionalStateAbs casNew;
 
 	private boolean	bWasEnabled;
 	
@@ -68,74 +62,67 @@ public class ReattachSafelyState extends ConditionalAppStateAbs{
 //		throw new NullPointerException("deprecated!!!");
 //	}
 	public static class CfgParm implements ICfgParm{
-		ConditionalAppStateAbs stateTarget;
-		public CfgParm(ConditionalAppStateAbs stateTarget) {
+		ConditionalStateAbs casTarget;
+		public CfgParm(ConditionalStateAbs casTarget) {
 			super();
-			this.stateTarget = stateTarget;
+			this.casTarget = casTarget;
 		}
 	}
 	@Override
 	public void configure(ICfgParm icfg) {
-//	public void configure(ConditionalAppStateAbs stateTarget) {
+//	public void configure(ConditionalAppStateAbs casTarget) {
 		CfgParm cfg = (CfgParm)icfg;
 		
-		if(cfg.stateTarget==null)throw new NullPointerException("target state is null");
-		this.stateTarget=cfg.stateTarget;
+		if(cfg.casTarget==null)throw new NullPointerException("target state is null");
+		this.casTarget=cfg.casTarget;
 		
-		super.configure(new ConditionalAppStateAbs.CfgParm(
-			GlobalSappRefI.i().get()));
+		super.configure(new ConditionalStateAbs.CfgParm(
+			GlobalAppRefI.i().get()));
 	}
 	
 	@Override
-	public boolean updateValidating(float tpf) {
+	public boolean updateOrUndo(float tpf) {
 		if(ercCurrentStep==null)return true;
 		
-		if(!stateTarget.reattachValidateStep(ercCurrentStep))return false;
-		
 		/**
-		 * Not using: app().getStateManager().getState()
-		 * because I can have several state's instances of the same class,
+		 * We can have several state's instances of the same class,
 		 * like several dialogs currently opened.
 		 */
-		boolean bIsAttached = stateTarget.isAttachedToStateManager();
-		
 		boolean bStepDone = false;
 		switch(ercCurrentStep){
-			case Step0Detach:
-				if(bIsAttached){
-					Callable<Void> detach = new Callable<Void>() {
-						@Override
-						public Void call() throws Exception {
-							app().getStateManager().detach(stateTarget);
-							return null;
-						}
-					};
-					
-					getApp().enqueue(detach);
-					ercCurrentStep=ERecreateConsoleSteps.Step1Attach;
+			case Step0DiscardTarget:
+				if(casTarget.isAttachedToManager()){
+					if(!casTarget.reattachPrepareAndValidateStep(ercCurrentStep))return false;
+					casTarget.requestDiscard();
+					ercCurrentStep=ERecreateConsoleSteps.Step1AttachNew;
 					bStepDone=true;
 				}
 				break;
-			case Step1Attach:
-				if(!bIsAttached){
-					Callable<Void> attach = new Callable<Void>() {
-						@Override
-						public Void call() throws Exception {
-							app().getStateManager().attach(stateTarget);
-							if(bWasEnabled){
-								setEnabledRequest(true);
-							}
-							return null;
-						}
-					};
+			case Step1AttachNew:
+				if(casTarget.isDiscarded()){
+					if(!casTarget.reattachPrepareAndValidateStep(ercCurrentStep))return false;
 					
-					getApp().enqueue(attach);
-					ercCurrentStep=ERecreateConsoleSteps.Step2PostInitialization;
+					casNew = casTarget.createAndConfigureSelfCopy();
+					casNew.setEnabledRequest(bWasEnabled);
+					
+//					Callable<Void> attach = new Callable<Void>() {
+//						@Override
+//						public Void call() throws Exception {
+//							ConditionalAppStateManagerI.i().attach(casNew);
+//							if(bWasEnabled){
+//								casNew.setEnabledRequest(true);
+//							}
+//							return null;
+//						}
+//					};
+//					
+//					getApp().enqueue(attach);
+					ercCurrentStep=ERecreateConsoleSteps.Step2PostInitializationOfNew;
 					bStepDone=true;
 				}
 				break;
-			case Step2PostInitialization:
-				if(stateTarget.isInitializedProperly()){
+			case Step2PostInitializationOfNew:
+				if(casNew.isInitializedProperly()){
 					getApp().enqueue(postInitialization);
 					ercCurrentStep=null;
 					bStepDone=true;
@@ -147,7 +134,7 @@ public class ReattachSafelyState extends ConditionalAppStateAbs{
 		
 		if(!bStepDone)return false;
 		
-		return super.updateValidating(tpf);
+		return super.updateOrUndo(tpf);
 	}
 	
 	public boolean isProcessingRequest(){
@@ -156,11 +143,9 @@ public class ReattachSafelyState extends ConditionalAppStateAbs{
 	
 //	public void request(Callable<Void> detach, Callable<Void> attach,	Callable<Void> postInitialization) {
 	public void request(Callable<Void> postInitialization) {
-//		this.detach = detach;
-//		this.attach = attach;
-		bWasEnabled=stateTarget.isEnabled();
+		this.bWasEnabled=casTarget.isEnabled();
 		this.postInitialization = postInitialization;
-		ercCurrentStep=ERecreateConsoleSteps.Step0Detach;
+		this.ercCurrentStep=ERecreateConsoleSteps.Step0DiscardTarget;
 	}
 
 }

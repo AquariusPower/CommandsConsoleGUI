@@ -34,7 +34,7 @@ import com.github.commandsconsolegui.jmegui.console.ConsoleJmeStateAbs;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class GlobalConsoleGuiI extends Global<ConsoleJmeStateAbs>{
+public class GlobalConsoleGuiI extends GlobalAbs<ConsoleJmeStateAbs>{
 	private static GlobalConsoleGuiI instance = new GlobalConsoleGuiI();
 	public static GlobalConsoleGuiI i(){return instance;}
 }

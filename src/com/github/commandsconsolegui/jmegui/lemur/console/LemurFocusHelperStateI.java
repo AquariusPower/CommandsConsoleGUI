@@ -247,10 +247,10 @@ public class LemurFocusHelperStateI extends CmdConditionalAppStateAbs implements
 	}
 	
 	@Override
-	protected boolean updateValidating(float tpf) {
+	protected boolean updateOrUndo(float tpf) {
 		Spatial spt = getCurrentFocusRequester();
 		GuiGlobals.getInstance().requestFocus(spt); //TODO timed delay?
-		return super.updateValidating(tpf);
+		return super.updateOrUndo(tpf);
 	}
 
 }

@@ -31,6 +31,7 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
+import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.console.ConsoleJmeStateAbs;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -103,7 +104,7 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 //	}
 	
 	@Override
-	protected boolean initializeValidating() {
+	protected boolean initOrUndo() {
 		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
 		
 		addStyle(BaseStyles.GLASS);
@@ -111,7 +112,7 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 		
 //		initializationCompleted();
 		
-		return super.initializeValidating();
+		return super.initOrUndo();
 	}
 	
 	public static class CfgParm implements ICfgParm{
@@ -147,6 +148,8 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 //		}
 		LemurFocusHelperStateI.i().configure(new LemurFocusHelperStateI.CfgParm(
 			null));
+		
+		ConditionalStateManagerI.i().configure(GlobalSappRefI.i().get());
 		
 //		return true;
 	}
@@ -338,16 +341,16 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 	}
 	
 	@Override
-	protected boolean enableValidating() {
+	protected boolean enableOrUndo() {
 		commonOnEnableDisable();
-		return super.enableValidating();
+		return super.enableOrUndo();
 	}
 	
 	@Override
-	protected boolean disableValidating() {
+	protected boolean disableOrUndo() {
 		closeHint();
 		commonOnEnableDisable();
-		return super.disableValidating();
+		return super.disableOrUndo();
 	};
 	
 //	@Override

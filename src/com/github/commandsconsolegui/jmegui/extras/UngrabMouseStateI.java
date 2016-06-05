@@ -108,7 +108,7 @@ public class UngrabMouseStateI extends ConditionalAppStateAbs {
 	}
 	
 	@Override
-	protected boolean initializeValidating() {
+	protected boolean initOrUndo() {
 		r = new Runnable() {
 			@Override
 			public void run() {
@@ -130,7 +130,7 @@ public class UngrabMouseStateI extends ConditionalAppStateAbs {
 		t.start();
 		
 //		initializationCompleted();
-		return super.initializeValidating();
+		return super.initOrUndo();
 	}
 	
 //	@Override
@@ -177,15 +177,15 @@ public class UngrabMouseStateI extends ConditionalAppStateAbs {
 	}
 	
 	@Override
-	protected boolean enableValidating() {
+	protected boolean enableOrUndo() {
 		updateTimeAtMainThread();
-		return super.enableValidating();
+		return super.enableOrUndo();
 	}
 
 	@Override
-	protected boolean updateValidating(float tpf) {
+	protected boolean updateOrUndo(float tpf) {
 		updateTimeAtMainThread();
-		return super.updateValidating(tpf);
+		return super.updateOrUndo(tpf);
 	}
 
 }

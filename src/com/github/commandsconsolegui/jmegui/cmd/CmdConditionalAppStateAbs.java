@@ -32,7 +32,8 @@ import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.jmegui.ConditionalAppStateAbs;
+import com.github.commandsconsolegui.jmegui.ConditionalStateAbs;
+import com.github.commandsconsolegui.jmegui.ConditionalStateAbs.ICfgParm;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -44,7 +45,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class CmdConditionalAppStateAbs extends ConditionalAppStateAbs implements IConsoleCommandListener, IReflexFillCfg {
+public abstract class CmdConditionalAppStateAbs extends ConditionalStateAbs implements IConsoleCommandListener, IReflexFillCfg {
 	private CommandsDelegatorI cd;
 	
 	private String	strCmdIdentifier;
@@ -78,11 +79,11 @@ public abstract class CmdConditionalAppStateAbs extends ConditionalAppStateAbs i
 		}
 	}
 	@Override
-	public void configure(ICfgParm icfg) {
+	public CmdConditionalAppStateAbs configure(ICfgParm icfg) {
 //	protected void configure(String strCmdIdentifier,boolean bIgnorePrefixAndSuffix) {
 		CfgParm cfg = (CfgParm)icfg;
 		
-		super.configure(new ConditionalAppStateAbs.CfgParm(
+		super.configure(new ConditionalStateAbs.CfgParm(
 			GlobalSappRefI.i().get()));
 		
 		cd=GlobalCommandsDelegatorI.i().get();
@@ -98,6 +99,7 @@ public abstract class CmdConditionalAppStateAbs extends ConditionalAppStateAbs i
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 		
 //		return isConfigured();
+		return this;
 	}
 	
 	@Override

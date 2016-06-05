@@ -27,28 +27,22 @@
 
 package com.github.commandsconsolegui.jmegui;
 
-import java.util.concurrent.Callable;
-
-import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ERecreateConsoleSteps;
-import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ReattachSafelyValidateSteps;
+//import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ERecreateConsoleSteps;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppState;
-import com.jme3.app.state.AppStateManager;
-import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Node;
 
 /**
- * Life cycle steps: configure, pre-initialize, initialize, enable, disable, cleanup<br>
+ * Life cycle steps: configure, initialize, enable, disable, discard <br>
  * <br>
  * Every step can be validated and delayed until proper conditions are met.<br>
  * WARNING: a step not completed must self clean/undo before such method returns!<br>
  * <br>
- * This class modifies the way {@link #AppState} is managed.<br>
- * This basically means that, after each step request, you must verify if it succeeded
+ * After each step request, you must verify if it succeeded
  * before making new decisions.<br>
  * <br>
- * Most important steps will actually happen during {@link #updateProperly(float)},
+ * Most important steps will actually happen during {@link #doItAllProperly(float)},
  * where they will be properly validated and retried at specified time interval (default 0).<br>
  * <br>
  * SELFNOTE: Keep this class depending solely in JME!<br>
@@ -56,7 +50,7 @@ import com.jme3.scene.Node;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class ConditionalAppStateAbs implements AppState, ReattachSafelyValidateSteps {
+public abstract class ConditionalStateAbs {
 //	public static interface ICfgParm{}
 	
 	private Node nodeGUI;
@@ -65,9 +59,9 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 	private boolean bConfigured;
 	private Long lTimeReferenceMilis = null;
 	
-	/** true to delay initialization*/
-	protected boolean bPreInitHold=false;
-	private boolean	bPreInitialized;
+//	/** true to delay initialization*/
+//	protected boolean bPreInitHold=false;
+//	private boolean	bPreInitialized;
 	
 	// TRY INIT 
 	private long lInitRetryStartMilis;
@@ -89,7 +83,6 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 	/** set to true to allow instant configuration but wait before properly initializing*/
 	protected boolean bHoldProperInitialization = false;
 	
-	/** you can skip configure() by setting this one*/
 	private Application app;
 	
 	private boolean	bLastUpdateSuccessful;
@@ -101,8 +94,10 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 	private boolean	bDisableSuccessful;
 	private boolean	bHoldDisable;
 	
-	private boolean	bCleaningUp;
-	private AppStateManager	asmCurrent;
+	private boolean	bDiscardRequested;
+	private AppState	asmParent;
+
+	private boolean	bDiscarded;
 	
 //	public static class TimedDelay{
 //		long lTimeStart;
@@ -129,8 +124,11 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 	
 	/**
 	 * Each subclass can have the same name "CfgParm".
+	 * 
 	 * Just reference the CfgParm of the superclass directly ex.: 
 	 * 	new ConditionalAppStateAbs.CfgParm()
+	 * 
+	 * This is also very important when restarting (configuring a new and fresh robust instance) 
 	 */
 	public static interface ICfgParm{}
 	
@@ -141,7 +139,10 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 			this.app = app;
 		}
 	}
-	
+	ICfgParm icfg;
+
+	private boolean	bRestartRequested;
+
 	/**
 	 * Configure simple references assignments and variable values.
 	 * Must be used before initialization.
@@ -149,7 +150,8 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 	 * 
 	 * @param cp
 	 */
-	public void configure(ICfgParm icfg){
+	public ConditionalStateAbs configure(ICfgParm icfg){
+		this.icfg=icfg;
 		CfgParm cfg = (CfgParm)icfg;
 		
 //	protected void configure(Application app){
@@ -159,11 +161,17 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 		if(cfg.app==null)throw new NullPointerException("app is null");
 		this.app=cfg.app;
 		
+		if(!ConditionalStateManagerI.i().attach(this)){
+//		if(!app.getStateManager().attach(this)){
+			throw new NullPointerException("state already attached: "+this.getClass().getName()+"; "+this);
+		}
+//		preInitRequest();
+		
 		// configs above
 		this.bConfigured=true;
 		msgDbg("cfg",this.bConfigured);
 		
-		preInitRequest();
+		return this;
 	}
 	
 	protected void msgDbg(String str, boolean bSuccess) {
@@ -197,71 +205,52 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 	}
 	
 	
-	/**
-	 * This will self configure/add to state manager.
-	 * This is to be called after a {@link #cleanupProperly()}.
-	 * 
-	 * @return
-	 */
-	protected boolean preInitRequest() {
-		assertIsConfigured();
-		
-		if(bPreInitialized)return true;
-		
-		if(!bPreInitHold){
-			if(!app.getStateManager().attach(this)){
-				throw new NullPointerException("state already attached: "+this.getClass().getName()+"; "+this);
-			}
-			
-			bPreInitialized=true;
-			
-			msgDbg("pre-init",bPreInitialized);
-			
-			return bPreInitialized;
-		}
-		
-		return false;
-	}
+//	/**
+//	 * This will self configure/add to state manager.
+//	 * This is to be called after a {@link #cleanupProperly()}.
+//	 * 
+//	 * @return
+//	 */
+//	protected boolean preInitRequest() {
+//		assertIsConfigured();
+//		
+//		if(bPreInitialized)return true;
+//		
+//		if(!bPreInitHold){
+//			if(!ConditionalAppStateManagerI.i().attach(this)){
+////			if(!app.getStateManager().attach(this)){
+//				throw new NullPointerException("state already attached: "+this.getClass().getName()+"; "+this);
+//			}
+//			
+//			bPreInitialized=true;
+//			
+//			msgDbg("pre-init",bPreInitialized);
+//			
+//			return bPreInitialized;
+//		}
+//		
+//		return false;
+//	}
 	
 	protected void assertIsConfigured() {
 		if(!isConfigured())throw new NullPointerException("not configured yet!");
 	}
 	
-	protected void assertIsPreInitialized() {
-		if(!bPreInitialized)throw new NullPointerException("not pre-initialized yet!");
-	}
-
-	public boolean isPreInitHold() {
-		return bPreInitHold;
-	}
-
-	public void setPreInitHold(boolean bPreInitHold) {
-		this.bPreInitHold = bPreInitHold;
-	}
-	
-	/**
-	 * dummified<br>
-	 * implement {@link #initializeValidating()} instead<br>
-	 * the initialization will actually happen at {@link #updateProperly(float)}<br>
-	 */
-	@Deprecated
-	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		// KEEP EMPTY! dummified!
-	};
-	
-	/**
-	 * use {@link #isInitializedProperly()} instead
-	 */
-	@Deprecated
-	@Override
-	public boolean isInitialized() {
-		return isInitializedProperly();
-	}
-	
-	public boolean isPreInitialized(){
-		return bPreInitialized;
-	}
+//	protected void assertIsPreInitialized() {
+//		if(!bPreInitialized)throw new NullPointerException("not pre-initialized yet!");
+//	}
+//
+//	public boolean isPreInitHold() {
+//		return bPreInitHold;
+//	}
+//
+//	public void setPreInitHold(boolean bPreInitHold) {
+//		this.bPreInitHold = bPreInitHold;
+//	}
+//	
+//	public boolean isPreInitialized(){
+//		return bPreInitialized;
+//	}
 	
 	public boolean isInitializedProperly(){
 		return bProperlyInitialized;
@@ -308,58 +297,64 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 	}
 	
 	protected boolean initCheckPrerequisites(){return true;}
-	protected boolean initializeValidating(){return true;}
-	protected boolean updateValidating(float tpf){return true;}
-	protected boolean enableValidating(){return true;}
-	protected boolean disableValidating(){return true;}
-	protected boolean cleanupValidating(){return true;}
+	protected boolean initOrUndo(){return true;}
+	protected boolean updateOrUndo(float tpf){return true;}
+	protected boolean enableOrUndo(){return true;}
+	protected boolean disableOrUndo(){return true;}
 	
-	/**
-	 * 
-	 */
-	@Deprecated
-	@Override
-	public void update(float tpf) {
-		/**
-		 * this code is implemented here to keep compatibility to calls made to {@link AppState}
-		 */
-		updateProperly(tpf);
+	private boolean doItInitializeProperly(float tpf){
+		if(bHoldProperInitialization)return false;
+		
+		if(updateTime() < (lInitRetryStartMilis+lInitRetryDelayMilis)){
+			return false;
+		}
+		
+		if(!initCheckPrerequisites() || !initOrUndo()){
+			lInitRetryStartMilis=updateTime();
+			msgDbg("init",false);
+			return false;
+		}
+		
+		bProperlyInitialized=true;
+		msgDbg("init",bProperlyInitialized);
+		
+		return true;
 	}
 	
 	/**
-	 * Better not override, just use {@link #updateValidating(float)} instead!<br>
-	 * TODO make it final? would provide less flexibility to developers tho...
+	 * This will:
+	 * - Initialize properly
+	 * - enable/disable properly
+	 * - update properly
+	 * 
+	 * Use {@link #updateOrUndo(float)}<br>
 	 */
-	public boolean updateProperly(float tpf) {
+	public boolean doItAllProperly(ConditionalStateManagerI.CompositeControl cc, float tpf) {
+		cc.assertSelfNotNull();
 		assertIsConfigured();
-		assertIsPreInitialized();
+//		assertIsPreInitialized();
+		if(bDiscardRequested)return false;
+//		if(bRestartRequested)return false;
 		
 		if(!bProperlyInitialized){
-			if(bHoldProperInitialization)return false;
-			
-			if(updateTime() < (lInitRetryStartMilis+lInitRetryDelayMilis)){
-				return false;
-			}
-			
-			if(!initCheckPrerequisites() || !initializeValidating()){
-				lInitRetryStartMilis=updateTime();
-				msgDbg("init",false);
-				return false;
-			}
-			
-			bProperlyInitialized=true;
-			msgDbg("init",bProperlyInitialized);
+			if(!doItInitializeProperly(tpf))return false;
+		}else{
+			if(!doItEnableOrDisableProperly(tpf))return false;
 		}
 		
+		return false;
+	};
+	
+	private boolean doItEnableOrDisableProperly(float tpf) {
 		if(bEnabledRequested && !bEnabled){
 			if(bHoldEnable)return false;
-			bEnableSuccessful=enableValidating();
+			bEnableSuccessful=enableOrUndo();
 			msgDbg("enabled",bEnableSuccessful);
 			bEnabled=bEnableSuccessful;
 		}else
 		if(bDisabledRequested && bEnabled){
 			if(bHoldDisable)return false;
-			bDisableSuccessful=disableValidating();
+			bDisableSuccessful=disableOrUndo();
 			msgDbg("disabled",bDisableSuccessful);
 			bEnabled=!bDisableSuccessful;
 		}
@@ -367,7 +362,7 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 		if(bEnabled){
 			if(bHoldUpdates)return false;
 			
-			bLastUpdateSuccessful = updateValidating(tpf);
+			bLastUpdateSuccessful = updateOrUndo(tpf);
 			if(!bLastUpdateSuccessful){
 				msgDbg("update",false); //only on fail!!!
 				return false;
@@ -377,21 +372,12 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 			 */
 		}
 		
-		return false;
-	};
-	
+		return true;
+	}
+
 	public void toggleRequest(){
 //		assertIsPreInitialized();
 		setEnabledRequest(!isEnabled());
-	}
-	
-	@Deprecated
-	@Override
-	public void setEnabled(boolean bEnabledRequested) {
-		/**
-		 * this code is implemented here to keep compatibility to calls made to {@link AppState}
-		 */
-		setEnabledRequest(bEnabledRequested);
 	}
 	
 	/**
@@ -400,7 +386,7 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 	 * @param bEnabledRequested if false, will be a Disable Request.
 	 */
 	public void setEnabledRequest(boolean bEnabledRequested) {
-		assertIsPreInitialized();
+//		assertIsPreInitialized();
 		
 		if(bEnabledRequested){
 			this.bEnabledRequested = true;
@@ -413,114 +399,83 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 	};
 
 	public void requestEnable(){
-		setEnabled(true);
+		setEnabledRequest(true);
 	}
 	
 	public void requestDisable(){
-		setEnabled(false);
+		setEnabledRequest(false);
 	}
 	
-	@Override
 	public boolean isEnabled() {
 		return bEnabled;
 	}
 	
-	@Deprecated
-	@Override 
-	public void cleanup() {
-		/**
-		 * this code is implemented here to keep compatibility to calls made to {@link AppState}
-		 */
-		cleanupProperly();
-	}
-	
-	public boolean isCleaningUp() {
-		return bCleaningUp;
+	public boolean isDiscarding() {
+		return bDiscardRequested;
 	}
 	
 	/**
-	 * Better not override, just use {@link #cleanupValidating()} instead!<br>
-	 * TODO make it final? would provide less flexibility to developers tho...
+	 * Better not override, just use {@link #dcleanupValidating()} instead!<br>
+	 * 
+	 * By discarding, it will be easier to setup a fresh, consistent and robust state.
+	 * If you need values from the discarded state, just copy/move/clone them to the new one.
 	 */
-	public void cleanupProperly() {
-		if(!bProperlyInitialized)return; //TODO log warn
-		
-		bCleaningUp = true;
+	public boolean prepareAndCheckIfReadyToDiscard(ConditionalStateManagerI.CompositeControl cc) {
+		cc.assertSelfNotNull();
+		if(!bProperlyInitialized)return false; //TODO log warn
+		if(!isDiscarding())throw new NullPointerException("not discarding");
 		
 		if(bEnabled){
-			boolean bReAddToQueue=false;
+			boolean bRetry=false;
 			
 			if(updateTime() < (lCleanupRequestMilis+lCleanupRetryDelayMilis)){
-				bReAddToQueue=true;
+				bRetry=true;
 			}else{
-				bReAddToQueue=!disableValidating();
-				if(bReAddToQueue){ //failed, retry
+				bRetry = !disableOrUndo();
+				if(bRetry){ //failed, retry
 					lCleanupRequestMilis=updateTime();
 				}
 			}
 			
-			if(bReAddToQueue){
-				msgDbg("cleanup",false);
-				app.enqueue(new Callable<Void>() {
-					@Override
-					public Void call() throws Exception {
-						cleanupProperly(); // stackless "recursiveness"
-						return null;
-					}
-				});
-				return;
+			if(bRetry){
+				msgDbg(""+ELogAction.discard,false);
+				return false;
 			}
 		}
 		
-		cleanupValidating();
+		asmParent=null;
 		
-		bEnabled=false;
-		bLastUpdateSuccessful=false;
+		msgDbg(""+ELogAction.discard,true);
 		
-		bEnabledRequested=false;
-		bDisabledRequested=false;
-		
-		bPreInitialized=false;
-		bProperlyInitialized=false;
-		
-		lInitRetryStartMilis=0;
-		bHoldProperInitialization=false;
-		
-		bLastUpdateSuccessful=false;
-		bHoldUpdates=false;
-		
-		bEnableSuccessful=false;
-		bHoldEnable=false;
-		
-		bDisableSuccessful=false;
-		bHoldDisable=false;
-		
-		/**
-		 * SKIP THESE!
-		 * {@link #bConfigured}
-		 */
-		
-		bCleaningUp=false;
-		msgDbg("cleanup",true);
+		return true;
 	}
 	
-	@Override public void stateAttached(AppStateManager stateManager) {
-		if(asmCurrent!=null)throw new NullPointerException("already attached to "+asmCurrent+"; requested attach to "+stateManager);
-		asmCurrent = stateManager;
+	enum ELogAction{
+		discard,
+		
 	}
 	
-	@Override public void stateDetached(AppStateManager stateManager) {
-		if(asmCurrent==null)throw new NullPointerException("not attached but still requested detach from "+stateManager+"?");
-		if(!asmCurrent.equals(stateManager))throw new NullPointerException("attached to another "+asmCurrent+" and being detached from "+stateManager+"?");
-		asmCurrent = null;
+	public boolean isDiscarded(){
+		return bDiscarded;
 	}
 	
-	public boolean isAttachedToStateManager(){
-		return asmCurrent!=null;
+//	@Override public void stateAttached(AppStateManager stateManager) {
+//		if(asmParent!=null)throw new NullPointerException("already attached to "+asmParent+"; requested attach to "+stateManager);
+//		asmParent = stateManager;
+//	}
+//	
+//	@Override public void stateDetached(AppStateManager stateManager) {
+//		if(asmParent==null)throw new NullPointerException("not attached but still requested detach from "+stateManager+"?");
+//		if(!asmParent.equals(stateManager))throw new NullPointerException("attached to another "+asmParent+" and being detached from "+stateManager+"?");
+//		asmParent = null;
+//	}
+	
+	public boolean isAttachedToManager(){
+		return asmParent!=null;
 	}
 	
-	public AppStateManager getStateManagingThis(){
-		return asmCurrent;
+	public AppState getAppStateManagingThis(){
+		return asmParent;
 	}
 	
 	public Node getNodeGUI() {
@@ -531,8 +486,53 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 		if(nodeGUI==null)throw new NullPointerException("null node gui");
 		this.nodeGUI = nodeGUI;
 	}
+	
+//	public boolean reattachPrepareAndValidateStep(ERecreateConsoleSteps ercs){
+//		return true;
+//	}
 
+	public void setAppStateManagingThis(ConditionalStateManagerI.CompositeControl cc,ConditionalStateManagerI asmParent) {
+		cc.assertSelfNotNull();
+//		assertCompositeControlNotNull(cc);
+		if(this.asmParent!=null)throw new NullPointerException("already managed by "+this.asmParent+"; request made to attach at "+asmParent);
+		this.asmParent=asmParent;
+	}
 
+//	private void assertCompositeControlNotNull(ConditionalAppStateManagerI.CompositeControl cc) {
+//		if(cc==null)throw new NullPointerException("the "+ConditionalAppStateManagerI.CompositeControl.class.getName()+" access restrictor is required!");
+//	}
+	
+	public void requestDiscard(){
+		bDiscardRequested = true;
+	}
+	
+	public ConditionalStateAbs copyValuesFrom(ConditionalStateAbs cas){
+		return this;
+	}
+	
+	public ConditionalStateAbs createAndConfigureSelfCopy() {
+		try {
+			return this.getClass().newInstance().configure(icfg).copyValuesFrom(this);
+		} catch (InstantiationException | IllegalAccessException e) {
+			NullPointerException npe = new NullPointerException("object copy failed");
+			npe.initCause(e);
+			throw npe;
+		}
+	}
+
+	public void applyDiscardedStatus(ConditionalStateManagerI.CompositeControl cc) {
+		cc.assertSelfNotNull();
+		bDiscarded=true;
+	}
+	
+	public void requestRestart(){
+		bRestartRequested = true;
+	}
+	
+	public boolean isRestartRequested() {
+		return bRestartRequested;
+	}
+	
 //	Long	lInitializationCompletedMilis;
 ////	long	lInitializationStartedMilis;
 ////	long	lInitializationMaxDelayMilis=1000;
@@ -626,8 +626,4 @@ public abstract class ConditionalAppStateAbs implements AppState, ReattachSafely
 //		return GlobalCommandsDelegatorI.i().get().getReflexFillCfg(rfcv);
 //	}
 	
-	// EASY SKIPPERS
-	@Override public void render(RenderManager rm) {}
-	@Override public void postRender(){}
-	@Override public boolean reattachValidateStep(ERecreateConsoleSteps ercs) {return true;}
 }

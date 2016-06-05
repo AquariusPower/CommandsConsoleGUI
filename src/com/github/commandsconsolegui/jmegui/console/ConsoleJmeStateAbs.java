@@ -535,12 +535,12 @@ public abstract class ConsoleJmeStateAbs extends BaseDialogJmeStateAbs implement
 //	}
 	
 	@Override
-	protected boolean enableValidating() {
+	protected boolean enableOrUndo() {
 		if(!bInitializeOnlyTheUI){
 			initializeOnlyTheUI();
 		}
 		
-		return super.enableValidating();
+		return super.enableOrUndo();
 	}
 	
 //	@Override
@@ -926,8 +926,8 @@ public abstract class ConsoleJmeStateAbs extends BaseDialogJmeStateAbs implement
 //	}
 	
 	@Override
-	public boolean updateProperly(float tpf) {
-		if(!super.updateProperly(tpf))return false;
+	public boolean doItAllProperly(float tpf) {
+		if(!super.doItAllProperly(tpf))return false;
 		
 		if(bKeepInitiallyInvisibleUntilFirstClosed){
 			setInitializationVisibility(false);

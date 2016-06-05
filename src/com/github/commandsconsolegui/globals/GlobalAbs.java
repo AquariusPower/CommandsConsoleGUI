@@ -27,14 +27,37 @@
 
 package com.github.commandsconsolegui.globals;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
+import com.github.commandsconsolegui.misc.CheckInitAndCleanupI;
 
 /**
- * 
+ * "centralizing" objects to easy coding.
  * @author AquariusPower <https://github.com/AquariusPower>
- *
+ * 
+ * @param <T>
  */
-public class GlobalCommandsDelegatorI extends GlobalAbs<CommandsDelegatorI> {
-	private static GlobalCommandsDelegatorI instance = new GlobalCommandsDelegatorI();
-	public static GlobalCommandsDelegatorI i(){return instance;}
+public abstract class GlobalAbs<T> { //not abstract methods yet tho...
+	T obj;
+	
+	protected void setAssertingNotAlreadySet(T objNew){
+//		if(this.obj!=null){
+		this.obj = CheckInitAndCleanupI.i().assertGlobalIsNull(this.obj, objNew);
+//			this.obj = InitTraceI.i().getAssertValidatingIsNull(this.obj, obj);
+//			throw new NullPointerException("already set: "+obj);
+//		}
+//		this.obj=obj;
+	}
+	
+	/**
+	 * validates if referenced object is set
+	 * @return
+	 */
+	public T get(){
+		if(obj==null)throw new NullPointerException("global not set yet...");
+		return obj;
+	}
+	
+	public T set(T obj){
+		setAssertingNotAlreadySet(obj);
+		return this.obj; //easy chain
+	} 
 }

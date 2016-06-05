@@ -104,10 +104,10 @@ public abstract class BaseDialogJmeStateAbs extends CmdConditionalAppStateAbs im
 	 * This will setup and instantiate everything to make it actually be able to work.
 	 */
 	@Override
-	protected boolean initializeValidating() {
+	protected boolean initOrUndo() {
 		if(!initGUI())return false;
 		if(!initKeyMappings())return false;
-		return super.initializeValidating();
+		return super.initOrUndo();
 	}
 	
 	protected abstract boolean initGUI();
@@ -122,23 +122,23 @@ public abstract class BaseDialogJmeStateAbs extends CmdConditionalAppStateAbs im
 	protected abstract void actionSubmit();
 	
 	@Override
-	protected boolean enableValidating() {
+	protected boolean enableOrUndo() {
 		getNodeGUI().attachChild(sptContainerMain);
 		
 		requestFocus(sptIntputField);
 		
 		setMouseCursorKeepUngrabbed(true);
 		
-		return super.enableValidating();
+		return super.enableOrUndo();
 	}
 	
 	@Override
-	protected boolean disableValidating() {
+	protected boolean disableOrUndo() {
 		sptContainerMain.removeFromParent();
 		
 		setMouseCursorKeepUngrabbed(false);
 		
-		return super.disableValidating();
+		return super.disableOrUndo();
 	}
 	
 	/**

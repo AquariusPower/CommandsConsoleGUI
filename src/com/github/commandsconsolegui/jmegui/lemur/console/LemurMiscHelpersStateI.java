@@ -398,13 +398,13 @@ public class LemurMiscHelpersStateI extends CmdConditionalAppStateAbs implements
 	}
 
 	@Override
-	protected boolean initializeValidating() {
+	protected boolean initOrUndo() {
 		tdTextCursorBlink.updateTime();
-		return super.initializeValidating();
+		return super.initOrUndo();
 	}
 
 	@Override
-	protected boolean updateValidating(float tpf) {
+	protected boolean updateOrUndo(float tpf) {
 //		LemurFocusHelperStateI.i().update(tpf);
 		
 		if(tfToBlinkCursor!=null){
@@ -412,7 +412,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalAppStateAbs implements
 			updateLargeTextCursorMode(tfToBlinkCursor);
 		}
 		
-		return super.updateValidating(tpf);
+		return super.updateOrUndo(tpf);
 	}
 	
 	public static class CfgParm implements ICfgParm{} //look at super class

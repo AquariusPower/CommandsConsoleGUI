@@ -69,7 +69,7 @@ public class CommandsBackgroundStateI extends CmdConditionalAppStateAbs {
 	}
 	
 	@Override
-	protected boolean updateValidating(float tpf) {
+	protected boolean updateOrUndo(float tpf) {
 		if(!btgExecCommandsInBackground.b())return true; //this is an OK state, no failure!
 		
 		if(cgsaGraphicalConsoleUI.isEnabled())return true; //will be foreground execution, this is an OK state, no failure!
@@ -80,7 +80,7 @@ public class CommandsBackgroundStateI extends CmdConditionalAppStateAbs {
 		 */
 		cd().update(tpf);
 		
-		return super.updateValidating(tpf);
+		return super.updateOrUndo(tpf);
 	}
 	
 	@Override

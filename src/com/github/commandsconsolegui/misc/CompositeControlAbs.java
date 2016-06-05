@@ -25,39 +25,32 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.globals;
-
-import com.github.commandsconsolegui.misc.CheckInitAndCleanupI;
+package com.github.commandsconsolegui.misc;
 
 /**
- * "centralizing" objects to easy coding.
- * @author AquariusPower <https://github.com/AquariusPower>
  * 
+ * @author AquariusPower <https://github.com/AquariusPower>
+ *
  * @param <T>
  */
-public class Global<T> {
-	T obj;
+public class CompositeControlAbs<T>{
+	private T	ref;
 	
-	protected void setAssertingNotAlreadySet(T objNew){
-//		if(this.obj!=null){
-		this.obj = CheckInitAndCleanupI.i().assertGlobalIsNull(this.obj, objNew);
-//			this.obj = InitTraceI.i().getAssertValidatingIsNull(this.obj, obj);
-//			throw new NullPointerException("already set: "+obj);
-//		}
-//		this.obj=obj;
+	/** 
+	 * sub class MUST override this constructor as PRIVATE!!!
+	 * so it can only be instantiated at its composite owner!
+	 */
+	public CompositeControlAbs(T ref){
+		this.ref=ref;
+	};
+	
+	public T getOwner(){
+		//TODO validate if owner really owns this object?
+		return ref;
 	}
 	
 	/**
-	 * validates if referenced object is set
-	 * @return
+	 * quite fun this one...
 	 */
-	public T get(){
-		if(obj==null)throw new NullPointerException("global not set yet...");
-		return obj;
-	}
-	
-	public T set(T obj){
-		setAssertingNotAlreadySet(obj);
-		return this.obj; //easy chain
-	} 
+	public void assertSelfNotNull(){/*yes, to nothing here...*/}
 }

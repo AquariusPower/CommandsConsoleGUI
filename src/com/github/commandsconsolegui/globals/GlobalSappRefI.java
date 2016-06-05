@@ -34,7 +34,7 @@ import com.jme3.app.SimpleApplication;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class GlobalSappRefI extends Global<SimpleApplication> {
+public class GlobalSappRefI extends GlobalAbs<SimpleApplication> {
 	private static GlobalSappRefI instance = new GlobalSappRefI();
 	public static GlobalSappRefI i(){return instance;}
 	

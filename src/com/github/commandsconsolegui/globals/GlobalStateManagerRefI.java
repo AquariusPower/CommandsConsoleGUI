@@ -32,7 +32,7 @@ import com.jme3.app.state.AppStateManager;
 /**
  * @author AquariusPower <https://github.com/AquariusPower>
  */
-public class GlobalStateManagerRefI extends Global<AppStateManager> {
+public class GlobalStateManagerRefI extends GlobalAbs<AppStateManager> {
 	private static GlobalStateManagerRefI instance = new GlobalStateManagerRefI();
 	public static GlobalStateManagerRefI i(){return instance;}
 }
