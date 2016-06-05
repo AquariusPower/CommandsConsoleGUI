@@ -28,6 +28,7 @@
 package com.github.commandsconsolegui.jmegui;
 
 //import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ERecreateConsoleSteps;
+import com.github.commandsconsolegui.misc.DeveloperMistakeException;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppState;
@@ -139,7 +140,7 @@ public abstract class ConditionalStateAbs {
 			this.app = app;
 		}
 	}
-	ICfgParm icfg;
+	protected ICfgParm icfgOfInstance;
 
 	private boolean	bRestartRequested;
 
@@ -151,19 +152,30 @@ public abstract class ConditionalStateAbs {
 	 * @param cp
 	 */
 	public ConditionalStateAbs configure(ICfgParm icfg){
-		this.icfg=icfg;
 		CfgParm cfg = (CfgParm)icfg;
 		
+		/**
+		 * this is more a double check, extra safety.
+		 */
+		if(icfgOfInstance==null)throw new DeveloperMistakeException(
+			"the instantiated class needs to set the configuration params to be used on a restart!");
+		
+		if(!icfgOfInstance.getClass().equals(this.getClass())){
+			throw new DeveloperMistakeException(
+				"the stored cfg params must be of the instantiated class!");
+		}
+		
 //	protected void configure(Application app){
-		if(this.bConfigured)throw new NullPointerException("already configured");
+		if(this.bConfigured)throw new DeveloperMistakeException("already configured");
 		
 		// internal configurations
-		if(cfg.app==null)throw new NullPointerException("app is null");
+		if(cfg.app==null)throw new DeveloperMistakeException("app is null");
 		this.app=cfg.app;
 		
 		if(!ConditionalStateManagerI.i().attach(this)){
 //		if(!app.getStateManager().attach(this)){
-			throw new NullPointerException("state already attached: "+this.getClass().getName()+"; "+this);
+			throw new DeveloperMistakeException("state already attached: "
+				+this.getClass().getName()+"; "+this);
 		}
 //		preInitRequest();
 		
@@ -171,7 +183,23 @@ public abstract class ConditionalStateAbs {
 		this.bConfigured=true;
 		msgDbg("cfg",this.bConfigured);
 		
-		return this;
+		return storeCfgAndReturnSelf(icfg);
+	}
+	
+	/**
+	 * Implementation methodology:
+	 * 
+	 * This can be used in every sub-class {@link #configure(ICfgParm)} method,
+	 * the last one, the instantiated, will overwrite the value!
+	 * 
+	 * This is most useful in case a class is modified to be abstract.
+	 * 
+	 * @param icfg
+	 * @return
+	 */
+	protected <T extends ConditionalStateAbs> T storeCfgAndReturnSelf(ICfgParm icfg){
+		this.icfgOfInstance=icfg;
+		return (T)this;
 	}
 	
 	protected void msgDbg(String str, boolean bSuccess) {
@@ -233,7 +261,7 @@ public abstract class ConditionalStateAbs {
 //	}
 	
 	protected void assertIsConfigured() {
-		if(!isConfigured())throw new NullPointerException("not configured yet!");
+		if(!isConfigured())throw new DeveloperMistakeException("not configured yet!");
 	}
 	
 //	protected void assertIsPreInitialized() {
@@ -423,7 +451,7 @@ public abstract class ConditionalStateAbs {
 	public boolean prepareAndCheckIfReadyToDiscard(ConditionalStateManagerI.CompositeControl cc) {
 		cc.assertSelfNotNull();
 		if(!bProperlyInitialized)return false; //TODO log warn
-		if(!isDiscarding())throw new NullPointerException("not discarding");
+		if(!isDiscarding())throw new DeveloperMistakeException("not discarding");
 		
 		if(bEnabled){
 			boolean bRetry=false;
@@ -483,7 +511,7 @@ public abstract class ConditionalStateAbs {
 	}
 
 	protected void setNodeGUI(Node nodeGUI) {
-		if(nodeGUI==null)throw new NullPointerException("null node gui");
+		if(nodeGUI==null)throw new DeveloperMistakeException("null node gui");
 		this.nodeGUI = nodeGUI;
 	}
 	
@@ -494,7 +522,8 @@ public abstract class ConditionalStateAbs {
 	public void setAppStateManagingThis(ConditionalStateManagerI.CompositeControl cc,ConditionalStateManagerI asmParent) {
 		cc.assertSelfNotNull();
 //		assertCompositeControlNotNull(cc);
-		if(this.asmParent!=null)throw new NullPointerException("already managed by "+this.asmParent+"; request made to attach at "+asmParent);
+		if(this.asmParent!=null)throw new DeveloperMistakeException(
+			"already managed by "+this.asmParent+"; request made to attach at "+asmParent);
 		this.asmParent=asmParent;
 	}
 
@@ -506,13 +535,19 @@ public abstract class ConditionalStateAbs {
 		bDiscardRequested = true;
 	}
 	
-	public ConditionalStateAbs copyValuesFrom(ConditionalStateAbs cas){
+	/**
+	 * everything that is not configured can be copied thru this method
+	 * 
+	 * @param cas
+	 * @return
+	 */
+	public ConditionalStateAbs copyCurrentValuesFrom(ConditionalStateAbs cas){
 		return this;
 	}
 	
 	public ConditionalStateAbs createAndConfigureSelfCopy() {
 		try {
-			return this.getClass().newInstance().configure(icfg).copyValuesFrom(this);
+			return this.getClass().newInstance().configure(icfgOfInstance).copyCurrentValuesFrom(this);
 		} catch (InstantiationException | IllegalAccessException e) {
 			NullPointerException npe = new NullPointerException("object copy failed");
 			npe.initCause(e);

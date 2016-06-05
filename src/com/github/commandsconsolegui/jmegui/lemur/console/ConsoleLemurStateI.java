@@ -32,8 +32,9 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
+import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI.CompositeControl;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
-import com.github.commandsconsolegui.jmegui.console.ConsoleJmeStateAbs;
+import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.font.BitmapCharacter;
 import com.jme3.font.BitmapCharacterSet;
@@ -73,7 +74,7 @@ import com.simsilica.lemur.style.Styles;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
+public class ConsoleLemurStateI extends ConsoleStateAbs{
 	protected static ConsoleLemurStateI instance=new ConsoleLemurStateI();
 	public static ConsoleLemurStateI i(){return instance;}
 	
@@ -130,28 +131,28 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 		}
 	}
 	@Override
-	public void configure(ICfgParm icfg) {
-//	public void configure(String strUIId, boolean bIgnorePrefixAndSuffix, int iToggleConsoleKey, Node nodeGUI) {
+	public ConsoleLemurStateI configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
-		super.configure(new ConsoleJmeStateAbs.CfgParm(
+		
+		super.icfgOfInstance = icfg;
+		
+		super.configure(new ConsoleStateAbs.CfgParm(
 			cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.iToggleConsoleKey, cfg.nodeGUI));
 		
 		GuiGlobals.initialize(GlobalSappRefI.i().get());
 		
 		// misc cfg
-		LemurMiscHelpersStateI.i().configure(new LemurMiscHelpersStateI.CfgParm(
-			));
+		LemurMiscHelpersStateI.i().configure(new LemurMiscHelpersStateI.CfgParm());
 		
 //		LemurMiscHelpersStateI.i().initialize(app().getStateManager(), sapp);
 //		if(!app().getStateManager().attach(LemurMiscHelpersStateI.i())){
 //			throw new NullPointerException("already attached state "+LemurMiscHelpersStateI.class.getName());
 //		}
-		LemurFocusHelperStateI.i().configure(new LemurFocusHelperStateI.CfgParm(
-			null));
+		LemurFocusHelperStateI.i().configure(new LemurFocusHelperStateI.CfgParm(null));
 		
 		ConditionalStateManagerI.i().configure(GlobalSappRefI.i().get());
 		
-//		return true;
+		return this;
 	}
 	
 //	public void ConsoleGUILemurState(int iOpenConsoleHotKey, ConsoleCommands cc, Application app) {
@@ -818,12 +819,18 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 		LemurFocusHelperStateI.i().removeFocusableFromList((Spatial) obj);
 	}
 
+//	@Override
+//	protected boolean cleanupValidating() {
+//		getContainerConsole().clearChildren();
+//		return super.cleanupValidating();
+//	}
+	
 	@Override
-	protected boolean cleanupValidating() {
+	public boolean prepareAndCheckIfReadyToDiscard(CompositeControl cc) {
 		getContainerConsole().clearChildren();
-		return super.cleanupValidating();
+		return super.prepareAndCheckIfReadyToDiscard(cc);
 	}
-
+	
 //	@Override
 //	public void initializationCompleted() {
 //		// TODO Auto-generated method stub
@@ -846,4 +853,5 @@ public class ConsoleLemurStateI extends ConsoleJmeStateAbs{
 		// TODO Auto-generated method stub
 		
 	}
+
 }

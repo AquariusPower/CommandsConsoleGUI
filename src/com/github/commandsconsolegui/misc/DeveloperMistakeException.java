@@ -25,16 +25,25 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.globals;
-
-import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
+package com.github.commandsconsolegui.misc;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class GlobalConsoleGuiI extends GlobalAbs<ConsoleStateAbs>{
-	private static GlobalConsoleGuiI instance = new GlobalConsoleGuiI();
-	public static GlobalConsoleGuiI i(){return instance;}
+public class DeveloperMistakeException extends NullPointerException {
+	private static final long	serialVersionUID	= 1342052861109804737L;
+
+	public DeveloperMistakeException() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public DeveloperMistakeException(String s) {
+		super(s);
+		// TODO Auto-generated constructor stub
+	}
+	
+	
 }

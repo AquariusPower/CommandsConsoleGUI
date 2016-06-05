@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.jmegui;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
+import com.github.commandsconsolegui.misc.DeveloperMistakeException;
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 
@@ -103,7 +104,7 @@ public class ConditionalStateManagerI extends AbstractAppState {
 	@Override
 	public void setEnabled(boolean enabled) {
 		if(!enabled){
-			throw new NullPointerException("this state MUST never be disabled! "+ConditionalStateManagerI.class.getName());
+			throw new DeveloperMistakeException("this state MUST never be disabled! "+ConditionalStateManagerI.class.getName());
 		}
 		super.setEnabled(enabled);
 	}
@@ -115,7 +116,7 @@ public class ConditionalStateManagerI extends AbstractAppState {
 	@Override
 	public void cleanup() {
 		if(!bApplicationIsExiting){
-			throw new NullPointerException("this state MUST never be stopped! "+ConditionalStateManagerI.class.getName());
+			throw new DeveloperMistakeException("this state MUST never be terminated/cleaned! "+ConditionalStateManagerI.class.getName());
 		}
 	}
 	

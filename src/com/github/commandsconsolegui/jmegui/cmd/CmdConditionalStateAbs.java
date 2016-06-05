@@ -33,7 +33,6 @@ import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.ConditionalStateAbs;
-import com.github.commandsconsolegui.jmegui.ConditionalStateAbs.ICfgParm;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -45,7 +44,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class CmdConditionalAppStateAbs extends ConditionalStateAbs implements IConsoleCommandListener, IReflexFillCfg {
+public abstract class CmdConditionalStateAbs extends ConditionalStateAbs implements IConsoleCommandListener, IReflexFillCfg {
 	private CommandsDelegatorI cd;
 	
 	private String	strCmdIdentifier;
@@ -79,12 +78,10 @@ public abstract class CmdConditionalAppStateAbs extends ConditionalStateAbs impl
 		}
 	}
 	@Override
-	public CmdConditionalAppStateAbs configure(ICfgParm icfg) {
-//	protected void configure(String strCmdIdentifier,boolean bIgnorePrefixAndSuffix) {
+	public CmdConditionalStateAbs configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
 		
-		super.configure(new ConditionalStateAbs.CfgParm(
-			GlobalSappRefI.i().get()));
+		super.configure(new ConditionalStateAbs.CfgParm(GlobalSappRefI.i().get()));
 		
 		cd=GlobalCommandsDelegatorI.i().get();
 		
@@ -99,7 +96,7 @@ public abstract class CmdConditionalAppStateAbs extends ConditionalStateAbs impl
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 		
 //		return isConfigured();
-		return this;
+		return storeCfgAndReturnSelf(icfg);
 	}
 	
 	@Override
@@ -114,11 +111,11 @@ public abstract class CmdConditionalAppStateAbs extends ConditionalStateAbs impl
 		
 		if(cc.checkCmdValidity(this,strCmdIdentifier,"[bEnabledForce]")){
 			Boolean bEnabledForce = cc.paramBoolean(1);
-			if(!isInitializedProperly() && bEnabledForce){
-				if(!preInitRequest()){
-					cc.dumpWarnEntry("unable to initialize "+strCmdIdentifier);
-				}
-			}
+//			if(!isInitializedProperly() && bEnabledForce){
+////				if(!preInitRequest()){
+//					cc.dumpWarnEntry("unable to initialize "+strCmdIdentifier);
+////				}
+//			}
 			
 			if(bEnabledForce!=null){
 				setEnabledRequest(bEnabledForce);

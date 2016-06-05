@@ -32,10 +32,9 @@ import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.jmegui.ConditionalStateAbs.ICfgParm;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
-import com.github.commandsconsolegui.jmegui.ConditionalAppStateAbs.ICfgParm;
-import com.github.commandsconsolegui.jmegui.ReattachSafelyState.CfgParm;
-import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalAppStateAbs;
+import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -60,7 +59,7 @@ import com.simsilica.lemur.focus.FocusManagerState;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class LemurMiscHelpersStateI extends CmdConditionalAppStateAbs implements IWorkAroundBugFix {
+public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IWorkAroundBugFix {
 	private static LemurMiscHelpersStateI instance = new LemurMiscHelpersStateI(); 
 	public static LemurMiscHelpersStateI i(){return instance;}
 	
@@ -415,13 +414,20 @@ public class LemurMiscHelpersStateI extends CmdConditionalAppStateAbs implements
 		return super.updateOrUndo(tpf);
 	}
 	
-	public static class CfgParm implements ICfgParm{} //look at super class
+	/**
+	 * Keep this as implementation methodology. Look at super classes also.
+	 */
+	public static class CfgParm implements ICfgParm{}
 	@Override
-	public void configure(ICfgParm icfg) {
-//	public void configure() {
+	public LemurMiscHelpersStateI configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
-		super.configure(new CmdConditionalAppStateAbs.CfgParm(
+		
+		super.icfgOfInstance=icfg;
+		
+		super.configure(new CmdConditionalStateAbs.CfgParm(
 			LemurMiscHelpersStateI.class.getSimpleName(), false));
+		
+		return storeCfgAndReturnSelf(icfg);
 	}
 
 }

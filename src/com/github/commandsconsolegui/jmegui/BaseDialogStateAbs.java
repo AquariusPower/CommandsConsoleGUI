@@ -27,9 +27,8 @@
 
 package com.github.commandsconsolegui.jmegui;
 
-import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalAppStateAbs;
+import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
-import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -41,7 +40,7 @@ import com.jme3.scene.Spatial;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class BaseDialogJmeStateAbs extends CmdConditionalAppStateAbs implements IReflexFillCfg{
+public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implements IReflexFillCfg{
 //	protected SimpleApplication	sapp;
 //	protected CommandsDelegatorI	cd;
 	
@@ -58,7 +57,7 @@ public abstract class BaseDialogJmeStateAbs extends CmdConditionalAppStateAbs im
 		return sptContainerMain;
 	}
 	
-	protected BaseDialogJmeStateAbs setContainerMain(Spatial spt){
+	protected BaseDialogStateAbs setContainerMain(Spatial spt){
 		this.sptContainerMain=spt;
 		return this;
 	}
@@ -77,7 +76,7 @@ public abstract class BaseDialogJmeStateAbs extends CmdConditionalAppStateAbs im
 		}
 	}
 	@Override
-	public void configure(ICfgParm icfg) {
+	public BaseDialogStateAbs configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
 //	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
 		
@@ -95,8 +94,9 @@ public abstract class BaseDialogJmeStateAbs extends CmdConditionalAppStateAbs im
 		this.strTitle = "Dialog: "+cfg.strUIId;
 //		btgShowDialog.setCustomCmdId(this.strCmd);
 		
-		super.configure(new CmdConditionalAppStateAbs.CfgParm(
-			cfg.strUIId, cfg.bIgnorePrefixAndSuffix));
+		super.configure(new CmdConditionalStateAbs.CfgParm(cfg.strUIId, cfg.bIgnorePrefixAndSuffix));
+		
+		return storeCfgAndReturnSelf(icfg);
 	}
 	
 	/**
@@ -163,7 +163,7 @@ public abstract class BaseDialogJmeStateAbs extends CmdConditionalAppStateAbs im
 		return sptIntputField;
 	}
 
-	protected BaseDialogJmeStateAbs setIntputField(Spatial sptIntputField) {
+	protected BaseDialogStateAbs setIntputField(Spatial sptIntputField) {
 		this.sptIntputField = sptIntputField;
 		return this;
 	}

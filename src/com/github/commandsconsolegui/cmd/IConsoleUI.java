@@ -82,7 +82,7 @@ public interface IConsoleUI extends ICheckInitAndCleanupI{
 
 	public abstract boolean statsFieldToggle();
 
-	public abstract void recreateConsoleGui();
+//	public abstract void recreateConsoleGui();
 
 	public abstract boolean isEnabled();
 }

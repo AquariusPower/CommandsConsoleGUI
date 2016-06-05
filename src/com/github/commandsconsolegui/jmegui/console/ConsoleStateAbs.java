@@ -50,10 +50,10 @@ import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
-import com.github.commandsconsolegui.jmegui.BaseDialogJmeStateAbs;
+import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.ReattachSafelyState;
-import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ReattachSafelyValidateSteps;
+import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI.CompositeControl;
 //import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersState;
 import com.github.commandsconsolegui.misc.AutoCompleteI;
 import com.github.commandsconsolegui.misc.DebugI;
@@ -94,10 +94,10 @@ import com.jme3.texture.Texture2D;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class ConsoleJmeStateAbs extends BaseDialogJmeStateAbs implements IConsoleUI, ReattachSafelyValidateSteps, IWorkAroundBugFix {
+public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements IConsoleUI, IWorkAroundBugFix {
 //	protected FpsLimiterState fpslState = new FpsLimiterState();
 	
-	ReattachSafelyState rss;
+//	ReattachSafelyState rss;
 	
 	//	protected final String strInputIMCPREFIX = "CONSOLEGUISTATE_";
 	public final String strFinalFieldInputCodePrefix="INPUT_MAPPING_CONSOLE_";
@@ -332,8 +332,8 @@ public abstract class ConsoleJmeStateAbs extends BaseDialogJmeStateAbs implement
 	protected abstract void updateVisibleRowsAmount(); 
 	protected abstract void clearHintSelection();
 	protected abstract Integer getHintIndex();
-	protected abstract ConsoleJmeStateAbs setHintIndex(Integer i);
-	protected abstract ConsoleJmeStateAbs setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines);
+	protected abstract ConsoleStateAbs setHintIndex(Integer i);
+	protected abstract ConsoleStateAbs setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines);
 	protected abstract void scrollHintToIndex(int i);
 	protected abstract void lineWrapDisableForChildrenOf(Node gp);
 	protected abstract boolean mapKeysForInputField();
@@ -396,7 +396,7 @@ public abstract class ConsoleJmeStateAbs extends BaseDialogJmeStateAbs implement
 		}
 	}
 	@Override
-	public void configure(ICfgParm icfg) {
+	public ConsoleStateAbs configure(ICfgParm icfg) {
 //	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,int iToggleConsoleKey, Node nodeGUI) {
 		CfgParm cfg = (CfgParm)icfg;
 		
@@ -407,11 +407,11 @@ public abstract class ConsoleJmeStateAbs extends BaseDialogJmeStateAbs implement
 		 */
 		boolean bConsoleDialogInitiallyEnabled=true;
 		
-		super.configure(new BaseDialogJmeStateAbs.CfgParm(
+		super.configure(new BaseDialogStateAbs.CfgParm(
 			cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.nodeGUI, bConsoleDialogInitiallyEnabled));
 		
-		rss = new ReattachSafelyState();
-		rss.configure(new ReattachSafelyState.CfgParm(this));
+//		rss = new ReattachSafelyState();
+//		rss.configure(new ReattachSafelyState.CfgParm(this));
 		
 		this.iToggleConsoleKey=cfg.iToggleConsoleKey;
 //		if(cd==null)throw new NullPointerException("Missing "+CommandsDelegatorI.class.getName()+" instance (or a more specialized, like the scripting one)");
@@ -425,6 +425,7 @@ public abstract class ConsoleJmeStateAbs extends BaseDialogJmeStateAbs implement
 		
 //		bConfigured=true;
 //		return true;
+		return storeCfgAndReturnSelf(icfg);
 	}
 	
 //	protected ConsoleGuiStateAbs(ConsoleCommands cc) {
@@ -926,8 +927,8 @@ public abstract class ConsoleJmeStateAbs extends BaseDialogJmeStateAbs implement
 //	}
 	
 	@Override
-	public boolean doItAllProperly(float tpf) {
-		if(!super.doItAllProperly(tpf))return false;
+	protected boolean updateOrUndo(float tpf) {
+		if(!super.updateOrUndo(tpf))return false;
 		
 		if(bKeepInitiallyInvisibleUntilFirstClosed){
 			setInitializationVisibility(false);
@@ -1696,20 +1697,20 @@ public abstract class ConsoleJmeStateAbs extends BaseDialogJmeStateAbs implement
 	}
 	
 	@Override
-	public void render(RenderManager rm) {
-	}
-
-	@Override
-	public void postRender() {
-	}
-	
-	@Override
 	public Node getContainerMain(){
 		return (Node)super.getContainerMain();
 	}
 	
+	/**
+	 * This method can be overriden but this is not necessary,
+	 * because this is not a cleanup procedure...
+	 * 
+	 * This class object will be discarded/trashed/gc.
+	 * 
+	 * see how flow starting with {@link #requestRestart()} works
+	 */
 	@Override
-	protected boolean cleanupValidating() {
+	public boolean prepareAndCheckIfReadyToDiscard(CompositeControl cc) {
 //		tdLetCpuRest.reset();
 //		tdScrollToBottomRequestAndSuspend.reset();
 //		tdScrollToBottomRetry.reset();
@@ -1740,7 +1741,7 @@ public abstract class ConsoleJmeStateAbs extends BaseDialogJmeStateAbs implement
     bInitializeOnlyTheUI=false;
 //    bInitialized=false;
     
-    return super.cleanupValidating();
+		return super.prepareAndCheckIfReadyToDiscard(cc);
 	}
 	
 //	protected boolean isInitiallyClosed() {
@@ -2228,45 +2229,45 @@ public abstract class ConsoleJmeStateAbs extends BaseDialogJmeStateAbs implement
 		this.sptScrollTarget = target;
 	}
 	
-	@Override
-	public void recreateConsoleGui() {
-		if(rss.isProcessingRequest()){
-			cd().dumpWarnEntry("Console recreation request is already being processed...");
-			return;
-		}
-		
-//		Callable<Void> detach = new Callable<Void>() {
+//	@Override
+//	public void recreateConsoleGui() {
+//		if(rss.isProcessingRequest()){
+//			cd().dumpWarnEntry("Console recreation request is already being processed...");
+//			return;
+//		}
+//		
+////		Callable<Void> detach = new Callable<Void>() {
+////			@Override
+////			public Void call() throws Exception {
+////				app().getStateManager().detach(ConsoleJmeStateAbs.this);
+////				return null;
+////			}
+////		};
+////		
+////		final boolean bWasEnabled=isEnabled();
+////		Callable<Void> attach = new Callable<Void>() {
+////			@Override
+////			public Void call() throws Exception {
+////				app().getStateManager().attach(ConsoleJmeStateAbs.this);
+////				if(bWasEnabled){
+////					setEnabledRequest(true);
+////				}
+////				return null;
+////			}
+////		};
+//		
+//		Callable<Void> postInitialization = new Callable<Void>() {
 //			@Override
 //			public Void call() throws Exception {
-//				app().getStateManager().detach(ConsoleJmeStateAbs.this);
+//				modifyConsoleHeight(fConsoleHeightPerc);
+//				scrollToBottomRequest();
 //				return null;
 //			}
 //		};
 //		
-//		final boolean bWasEnabled=isEnabled();
-//		Callable<Void> attach = new Callable<Void>() {
-//			@Override
-//			public Void call() throws Exception {
-//				app().getStateManager().attach(ConsoleJmeStateAbs.this);
-//				if(bWasEnabled){
-//					setEnabledRequest(true);
-//				}
-//				return null;
-//			}
-//		};
-		
-		Callable<Void> postInitialization = new Callable<Void>() {
-			@Override
-			public Void call() throws Exception {
-				modifyConsoleHeight(fConsoleHeightPerc);
-				scrollToBottomRequest();
-				return null;
-			}
-		};
-		
-//		rss.request(detach,attach,postInitialization);
-		rss.request(postInitialization);
-	}
+////		rss.request(detach,attach,postInitialization);
+//		rss.request(postInitialization);
+//	}
 	
 	/**
 	 * TODO WIP, not working yet... may be it is not possible to convert at all yet?
