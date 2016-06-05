@@ -31,7 +31,7 @@ import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalConsoleGuiI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.jmegui.console.ConsoleJmeStateAbs;
+import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
 import com.jme3.app.SimpleApplication;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Panel;
@@ -45,10 +45,10 @@ import com.simsilica.lemur.event.DefaultCursorListener;
  *
  */
 public class ConsoleCursorListener extends DefaultCursorListener {
-	ConsoleJmeStateAbs csa;
+	ConsoleStateAbs csa;
 	private SimpleApplication	sapp;
 	private CommandsDelegatorI	cc;
-	private ConsoleJmeStateAbs	cgui;
+	private ConsoleStateAbs	cgui;
 	
 	public void configure(){
 		this.sapp=GlobalSappRefI.i().get();

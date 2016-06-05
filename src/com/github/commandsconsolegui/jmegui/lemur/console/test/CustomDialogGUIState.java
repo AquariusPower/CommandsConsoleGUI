@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.jmegui.lemur.console.test;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.jmegui.ConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.scene.Node;
@@ -52,12 +53,13 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs<String>{
 		}
 	}
 	@Override
-	public void configure(ICfgParm icfg) {
+	public CustomDialogGUIState configure(ICfgParm icfg) {
 //	public void configure(String strUIId, boolean bIgnorePrefixAndSuffix) {
 		CfgParm cfg = (CfgParm)icfg;
 		astr = new ArrayList<String>();
 		super.configure(new LemurDialogGUIStateAbs.CfgParm(
 			cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.nodeGUI));
+		return storeCfgAndReturnSelf(icfg);
 	}
 	
 	@Override
@@ -73,12 +75,12 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs<String>{
 		updateList(astr);
 	}
 
-	@Override
-	protected boolean cleanupValidating() {
-		astr.clear();
-		astr=null;
-		return super.cleanupValidating();
-	}
+//	@Override
+//	protected boolean cleanupValidating() {
+//		astr.clear();
+//		astr=null;
+//		return super.cleanupValidating();
+//	}
 
 	@Override
 	protected boolean initCheckPrerequisites() {

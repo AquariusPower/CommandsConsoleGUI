@@ -134,7 +134,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 	public ConsoleLemurStateI configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
 		
-		super.icfgOfInstance = icfg;
+//		super.icfgOfInstance = icfg;
 		
 		super.configure(new ConsoleStateAbs.CfgParm(
 			cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.iToggleConsoleKey, cfg.nodeGUI));
@@ -152,7 +152,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 		
 		ConditionalStateManagerI.i().configure(GlobalSappRefI.i().get());
 		
-		return this;
+		return storeCfgAndReturnSelf(icfg);
 	}
 	
 //	public void ConsoleGUILemurState(int iOpenConsoleHotKey, ConsoleCommands cc, Application app) {

@@ -29,11 +29,6 @@ package com.github.commandsconsolegui.jmegui.cmd;
 
 import com.github.commandsconsolegui.cmd.IConsoleUI;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
-import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.misc.ReflexFillI;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 
 /**
  * This is not a thread.
@@ -43,7 +38,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class CommandsBackgroundStateI extends CmdConditionalAppStateAbs {
+public class CommandsBackgroundStateI extends CmdConditionalStateAbs {
 	private static CommandsBackgroundStateI instance = new CommandsBackgroundStateI();
 	public static CommandsBackgroundStateI i(){return instance;}
 	
@@ -60,12 +55,14 @@ public class CommandsBackgroundStateI extends CmdConditionalAppStateAbs {
 		}
 	}
 	@Override
-	public void configure(ICfgParm icfg){
+	public CommandsBackgroundStateI configure(ICfgParm icfg){
 		CfgParm cfg = (CfgParm)icfg;
 		if(cfg.icui==null)throw new NullPointerException("invalid instance for "+IConsoleUI.class.getName());
 		this.cgsaGraphicalConsoleUI = cfg.icui;
-		super.configure(new CmdConditionalAppStateAbs.CfgParm(
+		super.configure(new CmdConditionalStateAbs.CfgParm(
 			CommandsBackgroundStateI.class.getSimpleName(), true));
+		
+		return storeCfgAndReturnSelf(icfg);
 	}
 	
 	@Override

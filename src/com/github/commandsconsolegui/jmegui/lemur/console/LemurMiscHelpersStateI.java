@@ -422,7 +422,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	public LemurMiscHelpersStateI configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
 		
-		super.icfgOfInstance=icfg;
+//		super.icfgOfInstance=icfg;
 		
 		super.configure(new CmdConditionalStateAbs.CfgParm(
 			LemurMiscHelpersStateI.class.getSimpleName(), false));

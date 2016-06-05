@@ -29,7 +29,7 @@ package com.github.commandsconsolegui.jmegui.extras;
 
 import java.util.HashMap;
 
-import com.github.commandsconsolegui.jmegui.BaseDialogJmeStateAbs;
+import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.jme3.scene.Node;
 
 /**
@@ -39,7 +39,7 @@ import com.jme3.scene.Node;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class InteractionDialogStateAbs <V> extends BaseDialogJmeStateAbs{
+public abstract class InteractionDialogStateAbs <V> extends BaseDialogStateAbs{
 	protected Node cntrNorth;
 	protected String	strLastFilter = "";
 	protected HashMap<String,V> hmKeyValue = new HashMap<String,V>();
@@ -56,13 +56,17 @@ public abstract class InteractionDialogStateAbs <V> extends BaseDialogJmeStateAb
 		return super.enableOrUndo();
 	}
 	
-	public static class CfgParm extends BaseDialogJmeStateAbs.CfgParm{
+	public static class CfgParm extends BaseDialogStateAbs.CfgParm{
 		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI) {
 			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI, 
 					false /** Dialogs must be initially disabled because they are enabled on user demand. */
 				);
 		}
 	}
+//	@Override
+//	public BaseDialogStateAbs configure(ICfgParm icfg) {
+//		return super.configure(icfg);
+//	}
 	
 	/**
 	 * when dialog is enabled,

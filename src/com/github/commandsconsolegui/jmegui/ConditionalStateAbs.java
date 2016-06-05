@@ -51,7 +51,11 @@ import com.jme3.scene.Node;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class ConditionalStateAbs {
+public abstract class ConditionalStateAbs  {
+//	public static interface IConditionalStateAbsForConsoleUI{
+//		public abstract void requestRestart();
+//	}
+	
 //	public static interface ICfgParm{}
 	
 	private Node nodeGUI;
@@ -140,7 +144,7 @@ public abstract class ConditionalStateAbs {
 			this.app = app;
 		}
 	}
-	protected ICfgParm icfgOfInstance;
+	private ICfgParm icfgOfInstance;
 
 	private boolean	bRestartRequested;
 

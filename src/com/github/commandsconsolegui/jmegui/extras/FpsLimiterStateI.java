@@ -29,9 +29,9 @@ package com.github.commandsconsolegui.jmegui.extras;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
-import com.github.commandsconsolegui.jmegui.ConditionalAppStateAbs.ICfgParm;
-import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalAppStateAbs;
-import com.jme3.app.Application;
+import com.github.commandsconsolegui.jmegui.ConditionalStateAbs;
+import com.github.commandsconsolegui.jmegui.ConditionalStateAbs.ICfgParm;
+import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 
 /**
  * Spare GPU fan!
@@ -39,7 +39,7 @@ import com.jme3.app.Application;
  * @author AquariusPower <https://github.com/AquariusPower>
  * 
  */
-public class FpsLimiterStateI extends CmdConditionalAppStateAbs{
+public class FpsLimiterStateI extends CmdConditionalStateAbs{
 	private static FpsLimiterStateI instance = new FpsLimiterStateI();
 	public static FpsLimiterStateI i(){return instance;}
 	
@@ -56,10 +56,11 @@ public class FpsLimiterStateI extends CmdConditionalAppStateAbs{
 	
 	public static class CfgParm implements ICfgParm{} //look at super class
 	@Override
-	public void configure(ICfgParm icfg) {
+	public FpsLimiterStateI configure(ICfgParm icfg) {
 		setMaxFps(60);
-		super.configure(new CmdConditionalAppStateAbs.CfgParm(
+		super.configure(new CmdConditionalStateAbs.CfgParm(
 			FpsLimiterStateI.class.getSimpleName(),false));
+		return storeCfgAndReturnSelf(icfg);
 	}
 	
 	public FpsLimiterStateI setMaxFps(int iMaxFPS){
@@ -93,7 +94,7 @@ public class FpsLimiterStateI extends CmdConditionalAppStateAbs{
 	 * @param bFpsLimiter
 	 */
 	@Override
-	public void update(float tpf) {
+	protected boolean updateOrUndo(float tpf) {
 		try {
 			/**
 			 * //MUST BE BEFORE THE SLEEP!!!!!!
@@ -111,6 +112,8 @@ public class FpsLimiterStateI extends CmdConditionalAppStateAbs{
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		
+		return true;
 	}
 	
 	public long getFrameDelayByCpuUsageMilis(){

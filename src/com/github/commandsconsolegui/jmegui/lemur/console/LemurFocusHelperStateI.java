@@ -32,11 +32,10 @@ import java.util.Collections;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
-import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.globals.GlobalSappRefI;
+import com.github.commandsconsolegui.jmegui.ConditionalStateAbs;
+import com.github.commandsconsolegui.jmegui.ConditionalStateAbs.ICfgParm;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
-import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalAppStateAbs;
-import com.jme3.app.SimpleApplication;
+import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.GuiGlobals;
@@ -52,7 +51,7 @@ import com.simsilica.lemur.focus.FocusTarget;
  * @author AquariusPower <https://github.com/AquariusPower>
  * 
  */
-public class LemurFocusHelperStateI extends CmdConditionalAppStateAbs implements FocusChangeListener {
+public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements FocusChangeListener {
 	private static LemurFocusHelperStateI	instance=new LemurFocusHelperStateI();
 	public static LemurFocusHelperStateI i(){return instance;}
 	
@@ -80,15 +79,18 @@ public class LemurFocusHelperStateI extends CmdConditionalAppStateAbs implements
 	/**
 	 * The initial Z value from where the dialogs will be sorted/ordered.
 	 * So if you have other gui elements, this can be changed to show dialogs above or under them.
+	 * @return 
+	 * @return 
 	 */
 	@Override
-	public void configure(ICfgParm icfg) {
+	public LemurFocusHelperStateI configure(ICfgParm icfg) {
 //	public void configure(Float fBaseZ){
 		CfgParm cfg = (CfgParm)icfg;
 		if(cfg.fBaseZ!=null)this.fBaseZ = cfg.fBaseZ;
-		super.configure(new CmdConditionalAppStateAbs.CfgParm(
+		super.configure(new CmdConditionalStateAbs.CfgParm(
 			LemurFocusHelperStateI.class.getSimpleName(), false));
 //		configure();
+		return storeCfgAndReturnSelf(icfg);
 	}
 	
 	public ArrayList<String> debugReport(){

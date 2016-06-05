@@ -760,7 +760,8 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public void cmdResetConsole() {
-		icui.recreateConsoleGui();
+		icui.requestRestart();
+//		icui.recreateConsoleGui();
 	}
 
 	protected ECmdReturnStatus cmdRawLineCheckAlias(){

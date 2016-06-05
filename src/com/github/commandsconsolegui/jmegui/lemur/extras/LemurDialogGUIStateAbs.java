@@ -285,8 +285,8 @@ public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateA
 	}
 	
 	@Override
-	public boolean doItAllProperly(float tpf) {
-		if(!super.doItAllProperly(tpf))return false;
+	protected boolean updateOrUndo(float tpf) {
+		if(!super.updateOrUndo(tpf))return false;
 		
 		Integer iSelected = getSelectedIndex();
 		if(iSelected!=null){

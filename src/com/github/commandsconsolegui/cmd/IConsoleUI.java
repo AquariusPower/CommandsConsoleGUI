@@ -85,4 +85,6 @@ public interface IConsoleUI extends ICheckInitAndCleanupI{
 //	public abstract void recreateConsoleGui();
 
 	public abstract boolean isEnabled();
+
+	public abstract void requestRestart();
 }

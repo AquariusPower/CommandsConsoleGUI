@@ -29,19 +29,16 @@ package com.github.commandsconsolegui.jmegui.extras;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
-import com.github.commandsconsolegui.jmegui.ConditionalAppStateAbs;
-import com.jme3.app.Application;
-import com.jme3.app.SimpleApplication;
+import com.github.commandsconsolegui.jmegui.ConditionalStateAbs;
+import com.github.commandsconsolegui.jmegui.ConditionalStateAbs.ICfgParm;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class UngrabMouseStateI extends ConditionalAppStateAbs {
+public class UngrabMouseStateI extends ConditionalStateAbs {
 	private static UngrabMouseStateI instance = new UngrabMouseStateI();
 	public static UngrabMouseStateI i(){return instance;}
 	
@@ -71,18 +68,20 @@ public class UngrabMouseStateI extends ConditionalAppStateAbs {
 	/**
 	 * @param lSlowMachineDelayToUngrabMilis null to use default
 	 * @param bKeepUngrabbedOnSlowdown null to use default
+	 * @return 
 	 */
 	@Override
-	public void configure(ICfgParm icfg) {
+	public UngrabMouseStateI configure(ICfgParm icfg) {
 //	public void configure(Long lSlowMachineDelayToUngrabMilis, Boolean bKeepUngrabbedOnSlowdown) {
 		CfgParm cfg = (CfgParm)icfg;
-		super.configure(new ConditionalAppStateAbs.CfgParm(
+		super.configure(new ConditionalStateAbs.CfgParm(
 				GlobalSappRefI.i().get()));
 		
 		if(cfg.lSlowMachineDelayToUngrabMilis!=null)this.lDelayToUngrabMilis=cfg.lSlowMachineDelayToUngrabMilis;
 		if(cfg.bKeepUngrabbedOnSlowdown!=null)this.bKeepUngrabbedOnSlowDown=cfg.bKeepUngrabbedOnSlowdown;
 		
 //		GlobalSappRefI.i().get().getStateManager().attach(this);
+		return storeCfgAndReturnSelf(icfg);
 	}
 //	@Deprecated
 //	@Override
@@ -112,7 +111,8 @@ public class UngrabMouseStateI extends ConditionalAppStateAbs {
 		r = new Runnable() {
 			@Override
 			public void run() {
-				while(!isCleaningUp()){
+//				while(!isCleaningUp()){ //mainly during application close
+				while(!isDiscarding()){ //mainly during application close
 					updateAtNewThread();
 					try {
 						Thread.sleep(lDelayToUngrabMilis);
