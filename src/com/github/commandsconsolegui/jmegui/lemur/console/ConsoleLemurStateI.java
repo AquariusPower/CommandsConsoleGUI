@@ -89,7 +89,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 	private ColorRGBA	colorConsoleStyleBackground;
 	
 	public ConsoleLemurStateI(){
-		vlstrDumpEntriesSlowedQueue = new VersionedList<String>();
+		setDumpEntriesSlowedQueue(new VersionedList<String>());
 		vlstrDumpEntries = new VersionedList<String>();
 	}
 	
@@ -103,7 +103,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 //		addStyle(BaseStyles.GLASS);
 //		addStyle(Styles.ROOT_STYLE);
 //	}
-	
+
 	@Override
 	protected boolean initOrUndo() {
 		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);

@@ -109,6 +109,9 @@ public class ConditionalStateManagerI extends AbstractAppState {
 		super.setEnabled(enabled);
 	}
 	
+	/**
+	 * use this whenever application exit is requested
+	 */
 	public void applicationIsExiting(){
 		bApplicationIsExiting=true;
 	}

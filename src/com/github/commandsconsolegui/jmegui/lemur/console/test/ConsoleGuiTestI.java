@@ -35,6 +35,7 @@ import com.github.commandsconsolegui.extras.SingleAppInstanceI;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalConsoleGuiI;
 import com.github.commandsconsolegui.globals.GlobalSappRefI;
+import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CommandsBackgroundStateI;
 import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
@@ -100,9 +101,8 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 			ConsoleGuiTestI.class.getSimpleName(), false, KeyInput.KEY_F10, getGuiNode()));
 		CommandsBackgroundStateI.i().configure(new CommandsBackgroundStateI.CfgParm(
 			ConsoleLemurStateI.i()));
-		FpsLimiterStateI.i().configure(null);
-		UngrabMouseStateI.i().configure(new UngrabMouseStateI.CfgParm(
-			null,null));
+		FpsLimiterStateI.i().configure(new FpsLimiterStateI.CfgParm());
+		UngrabMouseStateI.i().configure(new UngrabMouseStateI.CfgParm(null,null));
 
 		cd.addConsoleCommandListener(this);
 		
@@ -183,5 +183,11 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 		if(rfcfg==null)rfcfg = cd.getReflexFillCfg(rfcv);
 		
 		return rfcfg;
+	}
+	
+	@Override
+	public void stop(boolean waitFor) {
+		ConditionalStateManagerI.i().applicationIsExiting();
+		super.stop(waitFor);
 	}
 }	

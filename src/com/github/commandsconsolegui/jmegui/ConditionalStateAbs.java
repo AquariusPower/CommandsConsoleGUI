@@ -158,17 +158,6 @@ public abstract class ConditionalStateAbs  {
 	public ConditionalStateAbs configure(ICfgParm icfg){
 		CfgParm cfg = (CfgParm)icfg;
 		
-		/**
-		 * this is more a double check, extra safety.
-		 */
-		if(icfgOfInstance==null)throw new DeveloperMistakeException(
-			"the instantiated class needs to set the configuration params to be used on a restart!");
-		
-		if(!icfgOfInstance.getClass().equals(this.getClass())){
-			throw new DeveloperMistakeException(
-				"the stored cfg params must be of the instantiated class!");
-		}
-		
 //	protected void configure(Application app){
 		if(this.bConfigured)throw new DeveloperMistakeException("already configured");
 		
@@ -328,7 +317,19 @@ public abstract class ConditionalStateAbs  {
 		return bDisableSuccessful;
 	}
 	
-	protected boolean initCheckPrerequisites(){return true;}
+	protected boolean initCheckPrerequisites(){
+		if(icfgOfInstance==null)throw new DeveloperMistakeException(
+			"the instantiated class needs to set the configuration params to be used on a restart!");
+		
+		if(!icfgOfInstance.getClass().getName().startsWith(this.getClass().getName()+"$")){
+//		if(!icfgOfInstance.getClass().equals(this.getClass())){
+			throw new DeveloperMistakeException(
+				"the stored cfg params must be of the instantiated class to be used on restarting it: "
+				+this.getClass().getName());
+		}
+		
+		return true;
+	}
 	protected boolean initOrUndo(){return true;}
 	protected boolean updateOrUndo(float tpf){return true;}
 	protected boolean enableOrUndo(){return true;}

@@ -80,6 +80,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.texture.Texture2D;
+import com.simsilica.lemur.core.VersionedList;
 
 /**
  * A graphical console where developers and users can issue application commands.
@@ -166,7 +167,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 //	protected TextField tfAutoCompleteHint;
 //	protected SimpleApplication	sapp;
 //	protected boolean	bEnabled;
-	protected AbstractList<String> vlstrDumpEntriesSlowedQueue;
+	private AbstractList<String> vlstrDumpEntriesSlowedQueue;
 	protected AbstractList<String> vlstrDumpEntries;
 	protected AbstractList<String> vlstrAutoCompleteHint;
 	protected Node lstbxAutoCompleteHint;
@@ -2479,6 +2480,10 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 			svUserFontOption.setObjectValue(strConsoleDefaultFontName );
 		}
 	//	BitmapFont font = app().getAssetManager().loadFont("Interface/Fonts/Console512x.fnt");
+	}
+
+	protected void setDumpEntriesSlowedQueue(VersionedList<String> vlstrDumpEntriesSlowedQueue) {
+		this.vlstrDumpEntriesSlowedQueue = vlstrDumpEntriesSlowedQueue;
 	}
 }
 
