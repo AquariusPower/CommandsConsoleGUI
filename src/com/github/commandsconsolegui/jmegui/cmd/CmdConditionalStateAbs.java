@@ -69,11 +69,11 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 //	}
 	
 	public static class CfgParm implements ICfgParm{
-		String strCmdIdentifier;
 		boolean bIgnorePrefixAndSuffix;
-		public CfgParm(String strCmdIdentifier, boolean bIgnorePrefixAndSuffix) {
+		private String	strId;
+		public CfgParm(String strCmdBaseId, boolean bIgnorePrefixAndSuffix) {
 			super();
-			this.strCmdIdentifier = strCmdIdentifier;
+			this.strId = strCmdBaseId;
 			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
 		}
 	}
@@ -81,14 +81,14 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 	public CmdConditionalStateAbs configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
 		
-		super.configure(new ConditionalStateAbs.CfgParm(GlobalAppRefI.i().get()));
+		super.configure(new ConditionalStateAbs.CfgParm(GlobalAppRefI.i().get(),cfg.strId));
 		
 		cd=GlobalCommandsDelegatorI.i().get();
 		
-		if(cfg.strCmdIdentifier==null || cfg.strCmdIdentifier.isEmpty())throw new NullPointerException("invalid cmd id");
+		if(cfg.strId==null || cfg.strId.isEmpty())throw new NullPointerException("invalid cmd id");
 		this.strCmdIdentifier="";
 		if(!cfg.bIgnorePrefixAndSuffix)this.strCmdIdentifier+=strCmdPrefix;
-		this.strCmdIdentifier+=cfg.strCmdIdentifier;
+		this.strCmdIdentifier+=cfg.strId;
 		if(!cfg.bIgnorePrefixAndSuffix)this.strCmdIdentifier+=strCmdSuffix;
 		
 		cd.addConsoleCommandListener(this);
@@ -131,7 +131,25 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 		
 		return cc.cmdFoundReturnStatus(bCommandWorked);
 	}
-
+	
+	@Override
+	protected boolean enableOrUndo() {
+		if(!super.enableOrUndo())return false;
+		
+		cd.dumpInfoEntry(getCmd()+" enabled");
+		
+		return true;
+	}
+	
+	@Override
+	protected boolean disableOrUndo() {
+		if(!super.disableOrUndo())return false;
+		
+		cd.dumpInfoEntry(getCmd()+" disabled");
+		
+		return true;
+	}
+	
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		return cd.getReflexFillCfg(rfcv);

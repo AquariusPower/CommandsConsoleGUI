@@ -343,15 +343,23 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 	
 	@Override
 	protected boolean enableOrUndo() {
-		commonOnEnableDisable();
-		return super.enableOrUndo();
+		if(!super.enableOrUndo())return false;
+		
+		LemurFocusHelperStateI.i().requestFocus(getIntputField());
+//	commonOnEnableDisable();
+		
+		return true;
 	}
 	
 	@Override
 	protected boolean disableOrUndo() {
+		if(!super.disableOrUndo())return false;
+		
 		closeHint();
-		commonOnEnableDisable();
-		return super.disableOrUndo();
+		LemurFocusHelperStateI.i().removeFocusableFromList(getIntputField());
+//		commonOnEnableDisable();
+		
+		return true;
 	};
 	
 //	@Override
@@ -364,12 +372,12 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 //		commonOnEnableDisable();
 //	}
 	
-	protected void commonOnEnableDisable(){
-		updateOverrideInputFocus();
-//		if(LemurFocusHelperStateI.i().isFocusRequesterListEmpty()){
-//			GuiGlobals.getInstance().setCursorEventsEnabled(this.bEnabled);
-//		}
-	}
+//	protected void commonOnEnableDisable(){
+//		updateOverrideInputFocus();
+////		if(LemurFocusHelperStateI.i().isFocusRequesterListEmpty()){
+////			GuiGlobals.getInstance().setCursorEventsEnabled(this.bEnabled);
+////		}
+//	}
 	
 //	@Override
 //	public void setEnabled(boolean bEnabled) {
@@ -802,25 +810,25 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 	protected String getStatsText() {
 		return lblStats.getText();
 	}
-	@Override
-	public Object getFocus(){
-		return LemurFocusHelperStateI.i().getFocused();
-	}
-	@Override
-	public boolean setFocus(Object obj){
-		if(obj==null){
-			LemurFocusHelperStateI.i().removeAllFocus();
-		}else{
-			LemurFocusHelperStateI.i().requestFocus((Spatial) obj);
-		}
-		
-		return obj==null?true:obj.equals(getFocus());
-	}
-
-	@Override
-	protected void removeFocus(Object obj) {
-		LemurFocusHelperStateI.i().removeFocusableFromList((Spatial) obj);
-	}
+//	@Override
+//	public Object getFocus(){
+//		return LemurFocusHelperStateI.i().getFocused();
+//	}
+//	@Override
+//	public boolean setFocus(Object obj){
+//		if(obj==null){
+//			LemurFocusHelperStateI.i().removeAllFocus();
+//		}else{
+//			LemurFocusHelperStateI.i().requestFocus((Spatial) obj);
+//		}
+//		
+//		return obj==null?true:obj.equals(getFocus());
+//	}
+//
+//	@Override
+//	protected void removeFocus(Object obj) {
+//		LemurFocusHelperStateI.i().removeFocusableFromList((Spatial) obj);
+//	}
 
 //	@Override
 //	protected boolean cleanupValidating() {
@@ -845,16 +853,23 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 		return super.isInitializedProperly();
 	}
 
-	@Override
-	public void requestFocus(Spatial spt) {
-		// TODO Auto-generated method stub
-		
-	}
+//	@Override
+//	public void requestFocus(Spatial spt) {
+//		// TODO Auto-generated method stub
+//		
+//	}
 
 	@Override
 	protected void actionSubmit() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	protected void updateOverrideInputFocus() {
+		if(!getIntputField().equals(LemurFocusHelperStateI.i().getFocused())){
+			LemurFocusHelperStateI.i().requestFocus(getIntputField(),true);
+		}
 	}
 
 }

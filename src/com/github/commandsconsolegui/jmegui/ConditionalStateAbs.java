@@ -28,8 +28,8 @@
 package com.github.commandsconsolegui.jmegui;
 
 //import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ERecreateConsoleSteps;
-import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.MsgI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppState;
 import com.jme3.scene.Node;
@@ -52,6 +52,12 @@ import com.jme3.scene.Node;
  *
  */
 public abstract class ConditionalStateAbs  {
+	
+	/**
+	 * This Id is only required if there is more than one state of the same class.
+	 */
+	protected String strCaseInsensitiveId = null;
+	
 //	public static interface IConditionalStateAbsForConsoleUI{
 //		public abstract void requestRestart();
 //	}
@@ -69,21 +75,50 @@ public abstract class ConditionalStateAbs  {
 //	private boolean	bPreInitialized;
 	
 	// TRY INIT 
-	private long lInitRetryStartMilis;
-	/** 0 means retry at every update*/
-	protected long lInitRetryDelayMilis;
+	protected class Retry{
+		long lStartMilis=0;
+		
+		/** 0 means retry at every update*/
+		long lDelayMilis=0;
+		
+		public void setRetryDelay(long lMilis){
+			this.lDelayMilis=lMilis;
+		}
+		
+		boolean canRetryNow(){
+			return getUpdatedTime() > (lStartMilis+lDelayMilis);
+		}
+//		private boolean canRetryEnableNow(){
+//			return updateTime() > (lEnableRetryStartMilis+lEnableRetryDelayMilis);
+//		}
+//		private boolean canRetryDisableNow(){
+//			return updateTime() > (lDisableRetryStartMilis+lDisableRetryDelayMilis);
+//		}
+
+		public void resetStartTime() {
+			lStartMilis=getUpdatedTime();
+		}
+		
+	}
+	protected Retry rInit = new Retry();
+	protected Retry rEnable = new Retry();
+	protected Retry rDisable = new Retry();
+	protected Retry rDiscard = new Retry();
+//	private long lInitRetryStartMilis;
+//	/** 0 means retry at every update*/
+//	protected long lInitRetryDelayMilis;
+//	private long lCleanupRequestMilis;
+//	/** 0 means retry at every queue processing step*/
+//	protected long lCleanupRetryDelayMilis;
 	
 	// PROPERLY INIT
 	private boolean	bProperlyInitialized;
 	
-	/** it can be initially disabled if you prefer.*/
-	protected boolean	bEnabled = true;
-	private boolean	bEnabledRequested;
-	private boolean	bDisabledRequested;
+	/** it must be initially disabled, the request will properly enable it*/
+	protected boolean	bEnabled = false;
 	
-	private long lCleanupRequestMilis;
-	/** 0 means retry at every queue processing step*/
-	protected long lCleanupRetryDelayMilis;
+	private boolean	bEnabledRequested = true; //initially all will be wanted as enabled by default
+	private boolean	bDisabledRequested;
 	
 	/** set to true to allow instant configuration but wait before properly initializing*/
 	protected boolean bHoldProperInitialization = false;
@@ -139,9 +174,11 @@ public abstract class ConditionalStateAbs  {
 	
 	public static class CfgParm implements ICfgParm{
 		Application app;
-		public CfgParm(Application app) {
+		String strId;
+		public CfgParm(Application app, String strId) {
 			super();
 			this.app = app;
+			this.strId = strId;
 		}
 	}
 	private ICfgParm icfgOfInstance;
@@ -164,6 +201,17 @@ public abstract class ConditionalStateAbs  {
 		// internal configurations
 		if(cfg.app==null)throw new PrerequisitesNotMetException("app is null");
 		this.app=cfg.app;
+		
+		if(cfg.strId!=null){
+			@SuppressWarnings("unchecked") //so obvious...
+			ConditionalStateAbs csa = ConditionalStateManagerI.i().getConditionalState(
+				(Class<ConditionalStateAbs>)this.getClass(), cfg.strId);
+			
+			if(csa!=null){
+				throw new PrerequisitesNotMetException("conflicting state Id "+cfg.strId);
+			}
+		}
+		this.strCaseInsensitiveId = cfg.strId;
 		
 		if(!ConditionalStateManagerI.i().attach(this)){
 //		if(!app.getStateManager().attach(this)){
@@ -195,6 +243,10 @@ public abstract class ConditionalStateAbs  {
 		return (T)this;
 	}
 	
+	protected ICfgParm getCfg(){
+		return icfgOfInstance;
+	}
+	
 	protected void msgDbg(String str, boolean bSuccess) {
 		MsgI.i().msgDbg(str, bSuccess, this);
 	}
@@ -214,7 +266,7 @@ public abstract class ConditionalStateAbs  {
 		this.lTimeReferenceMilis=lMilis;
 	}
 	
-	private long updateTime(){
+	private long getUpdatedTime(){
 		return lTimeReferenceMilis==null ? System.currentTimeMillis() : lTimeReferenceMilis;
 	}
 	
@@ -338,12 +390,10 @@ public abstract class ConditionalStateAbs  {
 	private boolean doItInitializeProperly(float tpf){
 		if(bHoldProperInitialization)return false;
 		
-		if(updateTime() < (lInitRetryStartMilis+lInitRetryDelayMilis)){
-			return false;
-		}
+		if(!rInit.canRetryNow())return false;
 		
 		if(!initCheckPrerequisites() || !initOrUndo()){
-			lInitRetryStartMilis=updateTime();
+			rInit.resetStartTime();
 			msgDbg("init",false);
 			return false;
 		}
@@ -370,7 +420,9 @@ public abstract class ConditionalStateAbs  {
 //		if(bDiscardRequested)return false;
 		
 		if(!bProperlyInitialized){
-			if(!doItInitializeProperly(tpf))return false;
+			if(bEnabledRequested){
+				if(!doItInitializeProperly(tpf))return false;
+			}
 		}else{
 			if(!doItEnableOrDisableProperly(tpf))return false;
 		}
@@ -381,15 +433,31 @@ public abstract class ConditionalStateAbs  {
 	private boolean doItEnableOrDisableProperly(float tpf) {
 		if(bEnabledRequested && !bEnabled){
 			if(bHoldEnable)return false;
+			if(!rEnable.canRetryNow())return false;
+			
 			bEnableSuccessful=enableOrUndo();
 			msgDbg("enabled",bEnableSuccessful);
 			bEnabled=bEnableSuccessful;
+			
+			if(bEnableSuccessful){
+				bEnabledRequested=false; //otherwise will keep trying
+			}else{
+				rEnable.resetStartTime();
+			}
 		}else
 		if(bDisabledRequested && bEnabled){
 			if(bHoldDisable)return false;
+			if(!rDisable.canRetryNow())return false;
+			
 			bDisableSuccessful=disableOrUndo();
 			msgDbg("disabled",bDisableSuccessful);
 			bEnabled=!bDisableSuccessful;
+			
+			if(bDisableSuccessful){
+				bDisabledRequested=false; //otherwise will keep trying
+			}else{
+				rDisable.resetStartTime();
+			}
 		}
 		
 		if(bEnabled){
@@ -430,7 +498,14 @@ public abstract class ConditionalStateAbs  {
 		}
 //		lEnableDisableRequestTimeMilis=updateTime();
 	};
-
+	
+	/**
+	 * this will simply avoid initially enabling under request
+	 */
+	protected void initiallyDisabled(){
+		this.bEnabledRequested = false;
+	}
+	
 	public void requestEnable(){
 		setEnabledRequest(true);
 	}
@@ -459,12 +534,14 @@ public abstract class ConditionalStateAbs  {
 		if(bEnabled){
 			boolean bRetry=false;
 			
-			if(updateTime() < (lCleanupRequestMilis+lCleanupRetryDelayMilis)){
+			if(!rDiscard.canRetryNow()){
+//			if(getUpdatedTime() < (lCleanupRequestMilis+lCleanupRetryDelayMilis)){
 				bRetry=true;
 			}else{
 				bRetry = !disableOrUndo();
 				if(bRetry){ //failed, retry
-					lCleanupRequestMilis=updateTime();
+					rDiscard.resetStartTime();
+//					lCleanupRequestMilis=getUpdatedTime();
 				}
 			}
 			
@@ -570,6 +647,10 @@ public abstract class ConditionalStateAbs  {
 	public boolean isRestartRequested() {
 		return bRestartRequested;
 	}
+
+	public String getId() {
+		return strCaseInsensitiveId;
+	}
 	
 //	Long	lInitializationCompletedMilis;
 ////	long	lInitializationStartedMilis;
@@ -664,4 +745,14 @@ public abstract class ConditionalStateAbs  {
 //		return GlobalCommandsDelegatorI.i().get().getReflexFillCfg(rfcv);
 //	}
 	
+	/**
+	 * each state can have its delay value set individually also.
+	 * @param lMilis
+	 */
+	public void setRetryDelay(long lMilis){
+		rInit.setRetryDelay(lMilis);
+		rEnable.setRetryDelay(lMilis);
+		rDisable.setRetryDelay(lMilis);
+		rDiscard.setRetryDelay(lMilis);
+	}
 }

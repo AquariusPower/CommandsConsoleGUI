@@ -64,14 +64,14 @@ public class MiscJmeI {
 	 * @param sptStart
 	 * @return parentest spatial, least top nodes
 	 */
-	public Spatial getParentestFrom(Spatial sptStart){
+	public Node getParentestFrom(Spatial sptStart){
 		Spatial sptParentest = sptStart;
 		while(sptParentest.getParent()!=null){
 			if(GlobalGUINodeI.i().get().equals(sptParentest.getParent()))break;
 			if(GlobalRootNodeI.i().get().equals(sptParentest.getParent()))break;
 			sptParentest=sptParentest.getParent();
 		}
-		return sptParentest;
+		return (Node)sptParentest; //parent is always Node
 	}
 	
 	public void saveImageToFile(com.jme3.texture.Image img, String strFileNameWithoutExt) {

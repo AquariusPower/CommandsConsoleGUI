@@ -30,11 +30,14 @@ package com.github.commandsconsolegui.jmegui.extras;
 import java.util.HashMap;
 
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
+import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs.CfgParm;
 import com.jme3.scene.Node;
 
 /**
  * A console command will be automatically created based on the configured {@link #strUIId}.<br>
- * See it at {@link #BaseUIStateAbs(String)}.
+ * See it at {@link BaseDialogStateAbs}.
+ * 
+ * TODO mix this with LemurDialogGUIStateAbs or {@link BaseDialogStateAbs} ?
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
@@ -47,26 +50,23 @@ public abstract class InteractionDialogStateAbs <V> extends BaseDialogStateAbs{
 	
 	public abstract void clearSelection();
 	
-	@Override
-	protected boolean enableOrUndo() {
-		updateTextInfo();
-		updateList();
-		updateInputField();
-		
-		return super.enableOrUndo();
-	}
-	
 	public static class CfgParm extends BaseDialogStateAbs.CfgParm{
 		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI) {
-			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI, 
-					false /** Dialogs must be initially disabled because they are enabled on user demand. */
+			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI,
+					/** 
+					 * Dialogs must be initially disabled because they are enabled 
+					 * on user demand. 
+					 */
+					false 
 				);
 		}
 	}
-//	@Override
-//	public BaseDialogStateAbs configure(ICfgParm icfg) {
-//		return super.configure(icfg);
-//	}
+	@Override
+	public InteractionDialogStateAbs<V> configure(ICfgParm icfg) {
+		CfgParm cfg = (CfgParm)icfg;
+		super.configure(icfg);
+		return storeCfgAndReturnSelf(icfg);
+	}
 	
 	/**
 	 * when dialog is enabled,
@@ -89,16 +89,14 @@ public abstract class InteractionDialogStateAbs <V> extends BaseDialogStateAbs{
 	
 	protected abstract void updateTextInfo();
 	
+	/**
+	 * this will react to changes on the list
+	 */
 	@Override
 	protected boolean updateOrUndo(float tpf) {
 		String str = getSelectedKey();
 		if(str!=null)strLastSelectedKey=str;
 		
-		updateTextInfo();
-		
-		//requestFocus(intputText); //keep focus at input as it shall have all listeners.
-		
-//		setMouseCursorKeepUngrabbed(isEnabled());
 		return super.updateOrUndo(tpf);
 	}
 	
@@ -120,8 +118,22 @@ public abstract class InteractionDialogStateAbs <V> extends BaseDialogStateAbs{
 	 */
 	@Override
 	protected void actionSubmit(){
-		strLastFilter=getInputText();
-		updateList();
+		this.strLastFilter=getInputText();
+		
+		updateAllParts();
 	}
-
+	
+	protected void updateAllParts(){
+		updateTextInfo();
+		
+		updateList();
+		
+		updateInputField();
+	}
+	
+	@Override
+	protected boolean enableOrUndo() {
+		updateAllParts();
+		return super.enableOrUndo();
+	}
 }

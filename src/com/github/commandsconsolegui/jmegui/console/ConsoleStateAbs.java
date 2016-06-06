@@ -295,8 +295,8 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 	protected boolean	bExceptionOnce = true;
 	protected boolean	bKeepInitiallyInvisibleUntilFirstClosed = false;
 //	protected FocusManagerState	focusState;
-	protected Spatial	sptPreviousFocus;
-	protected boolean	bRestorePreviousFocus;
+//	protected Spatial	sptPreviousFocus;
+//	protected boolean	bRestorePreviousFocus;
 	protected boolean	bInitializeOnlyTheUI;
 //	protected boolean	bConfigured;
 	protected BitmapFont	font;
@@ -314,15 +314,15 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 	 * keep them together for easy review
 	 */
 	
-	/** This method is GUI independent */
-	protected abstract Object getFocus();
-	/**
-	 * This method is GUI independent
-	 * @param obj if null, is to remove focus from everything
-	 */
-	protected abstract boolean setFocus(Object obj);
-	/** This method is GUI independent */
-	protected abstract void removeFocus(Object obj);
+//	/** This method is GUI independent */
+//	protected abstract Object getFocus();
+//	/**
+//	 * This method is GUI independent
+//	 * @param obj if null, is to remove focus from everything
+//	 */
+//	protected abstract boolean setFocus(Object obj);
+//	/** This method is GUI independent */
+//	protected abstract void removeFocus(Object obj);
 	protected abstract float fontWidth(String strChars, String strStyle, boolean bAveraged);
 	protected abstract void setStatsText(String str);
 	protected abstract String getStatsText();
@@ -956,13 +956,15 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 		return true; 
 	}
 	
-	protected void updateOverrideInputFocus(){
-		if(isEnabled()){
-			setFocus(getIntputField());
-		}else{
-			removeFocus(getIntputField());
-		}
-	}
+	protected abstract void updateOverrideInputFocus();
+//	{
+//		if(isEnabled()){
+//			LemurFocusHelperStateI.i().requestFocus(getIntputField());
+//			setFocus(getIntputField());
+//		}else{
+//			removeFocus(getIntputField());
+//		}
+//	}
 	
 //	protected void updateOverrideInputFocus(){
 //		Spatial sptWithFocus = (Spatial) getFocus();

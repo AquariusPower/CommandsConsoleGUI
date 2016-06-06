@@ -70,27 +70,74 @@ public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateA
 		return (Container)super.getContainerMain();
 	}
 	
-	@Override
-	protected boolean initGUI(){
-		return initGUI(0.75f, 0.25f);
-	}
-	
-	protected boolean initGUI(float fDialogPerc, float fInfoPerc){
-		return initGUI(fDialogPerc, fInfoPerc,null);
-	}
-	
 	public static class CfgParm extends InteractionDialogStateAbs.CfgParm{
-		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI) {
+		Float fDialogHeightPercentOfAppWindow;
+		Float fDialogWidthPercentOfAppWindow;
+		Float fInfoHeightPercentOfDialog;
+		Integer iEntryHeightPixels;
+//		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI) {
+//			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI);
+//		}
+		/**
+		 * 
+		 * @param strUIId
+		 * @param bIgnorePrefixAndSuffix
+		 * @param nodeGUI
+		 * @param fDialogHeightPercentOfAppWindow (if null will use default) the percentual height to cover the application screen/window
+		 * @param fDialogWidthPercentOfAppWindow (if null will use default) the percentual width to cover the application screen/window
+		 * @param fInfoHeightPercentOfDialog (if null will use default) the percentual height to show informational text, the list and input field will properly use the remaining space
+		 * @param iEntryHeightPixels
+		 */
+		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix,
+				Node nodeGUI, Float fDialogHeightPercentOfAppWindow,
+				Float fDialogWidthPercentOfAppWindow, Float fInfoHeightPercentOfDialog,
+				Integer iEntryHeightPixels)
+		{
 			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI);
+			
+			this.fDialogHeightPercentOfAppWindow = fDialogHeightPercentOfAppWindow;
+			this.fDialogWidthPercentOfAppWindow = fDialogWidthPercentOfAppWindow;
+			this.fInfoHeightPercentOfDialog = fInfoHeightPercentOfDialog;
+			this.iEntryHeightPixels = iEntryHeightPixels;
 		}
 	}
+	@Override
+	public LemurDialogGUIStateAbs<V> configure(ICfgParm icfg) {
+		CfgParm cfg = (CfgParm)icfg;
+		
+		if(cfg.fDialogHeightPercentOfAppWindow==null){
+			cfg.fDialogHeightPercentOfAppWindow=0.75f;
+		}
+		
+		if(cfg.fDialogWidthPercentOfAppWindow==null){
+			cfg.fDialogWidthPercentOfAppWindow=0.75f;
+		}
+		
+		if(cfg.fInfoHeightPercentOfDialog==null){
+			cfg.fInfoHeightPercentOfDialog=0.25f;
+		}
+		
+		super.configure(icfg);
+		return storeCfgAndReturnSelf(icfg);
+	}
 	
+//	@Override
+//	protected boolean initGUI(){
+//		return initGUI(0.75f, 0.75f, 0.25f, null);
+//	}
+//protected boolean initGUI(float fDialogHeightPercentOfAppWindow, float fDialogWidthPercentOfAppWindow, float fInfoHeightPercentOfDialog, Integer iEntryHeightPixels){
 	/**
 	 * The input field will not require height, will be small on south edge.
 	 * @param fDialogPerc the percentual width/height to cover the application screen/window 
 	 * @param fInfoPerc the percentual height to show informational text, the list and input field will properly use the remaining space
 	 */
-	protected boolean initGUI(float fDialogPerc, float fInfoPerc, Integer iEntryHeightPixels){
+	/**
+	 * The input field will not require height, will be small on south edge.
+	 */
+	@Override
+	protected boolean initGUI(){
+		CfgParm cfg = (CfgParm)getCfg();
+		
 		String strStyle = ConsoleLemurStateI.i().STYLE_CONSOLE;//BaseStyles.GLASS;
 		
 		Vector3f v3fApplicationWindowSize = new Vector3f(
@@ -99,65 +146,68 @@ public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateA
 			0);
 			
 		setContainerMain(new Container(new BorderLayout(), strStyle));
-		getContainerMain().setName(strUIId+"_Dialog");
+		getContainerMain().setName(getId()+"_Dialog");
 		
-		Vector3f v3fDiagWindowSize = v3fApplicationWindowSize.mult(fDialogPerc);
+//		Vector3f v3fDiagWindowSize = v3fApplicationWindowSize.mult(fDialogPerc);
+		Vector3f v3fDiagWindowSize = new Vector3f(v3fApplicationWindowSize);
+		v3fDiagWindowSize.y *= cfg.fDialogHeightPercentOfAppWindow;
+		v3fDiagWindowSize.x *= cfg.fDialogWidthPercentOfAppWindow;
 		getContainerMain().setPreferredSize(v3fDiagWindowSize);
 		
 		///////////////////////// NORTH
 		cntrNorth = new Container(new BorderLayout(), strStyle);
-		getNorthContainer().setName(strUIId+"_NorthContainer");
+		getNorthContainer().setName(getId()+"_NorthContainer");
 		Vector3f v3fNorthSize = v3fDiagWindowSize.clone();
-		v3fNorthSize.y *= fInfoPerc;
+		v3fNorthSize.y *= cfg.fInfoHeightPercentOfDialog;
 		getNorthContainer().setPreferredSize(v3fNorthSize);
 		
 		//title 
 		lblTitle = new Label(strTitle,strStyle);
-		lblTitle.setName(strUIId+"_Title");
+		lblTitle.setName(getId()+"_Title");
 		lblTitle.setColor(ColorRGBA.Green); //TODO make it custom
 		getNorthContainer().addChild(lblTitle, BorderLayout.Position.North);
 		
 		// simple info
 		lblTextInfo = new Label("",strStyle);
-		lblTextInfo.setName(strUIId+"_TxtInfo");
+		lblTextInfo.setName(getId()+"_TxtInfo");
 		getNorthContainer().addChild(lblTextInfo, BorderLayout.Position.Center);
 		
 		getContainerMain().addChild(getNorthContainer(), BorderLayout.Position.North);
 		
 		//////////////////////////// CENTER
 		// list
-		float fListPerc = 1.0f - fInfoPerc;
+		float fListPerc = 1.0f - cfg.fInfoHeightPercentOfDialog;
 		Vector3f v3fEntryListSize = v3fDiagWindowSize.clone();
 		v3fEntryListSize.y *= fListPerc;
 		lstbxEntriesToSelect = new ListBox<String>(new VersionedList<String>(),strStyle);
-		lstbxEntriesToSelect.setName(strUIId+"_EntriesList");
+		lstbxEntriesToSelect.setName(getId()+"_EntriesList");
 		lstbxEntriesToSelect.setSize(v3fEntryListSize); //not preferred, so the input field can fit properly
 		//TODO multi was not implemented yet... lstbxVoucherListBox.getSelectionModel().setSelectionMode(SelectionMode.Multi);
 		getContainerMain().addChild(lstbxEntriesToSelect, BorderLayout.Position.Center);
 		
 		vlstrEntriesList.add("(Empty list)");
 		lstbxEntriesToSelect.setModel((VersionedList<String>)vlstrEntriesList);
-		if(iEntryHeightPixels==null){
+		if(cfg.iEntryHeightPixels==null){
 			if(vlstrEntriesList.size()>0){
 				if(vlstrEntriesList.get(0) instanceof String){
 					Float fEntryHeight = LemurMiscHelpersStateI.i().guessEntryHeight(lstbxEntriesToSelect);
 					if(fEntryHeight!=null){
-						iEntryHeightPixels=fEntryHeight.intValue(); //calc based on entry (or font) height and listbox height
-						cd().dumpInfoEntry("entry height "+iEntryHeightPixels);
+						cfg.iEntryHeightPixels=fEntryHeight.intValue(); //calc based on entry (or font) height and listbox height
+						cd().dumpInfoEntry("entry height "+cfg.iEntryHeightPixels);
 					}else{
-						iEntryHeightPixels=20; //blind placeholder
-						cd().dumpWarnEntry("blind entry height "+iEntryHeightPixels);
+						cfg.iEntryHeightPixels=20; //blind placeholder
+						cd().dumpWarnEntry("blind entry height "+cfg.iEntryHeightPixels);
 					}
 				}
 			}
 		}
-		iVisibleRows = (int) (v3fEntryListSize.y/iEntryHeightPixels);
+		iVisibleRows = (int) (v3fEntryListSize.y/cfg.iEntryHeightPixels);
 		lstbxEntriesToSelect.setVisibleItems(iVisibleRows);
 		
 		//////////////////////////////// SOUTH
 		// filter
 		setIntputField(new TextField("",strStyle));
-		getInputField().setName(strUIId+"_InputField");
+		getInputField().setName(getId()+"_InputField");
 		LemurFocusHelperStateI.i().addFocusChangeListener(getInputField());
 		getContainerMain().addChild(getInputField(), BorderLayout.Position.South);
 		
@@ -182,18 +232,29 @@ public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateA
 		lstbxEntriesToSelect.getSelectionModel().setSelection(-1); //clear selection
 	}
 	
+//	@Override
+//	public void requestFocus(Spatial spt) {
+//		LemurFocusHelperStateI.i().requestFocus(spt);
+//	}
+	
 	@Override
-	public void requestFocus(Spatial spt) {
-		LemurFocusHelperStateI.i().requestFocus(spt);
+	protected boolean enableOrUndo() {
+		if(!super.enableOrUndo())return false;
+		
+		LemurFocusHelperStateI.i().requestFocus(getInputField());
+		
+		return true;
 	}
 	
 	@Override
 	protected boolean disableOrUndo() {
-		if(getInputField().equals(LemurFocusHelperStateI.i().getFocused())){
-			LemurFocusHelperStateI.i().removeFocusableFromList(getInputField());
-		}
+		if(!super.disableOrUndo())return false;
 		
-		return super.disableOrUndo();
+//		if(getInputField().equals(LemurFocusHelperStateI.i().getFocused())){
+			LemurFocusHelperStateI.i().removeFocusableFromList(getInputField());
+//		}
+		
+		return true;
 	}
 	
 	/**
@@ -224,15 +285,27 @@ public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateA
 	}
 	
 	/**
-	 * call {@link #updateList(ArrayList)} from this overriden method.
+	 * call {@link #updateList(ArrayList)} from the method overriding this
 	 */
 	@Override
 	protected abstract void updateList();
 	
-	protected void updateList(ArrayList<V> aValueList){
+	/**
+	 * override ex. to avoid reseting
+	 */
+	protected void resetList(){
 		hmKeyValue.clear();
 		vlstrEntriesList.clear();
 		lstbxEntriesToSelect.getSelectionModel().setSelection(-1);
+	}
+	
+	/**
+	 * basic functionality
+	 * 
+	 * @param aValueList
+	 */
+	protected void updateList(ArrayList<V> aValueList){
+		resetList();
 		
 		for(V val:aValueList){
 			String strEntry = formatEntryKey(val);
@@ -247,8 +320,29 @@ public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateA
 			int i = vlstrEntriesList.indexOf(strLastSelectedKey);
 			if(i>-1)lstbxEntriesToSelect.getSelectionModel().setSelection(i);
 		}
+	}
+	
+	@Override
+	protected boolean updateOrUndo(float tpf) {
+		if(!super.updateOrUndo(tpf))return false;
 		
-		updateTextInfo();
+		Integer iSelected = getSelectedIndex();
+		if(iSelected!=null){
+			int iTopEntryIndex = getTopEntryIndex();
+			int iBottomItemIndex = getBottomEntryIndex();
+			Integer iScrollTo=null;
+			if(iSelected>=iBottomItemIndex){
+				iScrollTo=iSelected-iBottomItemIndex+iTopEntryIndex;
+			}else
+			if(iSelected<=iTopEntryIndex){
+				iScrollTo=iSelected-1;
+			}
+			if(iScrollTo!=null){
+				scrollTo(iScrollTo);
+			}
+		}
+		
+		return true;
 	}
 	
 	/**
@@ -282,29 +376,6 @@ public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateA
 	
 	protected void scrollTo(int iIndex){
 		lstbxEntriesToSelect.getSlider().getModel().setValue(getMaxIndex()-iIndex);
-	}
-	
-	@Override
-	protected boolean updateOrUndo(float tpf) {
-		if(!super.updateOrUndo(tpf))return false;
-		
-		Integer iSelected = getSelectedIndex();
-		if(iSelected!=null){
-			int iTopEntryIndex = getTopEntryIndex();
-			int iBottomItemIndex = getBottomEntryIndex();
-			Integer iScrollTo=null;
-			if(iSelected>=iBottomItemIndex){
-				iScrollTo=iSelected-iBottomItemIndex+iTopEntryIndex;
-			}else
-			if(iSelected<=iTopEntryIndex){
-				iScrollTo=iSelected-1;
-			}
-			if(iScrollTo!=null){
-				scrollTo(iScrollTo);
-			}
-		}
-		
-		return true;
 	}
 	
 	@Override
@@ -363,7 +434,7 @@ public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateA
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI cc) {
 		boolean bCommandWorked = false;
 		
-		if(cc.checkCmdValidity(this,"showDialogKeyBinds"+strUIId,"")){
+		if(cc.checkCmdValidity(this,"showDialogKeyBinds"+getId(),"")){
 			cc.dumpSubEntry("ESC - close; Up/Down - nav. list entry; Enter - accept/submit choice;");
 			bCommandWorked = true;
 		}else

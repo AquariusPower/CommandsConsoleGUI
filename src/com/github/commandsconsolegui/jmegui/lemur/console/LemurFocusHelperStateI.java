@@ -32,8 +32,7 @@ import java.util.Collections;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
-import com.github.commandsconsolegui.jmegui.ConditionalStateAbs;
-import com.github.commandsconsolegui.jmegui.ConditionalStateAbs.ICfgParm;
+import com.github.commandsconsolegui.globals.GlobalGUINodeI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.jme3.scene.Node;
@@ -145,9 +144,31 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	}
 	
 	public void requestFocus(Spatial spt) {
+		requestFocus(spt, false);
+	}
+	/**
+	 * 
+	 * @param spt
+	 * @param bOnlyIfAlreadyOnTheList if false, will be added to the list
+	 */
+	public void requestFocus(Spatial spt, boolean bOnlyIfAlreadyOnTheList) {
 		if(spt==null)throw new NullPointerException("invalid null focusable");
 		
+		if(bOnlyIfAlreadyOnTheList){
+			if(!asptFocusRequestList.contains(spt)){
+				return;
+			}
+		}
+		
 		asptFocusRequestList.remove(spt); //to update the priority
+		
+		// validate
+		Node node = MiscJmeI.i().getParentestFrom(spt);
+		if(node==null || !GlobalGUINodeI.i().get().equals(node.getParent())){
+			msgDbg("not at GUI node "+spt.getName(),false);
+			return;
+		}
+		
 		asptFocusRequestList.add(spt);
 		
 		if(spt instanceof TextField){
