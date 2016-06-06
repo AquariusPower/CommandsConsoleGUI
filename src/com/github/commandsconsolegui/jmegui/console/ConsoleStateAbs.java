@@ -80,7 +80,6 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.texture.Texture2D;
-import com.simsilica.lemur.core.VersionedList;
 
 /**
  * A graphical console where developers and users can issue application commands.
@@ -236,7 +235,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 //	protected String	strValidCmdCharsRegex = "A-Za-z0-9_-"+"\\"+strCommandPrefixChar;
 //	protected String	strValidCmdCharsRegex = "a-zA-Z0-9_"; // better not allow "-" as has other uses like negate number and commands functionalities
 //	protected String	strStatsLast = "";
-	protected Node	ctnrStatsAndControls;
+	private Node	ctnrStatsAndControls;
 	protected Vector3f	v3fStatsAndControlsSize;
 //	protected Button	btnClipboardShow;
 	protected boolean	bConsoleStyleCreated;
@@ -1938,7 +1937,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 			case Up:
 				if(objSource==null || objSource==lstbxAutoCompleteHint)bOk=navigateHint(-1);
 				
-				if((objSource==null && !bOk) || objSource.equals(getIntputField())){
+				if((objSource==null && !bOk) || (objSource!=null && objSource.equals(getIntputField()))){
 					cd().addCmdHistoryCurrentIndex(-1);
 					/**
 					 * to not lose last possibly typed (but not issued) cmd
@@ -2482,8 +2481,24 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 	//	BitmapFont font = app().getAssetManager().loadFont("Interface/Fonts/Console512x.fnt");
 	}
 
-	protected void setDumpEntriesSlowedQueue(VersionedList<String> vlstrDumpEntriesSlowedQueue) {
+	protected void setDumpEntriesSlowedQueue(AbstractList<String> vlstrDumpEntriesSlowedQueue) {
 		this.vlstrDumpEntriesSlowedQueue = vlstrDumpEntriesSlowedQueue;
+	}
+	
+	public void setHintBox(Node listBox) {
+		this.lstbxAutoCompleteHint=listBox;
+	}
+	
+	public Node getHintBox() {
+		return lstbxAutoCompleteHint;
+	}
+	
+	public void setStatsAndControls(Node container) {
+		this.ctnrStatsAndControls = container;
+	}
+	
+	public Node getStatsAndControls() {
+		return ctnrStatsAndControls;
 	}
 }
 

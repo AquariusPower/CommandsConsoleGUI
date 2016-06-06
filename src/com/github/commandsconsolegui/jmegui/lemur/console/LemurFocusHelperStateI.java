@@ -157,6 +157,10 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 		GuiGlobals.getInstance().requestFocus(spt);
 	}
 	
+	public boolean isFocusRequesterListEmpty(){
+		return asptFocusRequestList.size()==0;
+	}
+	
 	public Spatial getCurrentFocusRequester(){
 		if(asptFocusRequestList.size()==0)return null;
 		return asptFocusRequestList.get(asptFocusRequestList.size()-1);
@@ -252,6 +256,10 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	protected boolean updateOrUndo(float tpf) {
 		Spatial spt = getCurrentFocusRequester();
 		GuiGlobals.getInstance().requestFocus(spt); //TODO timed delay?
+		
+		GuiGlobals.getInstance().setCursorEventsEnabled(
+			!isFocusRequesterListEmpty());
+		
 		return super.updateOrUndo(tpf);
 	}
 

@@ -28,7 +28,7 @@
 package com.github.commandsconsolegui.jmegui.lemur.console.test;
 
 import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegatorI;
-import com.github.commandsconsolegui.globals.GlobalSappRefI;
+import com.github.commandsconsolegui.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -84,9 +84,9 @@ public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleC
 		if(EStats.MousePosition.b()){
 			strStatsLast+=
 					"xy"
-						+(int)GlobalSappRefI.i().get().getInputManager().getCursorPosition().x
+						+(int)GlobalAppRefI.i().get().getInputManager().getCursorPosition().x
 						+","
-						+(int)GlobalSappRefI.i().get().getInputManager().getCursorPosition().y
+						+(int)GlobalAppRefI.i().get().getInputManager().getCursorPosition().y
 						+";";
 		}
 		
@@ -104,7 +104,7 @@ public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleC
 	
 	@Override
 	public void cmdExit() {
-		GlobalSappRefI.i().get().stop();
+		GlobalAppRefI.i().get().stop();
 		super.cmdExit();
 	}
 	

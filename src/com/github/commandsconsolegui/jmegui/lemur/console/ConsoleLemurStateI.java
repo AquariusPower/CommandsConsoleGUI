@@ -30,7 +30,7 @@ package com.github.commandsconsolegui.jmegui.lemur.console;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
-import com.github.commandsconsolegui.globals.GlobalSappRefI;
+import com.github.commandsconsolegui.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI.CompositeControl;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
@@ -139,7 +139,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 		super.configure(new ConsoleStateAbs.CfgParm(
 			cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.iToggleConsoleKey, cfg.nodeGUI));
 		
-		GuiGlobals.initialize(GlobalSappRefI.i().get());
+		GuiGlobals.initialize(GlobalAppRefI.i().get());
 		
 		// misc cfg
 		LemurMiscHelpersStateI.i().configure(new LemurMiscHelpersStateI.CfgParm());
@@ -150,7 +150,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 //		}
 		LemurFocusHelperStateI.i().configure(new LemurFocusHelperStateI.CfgParm(null));
 		
-		ConditionalStateManagerI.i().configure(GlobalSappRefI.i().get());
+		ConditionalStateManagerI.i().configure(GlobalAppRefI.i().get());
 		
 		return storeCfgAndReturnSelf(icfg);
 	}
@@ -248,7 +248,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 		
 		// auto complete hint
 		super.vlstrAutoCompleteHint = new VersionedList<String>();
-		super.lstbxAutoCompleteHint = new ListBox<String>(new VersionedList<String>(),strStyle);
+		super.setHintBox(new ListBox<String>(new VersionedList<String>(),strStyle));
 		getHintBox().setModel(getHintList());
 		CursorEventControl.addListenersToSpatial(getHintBox(), consoleCursorListener);
 		
@@ -266,7 +266,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 		/**
 		 * TOP ELEMENT =================================================================
 		 */
-		ctnrStatsAndControls = new Container(strStyle);
+		super.setStatsAndControls(new Container(strStyle));
 //		getContainerStatsAndControls().setName("ConsoleStats");
 		getContainerConsole().addChild(getContainerStatsAndControls(), BorderLayout.Position.North);
 		
@@ -366,7 +366,9 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 	
 	protected void commonOnEnableDisable(){
 		updateOverrideInputFocus();
-		GuiGlobals.getInstance().setCursorEventsEnabled(this.bEnabled);
+//		if(LemurFocusHelperStateI.i().isFocusRequesterListEmpty()){
+//			GuiGlobals.getInstance().setCursorEventsEnabled(this.bEnabled);
+//		}
 	}
 	
 //	@Override
@@ -412,9 +414,10 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 		}
 	}
 	
+	@Override
 	@SuppressWarnings("unchecked")
 	public ListBox<String> getHintBox() {
-		return (ListBox<String>)super.lstbxAutoCompleteHint;
+		return (ListBox<String>)super.getHintBox();
 	}
 	
 	public ListBox<String> getDumpArea() {
@@ -715,7 +718,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 	}
 	
 	public Container getContainerStatsAndControls(){
-		return (Container)ctnrStatsAndControls;
+		return (Container)super.getStatsAndControls();
 	}
 	
 	protected class ButtonClick implements Command<Button>{

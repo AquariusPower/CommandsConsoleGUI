@@ -25,25 +25,14 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.misc;
+package com.github.commandsconsolegui.globals;
+
+import com.jme3.scene.Node;
 
 /**
- * 
  * @author AquariusPower <https://github.com/AquariusPower>
- *
  */
-public class DeveloperMistakeException extends NullPointerException {
-	private static final long	serialVersionUID	= 1342052861109804737L;
-
-	public DeveloperMistakeException() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
-
-	public DeveloperMistakeException(String s) {
-		super(s);
-		// TODO Auto-generated constructor stub
-	}
-	
-	
+public class GlobalGUINodeI extends GlobalAbs<Node> {
+	private static GlobalGUINodeI instance = new GlobalGUINodeI();
+	public static GlobalGUINodeI i(){return instance;}
 }

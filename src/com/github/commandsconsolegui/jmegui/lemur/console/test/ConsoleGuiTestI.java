@@ -32,9 +32,11 @@ import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.extras.SingleAppInstanceI;
+import com.github.commandsconsolegui.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalConsoleGuiI;
-import com.github.commandsconsolegui.globals.GlobalSappRefI;
+import com.github.commandsconsolegui.globals.GlobalGUINodeI;
+import com.github.commandsconsolegui.globals.GlobalRootNodeI;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CommandsBackgroundStateI;
@@ -95,6 +97,12 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 		cd = GlobalCommandsDelegatorI.i().set(new CustomCommandsI());
 		MiscJmeI.i().configure(cd);
 		
+		/**
+		 * as you may not be using {@link SimpleApplication#} 
+		 */
+		GlobalGUINodeI.i().set(getGuiNode());
+		GlobalRootNodeI.i().set(getRootNode());
+		
 		GlobalConsoleGuiI.i().set(ConsoleLemurStateI.i());
 		
 		ConsoleLemurStateI.i().configure(new ConsoleLemurStateI.CfgParm(
@@ -108,7 +116,10 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 		
 		diag = new CustomDialogGUIState();
 		diag.configure(new CustomDialogGUIState.CfgParm(
-				"TestDialog", false, getGuiNode()));
+			"TestDialog1", false, getGuiNode()));
+		
+		new CustomDialogGUIState().configure(new CustomDialogGUIState.CfgParm(
+			"TestDialog2", false, getGuiNode()));
 		
 //		SingleInstanceState.i().configureBeforeInitializing(this,true);
 		SingleAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);
@@ -120,7 +131,7 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 	}
 	
 	public static void main( String... args ) {
-		ConsoleGuiTestI main = (ConsoleGuiTestI) GlobalSappRefI.i().set(ConsoleGuiTestI.i());
+		ConsoleGuiTestI main = (ConsoleGuiTestI) GlobalAppRefI.i().set(ConsoleGuiTestI.i());
 		main.configure();
 		
 		if(main.bHideSettings){

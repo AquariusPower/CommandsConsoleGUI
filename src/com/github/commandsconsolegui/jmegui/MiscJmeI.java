@@ -33,9 +33,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.BufferUnderflowException;
 
-import com.github.commandsconsolegui.globals.GlobalSappRefI;
+import com.github.commandsconsolegui.globals.GlobalGUINodeI;
+import com.github.commandsconsolegui.globals.GlobalRootNodeI;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
-import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapText;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -48,14 +48,14 @@ public class MiscJmeI {
 	private static MiscJmeI instance = new MiscJmeI();
 	public static MiscJmeI i(){return instance;}
 
-	private SimpleApplication	sapp;
+//	private SimpleApplication	sapp;
 	private IHandleExceptions	ihe;
 	private boolean	bConfigured;
 	
 	public void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 		this.ihe=ihe;
-		this.sapp=GlobalSappRefI.i().get();
+//		this.sapp=GlobalSappRefI.i().get();
 		bConfigured=true;
 	}
 	
@@ -67,8 +67,8 @@ public class MiscJmeI {
 	public Spatial getParentestFrom(Spatial sptStart){
 		Spatial sptParentest = sptStart;
 		while(sptParentest.getParent()!=null){
-			if(sapp.getGuiNode().equals(sptParentest.getParent()))break;
-			if(sapp.getRootNode().equals(sptParentest.getParent()))break;
+			if(GlobalGUINodeI.i().get().equals(sptParentest.getParent()))break;
+			if(GlobalRootNodeI.i().get().equals(sptParentest.getParent()))break;
 			sptParentest=sptParentest.getParent();
 		}
 		return sptParentest;

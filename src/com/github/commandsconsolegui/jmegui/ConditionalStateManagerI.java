@@ -30,7 +30,7 @@ package com.github.commandsconsolegui.jmegui;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
-import com.github.commandsconsolegui.misc.DeveloperMistakeException;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 
@@ -72,7 +72,7 @@ public class ConditionalStateManagerI extends AbstractAppState {
 		
 		ArrayList<ConditionalStateAbs> aToDiscard = null;
 		for(ConditionalStateAbs cas:aCondStateList){
-			cas.doItAllProperly(ccSelf,tpf);
+			if(!cas.doItAllProperly(ccSelf,tpf))continue;
 			
 			if(cas.isRestartRequested()){
 				if(cas.isEnabled()){
@@ -104,7 +104,7 @@ public class ConditionalStateManagerI extends AbstractAppState {
 	@Override
 	public void setEnabled(boolean enabled) {
 		if(!enabled){
-			throw new DeveloperMistakeException("this state MUST never be disabled! "+ConditionalStateManagerI.class.getName());
+			throw new PrerequisitesNotMetException("this state MUST never be disabled! "+ConditionalStateManagerI.class.getName());
 		}
 		super.setEnabled(enabled);
 	}
@@ -119,7 +119,7 @@ public class ConditionalStateManagerI extends AbstractAppState {
 	@Override
 	public void cleanup() {
 		if(!bApplicationIsExiting){
-			throw new DeveloperMistakeException("this state MUST never be terminated/cleaned! "+ConditionalStateManagerI.class.getName());
+			throw new PrerequisitesNotMetException("this state MUST never be terminated/cleaned! "+ConditionalStateManagerI.class.getName());
 		}
 	}
 	

@@ -363,7 +363,7 @@ public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateA
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI cc) {
 		boolean bCommandWorked = false;
 		
-		if(cc.checkCmdValidity(this,"showDialogKeyBinds","")){
+		if(cc.checkCmdValidity(this,"showDialogKeyBinds"+strUIId,"")){
 			cc.dumpSubEntry("ESC - close; Up/Down - nav. list entry; Enter - accept/submit choice;");
 			bCommandWorked = true;
 		}else

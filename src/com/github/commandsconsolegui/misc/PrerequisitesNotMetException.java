@@ -25,14 +25,26 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.globals;
-
-import com.jme3.app.state.AppStateManager;
+package com.github.commandsconsolegui.misc;
 
 /**
+ * Things that should be been coded in a certain way but were overlooked.
+ * 
  * @author AquariusPower <https://github.com/AquariusPower>
+ *
  */
-public class GlobalStateManagerRefI extends GlobalAbs<AppStateManager> {
-	private static GlobalStateManagerRefI instance = new GlobalStateManagerRefI();
-	public static GlobalStateManagerRefI i(){return instance;}
+public class PrerequisitesNotMetException extends NullPointerException {
+	private static final long	serialVersionUID	= 1342052861109804737L;
+
+	public PrerequisitesNotMetException() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public PrerequisitesNotMetException(String s) {
+		super(s);
+		// TODO Auto-generated constructor stub
+	}
+	
+	
 }

@@ -48,11 +48,11 @@ import com.jme3.app.Application;
 public class GlobalAppRefI extends GlobalAbs<Application>{
 	private static GlobalAppRefI instance = new GlobalAppRefI();
 	public static GlobalAppRefI i(){return instance;}
-	
-	@Override
-	public Application set(Application obj) {
-		GlobalStateManagerRefI.i().set(obj.getStateManager());
-		return super.set(obj);
-	}
+//	
+//	@Override
+//	public Application set(Application obj) {
+//		GlobalStateManagerRefI.i().set(obj.getStateManager());
+//		return super.set(obj);
+//	}
 }
 

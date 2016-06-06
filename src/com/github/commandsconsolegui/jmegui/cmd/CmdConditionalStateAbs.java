@@ -30,8 +30,8 @@ package com.github.commandsconsolegui.jmegui.cmd;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.globals.GlobalSappRefI;
 import com.github.commandsconsolegui.jmegui.ConditionalStateAbs;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -81,7 +81,7 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 	public CmdConditionalStateAbs configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
 		
-		super.configure(new ConditionalStateAbs.CfgParm(GlobalSappRefI.i().get()));
+		super.configure(new ConditionalStateAbs.CfgParm(GlobalAppRefI.i().get()));
 		
 		cd=GlobalCommandsDelegatorI.i().get();
 		

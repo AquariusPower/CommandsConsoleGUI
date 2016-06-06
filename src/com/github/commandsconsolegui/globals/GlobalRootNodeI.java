@@ -27,25 +27,12 @@
 
 package com.github.commandsconsolegui.globals;
 
-import com.jme3.app.SimpleApplication;
+import com.jme3.scene.Node;
 
 /**
- * Use this or {@link GlobalAppRefI}
  * @author AquariusPower <https://github.com/AquariusPower>
- *
  */
-public class GlobalSappRefI extends GlobalAbs<SimpleApplication> {
-	private static GlobalSappRefI instance = new GlobalSappRefI();
-	public static GlobalSappRefI i(){return instance;}
-	
-	@Override
-	public SimpleApplication set(SimpleApplication obj) {
-		GlobalAppRefI.i().set(obj);
-		return super.set(obj);
-	}
-//	@Override
-//	protected void setAssertingNotAlreadySet(SimpleApplication obj) {
-//		GlobalAppRefI.i().set(obj);
-//		super.setAssertingNotAlreadySet(obj);
-//	}
+public class GlobalRootNodeI extends GlobalAbs<Node> {
+	private static GlobalGUINodeI instance = new GlobalGUINodeI();
+	public static GlobalGUINodeI i(){return instance;}
 }

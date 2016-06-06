@@ -28,7 +28,7 @@
 package com.github.commandsconsolegui.jmegui;
 
 //import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ERecreateConsoleSteps;
-import com.github.commandsconsolegui.misc.DeveloperMistakeException;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppState;
@@ -159,15 +159,15 @@ public abstract class ConditionalStateAbs  {
 		CfgParm cfg = (CfgParm)icfg;
 		
 //	protected void configure(Application app){
-		if(this.bConfigured)throw new DeveloperMistakeException("already configured");
+		if(this.bConfigured)throw new PrerequisitesNotMetException("already configured");
 		
 		// internal configurations
-		if(cfg.app==null)throw new DeveloperMistakeException("app is null");
+		if(cfg.app==null)throw new PrerequisitesNotMetException("app is null");
 		this.app=cfg.app;
 		
 		if(!ConditionalStateManagerI.i().attach(this)){
 //		if(!app.getStateManager().attach(this)){
-			throw new DeveloperMistakeException("state already attached: "
+			throw new PrerequisitesNotMetException("state already attached: "
 				+this.getClass().getName()+"; "+this);
 		}
 //		preInitRequest();
@@ -254,7 +254,7 @@ public abstract class ConditionalStateAbs  {
 //	}
 	
 	protected void assertIsConfigured() {
-		if(!isConfigured())throw new DeveloperMistakeException("not configured yet!");
+		if(!isConfigured())throw new PrerequisitesNotMetException("not configured yet!");
 	}
 	
 //	protected void assertIsPreInitialized() {
@@ -318,12 +318,12 @@ public abstract class ConditionalStateAbs  {
 	}
 	
 	protected boolean initCheckPrerequisites(){
-		if(icfgOfInstance==null)throw new DeveloperMistakeException(
+		if(icfgOfInstance==null)throw new PrerequisitesNotMetException(
 			"the instantiated class needs to set the configuration params to be used on a restart!");
 		
 		if(!icfgOfInstance.getClass().getName().startsWith(this.getClass().getName()+"$")){
 //		if(!icfgOfInstance.getClass().equals(this.getClass())){
-			throw new DeveloperMistakeException(
+			throw new PrerequisitesNotMetException(
 				"the stored cfg params must be of the instantiated class to be used on restarting it: "
 				+this.getClass().getName());
 		}
@@ -366,8 +366,8 @@ public abstract class ConditionalStateAbs  {
 		cc.assertSelfNotNull();
 		assertIsConfigured();
 //		assertIsPreInitialized();
-		if(bDiscardRequested)return false;
 //		if(bRestartRequested)return false;
+//		if(bDiscardRequested)return false;
 		
 		if(!bProperlyInitialized){
 			if(!doItInitializeProperly(tpf))return false;
@@ -375,7 +375,7 @@ public abstract class ConditionalStateAbs  {
 			if(!doItEnableOrDisableProperly(tpf))return false;
 		}
 		
-		return false;
+		return true;
 	};
 	
 	private boolean doItEnableOrDisableProperly(float tpf) {
@@ -448,15 +448,13 @@ public abstract class ConditionalStateAbs  {
 	}
 	
 	/**
-	 * Better not override, just use {@link #dcleanupValidating()} instead!<br>
-	 * 
 	 * By discarding, it will be easier to setup a fresh, consistent and robust state.
 	 * If you need values from the discarded state, just copy/move/clone them to the new one.
 	 */
 	public boolean prepareAndCheckIfReadyToDiscard(ConditionalStateManagerI.CompositeControl cc) {
 		cc.assertSelfNotNull();
 		if(!bProperlyInitialized)return false; //TODO log warn
-		if(!isDiscarding())throw new DeveloperMistakeException("not discarding");
+		if(!isDiscarding())throw new PrerequisitesNotMetException("not discarding");
 		
 		if(bEnabled){
 			boolean bRetry=false;
@@ -516,7 +514,7 @@ public abstract class ConditionalStateAbs  {
 	}
 
 	protected void setNodeGUI(Node nodeGUI) {
-		if(nodeGUI==null)throw new DeveloperMistakeException("null node gui");
+		if(nodeGUI==null)throw new PrerequisitesNotMetException("null node gui");
 		this.nodeGUI = nodeGUI;
 	}
 	
@@ -527,7 +525,7 @@ public abstract class ConditionalStateAbs  {
 	public void setAppStateManagingThis(ConditionalStateManagerI.CompositeControl cc,ConditionalStateManagerI asmParent) {
 		cc.assertSelfNotNull();
 //		assertCompositeControlNotNull(cc);
-		if(this.asmParent!=null)throw new DeveloperMistakeException(
+		if(this.asmParent!=null)throw new PrerequisitesNotMetException(
 			"already managed by "+this.asmParent+"; request made to attach at "+asmParent);
 		this.asmParent=asmParent;
 	}
