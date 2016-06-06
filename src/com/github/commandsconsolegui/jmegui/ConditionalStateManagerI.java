@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.jmegui;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.app.Application;
@@ -52,7 +53,7 @@ public class ConditionalStateManagerI extends AbstractAppState {
 	
 	ArrayList<ConditionalStateAbs> aCondStateList = new ArrayList<ConditionalStateAbs>();
 
-	private boolean	bApplicationIsExiting;
+//	private boolean	bApplicationIsExiting;
 	
 	public void configure(Application app){
 		app.getStateManager().attach(this);
@@ -109,16 +110,17 @@ public class ConditionalStateManagerI extends AbstractAppState {
 		super.setEnabled(enabled);
 	}
 	
-	/**
-	 * use this whenever application exit is requested
-	 */
-	public void applicationIsExiting(){
-		bApplicationIsExiting=true;
-	}
+//	/**
+//	 * use this whenever application exit is requested
+//	 */
+//	public void applicationIsExiting(){
+//		bApplicationIsExiting=true;
+//	}
 	
 	@Override
 	public void cleanup() {
-		if(!bApplicationIsExiting){
+//		if(!bApplicationIsExiting){
+		if(!GlobalAppRefI.i().isApplicationExiting()){
 			throw new PrerequisitesNotMetException("this state MUST never be terminated/cleaned! "+ConditionalStateManagerI.class.getName());
 		}
 	}

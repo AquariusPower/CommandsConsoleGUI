@@ -351,7 +351,7 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public void cmdExit(){
-//		sapp.stop();
+		//TODO sleep or wait for application to stop outside here?
 		System.exit(0);
 	}
 	
@@ -2561,7 +2561,7 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 		CopyFromTo,
 		FunctionCreation(true),
 		IfConditionalBlock(true),
-		MousePosition,
+		MouseCursorPosition,
 		TimePerFrame,
 		;
 		
@@ -2572,6 +2572,10 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 		EStats(boolean b){this.b=b;}
 	}
 	
+	/**
+	 * this must be here because a console not using JME can show this info too.
+	 * @return
+	 */
 	public String prepareStatsFieldText(){
 		String strStatsLast = "";
 		

@@ -54,5 +54,16 @@ public class GlobalAppRefI extends GlobalAbs<Application>{
 //		GlobalStateManagerRefI.i().set(obj.getStateManager());
 //		return super.set(obj);
 //	}
+
+	private boolean	bExiting;
+	
+	public void setAppExiting(boolean b){
+		this.bExiting=b;
+	}
+	
+	public boolean isApplicationExiting(){
+		//TODO is there some way to test if JME is exiting???
+		return bExiting;
+	}
 }
 

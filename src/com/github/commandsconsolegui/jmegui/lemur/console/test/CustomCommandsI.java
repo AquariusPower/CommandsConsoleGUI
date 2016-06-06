@@ -30,7 +30,6 @@ package com.github.commandsconsolegui.jmegui.lemur.console.test;
 import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 
 /**
@@ -42,34 +41,11 @@ public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleC
 	public CustomCommandsI(){
 		super();
 		
-//		ConsoleGUILemurStateI.i().configureSimple(KeyInput.KEY_F10);
-//		FpsLimiterStateI.i().configure();
-//		UngrabMouseStateI.i().configureSimple(null,true);
-		
 		/**
 		 *  This allows test3 at endUserCustomMethod() to work.
 		 */
 		ReflexFillI.i().setUseDefaultCfgIfMissing(true);
 	}
-	
-//	@Override
-//	public ECmdReturnStatus executePreparedCommandRoot() {
-//		boolean bCommandWorked = false;
-//		
-//		if(checkCmdValidity(null,"fpsLimit","[iMaxFps]")){
-//			Integer iMaxFps = paramInt(1);
-//			if(iMaxFps!=null){
-//				FpsLimiterStateI.i().setMaxFps(iMaxFps);
-//				bCommandWorked=true;
-//			}
-//			dumpSubEntry("FpsLimit = "+FpsLimiterStateI.i().getFpsLimit());
-//		}else
-//		{
-//			return super.executePreparedCommandRoot();
-//		}
-//		
-//		return cmdFoundReturnStatus(bCommandWorked);
-//	}
 	
 	@Override
 	public void updateToggles() {
@@ -81,22 +57,17 @@ public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleC
 	public String prepareStatsFieldText() {
 		String strStatsLast = super.prepareStatsFieldText();
 		
-		if(EStats.MousePosition.b()){
+		if(EStats.MouseCursorPosition.b()){
 			strStatsLast+=
-					"xy"
-						+(int)GlobalAppRefI.i().get().getInputManager().getCursorPosition().x
-						+","
-						+(int)GlobalAppRefI.i().get().getInputManager().getCursorPosition().y
-						+";";
+				"xy"
+					+(int)GlobalAppRefI.i().get().getInputManager().getCursorPosition().x
+					+","
+					+(int)GlobalAppRefI.i().get().getInputManager().getCursorPosition().y
+					+";";
 		}
 		
 		if(EStats.TimePerFrame.b()){
-			strStatsLast+=
-					"Tpf"+(FpsLimiterStateI.i().isEnabled() ? (int)(fTPF*1000.0f) : MiscI.i().fmtFloat(fTPF,6)+"s")
-						+(FpsLimiterStateI.i().isEnabled()?
-							"="+FpsLimiterStateI.i().getFrameDelayByCpuUsageMilis()+"+"+FpsLimiterStateI.i().getThreadSleepTimeMilis()+"ms"
-							:"")
-						+";";
+			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(fTPF)+";";
 		}
 		
 		return strStatsLast; 
@@ -108,11 +79,4 @@ public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleC
 		super.cmdExit();
 	}
 	
-//	@Override
-//	public void configure(IConsoleUI icui) {
-//		super.configure(icui);
-//		
-////		CommandsBackgroundState.i().configure(GlobalSappRefI.i().get(), icui, this);
-////		MiscJmeI.i().configure(GlobalSappRefI.i().get(), this);
-//	}
 }

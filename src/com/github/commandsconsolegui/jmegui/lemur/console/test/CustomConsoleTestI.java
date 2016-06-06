@@ -29,25 +29,17 @@ package com.github.commandsconsolegui.jmegui.lemur.console.test;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
-import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.extras.SingleAppInstanceI;
 import com.github.commandsconsolegui.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalConsoleGuiI;
-import com.github.commandsconsolegui.globals.GlobalGUINodeI;
-import com.github.commandsconsolegui.globals.GlobalRootNodeI;
-import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
-import com.github.commandsconsolegui.jmegui.MiscJmeI;
-import com.github.commandsconsolegui.jmegui.cmd.CommandsBackgroundStateI;
-import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
+import com.github.commandsconsolegui.jmegui.console.SimpleConsoleAppAbs;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
 import com.jme3.system.AppSettings;
 
@@ -56,9 +48,9 @@ import com.jme3.system.AppSettings;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleGuiTestI extends SimpleApplication implements IConsoleCommandListener, IReflexFillCfg{
-	private static ConsoleGuiTestI instance = new ConsoleGuiTestI();
-	public static ConsoleGuiTestI i(){return instance;}
+public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFillCfg{
+	private static CustomConsoleTestI instance = new CustomConsoleTestI();
+	public static CustomConsoleTestI i(){return instance;}
 	
 	protected boolean bHideSettings=true; 
 	
@@ -66,7 +58,8 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 	private final String strFieldCodePrefix="sf";
 	private final String strFieldCodePrefixLess = "VariantAsPrefixLess";
 	
-	public final StringCmdField CMD_END_USER_COMMAND_TEST = new StringCmdField(this,CustomCommandsI.strFinalCmdCodePrefix);
+	public final StringCmdField CMD_END_DEVELOPER_COMMAND_TEST = new StringCmdField(
+		this,CustomCommandsI.strFinalCmdCodePrefix);
 	
 	/**
 	 * these below were not implemented as commands here, 
@@ -76,11 +69,15 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 	private StringCmdField testCommandAutoFillPrefixLessVariant2 = new StringCmdField(this,strFieldCodePrefixLess);
 	private StringCmdField testCommandAutoFillPrefixLessVariantDefaulted3 = new StringCmdField(this,null);
 	private StringCmdField CMD_TRADITIONAL_PRETTYFIED_0 = new StringCmdField(this,CustomCommandsI.strFinalCmdCodePrefix);
-	private CustomDialogGUIState	diag;
-
-	private CommandsDelegatorI	cd;
 	
-	public boolean endUserCustomMethod(Integer i){
+	// generic dialog
+	private CustomDialogGUIState	diag;
+	
+	public CustomConsoleTestI() {
+		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
+	}
+	
+	public boolean endDevCustomMethod(Integer i){
 		cd.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
 		
 		cd.dumpSubEntry("CommandTest0: "+CMD_TRADITIONAL_PRETTYFIED_0);
@@ -94,26 +91,15 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 	
 	@Override
 	public void simpleInitApp() {
+		// the commands pipe
 		cd = GlobalCommandsDelegatorI.i().set(new CustomCommandsI());
-		MiscJmeI.i().configure(cd);
 		
-		/**
-		 * as you may not be using {@link SimpleApplication#} 
-		 */
-		GlobalGUINodeI.i().set(getGuiNode());
-		GlobalRootNodeI.i().set(getRootNode());
-		
+		// the conole UI
 		GlobalConsoleGuiI.i().set(ConsoleLemurStateI.i());
-		
 		ConsoleLemurStateI.i().configure(new ConsoleLemurStateI.CfgParm(
-			ConsoleGuiTestI.class.getSimpleName(), false, KeyInput.KEY_F10, getGuiNode()));
-		CommandsBackgroundStateI.i().configure(new CommandsBackgroundStateI.CfgParm(
-			ConsoleLemurStateI.i()));
-		FpsLimiterStateI.i().configure(new FpsLimiterStateI.CfgParm());
-		UngrabMouseStateI.i().configure(new UngrabMouseStateI.CfgParm(null,null));
-
-		cd.addConsoleCommandListener(this);
+			CustomConsoleTestI.class.getSimpleName(), false, KeyInput.KEY_F10, getGuiNode()));
 		
+		// test dialogs
 		diag = new CustomDialogGUIState();
 		diag.configure(new CustomDialogGUIState.CfgParm(
 			"TestDialog1", false, getGuiNode()));
@@ -121,25 +107,27 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 		new CustomDialogGUIState().configure(new CustomDialogGUIState.CfgParm(
 			"TestDialog2", false, getGuiNode()));
 		
-//		SingleInstanceState.i().configureBeforeInitializing(this,true);
-		SingleAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);
+		// other basic initializations
+		super.simpleInitApp();
 	}
 	
+	/**
+	 * this is here just to help
+	 */
 	@Override
 	public void simpleUpdate(float tpf) {
 		super.simpleUpdate(tpf);
 	}
 	
 	public static void main( String... args ) {
-		ConsoleGuiTestI main = (ConsoleGuiTestI) GlobalAppRefI.i().set(ConsoleGuiTestI.i());
-		main.configure();
+		CustomConsoleTestI main = (CustomConsoleTestI) GlobalAppRefI.i().set(CustomConsoleTestI.i());
 		
 		if(main.bHideSettings){
 			AppSettings as = new AppSettings(true);
 			as.setResizable(true);
 			as.setWidth(1024);
 			as.setHeight(768);
-			//as.setFrameRate(30);
+			//as.setFrameRate(30); //TODO are we unable to change this on-the-fly after starting the application?
 			main.setSettings(as);
 			main.setShowSettings(false);
 		}
@@ -149,16 +137,12 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 		main.start();
 	}
 
-	private void configure() {
-		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
-	}
-
 	@Override
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI	cc) {
 		boolean bCommandWorked = false;
 		
-		if(cc.checkCmdValidity(this,CMD_END_USER_COMMAND_TEST,"[iHowMany] users working?")){
-			bCommandWorked = endUserCustomMethod(cc.paramInt(1));
+		if(cc.checkCmdValidity(this,CMD_END_DEVELOPER_COMMAND_TEST,"[iHowMany] users working?")){
+			bCommandWorked = endDevCustomMethod(cc.paramInt(1));
 		}else
 		{
 			return ECmdReturnStatus.NotFound;
@@ -190,15 +174,8 @@ public class ConsoleGuiTestI extends SimpleApplication implements IConsoleComman
 		 * just call it!
 		 * Remember to set the same variant!
 		 */
-//		if(rfcfg==null)rfcfg = getReflexFillCfg(rfcv);
 		if(rfcfg==null)rfcfg = cd.getReflexFillCfg(rfcv);
 		
 		return rfcfg;
-	}
-	
-	@Override
-	public void stop(boolean waitFor) {
-		ConditionalStateManagerI.i().applicationIsExiting();
-		super.stop(waitFor);
 	}
 }	

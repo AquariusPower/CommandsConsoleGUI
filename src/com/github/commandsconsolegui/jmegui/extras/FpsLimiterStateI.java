@@ -32,6 +32,7 @@ import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.jmegui.ConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.ConditionalStateAbs.ICfgParm;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
+import com.github.commandsconsolegui.misc.MiscI;
 
 /**
  * Spare GPU fan!
@@ -143,5 +144,14 @@ public class FpsLimiterStateI extends CmdConditionalStateAbs{
 		
 		return cc.cmdFoundReturnStatus(bCommandWorked);
 	}
-
+	
+	public String getSimpleStatsReport(float fTPF){
+		return "Tpf"
+			+(FpsLimiterStateI.i().isEnabled() ? 
+				(int)(fTPF*1000.0f) : 
+				MiscI.i().fmtFloat(fTPF,6)+"s")
+			+(FpsLimiterStateI.i().isEnabled() ? 
+				"="+FpsLimiterStateI.i().getFrameDelayByCpuUsageMilis()+"+"+FpsLimiterStateI.i().getThreadSleepTimeMilis()+"ms" :
+				"");
+	}
 }
