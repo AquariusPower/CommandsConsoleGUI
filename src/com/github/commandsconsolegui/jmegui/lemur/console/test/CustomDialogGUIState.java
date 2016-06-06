@@ -53,11 +53,11 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs<String>{
 //}
 //}
 	public static class CfgParm extends LemurDialogGUIStateAbs.CfgParm{
-		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix,
+		public CfgParm(boolean	bOptionSelectionMode,String strUIId, boolean bIgnorePrefixAndSuffix,
 				Node nodeGUI, Float fDialogHeightPercentOfAppWindow,
 				Float fDialogWidthPercentOfAppWindow, Float fInfoHeightPercentOfDialog,
 				Integer iEntryHeightPixels) {
-			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI,
+			super(bOptionSelectionMode,strUIId, bIgnorePrefixAndSuffix, nodeGUI,
 					fDialogHeightPercentOfAppWindow, fDialogWidthPercentOfAppWindow,
 					fInfoHeightPercentOfDialog, iEntryHeightPixels);
 			// TODO Auto-generated constructor stub
@@ -83,10 +83,9 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs<String>{
 	}
 	
 	@Override
-	protected void updateTextInfo() {
-		lblTextInfo.setText("Info: Type a list filter at input text area and hit Enter.");
-//		super.updateTextInfo();
-	}
+	protected String getTextInfo() {
+		return super.getTextInfo()+"Custom Dialog: Test.";
+	};
 	
 	@Override
 	protected void updateList() {

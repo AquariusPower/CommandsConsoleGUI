@@ -30,7 +30,6 @@ package com.github.commandsconsolegui.jmegui.extras;
 import java.util.HashMap;
 
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
-import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs.CfgParm;
 import com.jme3.scene.Node;
 
 /**
@@ -47,11 +46,18 @@ public abstract class InteractionDialogStateAbs <V> extends BaseDialogStateAbs{
 	protected String	strLastFilter = "";
 	protected HashMap<String,V> hmKeyValue = new HashMap<String,V>();
 	protected String	strLastSelectedKey;
+	protected boolean bOptionSelectionMode = false;
+	private V	valueOptionSelected;
 	
 	public abstract void clearSelection();
 	
+	public V getOptionSelected(){
+		return valueOptionSelected;
+	}
+	
 	public static class CfgParm extends BaseDialogStateAbs.CfgParm{
-		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI) {
+		public boolean	bOptionSelectionMode;
+		public CfgParm(boolean	bOptionSelectionMode, String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI) {
 			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI,
 					/** 
 					 * Dialogs must be initially disabled because they are enabled 
@@ -59,11 +65,13 @@ public abstract class InteractionDialogStateAbs <V> extends BaseDialogStateAbs{
 					 */
 					false 
 				);
+			this.bOptionSelectionMode=bOptionSelectionMode;
 		}
 	}
 	@Override
 	public InteractionDialogStateAbs<V> configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
+		this.bOptionSelectionMode=cfg.bOptionSelectionMode;
 		super.configure(icfg);
 		return storeCfgAndReturnSelf(icfg);
 	}
@@ -89,6 +97,16 @@ public abstract class InteractionDialogStateAbs <V> extends BaseDialogStateAbs{
 	
 	protected abstract void updateTextInfo();
 	
+	protected String getTextInfo(){
+		String str="Info: Type a list filter at input text area and hit Enter.\n";
+		
+		if(bOptionSelectionMode){
+			str+="Option Mode: when hitting Enter, if an entry is selected, it's value will be chosen.\n";
+		}
+		
+		return str;
+	}
+	
 	/**
 	 * this will react to changes on the list
 	 */
@@ -111,6 +129,12 @@ public abstract class InteractionDialogStateAbs <V> extends BaseDialogStateAbs{
 		return val.toString();
 	}
 	
+	/**
+	 * override empty to disable filter
+	 */
+	protected void applyListFilter(){
+		this.strLastFilter=getInputText();
+	}
 	
 	/**
 	 * what happens when pressing ENTER keys
@@ -118,9 +142,23 @@ public abstract class InteractionDialogStateAbs <V> extends BaseDialogStateAbs{
 	 */
 	@Override
 	protected void actionSubmit(){
-		this.strLastFilter=getInputText();
-		
+		applyListFilter();
 		updateAllParts();
+		
+		if(bOptionSelectionMode){
+			
+//			if(getInputText().isEmpty()){ // was cleared
+				valueOptionSelected = getSelectedValue(); //this value is in this console variable now
+				if(valueOptionSelected!=null){
+					cd().dumpInfoEntry(this.getId()+": Option Selected: "+valueOptionSelected);
+					requestDisable(); //close if there is one entry selected
+				}
+//			}else{
+//				getInputField().setText(""); //clear input field
+//			}
+			
+//			}
+		}
 	}
 	
 	protected void updateAllParts(){

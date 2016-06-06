@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.jmegui.lemur.console.test;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
+import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.extras.SingleAppInstanceI;
 import com.github.commandsconsolegui.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
@@ -41,6 +42,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.input.KeyInput;
+import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
 
 /**
@@ -70,8 +72,12 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 	private StringCmdField testCommandAutoFillPrefixLessVariantDefaulted3 = new StringCmdField(this,null);
 	private StringCmdField CMD_TRADITIONAL_PRETTYFIED_0 = new StringCmdField(this,CustomCommandsI.strFinalCmdCodePrefix);
 	
+//	private StringVarField svfOptionSelectedDialog2 = new StringVarField(this,"");
+	
 	// generic dialog
-	private CustomDialogGUIState	diag;
+	private CustomDialogGUIState	diag2;
+
+//	private String	strOptionSelected;
 	
 	public CustomConsoleTestI() {
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
@@ -100,14 +106,46 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 			CustomConsoleTestI.class.getSimpleName(), false, KeyInput.KEY_F10, getGuiNode()));
 		
 		// test dialogs
-		diag = new CustomDialogGUIState();
-		diag.configure(new CustomDialogGUIState.CfgParm(
-			"TestDialog1", false, getGuiNode(), null, null, null, null
+		new CustomDialogGUIState().configure(new CustomDialogGUIState.CfgParm(
+			false, "TestDialog1", false, getGuiNode(), null, null, null, null
 		));
 		
-		new CustomDialogGUIState().configure(new CustomDialogGUIState.CfgParm(
-			"TestDialog2", false, getGuiNode(), 0.5f, 0.6f, null, null
+		// this dialog, after closed, may have diag2.getOptionSelected() available
+		diag2 = new CustomDialogGUIState().configure(new CustomDialogGUIState.CfgParm(
+			true, "TestDialog2", false, getGuiNode(), 0.5f, 0.6f, null, null
 		));
+		
+		
+//		new CustomDialogGUIState(){
+//			class CfgParm extends CustomDialogGUIState.CfgParm{
+//				public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix,
+//						Node nodeGUI, Float fDialogHeightPercentOfAppWindow,
+//						Float fDialogWidthPercentOfAppWindow,
+//						Float fInfoHeightPercentOfDialog, Integer iEntryHeightPixels) {
+//					super(strUIId, bIgnorePrefixAndSuffix, nodeGUI,
+//							fDialogHeightPercentOfAppWindow, fDialogWidthPercentOfAppWindow,
+//							fInfoHeightPercentOfDialog, iEntryHeightPixels);
+//					// TODO Auto-generated constructor stub
+//				}};
+//			@Override
+//			protected void applyListFilter() {}; //disables filtering
+//			@Override
+//			protected void actionSubmit() { 
+//				super.actionSubmit();
+//				
+//				if(getInputText().isEmpty()){ // was cleared
+//					String str=getSelectedValue();
+//					if(str!=null){
+//						svfOptionSelectedDialog2.setObjectValue(str); //this value is in this console variable now
+//						requestDisable(); //close if there is one entry selected
+//					}
+//				}else{
+//					getInputField().setText(""); //clear input field
+//				}
+//			};
+//		}.configure(new CustomDialogGUIState.CfgParm(
+//			true, "TestDialog2", false, getGuiNode(), 0.5f, 0.6f, null, null
+//		));
 		
 		// other basic initializations
 		super.simpleInitApp();

@@ -88,12 +88,12 @@ public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateA
 		 * @param fInfoHeightPercentOfDialog (if null will use default) the percentual height to show informational text, the list and input field will properly use the remaining space
 		 * @param iEntryHeightPixels
 		 */
-		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix,
+		public CfgParm(boolean	bOptionSelectionMode,String strUIId, boolean bIgnorePrefixAndSuffix,
 				Node nodeGUI, Float fDialogHeightPercentOfAppWindow,
 				Float fDialogWidthPercentOfAppWindow, Float fInfoHeightPercentOfDialog,
 				Integer iEntryHeightPixels)
 		{
-			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI);
+			super(bOptionSelectionMode,strUIId, bIgnorePrefixAndSuffix, nodeGUI);
 			
 			this.fDialogHeightPercentOfAppWindow = fDialogHeightPercentOfAppWindow;
 			this.fDialogWidthPercentOfAppWindow = fDialogWidthPercentOfAppWindow;
@@ -351,7 +351,7 @@ public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateA
 	@Override
 	protected void updateTextInfo(){
 //		lblTextInfo.setText("DIALOG for "+this.getClass().getSimpleName());
-		lblTextInfo.setText("Info:");
+		lblTextInfo.setText(getTextInfo());
 	}
 	
 	@Override
