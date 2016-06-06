@@ -74,7 +74,7 @@ public class UngrabMouseStateI extends ConditionalStateAbs {
 //	public void configure(Long lSlowMachineDelayToUngrabMilis, Boolean bKeepUngrabbedOnSlowdown) {
 		CfgParm cfg = (CfgParm)icfg;
 		super.configure(new ConditionalStateAbs.CfgParm(
-				GlobalAppRefI.i().get()));
+				GlobalAppRefI.i().get(),null));
 		
 		if(cfg.lSlowMachineDelayToUngrabMilis!=null)this.lDelayToUngrabMilis=cfg.lSlowMachineDelayToUngrabMilis;
 		if(cfg.bKeepUngrabbedOnSlowdown!=null)this.bKeepUngrabbedOnSlowDown=cfg.bKeepUngrabbedOnSlowdown;

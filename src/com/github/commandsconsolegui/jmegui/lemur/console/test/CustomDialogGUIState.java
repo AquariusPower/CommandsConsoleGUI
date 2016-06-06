@@ -41,24 +41,44 @@ import com.simsilica.lemur.GuiGlobals;
 public class CustomDialogGUIState extends LemurDialogGUIStateAbs<String>{
 	ArrayList<String> astr;
 	
-	public static class CfgParm implements ICfgParm{
-		String strUIId;
-		boolean bIgnorePrefixAndSuffix;
-		Node nodeGUI;
-		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
-			super();
-			this.strUIId = strUIId;
-			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
-			this.nodeGUI =nodeGUI;
+//public static class CfgParm implements ICfgParm{
+//String strUIId;
+//boolean bIgnorePrefixAndSuffix;
+//Node nodeGUI;
+//public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
+//	super();
+//	this.strUIId = strUIId;
+//	this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
+//	this.nodeGUI =nodeGUI;
+//}
+//}
+	public static class CfgParm extends LemurDialogGUIStateAbs.CfgParm{
+		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix,
+				Node nodeGUI, Float fDialogHeightPercentOfAppWindow,
+				Float fDialogWidthPercentOfAppWindow, Float fInfoHeightPercentOfDialog,
+				Integer iEntryHeightPixels) {
+			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI,
+					fDialogHeightPercentOfAppWindow, fDialogWidthPercentOfAppWindow,
+					fInfoHeightPercentOfDialog, iEntryHeightPixels);
+			// TODO Auto-generated constructor stub
 		}
 	}
+	
 	@Override
 	public CustomDialogGUIState configure(ICfgParm icfg) {
-//	public void configure(String strUIId, boolean bIgnorePrefixAndSuffix) {
 		CfgParm cfg = (CfgParm)icfg;
+		
 		astr = new ArrayList<String>();
-		super.configure(new LemurDialogGUIStateAbs.CfgParm(
-			cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.nodeGUI));
+		super.configure(cfg); //params are identical
+//		super.configure(new LemurDialogGUIStateAbs.CfgParm(
+//			cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.nodeGUI, ));
+		
+		/**
+		 * this is just an example as state changes can be delayed
+		 */
+		super.setRetryDelay(500);
+		super.rInit.setRetryDelay(1000); //after the generic one
+		
 		return storeCfgAndReturnSelf(icfg);
 	}
 	
@@ -72,19 +92,14 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs<String>{
 	protected void updateList() {
 		astr.add("New test entry: "+MiscI.i().getDateTimeForFilename(true));
 		if(astr.size()>100)astr.remove(0);
+		
 		updateList(astr);
 	}
-
-//	@Override
-//	protected boolean cleanupValidating() {
-//		astr.clear();
-//		astr=null;
-//		return super.cleanupValidating();
-//	}
 
 	@Override
 	protected boolean initCheckPrerequisites() {
 		if(GuiGlobals.getInstance()==null)return false;
+		
 		return super.initCheckPrerequisites();
 	}
 	

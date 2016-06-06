@@ -47,7 +47,7 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 	private Spatial	sptContainerMain;
 	private Spatial	sptIntputField;
 	
-	protected String strUIId = null;
+//	protected String strUIId = null;
 //	protected String	strCmd;
 //	protected StackTraceElement[] asteInitDebug = null;
 	protected String	strTitle;
@@ -80,15 +80,18 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 		CfgParm cfg = (CfgParm)icfg;
 //	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
 		
-		bEnabled=cfg.bInitiallyEnabled;
+//		bEnabled=cfg.bInitiallyEnabled;
+//		if(!cfg.bInitiallyEnabled)requestDisable();
+		if(!cfg.bInitiallyEnabled)initiallyDisabled();
 		
 		super.setNodeGUI(cfg.nodeGUI);//getNodeGUI()
 
 		strCmdPrefix = "toggleUI";
 		strCmdSuffix = "";
 		
+//		ConditionalStateManagerI.i().
 		if(cfg.strUIId==null || cfg.strUIId.isEmpty())throw new NullPointerException("invalid UI identifier");
-		this.strUIId=cfg.strUIId;
+		this.strCaseInsensitiveId=cfg.strUIId;
 		
 //		this.strCmd=strCmdPrefix+strUIId+strCmdSuffix;
 		this.strTitle = "Dialog: "+cfg.strUIId;
