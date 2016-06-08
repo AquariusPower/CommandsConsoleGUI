@@ -30,19 +30,20 @@ package com.github.commandsconsolegui.jmegui.lemur.console;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalConsoleGuiI;
+import com.github.commandsconsolegui.jmegui.MouseCursor.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
+import com.github.commandsconsolegui.jmegui.lemur.MouseCursorListenerAbs;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.event.CursorButtonEvent;
 import com.simsilica.lemur.event.CursorMotionEvent;
-import com.simsilica.lemur.event.DefaultCursorListener;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleMouseCursorListenerI extends DefaultCursorListener {
+public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 	private static ConsoleMouseCursorListenerI instance = new ConsoleMouseCursorListenerI();
 	public static ConsoleMouseCursorListenerI i(){return instance;}
 	
@@ -95,18 +96,47 @@ public class ConsoleMouseCursorListenerI extends DefaultCursorListener {
 		cursorMoveEvent(event, target, capture);
 	}
 	
+//	@Override
+//	protected boolean click(EMouseCursorButton button, Spatial target,	Spatial capture) {
+//		debugReport(null, button.getLastButtonEvent(), target, capture);
+//		
+//		if(!button.isPressed()){ //on release
+//			switch(button){
+//				case ActionClick:
+//					if(cgui.isHintBox(target)){
+//						cgui.checkAndApplyHintAtInputField();
+//						return true;
+//					}
+//					break;
+//				case ContextPropertiesClick:
+//					break;
+//				case ScrollClick:
+//					break;
+//			}
+//		}
+//		
+//		return super.click(button, target, capture);
+//	}
+	
 	@Override
-	protected void click(CursorButtonEvent event, Spatial target,	Spatial capture) {
-		super.click(event, target, capture);
+	public boolean cursorClick(EMouseCursorButton button, CursorButtonEvent eventButton, Spatial target,Spatial capture) {
+		debugReport(null, eventButton, target, capture);
 		
-		if(!event.isPressed()){ //on release
-			if(event.getButtonIndex()==0){ //main button
+//		if(!button.isPressed()){ //on release
+		switch(button){
+			case ActionClick:
 				if(cgui.isHintBox(target)){
 					cgui.checkAndApplyHintAtInputField();
+					return true;
 				}
-			}
+				break;
+			case ContextPropertiesClick:
+				break;
+			case ScrollClick:
+				break;
 		}
+//		}
 		
-		debugReport(null, event, target, capture);
+		return super.cursorClick(button, eventButton, target, capture);
 	}
 }

@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.jmegui;
 
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
+import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -59,12 +60,14 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 		boolean bIgnorePrefixAndSuffix;
 		Node nodeGUI;
 		boolean bInitiallyEnabled;
-		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI, boolean bInitiallyEnabled) {
+//		Long lMouseCursorClickDelayMilis;
+		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI, boolean bInitiallyEnabled){//, Long lMouseCursorClickDelayMilis) {
 			super();
 			this.strUIId = strUIId;
 			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
 			this.nodeGUI = nodeGUI;
 			this.bInitiallyEnabled=bInitiallyEnabled;
+//			this.lMouseCursorClickDelayMilis=lMouseCursorClickDelayMilis;
 		}
 	}
 	@Override
@@ -75,6 +78,8 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 //		bEnabled=cfg.bInitiallyEnabled;
 //		if(!cfg.bInitiallyEnabled)requestDisable();
 		if(!cfg.bInitiallyEnabled)initiallyDisabled();
+		
+//		MouseCursor.i().configure(cfg.lMouseCursorClickDelayMilis);
 		
 		super.setNodeGUI(cfg.nodeGUI);//getNodeGUI()
 

@@ -35,6 +35,7 @@ import com.github.commandsconsolegui.extras.SingleAppInstanceI;
 import com.github.commandsconsolegui.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalConsoleGuiI;
+import com.github.commandsconsolegui.jmegui.MouseCursor;
 import com.github.commandsconsolegui.jmegui.console.SimpleConsoleAppAbs;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -114,38 +115,6 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 		diag2 = new CustomDialogGUIState().configure(new CustomDialogGUIState.CfgParm(
 			true, "TestDialog2", false, getGuiNode(), 0.5f, 0.6f, null, null
 		));
-		
-		
-//		new CustomDialogGUIState(){
-//			class CfgParm extends CustomDialogGUIState.CfgParm{
-//				public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix,
-//						Node nodeGUI, Float fDialogHeightPercentOfAppWindow,
-//						Float fDialogWidthPercentOfAppWindow,
-//						Float fInfoHeightPercentOfDialog, Integer iEntryHeightPixels) {
-//					super(strUIId, bIgnorePrefixAndSuffix, nodeGUI,
-//							fDialogHeightPercentOfAppWindow, fDialogWidthPercentOfAppWindow,
-//							fInfoHeightPercentOfDialog, iEntryHeightPixels);
-//					// TODO Auto-generated constructor stub
-//				}};
-//			@Override
-//			protected void applyListFilter() {}; //disables filtering
-//			@Override
-//			protected void actionSubmit() { 
-//				super.actionSubmit();
-//				
-//				if(getInputText().isEmpty()){ // was cleared
-//					String str=getSelectedValue();
-//					if(str!=null){
-//						svfOptionSelectedDialog2.setObjectValue(str); //this value is in this console variable now
-//						requestDisable(); //close if there is one entry selected
-//					}
-//				}else{
-//					getInputField().setText(""); //clear input field
-//				}
-//			};
-//		}.configure(new CustomDialogGUIState.CfgParm(
-//			true, "TestDialog2", false, getGuiNode(), 0.5f, 0.6f, null, null
-//		));
 		
 		// other basic initializations
 		super.simpleInitApp();

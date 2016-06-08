@@ -57,14 +57,13 @@ public abstract class InteractionDialogStateAbs <V> extends BaseDialogStateAbs{
 	
 	public static class CfgParm extends BaseDialogStateAbs.CfgParm{
 		public boolean	bOptionSelectionMode;
-		public CfgParm(boolean	bOptionSelectionMode, String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI) {
+		public CfgParm(boolean bOptionSelectionMode, String strUIId, boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
 			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI,
 					/** 
 					 * Dialogs must be initially disabled because they are enabled 
 					 * on user demand. 
 					 */
-					false 
-				);
+					false);
 			this.bOptionSelectionMode=bOptionSelectionMode;
 		}
 	}

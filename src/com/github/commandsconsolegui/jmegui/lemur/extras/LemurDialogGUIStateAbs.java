@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.jmegui.extras.InteractionDialogStateAbs;
-import com.github.commandsconsolegui.jmegui.lemur.DialogDragMouseCursorListenerI;
+import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
@@ -56,6 +56,7 @@ import com.simsilica.lemur.event.KeyActionListener;
 /**
 * 
 * More info at {@link InteractionDialogStateAbs}
+*	TODO implement docking dialogs, a small icon will be created at app window edges
 * 
 * @author AquariusPower <https://github.com/AquariusPower>
 *
@@ -107,7 +108,7 @@ public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateA
 	public LemurDialogGUIStateAbs<V> configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
 		
-		DialogDragMouseCursorListenerI.i().configure();
+//		DialogMouseCursorListenerI.i().configure(null);
 		
 		if(cfg.fDialogHeightPercentOfAppWindow==null){
 			cfg.fDialogHeightPercentOfAppWindow=0.75f;
@@ -175,7 +176,7 @@ public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateA
 		lblTitle.setName(getId()+"_Title");
 		lblTitle.setColor(ColorRGBA.Green); //TODO make it custom
 		getNorthContainer().addChild(lblTitle, BorderLayout.Position.North);
-		CursorEventControl.addListenersToSpatial(lblTitle, DialogDragMouseCursorListenerI.i());
+		CursorEventControl.addListenersToSpatial(lblTitle, DialogMouseCursorListenerI.i());
 		
 		// simple info
 		lblTextInfo = new Label("",strStyle);

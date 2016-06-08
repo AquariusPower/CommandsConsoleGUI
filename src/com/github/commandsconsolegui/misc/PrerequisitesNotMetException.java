@@ -41,10 +41,14 @@ public class PrerequisitesNotMetException extends NullPointerException {
 		// TODO Auto-generated constructor stub
 	}
 
-	public PrerequisitesNotMetException(String s) {
-		super(s);
-		// TODO Auto-generated constructor stub
+	public PrerequisitesNotMetException(String str, Object... aobj) {
+		super(join(str,aobj));
 	}
 	
-	
+	private static String join(String str, Object... aobj){
+		for(Object obj:aobj){
+			str+=";"+obj;
+		}
+		return str;
+	}
 }

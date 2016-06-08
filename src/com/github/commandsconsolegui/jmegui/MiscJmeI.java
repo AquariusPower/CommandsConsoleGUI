@@ -37,9 +37,14 @@ import com.github.commandsconsolegui.globals.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.GlobalRootNodeI;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.jme3.font.BitmapText;
+import com.jme3.input.MouseInput;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.system.JmeSystem;
+import com.simsilica.lemur.event.AbstractCursorEvent;
+import com.simsilica.lemur.event.CursorButtonEvent;
+import com.simsilica.lemur.event.CursorMotionEvent;
 
 /**
  * @author AquariusPower <https://github.com/AquariusPower>
@@ -106,4 +111,13 @@ public class MiscJmeI {
 		}
 		return null;
 	}
+	
+	public Vector3f eventToV3f(AbstractCursorEvent event){
+		return new Vector3f(event.getX(),event.getY(),0);
+	}
+	
+//	
+//	public boolean isMouseCursorButton(EMouseCursorButton emcb, int iIndex){
+//		return emcb.getIndex()==iIndex;
+//	}
 }

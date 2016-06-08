@@ -1182,6 +1182,11 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 			bRestrictedOnly=true;
 			strFilter=strFilter.substring(1);
 		}
+		
+//		setupVars(false); //this will refresh any pending variables
+//		databaseSave(); //this will refresh any pending variables too
+		
+		ArrayList<String> astr = new ArrayList<String>();
 //		if(strFilter!=null)strFilter=strFilter.substring(1);
 		for(String strVarId : getVariablesIdentifiers(true)){
 			if(isRestricted(strVarId) && !bRestrictedOnly)continue;
@@ -1191,9 +1196,14 @@ public class CommandsDelegatorI implements IReflexFillCfg, IHandleExceptions{
 			 * empty filter will work too.
 			 */
 			if(strVarId.toLowerCase().contains(strFilter.toLowerCase())){
-				varReport(strVarId);
+				astr.add(strVarId);
 			}
 		}
+		Collections.sort(astr);
+		for(String str:astr){
+			varReport(str);
+		}
+		
 		dumpSubEntry(getCommentPrefix()+"UserVarListHashCode="+tmUserVariables.hashCode());
 		
 		return true;

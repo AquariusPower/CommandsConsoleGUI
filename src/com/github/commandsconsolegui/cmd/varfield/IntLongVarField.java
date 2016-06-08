@@ -41,6 +41,8 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
  * This class is intended to be used only as class field variables.
  * It automatically creates console variables.
  * 
+ * TODO set limit min and max, optinally throw exception or just fix the value to not over/underflow
+ * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
