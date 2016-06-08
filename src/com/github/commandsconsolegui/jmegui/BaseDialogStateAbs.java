@@ -41,17 +41,9 @@ import com.jme3.scene.Spatial;
  *
  */
 public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implements IReflexFillCfg{
-//	protected SimpleApplication	sapp;
-//	protected CommandsDelegatorI	cd;
-	
 	private Spatial	sptContainerMain;
 	private Spatial	sptIntputField;
-	
-//	protected String strUIId = null;
-//	protected String	strCmd;
-//	protected StackTraceElement[] asteInitDebug = null;
 	protected String	strTitle;
-//	BoolTogglerCmdField btgShowDialog = new BoolTogglerCmdField(this,false);
 	
 	public Spatial getContainerMain(){
 		return sptContainerMain;
@@ -116,7 +108,6 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 	protected abstract boolean initGUI();
 	protected abstract boolean initKeyMappings();
 	public abstract String getInputText();
-//	public abstract void requestFocus(Spatial spt);
 	
 	/**
 	 * what happens when pressing ENTER keys
@@ -127,8 +118,6 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 	@Override
 	protected boolean enableOrUndo() {
 		getNodeGUI().attachChild(sptContainerMain);
-		
-//		requestFocus(sptIntputField);
 		
 		setMouseCursorKeepUngrabbed(true);
 		

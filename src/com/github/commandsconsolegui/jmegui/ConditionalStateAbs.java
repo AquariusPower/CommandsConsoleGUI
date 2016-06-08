@@ -28,10 +28,15 @@
 package com.github.commandsconsolegui.jmegui;
 
 //import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ERecreateConsoleSteps;
+import java.io.IOException;
+
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppState;
+import com.jme3.export.JmeExporter;
+import com.jme3.export.JmeImporter;
+import com.jme3.export.Savable;
 import com.jme3.scene.Node;
 
 /**
@@ -51,7 +56,7 @@ import com.jme3.scene.Node;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class ConditionalStateAbs  {
+public abstract class ConditionalStateAbs implements Savable{
 	
 	/**
 	 * This Id is only required if there is more than one state of the same class.
@@ -755,4 +760,13 @@ public abstract class ConditionalStateAbs  {
 		rDisable.setRetryDelay(lMilis);
 		rDiscard.setRetryDelay(lMilis);
 	}
+
+  @Override
+	public void write(JmeExporter ex) throws IOException{
+  	
+  };
+  @Override
+	public void read(JmeImporter im) throws IOException{
+  	
+  };
 }

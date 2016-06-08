@@ -33,8 +33,11 @@ import java.util.Collections;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.globals.GlobalGUINodeI;
+import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
+import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.GuiGlobals;
@@ -141,6 +144,17 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	public void removeAllFocus(){
 		asptFocusRequestList.clear();
 		GuiGlobals.getInstance().requestFocus(null);
+	}
+	
+	public void prepareDialogToBeFocused(BaseDialogStateAbs diag){
+		diag.getContainerMain().setUserData(BaseDialogStateAbs.class.getName(), diag);
+	}
+	
+	public void requestDialogFocus(Spatial sptChild) {
+		BaseDialogStateAbs diag = (BaseDialogStateAbs)MiscJmeI.i().getParentestFrom(sptChild)
+			.getUserData(BaseDialogStateAbs.class.getName());
+		if(diag==null)throw new PrerequisitesNotMetException(sptChild.getName());
+		requestFocus(diag.getIntputField(),true);
 	}
 	
 	public void requestFocus(Spatial spt) {

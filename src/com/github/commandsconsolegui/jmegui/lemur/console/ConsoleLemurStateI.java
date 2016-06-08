@@ -79,7 +79,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 	public static ConsoleLemurStateI i(){return instance;}
 	
 	StringVarField svfBackgroundHexaColorRGBA = new StringVarField(this,"");
-	protected ConsoleCursorListener consoleCursorListener;
+//	protected ConsoleMouseCursorListenerI consoleCursorListener;
 	protected Button	btnCopy;
 	protected Button	btnPaste;
 	protected Button	btnClipboardShow;
@@ -151,6 +151,8 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 		LemurFocusHelperStateI.i().configure(new LemurFocusHelperStateI.CfgParm(null));
 		
 		ConditionalStateManagerI.i().configure(GlobalAppRefI.i().get());
+		
+		ConsoleMouseCursorListenerI.i().configure();
 		
 		return storeCfgAndReturnSelf(icfg);
 	}
@@ -243,14 +245,14 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 	public void initializeOnlyTheUI() {
 		prepareStyle();
 		
-		consoleCursorListener = new ConsoleCursorListener();
-		consoleCursorListener.configure();
+//		consoleCursorListener = new ConsoleMouseCursorListenerI();
+//		consoleCursorListener.configure();
 		
 		// auto complete hint
 		super.vlstrAutoCompleteHint = new VersionedList<String>();
 		super.setHintBox(new ListBox<String>(new VersionedList<String>(),strStyle));
 		getHintBox().setModel(getHintList());
-		CursorEventControl.addListenersToSpatial(getHintBox(), consoleCursorListener);
+		CursorEventControl.addListenersToSpatial(getHintBox(), ConsoleMouseCursorListenerI.i());
 		
 		// main container
 		setContainerMain(new Container(new BorderLayout(), strStyle));
@@ -304,7 +306,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 		 * CENTER ELEMENT (dump entries area) ===========================================
 		 */
 		lstbxDumpArea = new ListBox<String>(new VersionedList<String>(),strStyle);
-    CursorEventControl.addListenersToSpatial(getDumpArea(), consoleCursorListener);
+    CursorEventControl.addListenersToSpatial(getDumpArea(), ConsoleMouseCursorListenerI.i());
 		Vector3f v3fLstbxSize = v3fConsoleSize.clone();
 //		v3fLstbxSize.x/=2;
 //		v3fLstbxSize.y/=2;
@@ -329,7 +331,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 		 */
 		// input
 		super.setIntputField(new TextField(""+cd().getCommandPrefix(),strStyle));
-    CursorEventControl.addListenersToSpatial(getInputField(), consoleCursorListener);
+    CursorEventControl.addListenersToSpatial(getInputField(), ConsoleMouseCursorListenerI.i());
 		LemurFocusHelperStateI.i().addFocusChangeListener(getInputField());
 		fInputHeight = MiscJmeI.i().retrieveBitmapTextFor(getInputField()).getLineHeight();
 		getContainerConsole().addChild( getInputField(), BorderLayout.Position.South );

@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
 import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
 import com.github.commandsconsolegui.jmegui.extras.InteractionDialogStateAbs;
+import com.github.commandsconsolegui.jmegui.lemur.DialogDragMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
@@ -48,6 +49,7 @@ import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.TextEntryComponent;
 import com.simsilica.lemur.core.VersionedList;
+import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.event.KeyAction;
 import com.simsilica.lemur.event.KeyActionListener;
 
@@ -105,6 +107,8 @@ public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateA
 	public LemurDialogGUIStateAbs<V> configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
 		
+		DialogDragMouseCursorListenerI.i().configure();
+		
 		if(cfg.fDialogHeightPercentOfAppWindow==null){
 			cfg.fDialogHeightPercentOfAppWindow=0.75f;
 		}
@@ -119,6 +123,10 @@ public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateA
 		
 		super.configure(icfg);
 		return storeCfgAndReturnSelf(icfg);
+	}
+	
+	public boolean isMyChild(Spatial spt){
+		return getContainerMain().hasChild(spt); //this is actually recursive!!!
 	}
 	
 //	@Override
@@ -147,6 +155,7 @@ public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateA
 			
 		setContainerMain(new Container(new BorderLayout(), strStyle));
 		getContainerMain().setName(getId()+"_Dialog");
+		LemurFocusHelperStateI.i().prepareDialogToBeFocused(this);
 		
 //		Vector3f v3fDiagWindowSize = v3fApplicationWindowSize.mult(fDialogPerc);
 		Vector3f v3fDiagWindowSize = new Vector3f(v3fApplicationWindowSize);
@@ -166,6 +175,7 @@ public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateA
 		lblTitle.setName(getId()+"_Title");
 		lblTitle.setColor(ColorRGBA.Green); //TODO make it custom
 		getNorthContainer().addChild(lblTitle, BorderLayout.Position.North);
+		CursorEventControl.addListenersToSpatial(lblTitle, DialogDragMouseCursorListenerI.i());
 		
 		// simple info
 		lblTextInfo = new Label("",strStyle);

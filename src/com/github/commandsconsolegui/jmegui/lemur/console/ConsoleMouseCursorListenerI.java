@@ -42,15 +42,16 @@ import com.simsilica.lemur.event.DefaultCursorListener;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleCursorListener extends DefaultCursorListener {
+public class ConsoleMouseCursorListenerI extends DefaultCursorListener {
+	private static ConsoleMouseCursorListenerI instance = new ConsoleMouseCursorListenerI();
+	public static ConsoleMouseCursorListenerI i(){return instance;}
+	
 	ConsoleStateAbs csa;
-//	private SimpleApplication	sapp;
-	private CommandsDelegatorI	cc;
+	private CommandsDelegatorI	cd;
 	private ConsoleStateAbs	cgui;
 	
 	public void configure(){
-//		this.sapp=GlobalSappRefI.i().get();
-		this.cc=GlobalCommandsDelegatorI.i().get();
+		this.cd=GlobalCommandsDelegatorI.i().get();
 		this.cgui=GlobalConsoleGuiI.i().get();
 	}
 
@@ -62,7 +63,7 @@ public class ConsoleCursorListener extends DefaultCursorListener {
 	}
 	
 	public void debugReport(CursorMotionEvent eventM, CursorButtonEvent eventB, Spatial target,	Spatial capture){
-		if(!cc.btgShowDebugEntries.b())return;
+		if(!cd.btgShowDebugEntries.b())return;
 		
 		Panel pnlTgt = (Panel)target;
 		Panel pnlCap = (Panel)capture;
@@ -71,7 +72,7 @@ public class ConsoleCursorListener extends DefaultCursorListener {
 		String strCap	=	"";if(pnlCap!=null)strCap	="Cap:"+debugPart(pnlCap);
 		String strB		=	"";if(eventB!=null)strB		="B:"+eventB.getButtonIndex()+";";
 		String strM		=	"";if(eventM!=null)strM		="M:"+eventM.getX()+","+eventM.getY()+";";
-		cc.dumpDebugEntry("FOCUS@"+strTgt+strCap+strB+strM);
+		cd.dumpDebugEntry("FOCUS@"+strTgt+strCap+strB+strM);
 	}
 	
 	protected void cursorMoveEvent(CursorMotionEvent event, Spatial target,	Spatial capture) {
