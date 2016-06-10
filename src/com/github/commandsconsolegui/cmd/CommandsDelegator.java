@@ -912,7 +912,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			
 			int iWrapAt = ilvConsoleMaxWidthInCharsForLineWrap.intValue();
 //			if(iConsoleMaxWidthInCharsForLineWrap==null){
-			if(ilvConsoleMaxWidthInCharsForLineWrap.intValue()==0){
+			if(iWrapAt==0){ //updateFontStuff();
 				iWrapAt = icui.getLineWrapAt();
 //				if(STYLE_CONSOLE.equals(strStyle)){ //TODO is faster?
 //					iWrapAt = (int) (widthForDumpEntryField() / fWidestCharForCurrentStyleFont ); //'W' but any char will do for monospaced font

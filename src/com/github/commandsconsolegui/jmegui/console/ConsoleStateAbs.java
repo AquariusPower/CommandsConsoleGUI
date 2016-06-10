@@ -254,7 +254,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 //	protected String	strLineEncloseChar = "'";
 //	protected String	strCmdLinePrepared = "";
 //	protected CharSequence	strReplaceTAB = "  ";
-	protected float	fWidestCharForCurrentStyleFont;
+	protected Float	fWidestCharForCurrentStyleFont = null;
 	protected boolean	bKeyShiftIsPressed;
 	protected boolean	bKeyControlIsPressed;
 	protected Vector3f	v3fConsoleSize;
@@ -515,7 +515,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 		
 		// instantiations initializer
 		initializeOnlyTheUIpreInit();
-		initializeOnlyTheUI();
+		initializeOnlyTheUIallSteps();
 		
 		bInitiallyClosedOnce=false; // to not interfere on reinitializing after a cleanup
 		
@@ -535,7 +535,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 	@Override
 	protected boolean enableOrUndo() {
 		if(!bInitializeOnlyTheUI){
-			initializeOnlyTheUI();
+			initializeOnlyTheUIallSteps();
 		}
 		
 		return super.enableOrUndo();
@@ -604,6 +604,12 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 			v3fApplicationWindowSize.x -(iMargin*2),
 			(v3fApplicationWindowSize.y * fConsoleHeightPerc) -iMargin,
 			0); //TODO why Z shouldnt be 0? changed to 0.1 and 1, but made no difference.
+	}
+	
+	protected void initializeOnlyTheUIallSteps(){
+		prepareStyle();
+		initializeOnlyTheUI();
+		updateFontStuff();
 	}
 	
 	/**
@@ -1674,7 +1680,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 			
 			cd().varSet(CMD_CONSOLE_STYLE, strStyle, true);
 			
-			updateFontStuff();
+//			updateFontStuff();
 			
 			cd().cmdResetConsole();
 		}else{
@@ -2150,6 +2156,8 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 	
 	@Override
 	public int getLineWrapAt() {
+//		updateFontStuff();
+
 		boolean bUseFixedWrapColumn = cd().btgUseFixedLineWrapModeForAllFonts.b();
 		
 		/**
@@ -2481,6 +2489,8 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 			svUserFontOption.setObjectValue(strConsoleDefaultFontName );
 		}
 	//	BitmapFont font = app().getAssetManager().loadFont("Interface/Fonts/Console512x.fnt");
+		
+//		updateFontStuff();
 	}
 
 	protected void setDumpEntriesSlowedQueue(AbstractList<String> vlstrDumpEntriesSlowedQueue) {

@@ -239,11 +239,13 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 //		fMonofontCharWidth = fontWidth(strAllChars,STYLE_CONSOLE);
 		
 //		bConsoleStyleCreated=true;
+		
+//		updateFontStuff();
 	}
 	
 	@Override
 	public void initializeOnlyTheUI() {
-		prepareStyle();
+//		prepareStyle();
 		
 //		consoleCursorListener = new ConsoleMouseCursorListenerI();
 //		consoleCursorListener.configure();
@@ -799,6 +801,11 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 	
 	@Override
 	protected float fontWidth(String strChars, String strStyle, boolean bAveraged){
+		/**
+		 * This is the unquestionable width value.
+		 * 
+		 * TODO find a better, more direct, way to get the width?
+		 */
 		float f = MiscJmeI.i().retrieveBitmapTextFor(new Label(strChars,strStyle)).getLineWidth();
 		if(bAveraged)f/=strChars.length();
 		return f;
