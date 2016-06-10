@@ -29,8 +29,8 @@ package com.github.commandsconsolegui.jmegui.lemur.extras;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.jmegui.extras.InteractionDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
@@ -442,7 +442,7 @@ public abstract class LemurDialogGUIStateAbs <V> extends InteractionDialogStateA
 	}
 	
 	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI cc) {
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
 		boolean bCommandWorked = false;
 		
 		if(cc.checkCmdValidity(this,"showDialogKeyBinds"+getId(),"")){

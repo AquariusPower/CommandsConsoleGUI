@@ -44,6 +44,7 @@ public class StringCmdField implements IReflexFillCfgVariant{
 	protected IReflexFillCfg rfcfgOwner;
 //	protected int	iReflexFillCfgVariant;
 	protected String	strReflexFillCfgCodePrefixVariant;
+	private String	strHelpComment;
 	protected static boolean bIgnoreCaseOnComparison = true;
 	
 	/**
@@ -58,12 +59,19 @@ public class StringCmdField implements IReflexFillCfgVariant{
 //		this(rfcfgOwner,0);
 //	}
 	
+	public StringCmdField(String strCmdIdentifier, String strHelpComment){
+		this.strCmdIdentifier=strCmdIdentifier;
+		this.strHelpComment = strHelpComment;
+	}
+	
 	/**
 	 * The value cannot be prepared at the constructor, 
 	 * as it has not returned yet, so it's object owner will not have 
 	 * a valid field (will still be null).
 	 */
-	public StringCmdField(IReflexFillCfg rfcfgOwner, String strReflexFillCfgCodePrefixVariant){ // int iReflexFillCfgVariant){
+	public StringCmdField(IReflexFillCfg rfcfgOwner, String strReflexFillCfgCodePrefixVariant, String strHelpComment){ // int iReflexFillCfgVariant){
+		this((String)null,strHelpComment);
+		
 //		this.iReflexFillCfgVariant=iReflexFillCfgVariant;
 		this.strReflexFillCfgCodePrefixVariant = strReflexFillCfgCodePrefixVariant;
 		
@@ -75,8 +83,8 @@ public class StringCmdField implements IReflexFillCfgVariant{
 			throw new NullPointerException("cant be null for: "+IReflexFillCfg.class.getName());
 		}
 	}
-	public StringCmdField(String strCmdIdentifier){
-		this.strCmdIdentifier=strCmdIdentifier;
+	public StringCmdField(IReflexFillCfg rfcfgOwner, String strReflexFillCfgCodePrefixVariant){
+		this(rfcfgOwner, strReflexFillCfgCodePrefixVariant, null);
 	}
 	
 	/**
@@ -86,6 +94,10 @@ public class StringCmdField implements IReflexFillCfgVariant{
 	public String toString() {
 		if(strCmdIdentifier==null)initialize();
 		return this.strCmdIdentifier;
+	}
+	
+	public String getHelpComment(){
+		return strHelpComment;
 	}
 	
 	protected void initialize(){

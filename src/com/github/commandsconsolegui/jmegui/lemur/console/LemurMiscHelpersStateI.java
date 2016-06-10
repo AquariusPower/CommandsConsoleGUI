@@ -27,8 +27,8 @@
 
 package com.github.commandsconsolegui.jmegui.lemur.console;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
@@ -65,7 +65,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	
 	public final BoolTogglerCmdField	btgTextCursorPulseFadeBlinkMode = new BoolTogglerCmdField(this,true);
 	public final BoolTogglerCmdField	btgTextCursorLarge = new BoolTogglerCmdField(this,true);
-	public final StringCmdField CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringCmdField(this, CommandsDelegatorI.strFinalCmdCodePrefix);
+	public final StringCmdField CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringCmdField(this, CommandsDelegator.strFinalCmdCodePrefix);
 
 //	private SimpleApplication	sapp;
 	
@@ -221,7 +221,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	
 	
 	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI	cc) {
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator	cc) {
 		boolean bCmdEndedGracefully = false;
 		
 		if(cc.checkCmdValidity(this,CMD_FIX_INVISIBLE_TEXT_CURSOR ,"in case text cursor is invisible")){

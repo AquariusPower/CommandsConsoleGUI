@@ -29,9 +29,9 @@ package com.github.commandsconsolegui.misc;
 
 import java.lang.management.ManagementFactory;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 
 /**
  * 
@@ -61,11 +61,11 @@ public class DebugI implements IConsoleCommandListener{
 	private Boolean	bDebugMode;
 	private boolean	bConfigured;
 	
-	public void configure(CommandsDelegatorI cc){
+	public void configure(CommandsDelegator cc){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 		//		if(Debug.instance==null)Debug.instance=this;
 //		this.cc=cc;
-		if(cc==null)throw new NullPointerException("invalid instance for "+CommandsDelegatorI.class.getName()); // KEEP ON TOP
+		if(cc==null)throw new NullPointerException("invalid instance for "+CommandsDelegator.class.getName()); // KEEP ON TOP
 		cc.addConsoleCommandListener(this);
 		
 		bConfigured=true;
@@ -84,7 +84,7 @@ public class DebugI implements IConsoleCommandListener{
 	}
 
 	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI	cc) {
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator	cc) {
 		boolean bCmdWorked=false;
 		
 		if(cc.checkCmdValidity(this,"debug","[optionToToggle] [force:true|false] empty for a list")){

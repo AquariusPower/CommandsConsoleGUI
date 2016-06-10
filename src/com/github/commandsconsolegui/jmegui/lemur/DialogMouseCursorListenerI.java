@@ -116,7 +116,7 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 //	}
 	
 	@Override
-	public boolean cursorClick(EMouseCursorButton button, CursorButtonEvent eventButton, Spatial target,Spatial capture) {
+	public boolean click(EMouseCursorButton button, CursorButtonEvent eventButton, Spatial target,Spatial capture) {
 		LemurFocusHelperStateI.i().requestDialogFocus(capture);
 		
 		// missing ones are ignored so each element can consume it properly
@@ -126,11 +126,11 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 				return true;
 		}
 		
-		return super.cursorClick(button, eventButton, target, capture);
+		return super.click(button, eventButton, target, capture);
 	}
 	
 	@Override
-	public boolean cursorDragged(ArrayList<EMouseCursorButton> aButtonList,CursorMotionEvent eventMotion, Spatial target, Spatial capture) {
+	public boolean drag(ArrayList<EMouseCursorButton> aButtonList,CursorMotionEvent eventMotion, Spatial target, Spatial capture) {
 		for(EMouseCursorButton button:aButtonList){
 			// missing ones are ignored so each element can consume it properly
 			switch(button){
@@ -143,6 +143,6 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 			}
 		}
 			
-		return super.cursorDragged(aButtonList, eventMotion, target, capture);
+		return super.drag(aButtonList, eventMotion, target, capture);
 	}
 }

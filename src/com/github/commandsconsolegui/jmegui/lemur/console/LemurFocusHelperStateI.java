@@ -30,10 +30,11 @@ package com.github.commandsconsolegui.jmegui.lemur.console;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.globals.GlobalGUINodeI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
+import com.github.commandsconsolegui.jmegui.MouseCursor;
 import com.github.commandsconsolegui.jmegui.MouseCursor.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.MouseCursorListenerAbs;
@@ -96,6 +97,9 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 		super.configure(new CmdConditionalStateAbs.CfgParm(
 			LemurFocusHelperStateI.class.getSimpleName(), false));
 //		configure();
+		
+//		MouseCursor.i().configure(null);
+		
 		return storeCfgAndReturnSelf(icfg);
 	}
 	
@@ -328,7 +332,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	}
 	
 	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI cc) {
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
 		boolean bCmdEndedGracefully = false;
 		
 		if(cc.checkCmdValidity(this,"debugFocusReport","")){

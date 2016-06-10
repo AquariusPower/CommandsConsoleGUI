@@ -39,8 +39,8 @@ import truetypefontlite.TrueTypeFont;
 import truetypefontlite.TrueTypeKey;
 import truetypefontlite.TrueTypeLoader;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.DumpEntryData;
 import com.github.commandsconsolegui.cmd.EDataBaseOperations;
 import com.github.commandsconsolegui.cmd.IConsoleUI;
@@ -111,11 +111,11 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 	/**
 	 * commands user can type
 	 */
-	public final StringCmdField CMD_CLOSE_CONSOLE = new StringCmdField(this,CommandsDelegatorI.strFinalCmdCodePrefix);
-	public final StringCmdField CMD_CONSOLE_HEIGHT = new StringCmdField(this,CommandsDelegatorI.strFinalCmdCodePrefix);
-	public final StringCmdField CMD_CONSOLE_STYLE = new StringCmdField(this,CommandsDelegatorI.strFinalCmdCodePrefix);
-	public final StringCmdField CMD_DEFAULT = new StringCmdField(this,CommandsDelegatorI.strFinalCmdCodePrefix);
-	public final StringCmdField CMD_FONT_LIST = new StringCmdField(this,CommandsDelegatorI.strFinalCmdCodePrefix);
+	public final StringCmdField CMD_CLOSE_CONSOLE = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
+	public final StringCmdField CMD_CONSOLE_HEIGHT = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
+	public final StringCmdField CMD_CONSOLE_STYLE = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
+	public final StringCmdField CMD_DEFAULT = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
+	public final StringCmdField CMD_FONT_LIST = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
 	
 	protected String strDefaultFont = "DroidSansMono";
 	protected StringVarField	svUserFontOption = new StringVarField(this, strDefaultFont);
@@ -1783,7 +1783,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 	}
 
 	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI	cc){
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator	cc){
 		boolean bCommandWorked = false;
 		
 		if(cc.checkCmdValidity(this,CMD_CLOSE_CONSOLE,"like the bound key to do it")){

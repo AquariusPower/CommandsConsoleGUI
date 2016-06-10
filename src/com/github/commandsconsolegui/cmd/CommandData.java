@@ -29,6 +29,9 @@ package com.github.commandsconsolegui.cmd;
 
 import java.util.Comparator;
 
+import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
@@ -39,25 +42,14 @@ public class CommandData {
 	String strComment;
 	IConsoleCommandListener icclOwner;
 	
-	
-	
 	public String getBaseCmd() {
 		return strBaseCmd;
-	}
-	public void setBaseCmd(String strBaseCmd) {
-		this.strBaseCmd = strBaseCmd;
 	}
 	public String getComment() {
 		return strComment;
 	}
-	public void setComment(String strComment) {
-		this.strComment = strComment;
-	}
 	public IConsoleCommandListener getOwner() {
 		return icclOwner;
-	}
-	public void setOwner(IConsoleCommandListener icclOwner) {
-		this.icclOwner = icclOwner;
 	}
 	
 	public CommandData(IConsoleCommandListener icclOwner, String strBaseCmd, String strComment) {
@@ -65,6 +57,8 @@ public class CommandData {
 		this.icclOwner = icclOwner;
 		this.strBaseCmd = strBaseCmd;
 		this.strComment = strComment;
+		
+		if(this.icclOwner==null)throw new PrerequisitesNotMetException("listener cannot be null");
 	}
 	
 	public static CommandComparator comparator(){
@@ -80,8 +74,14 @@ public class CommandData {
 	}
 	public String asHelp() {
 		return strBaseCmd+" "
-			+strComment+" "
-			+"("+(icclOwner!=null ? icclOwner.getClass().getSimpleName() : "Root")+")";
+				+strComment+" "
+				+"("+GlobalCommandsDelegatorI.i().get().getListenerId(icclOwner)+")";
+		
+//		return strBaseCmd+" "
+//			+strComment+" "
+//			+"("+(icclOwner!=null ? 
+//					icclOwner.getClass().getSimpleName() : 
+//					GlobalCommandsDelegatorI.i().get().getSelfRootListenerId())+")";
 	}
 	
 }

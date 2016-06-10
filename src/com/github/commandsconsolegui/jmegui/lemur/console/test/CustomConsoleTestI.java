@@ -27,8 +27,8 @@
 
 package com.github.commandsconsolegui.jmegui.lemur.console.test;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.extras.SingleAppInstanceI;
@@ -62,7 +62,7 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 	private final String strFieldCodePrefixLess = "VariantAsPrefixLess";
 	
 	public final StringCmdField CMD_END_DEVELOPER_COMMAND_TEST = new StringCmdField(
-		this,CustomCommandsI.strFinalCmdCodePrefix);
+		this,CustomCommands.strFinalCmdCodePrefix);
 	
 	/**
 	 * these below were not implemented as commands here, 
@@ -71,7 +71,7 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 	private StringCmdField sfTestCommandAutoFillVariant1 = new StringCmdField(this,strFieldCodePrefix);
 	private StringCmdField testCommandAutoFillPrefixLessVariant2 = new StringCmdField(this,strFieldCodePrefixLess);
 	private StringCmdField testCommandAutoFillPrefixLessVariantDefaulted3 = new StringCmdField(this,null);
-	private StringCmdField CMD_TRADITIONAL_PRETTYFIED_0 = new StringCmdField(this,CustomCommandsI.strFinalCmdCodePrefix);
+	private StringCmdField CMD_TRADITIONAL_PRETTYFIED_0 = new StringCmdField(this,CustomCommands.strFinalCmdCodePrefix);
 	
 //	private StringVarField svfOptionSelectedDialog2 = new StringVarField(this,"");
 	
@@ -99,7 +99,7 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 	@Override
 	public void simpleInitApp() {
 		// the commands pipe
-		cd = GlobalCommandsDelegatorI.i().set(new CustomCommandsI());
+		cd = GlobalCommandsDelegatorI.i().set(new CustomCommands());
 		
 		// the conole UI
 		GlobalConsoleGuiI.i().set(ConsoleLemurStateI.i());
@@ -147,7 +147,7 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 	}
 
 	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI	cc) {
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator	cc) {
 		boolean bCommandWorked = false;
 		
 		if(cc.checkCmdValidity(this,CMD_END_DEVELOPER_COMMAND_TEST,"[iHowMany] users working?")){

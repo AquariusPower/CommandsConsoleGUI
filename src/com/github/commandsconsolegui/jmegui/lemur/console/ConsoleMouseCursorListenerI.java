@@ -27,9 +27,10 @@
 
 package com.github.commandsconsolegui.jmegui.lemur.console;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalConsoleGuiI;
+import com.github.commandsconsolegui.jmegui.MouseCursor;
 import com.github.commandsconsolegui.jmegui.MouseCursor.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.MouseCursorListenerAbs;
@@ -48,12 +49,14 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 	public static ConsoleMouseCursorListenerI i(){return instance;}
 	
 	ConsoleStateAbs csa;
-	private CommandsDelegatorI	cd;
+	private CommandsDelegator	cd;
 	private ConsoleStateAbs	cgui;
 	
 	public void configure(){
 		this.cd=GlobalCommandsDelegatorI.i().get();
 		this.cgui=GlobalConsoleGuiI.i().get();
+		
+		MouseCursor.i().configure(null);
 	}
 
 	protected String debugPart(Panel pnl){
@@ -119,7 +122,7 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 //	}
 	
 	@Override
-	public boolean cursorClick(EMouseCursorButton button, CursorButtonEvent eventButton, Spatial target,Spatial capture) {
+	public boolean click(EMouseCursorButton button, CursorButtonEvent eventButton, Spatial target,Spatial capture) {
 		debugReport(null, eventButton, target, capture);
 		
 //		if(!button.isPressed()){ //on release
@@ -137,6 +140,6 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 		}
 //		}
 		
-		return super.cursorClick(button, eventButton, target, capture);
+		return super.click(button, eventButton, target, capture);
 	}
 }

@@ -27,7 +27,7 @@
 
 package com.github.commandsconsolegui.jmegui.lemur.console.test;
 
-import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegatorI;
+import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegator;
 import com.github.commandsconsolegui.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -37,8 +37,8 @@ import com.github.commandsconsolegui.misc.ReflexFillI;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class CustomCommandsI extends ScriptingCommandsDelegatorI{ //use ConsoleCommands to prevent scripts usage
-	public CustomCommandsI(){
+public class CustomCommands extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
+	public CustomCommands(){
 		super();
 		
 		/**

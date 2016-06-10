@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.MiscI;
 
@@ -336,7 +336,7 @@ public class SingleAppInstanceI { //implements IReflexFillCfg{
 	 * at main()
 	 * 
 	 * This will allow for a very fast exit avoiding resources allocation.
-	 * The {@link #configureRequiredAtApplicationInitialization(CommandsDelegatorI)} call is still required!
+	 * The {@link #configureRequiredAtApplicationInitialization(CommandsDelegator)} call is still required!
 	 */
 	public void configureOptionalAtMainMethod(){
 		configureAndInitialize(true);

@@ -36,9 +36,9 @@ public class AliasData{
 	String strAliasId;
 	String strCmdLine; // may contain ending comment too
 	boolean	bBlocked;
-	CommandsDelegatorI cc;
+	CommandsDelegator cc;
 	
-	public AliasData(CommandsDelegatorI cc){
+	public AliasData(CommandsDelegator cc){
 		this.cc=cc;
 	}
 	

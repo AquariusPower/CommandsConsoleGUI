@@ -27,7 +27,7 @@
 
 package com.github.commandsconsolegui.cmd;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 
 /**
  * 
@@ -38,7 +38,7 @@ public interface IConsoleCommandListener{
 	/**
 	 * Any class can implement commands.
 	 * The main requirement is that the listener is registered with:
-	 * {@link CommandsDelegatorI#addConsoleCommandListener(IConsoleCommandListener)}
+	 * {@link CommandsDelegator#addConsoleCommandListener(IConsoleCommandListener)}
 	 */
-	public abstract ECmdReturnStatus execConsoleCommand(CommandsDelegatorI ccRequester);
+	public abstract ECmdReturnStatus execConsoleCommand(CommandsDelegator ccRequester);
 }

@@ -27,8 +27,8 @@
 
 package com.github.commandsconsolegui.jmegui.extras;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.jmegui.ConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.ConditionalStateAbs.ICfgParm;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
@@ -126,10 +126,10 @@ public class FpsLimiterStateI extends CmdConditionalStateAbs{
 	}
 	
 	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI cc) {
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
 		boolean bCommandWorked = false;
 		
-		if(cc.checkCmdValidity(null,"fpsLimit","[iMaxFps]")){
+		if(cc.checkCmdValidity(this,"fpsLimit","[iMaxFps]")){
 			Integer iMaxFps = cc.paramInt(1);
 			if(iMaxFps!=null){
 				FpsLimiterStateI.i().setMaxFps(iMaxFps);

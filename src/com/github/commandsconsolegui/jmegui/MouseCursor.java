@@ -27,21 +27,27 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.github.commandsconsolegui.jmegui;
 
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.input.MouseInput;
 import com.jme3.math.Vector3f;
-import com.simsilica.lemur.event.CursorButtonEvent;
 
 /**
  * Allows multiple mouse buttons to be clicked or dragged at same time.
  * @author AquariusPower <https://github.com/AquariusPower>
  */
-public class MouseCursor implements IReflexFillCfg{
+public class MouseCursor implements IReflexFillCfg, IConsoleCommandListener{
+	public final StringCmdField CMD_FIX_RESETING_MOUSE_CURSOR = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
+	
 	private static MouseCursor instance = new MouseCursor();
 	public static MouseCursor i(){return instance;}
 	
@@ -49,13 +55,16 @@ public class MouseCursor implements IReflexFillCfg{
 	
 //	protected long lClickDelayMilis;
 	
-//	/**
-//	 * 
-//	 * @param lClickDelayMilis will use default if null
-//	 */
-//	public void configure(Long lClickDelayMilis) {
-//		this.lClickDelayMilis=lClickDelayMilis==null?100:lClickDelayMilis;
-//	}
+	/**
+	 * Calling this method will also promptly instantiate this class and
+	 * make its console var(s) initially available!
+	 * 
+	 * @param lClickDelayMilis will use default if null
+	 */
+	public void configure(Long lClickDelayMilis) {
+		if(lClickDelayMilis!=null)ilvClickMaxDelayMilis.setObjectValue(lClickDelayMilis);
+		GlobalCommandsDelegatorI.i().get().addConsoleCommandListener(this);
+	}
 	
 	static class MouseCursorButtonData{
 		Long lPressedMilis = null;
@@ -71,6 +80,25 @@ public class MouseCursor implements IReflexFillCfg{
 //		CursorMotionEvent	eventMotion;
 //		public boolean	bIsPressed;
 //		public Vector3f	v3fDragDisplacement;
+		
+		void reset(){
+			lPressedMilis = null;
+			v3fPressedPos = null;
+			v3fDragLastUpdatePos = null;
+		}
+		
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append("MouseCursorButtonData [lPressedMilis=");
+			builder.append(lPressedMilis);
+			builder.append(", v3fPressedPos=");
+			builder.append(v3fPressedPos);
+			builder.append(", v3fDragLastUpdatePos=");
+			builder.append(v3fDragLastUpdatePos);
+			builder.append("]");
+			return builder.toString();
+		}
 	}
 	
 	public static class MouseCursorUpdatedValues{
@@ -92,13 +120,13 @@ public class MouseCursor implements IReflexFillCfg{
 		ContextPropertiesClick(MouseInput.BUTTON_RIGHT),
 		ScrollClick(MouseInput.BUTTON_MIDDLE),
 		
-		// below is not actually supported?
-		Button4(MouseInput.BUTTON_MIDDLE+1),
-		Button5(MouseInput.BUTTON_MIDDLE+2),
-		Button6(MouseInput.BUTTON_MIDDLE+3),
-		Button7(MouseInput.BUTTON_MIDDLE+4),
-		Button8(MouseInput.BUTTON_MIDDLE+5),
-		Button9(MouseInput.BUTTON_MIDDLE+6),
+		//TODO is below not actually supportable?
+		Action4Click(MouseInput.BUTTON_MIDDLE+1),
+		Action5Click(MouseInput.BUTTON_MIDDLE+2),
+		Action6Click(MouseInput.BUTTON_MIDDLE+3),
+		Action7Click(MouseInput.BUTTON_MIDDLE+4),
+		Action8Click(MouseInput.BUTTON_MIDDLE+5),
+		Action9Click(MouseInput.BUTTON_MIDDLE+6),
 		;
 		
 		int iIndex;
@@ -217,5 +245,68 @@ public class MouseCursor implements IReflexFillCfg{
 
 	public boolean isClickDelay(Long lDelayMilis) {
 		return lDelayMilis < ilvClickMaxDelayMilis.getLong();
+	}
+	
+	/**
+	 * In case user press a button, but when the button is released, 
+	 * that event is not captured like when freeze lag happens.
+	 * 
+	 * TODO find a way to detect such condition, may be when a dialog is created or closed, no button should have its pressed state recognized?
+	 * TODO call this after every dialog/console mouse cursor action completes?
+	 * 
+	 * To fix that, use this command: {@link #CMD_FIX_RESETING_MOUSE_BUTTONS}
+	 * 
+	 * To test it, at console, open a dialog and call this command ex.:
+	 *	/sleep 3 fixResetingMouseCursor #(if I havent refactored yet...)
+	 * Now, while dragging the dialog around, you will lose that grab.
+	 */
+	public void resetFixingAllButtonsState(){
+		for(EMouseCursorButton e:EMouseCursorButton.values()){
+			e.mcbd.reset();
+		}
+	}
+	
+	public String report(){
+		String str="";
+		for(EMouseCursorButton e:EMouseCursorButton.values()){
+			str+=""+e+": "+e.mcbd.toString()+"\n";
+		}
+		return str;
+	}
+	
+	@Override
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
+		boolean bCommandWorked = false;
+		
+		if(cc.checkCmdValidity(this,CMD_FIX_RESETING_MOUSE_CURSOR,null)){
+			String strBefore = report();
+			cc.dumpSubEntry(cc.getCommentPrefixStr()+"Before:\n"+report());
+			
+			resetFixingAllButtonsState();
+			
+			String strAfter = report();
+			String[] aBefore = strBefore.split("\n");
+			String[] aAfter = strAfter.split("\n");
+			boolean bChanged=false;
+			for(int i=0;i<aBefore.length;i++){
+				if(!aBefore[i].equals(aAfter[i])){
+					cc.dumpSubEntry(cc.getCommentPrefixStr()+"Changed: "+aAfter[i]);
+					bChanged = true;
+				}
+			}
+			if(!bChanged)cc.dumpSubEntry(cc.getCommentPrefixStr()+"Nothing changed...");
+			
+			bCommandWorked=true;
+		}else
+		if(cc.checkCmdValidity(this,"mouseCursorReport","")){
+			cc.dumpSubEntry(report());
+			bCommandWorked=true;
+		}else
+		{
+//			return cc.executePreparedCommandRoot();
+			return ECmdReturnStatus.NotFound;
+		}
+		
+		return cc.cmdFoundReturnStatus(bCommandWorked);
 	}
 }

@@ -27,7 +27,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.github.commandsconsolegui.jmegui.console;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.extras.SingleAppInstanceI;
 import com.github.commandsconsolegui.globals.GlobalAppRefI;
@@ -49,7 +49,7 @@ import com.jme3.app.SimpleApplication;
 public abstract class SimpleConsoleAppAbs extends SimpleApplication implements IConsoleCommandListener {
 	protected boolean bHideSettings=true; 
 	
-	protected CommandsDelegatorI	cd;
+	protected CommandsDelegator	cd;
 	
 	@Override
 	public void simpleInitApp() {

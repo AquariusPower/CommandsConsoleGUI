@@ -27,8 +27,8 @@
 
 package com.github.commandsconsolegui.jmegui.cmd;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
@@ -45,16 +45,16 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
  *
  */
 public abstract class CmdConditionalStateAbs extends ConditionalStateAbs implements IConsoleCommandListener, IReflexFillCfg {
-	private CommandsDelegatorI cd;
+	private CommandsDelegator cd;
 	
 	private String	strCmdIdentifier;
 	protected String strCmdPrefix="toggle";
 	protected String strCmdSuffix="State";
 	
-	public CommandsDelegatorI getCmdDelegator(){
+	public CommandsDelegator getCmdDelegator(){
 		return cd();
 	}
-	public CommandsDelegatorI cd(){
+	public CommandsDelegator cd(){
 		return cd;
 	}
 	
@@ -106,7 +106,7 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 	}
 	
 	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI cc) {
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
 		boolean bCommandWorked = false;
 		
 		if(cc.checkCmdValidity(this,strCmdIdentifier,"[bEnabledForce]")){

@@ -27,14 +27,14 @@
 
 package com.github.commandsconsolegui.globals;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class GlobalCommandsDelegatorI extends GlobalAbs<CommandsDelegatorI> {
+public class GlobalCommandsDelegatorI extends GlobalAbs<CommandsDelegator> {
 	private static GlobalCommandsDelegatorI instance = new GlobalCommandsDelegatorI();
 	public static GlobalCommandsDelegatorI i(){return instance;}
 }

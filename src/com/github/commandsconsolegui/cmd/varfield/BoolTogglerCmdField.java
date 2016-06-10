@@ -29,9 +29,11 @@ package com.github.commandsconsolegui.cmd.varfield;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData.IVarIdValueOwner;
+import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -177,6 +179,10 @@ public class BoolTogglerCmdField implements IReflexFillCfgVariant, IVarIdValueOw
 	}
 
 	public IConsoleCommandListener getOwnerAsCmdListener() {
+		if(rfcfgOwner instanceof CommandsDelegator){
+			return GlobalCommandsDelegatorI.i().get().getPseudoListener();
+		}
+		
 		if(rfcfgOwner instanceof IConsoleCommandListener){
 			return (IConsoleCommandListener)rfcfgOwner;
 		}

@@ -31,8 +31,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI;
-import com.github.commandsconsolegui.cmd.CommandsDelegatorI.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -64,7 +64,7 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 	private static ReflexHacks instance = new ReflexHacks();
 	public static ReflexHacks i(){return instance;}
 	
-	private CommandsDelegatorI cc;
+	private CommandsDelegator cc;
 	public final BoolTogglerCmdField	btgAllowHacks = new BoolTogglerCmdField(this,false,BoolTogglerCmdField.strTogglerCodePrefix,
 		"Hacks allows for otherwise impossible features, but they may break if targeted classes are updated.");
 
@@ -130,11 +130,11 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 	}
 	
 //	public void configure(SimpleApplication sapp, CommandsDelegatorI cc, IHandleExceptions ihe){
-	public void configure(CommandsDelegatorI cc, IHandleExceptions ihe){
+	public void configure(CommandsDelegator cc, IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 //		this.sapp = sapp;
 		
-		if(cc==null)throw  new NullPointerException("invalid instance for "+CommandsDelegatorI.class.getName());
+		if(cc==null)throw  new NullPointerException("invalid instance for "+CommandsDelegator.class.getName());
 		this.cc=cc;
 		
 		if(ihe==null)throw  new NullPointerException("invalid instance for "+IHandleExceptions.class.getName());
@@ -153,7 +153,7 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 	 * fields to be indicated as owned by this class. 
 	 */
 	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegatorI cc) {
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
 		return ECmdReturnStatus.NotFound;
 //		/**
 //		 * remove this below if something else is actually implemented here...

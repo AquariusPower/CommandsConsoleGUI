@@ -45,7 +45,7 @@ import com.google.common.collect.Lists;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ScriptingCommandsDelegatorI extends CommandsDelegatorI {
+public class ScriptingCommandsDelegator extends CommandsDelegator {
 	public final StringCmdField CMD_FUNCTION = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_FUNCTION_CALL = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_FUNCTION_END = new StringCmdField(this,strFinalCmdCodePrefix);
@@ -185,16 +185,16 @@ public class ScriptingCommandsDelegatorI extends CommandsDelegatorI {
 		if(ecrs.compareTo(ECmdReturnStatus.NotFound)!=0)return ecrs;
 		
 		if(!bCommandWorked){
-			if(checkCmdValidity(null,CMD_FUNCTION,"<id> begins a function block")){
+			if(checkCmdValidity(icclPseudo,CMD_FUNCTION,"<id> begins a function block")){
 				bCommandWorked=cmdFunctionBegin();
 			}else
-			if(checkCmdValidity(null,CMD_FUNCTION_CALL,"<id> [parameters...] retrieve parameters values with ex.: ${id_1} ${id_2} ...")){
+			if(checkCmdValidity(icclPseudo,CMD_FUNCTION_CALL,"<id> [parameters...] retrieve parameters values with ex.: ${id_1} ${id_2} ...")){
 				bCommandWorked=cmdFunctionCall();
 			}else
-			if(checkCmdValidity(null,CMD_FUNCTION_END,"ends a function block")){
+			if(checkCmdValidity(icclPseudo,CMD_FUNCTION_END,"ends a function block")){
 				bCommandWorked=cmdFunctionEnd();
 			}else
-			if(checkCmdValidity(null,"functionList","[filter]")){
+			if(checkCmdValidity(icclPseudo,"functionList","[filter]")){
 				String strFilter = paramString(1);
 				ArrayList<String> astr = Lists.newArrayList(tmFunctions.keySet().iterator());
 				for(String str:astr){
@@ -203,7 +203,7 @@ public class ScriptingCommandsDelegatorI extends CommandsDelegatorI {
 				}
 				bCommandWorked=true;
 			}else
-			if(checkCmdValidity(null,"functionShow","<functionId>")){
+			if(checkCmdValidity(icclPseudo,"functionShow","<functionId>")){
 				String strFuncId = paramString(1);
 				if(strFuncId!=null){
 					ArrayList<String> astr = tmFunctions.get(strFuncId);
@@ -219,16 +219,16 @@ public class ScriptingCommandsDelegatorI extends CommandsDelegatorI {
 					}
 				}
 			}else
-			if(checkCmdValidity(null,CMD_ELSE,"conditinal block")){
+			if(checkCmdValidity(icclPseudo,CMD_ELSE,"conditinal block")){
 				bCommandWorked=cmdElse();
 			}else
-			if(checkCmdValidity(null,CMD_ELSE_IF,"<[!]<true|false>> conditional block")){
+			if(checkCmdValidity(icclPseudo,CMD_ELSE_IF,"<[!]<true|false>> conditional block")){
 				bCommandWorked=cmdElseIf();
 			}else
-			if(checkCmdValidity(null,CMD_IF,"<[!]<true|false>> [cmd|alias] if cmd|alias is not present, this will be a multiline block start!")){
+			if(checkCmdValidity(icclPseudo,CMD_IF,"<[!]<true|false>> [cmd|alias] if cmd|alias is not present, this will be a multiline block start!")){
 				bCommandWorked=cmdIf();
 			}else
-			if(checkCmdValidity(null,CMD_IF_END,"ends conditional block")){
+			if(checkCmdValidity(icclPseudo,CMD_IF_END,"ends conditional block")){
 				bCommandWorked=cmdIfEnd();
 			}else
 			{
