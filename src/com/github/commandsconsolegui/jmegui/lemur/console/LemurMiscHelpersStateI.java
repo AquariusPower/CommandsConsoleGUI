@@ -32,10 +32,10 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
-import com.github.commandsconsolegui.jmegui.ConditionalStateAbs.ICfgParm;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexHacks;
@@ -241,46 +241,46 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		return cd().getReflexFillCfg(rfcv);
 	}
 	
-	private String strCaratNewPosition = "CaratNewPosition";
-	/**
-	 * Carat new position will be stored at {@link TextField#}
-	 * 
-	 * @param tf
-	 * @param strCurrent
-	 * @param strPasted
-	 * @return
-	 */
-	public String prepareStringToPasteAtCaratPosition(TextField tf, String strCurrent, String strPasted) {
-		int iCarat = tf.getDocumentModel().getCarat();
-		String strBefore = strCurrent.substring(0,iCarat);
-		String strAfter = strCurrent.substring(iCarat);
-		
-		strCurrent = strBefore + strPasted;
-		tf.setUserData(strCaratNewPosition, strCurrent.length());
-		strCurrent += strAfter;
-		
-		return strCurrent;
-	}
-	
-	public void pasteAtCaratPosition(TextField tf, String strCurrent, String strPasted) {
-		tf.setText(prepareStringToPasteAtCaratPosition(tf, strCurrent, strPasted));
-		positionCaratProperly(tf);//, (int) tf.getUserData(strCaratNewPosition));
-	}
-	
-	/**
-	 * 
-	 * @param tf must have had the new carat set by {@link #prepareStringToPasteAtCaratPosition(TextField, String, String)} 
-	 * @param tec 
-	 */
-	public void positionCaratProperly(TextField tf) {
-		Object objUD = tf.getUserData(strCaratNewPosition);
-		if(objUD==null){
-			cd().dumpExceptionEntry(new NullPointerException("missing carat new position user data"));
-		}else{
-			int iMoveCaratTo = (int)objUD;
-			setCaratPosition(tf, iMoveCaratTo);
-		}
-	}
+//	private String strCaratNewPosition = "CaratNewPosition";
+//	/**
+//	 * Carat new position will be stored at {@link TextField#}
+//	 * 
+//	 * @param tf
+//	 * @param strCurrent
+//	 * @param strPasted
+//	 * @return
+//	 */
+//	public String prepareStringToPasteAtCaratPosition(TextField tf, String strCurrent, String strPasted) {
+//		int iCarat = tf.getDocumentModel().getCarat();
+//		String strBefore = strCurrent.substring(0,iCarat);
+//		String strAfter = strCurrent.substring(iCarat);
+//		
+//		strCurrent = strBefore + strPasted;
+//		tf.setUserData(strCaratNewPosition, strCurrent.length());
+//		strCurrent += strAfter;
+//		
+//		return strCurrent;
+//	}
+//	
+//	public void pasteAtCaratPosition(TextField tf, String strCurrent, String strPasted) {
+//		tf.setText(prepareStringToPasteAtCaratPosition(tf, strCurrent, strPasted));
+//		positionCaratProperly(tf);//, (int) tf.getUserData(strCaratNewPosition));
+//	}
+//	
+//	/**
+//	 * 
+//	 * @param tf must have had the new carat set by {@link #prepareStringToPasteAtCaratPosition(TextField, String, String)} 
+//	 * @param tec 
+//	 */
+//	public void positionCaratProperly(TextField tf) {
+//		Object objUD = tf.getUserData(strCaratNewPosition);
+//		if(objUD==null){
+//			cd().dumpExceptionEntry(new NullPointerException("missing carat new position user data"));
+//		}else{
+//			int iMoveCaratTo = (int)objUD;
+//			setCaratPosition(tf, iMoveCaratTo);
+//		}
+//	}
 	
 	/**
 	 * To show the cursor at the new carat position, 
@@ -299,20 +299,21 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 			dm.right();
 		}
 		
-		resetCursorPosition(tf);
+		bugFix(EBugFix.UpdateTextFieldTextAndCaratVisibility,tf);
+//		resetCursorPosition(tf);
 	}
 	
-	/**
-	 * This updates the displayed text cursor position.
-	 * 
-	 * This below is actually a trick, 
-	 * because this flow will finally call the required method.
-	 *  
-	 * @param tf
-	 */
-	public void resetCursorPosition(TextField tf){
-		tf.setFontSize(tf.getFontSize()); //resetCursorPositionHK(tf);
-	}
+//	/**
+//	 * This updates the displayed text cursor position.
+//	 * 
+//	 * This below is actually a trick, 
+//	 * because this flow will finally call the required method.
+//	 *  
+//	 * @param tf
+//	 */
+//	public void resetCursorPosition(TextField tf){
+//		tf.setFontSize(tf.getFontSize()); //resetCursorPositionHK(tf);
+//	}
 	@Deprecated
 	public void resetCursorPositionHK(TextField tf){
 		TextEntryComponent tec = ((TextEntryComponent)ReflexHacks.i().getFieldValueHK(tf, "text"));
@@ -347,10 +348,13 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	
 	enum EBugFix{
 		InvisibleCursor,
+		UpdateTextFieldTextAndCaratVisibility,
 	}
 	@Override
 	public Object bugFix(Object... aobj) {
-		switch((EBugFix)aobj[0]){
+		boolean bFixed = false;
+		EBugFix e = (EBugFix)aobj[0];
+		switch(e){
 			case InvisibleCursor:{
 				/**
 				 * To the point, but unnecessary.
@@ -361,6 +365,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 					if(!bFixInvisibleTextInputCursor)return null;
 //				getBitmapTextFrom(tf).setAlpha(1f); //this is a fix to let text cursor be visible.
 					geomCursor.getMaterial().setColor("Color",ColorRGBA.White.clone());
+					bFixed=true;
 				}else
 				if(aobj[1] instanceof TextField){
 					TextField tf = (TextField) aobj[1];
@@ -391,10 +396,31 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 					tf.setColor(tf.getColor());
 					
 					tf.setUserData(strInvisibleCursorFixed,true);
-				}
-				
+					bFixed=true;
+				}				
+			}break;
+			case UpdateTextFieldTextAndCaratVisibility:{
+				/**
+				 * This updates the displayed text cursor position.
+				 * 
+				 * This below is actually a trick, 
+				 * because this flow will finally call the required method.
+				 * {@link TextEntryComponent#resetCursorPosition}
+				 *  
+				 * @param tf
+				 */
+				if(aobj[1] instanceof TextField){
+					TextField tf = (TextField) aobj[1];
+					tf.setFontSize(tf.getFontSize());
+					bFixed=true;
+				}				
 			}break;
 		}
+		
+		if(!bFixed){
+			throw new PrerequisitesNotMetException("cant bugfix this way...",aobj);
+		}
+		
 		return null;
 	}
 

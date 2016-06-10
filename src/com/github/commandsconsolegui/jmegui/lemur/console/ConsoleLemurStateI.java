@@ -37,6 +37,7 @@ import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI.CompositeControl;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
+import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI.EBugFix;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.font.BitmapCharacter;
 import com.jme3.font.BitmapCharacterSet;
@@ -49,6 +50,7 @@ import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
+import com.simsilica.lemur.DocumentModel;
 import com.simsilica.lemur.GridPanel;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.HAlignment;
@@ -518,7 +520,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 						if(bKeyShiftIsPressed){
 							if(bControl)cd().showClipboard();
 						}else{
-							if(bControl)editPaste();
+							if(bControl)editPasteFromClipBoard();
 						}
 						break;
 					case KeyInput.KEY_X: 
@@ -532,7 +534,10 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 						autoCompleteInputField(bControl);
 						break;
 					case KeyInput.KEY_DELETE:
-						if(bControl)clearInputTextField();
+						if(bControl){
+							clearInputTextField();
+//							updateSelectionIndexForAutoFillInputFieldText();
+						}
 						break;
 					case KeyInput.KEY_SLASH:
 						if(bControl)cd().toggleLineCommentOrCommand();
@@ -694,25 +699,39 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 	}
 	
 	@Override
-	public void setInputField(String str){
+	public void setInputFieldText(String str){
 		/**
 		 * do NOT trim() the string, it may be being auto completed and 
 		 * an space being appended to help on typing new parameters.
 		 */
 		getInputField().setText(fixStringToInputField(str));
+//		LemurMiscHelpersStateI.i().bugFix(EBugFix.UpdateTextFieldTextAndCaratVisibility, getInputField());
 	}
 	
+//	@Override
+//	protected void editPasteFromClipBoard() {
+//		super.editPasteFromClipBoard();
+//		LemurMiscHelpersStateI.i().positionCaratProperly(getInputField());
+//	}
 	@Override
-	protected void editPaste() {
-		super.editPaste();
-		LemurMiscHelpersStateI.i().positionCaratProperly(getInputField());
+	protected boolean editInsertAtCaratPosition(String str) {
+//		if(isInputTextFieldEmpty() && cd().isCommandString(str)){
+//			setInputFieldText(str.trim());
+//		}else{
+			DocumentModel dm = getInputField().getDocumentModel();
+			for(int i=0;i<str.length();i++)dm.insert(str.charAt(i));
+			LemurMiscHelpersStateI.i().bugFix(EBugFix.UpdateTextFieldTextAndCaratVisibility, getInputField());
+//		}
+//		LemurMiscHelpersStateI.i().resetCursorPosition(getInputField());
+//		setInputFieldText(getInputText());
+		return true; //getInputField().getText()
 	}
 	
 //	public boolean isBlank(char c){
 //		String str="";str.contains(""+c);
 //		return c==' ' || c=='\t';
 //	}
-	
+
 	public void navigateWord(boolean bForward){
 		Integer iCurPos = getInputFieldCaratPosition();
 		String strText = getInputText(); //strText.length()
@@ -809,17 +828,17 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 		LemurMiscHelpersStateI.i().setCaratPosition(getInputField(),iNewPos);
 	}
 	
-	@Override
-	protected String prepareToPaste(String strPasted, String strCurrent) {
-		if(!isInputTextFieldEmpty()){
-			strCurrent = LemurMiscHelpersStateI.i().prepareStringToPasteAtCaratPosition(
-				getInputField(), strCurrent, strPasted);
-		}else{
-			return super.prepareToPaste(strPasted, strCurrent);
-		}
-		
-		return strCurrent;
-	}
+//	@Override
+//	protected String prepareToPaste(String strPasted, String strCurrent) {
+//		if(!isInputTextFieldEmpty()){
+//			strCurrent = LemurMiscHelpersStateI.i().prepareStringToPasteAtCaratPosition(
+//				getInputField(), strCurrent, strPasted);
+//		}else{
+//			return super.prepareToPaste(strPasted, strCurrent);
+//		}
+//		
+//		return strCurrent;
+//	}
 	@Override
 	protected void updateDumpAreaSelectedIndex(){
 		Integer i = getDumpArea().getSelectionModel().getSelection();
@@ -870,7 +889,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 				cd().editCopyOrCut(false,true,false);
 			}else
 			if(source.equals(btnPaste)){
-				editPaste();
+				editPasteFromClipBoard();
 			}
 		}
 	}
@@ -993,6 +1012,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 			cc.dumpSubEntry("Ctrl+right - navigate to next word");
 			cc.dumpSubEntry("Shift+Ctrl+V - show clipboard");
 			cc.dumpSubEntry("Shift+Click - marks dump area CopyTo selection marker for copy/cut");
+			cc.dumpSubEntry("Ctrl+Click - if dump area entry is a command, it will overwrite the input field");
 			cc.dumpSubEntry("Ctrl+Del - clear input field");
 			cc.dumpSubEntry("TAB - autocomplete (starting with)");
 			cc.dumpSubEntry("Ctrl+TAB - autocomplete (contains)");

@@ -679,28 +679,63 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 		return true;
 	}
 	
-	protected String prepareToPaste(String strPasted, String strCurrent){
-		if(isInputTextFieldEmpty() && strPasted.trim().startsWith(""+cd().getCommandPrefix())){
+//	protected String prepareToPaste(String strPasted, String strCurrent){
+//		if(isInputTextFieldEmpty() && strPasted.trim().startsWith(""+cd().getCommandPrefix())){
+//			/**
+//			 * replaces currently input field "empty" line 
+//			 * with the command (can be invalid in this case, user may complete it properly)
+//			 */
+//			strCurrent = strPasted.trim(); 
+//		}else{
+//			strCurrent+=strPasted; //simple append if there is no carat position reference
+//		}
+//		
+//		return strCurrent;
+//	}
+	
+//	protected void editPasteAppending(String strPasted) {
+////		String strPasted = MiscI.i().retrieveClipboardString(true);
+////		if(strPasted.endsWith("\\n"))strPasted=strPasted.substring(0, strPasted.length()-2);
+//		
+//		String strCurrent = getInputText();
+////		strCurrent = prepareToPaste(strPasted, strCurrent);
+//		
+//////		if(isInputTextFieldEmpty() && strPasted.trim().startsWith(""+cd().getCommandPrefix())){
+////		if(isInputTextFieldEmpty() && cd().isCommandString(strPasted)){
+////			/**
+////			 * replaces currently input field "empty" line 
+////			 * with the command (can be invalid in this case, user may complete it properly)
+////			 */
+////			strCurrent = strPasted.trim(); 
+////		}else{
+//			strCurrent+=strPasted; //simple append if there is no carat position reference
+////		}
+//		
+//		setInputFieldText(strCurrent); 
+//	}
+	
+	protected void editPasteFromClipBoard() {
+		String str = MiscI.i().retrieveClipboardString(true);
+		if(str.endsWith("\\n"))str=str.substring(0, str.length()-2);
+		
+		if(isInputTextFieldEmpty() && cd().isCommandString(str)){
 			/**
 			 * replaces currently input field "empty" line 
 			 * with the command (can be invalid in this case, user may complete it properly)
 			 */
-			strCurrent = strPasted.trim(); 
+			setInputFieldText(str.trim());
 		}else{
-			strCurrent+=strPasted; //simple append if there is no carat position reference
+			if(!editInsertAtCaratPosition(str)){
+				/**
+				 * just append the text
+				 */
+				setInputFieldText(getInputText()+str); 
+//				editPasteAppending(str);
+			}
 		}
-		
-		return strCurrent;
-	}
+	}	
 	
-	protected void editPaste() {
-		String strPasted = MiscI.i().retrieveClipboardString(true);
-		if(strPasted.endsWith("\\n"))strPasted=strPasted.substring(0, strPasted.length()-2);
-		
-		String strCurrent = getInputText();
-		strCurrent = prepareToPaste(strPasted, strCurrent);
-		setInputField(strCurrent); 
-	}
+	protected abstract boolean editInsertAtCaratPosition(String str);
 	
 //	protected void cmdHistSave(String strCmd) {
 //		fileAppendLine(flCmdHist,strCmd);
@@ -915,7 +950,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 		String str = cd().getCmdHistoryAtIndex(iIndex);
 		if(str==null)return;
 		
-		setInputField(str);
+		setInputFieldText(str);
 	}
 	
 //	class ThreadBackgrounCommands implements Runnable{
@@ -1135,26 +1170,32 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 	
 	protected void updateInputFieldFillWithSelectedEntry() {
 		// auto-fill with selected command
-		if(getDumpAreaSelectedIndex()>=0){
+		if(getDumpAreaSelectedIndex()>=0){// && isInputTextFieldEmpty()){
 			if(iSelectionIndexPreviousForFill!=getDumpAreaSelectedIndex()){ //to let user type things...
 				updateCopyFrom();
 				
-				String strCmdChk = cd().editCopyOrCut(true,false,true); //vlstrDumpEntries.get(getDumpAreaSelectedIndex()).trim();
-				strCmdChk=strCmdChk.trim();
-				if(cd().validateBaseCommand(strCmdChk)){
-					if(!strCmdChk.startsWith(""+cd().getCommandPrefix()))strCmdChk=cd().getCommandPrefix()+strCmdChk;
-					dumpAndClearInputField();
-//					int iCommentBegin = strCmdChk.indexOf(cc.getCommentPrefix());
-//					if(iCommentBegin>=0)strCmdChk=strCmdChk.substring(0,iCommentBegin);
-//					strCmdChk=clearCommentsFromMultiline(strCmdChk);
-//					if(strCmdChk.endsWith("\\n"))strCmdChk=strCmdChk.substring(0,strCmdChk.length()-2);
-//					if(strCmdChk.endsWith("\n" ))strCmdChk=strCmdChk.substring(0,strCmdChk.length()-1);
-					setInputField(strCmdChk);
+				if(bKeyControlIsPressed){
+					String strCmdChk = cd().editCopyOrCut(true,false,true); //vlstrDumpEntries.get(getDumpAreaSelectedIndex()).trim();
+					strCmdChk=strCmdChk.trim();
+					if(cd().validateBaseCommand(strCmdChk)){
+						if(!strCmdChk.startsWith(""+cd().getCommandPrefix()))strCmdChk=cd().getCommandPrefix()+strCmdChk;
+						dumpAndClearInputField();
+//						int iCommentBegin = strCmdChk.indexOf(cc.getCommentPrefix());
+//						if(iCommentBegin>=0)strCmdChk=strCmdChk.substring(0,iCommentBegin);
+//						strCmdChk=clearCommentsFromMultiline(strCmdChk);
+//						if(strCmdChk.endsWith("\\n"))strCmdChk=strCmdChk.substring(0,strCmdChk.length()-2);
+//						if(strCmdChk.endsWith("\n" ))strCmdChk=strCmdChk.substring(0,strCmdChk.length()-1);
+						setInputFieldText(strCmdChk);
+					}
 				}
 				
-				iSelectionIndexPreviousForFill = getDumpAreaSelectedIndex();
+				updateSelectionIndexForAutoFillInputFieldText();
+//				iSelectionIndexPreviousForFill = getDumpAreaSelectedIndex();
 			}
 		}
+	}
+	protected void updateSelectionIndexForAutoFillInputFieldText() {
+		iSelectionIndexPreviousForFill = getDumpAreaSelectedIndex();
 	}
 	
 	protected String clearCommentsFromMultiline(String str){
@@ -1297,7 +1338,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 			if(strHintCmd!=null){
 				strHintCmd=cd().getCommandPrefix()+cd().extractCommandPart(strHintCmd,0)+" ";
 				if(!getInputText().equals(strHintCmd)){
-					setInputField(strHintCmd);
+					setInputFieldText(strHintCmd);
 					return true;
 				}
 			}
@@ -1309,7 +1350,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 	
 	@Override
 	public void clearInputTextField() {
-		setInputField(""+cd().getCommandPrefix());
+		setInputFieldText(""+cd().getCommandPrefix());
 	}
 	
 //	protected boolean actionSubmitCommand(final String strCmd){
@@ -1537,7 +1578,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 		}
 		
 		if(strCompletedCmd.trim().isEmpty())strCompletedCmd=""+cd().getCommandPrefix();
-		setInputField(strCompletedCmd+strCmdAfterCarat);
+		setInputFieldText(strCompletedCmd+strCmdAfterCarat);
 //		LemurMiscHelpersState.i().setCaratPosition(intputField, strCompletedCmd.length());
 //		if(efHK!=null)efHK.setCaratPosition(strCompletedCmd.length());
 		
@@ -1965,7 +2006,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 					cd().addCmdHistoryCurrentIndex(1);
 					if(cd().getCmdHistoryCurrentIndex()>=cd().getCmdHistorySize()){
 						if(strNotSubmitedCmd!=null){
-							setInputField(strNotSubmitedCmd);
+							setInputFieldText(strNotSubmitedCmd);
 						}
 					}
 					fillInputFieldWithHistoryDataAtIndex(cd().getCmdHistoryCurrentIndex());

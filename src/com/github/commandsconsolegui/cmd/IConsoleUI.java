@@ -58,7 +58,7 @@ public interface IConsoleUI extends ICheckInitAndCleanupI{
 
 	public abstract String getInputText();
 
-	public abstract void setInputField(String str);
+	public abstract void setInputFieldText(String str);
 
 	public abstract void scrollToBottomRequest();
 

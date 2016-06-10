@@ -2558,6 +2558,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		if(strCmdPart==null)return false;
 		return strCmdPart.matches("["+strValidCmdCharsRegex+"]*");
 	}
+	
+	public boolean isCommandString(String str) {
+		return str.trim().startsWith(getCommandPrefixStr());
+	}
+	
 	protected void dumpAllStats(){
 		icui.dumpAllStats();
 		
@@ -2846,7 +2851,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}else{
 			str=getCommentPrefix()+str;
 		}
-		icui.setInputField(str);
+		icui.setInputFieldText(str);
 	}
 
 	@Override
