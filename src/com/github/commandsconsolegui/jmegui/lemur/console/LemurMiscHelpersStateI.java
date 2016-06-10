@@ -320,7 +320,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		ReflexHacks.i().callMethodHK(tec,"resetCursorPosition");
 	}
 
-	public Float guessEntryHeight(ListBox<String> listBox){
+	public Float guessEntryHeight(ListBox<?> listBox){
 		if(listBox.getGridPanel().getChildren().isEmpty())return null;
 		
 		Button	btnFixVisibleRowsHelper = null;

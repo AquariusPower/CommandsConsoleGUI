@@ -33,6 +33,7 @@ import java.util.Collections;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.globals.GlobalGUINodeI;
+import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.MouseCursor;
 import com.github.commandsconsolegui.jmegui.MouseCursor.EMouseCursorButton;
@@ -189,15 +190,15 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	}
 	ClickFocusMouseCursorListener focusMouseCursorListener = new ClickFocusMouseCursorListener();
 	
-	public void prepareDialogToBeFocused(LemurDialogGUIStateAbs<?> diag){
+	public void prepareDialogToBeFocused(LemurDialogGUIStateAbs diag){
 		diag.getContainerMain().setUserData(LemurDialogGUIStateAbs.class.getName(), diag);
 		
 		CursorEventControl.addListenersToSpatial(diag.getContainerMain(), 
 			focusMouseCursorListener);
 	}
 	
-	public LemurDialogGUIStateAbs<?> retrieveDialogFromSpatial(Spatial sptAny){
-		LemurDialogGUIStateAbs<?> diag = (LemurDialogGUIStateAbs<?>)MiscJmeI.i().getParentestFrom(sptAny)
+	public LemurDialogGUIStateAbs retrieveDialogFromSpatial(Spatial sptAny){
+		LemurDialogGUIStateAbs diag = (LemurDialogGUIStateAbs)MiscJmeI.i().getParentestFrom(sptAny)
 				.getUserData(LemurDialogGUIStateAbs.class.getName());
 		
 		if(diag==null)throw new PrerequisitesNotMetException(sptAny.getName());
@@ -206,7 +207,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	}
 	
 	public void lowerDialogFocusPriority(Spatial sptAny){
-		LemurDialogGUIStateAbs<?> diag = retrieveDialogFromSpatial(sptAny);
+		LemurDialogGUIStateAbs diag = retrieveDialogFromSpatial(sptAny);
 		Spatial sptFocusable = diag.getIntputField();
 		
 		if(asptFocusRequestList.contains(sptFocusable)){
@@ -219,8 +220,15 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	}
 	
 	public void requestDialogFocus(Spatial sptChild) {
-		LemurDialogGUIStateAbs<?> diag = retrieveDialogFromSpatial(sptChild);
-		requestFocus(diag.getIntputField(),true);
+		LemurDialogGUIStateAbs diag = retrieveDialogFromSpatial(sptChild);
+		
+		BaseDialogStateAbs diagFocus = diag;
+		for(BaseDialogStateAbs diagModal:diag.getModalChildListCopy()){
+			diagFocus = diagModal;
+			break;
+		}
+		
+		requestFocus(diagFocus.getIntputField(),true);
 	}
 	
 	public void requestFocus(Spatial spt) {

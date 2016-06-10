@@ -405,7 +405,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 		boolean bConsoleDialogInitiallyEnabled=true;
 		
 		super.configure(new BaseDialogStateAbs.CfgParm(
-			cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.nodeGUI, bConsoleDialogInitiallyEnabled));
+			cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.nodeGUI, bConsoleDialogInitiallyEnabled, null));
 		
 //		rss = new ReattachSafelyState();
 //		rss.configure(new ReattachSafelyState.CfgParm(this));

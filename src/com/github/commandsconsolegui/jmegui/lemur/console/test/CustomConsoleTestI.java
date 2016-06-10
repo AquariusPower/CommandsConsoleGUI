@@ -110,12 +110,12 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 		
 		// test dialogs
 		diag1 = new CustomDialogGUIState().configure(new CustomDialogGUIState.CfgParm(
-			false, "TestDialog1", false, getGuiNode(), null, null, null, null
+			false, "TestDialog1", false, getGuiNode(), null, null, null, null, null
 		));
 		
 		// this dialog, after closed, may have diag2.getOptionSelected() available
 		diag2 = new CustomDialogGUIState().configure(new CustomDialogGUIState.CfgParm(
-			true, "TestDialog2", false, getGuiNode(), 0.5f, 0.6f, null, null
+			true, "TestDialog2", false, getGuiNode(), 0.5f, 0.6f, null, null, diag1
 		));
 		
 		// other basic initializations

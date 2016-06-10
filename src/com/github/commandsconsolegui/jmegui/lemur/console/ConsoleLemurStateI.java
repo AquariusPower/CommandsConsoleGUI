@@ -1017,7 +1017,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 			cc.dumpSubEntry("TAB - autocomplete (starting with)");
 			cc.dumpSubEntry("Ctrl+TAB - autocomplete (contains)");
 			cc.dumpSubEntry("Ctrl+/ - toggle input field comment");
-			cc.dumpSubEntry("HintListFill: Ctrl (contains mode) or Ctrl+Shift (overrides existing hint list)");
+			cc.dumpSubEntry("HintListFill: Ctrl (contains mode) or Ctrl+Shift (overrides existing hint list with contains mode)");
 			bCommandWorked=true;
 		}else
 		{
@@ -1026,4 +1026,10 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 		
 		return cc.cmdFoundReturnStatus(bCommandWorked);
 	}
+
+//	@Override
+//	public void setAnswerFromModalChild(Object... aobj) {
+//		// TODO Auto-generated method stub
+//		
+//	}
 }

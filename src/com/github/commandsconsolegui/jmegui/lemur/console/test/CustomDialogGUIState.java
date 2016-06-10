@@ -28,8 +28,10 @@
 package com.github.commandsconsolegui.jmegui.lemur.console.test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-import com.github.commandsconsolegui.jmegui.ConditionalStateAbs;
+import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
+import com.github.commandsconsolegui.jmegui.extras.DialogListEntry;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.scene.Node;
@@ -38,8 +40,10 @@ import com.simsilica.lemur.GuiGlobals;
 /**
  * @author AquariusPower <https://github.com/AquariusPower>
  */
-public class CustomDialogGUIState extends LemurDialogGUIStateAbs<String>{
-	ArrayList<String> astr;
+public class CustomDialogGUIState extends LemurDialogGUIStateAbs{
+//	ArrayList<String> astr;
+//	HashMap<String,String> hmKeyValueTmp = new HashMap<String,String>();
+//	private Object	answerFromModal;
 	
 //public static class CfgParm implements ICfgParm{
 //String strUIId;
@@ -56,19 +60,22 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs<String>{
 		public CfgParm(boolean	bOptionSelectionMode,String strUIId, boolean bIgnorePrefixAndSuffix,
 				Node nodeGUI, Float fDialogHeightPercentOfAppWindow,
 				Float fDialogWidthPercentOfAppWindow, Float fInfoHeightPercentOfDialog,
-				Integer iEntryHeightPixels) {
+				Integer iEntryHeightPixels, BaseDialogStateAbs modalParent) {
 			super(bOptionSelectionMode,strUIId, bIgnorePrefixAndSuffix, nodeGUI,
 					fDialogHeightPercentOfAppWindow, fDialogWidthPercentOfAppWindow,
-					fInfoHeightPercentOfDialog, iEntryHeightPixels);
+					fInfoHeightPercentOfDialog, iEntryHeightPixels, modalParent);
 			// TODO Auto-generated constructor stub
 		}
 	}
+
+	protected ArrayList<DialogListEntry>	adleFullList = new ArrayList<DialogListEntry>();
 	
 	@Override
 	public CustomDialogGUIState configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
 		
-		astr = new ArrayList<String>();
+//		astr = new ArrayList<String>();
+//		hmKeyValueTmp.clear();
 		super.configure(cfg); //params are identical
 //		super.configure(new LemurDialogGUIStateAbs.CfgParm(
 //			cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.nodeGUI, ));
@@ -89,17 +96,67 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs<String>{
 	
 	@Override
 	protected void updateList() {
-		astr.add("New test entry: "+MiscI.i().getDateTimeForFilename(true));
-		if(astr.size()>100)astr.remove(0);
+		DialogListEntry dleAnswer = extractAnswerFromModal();
+		if(dleAnswer!=null){
+			adleFullList.set(getSelectedIndex(), dleAnswer);
+//			vlEntriesList.set(getSelectedIndex(), dleAnswer);
+		}else{
+			DialogListEntry dle = new DialogListEntry();
+			dle.setText(this.getId()+": New test entry: "+MiscI.i().getDateTimeForFilename(true));
+//			String strEntry = "";
+//			String strValue = "New test entry: "+MiscI.i().getDateTimeForFilename(true);
+//			String strKey = formatEntryKey(strValue);
+//			strEntry+=this.getId()+": ";
+//			strEntry+=strKey+", ";
+//			strEntry+=strValue;
+//			hmKeyValueTmp.put(strKey,strEntry);
+//			if(hmKeyValueTmp.size()>100)hmKeyValueTmp.remo
+//			if(astr.size()>100)astr.remove(0);
+			adleFullList.add(dle);
+			if(adleFullList.size()>100)adleFullList.remove(0);
+		}
 		
-		updateList(astr);
+		updateList(adleFullList);
+		
+		super.updateList();
 	}
-
+	
+//	@Override
+//	protected String getSelectedEntryKey() {
+//		return hmKeyValueTmp.get(formatEntryKey(getSelectedEntryValue()));
+//	}
+	
 	@Override
 	protected boolean initCheckPrerequisites() {
 		if(GuiGlobals.getInstance()==null)return false;
 		
 		return super.initCheckPrerequisites();
 	}
+	
+//	@Override
+//	protected boolean disableOrUndo() {
+//		if(!super.disableOrUndo())return false;
+//		
+//		getModalParent().setAnswerFromModal(getOptionSelected());
+//		
+//		return true;
+//	}
+	
+//	@Override
+//	public String formatEntryKey(String val) {
+//		return "Entry: "+val;
+//	}
+
+//	@Override
+//	protected String getSelectedKey() {
+//		return null;
+//	}
+
+//	@Override
+//	public void setAnswerFromModalChild(Object... aobj) {
+//		if(aobj.length==0)return;
+//		
+//		answerFromModal = aobj[1];
+//	}
 	
 }

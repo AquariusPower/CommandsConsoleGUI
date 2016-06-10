@@ -27,48 +27,63 @@
 
 package com.github.commandsconsolegui.jmegui.extras;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.jme3.scene.Node;
 
 /**
+ * This class would be useful to a non Lemur dialog too.
+ * TODO mix this with LemurDialogGUIStateAbs or {@link BaseDialogStateAbs} or both (some things to one, some to the other)?
+ * 
  * A console command will be automatically created based on the configured {@link #strUIId}.<br>
  * See it at {@link BaseDialogStateAbs}.
- * 
- * TODO mix this with LemurDialogGUIStateAbs or {@link BaseDialogStateAbs} ?
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class InteractionDialogStateAbs <V> extends BaseDialogStateAbs{
+public abstract class InteractionDialogStateAbs extends BaseDialogStateAbs{
 	protected Node cntrNorth;
 	protected String	strLastFilter = "";
-	protected HashMap<String,V> hmKeyValue = new HashMap<String,V>();
-	protected String	strLastSelectedKey;
+//	protected ArrayList<DialogListEntry> aEntryList = new ArrayList<DialogListEntry>();
+//	protected String	strLastSelectedKey;
 	protected boolean bOptionSelectionMode = false;
-	private V	valueOptionSelected;
-	
+	protected DialogListEntry	dleLastSelected;
+//	private V	valueOptionSelected;
+
 	public abstract void clearSelection();
 	
-	public V getOptionSelected(){
-		return valueOptionSelected;
-	}
+//	public V getOptionSelected(){
+//		return valueOptionSelected;
+//	}
+	
+//	@Override
+//	protected boolean disableOrUndo() {
+//		if(!super.disableOrUndo())return false;
+//		getModalParent().setAnswerFromModal(getOptionSelected());
+//		return true;
+//	}
 	
 	public static class CfgParm extends BaseDialogStateAbs.CfgParm{
 		public boolean	bOptionSelectionMode;
-		public CfgParm(boolean bOptionSelectionMode, String strUIId, boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
-			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI,
-					/** 
-					 * Dialogs must be initially disabled because they are enabled 
-					 * on user demand. 
-					 */
-					false);
+		public CfgParm(boolean bOptionSelectionMode, String strUIId, boolean bIgnorePrefixAndSuffix,Node nodeGUI,BaseDialogStateAbs modalParent) {
+			super(
+				strUIId, 
+				bIgnorePrefixAndSuffix, 
+				nodeGUI,
+				/** 
+				 * Dialogs must be initially disabled because they are enabled 
+				 * on user demand. 
+				 */
+				false,
+				modalParent);
 			this.bOptionSelectionMode=bOptionSelectionMode;
 		}
 	}
 	@Override
-	public InteractionDialogStateAbs<V> configure(ICfgParm icfg) {
+	public InteractionDialogStateAbs configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
 		this.bOptionSelectionMode=cfg.bOptionSelectionMode;
 		super.configure(icfg);
@@ -80,14 +95,28 @@ public abstract class InteractionDialogStateAbs <V> extends BaseDialogStateAbs{
 	 * default is to fill with the last filter
 	 */
 	protected abstract void updateInputField();
-
-	protected abstract Integer getSelectedIndex();
 	
-	protected abstract String getSelectedKey();
+	public abstract DialogListEntry getSelectedEntry();
+//		Integer i = getSelectedIndex();
+//		if(i==null)return null;
+//		return aEntryList.get(i);
+//	}
+//	protected abstract Integer getSelectedIndex();
 	
-	protected V getSelectedValue() {
-		return hmKeyValue.get(getSelectedKey());
-	}
+//	
+//	protected abstract String getSelectedEntryKey();
+//	protected String getSelectedKey(){
+//		for(Entry<String, V> entry:hmKeyValue.entrySet()){
+//			if(entry.getValue().equals(getSelectedValue())){
+//				return entry.getKey();
+//			}
+//		}
+//		return null;
+//	}
+//	
+//	protected DialogListEntry getSelectedEntryValue() {
+//		return aEntryList.get(getSelectedEntryKey());
+//	}
 	
 	/**
 	 * 
@@ -111,27 +140,34 @@ public abstract class InteractionDialogStateAbs <V> extends BaseDialogStateAbs{
 	 */
 	@Override
 	protected boolean updateOrUndo(float tpf) {
-		String str = getSelectedKey();
-		if(str!=null)strLastSelectedKey=str;
+//		String str = getSelectedEntryKey();
+//		if(str!=null)strLastSelectedKey=str;
+		DialogListEntry dle = getSelectedEntry();
+		if(dle!=null)dleLastSelected = dle;
+		
+		if(isAnswerFromModalFilled()){
+			updateAllParts();
+		}
 		
 		return super.updateOrUndo(tpf);
 	}
 	
-	/**
-	 * What will be shown at each entry on the list.
-	 * Default is to return the default string about the object.
-	 * 
-	 * @param val
-	 * @return
-	 */
-	public String formatEntryKey(V val){
-		return val.toString();
-	}
+//	/**
+//	 * What will be shown at each entry on the list.
+//	 * Default is to return the default string about the object.
+//	 * 
+//	 * @param val
+//	 * @return
+//	 */
+//	public String formatEntryKey(V val){
+//		return ""+val.hashCode();
+//	}
 	
+
 	/**
 	 * override empty to disable filter
 	 */
-	protected void applyListFilter(){
+	protected void applyListKeyFilter(){
 		this.strLastFilter=getInputText();
 	}
 	
@@ -141,15 +177,16 @@ public abstract class InteractionDialogStateAbs <V> extends BaseDialogStateAbs{
 	 */
 	@Override
 	protected void actionSubmit(){
-		applyListFilter();
+		applyListKeyFilter();
 		updateAllParts();
 		
 		if(bOptionSelectionMode){
 			
 //			if(getInputText().isEmpty()){ // was cleared
-				valueOptionSelected = getSelectedValue(); //this value is in this console variable now
-				if(valueOptionSelected!=null){
-					cd().dumpInfoEntry(this.getId()+": Option Selected: "+valueOptionSelected);
+				DialogListEntry dle = getSelectedEntry(); //this value is in this console variable now
+				getModalParent().setAnswerFromModal(dle);
+				if(dle!=null){
+					cd().dumpInfoEntry(this.getId()+": Option Selected: "+dle.toString());
 					requestDisable(); //close if there is one entry selected
 				}
 //			}else{
@@ -158,6 +195,7 @@ public abstract class InteractionDialogStateAbs <V> extends BaseDialogStateAbs{
 			
 //			}
 		}
+		
 	}
 	
 	protected void updateAllParts(){
@@ -173,4 +211,10 @@ public abstract class InteractionDialogStateAbs <V> extends BaseDialogStateAbs{
 		updateAllParts();
 		return super.enableOrUndo();
 	}
+	
+//	@Override
+//	protected boolean disableOrUndo() {
+//		if(getModalParent()!=null)getModalParent().setAnswerFromModalChild(valueOptionSelected);
+//		return super.disableOrUndo();
+//	}
 }

@@ -27,9 +27,11 @@
 
 package com.github.commandsconsolegui.jmegui;
 
+import java.util.ArrayList;
+
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
+import com.github.commandsconsolegui.jmegui.extras.DialogListEntry;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
-import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -46,6 +48,11 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 	private Spatial	sptIntputField;
 	protected String	strTitle;
 	
+	private BaseDialogStateAbs modalParent;
+	private ArrayList<BaseDialogStateAbs> aModalChildList = new ArrayList<BaseDialogStateAbs>();
+	private DialogListEntry dleAnswerFromModal;
+//	private Object[]	aobjModalAnswer;
+	
 	public Spatial getContainerMain(){
 		return sptContainerMain;
 	}
@@ -60,13 +67,15 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 		boolean bIgnorePrefixAndSuffix;
 		Node nodeGUI;
 		boolean bInitiallyEnabled;
+		BaseDialogStateAbs modalParent;
 //		Long lMouseCursorClickDelayMilis;
-		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI, boolean bInitiallyEnabled){//, Long lMouseCursorClickDelayMilis) {
+		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI, boolean bInitiallyEnabled, BaseDialogStateAbs modalParent){//, Long lMouseCursorClickDelayMilis) {
 			super();
 			this.strUIId = strUIId;
 			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
 			this.nodeGUI = nodeGUI;
 			this.bInitiallyEnabled=bInitiallyEnabled;
+			this.modalParent=modalParent;
 //			this.lMouseCursorClickDelayMilis=lMouseCursorClickDelayMilis;
 		}
 	}
@@ -82,7 +91,10 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 //		MouseCursor.i().configure(cfg.lMouseCursorClickDelayMilis);
 		
 		super.setNodeGUI(cfg.nodeGUI);//getNodeGUI()
-
+		
+		this.modalParent=cfg.modalParent;
+//		updateModalParent();
+		
 		strCmdPrefix = "toggleUI";
 		strCmdSuffix = "";
 		
@@ -125,6 +137,8 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 		getNodeGUI().attachChild(sptContainerMain);
 		
 		setMouseCursorKeepUngrabbed(true);
+		if(modalParent!=null)modalParent.updateModalChild(true,this);
+//		updateModalParent(true);
 		
 		return super.enableOrUndo();
 	}
@@ -134,6 +148,8 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 		sptContainerMain.removeFromParent();
 		
 		setMouseCursorKeepUngrabbed(false);
+		if(modalParent!=null)modalParent.updateModalChild(false,this);
+//		updateModalParent(false);
 		
 		return super.disableOrUndo();
 	}
@@ -164,4 +180,61 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 		this.sptIntputField = sptIntputField;
 		return this;
 	}
+
+	public BaseDialogStateAbs getModalParent(){
+		return this.modalParent;
+	}
+	
+//	public abstract void setAnswerFromModalChild(Object... aobj);
+	
+	public ArrayList<BaseDialogStateAbs> getModalChildListCopy() {
+		return new ArrayList<BaseDialogStateAbs>(aModalChildList);
+	}
+	protected void updateModalChild(boolean bAdd, BaseDialogStateAbs modal) {
+//		if(this.modalParent==null)return;
+			
+		if(bAdd){
+			if(!aModalChildList.contains(modal)){
+				aModalChildList.add(modal);
+			}
+		}else{
+			aModalChildList.remove(modal);
+//			aobjModalAnswer=modal.aobjModalAnswer;
+//			setModalAnswer(modal.aobjModalAnswer);
+		}
+	}
+//	protected void updateModalParent(boolean bAdd) {
+//		if(this.modalParent==null)return;
+//		
+//		if(bAdd){
+//			if(!modalParent.aModalChildList.contains(this)){
+//				modalParent.aModalChildList.add(this);
+//			}
+//		}else{
+//			modalParent.aModalChildList.remove(this);
+//			modalParent.setModalAnswer(this.aobjModalAnswer);
+//		}
+//	}
+//	protected void setModalAnswer(Object... aobjModalAnswer) {
+//		this.aobjModalAnswer=aobjModalAnswer;
+//	}
+
+	public void setAnswerFromModal(DialogListEntry dle) {
+		this.dleAnswerFromModal = dle;
+	}
+	
+	/**
+	 * the answer will be null after this
+	 * @return
+	 */
+	public DialogListEntry extractAnswerFromModal(){
+		DialogListEntry dle = dleAnswerFromModal;
+		dleAnswerFromModal = null;
+		return dle;
+	}
+	
+	public boolean isAnswerFromModalFilled() {
+		return dleAnswerFromModal!=null;
+	}
+	
 }
