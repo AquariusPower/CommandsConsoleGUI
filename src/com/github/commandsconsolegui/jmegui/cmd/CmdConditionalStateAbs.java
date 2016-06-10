@@ -126,7 +126,7 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 			bCommandWorked = true;
 		}else
 		{
-			return ECmdReturnStatus.NotFound;
+			return ECmdReturnStatus.NotFound; //end of inheritance seek
 		}
 		
 		return cc.cmdFoundReturnStatus(bCommandWorked);

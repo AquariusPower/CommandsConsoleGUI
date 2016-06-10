@@ -29,6 +29,8 @@ package com.github.commandsconsolegui.jmegui.lemur.console;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
@@ -87,6 +89,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 	protected Label	lblStats;
 
 	private ColorRGBA	colorConsoleStyleBackground;
+	private TextEntryComponent	tecInputField;
 	
 	public ConsoleLemurStateI(){
 		setDumpEntriesSlowedQueue(new VersionedList<String>());
@@ -475,13 +478,25 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 		getHintBox().setVisibleItems(iVisibleLines);
 		return this;
 	}
-
+	
+	protected void setInputFieldTextEntryComponent(TextEntryComponent source){
+		if(this.tecInputField!=null){
+			if(!this.tecInputField.equals(source)){
+				throw new NullPointerException("input field changed? support is required for this...");
+			}
+		}
+		this.tecInputField = source;
+	}
+	
 	@Override
 	protected boolean mapKeysForInputField(){
 		// simple actions
 		KeyActionListener actSimpleActions = new KeyActionListener() {
 			@Override
 			public void keyAction(TextEntryComponent source, KeyAction key) {
+				setInputFieldTextEntryComponent(source);
+//				LemurMiscHelpersStateI.i().initializeSpecialKeyListeners(source);
+				
 				boolean bControl = key.hasModifier(KeyAction.CONTROL_DOWN); //0x1
 //				boolean bShift = key.hasModifier(0x01);
 //				boolean bAlt = key.hasModifier(0x001);
@@ -522,6 +537,12 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 					case KeyInput.KEY_SLASH:
 						if(bControl)cd().toggleLineCommentOrCommand();
 						break;
+					case KeyInput.KEY_LEFT:
+						if(bControl)navigateWord(false);
+						break;
+					case KeyInput.KEY_RIGHT:
+						if(bControl)navigateWord(true);
+						break;
 				}
 			}
 		};
@@ -537,6 +558,8 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_DELETE,KeyAction.CONTROL_DOWN), actSimpleActions);
 		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_SLASH,KeyAction.CONTROL_DOWN), actSimpleActions);
 		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_ESCAPE), actSimpleActions);
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_LEFT,KeyAction.CONTROL_DOWN), actSimpleActions);
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_RIGHT,KeyAction.CONTROL_DOWN), actSimpleActions);
 		
 		// cmd history select action
 		KeyActionListener actCmdHistoryEntrySelectAction = new KeyActionListener() {
@@ -685,6 +708,107 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 		LemurMiscHelpersStateI.i().positionCaratProperly(getInputField());
 	}
 	
+//	public boolean isBlank(char c){
+//		String str="";str.contains(""+c);
+//		return c==' ' || c=='\t';
+//	}
+	
+	public void navigateWord(boolean bForward){
+		Integer iCurPos = getInputFieldCaratPosition();
+		String strText = getInputText(); //strText.length()
+//		String strBefore = str.substring(0,iCurPos);
+//		String strAfter = str.substring(iCurPos);
+		
+		Integer iNewPos = null;
+//		boolean bFoundBlank=false;
+		int i=iCurPos;
+		
+		if(bForward){
+			if(i==strText.length())return;
+		}else{
+			if(i==0)return;
+			
+//			if(i==strText.length()){
+				i--;
+//			}
+		}
+		
+		boolean bLetter = Character.isLetter(strText.charAt(i));
+		while(true){
+			i+=bForward?1:-1;
+			if(i==0 || i==strText.length())break;
+			
+			if(bForward){
+				if(!bLetter){
+					if(!Character.isLetter(strText.charAt(i))){
+						continue;
+					}
+					break; //found letter
+				}else{
+					if(!Character.isLetter(strText.charAt(i))){
+						bLetter=false;
+					}
+					continue;
+				}
+			}else{
+				if(!bLetter){
+					if(Character.isLetter(strText.charAt(i))){
+						bLetter=true;
+					}
+					continue;
+				}else{
+					if(Character.isLetter(strText.charAt(i))){
+						continue;
+					}
+					i++; //this will skip the blank to the next char.
+					break;
+				}
+			}
+		}
+		iNewPos=i;
+		
+		
+//		String strWork=new StringBuffer(bForward?strAfter:strBefore).reverse().toString();
+//		for(int i=0; i<strWork.length(); i++){
+//			char c = strWork.charAt(i);
+//			if(iNewPos!=null){
+//				if(bForward){
+//					
+//				}else{
+//					
+//				}
+//				
+//				if(isBlank(c)){
+//					iNewPos++;
+//					continue;
+//				}else{
+//					break; //the begin of next/previous word
+//				}
+//			}
+//			
+//			if(isBlank(c)){
+//				bFoundBlank=true;
+//			}else{
+//				if(bFoundBlank){
+//					iNewPos=bForward?i:-i;
+//				}
+//			}
+//		}
+//		
+//		if(iNewPos==null){
+//			iNewPos=bForward ? iCurPos+strAfter.length() : 0;
+//		}else{
+//			iNewPos+=iCurPos;
+//		}
+//		
+//		if(bForward){
+//			iNewPos++;
+//		}else{
+//		}
+		
+		LemurMiscHelpersStateI.i().setCaratPosition(getInputField(),iNewPos);
+	}
+	
 	@Override
 	protected String prepareToPaste(String strPasted, String strCurrent) {
 		if(!isInputTextFieldEmpty()){
@@ -819,31 +943,6 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 	protected String getStatsText() {
 		return lblStats.getText();
 	}
-//	@Override
-//	public Object getFocus(){
-//		return LemurFocusHelperStateI.i().getFocused();
-//	}
-//	@Override
-//	public boolean setFocus(Object obj){
-//		if(obj==null){
-//			LemurFocusHelperStateI.i().removeAllFocus();
-//		}else{
-//			LemurFocusHelperStateI.i().requestFocus((Spatial) obj);
-//		}
-//		
-//		return obj==null?true:obj.equals(getFocus());
-//	}
-//
-//	@Override
-//	protected void removeFocus(Object obj) {
-//		LemurFocusHelperStateI.i().removeFocusableFromList((Spatial) obj);
-//	}
-
-//	@Override
-//	protected boolean cleanupValidating() {
-//		getContainerConsole().clearChildren();
-//		return super.cleanupValidating();
-//	}
 	
 	@Override
 	public boolean prepareAndCheckIfReadyToDiscard(CompositeControl cc) {
@@ -880,5 +979,31 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 			LemurFocusHelperStateI.i().requestFocus(getIntputField(),true);
 		}
 	}
-
+	
+	@Override
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
+		boolean bCommandWorked = false;
+		
+		if(cc.checkCmdValidity(this,"showBinds","")){
+			cc.dumpInfoEntry("Key bindings: ");
+			cc.dumpSubEntry("Ctrl+C - copy");
+			cc.dumpSubEntry("Ctrl+X - cut");
+			cc.dumpSubEntry("Ctrl+V - paste");
+			cc.dumpSubEntry("Ctrl+left - navigate to previous word");
+			cc.dumpSubEntry("Ctrl+right - navigate to next word");
+			cc.dumpSubEntry("Shift+Ctrl+V - show clipboard");
+			cc.dumpSubEntry("Shift+Click - marks dump area CopyTo selection marker for copy/cut");
+			cc.dumpSubEntry("Ctrl+Del - clear input field");
+			cc.dumpSubEntry("TAB - autocomplete (starting with)");
+			cc.dumpSubEntry("Ctrl+TAB - autocomplete (contains)");
+			cc.dumpSubEntry("Ctrl+/ - toggle input field comment");
+			cc.dumpSubEntry("HintListFill: Ctrl (contains mode) or Ctrl+Shift (overrides existing hint list)");
+			bCommandWorked=true;
+		}else
+		{
+			return super.execConsoleCommand(cc);
+		}
+		
+		return cc.cmdFoundReturnStatus(bCommandWorked);
+	}
 }

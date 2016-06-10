@@ -270,6 +270,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	/**
 	 * 
 	 * @param tf must have had the new carat set by {@link #prepareStringToPasteAtCaratPosition(TextField, String, String)} 
+	 * @param tec 
 	 */
 	public void positionCaratProperly(TextField tf) {
 		Object objUD = tf.getUserData(strCaratNewPosition);
@@ -283,11 +284,12 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	
 	/**
 	 * To show the cursor at the new carat position, 
-	 * this required method: {@link TextEntryComponent#resetCursorPosition}
+	 * this required protected method: {@link TextEntryComponent#resetCursorPosition}
 	 * must be reached in some way...
 	 * 
 	 * @param tf
 	 * @param iMoveCaratTo
+	 * @param tec 
 	 */
 	public void setCaratPosition(TextField tf, int iMoveCaratTo) {
 		// position carat properly
@@ -310,7 +312,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	 */
 	public void resetCursorPosition(TextField tf){
 		tf.setFontSize(tf.getFontSize()); //resetCursorPositionHK(tf);
-	}	
+	}
 	@Deprecated
 	public void resetCursorPositionHK(TextField tf){
 		TextEntryComponent tec = ((TextEntryComponent)ReflexHacks.i().getFieldValueHK(tf, "text"));
@@ -429,5 +431,9 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		
 		return storeCfgAndReturnSelf(icfg);
 	}
+
+//	public void initializeSpecialKeyListeners(TextEntryComponent source) {
+//		source.
+//	}
 
 }

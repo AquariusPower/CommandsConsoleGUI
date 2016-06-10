@@ -78,6 +78,8 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 	// generic dialog
 	private CustomDialogGUIState	diag2;
 
+	private CustomDialogGUIState	diag1;
+
 //	private String	strOptionSelected;
 	
 	public CustomConsoleTestI() {
@@ -107,7 +109,7 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 			CustomConsoleTestI.class.getSimpleName(), false, KeyInput.KEY_F10, getGuiNode()));
 		
 		// test dialogs
-		new CustomDialogGUIState().configure(new CustomDialogGUIState.CfgParm(
+		diag1 = new CustomDialogGUIState().configure(new CustomDialogGUIState.CfgParm(
 			false, "TestDialog1", false, getGuiNode(), null, null, null, null
 		));
 		

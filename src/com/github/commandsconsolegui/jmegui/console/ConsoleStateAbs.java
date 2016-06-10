@@ -1830,7 +1830,8 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 			bCommandWorked=true;
 		}else
 		{
-			return ECmdReturnStatus.NotFound;
+			return super.execConsoleCommand(cc);
+//			return ECmdReturnStatus.NotFound;
 		}
 		
 		return cc.cmdFoundReturnStatus(bCommandWorked);

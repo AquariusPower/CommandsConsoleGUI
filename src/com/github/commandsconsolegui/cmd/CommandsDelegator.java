@@ -671,20 +671,6 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			cmdResetConsole();
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,"showBinds","")){
-			dumpInfoEntry("Key bindings: ");
-			dumpSubEntry("Ctrl+C - copy");
-			dumpSubEntry("Ctrl+X - cut");
-			dumpSubEntry("Ctrl+V - paste");
-			dumpSubEntry("Shift+Ctrl+V - show clipboard");
-			dumpSubEntry("Shift+Click - marks dump area CopyTo selection marker for copy/cut");
-			dumpSubEntry("Ctrl+Del - clear input field");
-			dumpSubEntry("TAB - autocomplete (starting with)");
-			dumpSubEntry("Ctrl+TAB - autocomplete (contains)");
-			dumpSubEntry("Ctrl+/ - toggle input field comment");
-			dumpSubEntry("HintListFill: Ctrl (contains mode) or Ctrl+Shift (overrides existing hint list)");
-			bCmdWorked=true;
-		}else
 		if(checkCmdValidity(icclPseudo,"showSetup","show restricted variables")){
 			for(String str:MiscI.i().fileLoad(flSetup)){
 				dumpSubEntry(str);
