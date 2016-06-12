@@ -30,8 +30,9 @@ package com.github.commandsconsolegui.jmegui.lemur.console;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalConsoleGuiI;
-import com.github.commandsconsolegui.jmegui.MouseCursor;
-import com.github.commandsconsolegui.jmegui.MouseCursor.EMouseCursorButton;
+import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
+import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
+import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.MouseCursorListenerAbs;
 import com.jme3.scene.Spatial;
@@ -56,7 +57,7 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 		this.cd=GlobalCommandsDelegatorI.i().get();
 		this.cgui=GlobalConsoleGuiI.i().get();
 		
-		MouseCursor.i().configure(null);
+		MouseCursorCentralI.i().configure(null);
 	}
 
 	protected String debugPart(Panel pnl){
@@ -122,11 +123,11 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 //	}
 	
 	@Override
-	public boolean click(EMouseCursorButton button, CursorButtonEvent eventButton, Spatial target,Spatial capture,int iClickCount) {
+	public boolean click(MouseCursorButtonData button, CursorButtonEvent eventButton, Spatial target,Spatial capture,int iClickCount) {
 		debugReport(null, eventButton, target, capture);
 		
 //		if(!button.isPressed()){ //on release
-		switch(button){
+		switch(button.getActivatorType()){
 			case ActionClick:
 				if(cgui.isHintBox(target)){
 					cgui.checkAndApplyHintAtInputField();

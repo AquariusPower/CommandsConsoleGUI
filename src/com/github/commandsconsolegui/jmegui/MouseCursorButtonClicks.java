@@ -29,8 +29,9 @@ package com.github.commandsconsolegui.jmegui;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 
-import com.github.commandsconsolegui.jmegui.MouseCursor.EMouseCursorButton;
+import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.scene.Spatial;
 
@@ -39,7 +40,12 @@ import com.jme3.scene.Spatial;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class MouseButtonFlurryOfClicks {
+public class MouseCursorButtonClicks {
+	EMouseCursorButton emcb = null;
+	public MouseCursorButtonClicks(EMouseCursorButton emcb) {
+		this.emcb = emcb;
+	}
+	
 	public static class MouseButtonClick{
 		long lMilis=-1;
 		EMouseCursorButton emcb;
@@ -64,40 +70,27 @@ public class MouseButtonFlurryOfClicks {
 			this.target = target;
 			this.capture = capture;
 		}
-		
-		
 	}
 	
 	ArrayList<MouseButtonClick> aFlurryOfClicks = new ArrayList<MouseButtonClick>();
 	
-	//TODO this is wrong...
-	private boolean clicksMaintenanceUpdate(){
-		return true;
-//		// maintenance
-//		for(MouseButtonClick c:aFlurryOfClicks.toArray(new MouseButtonClick[0])){
-//			if((System.currentTimeMillis()-c.lMilis)>MouseCursor.i().ilvMultiClickMaxDelayMilis.getLong()){
-//				aFlurryOfClicks.remove(c);
-//			}
-//		}
-//		
-//		return aFlurryOfClicks.size()>0;
-	}
-	
+	@Deprecated
 	public ArrayList<MouseButtonClick> getClicksListFor(EMouseCursorButton emcb){
-		if(clicksMaintenanceUpdate()){
+//		if(clicksMaintenanceUpdate()){
 			ArrayList<MouseButtonClick> a = new ArrayList<MouseButtonClick>();
 			for(MouseButtonClick c:aFlurryOfClicks){
 				if(c.emcb.compareTo(emcb)==0)a.add(c);
 			}
 			
 			return a;
-		}
+//		}
 		
-		return null;
+//		return null;
 	}
 	
 	public int getMultiClickCountFor(EMouseCursorButton emcb){
-		ArrayList<MouseButtonClick> clkForButtonList = getClicksListFor(emcb);
+//		ArrayList<MouseButtonClick> clkForButtonList = getClicksListFor(emcb);
+		ArrayList<MouseButtonClick> clkForButtonList = new ArrayList<MouseButtonClick>(aFlurryOfClicks);
 		Collections.reverse(clkForButtonList); //from newest to oldest
 		
 		int iClickCount=1;
@@ -108,7 +101,7 @@ public class MouseButtonFlurryOfClicks {
 					if(clkCurrent.isRepeating(clkNewer)){
 						long lDelay=clkNewer.lMilis-clkCurrent.lMilis;
 						if(lDelay<0)throw new PrerequisitesNotMetException("invalid negative multi-click delay");
-						if(lDelay <= MouseCursor.i().ilvMultiClickMaxDelayMilis.getLong()){
+						if(lDelay <= MouseCursorCentralI.i().ilvMultiClickMaxDelayMilis.getLong()){
 							iClickCount++;
 						}else{
 							/**
@@ -131,15 +124,6 @@ public class MouseButtonFlurryOfClicks {
 //}
 	public void addClick(MouseButtonClick foc) {
 		aFlurryOfClicks.add(foc);
-	}
-	
-	public int checkAndRetrieveClickCount(EMouseCursorButton emcb, Spatial target, Spatial capture) {
-		if(MouseCursor.i().isClickDelay(emcb.setReleasedAndGetDelay())){
-			addClick(new MouseButtonClick(emcb, target, capture));
-			return getMultiClickCountFor(emcb);
-		}
-		
-		return 0;
 	}
 	
 }

@@ -30,9 +30,11 @@ package com.github.commandsconsolegui.jmegui.lemur;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
-import com.github.commandsconsolegui.jmegui.MouseButtonFlurryOfClicks;
-import com.github.commandsconsolegui.jmegui.MouseCursor;
-import com.github.commandsconsolegui.jmegui.MouseCursor.EMouseCursorButton;
+import com.github.commandsconsolegui.jmegui.MouseCursorButtonClicks;
+import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
+import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
+import com.github.commandsconsolegui.jmegui.MouseCursorButtonsControl;
+import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.event.CursorButtonEvent;
 import com.simsilica.lemur.event.CursorListener;
@@ -46,23 +48,28 @@ import com.simsilica.lemur.event.CursorMotionEvent;
  *
  */
 public abstract class MouseCursorListenerAbs implements CursorListener {
-	MouseButtonFlurryOfClicks clicks = new MouseButtonFlurryOfClicks();
+	
+	MouseCursorButtonsControl mcab;
+	
+	public MouseCursorListenerAbs() {
+		 mcab = MouseCursorCentralI.i().createButtonsInstance(this);
+	}
 	
 	@Override
 	public void cursorButtonEvent(CursorButtonEvent eventButton, Spatial target, Spatial capture) {
-		EMouseCursorButton emcb = EMouseCursorButton.get(eventButton.getButtonIndex());
+		MouseCursorButtonData mcbd = mcab.getMouseCursorDataFor(EMouseCursorButton.get(eventButton.getButtonIndex()));
 		
 		if(eventButton.isPressed()){
-			emcb.setPressed(MiscJmeI.i().eventToV3f(eventButton));
+			mcbd.setPressed(MiscJmeI.i().eventToV3f(eventButton));
 			
-    	if(clickBegin(emcb, eventButton, target, capture)){
+    	if(clickBegin(mcbd, eventButton, target, capture)){
     		eventButton.setConsumed();
     	}
 		}else{
-			if(emcb.isPressed()){ // This check is NOT redundant. May happen just by calling: {@link MouseCursor#resetFixingAllButtons()}
-				int iClickCount=clicks.checkAndRetrieveClickCount(emcb, target, capture);
+			if(mcbd.isPressed()){ // This check is NOT redundant. May happen just by calling: {@link MouseCursor#resetFixingAllButtons()}
+				int iClickCount=mcbd.checkAndRetrieveClickCount(target, capture);
 				
-//				if(MouseCursor.i().isClickDelay(emcb.setReleasedAndGetDelay())){
+//				if(MouseCursor.i().isClickDelay(mcab.getMouseCursorDataFor(emcb).setReleasedAndGetDelay())){
 //					MouseCursor.i().addClick(
 //	      		new MouseButtonClick(emcb, eventButton, target, capture));
 //					
@@ -73,7 +80,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 					 * In this case, any displacement will be ignored.
 					 * TODO could the minimal displacement it be used in some way?
 					 */
-	      	if(click(emcb, eventButton, target, capture, iClickCount)){
+	      	if(click(mcbd, eventButton, target, capture, iClickCount)){
 	      		eventButton.setConsumed();
 	      	}
 				}
@@ -88,7 +95,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 	 * @param capture
 	 * @return if it is to be consumed
 	 */
-	public boolean click(EMouseCursorButton button, CursorButtonEvent eventButton, Spatial target,	Spatial capture, int iClickCount){
+	public boolean click(MouseCursorButtonData buttonData, CursorButtonEvent eventButton, Spatial target,	Spatial capture, int iClickCount){
 		return false;
 	}
 	
@@ -101,11 +108,11 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 	 * @param capture
 	 * @return
 	 */
-	public boolean clickBegin(EMouseCursorButton button, CursorButtonEvent eventButton, Spatial target,	Spatial capture){
+	public boolean clickBegin(MouseCursorButtonData button, CursorButtonEvent eventButton, Spatial target,	Spatial capture){
 		return false;
 	}
 	
-	public boolean clickEnd(EMouseCursorButton button, CursorButtonEvent eventButton, Spatial target,	Spatial capture){
+	public boolean clickEnd(MouseCursorButtonData button, CursorButtonEvent eventButton, Spatial target,	Spatial capture){
 		return false;
 	}
 	
@@ -119,16 +126,18 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 		// TODO Auto-generated method stub
 	}
 	
-	public boolean drag(ArrayList<EMouseCursorButton> aButtonList, CursorMotionEvent eventMotion, Spatial target,	Spatial capture){
+	public boolean drag(ArrayList<MouseCursorButtonData> aButtonList, CursorMotionEvent eventMotion, Spatial target,	Spatial capture){
 		return false;
 	}
 
 	@Override
 	public void cursorMoved(CursorMotionEvent eventMotion, Spatial target, Spatial capture) {
-		ArrayList<EMouseCursorButton> aButtonList = new ArrayList<EMouseCursorButton>();
+		ArrayList<MouseCursorButtonData> aButtonList = new ArrayList<MouseCursorButtonData>();
 		for(EMouseCursorButton e:EMouseCursorButton.values()){
 			// Buttons pressed during drag
-			if(e.isPressed())aButtonList.add(e);
+			if(mcab.getMouseCursorDataFor(e).isPressed()){
+				aButtonList.add(mcab.getMouseCursorDataFor(e));
+			}
 		}
 		
 		if(drag(aButtonList, eventMotion, target, capture)){

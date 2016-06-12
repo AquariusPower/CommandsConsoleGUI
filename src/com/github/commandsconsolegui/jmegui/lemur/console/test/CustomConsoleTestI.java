@@ -35,7 +35,7 @@ import com.github.commandsconsolegui.extras.SingleAppInstanceI;
 import com.github.commandsconsolegui.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalConsoleGuiI;
-import com.github.commandsconsolegui.jmegui.MouseCursor;
+import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
 import com.github.commandsconsolegui.jmegui.console.SimpleConsoleAppAbs;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs.EModalDiagType;

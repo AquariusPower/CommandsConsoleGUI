@@ -27,14 +27,13 @@
 
 package com.github.commandsconsolegui.jmegui.lemur;
 
-import groovy.lang.MissingClassException;
-
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
-import com.github.commandsconsolegui.jmegui.MouseCursor.EMouseCursorButton;
+import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
+import com.github.commandsconsolegui.jmegui.MouseCursorButtonsControl;
+import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
-import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
@@ -51,11 +50,11 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 	public static DialogMouseCursorListenerI i(){return instance;}
 	
 	@Override
-	public boolean click(EMouseCursorButton button, CursorButtonEvent eventButton, Spatial target,Spatial capture, int iClickCount) {
+	public boolean click(MouseCursorButtonData buttonData, CursorButtonEvent eventButton, Spatial target,Spatial capture, int iClickCount) {
 		LemurFocusHelperStateI.i().requestDialogFocus(capture);
 		
 		// missing ones are ignored so each element can consume it properly
-		switch(button){
+		switch(buttonData.getActivatorType()){
 			case ActionClick:
 				if(iClickCount>=2){
 					LemurDialogGUIStateAbs diag = LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
@@ -68,18 +67,18 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 				return diag.openPropertiesDialogFor(capture);
 		}
 		
-		return super.click(button, eventButton, target, capture, iClickCount);
+		return super.click(buttonData, eventButton, target, capture, iClickCount);
 	}
 	
 	@Override
-	public boolean drag(ArrayList<EMouseCursorButton> aButtonList,CursorMotionEvent eventMotion, Spatial target, Spatial capture) {
-		for(EMouseCursorButton button:aButtonList){
+	public boolean drag(ArrayList<MouseCursorButtonData> aButtonList,CursorMotionEvent eventMotion, Spatial target, Spatial capture) {
+		for(MouseCursorButtonData buttonData:aButtonList){
 			// missing ones are ignored so each element can consume it properly
-			switch(button){
+			switch(buttonData.getActivatorType()){
 				case ActionClick:
 					Spatial sptDialogMain = MiscJmeI.i().getParentestFrom(capture);
 					Vector3f v3fNewPos = MiscJmeI.i().eventToV3f(eventMotion);
-					Vector3f v3fDisplacement = button.updateDragPosAndGetDisplacement(v3fNewPos);
+					Vector3f v3fDisplacement = buttonData.updateDragPosAndGetDisplacement(v3fNewPos);
 					sptDialogMain.move(v3fDisplacement.negate());
 					return true;
 			}

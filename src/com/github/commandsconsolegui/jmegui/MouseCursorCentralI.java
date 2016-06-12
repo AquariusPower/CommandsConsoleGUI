@@ -35,6 +35,8 @@ import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI.CompositeControl;
+import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -47,14 +49,27 @@ import com.jme3.scene.Spatial;
  * Allows multiple mouse buttons to be clicked or dragged at same time.
  * @author AquariusPower <https://github.com/AquariusPower>
  */
-public class MouseCursor implements IReflexFillCfg, IConsoleCommandListener{
-	public final StringCmdField CMD_FIX_RESETING_MOUSE_CURSOR = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
+public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListener{
+	private static MouseCursorCentralI instance = new MouseCursorCentralI();
+	public static MouseCursorCentralI i(){return instance;}
 	
-	private static MouseCursor instance = new MouseCursor();
-	public static MouseCursor i(){return instance;}
+	public static class CompositeControl extends CompositeControlAbs<MouseCursorCentralI>{
+		private CompositeControl(MouseCursorCentralI casm){super(casm);};
+	}
+	private CompositeControl ccSelf = new CompositeControl(this);
+	
+	public final StringCmdField CMD_FIX_RESETING_MOUSE_CURSOR = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
 	
 	IntLongVarField ilvClickMaxDelayMilis = new IntLongVarField(this,300,"the delay between button pressed and button released");
 	IntLongVarField ilvMultiClickMaxDelayMilis = new IntLongVarField(this,500,"the delay between each subsequent click (button released moment)");
+	
+	ArrayList<MouseCursorButtonsControl> amcabList = new ArrayList<MouseCursorButtonsControl>();
+	
+	public MouseCursorButtonsControl  createButtonsInstance(Object objParent){
+		MouseCursorButtonsControl mcab = new MouseCursorButtonsControl(ccSelf,objParent);
+		amcabList.add(mcab);
+		return mcab;
+	}
 	
 //	protected long lClickDelayMilis;
 	
@@ -67,41 +82,6 @@ public class MouseCursor implements IReflexFillCfg, IConsoleCommandListener{
 	public void configure(Long lClickDelayMilis) {
 		if(lClickDelayMilis!=null)ilvClickMaxDelayMilis.setObjectValue(lClickDelayMilis);
 		GlobalCommandsDelegatorI.i().get().addConsoleCommandListener(this);
-	}
-	
-	static class MouseCursorButtonData{
-		Long lPressedMilis = null;
-//		Long lReleasedMilis = null;
-		
-		Vector3f v3fPressedPos = null;
-		
-		Vector3f v3fDragLastUpdatePos = null;
-//		Vector3f v3fReleasedPos = null;
-		
-//		CursorButtonEvent eventButton;
-//		Vector3f v3fPressedDraggingPosToConsume = null; 
-//		CursorMotionEvent	eventMotion;
-//		public boolean	bIsPressed;
-//		public Vector3f	v3fDragDisplacement;
-		
-		void reset(){
-			lPressedMilis = null;
-			v3fPressedPos = null;
-			v3fDragLastUpdatePos = null;
-		}
-		
-		@Override
-		public String toString() {
-			StringBuilder builder = new StringBuilder();
-			builder.append("MouseCursorButtonData [lPressedMilis=");
-			builder.append(lPressedMilis);
-			builder.append(", v3fPressedPos=");
-			builder.append(v3fPressedPos);
-			builder.append(", v3fDragLastUpdatePos=");
-			builder.append(v3fDragLastUpdatePos);
-			builder.append("]");
-			return builder.toString();
-		}
 	}
 	
 	public static class MouseCursorUpdatedValues{
@@ -134,8 +114,6 @@ public class MouseCursor implements IReflexFillCfg, IConsoleCommandListener{
 		
 		int iIndex;
 		
-		MouseCursorButtonData mcbd = new MouseCursorButtonData();
-		
 		EMouseCursorButton(int iIndex){
 			setIndex(iIndex);
 		}
@@ -156,57 +134,6 @@ public class MouseCursor implements IReflexFillCfg, IConsoleCommandListener{
 			}
 			return null;
 		}
-		
-		public boolean isPressed() {
-			return mcbd.lPressedMilis!=null;
-		}
-		
-		public void setPressed(Vector3f v3fPressedPos){
-			if(isPressed())throw new PrerequisitesNotMetException("already pressed! ",this,v3fPressedPos);
-			
-			mcbd.lPressedMilis = System.currentTimeMillis();
-			mcbd.v3fPressedPos = v3fPressedPos.clone();
-			mcbd.v3fDragLastUpdatePos = v3fPressedPos.clone();
-		}
-		
-		public Vector3f updateDragPosAndGetDisplacement(Vector3f v3fNewDragPos){
-			if(!isPressed())return null;
-			
-			Vector3f v3fDiff = mcbd.v3fDragLastUpdatePos.subtract(v3fNewDragPos);
-			mcbd.v3fDragLastUpdatePos.set(v3fNewDragPos);
-			
-			return v3fDiff;
-		}
-		
-		/**
-		 * Last drag displacement must be get before this call at
-		 * {@link #updateDragPosAndGetDisplacement(Vector3f)}
-		 * 
-		 * @return
-		 */
-		public Long setReleasedAndGetDelay(){
-			if(!isPressed())return null;
-			
-			long lDelay = System.currentTimeMillis() - mcbd.lPressedMilis;
-			mcbd.lPressedMilis=null;
-			return lDelay;
-		}
-		
-//		public void applyDrag(Vector3f v3fMouseCursorPosPrevious, Vector3f v3fNewMouseCursorPos) {
-//			Vector3f v3fDisplacement = v3fMouseCursorPosPrevious
-//				.subtract(v3fNewMouseCursorPos).negate();
-//			
-//			mcbi.v3fDragDisplacement = v3fDisplacement;
-//		}
-		
-//		public Vector3f getDragDisplacement() {
-//			return mcbd.v3fDragDisplacement;
-//		}
-//		
-//		public CursorButtonEvent getLastButtonEvent() {
-//			return mcbd.eventButton;
-//		}
-//		
 	}
 
 	@Override
@@ -218,33 +145,6 @@ public class MouseCursor implements IReflexFillCfg, IConsoleCommandListener{
 		return lDelayMilis < ilvClickMaxDelayMilis.getLong();
 	}
 	
-	/**
-	 * In case user press a button, but when the button is released, 
-	 * that event is not captured like when freeze lag happens.
-	 * 
-	 * TODO find a way to detect such condition, may be when a dialog is created or closed, no button should have its pressed state recognized?
-	 * TODO call this after every dialog/console mouse cursor action completes?
-	 * 
-	 * To fix that, use this command: {@link #CMD_FIX_RESETING_MOUSE_BUTTONS}
-	 * 
-	 * To test it, at console, open a dialog and call this command ex.:
-	 *	/sleep 3 fixResetingMouseCursor #(if I havent refactored yet...)
-	 * Now, while dragging the dialog around, you will lose that grab.
-	 */
-	public void resetFixingAllButtonsState(){
-		for(EMouseCursorButton e:EMouseCursorButton.values()){
-			e.mcbd.reset();
-		}
-	}
-	
-	public String report(){
-		String str="";
-		for(EMouseCursorButton e:EMouseCursorButton.values()){
-			str+=""+e+": "+e.mcbd.toString()+"\n";
-		}
-		return str;
-	}
-	
 	@Override
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
 		boolean bCommandWorked = false;
@@ -253,7 +153,9 @@ public class MouseCursor implements IReflexFillCfg, IConsoleCommandListener{
 			String strBefore = report();
 			cc.dumpSubEntry(cc.getCommentPrefixStr()+"Before:\n"+report());
 			
-			resetFixingAllButtonsState();
+			for(MouseCursorButtonsControl mcab:amcabList){
+				mcab.resetFixingAllButtonsState();
+			}
 			
 			String strAfter = report();
 			String[] aBefore = strBefore.split("\n");
@@ -270,7 +172,9 @@ public class MouseCursor implements IReflexFillCfg, IConsoleCommandListener{
 			bCommandWorked=true;
 		}else
 		if(cc.checkCmdValidity(this,"mouseCursorReport","")){
-			cc.dumpSubEntry(report());
+			for(MouseCursorButtonsControl mcab:amcabList){
+				cc.dumpSubEntry(mcab.report());
+			}
 			bCommandWorked=true;
 		}else
 		{
@@ -279,6 +183,14 @@ public class MouseCursor implements IReflexFillCfg, IConsoleCommandListener{
 		}
 		
 		return cc.cmdFoundReturnStatus(bCommandWorked);
+	}
+
+	private String report() {
+		String str="";
+		for(MouseCursorButtonsControl m:amcabList){
+			str+=m.report();
+		}
+		return str;
 	}
 
 }
