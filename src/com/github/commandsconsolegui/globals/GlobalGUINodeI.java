@@ -34,5 +34,6 @@ import com.jme3.scene.Node;
  */
 public class GlobalGUINodeI extends GlobalAbs<Node> {
 	private static GlobalGUINodeI instance = new GlobalGUINodeI();
-	public static GlobalGUINodeI i(){return instance;}
+	public static GlobalGUINodeI iGlobal(){return instance;}
+	public static Node i(){return iGlobal().get();}
 }

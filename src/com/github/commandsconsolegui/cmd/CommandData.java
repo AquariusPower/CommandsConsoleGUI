@@ -75,7 +75,7 @@ public class CommandData {
 	public String asHelp() {
 		return strBaseCmd+" "
 				+strComment+" "
-				+"("+GlobalCommandsDelegatorI.i().get().getListenerId(icclOwner)+")";
+				+"("+GlobalCommandsDelegatorI.i().getListenerId(icclOwner)+")";
 		
 //		return strBaseCmd+" "
 //			+strComment+" "

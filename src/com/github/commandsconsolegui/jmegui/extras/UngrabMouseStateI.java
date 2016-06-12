@@ -74,7 +74,7 @@ public class UngrabMouseStateI extends ConditionalStateAbs {
 //	public void configure(Long lSlowMachineDelayToUngrabMilis, Boolean bKeepUngrabbedOnSlowdown) {
 		CfgParm cfg = (CfgParm)icfg;
 		super.configure(new ConditionalStateAbs.CfgParm(
-				GlobalAppRefI.i().get(),null));
+				GlobalAppRefI.i(),null));
 		
 		if(cfg.lSlowMachineDelayToUngrabMilis!=null)this.lDelayToUngrabMilis=cfg.lSlowMachineDelayToUngrabMilis;
 		if(cfg.bKeepUngrabbedOnSlowdown!=null)this.bKeepUngrabbedOnSlowDown=cfg.bKeepUngrabbedOnSlowdown;
@@ -111,7 +111,7 @@ public class UngrabMouseStateI extends ConditionalStateAbs {
 			@Override
 			public void run() {
 //				while(!isCleaningUp()){ //mainly during application close
-				while(!isDiscarding() && !GlobalAppRefI.i().isApplicationExiting()){ //mainly during application close
+				while(!isDiscarding() && !GlobalAppRefI.iGlobal().isApplicationExiting()){ //mainly during application close
 					updateAtNewThread();
 					try {
 						Thread.sleep(lDelayToUngrabMilis);
@@ -148,14 +148,14 @@ public class UngrabMouseStateI extends ConditionalStateAbs {
 //		lTimeLastUpdateMilis=lCurrentTimeMilis;
 		
 //		boolean bIsGrabbed = org.lwjgl.input.Mouse.isGrabbed();
-		boolean bIsGrabbed = !GlobalAppRefI.i().get().getInputManager().isCursorVisible();
+		boolean bIsGrabbed = !GlobalAppRefI.i().getInputManager().isCursorVisible();
 		boolean bKeepUngrabbedRequested = aobjKeepUngrabbedRequesterList.size()>0;
 		
 		if(bIsGrabbed){
 			if(bIsSlow || bKeepUngrabbedRequested){
 				bWasUnGrabbedDuringSlowdown=true;
 //				org.lwjgl.input.Mouse.setGrabbed(false);
-				GlobalAppRefI.i().get().getInputManager().setCursorVisible(true);
+				GlobalAppRefI.i().getInputManager().setCursorVisible(true);
 			}
 		}else{
 			if(bKeepUngrabbedOnSlowDown){}else
@@ -167,7 +167,7 @@ public class UngrabMouseStateI extends ConditionalStateAbs {
 				if(!bIsSlow){
 					if(bWasUnGrabbedDuringSlowdown || !bKeepUngrabbedRequested){
 //						org.lwjgl.input.Mouse.setGrabbed(true);
-						GlobalAppRefI.i().get().getInputManager().setCursorVisible(false);
+						GlobalAppRefI.i().getInputManager().setCursorVisible(false);
 					}
 				}
 			}

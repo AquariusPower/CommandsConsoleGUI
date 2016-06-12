@@ -47,7 +47,8 @@ import com.jme3.app.Application;
  */
 public class GlobalAppRefI extends GlobalAbs<Application>{
 	private static GlobalAppRefI instance = new GlobalAppRefI();
-	public static GlobalAppRefI i(){return instance;}
+	public static GlobalAppRefI iGlobal(){return instance;}
+	public static Application i(){return iGlobal().get();}
 //	
 //	@Override
 //	public Application set(Application obj) {

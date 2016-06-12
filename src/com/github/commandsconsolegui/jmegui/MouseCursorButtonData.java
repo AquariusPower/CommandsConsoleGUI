@@ -27,6 +27,7 @@
 
 package com.github.commandsconsolegui.jmegui;
 
+import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.MouseCursorButtonClicks.MouseButtonClick;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -125,9 +126,14 @@ public class MouseCursorButtonData{
 	}
 	
 	public int checkAndRetrieveClickCount(Spatial target, Spatial capture) {
-		if(MouseCursorCentralI.i().isClickDelay(setReleasedAndGetDelay())){
-			clicks.addClick(new MouseButtonClick(eButton, target, capture));
-			return clicks.getMultiClickCountFor(eButton);
+		Long lDelay = setReleasedAndGetDelay();
+		if(lDelay!=null){
+			if(MouseCursorCentralI.i().isClickDelay(lDelay)){
+				clicks.addClick(new MouseButtonClick(eButton, target, capture));
+				return clicks.getMultiClickCountFor(eButton);
+			}
+		}else{
+			GlobalCommandsDelegatorI.i().dumpDevWarnEntry("null delay, already released button");
 		}
 		
 		return 0;

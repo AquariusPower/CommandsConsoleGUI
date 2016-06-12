@@ -102,10 +102,10 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 	@Override
 	public void simpleInitApp() {
 		// the commands pipe
-		cd = GlobalCommandsDelegatorI.i().set(new CustomCommands());
+		cd = GlobalCommandsDelegatorI.iGlobal().set(new CustomCommands());
 		
 		// the conole UI
-		GlobalConsoleGuiI.i().set(ConsoleLemurStateI.i());
+		GlobalConsoleGuiI.iGlobal().set(ConsoleLemurStateI.i());
 		ConsoleLemurStateI.i().configure(new ConsoleLemurStateI.CfgParm(
 			CustomConsoleTestI.class.getSimpleName(), false, KeyInput.KEY_F10, getGuiNode()));
 		
@@ -133,7 +133,8 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 	}
 	
 	public static void main( String... args ) {
-		CustomConsoleTestI main = (CustomConsoleTestI) GlobalAppRefI.i().set(CustomConsoleTestI.i());
+		CustomConsoleTestI main = (CustomConsoleTestI) GlobalAppRefI.iGlobal().set(
+			CustomConsoleTestI.i());
 		
 		if(main.bHideSettings){
 			AppSettings as = new AppSettings(true);

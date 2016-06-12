@@ -54,8 +54,8 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 	private ConsoleStateAbs	cgui;
 	
 	public void configure(){
-		this.cd=GlobalCommandsDelegatorI.i().get();
-		this.cgui=GlobalConsoleGuiI.i().get();
+		this.cd=GlobalCommandsDelegatorI.i();
+		this.cgui=GlobalConsoleGuiI.i();
 		
 		MouseCursorCentralI.i().configure(null);
 	}

@@ -81,9 +81,9 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 	public CmdConditionalStateAbs configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
 		
-		super.configure(new ConditionalStateAbs.CfgParm(GlobalAppRefI.i().get(),cfg.strId));
+		super.configure(new ConditionalStateAbs.CfgParm(GlobalAppRefI.i(),cfg.strId));
 		
-		cd=GlobalCommandsDelegatorI.i().get();
+		cd=GlobalCommandsDelegatorI.i();
 		
 		if(cfg.strId==null || cfg.strId.isEmpty())throw new NullPointerException("invalid cmd id");
 		this.strCmdIdentifier="";

@@ -58,11 +58,11 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 		/**
 		 * as you may not be using {@link SimpleApplication#} 
 		 */
-		GlobalGUINodeI.i().set(getGuiNode());
-		GlobalRootNodeI.i().set(getRootNode());
+		GlobalGUINodeI.iGlobal().set(getGuiNode());
+		GlobalRootNodeI.iGlobal().set(getRootNode());
 		
 		CommandsBackgroundStateI.i().configure(new CommandsBackgroundStateI.CfgParm(
-			GlobalConsoleGuiI.i().get()));
+			GlobalConsoleGuiI.i()));
 		
 		FpsLimiterStateI.i().configure(new FpsLimiterStateI.CfgParm());
 		UngrabMouseStateI.i().configure(new UngrabMouseStateI.CfgParm(null,null));
@@ -75,7 +75,7 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 	
 	@Override
 	public void stop(boolean waitFor) {
-		GlobalAppRefI.i().setAppExiting(true);
+		GlobalAppRefI.iGlobal().setAppExiting(true);
 //		ConditionalStateManagerI.i().applicationIsExiting();
 //		UngrabMouseStateI.i().applicationIsExiting();
 		super.stop(waitFor);

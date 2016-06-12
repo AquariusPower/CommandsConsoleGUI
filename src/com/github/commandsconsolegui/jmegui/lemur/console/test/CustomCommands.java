@@ -60,9 +60,9 @@ public class CustomCommands extends ScriptingCommandsDelegator{ //use ConsoleCom
 		if(EStats.MouseCursorPosition.b()){
 			strStatsLast+=
 				"xy"
-					+(int)GlobalAppRefI.i().get().getInputManager().getCursorPosition().x
+					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
 					+","
-					+(int)GlobalAppRefI.i().get().getInputManager().getCursorPosition().y
+					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
 					+";";
 		}
 		
@@ -75,7 +75,7 @@ public class CustomCommands extends ScriptingCommandsDelegator{ //use ConsoleCom
 	
 	@Override
 	public void cmdExit() {
-		GlobalAppRefI.i().get().stop();
+		GlobalAppRefI.i().stop();
 		super.cmdExit();
 	}
 	

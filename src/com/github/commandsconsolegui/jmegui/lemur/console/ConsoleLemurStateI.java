@@ -144,7 +144,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 		super.configure(new ConsoleStateAbs.CfgParm(
 			cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.iToggleConsoleKey, cfg.nodeGUI));
 		
-		GuiGlobals.initialize(GlobalAppRefI.i().get());
+		GuiGlobals.initialize(GlobalAppRefI.i());
 		
 		// misc cfg
 		LemurMiscHelpersStateI.i().configure(new LemurMiscHelpersStateI.CfgParm());
@@ -155,7 +155,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 //		}
 		LemurFocusHelperStateI.i().configure(new LemurFocusHelperStateI.CfgParm(null));
 		
-		ConditionalStateManagerI.i().configure(GlobalAppRefI.i().get());
+		ConditionalStateManagerI.i().configure(GlobalAppRefI.i());
 		
 		ConsoleMouseCursorListenerI.i().configure();
 		

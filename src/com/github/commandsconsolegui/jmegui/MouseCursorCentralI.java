@@ -81,7 +81,7 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 	 */
 	public void configure(Long lClickDelayMilis) {
 		if(lClickDelayMilis!=null)ilvClickMaxDelayMilis.setObjectValue(lClickDelayMilis);
-		GlobalCommandsDelegatorI.i().get().addConsoleCommandListener(this);
+		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
 	}
 	
 	public static class MouseCursorUpdatedValues{
@@ -138,7 +138,7 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
-		return GlobalCommandsDelegatorI.i().get().getReflexFillCfg(rfcv);
+		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 	}
 
 	public boolean isClickDelay(Long lDelayMilis) {

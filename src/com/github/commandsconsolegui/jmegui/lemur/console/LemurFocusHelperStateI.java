@@ -160,7 +160,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	}
 	public void assertAtGUINode(boolean bIs, Spatial sptAny){
 		Node parent = MiscJmeI.i().getParentestFrom(sptAny).getParent();
-		boolean bIsAtGuiNode = GlobalGUINodeI.i().get().equals(parent);
+		boolean bIsAtGuiNode = GlobalGUINodeI.i().equals(parent);
 		if(bIs){
 			if(!bIsAtGuiNode){
 				throw new PrerequisitesNotMetException("it is not at GUI node "+sptAny.getName());

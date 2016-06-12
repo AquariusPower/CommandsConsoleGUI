@@ -50,6 +50,7 @@ import com.simsilica.lemur.event.CursorMotionEvent;
 public abstract class MouseCursorListenerAbs implements CursorListener {
 	
 	MouseCursorButtonsControl mcab;
+	private boolean	bCancelNextMouseReleased;
 	
 	public MouseCursorListenerAbs() {
 		 mcab = MouseCursorCentralI.i().createButtonsInstance(this);
@@ -67,22 +68,26 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
     	}
 		}else{
 			if(mcbd.isPressed()){ // This check is NOT redundant. May happen just by calling: {@link MouseCursor#resetFixingAllButtons()}
-				int iClickCount=mcbd.checkAndRetrieveClickCount(target, capture);
-				
-//				if(MouseCursor.i().isClickDelay(mcab.getMouseCursorDataFor(emcb).setReleasedAndGetDelay())){
-//					MouseCursor.i().addClick(
-//	      		new MouseButtonClick(emcb, eventButton, target, capture));
-//					
-//					int iClickCount=MouseCursor.i().getMultiClickCountFor(emcb);
-				
-				if(iClickCount>0){
-					/**
-					 * In this case, any displacement will be ignored.
-					 * TODO could the minimal displacement it be used in some way?
-					 */
-	      	if(click(mcbd, eventButton, target, capture, iClickCount)){
-	      		eventButton.setConsumed();
-	      	}
+				if(bCancelNextMouseReleased){
+					bCancelNextMouseReleased=false;
+				}else{
+					int iClickCount=mcbd.checkAndRetrieveClickCount(target, capture);
+					
+	//				if(MouseCursor.i().isClickDelay(mcab.getMouseCursorDataFor(emcb).setReleasedAndGetDelay())){
+	//					MouseCursor.i().addClick(
+	//	      		new MouseButtonClick(emcb, eventButton, target, capture));
+	//					
+	//					int iClickCount=MouseCursor.i().getMultiClickCountFor(emcb);
+					
+					if(iClickCount>0){
+						/**
+						 * In this case, any displacement will be ignored.
+						 * TODO could the minimal displacement it be used in some way?
+						 */
+		      	if(click(mcbd, eventButton, target, capture, iClickCount)){
+		      		eventButton.setConsumed();
+		      	}
+					}
 				}
 			}
 		}
@@ -142,6 +147,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 		
 		if(drag(aButtonList, eventMotion, target, capture)){
 			eventMotion.setConsumed();
+			bCancelNextMouseReleased=true;
 		}
 		
 	}

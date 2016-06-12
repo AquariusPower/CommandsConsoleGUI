@@ -72,8 +72,8 @@ public class MiscJmeI {
 	public Node getParentestFrom(Spatial sptStart){
 		Spatial sptParentest = sptStart;
 		while(sptParentest.getParent()!=null){
-			if(GlobalGUINodeI.i().get().equals(sptParentest.getParent()))break;
-			if(GlobalRootNodeI.i().get().equals(sptParentest.getParent()))break;
+			if(GlobalGUINodeI.i().equals(sptParentest.getParent()))break;
+			if(GlobalRootNodeI.i().equals(sptParentest.getParent()))break;
 			sptParentest=sptParentest.getParent();
 		}
 		return (Node)sptParentest; //parent is always Node

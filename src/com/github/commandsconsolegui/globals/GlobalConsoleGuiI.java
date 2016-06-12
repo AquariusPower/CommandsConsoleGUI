@@ -36,5 +36,6 @@ import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
  */
 public class GlobalConsoleGuiI extends GlobalAbs<ConsoleStateAbs>{
 	private static GlobalConsoleGuiI instance = new GlobalConsoleGuiI();
-	public static GlobalConsoleGuiI i(){return instance;}
+	public static GlobalConsoleGuiI iGlobal(){return instance;}
+	public static ConsoleStateAbs i(){return iGlobal().get();}
 }

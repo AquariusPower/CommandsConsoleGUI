@@ -181,7 +181,7 @@ public class BoolTogglerCmdField implements IReflexFillCfgVariant, IVarIdValueOw
 
 	public IConsoleCommandListener getOwnerAsCmdListener() {
 		if(rfcfgOwner instanceof CommandsDelegator){
-			return GlobalCommandsDelegatorI.i().get().getPseudoListener();
+			return GlobalCommandsDelegatorI.i().getPseudoListener();
 		}
 		
 		if(rfcfgOwner instanceof IConsoleCommandListener){

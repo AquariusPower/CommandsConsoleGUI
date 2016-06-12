@@ -36,5 +36,6 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator;
  */
 public class GlobalCommandsDelegatorI extends GlobalAbs<CommandsDelegator> {
 	private static GlobalCommandsDelegatorI instance = new GlobalCommandsDelegatorI();
-	public static GlobalCommandsDelegatorI i(){return instance;}
+	public static GlobalCommandsDelegatorI iGlobal(){return instance;}
+	public static CommandsDelegator i(){return iGlobal().get();}
 }

@@ -567,10 +567,15 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		switch(iClickCount){
 			case 2:
 				if(isListBoxEntry(capture)){
-					LemurDialogGUIStateAbs diag = hmModals.get(EModalDiagType.ListEntryConfig);
-					if(diag!=null){
-						diag.requestEnable();
+					if(bOptionSelectionMode){
+						actionSubmit();
 						return true;
+					}else{
+						LemurDialogGUIStateAbs diag = hmModals.get(EModalDiagType.ListEntryConfig);
+						if(diag!=null){
+							diag.requestEnable();
+							return true;
+						}
 					}
 				}
 				break;
