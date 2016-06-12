@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntry;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
+import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -44,13 +46,13 @@ import com.jme3.scene.Spatial;
  *
  */
 public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implements IReflexFillCfg{
-	private Spatial	sptContainerMain;
-	private Spatial	sptIntputField;
+	protected Spatial	sptContainerMain;
+	protected Spatial	sptIntputField;
 	protected String	strTitle;
 	
-	private BaseDialogStateAbs modalParent;
-	private ArrayList<BaseDialogStateAbs> aModalChildList = new ArrayList<BaseDialogStateAbs>();
-	private DialogListEntry dleAnswerFromModal;
+	protected BaseDialogStateAbs modalParent;
+	protected ArrayList<BaseDialogStateAbs> aModalChildList = new ArrayList<BaseDialogStateAbs>();
+	protected DialogListEntry dleAnswerFromModal;
 //	private Object[]	aobjModalAnswer;
 	
 	public Spatial getContainerMain(){
@@ -183,6 +185,11 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 
 	public BaseDialogStateAbs getModalParent(){
 		return this.modalParent;
+	}
+	
+	public void setModalParent(LemurDialogGUIStateAbs modalParent) {
+		if(this.modalParent!=null)throw new PrerequisitesNotMetException("modal parente already set",this.modalParent,modalParent);
+		this.modalParent=modalParent;
 	}
 	
 //	public abstract void setAnswerFromModalChild(Object... aobj);

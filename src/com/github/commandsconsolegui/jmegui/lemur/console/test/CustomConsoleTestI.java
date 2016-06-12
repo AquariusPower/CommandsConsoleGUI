@@ -38,6 +38,7 @@ import com.github.commandsconsolegui.globals.GlobalConsoleGuiI;
 import com.github.commandsconsolegui.jmegui.MouseCursor;
 import com.github.commandsconsolegui.jmegui.console.SimpleConsoleAppAbs;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
+import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs.EModalDiagType;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -76,9 +77,9 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 //	private StringVarField svfOptionSelectedDialog2 = new StringVarField(this,"");
 	
 	// generic dialog
-	private CustomDialogGUIState	diag2;
+	private CustomDialogGUIState	diagCfg;
 
-	private CustomDialogGUIState	diag1;
+	private CustomDialogGUIState	diag;
 
 //	private String	strOptionSelected;
 	
@@ -108,15 +109,16 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 		ConsoleLemurStateI.i().configure(new ConsoleLemurStateI.CfgParm(
 			CustomConsoleTestI.class.getSimpleName(), false, KeyInput.KEY_F10, getGuiNode()));
 		
-		// test dialogs
-		diag1 = new CustomDialogGUIState().configure(new CustomDialogGUIState.CfgParm(
-			false, "TestDialog1", false, getGuiNode(), null, null, null, null, null
+		// this dialog, after closed, may have diag2.getOptionSelected() available
+		diagCfg = new CustomDialogGUIState().configure(new CustomDialogGUIState.CfgParm(
+			true, "ConfigDialog", false, getGuiNode(), 0.5f, 0.6f, null, null, null
 		));
 		
-		// this dialog, after closed, may have diag2.getOptionSelected() available
-		diag2 = new CustomDialogGUIState().configure(new CustomDialogGUIState.CfgParm(
-			true, "TestDialog2", false, getGuiNode(), 0.5f, 0.6f, null, null, diag1
+		// test dialogs
+		diag = new CustomDialogGUIState().configure(new CustomDialogGUIState.CfgParm(
+			false, "TestDialog", false, getGuiNode(), null, null, null, null, null
 		));
+		diag.configModalDialog(EModalDiagType.ListEntryConfig, diagCfg);
 		
 		// other basic initializations
 		super.simpleInitApp();

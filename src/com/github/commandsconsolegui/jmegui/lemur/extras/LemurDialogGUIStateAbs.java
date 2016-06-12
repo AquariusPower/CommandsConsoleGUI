@@ -29,7 +29,6 @@ package com.github.commandsconsolegui.jmegui.lemur.extras;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map.Entry;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
@@ -39,7 +38,6 @@ import com.github.commandsconsolegui.jmegui.extras.InteractionDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
-import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.input.KeyInput;
 import com.jme3.math.ColorRGBA;
@@ -535,6 +533,60 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 	public String getInputText() {
 		return getInputField().getText();
 	}
+	
+	public static enum EModalDiagType{
+		ListEntryConfig,
+		ListEntryProperties,
+		HintHelp, //generic
+	}
+	
+	HashMap<EModalDiagType, LemurDialogGUIStateAbs> hmModals = new HashMap<EModalDiagType, LemurDialogGUIStateAbs>();
+	
+//	public static class ModalDiag{
+//		EModalDiagType e;
+//		LemurDialogGUIStateAbs diagModal;
+//		public ModalDiag(EModalDiagType e, LemurDialogGUIStateAbs diagModal) {
+//			super();
+//			this.e = e;
+//			this.diagModal = diagModal;
+//		}
+//	}
+	
+	public void configModalDialog(EModalDiagType e, LemurDialogGUIStateAbs diagModal){
+		diagModal.setModalParent(this);
+		hmModals.put(e,diagModal);
+	}
 
-
+	public boolean multiClick(Spatial capture, int iClickCount) {
+		if(iClickCount==3){ //from most to least
+		}else
+		if(iClickCount==2){
+			if(isListBoxEntry(capture)){
+				LemurDialogGUIStateAbs diag = hmModals.get(EModalDiagType.ListEntryConfig);
+				if(diag!=null){
+					diag.requestEnable();
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	public boolean openPropertiesDialogFor(Spatial capture) {
+		if(isListBoxEntry(capture)){
+			LemurDialogGUIStateAbs diag = hmModals.get(EModalDiagType.ListEntryProperties);
+			if(diag!=null){
+				diag.requestEnable();
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public boolean isListBoxEntry(Spatial spt){
+		//TODO
+		return false;
+	}
 }

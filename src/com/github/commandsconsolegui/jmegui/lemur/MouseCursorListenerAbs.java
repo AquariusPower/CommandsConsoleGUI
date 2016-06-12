@@ -30,10 +30,9 @@ package com.github.commandsconsolegui.jmegui.lemur;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
+import com.github.commandsconsolegui.jmegui.MouseButtonFlurryOfClicks;
 import com.github.commandsconsolegui.jmegui.MouseCursor;
 import com.github.commandsconsolegui.jmegui.MouseCursor.EMouseCursorButton;
-import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.event.CursorButtonEvent;
 import com.simsilica.lemur.event.CursorListener;
@@ -47,6 +46,7 @@ import com.simsilica.lemur.event.CursorMotionEvent;
  *
  */
 public abstract class MouseCursorListenerAbs implements CursorListener {
+	MouseButtonFlurryOfClicks clicks = new MouseButtonFlurryOfClicks();
 	
 	@Override
 	public void cursorButtonEvent(CursorButtonEvent eventButton, Spatial target, Spatial capture) {
@@ -60,12 +60,20 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
     	}
 		}else{
 			if(emcb.isPressed()){ // This check is NOT redundant. May happen just by calling: {@link MouseCursor#resetFixingAllButtons()}
-				if(MouseCursor.i().isClickDelay(emcb.setReleasedAndGetDelay())){
+				int iClickCount=clicks.checkAndRetrieveClickCount(emcb, target, capture);
+				
+//				if(MouseCursor.i().isClickDelay(emcb.setReleasedAndGetDelay())){
+//					MouseCursor.i().addClick(
+//	      		new MouseButtonClick(emcb, eventButton, target, capture));
+//					
+//					int iClickCount=MouseCursor.i().getMultiClickCountFor(emcb);
+				
+				if(iClickCount>0){
 					/**
 					 * In this case, any displacement will be ignored.
 					 * TODO could the minimal displacement it be used in some way?
 					 */
-	      	if(click(emcb, eventButton, target, capture)){
+	      	if(click(emcb, eventButton, target, capture, iClickCount)){
 	      		eventButton.setConsumed();
 	      	}
 				}
@@ -80,7 +88,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 	 * @param capture
 	 * @return if it is to be consumed
 	 */
-	public boolean click(EMouseCursorButton button, CursorButtonEvent eventButton, Spatial target,	Spatial capture){
+	public boolean click(EMouseCursorButton button, CursorButtonEvent eventButton, Spatial target,	Spatial capture, int iClickCount){
 		return false;
 	}
 	

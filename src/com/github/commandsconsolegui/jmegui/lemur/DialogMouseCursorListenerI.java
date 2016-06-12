@@ -27,11 +27,15 @@
 
 package com.github.commandsconsolegui.jmegui.lemur;
 
+import groovy.lang.MissingClassException;
+
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.MouseCursor.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
+import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
+import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.event.CursorButtonEvent;
@@ -116,17 +120,26 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 //	}
 	
 	@Override
-	public boolean click(EMouseCursorButton button, CursorButtonEvent eventButton, Spatial target,Spatial capture) {
+	public boolean click(EMouseCursorButton button, CursorButtonEvent eventButton, Spatial target,Spatial capture, int iClickCount) {
 		LemurFocusHelperStateI.i().requestDialogFocus(capture);
 		
 		// missing ones are ignored so each element can consume it properly
 		switch(button){
+			case ActionClick:
+				if(iClickCount>=2){
+					LemurDialogGUIStateAbs diag = LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
+					return diag.multiClick(capture,iClickCount);
+				}
+				return true;
 			case ScrollClick:
 				LemurFocusHelperStateI.i().lowerDialogFocusPriority(capture);
 				return true;
+			case ContextPropertiesClick:
+				LemurDialogGUIStateAbs diag = LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
+				return diag.openPropertiesDialogFor(capture);
 		}
 		
-		return super.click(button, eventButton, target, capture);
+		return super.click(button, eventButton, target, capture, iClickCount);
 	}
 	
 	@Override
