@@ -50,75 +50,6 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 	private static DialogMouseCursorListenerI instance = new DialogMouseCursorListenerI();
 	public static DialogMouseCursorListenerI i(){return instance;}
 	
-//	protected Vector3f v3fPrevious=null;
-//
-//	@Override
-//	public void cursorButtonEvent(CursorButtonEvent event, Spatial target,Spatial capture) {
-//		if(event.getButtonIndex()==MouseInput.BUTTON_LEFT){
-//			if( event.isPressed() ) {
-//				v3fPrevious=eventToV3f(event);
-//				
-//				// still necessary
-//				LemurFocusHelperStateI.i().requestDialogFocus(capture);
-//			}else{
-//				v3fPrevious=null;
-//			}
-//		}
-//    
-//		super.cursorButtonEvent(event, target, capture);
-//	}
-//	
-//	@Override
-//	protected boolean click(CursorButtonEvent event, Spatial target, Spatial capture) {
-//		v3fPrevious=null; //click mode disables drag
-//		return false;
-//	}
-//	
-//	@Override
-//	public void cursorMoved(CursorMotionEvent event, Spatial target, Spatial capture) {
-//		if(v3fPrevious!=null){
-//			Vector3f v3fDisplacement = v3fPrevious.subtract(eventToV3f(event)).negate();
-//			
-//			MiscJmeI.i().getParentestFrom(capture).move(v3fDisplacement);
-//			
-//			v3fPrevious=eventToV3f(event);
-//		}
-//		
-//		super.cursorMoved(event, target, capture);
-//	}
-
-//	@Override
-//	protected boolean drag(ArrayList<EMouseCursorButton> aButtonList,Vector3f v3fDragDisplacement, Spatial target, Spatial capture) {
-//		for(EMouseCursorButton button:aButtonList){
-//			switch(button){
-//				case ActionClick:
-//					MiscJmeI.i().getParentestFrom(capture).move(v3fDragDisplacement);
-//					return true;
-//				case ContextPropertiesClick:
-//					break;
-//				case ScrollClick:
-//					break;
-//			}
-//		}
-//		
-//		return super.drag(aButtonList, v3fDragDisplacement, target, capture);
-//	}
-//
-//	@Override
-//	protected boolean click(EMouseCursorButton button, Spatial target, Spatial capture) {
-//		switch(button){
-//			case ActionClick:
-//				break;
-//			case ContextPropertiesClick:
-//				break;
-//			case ScrollClick:
-//				LemurFocusHelperStateI.i().removeFocusLoweringDialogInStack(capture);
-//				break;
-//		}
-//		
-//		return super.click(button, target, capture);
-//	}
-	
 	@Override
 	public boolean click(EMouseCursorButton button, CursorButtonEvent eventButton, Spatial target,Spatial capture, int iClickCount) {
 		LemurFocusHelperStateI.i().requestDialogFocus(capture);
@@ -128,12 +59,10 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 			case ActionClick:
 				if(iClickCount>=2){
 					LemurDialogGUIStateAbs diag = LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
-					return diag.multiClick(capture,iClickCount);
+					return diag.actionMultiClick(capture,iClickCount);
 				}
-				return true;
 			case ScrollClick:
-				LemurFocusHelperStateI.i().lowerDialogFocusPriority(capture);
-				return true;
+				return LemurFocusHelperStateI.i().lowerDialogFocusPriority(capture);
 			case ContextPropertiesClick:
 				LemurDialogGUIStateAbs diag = LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
 				return diag.openPropertiesDialogFor(capture);

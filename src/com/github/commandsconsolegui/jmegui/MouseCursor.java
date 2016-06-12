@@ -157,38 +157,6 @@ public class MouseCursor implements IReflexFillCfg, IConsoleCommandListener{
 			return null;
 		}
 		
-//		public EMouseCursorButton prepareData(CursorButtonEvent event) {
-////	  	mcbd.eventButton = event;
-////	  	mcbd.bIsPressed = event.isPressed();
-//	  	
-//	    long lMilis = System.currentTimeMillis();
-//	    Vector3f v3fPos = MiscJmeI.i().eventToV3f(event);
-//	    
-//	    if(event.isPressed()){
-////	    	mcbd.v3fReleasedPos = null;
-////	    	mcbd.lReleasedMilis = null;
-//	    	
-//	    	mcbd.v3fPressedPos = v3fPos;
-//	    	mcbd.lPressedMilis = lMilis;
-////	    	binfo.v3fPressedDraggingPosToConsume = v3fPos;
-//	    }else{
-//	    	mcbd.v3fReleasedPos = v3fPos;
-//	    	mcbd.lReleasedMilis = lMilis;
-//	    }
-//	    
-//	    return this;
-//		}
-//		
-//		public boolean isClicked(){
-//	    if(!mcbd.eventButton.isPressed() && mcbd.lReleasedMilis != null){
-//	  		if(mcbd.lReleasedMilis <= (mcbd.lPressedMilis + MouseCursor.i().ilvClickDelayMilis.getLong())){
-//	  			return true;
-//	  		}
-//	    }
-//	    
-//	    return false;
-//		}
-//		
 		public boolean isPressed() {
 			return mcbd.lPressedMilis!=null;
 		}

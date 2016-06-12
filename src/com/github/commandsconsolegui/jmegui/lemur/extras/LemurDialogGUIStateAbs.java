@@ -47,6 +47,7 @@ import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.ListBox;
+import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.TextEntryComponent;
@@ -162,6 +163,7 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		setContainerMain(new Container(new BorderLayout(), strStyle));
 		getContainerMain().setName(getId()+"_Dialog");
 		LemurFocusHelperStateI.i().prepareDialogToBeFocused(this);
+		CursorEventControl.addListenersToSpatial(getContainerMain(), DialogMouseCursorListenerI.i());
 		
 //		Vector3f v3fDiagWindowSize = v3fApplicationWindowSize.mult(fDialogPerc);
 		Vector3f v3fDiagWindowSize = new Vector3f(v3fApplicationWindowSize);
@@ -181,7 +183,7 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		lblTitle.setName(getId()+"_Title");
 		lblTitle.setColor(ColorRGBA.Green); //TODO make it custom
 		getNorthContainer().addChild(lblTitle, BorderLayout.Position.North);
-		CursorEventControl.addListenersToSpatial(lblTitle, DialogMouseCursorListenerI.i());
+//		CursorEventControl.addListenersToSpatial(lblTitle, DialogMouseCursorListenerI.i());
 		
 		// simple info
 		lblTextInfo = new Label("",strStyle);
@@ -401,6 +403,10 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 //		}
 //	}
 	
+	/**
+	 * 
+	 * @return -1 if none
+	 */
 	public int getSelectedIndex(){
 		return vlEntriesList.indexOf(dleLastSelected);
 	}
@@ -557,17 +563,17 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		hmModals.put(e,diagModal);
 	}
 
-	public boolean multiClick(Spatial capture, int iClickCount) {
-		if(iClickCount==3){ //from most to least
-		}else
-		if(iClickCount==2){
-			if(isListBoxEntry(capture)){
-				LemurDialogGUIStateAbs diag = hmModals.get(EModalDiagType.ListEntryConfig);
-				if(diag!=null){
-					diag.requestEnable();
-					return true;
+	public boolean actionMultiClick(Spatial capture, int iClickCount) {
+		switch(iClickCount){
+			case 2:
+				if(isListBoxEntry(capture)){
+					LemurDialogGUIStateAbs diag = hmModals.get(EModalDiagType.ListEntryConfig);
+					if(diag!=null){
+						diag.requestEnable();
+						return true;
+					}
 				}
-			}
+				break;
 		}
 		
 		return false;
@@ -586,7 +592,13 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 	}
 	
 	public boolean isListBoxEntry(Spatial spt){
-		//TODO
+		if(getSelectedIndex()>=0){
+			if(spt instanceof Panel){
+				//TODO check if it is correcly at the ListBox
+				return true;
+			}
+		}
+		
 		return false;
 	}
 }

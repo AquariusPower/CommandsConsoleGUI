@@ -206,7 +206,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 		return diag;
 	}
 	
-	public void lowerDialogFocusPriority(Spatial sptAny){
+	public boolean lowerDialogFocusPriority(Spatial sptAny){
 		LemurDialogGUIStateAbs diag = retrieveDialogFromSpatial(sptAny);
 		Spatial sptFocusable = diag.getIntputField();
 		
@@ -214,9 +214,12 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 			asptFocusRequestList.remove(sptFocusable);
 			asptFocusRequestList.add(0,sptFocusable);
 			requestDialogFocus(getCurrentFocusRequester());
+			return true;
 		}else{
-			throw new PrerequisitesNotMetException("spatial not at focus stack "+sptAny.getName());
+			cd().dumpDevWarnEntry("spatial not at focus stack "+sptAny.getName());
 		}
+		
+		return false;
 	}
 	
 	public void requestDialogFocus(Spatial sptChild) {
