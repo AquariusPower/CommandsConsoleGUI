@@ -91,15 +91,15 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 	}
 	
 	public static void invertButtons(){
-		EMouseCursorButton.ActionClick.setIndex(
+		EMouseCursorButton.Action1Click.setIndex(
 			EMouseCursorButton.ContextPropertiesClick.getIndex());
 		
 		EMouseCursorButton.ContextPropertiesClick.setIndex(
-			EMouseCursorButton.ActionClick.getIndex());
+			EMouseCursorButton.Action1Click.getIndex());
 	}
 	
 	public static enum EMouseCursorButton{
-		ActionClick(MouseInput.BUTTON_LEFT),
+		Action1Click(MouseInput.BUTTON_LEFT),
 		ContextPropertiesClick(MouseInput.BUTTON_RIGHT),
 		ScrollClick(MouseInput.BUTTON_MIDDLE),
 		
@@ -140,9 +140,19 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 	}
-
+	
+	public boolean isMultiClickDelayFrom(Long lFromMilis) {
+		return isMultiClickDelay(System.currentTimeMillis()-lFromMilis);
+	}
+	public boolean isMultiClickDelay(Long lDelayMilis) {
+		return lDelayMilis <= ilvMultiClickMaxDelayMilis.getLong();
+	}
+	
+	public boolean isClickDelayFrom(Long lFromMilis) {
+		return isClickDelay(System.currentTimeMillis()-lFromMilis);
+	}
 	public boolean isClickDelay(Long lDelayMilis) {
-		return lDelayMilis < ilvClickMaxDelayMilis.getLong();
+		return lDelayMilis <= ilvClickMaxDelayMilis.getLong();
 	}
 	
 	@Override

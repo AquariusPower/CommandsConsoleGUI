@@ -122,4 +122,20 @@ public class DebugI implements IConsoleCommandListener{
 		}
 		return bDebugMode;
 	}
+	
+	/**
+	 * put a breakpoint inside this method!
+	 * @param b
+	 */
+	public void conditionalBreakpoint(boolean b){
+		if(b){
+			/**
+			 * PUT A BREAKPOINT AT LINE BELOW!
+			 * that trick with ints is to avoid eclipse warning marker...
+			 */
+			int i2,iPutABreakPointHere=0;
+			i2=iPutABreakPointHere;
+			iPutABreakPointHere=i2;
+		}
+	}
 }

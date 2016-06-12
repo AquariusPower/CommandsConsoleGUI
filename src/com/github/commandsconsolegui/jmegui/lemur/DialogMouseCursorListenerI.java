@@ -30,8 +30,6 @@ package com.github.commandsconsolegui.jmegui.lemur;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
-import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
-import com.github.commandsconsolegui.jmegui.MouseCursorButtonsControl;
 import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
@@ -54,18 +52,24 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 		LemurFocusHelperStateI.i().requestDialogFocus(capture);
 		
 		// missing ones are ignored so each element can consume it properly
+		boolean bConsumed = false;
 		switch(buttonData.getActivatorType()){
-			case ActionClick:
+			case Action1Click:
 				if(iClickCount>=2){
 					LemurDialogGUIStateAbs diag = LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
-					return diag.actionMultiClick(capture,iClickCount);
+					bConsumed = diag.actionMultiClick(buttonData,capture,iClickCount);
 				}
+				break;
 			case ScrollClick:
-				return LemurFocusHelperStateI.i().lowerDialogFocusPriority(capture);
+				bConsumed = LemurFocusHelperStateI.i().lowerDialogFocusPriority(capture);
+				break;
 			case ContextPropertiesClick:
 				LemurDialogGUIStateAbs diag = LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
-				return diag.openPropertiesDialogFor(capture);
+				bConsumed = diag.openPropertiesDialogFor(capture);
+				break;
 		}
+		
+		if(bConsumed)return true;
 		
 		return super.click(buttonData, eventButton, target, capture, iClickCount);
 	}
@@ -75,11 +79,11 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 		for(MouseCursorButtonData buttonData:aButtonList){
 			// missing ones are ignored so each element can consume it properly
 			switch(buttonData.getActivatorType()){
-				case ActionClick:
+				case Action1Click:
 					Spatial sptDialogMain = MiscJmeI.i().getParentestFrom(capture);
 					Vector3f v3fNewPos = MiscJmeI.i().eventToV3f(eventMotion);
 					Vector3f v3fDisplacement = buttonData.updateDragPosAndGetDisplacement(v3fNewPos);
-					sptDialogMain.move(v3fDisplacement.negate());
+					sptDialogMain.move(v3fDisplacement);
 					return true;
 			}
 		}

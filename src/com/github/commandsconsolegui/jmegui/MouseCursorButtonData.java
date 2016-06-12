@@ -98,10 +98,18 @@ public class MouseCursorButtonData{
 		this.v3fDragLastUpdatePos = v3fPressedPos.clone();
 	}
 	
+	public Vector3f getDragDisplacementToPressedOrigin(){
+		return v3fDragLastUpdatePos.subtract(v3fPressedPos);
+	}
+	
+	public Vector3f getPressedDistanceTo(Vector3f eventToV3f) {
+		return eventToV3f.subtract(v3fPressedPos);
+	}
+	
 	public Vector3f updateDragPosAndGetDisplacement(Vector3f v3fNewDragPos){
 		if(!isPressed())return null;
 		
-		Vector3f v3fDiff = this.v3fDragLastUpdatePos.subtract(v3fNewDragPos);
+		Vector3f v3fDiff = v3fNewDragPos.subtract(this.v3fDragLastUpdatePos);
 		this.v3fDragLastUpdatePos.set(v3fNewDragPos);
 		
 		return v3fDiff;

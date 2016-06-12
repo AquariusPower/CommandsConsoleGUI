@@ -33,6 +33,8 @@ import java.util.HashMap;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
+import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
+import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntry;
 import com.github.commandsconsolegui.jmegui.extras.InteractionDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
@@ -416,7 +418,7 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		if(!super.updateOrUndo(tpf))return false;
 		
 		Integer iSelected = getSelectedIndex();
-		if(iSelected!=null){
+		if(iSelected!=null){ //TODO this is buggy...
 			int iTopEntryIndex = getTopEntryIndex();
 			int iBottomItemIndex = getBottomEntryIndex();
 			Integer iScrollTo=null;
@@ -431,8 +433,45 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 			}
 		}
 		
+		if(eMultiClickAction!=null){
+			/**
+			 * multi click actions execution must be delayed by the multi click delay limit 
+			 */
+			if(!MouseCursorCentralI.i().isMultiClickDelayFrom(lClickActionMilis)){
+				boolean bConsumed=false;
+				switch(eMultiClickAction){
+					case OpenConfigDialog:
+						LemurDialogGUIStateAbs diag = hmModals.get(EModalDiagType.ListEntryConfig);
+						if(diag!=null){
+							diag.requestEnable();
+						}
+						bConsumed=true;
+						break;
+					case OptionModeSubmit:
+						actionSubmit();
+						bConsumed=true;
+						break;
+					case DebugTestMultiClickAction3times:
+						cd().dumpDebugEntry(eMultiClickAction+" at "+getId());
+						bConsumed=true;
+						break;
+				}
+				
+				if(bConsumed){
+					consumeAndResetMultiClickAction();
+				}
+			}
+		}
+		
 		return true;
 	}
+	
+	enum EMultiClickAction{
+		OptionModeSubmit,
+		OpenConfigDialog, 
+		DebugTestMultiClickAction3times,
+	}
+	EMultiClickAction eMultiClickAction = null;
 	
 	/**
 	 * default is the class name, will look like the dialog title
@@ -546,7 +585,9 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		HintHelp, //generic
 	}
 	
-	HashMap<EModalDiagType, LemurDialogGUIStateAbs> hmModals = new HashMap<EModalDiagType, LemurDialogGUIStateAbs>();
+	protected HashMap<EModalDiagType, LemurDialogGUIStateAbs> hmModals = new HashMap<EModalDiagType, LemurDialogGUIStateAbs>();
+	protected Long	lClickActionMilis;
+	private MouseCursorButtonData	buttonData;
 	
 //	public static class ModalDiag{
 //		EModalDiagType e;
@@ -562,22 +603,49 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		diagModal.setModalParent(this);
 		hmModals.put(e,diagModal);
 	}
-
-	public boolean actionMultiClick(Spatial capture, int iClickCount) {
+	
+	/**
+	 * this will override older request if set fast enough
+	 * @param e
+	 */
+	protected void setMultiClickAction(MouseCursorButtonData buttonData, EMultiClickAction e){
+		/**
+		 * DO NOT CHECK if eClickAction != null
+		 * it is to be overriden!!!
+		 */
+		this.eMultiClickAction=e;
+		this.lClickActionMilis=System.currentTimeMillis();
+		this.buttonData=buttonData;
+	}
+	protected void consumeAndResetMultiClickAction(){
+		eMultiClickAction=null;
+		
+		lClickActionMilis=null;
+		
+		buttonData.getClicks().clearClicks();
+		buttonData=null;
+	}
+	
+	public boolean actionMultiClick(MouseCursorButtonData buttonData, Spatial capture, int iClickCount) {
 		switch(iClickCount){
 			case 2:
 				if(isListBoxEntry(capture)){
 					if(bOptionSelectionMode){
-						actionSubmit();
+						setMultiClickAction(buttonData, EMultiClickAction.OptionModeSubmit);
 						return true;
 					}else{
-						LemurDialogGUIStateAbs diag = hmModals.get(EModalDiagType.ListEntryConfig);
-						if(diag!=null){
-							diag.requestEnable();
-							return true;
-						}
+						setMultiClickAction(buttonData, EMultiClickAction.OpenConfigDialog);
+//						LemurDialogGUIStateAbs diag = hmModals.get(EModalDiagType.ListEntryConfig);
+//						if(diag!=null){
+//							diag.requestEnable();
+//							return true;
+//						}
 					}
+					return true;
 				}
+				break;
+			case 3:
+				setMultiClickAction(buttonData, EMultiClickAction.DebugTestMultiClickAction3times);
 				break;
 		}
 		
@@ -598,9 +666,14 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 	
 	public boolean isListBoxEntry(Spatial spt){
 		if(getSelectedIndex()>=0){
-			if(spt instanceof Panel){
-				//TODO check if it is correcly at the ListBox
+			boolean bForce=true;
+			if(bForce){
 				return true;
+			}else{
+				if(spt instanceof Panel){ //TODO the capture is actually the dialog container, can it be the listbox entry Panel?
+					//TODO check if it is correcly at the ListBox
+					return true;
+				}
 			}
 		}
 		

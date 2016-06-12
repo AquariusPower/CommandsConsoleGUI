@@ -30,11 +30,11 @@ package com.github.commandsconsolegui.jmegui.lemur;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
-import com.github.commandsconsolegui.jmegui.MouseCursorButtonClicks;
+import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
+import com.github.commandsconsolegui.jmegui.MouseCursorButtonsControl;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
-import com.github.commandsconsolegui.jmegui.MouseCursorButtonsControl;
-import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
+import com.github.commandsconsolegui.misc.DebugI;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.event.CursorButtonEvent;
 import com.simsilica.lemur.event.CursorListener;
@@ -69,6 +69,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 		}else{
 			if(mcbd.isPressed()){ // This check is NOT redundant. May happen just by calling: {@link MouseCursor#resetFixingAllButtons()}
 				if(bCancelNextMouseReleased){
+					mcbd.setReleasedAndGetDelay();
 					bCancelNextMouseReleased=false;
 				}else{
 					int iClickCount=mcbd.checkAndRetrieveClickCount(target, capture);
@@ -85,7 +86,9 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 						 * TODO could the minimal displacement it be used in some way?
 						 */
 		      	if(click(mcbd, eventButton, target, capture, iClickCount)){
+//		      		DebugI.i().conditionalBreakpoint(this instanceof DialogMouseCursorListenerI);
 		      		eventButton.setConsumed();
+//		      		mcbd.getClicks().clearClicks();
 		      	}
 					}
 				}
@@ -137,17 +140,27 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 
 	@Override
 	public void cursorMoved(CursorMotionEvent eventMotion, Spatial target, Spatial capture) {
+		if(capture==null){
+//			bCancelNextMouseReleased=true;
+			return;
+		}
+		
 		ArrayList<MouseCursorButtonData> aButtonList = new ArrayList<MouseCursorButtonData>();
 		for(EMouseCursorButton e:EMouseCursorButton.values()){
 			// Buttons pressed during drag
-			if(mcab.getMouseCursorDataFor(e).isPressed()){
-				aButtonList.add(mcab.getMouseCursorDataFor(e));
+			MouseCursorButtonData mdata = mcab.getMouseCursorDataFor(e);
+			if(mdata.isPressed()){
+				if(mdata.getPressedDistanceTo(MiscJmeI.i().eventToV3f(eventMotion)).length()>3){
+					aButtonList.add(mdata);
+				}
 			}
 		}
 		
-		if(drag(aButtonList, eventMotion, target, capture)){
-			eventMotion.setConsumed();
-			bCancelNextMouseReleased=true;
+		if(aButtonList.size()>0){
+			if(drag(aButtonList, eventMotion, target, capture)){
+				eventMotion.setConsumed();
+				bCancelNextMouseReleased=true;
+			}
 		}
 		
 	}

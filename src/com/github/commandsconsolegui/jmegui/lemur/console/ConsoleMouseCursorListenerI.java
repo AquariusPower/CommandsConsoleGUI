@@ -128,7 +128,7 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 		
 //		if(!button.isPressed()){ //on release
 		switch(button.getActivatorType()){
-			case ActionClick:
+			case Action1Click:
 				if(cgui.isHintBox(target)){
 					cgui.checkAndApplyHintAtInputField();
 					return true;

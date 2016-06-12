@@ -119,11 +119,17 @@ public class MouseCursorButtonClicks {
 		return iClickCount;
 	}
 	
+	
+	
 //public void addClick(FlurryOfClicks focEMouseCursorButton emcb, CursorButtonEvent eventButton, Spatial target, Spatial capture) {
 //aClicks.add(new FlurryOfClicks(emcb, eventButton, target, capture));
 //}
 	public void addClick(MouseButtonClick foc) {
 		aFlurryOfClicks.add(foc);
+	}
+
+	public void clearClicks() {
+		aFlurryOfClicks.clear();
 	}
 	
 }
