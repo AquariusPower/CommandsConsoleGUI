@@ -27,19 +27,22 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.github.commandsconsolegui.jmegui;
 
+import java.util.ArrayList;
+
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.input.MouseInput;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Spatial;
+import com.simsilica.lemur.event.CursorButtonEvent;
 
 /**
  * Allows multiple mouse buttons to be clicked or dragged at same time.
@@ -51,7 +54,37 @@ public class MouseCursor implements IReflexFillCfg, IConsoleCommandListener{
 	private static MouseCursor instance = new MouseCursor();
 	public static MouseCursor i(){return instance;}
 	
-	IntLongVarField ilvClickMaxDelayMilis = new IntLongVarField(this,300);
+	IntLongVarField ilvClickMaxDelayMilis = new IntLongVarField(this,300,"the delay between button pressed and button released");
+	IntLongVarField ilvMultiClickMaxDelayMilis = new IntLongVarField(this,500,"the delay between each subsequent click (button released moment)");
+	
+	public static class FlurryOfClicks{
+		long lMilis=-1;
+		EMouseCursorButton emcb;
+		CursorButtonEvent eventButton;
+		Spatial target;
+		Spatial capture;
+		
+		public boolean isRepeating(FlurryOfClicks other) {
+			if (!capture.equals(other.capture))return false;
+			if (emcb != other.emcb)return false;
+			if (!eventButton.equals(other.eventButton))return false;
+			if (!target.equals(other.target))return false;
+			
+			return true;
+		}
+		
+		
+	}
+	
+	ArrayList<FlurryOfClicks> aClicks = new ArrayList<FlurryOfClicks>();
+	
+	public ArrayList<FlurryOfClicks> getClicksListFor(EMouseCursorButton emcb){
+		ArrayList<FlurryOfClicks> a = new ArrayList<FlurryOfClicks>();
+		for(FlurryOfClicks c:aClicks){
+			if(c.emcb.compareTo(emcb)==0)a.add(c);
+		}
+		return a;
+	}
 	
 //	protected long lClickDelayMilis;
 	

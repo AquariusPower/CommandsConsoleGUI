@@ -46,6 +46,7 @@ import com.jme3.scene.Node;
  */
 public abstract class InteractionDialogStateAbs extends BaseDialogStateAbs{
 	protected Node cntrNorth;
+	protected Node cntrSouth;
 	protected String	strLastFilter = "";
 //	protected ArrayList<DialogListEntry> aEntryList = new ArrayList<DialogListEntry>();
 //	protected String	strLastSelectedKey;

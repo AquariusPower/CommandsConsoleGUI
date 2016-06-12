@@ -73,7 +73,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 //		this.sapp = sapp;
 //	}
 	
-	protected TimedDelayVarField tdTextCursorBlink = new TimedDelayVarField(this,1f);
+	protected TimedDelayVarField tdTextCursorBlink = new TimedDelayVarField(this,1f,"blink delay");
 	private boolean	bBlinkingTextCursor = true;
 	private FocusManagerState	focusState;
 	private TextField	tfToBlinkCursor;

@@ -47,14 +47,16 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
  *
  */
 public class IntLongVarField implements IReflexFillCfgVariant, IVarIdValueOwner{
-	private static boolean	bConfigured;
-	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
-	private static String	strCodePrefixVariant = "ilv";
-	private static ArrayList<IntLongVarField> ailvList = new ArrayList<IntLongVarField>();
-	Long lValue;
-	private IReflexFillCfg	rfcfgOwner;
-	private String	strVarId;
-	private VarIdValueOwnerData	vivo;
+	protected static boolean	bConfigured;
+	protected static IHandleExceptions	ihe = HandleExceptionsRaw.i();
+	protected static String	strCodePrefixVariant = "ilv";
+	protected static ArrayList<IntLongVarField> ailvList = new ArrayList<IntLongVarField>();
+	
+	protected IReflexFillCfg	rfcfgOwner;
+	protected String	strVarId;
+	protected VarIdValueOwnerData	vivo;
+	protected String	strHelp;
+	protected Long lValue;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
@@ -63,19 +65,20 @@ public class IntLongVarField implements IReflexFillCfgVariant, IVarIdValueOwner{
 	}
 	
 	public IntLongVarField(IReflexFillCfg rfcfgOwnerUseThis, IntLongVarField ilv) {
-		this(rfcfgOwnerUseThis, ilv.lValue);
+		this(rfcfgOwnerUseThis, ilv.lValue,null);
 	}
-	public IntLongVarField(IReflexFillCfg rfcfgOwnerUseThis, Integer iInitialValue) {
-		this(rfcfgOwnerUseThis, iInitialValue==null?null:iInitialValue.longValue());
+	public IntLongVarField(IReflexFillCfg rfcfgOwnerUseThis, Integer iInitialValue, String strHelp) {
+		this(rfcfgOwnerUseThis, iInitialValue==null?null:iInitialValue.longValue(), strHelp);
 	}
 	/**
 	 * @param rfcfgOwnerUseThis use null if this is not a class field, but a local variable
 	 * @param lInitialValue if null, the variable will be removed from console vars.
 	 */
-	public IntLongVarField(IReflexFillCfg rfcfgOwnerUseThis, Long lInitialValue) {
+	public IntLongVarField(IReflexFillCfg rfcfgOwnerUseThis, Long lInitialValue, String strHelp) {
 		if(rfcfgOwnerUseThis!=null)ailvList.add(this); //only fields allowed
 		this.rfcfgOwner=rfcfgOwnerUseThis;
 		this.lValue=lInitialValue;
+		this.strHelp=strHelp;
 	}
 	
 	@Override
@@ -92,7 +95,12 @@ public class IntLongVarField implements IReflexFillCfgVariant, IVarIdValueOwner{
 		
 		if(vivo!=null)vivo.setObjectValue(objValue);
 	}
-
+	
+	@Override
+	public String getHelp(){
+		return strHelp==null?"":strHelp;
+	}
+	
 	@Override
 	public String getCodePrefixVariant() {
 		return IntLongVarField.strCodePrefixVariant ;

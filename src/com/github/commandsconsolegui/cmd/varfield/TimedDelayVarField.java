@@ -50,11 +50,11 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
  */
 
 public class TimedDelayVarField implements IReflexFillCfgVariant, IVarIdValueOwner{
-	private static IHandleExceptions ihe = HandleExceptionsRaw.i();
+	protected static IHandleExceptions ihe = HandleExceptionsRaw.i();
 	protected static ArrayList<TimedDelayVarField> atdList = new ArrayList<TimedDelayVarField>();
 	
 	protected static Long lCurrentTimeNano;
-	private static boolean	bConfigured;
+	protected static boolean	bConfigured;
 	
 	public static final long lNanoOneSecond = 1000000000L; // 1s in nano time
 	public static final float fNanoToSeconds = 1f/lNanoOneSecond; //multiply nano by it to get in seconds
@@ -63,10 +63,11 @@ public class TimedDelayVarField implements IReflexFillCfgVariant, IVarIdValueOwn
 	protected float	fDelayLimitSeconds;
 	protected long	lDelayLimitNano;
 
-	private String strVarId;
+	protected String strVarId;
 
-	private IReflexFillCfg	rfcfgOwner;
-	private VarIdValueOwnerData	vivo;
+	protected IReflexFillCfg	rfcfgOwner;
+	protected VarIdValueOwnerData	vivo;
+	protected String	strHelp;
 
 	public static final String	strCodePrefixVariant = "td";
 	
@@ -97,8 +98,8 @@ public class TimedDelayVarField implements IReflexFillCfgVariant, IVarIdValueOwn
 	 * @param rfcfgOwnerUseThis
 	 * @param fDelay
 	 */
-	public TimedDelayVarField(float fDelay) {
-		this(null,fDelay);
+	public TimedDelayVarField(float fDelay, String strHelp) {
+		this(null,fDelay,strHelp);
 	}
 	/**
 	 * This constructor is for field variables.
@@ -107,10 +108,11 @@ public class TimedDelayVarField implements IReflexFillCfgVariant, IVarIdValueOwn
 	 * @param rfcfgOwnerUseThis use null if this is not a class field, but a local variable
 	 * @param fDelay
 	 */
-	public TimedDelayVarField(IReflexFillCfg rfcfgOwnerUseThis, float fDelay) {
+	public TimedDelayVarField(IReflexFillCfg rfcfgOwnerUseThis, float fDelay, String strHelp) {
 		if(rfcfgOwnerUseThis!=null)atdList.add(this); //only fields allowed
 		this.rfcfgOwner=rfcfgOwnerUseThis;
 		setDelayLimitSeconds(fDelay);
+		this.strHelp=strHelp;
 	}
 	
 	private void setDelayLimitSeconds(float fDelaySeconds){
@@ -367,5 +369,11 @@ public class TimedDelayVarField implements IReflexFillCfgVariant, IVarIdValueOwn
 	public String toString() {
 //		if(getValueRaw()==null)return null;
 		return MiscI.i().fmtFloat(getDelayLimitSeconds(),3);
+	}
+
+	@Override
+	public String getHelp() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

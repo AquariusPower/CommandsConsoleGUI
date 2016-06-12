@@ -82,7 +82,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 	protected static ConsoleLemurStateI instance=new ConsoleLemurStateI();
 	public static ConsoleLemurStateI i(){return instance;}
 	
-	StringVarField svfBackgroundHexaColorRGBA = new StringVarField(this,"");
+	StringVarField svfBackgroundHexaColorRGBA = new StringVarField(this,"","XXXXXXXX ex.: 'FF12BC4A' Red Green Blue Alpha");
 //	protected ConsoleMouseCursorListenerI consoleCursorListener;
 	protected Button	btnCopy;
 	protected Button	btnPaste;

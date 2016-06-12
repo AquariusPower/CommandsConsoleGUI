@@ -41,24 +41,30 @@ public class VarIdValueOwnerData {
 		public abstract String getVarId();
 		public abstract Object getValueRaw();
 		public abstract void setConsoleVarLink(VarIdValueOwnerData vivo);
+		public abstract String getHelp();
 	}
 	
-	String strId;
-	Object objValue;
-	IVarIdValueOwner owner;
-	IReflexFillCfg rfcfgClassHoldingTheOwner;
+	protected String strId;
+	protected Object objValue;
+	protected IVarIdValueOwner owner;
+	protected IReflexFillCfg rfcfgClassHoldingTheOwner;
+	protected String	strHelp;
 	
-	public VarIdValueOwnerData(String strId, Object objValue,	IVarIdValueOwner vivoOwner, IReflexFillCfg rfcfgClassHoldingTheOwner) {
+	public VarIdValueOwnerData(String strId, Object objValue,	IVarIdValueOwner vivoOwner, IReflexFillCfg rfcfgClassHoldingTheOwner, String strHelp) {
 		super();
 		this.strId = strId;
 		this.objValue = objValue;
 		this.owner = vivoOwner;
 		this.rfcfgClassHoldingTheOwner = rfcfgClassHoldingTheOwner;
+		if(strHelp!=null)this.strHelp = strHelp; //to avoid removing it
 	}
 
 	public void setObjectValue(Object objValue) {
 		this.objValue=objValue;
 	}
 	
+	public String getHelp(){
+		return strHelp==null?"":strHelp;
+	}
 	
 }

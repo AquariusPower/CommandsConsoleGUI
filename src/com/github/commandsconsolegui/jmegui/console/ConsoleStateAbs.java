@@ -118,9 +118,9 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 	public final StringCmdField CMD_FONT_LIST = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
 	
 	protected String strDefaultFont = "DroidSansMono";
-	protected StringVarField	svUserFontOption = new StringVarField(this, strDefaultFont);
+	protected StringVarField	svUserFontOption = new StringVarField(this, strDefaultFont, null);
 	protected int iDefaultFontSize = 12;
-	protected IntLongVarField ilvFontSize = new IntLongVarField(this, iDefaultFontSize);
+	protected IntLongVarField ilvFontSize = new IntLongVarField(this, iDefaultFontSize,null);
 	
 //	/**
 //	 * keep "initialized" vars together!
@@ -130,9 +130,9 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 	/**
 	 * keep delayers together!
 	 */
-	protected TimedDelayVarField tdStatsRefresh = new TimedDelayVarField(this,0.5f);
-	protected TimedDelayVarField tdScrollToBottomRequestAndSuspend = new TimedDelayVarField(this,0.5f);
-	protected TimedDelayVarField tdScrollToBottomRetry = new TimedDelayVarField(this,0.1f);
+	protected TimedDelayVarField tdStatsRefresh = new TimedDelayVarField(this,0.5f,"delay between simple stats field refresh");
+	protected TimedDelayVarField tdScrollToBottomRequestAndSuspend = new TimedDelayVarField(this,0.5f,null);
+	protected TimedDelayVarField tdScrollToBottomRetry = new TimedDelayVarField(this,0.1f,null);
 
 //	protected TimedDelay tdLetCpuRest = new TimedDelay(0.1f);
 //	protected TimedDelay tdStatsRefresh = new TimedDelay(0.5f);
@@ -206,7 +206,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 //	protected String	strFileInitConsCmds = strFilePrefix+"-Init";
 //	protected String	strFileSetup = strFilePrefix+"-Setup";
 //	protected String	strFileDatabase = strFilePrefix+"-DB";
-	protected FloatDoubleVarField	fdvConsoleHeightPercDefault = new FloatDoubleVarField(this,0.5);
+	protected FloatDoubleVarField	fdvConsoleHeightPercDefault = new FloatDoubleVarField(this,0.5,"percentual of the application window");
 	
 	/**
 	 * use the console height command to set this var, do not use a console variable for it,

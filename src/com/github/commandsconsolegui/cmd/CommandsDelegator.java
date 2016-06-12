@@ -125,9 +125,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	/**
 	 * keep delayers together!
 	 */
-	protected TimedDelayVarField tdLetCpuRest = new TimedDelayVarField(this,0.1f);
-	protected TimedDelayVarField tdDumpQueuedEntry = new TimedDelayVarField(this,1f/5f); // per second
-	protected TimedDelayVarField tdSpareGpuFan = new TimedDelayVarField(this,1.0f/60f); // like 60 FPS
+	protected TimedDelayVarField tdLetCpuRest = new TimedDelayVarField(this,0.1f,"updates will be skipped and only one update will be processed per delay, if this is active");
+	protected TimedDelayVarField tdDumpQueuedSlowEntry = new TimedDelayVarField(this,1f/5f,"how many dump entries will be shown per second (from the slow queue)");
+//	protected TimedDelayVarField tdSpareGpuFan = new TimedDelayVarField(this,1.0f/60f); // like 60 FPS
 	
 	/**
 	 * used to hold a reference to the identified/typed user command
@@ -187,8 +187,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	protected String	strTypeCmd="Cmd";
 	
 	/** 0 is auto wrap, -1 will trunc big lines */
-	protected IntLongVarField ilvConsoleMaxWidthInCharsForLineWrap = new IntLongVarField(this,0);
-	protected IntLongVarField ilvCurrentFixedLineWrapAtColumn = new IntLongVarField(this,0);
+	protected IntLongVarField ilvConsoleMaxWidthInCharsForLineWrap = new IntLongVarField(this,0,null);
+	protected IntLongVarField ilvCurrentFixedLineWrapAtColumn = new IntLongVarField(this,0,null);
 	protected HashMap<IConsoleCommandListener,StackTraceElement[]> hmDebugListenerAddedStack = new HashMap<IConsoleCommandListener,StackTraceElement[]>();
 	
 	protected boolean	bAddEmptyLineAfterCommand = true;
@@ -212,8 +212,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	protected String	strFileInitConsCmds = strFilePrefix+"-Init";
 	protected String	strFileSetup = strFilePrefix+"-Setup";
 	protected String	strFileDatabase = strFilePrefix+"-DB";
-	protected IntLongVarField ilvMaxCmdHistSize = new IntLongVarField(this,1000);
-	protected IntLongVarField ilvMaxDumpEntriesAmount = new IntLongVarField(this,100000);
+	protected IntLongVarField ilvMaxCmdHistSize = new IntLongVarField(this,1000,null);
+	protected IntLongVarField ilvMaxDumpEntriesAmount = new IntLongVarField(this,100000,"max dump area list size before older ones get removed");
 	protected ArrayList<String>	astrCmdAndParams = new ArrayList<String>();
 	protected ArrayList<ImportantMsgData>	astrImportantMsgBufferList = new ArrayList<ImportantMsgData>();
 	protected ArrayList<String>	astrExecConsoleCmdsQueue = new ArrayList<String>();
@@ -970,7 +970,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			dumpEntry(adeDumpEntryFastQueue.remove(0));
 		}
 			
-		if(!tdDumpQueuedEntry.isReady(true))return;
+		if(!tdDumpQueuedSlowEntry.isReady(true))return;
 		
 		if(icui.getDumpEntriesSlowedQueue().size()>0){
 			icui.getDumpEntries().add(icui.getDumpEntriesSlowedQueue().remove(0));
@@ -1772,7 +1772,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 
 	protected boolean cmdVarAdd(String strVarId, String strValueAdd, boolean bSave, boolean bOverwrite){
-		return cmdVarAdd(getVar(strVarId), new VarIdValueOwnerData(strVarId, strValueAdd, null, null), bSave, bOverwrite);
+		return cmdVarAdd(getVar(strVarId), new VarIdValueOwnerData(strVarId, strValueAdd, null, null, null), bSave, bOverwrite);
 	}
 	/**
 	 * In case variable exists will be this method.
@@ -1910,6 +1910,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		VarIdValueOwnerData vivo = selectVarSource(strVarId).get(strVarId);
 		String str="";
 		
+		// as reusable command
 		str+=getCommandPrefix();
 		str+=CMD_VAR_SET.toString();
 		str+=" ";
@@ -1919,20 +1920,27 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			str+="\""+vivo.objValue+"\"";
 			str+=" ";
 		}
+		
+		// comments
 		str+="#";
+		// var type
 		if(vivo!=null){
 			str+=vivo.objValue.getClass().getSimpleName();
 		}else{
 			str+="(ValueNotSet)";
 		}
 		str+=" ";
+		// scope
 		str+=(isRestricted(strVarId)?"(Restricted)":"(User)");
+		// dev info
 		if(btgShowDeveloperInfo.b()){
 			if(vivo.owner!=null && vivo.rfcfgClassHoldingTheOwner!=null){
 				str+=" ";
 				str+="["+vivo.rfcfgClassHoldingTheOwner.getClass().getName()+"]";
 			}
 		}
+		str+=" ";
+		str+=vivo.getHelp();
 		
 		return str;
 	}
@@ -2036,7 +2044,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				RESTRICTED_TOKEN+owner.getVarId(),
 				owner.getValueRaw(),
 				owner,
-				rfcfg),
+				rfcfg,
+				owner.getHelp()),
 			bSave);
 	}
 	
@@ -2048,7 +2057,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @return
 	 */
 	public boolean varSet(String strVarId, String strValue, boolean bSave) {
-		boolean bOk=varSet(new VarIdValueOwnerData(strVarId, strValue, null, null), bSave);
+		boolean bOk=varSet(new VarIdValueOwnerData(strVarId, strValue, null, null, null), bSave);
 		
 		if(bOk){
 			VarIdValueOwnerData vivo = getVar(strVarId);
@@ -2387,7 +2396,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 							pqe.bForceFailBlockExecution=true;
 							break;
 						}
-						pqe.tdSleep = new TimedDelayVarField(fDelay);
+						pqe.tdSleep = new TimedDelayVarField(fDelay,null);
 						pqe.tdSleep.updateTime();
 //						dumpDevInfoEntry(strCmd);
 						break;
@@ -2707,7 +2716,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public void initialize(){
 		if(!bConfigured)throw new NullPointerException("not configured yet");
 		
-		tdDumpQueuedEntry.updateTime();
+		tdDumpQueuedSlowEntry.updateTime();
 		
 		// init dump file, MUST BE THE FIRST!
 		flLastDump = new File(fileNamePrepareLog(strFileLastDump,false));

@@ -45,14 +45,15 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
  * @author AquariusPower <https://github.com/AquariusPower>
  */
 public class FloatDoubleVarField implements IReflexFillCfgVariant, IVarIdValueOwner{
-	private static boolean	bConfigured;
-	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
-	private static String	strCodePrefixVariant = "fdv";
-	private static ArrayList<FloatDoubleVarField> afdvList = new ArrayList<FloatDoubleVarField>();
-	Double dValue;
-	private IReflexFillCfg	rfcfgOwner;
-	private String	strVarId;
-	private VarIdValueOwnerData	vivo;
+	protected static boolean	bConfigured;
+	protected static IHandleExceptions	ihe = HandleExceptionsRaw.i();
+	protected static String	strCodePrefixVariant = "fdv";
+	protected static ArrayList<FloatDoubleVarField> afdvList = new ArrayList<FloatDoubleVarField>();
+	protected Double dValue;
+	protected IReflexFillCfg	rfcfgOwner;
+	protected String	strVarId;
+	protected VarIdValueOwnerData	vivo;
+	protected String	strHelp;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
@@ -60,20 +61,21 @@ public class FloatDoubleVarField implements IReflexFillCfgVariant, IVarIdValueOw
 		bConfigured=true;
 	}
 	
-	public FloatDoubleVarField(IReflexFillCfg rfcfgOwnerUseThis, FloatDoubleVarField fdv) {
-		this(rfcfgOwnerUseThis, fdv.dValue);
+	public FloatDoubleVarField(IReflexFillCfg rfcfgOwnerUseThis, FloatDoubleVarField fdv, String strHelp) {
+		this(rfcfgOwnerUseThis, fdv.dValue, strHelp);
 	}
-	public FloatDoubleVarField(IReflexFillCfg rfcfgOwnerUseThis, Float fInitialValue) {
-		this(rfcfgOwnerUseThis, fInitialValue==null?null:fInitialValue.doubleValue());
+	public FloatDoubleVarField(IReflexFillCfg rfcfgOwnerUseThis, Float fInitialValue, String strHelp) {
+		this(rfcfgOwnerUseThis, fInitialValue==null?null:fInitialValue.doubleValue(), strHelp);
 	}
 	/**
 	 * @param rfcfgOwnerUseThis use null if this is not a class field, but a local variable
 	 * @param dInitialValue if null, the variable will be removed from console vars.
 	 */
-	public FloatDoubleVarField(IReflexFillCfg rfcfgOwnerUseThis, Double dInitialValue) {
+	public FloatDoubleVarField(IReflexFillCfg rfcfgOwnerUseThis, Double dInitialValue, String strHelp) {
 		if(rfcfgOwnerUseThis!=null)afdvList.add(this); //only fields allowed
 		this.rfcfgOwner=rfcfgOwnerUseThis;
 		this.dValue=dInitialValue;
+		this.strHelp=strHelp;
 	}
 	
 	@Override
@@ -144,5 +146,10 @@ public class FloatDoubleVarField implements IReflexFillCfgVariant, IVarIdValueOw
 	public String toString() {
 		if(dValue==null)return null;
 		return MiscI.i().fmtFloat(dValue,3);
+	}
+
+	@Override
+	public String getHelp() {
+		return strHelp==null?"":strHelp;
 	}
 }

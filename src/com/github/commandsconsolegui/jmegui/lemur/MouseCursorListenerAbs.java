@@ -47,6 +47,7 @@ import com.simsilica.lemur.event.CursorMotionEvent;
  *
  */
 public abstract class MouseCursorListenerAbs implements CursorListener {
+	
 	@Override
 	public void cursorButtonEvent(CursorButtonEvent eventButton, Spatial target, Spatial capture) {
 		EMouseCursorButton emcb = EMouseCursorButton.get(eventButton.getButtonIndex());

@@ -53,6 +53,7 @@ public class StringVarField implements IReflexFillCfgVariant, IVarIdValueOwner{
 	private IReflexFillCfg	rfcfgOwner;
 	private String	strVarId;
 	private VarIdValueOwnerData	vivo;
+	private String	strHelp;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
@@ -60,17 +61,18 @@ public class StringVarField implements IReflexFillCfgVariant, IVarIdValueOwner{
 		bConfigured=true;
 	}
 	
-	public StringVarField(IReflexFillCfg rfcfgOwnerUseThis, StringVarField ilv) {
-		this(rfcfgOwnerUseThis, ilv.strValue);
+	public StringVarField(IReflexFillCfg rfcfgOwnerUseThis, StringVarField ilv,String strHelp) {
+		this(rfcfgOwnerUseThis, ilv.strValue,strHelp);
 	}
 	/**
 	 * @param rfcfgOwnerUseThis use null if this is not a class field, but a local variable
 	 * @param lInitialValue if null, the variable will be removed from console vars.
 	 */
-	public StringVarField(IReflexFillCfg rfcfgOwnerUseThis, String strInitialValue) {
+	public StringVarField(IReflexFillCfg rfcfgOwnerUseThis, String strInitialValue,String strHelp) {
 		if(rfcfgOwnerUseThis!=null)ailvList.add(this); //only fields allowed
 		this.rfcfgOwner=rfcfgOwnerUseThis;
 		this.strValue=strInitialValue;
+		this.strHelp=strHelp;
 	}
 	
 	@Override
@@ -128,6 +130,11 @@ public class StringVarField implements IReflexFillCfgVariant, IVarIdValueOwner{
 
 	public String getStringValue() {
 		return strValue;
+	}
+
+	@Override
+	public String getHelp() {
+		return strHelp==null?"":strHelp;
 	}
 	
 }

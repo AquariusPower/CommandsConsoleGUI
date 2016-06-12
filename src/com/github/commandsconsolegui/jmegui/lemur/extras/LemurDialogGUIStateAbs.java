@@ -73,6 +73,7 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 	private int	iVisibleRows;
 	private Integer	iEntryHeightPixels;
 	private Vector3f	v3fEntryListSize;
+	private Container	cntrEntryCfg;
 	
 	@Override
 	public Container getContainerMain(){
@@ -153,7 +154,7 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 	protected boolean initGUI(){
 		CfgParm cfg = (CfgParm)getCfg();
 		
-		String strStyle = ConsoleLemurStateI.i().STYLE_CONSOLE;//BaseStyles.GLASS;
+		String strStyle = ConsoleLemurStateI.i().STYLE_CONSOLE; //TODO make it custom
 		
 		Vector3f v3fApplicationWindowSize = new Vector3f(
 			app().getContext().getSettings().getWidth(),
@@ -170,7 +171,7 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		v3fDiagWindowSize.x *= cfg.fDialogWidthPercentOfAppWindow;
 		getContainerMain().setPreferredSize(v3fDiagWindowSize);
 		
-		///////////////////////// NORTH
+		///////////////////////// NORTH (info/help)
 		cntrNorth = new Container(new BorderLayout(), strStyle);
 		getNorthContainer().setName(getId()+"_NorthContainer");
 		Vector3f v3fNorthSize = v3fDiagWindowSize.clone();
@@ -191,7 +192,7 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		
 		getContainerMain().addChild(getNorthContainer(), BorderLayout.Position.North);
 		
-		//////////////////////////// CENTER
+		//////////////////////////// CENTER (list)
 		// list
 		float fListPerc = 1.0f - cfg.fInfoHeightPercentOfDialog;
 		v3fEntryListSize = v3fDiagWindowSize.clone();
@@ -207,30 +208,22 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		
 		iEntryHeightPixels = cfg.iEntryHeightPixels;
 		
-//		updateVisibleRows();
-//		if(cfg.iEntryHeightPixels==null){
-//			if(vlEntriesList.size()>0){
-//				if(vlEntriesList.get(0) instanceof String){
-//					Float fEntryHeight = LemurMiscHelpersStateI.i().guessEntryHeight(lstbxEntriesToSelect);
-//					if(fEntryHeight!=null){
-//						cfg.iEntryHeightPixels=fEntryHeight.intValue(); //calc based on entry (or font) height and listbox height
-//						cd().dumpInfoEntry("entry height "+cfg.iEntryHeightPixels);
-//					}else{
-//						cfg.iEntryHeightPixels=20; //blind placeholder
-//						cd().dumpWarnEntry("blind entry height "+cfg.iEntryHeightPixels);
-//					}
-//				}
-//			}
-//		}
-//		iVisibleRows = (int) (v3fEntryListSize.y/cfg.iEntryHeightPixels);
-//		lstbxEntriesToSelect.setVisibleItems(iVisibleRows);
+		//////////////////////////////// SOUTH (typing/config)
+		cntrSouth = new Container(new BorderLayout(), strStyle);
+		getSouthContainer().setName(getId()+"_SouthContainer");
 		
-		//////////////////////////////// SOUTH
-		// filter
+//		// configure an entry from the list
+//		cntrEntryCfg = new Container(new BorderLayout(), strStyle);
+//		cntrEntryCfg.setName(getId()+"_EntryConfig");
+//		getSouthContainer().addChild(cntrEntryCfg, Bor)
+		
+		// mainly used as a list filter
 		setIntputField(new TextField("",strStyle));
 		getInputField().setName(getId()+"_InputField");
 		LemurFocusHelperStateI.i().addFocusChangeListener(getInputField());
-		getContainerMain().addChild(getInputField(), BorderLayout.Position.South);
+		getSouthContainer().addChild(getInputField(),BorderLayout.Position.South);
+		
+		getContainerMain().addChild(getSouthContainer(), BorderLayout.Position.South);
 		
 		Vector3f v3fPos = new Vector3f(
 			(v3fApplicationWindowSize.x-v3fDiagWindowSize.x)/2f,
@@ -247,7 +240,11 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 	protected Container getNorthContainer() {
 		return (Container)cntrNorth;
 	}
-
+	
+	protected Container getSouthContainer() {
+		return (Container)cntrSouth;
+	}
+	
 	@Override
 	public void clearSelection() {
 		lstbxEntriesToSelect.getSelectionModel().setSelection(-1); //clear selection

@@ -98,7 +98,11 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs{
 	protected void updateList() {
 		DialogListEntry dleAnswer = extractAnswerFromModal();
 		if(dleAnswer!=null){
-			adleFullList.set(getSelectedIndex(), dleAnswer);
+			if(getSelectedIndex()>=0){
+				adleFullList.set(getSelectedIndex(), dleAnswer);
+			}else{
+				cd().dumpWarnEntry("no entry selected at "+this.getId()+" to apply modal dialog option");
+			}
 //			vlEntriesList.set(getSelectedIndex(), dleAnswer);
 		}else{
 			DialogListEntry dle = new DialogListEntry();

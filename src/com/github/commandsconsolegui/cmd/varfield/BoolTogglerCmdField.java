@@ -131,8 +131,9 @@ public class BoolTogglerCmdField implements IReflexFillCfgVariant, IVarIdValueOw
 		return strCommand;
 	}
 	
+	@Override
 	public String getHelp(){
-		return strHelp;
+		return strHelp==null?"":strHelp;
 	}
 	
 	public boolean get(){return bCurrent;}
