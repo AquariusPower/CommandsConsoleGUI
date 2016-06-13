@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.jmegui;
 
+import java.util.HashMap;
+
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.MouseCursorButtonClicks.MouseButtonClick;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
@@ -35,6 +37,10 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 
 /**
+ * Many methods here are event dependent.
+ * Multiple calls using the same event reference will behave consistently,
+ * as it was a single call, so only the first call to each of such methods
+ * will actually update/calculate things.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
@@ -50,6 +56,24 @@ public class MouseCursorButtonData{
 	Vector3f v3fPressedPos = null;
 	
 	Vector3f v3fDragLastUpdatePos = null;
+	
+	enum EMethodCall{
+		setPressed, 
+		updateDragPosAndGetDisplacement, 
+		setReleasedAndGetDelay, 
+		setReleasedAndRetrieveClickCount,
+	}
+//	class EventRef{
+//		Object objEventRef;
+//		Vector3f 
+//	}
+	HashMap<EMethodCall,Object> hmEventRef = new HashMap<EMethodCall,Object>();
+
+	private Vector3f	v3fTmpLastUpdateDisplacement;
+	private Long	lTmpLastReleasedDelay;
+	private Integer	iTmpLastClickCount;
+
+//	private Object	objEventRefToSetPressed;
 //	Vector3f v3fReleasedPos = null;
 	
 //	CursorButtonEvent eventButton;
@@ -71,6 +95,10 @@ public class MouseCursorButtonData{
 		lPressedMilis = null;
 		v3fPressedPos = null;
 		v3fDragLastUpdatePos = null;
+		
+		lTmpLastReleasedDelay = null;
+		v3fTmpLastUpdateDisplacement = null;
+		iTmpLastClickCount = null;
 	}
 	
 	@Override
@@ -90,12 +118,16 @@ public class MouseCursorButtonData{
 		return lPressedMilis!=null;
 	}
 	
-	public void setPressed(Vector3f v3fPressedPos){
+	public void setPressed(Object objEventRef, Vector3f v3fPressedPos){
+		if(hmEventRef.get(EMethodCall.setPressed)==objEventRef)return;
+		
 		if(isPressed())throw new PrerequisitesNotMetException("already pressed! ",this,v3fPressedPos);
 		
 		this.lPressedMilis = System.currentTimeMillis();
 		this.v3fPressedPos = v3fPressedPos.clone();
 		this.v3fDragLastUpdatePos = v3fPressedPos.clone();
+		
+		hmEventRef.put(EMethodCall.setPressed,objEventRef);
 	}
 	
 	public Vector3f getDragDisplacementToPressedOrigin(){
@@ -106,13 +138,17 @@ public class MouseCursorButtonData{
 		return eventToV3f.subtract(v3fPressedPos);
 	}
 	
-	public Vector3f updateDragPosAndGetDisplacement(Vector3f v3fNewDragPos){
-		if(!isPressed())return null;
+	public Vector3f updateDragPosAndGetDisplacement(Object objEventRef, Vector3f v3fNewDragPos){
+		if(hmEventRef.get(EMethodCall.updateDragPosAndGetDisplacement)!=objEventRef){
+			if(!isPressed())return null;
+			
+			v3fTmpLastUpdateDisplacement = v3fNewDragPos.subtract(v3fDragLastUpdatePos);
+			v3fDragLastUpdatePos.set(v3fNewDragPos);
+			
+			hmEventRef.put(EMethodCall.updateDragPosAndGetDisplacement,objEventRef);
+		}
 		
-		Vector3f v3fDiff = v3fNewDragPos.subtract(this.v3fDragLastUpdatePos);
-		this.v3fDragLastUpdatePos.set(v3fNewDragPos);
-		
-		return v3fDiff;
+		return v3fTmpLastUpdateDisplacement;
 	}
 	
 	/**
@@ -121,45 +157,41 @@ public class MouseCursorButtonData{
 	 * 
 	 * @return
 	 */
-	public Long setReleasedAndGetDelay(){
-		if(!isPressed())return null;
+	public Long setReleasedAndGetDelay(Object objEventRef){
+		if(hmEventRef.get(EMethodCall.setReleasedAndGetDelay)!=objEventRef){
+			if(!isPressed())return null;
+			
+			lTmpLastReleasedDelay = System.currentTimeMillis() - this.lPressedMilis;
+			this.lPressedMilis=null;
+			
+			hmEventRef.put(EMethodCall.setReleasedAndGetDelay,objEventRef);
+		}
 		
-		long lDelay = System.currentTimeMillis() - this.lPressedMilis;
-		this.lPressedMilis=null;
-		return lDelay;
+		return lTmpLastReleasedDelay;
 	}
 
 	public EMouseCursorButton getActivatorType() {
 		return eButton;
 	}
 	
-	public int checkAndRetrieveClickCount(Spatial target, Spatial capture) {
-		Long lDelay = setReleasedAndGetDelay();
-		if(lDelay!=null){
-			if(MouseCursorCentralI.i().isClickDelay(lDelay)){
-				clicks.addClick(new MouseButtonClick(eButton, target, capture));
-				return clicks.getMultiClickCountFor(eButton);
+	public int setReleasedAndRetrieveClickCount(Object objEventRef, Spatial target, Spatial capture) {
+		if(hmEventRef.get(EMethodCall.setReleasedAndRetrieveClickCount)!=objEventRef){
+			iTmpLastClickCount=0;
+			Long lDelay = setReleasedAndGetDelay(objEventRef);
+			if(lDelay!=null){
+				if(MouseCursorCentralI.i().isClickDelay(lDelay)){
+					clicks.addClick(new MouseButtonClick(eButton, target, capture));
+					iTmpLastClickCount = clicks.getMultiClickCountFor(eButton);
+					GlobalCommandsDelegatorI.i().dumpDevInfoEntry("MultiClick:"+eButton+","+iTmpLastClickCount);
+				}
+			}else{
+				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("null delay, already released button");
 			}
-		}else{
-			GlobalCommandsDelegatorI.i().dumpDevWarnEntry("null delay, already released button");
+			
+			hmEventRef.put(EMethodCall.setReleasedAndRetrieveClickCount,objEventRef);
 		}
 		
-		return 0;
+		return iTmpLastClickCount;
 	}
 
-//	public void applyDrag(Vector3f v3fMouseCursorPosPrevious, Vector3f v3fNewMouseCursorPos) {
-//		Vector3f v3fDisplacement = v3fMouseCursorPosPrevious
-//			.subtract(v3fNewMouseCursorPos).negate();
-//		
-//		mcbi.v3fDragDisplacement = v3fDisplacement;
-//	}
-	
-//	public Vector3f getDragDisplacement() {
-//		return this.v3fDragDisplacement;
-//	}
-//	
-//	public CursorButtonEvent getLastButtonEvent() {
-//		return this.eventButton;
-//	}
-//	
 }

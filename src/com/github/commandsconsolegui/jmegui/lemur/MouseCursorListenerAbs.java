@@ -42,7 +42,6 @@ import com.simsilica.lemur.event.CursorMotionEvent;
 
 /**
  * Click detection is based in time delay on this class.
- * Consumes the click only on button release.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
@@ -53,28 +52,35 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 	private boolean	bCancelNextMouseReleased;
 	
 	public MouseCursorListenerAbs() {
-		 mcab = MouseCursorCentralI.i().createButtonsInstance(this);
+//		 mcab = MouseCursorCentralI.i().createButtonsInstance(this);
+	}
+	
+	public MouseCursorButtonsControl mb(){
+//		return mcab;
+		return MouseCursorCentralI.i().getButtonsInstance();
 	}
 	
 	@Override
 	public void cursorButtonEvent(CursorButtonEvent eventButton, Spatial target, Spatial capture) {
-		MouseCursorButtonData mcbd = mcab.getMouseCursorDataFor(EMouseCursorButton.get(eventButton.getButtonIndex()));
+//		DebugI.i().conditionalBreakpoint(this instanceof DialogMouseCursorListenerI);
+		MouseCursorButtonData mcbd = mb().getMouseCursorDataFor(
+			EMouseCursorButton.get(eventButton.getButtonIndex()));
 		
 		if(eventButton.isPressed()){
-			mcbd.setPressed(MiscJmeI.i().eventToV3f(eventButton));
+			mcbd.setPressed(eventButton, MiscJmeI.i().eventToV3f(eventButton));
 			
     	if(clickBegin(mcbd, eventButton, target, capture)){
     		eventButton.setConsumed();
     	}
 		}else{
-			if(mcbd.isPressed()){ // This check is NOT redundant. May happen just by calling: {@link MouseCursor#resetFixingAllButtons()}
+//			if(mcbd.isPressed()){ // This check is NOT redundant. May happen just by calling: {@link MouseCursor#resetFixingAllButtons()}
 				if(bCancelNextMouseReleased){
-					mcbd.setReleasedAndGetDelay();
+					mcbd.setReleasedAndGetDelay(eventButton);
 					bCancelNextMouseReleased=false;
 				}else{
-					int iClickCount=mcbd.checkAndRetrieveClickCount(target, capture);
+					int iClickCount=mcbd.setReleasedAndRetrieveClickCount(eventButton, target, capture);
 					
-	//				if(MouseCursor.i().isClickDelay(mcab.getMouseCursorDataFor(emcb).setReleasedAndGetDelay())){
+	//				if(MouseCursor.i().isClickDelay(getMouseCursor().getMouseCursorDataFor(emcb).setReleasedAndGetDelay())){
 	//					MouseCursor.i().addClick(
 	//	      		new MouseButtonClick(emcb, eventButton, target, capture));
 	//					
@@ -86,13 +92,12 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 						 * TODO could the minimal displacement it be used in some way?
 						 */
 		      	if(click(mcbd, eventButton, target, capture, iClickCount)){
-//		      		DebugI.i().conditionalBreakpoint(this instanceof DialogMouseCursorListenerI);
 		      		eventButton.setConsumed();
 //		      		mcbd.getClicks().clearClicks();
 		      	}
 					}
 				}
-			}
+//			}
 		}
 	}
 		
@@ -148,7 +153,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 		ArrayList<MouseCursorButtonData> aButtonList = new ArrayList<MouseCursorButtonData>();
 		for(EMouseCursorButton e:EMouseCursorButton.values()){
 			// Buttons pressed during drag
-			MouseCursorButtonData mdata = mcab.getMouseCursorDataFor(e);
+			MouseCursorButtonData mdata = mb().getMouseCursorDataFor(e);
 			if(mdata.isPressed()){
 				if(mdata.getPressedDistanceTo(MiscJmeI.i().eventToV3f(eventMotion)).length()>3){
 					aButtonList.add(mdata);

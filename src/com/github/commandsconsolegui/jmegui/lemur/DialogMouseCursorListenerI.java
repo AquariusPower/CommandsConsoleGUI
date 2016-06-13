@@ -82,7 +82,7 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 				case Action1Click:
 					Spatial sptDialogMain = MiscJmeI.i().getParentestFrom(capture);
 					Vector3f v3fNewPos = MiscJmeI.i().eventToV3f(eventMotion);
-					Vector3f v3fDisplacement = buttonData.updateDragPosAndGetDisplacement(v3fNewPos);
+					Vector3f v3fDisplacement = buttonData.updateDragPosAndGetDisplacement(eventMotion, v3fNewPos);
 					sptDialogMain.move(v3fDisplacement);
 					return true;
 			}

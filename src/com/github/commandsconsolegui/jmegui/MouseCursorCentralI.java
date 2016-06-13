@@ -65,6 +65,12 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 	
 	ArrayList<MouseCursorButtonsControl> amcabList = new ArrayList<MouseCursorButtonsControl>();
 	
+	MouseCursorButtonsControl mcbcSingleInstance = new MouseCursorButtonsControl(ccSelf,this);
+	public MouseCursorButtonsControl getButtonsInstance(){
+		return mcbcSingleInstance;
+	}
+	
+	@Deprecated
 	public MouseCursorButtonsControl  createButtonsInstance(Object objParent){
 		MouseCursorButtonsControl mcab = new MouseCursorButtonsControl(ccSelf,objParent);
 		amcabList.add(mcab);
