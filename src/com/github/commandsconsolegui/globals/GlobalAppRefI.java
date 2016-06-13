@@ -45,7 +45,7 @@ import com.jme3.app.Application;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class GlobalAppRefI extends GlobalAbs<Application>{
+public class GlobalAppRefI extends GlobalHolderAbs<Application>{
 	private static GlobalAppRefI instance = new GlobalAppRefI();
 	public static GlobalAppRefI iGlobal(){return instance;}
 	public static Application i(){return iGlobal().get();}

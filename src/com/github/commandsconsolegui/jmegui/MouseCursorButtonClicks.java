@@ -36,10 +36,19 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.scene.Spatial;
 
 /**
+ * This is being too hard to implement...
+ * Many clicks are lost before being able to be computed here.
+ * Many are consumed too early, as there is no natural way to higher the priority 
+ * of the click counter listener so it could just count and skip consuming the
+ * event...
+ * 
+ * As an alternative, just create buttons, or modified clicks (ctrl, alt, shift) 
+ * to do that multi-clicks would do... (also that helps on preventing carpal tunnel syndrome :)) 
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
+@Deprecated
 public class MouseCursorButtonClicks {
 	EMouseCursorButton emcb = null;
 	public MouseCursorButtonClicks(EMouseCursorButton emcb) {

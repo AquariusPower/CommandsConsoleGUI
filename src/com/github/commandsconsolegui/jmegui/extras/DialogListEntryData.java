@@ -32,7 +32,7 @@ package com.github.commandsconsolegui.jmegui.extras;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class DialogListEntry {
+public class DialogListEntryData {
 	int iKey;
 	String strText;
 	Object objRef;

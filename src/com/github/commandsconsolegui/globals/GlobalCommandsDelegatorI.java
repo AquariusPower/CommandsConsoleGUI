@@ -34,8 +34,18 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class GlobalCommandsDelegatorI extends GlobalAbs<CommandsDelegator> {
+public class GlobalCommandsDelegatorI extends GlobalHolderAbs<CommandsDelegator> {
 	private static GlobalCommandsDelegatorI instance = new GlobalCommandsDelegatorI();
+	
+	/**
+	 * This global holder class.
+	 * @return
+	 */
 	public static GlobalCommandsDelegatorI iGlobal(){return instance;}
+	
+	/**
+	 * The referenced class instance.
+	 * @return
+	 */
 	public static CommandsDelegator i(){return iGlobal().get();}
 }

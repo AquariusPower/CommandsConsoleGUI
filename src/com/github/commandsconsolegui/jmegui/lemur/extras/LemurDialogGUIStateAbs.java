@@ -35,7 +35,7 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
-import com.github.commandsconsolegui.jmegui.extras.DialogListEntry;
+import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.InteractionDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
@@ -69,8 +69,8 @@ import com.simsilica.lemur.event.KeyActionListener;
 public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 	private Label	lblTitle;
 	private Label	lblTextInfo;
-	private ListBox<DialogListEntry>	lstbxEntriesToSelect;
-	private VersionedList<DialogListEntry>	vlEntriesList = new VersionedList<DialogListEntry>();
+	private ListBox<DialogListEntryData>	lstbxEntriesToSelect;
+	private VersionedList<DialogListEntryData>	vlEntriesList = new VersionedList<DialogListEntryData>();
 	private int	iVisibleRows;
 	private Integer	iEntryHeightPixels;
 	private Vector3f	v3fEntryListSize;
@@ -199,14 +199,15 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		float fListPerc = 1.0f - cfg.fInfoHeightPercentOfDialog;
 		v3fEntryListSize = v3fDiagWindowSize.clone();
 		v3fEntryListSize.y *= fListPerc;
-		lstbxEntriesToSelect = new ListBox<DialogListEntry>(new VersionedList<DialogListEntry>(),strStyle);
+		lstbxEntriesToSelect = new ListBox<DialogListEntryData>(
+			new VersionedList<DialogListEntryData>(), new CellRendererDialogEntry(), strStyle);
 		lstbxEntriesToSelect.setName(getId()+"_EntriesList");
 		lstbxEntriesToSelect.setSize(v3fEntryListSize); //not preferred, so the input field can fit properly
 		//TODO multi was not implemented yet... lstbxVoucherListBox.getSelectionModel().setSelectionMode(SelectionMode.Multi);
 		getContainerMain().addChild(lstbxEntriesToSelect, BorderLayout.Position.Center);
 		
 //		vlstrEntriesList.add("(Empty list)");
-		lstbxEntriesToSelect.setModel((VersionedList<DialogListEntry>)vlEntriesList);
+		lstbxEntriesToSelect.setModel((VersionedList<DialogListEntryData>)vlEntriesList);
 		
 		iEntryHeightPixels = cfg.iEntryHeightPixels;
 		
@@ -291,7 +292,7 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 	}
 	
 	@Override
-	public DialogListEntry getSelectedEntry() {
+	public DialogListEntryData getSelectedEntry() {
 		Integer iSel = lstbxEntriesToSelect.getSelectionModel().getSelection();
 		if(iSel==null)return null;
 		return	vlEntriesList.get(iSel);
@@ -370,10 +371,10 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 	 * 
 	 * @param aValueList
 	 */
-	protected void updateList(ArrayList<DialogListEntry> adle){
+	protected void updateList(ArrayList<DialogListEntryData> adle){
 		resetList();
 		
-		for(DialogListEntry dle:adle){
+		for(DialogListEntryData dle:adle){
 //			String strKey = formatEntryKey(entry.getValue());
 //			if(strKey==null)throw new NullPointerException("entry is null, not formatted?");
 			if(strLastFilter.isEmpty() || dle.getText().toLowerCase().contains(strLastFilter)){
@@ -441,10 +442,7 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 				boolean bConsumed=false;
 				switch(eMultiClickAction){
 					case OpenConfigDialog:
-						LemurDialogGUIStateAbs diag = hmModals.get(EModalDiagType.ListEntryConfig);
-						if(diag!=null){
-							diag.requestEnable();
-						}
+						openCfgDiag();
 						bConsumed=true;
 						break;
 					case OptionModeSubmit:
@@ -464,6 +462,13 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		}
 		
 		return true;
+	}
+	
+	public void openCfgDiag(){
+		LemurDialogGUIStateAbs diag = hmModals.get(EModalDiagType.ListEntryConfig);
+		if(diag!=null){
+			diag.requestEnable();
+		}
 	}
 	
 	enum EMultiClickAction{

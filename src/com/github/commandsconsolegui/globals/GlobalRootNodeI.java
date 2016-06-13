@@ -32,7 +32,7 @@ import com.jme3.scene.Node;
 /**
  * @author AquariusPower <https://github.com/AquariusPower>
  */
-public class GlobalRootNodeI extends GlobalAbs<Node> {
+public class GlobalRootNodeI extends GlobalHolderAbs<Node> {
 	private static GlobalGUINodeI instance = new GlobalGUINodeI();
 	public static GlobalGUINodeI iGlobal(){return instance;}
 	public static Node i(){return iGlobal().get();}

@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
+import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell;
+import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.ECell;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
@@ -55,6 +57,13 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 		boolean bConsumed = false;
 		switch(buttonData.getActivatorType()){
 			case Action1Click:
+				if(iClickCount==1){
+					Cell cell = (Cell)capture.getUserData(ECell.CellClassRef.toString());
+					if(cell.isCfgButton(capture)){
+						LemurDialogGUIStateAbs diag = LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
+						diag.openCfgDiag();
+					}
+				}else
 				if(iClickCount>=2){
 					LemurDialogGUIStateAbs diag = LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
 					bConsumed = diag.actionMultiClick(buttonData,capture,iClickCount);

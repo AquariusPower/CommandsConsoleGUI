@@ -51,7 +51,7 @@ public abstract class InteractionDialogStateAbs extends BaseDialogStateAbs{
 //	protected ArrayList<DialogListEntry> aEntryList = new ArrayList<DialogListEntry>();
 //	protected String	strLastSelectedKey;
 	protected boolean bOptionSelectionMode = false;
-	protected DialogListEntry	dleLastSelected;
+	protected DialogListEntryData	dleLastSelected;
 //	private V	valueOptionSelected;
 
 	public abstract void clearSelection();
@@ -97,7 +97,7 @@ public abstract class InteractionDialogStateAbs extends BaseDialogStateAbs{
 	 */
 	protected abstract void updateInputField();
 	
-	public abstract DialogListEntry getSelectedEntry();
+	public abstract DialogListEntryData getSelectedEntry();
 //		Integer i = getSelectedIndex();
 //		if(i==null)return null;
 //		return aEntryList.get(i);
@@ -143,7 +143,7 @@ public abstract class InteractionDialogStateAbs extends BaseDialogStateAbs{
 	protected boolean updateOrUndo(float tpf) {
 //		String str = getSelectedEntryKey();
 //		if(str!=null)strLastSelectedKey=str;
-		DialogListEntry dle = getSelectedEntry();
+		DialogListEntryData dle = getSelectedEntry();
 		if(dle!=null)dleLastSelected = dle;
 		
 		if(isAnswerFromModalFilled()){
@@ -184,7 +184,7 @@ public abstract class InteractionDialogStateAbs extends BaseDialogStateAbs{
 		if(bOptionSelectionMode){
 			
 //			if(getInputText().isEmpty()){ // was cleared
-				DialogListEntry dle = getSelectedEntry(); //this value is in this console variable now
+				DialogListEntryData dle = getSelectedEntry(); //this value is in this console variable now
 				getModalParent().setAnswerFromModal(dle);
 				if(dle!=null){
 					cd().dumpInfoEntry(this.getId()+": Option Selected: "+dle.toString());

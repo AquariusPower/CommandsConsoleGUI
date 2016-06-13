@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
-import com.github.commandsconsolegui.jmegui.extras.DialogListEntry;
+import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.scene.Node;
@@ -68,7 +68,7 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs{
 		}
 	}
 
-	protected ArrayList<DialogListEntry>	adleFullList = new ArrayList<DialogListEntry>();
+	protected ArrayList<DialogListEntryData>	adleFullList = new ArrayList<DialogListEntryData>();
 	
 	@Override
 	public CustomDialogGUIState configure(ICfgParm icfg) {
@@ -96,7 +96,7 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs{
 	
 	@Override
 	protected void updateList() {
-		DialogListEntry dleAnswer = extractAnswerFromModal();
+		DialogListEntryData dleAnswer = extractAnswerFromModal();
 		if(dleAnswer!=null){
 			if(getSelectedIndex()>=0){
 				adleFullList.set(getSelectedIndex(), dleAnswer);
@@ -105,7 +105,7 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs{
 			}
 //			vlEntriesList.set(getSelectedIndex(), dleAnswer);
 		}else{
-			DialogListEntry dle = new DialogListEntry();
+			DialogListEntryData dle = new DialogListEntryData();
 			dle.setText(this.getId()+": New test entry: "+MiscI.i().getDateTimeForFilename(true));
 //			String strEntry = "";
 //			String strValue = "New test entry: "+MiscI.i().getDateTimeForFilename(true);

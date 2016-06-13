@@ -31,11 +31,14 @@ import com.github.commandsconsolegui.misc.CheckInitAndCleanupI;
 
 /**
  * "centralizing" objects to easy coding.
+ * 
+ * Global Reference Holder
+ * 
  * @author AquariusPower <https://github.com/AquariusPower>
  * 
  * @param <T>
  */
-public abstract class GlobalAbs<T> { //not abstract methods yet tho...
+public abstract class GlobalHolderAbs<T> { //not abstract methods yet tho...
 	T obj;
 	
 	protected void setAssertingNotAlreadySet(T objNew){

@@ -30,7 +30,7 @@ package com.github.commandsconsolegui.jmegui;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
-import com.github.commandsconsolegui.jmegui.extras.DialogListEntry;
+import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -52,7 +52,7 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 	
 	protected BaseDialogStateAbs modalParent;
 	protected ArrayList<BaseDialogStateAbs> aModalChildList = new ArrayList<BaseDialogStateAbs>();
-	protected DialogListEntry dleAnswerFromModal;
+	protected DialogListEntryData dleAnswerFromModal;
 //	private Object[]	aobjModalAnswer;
 	
 	public Spatial getContainerMain(){
@@ -226,7 +226,7 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 //		this.aobjModalAnswer=aobjModalAnswer;
 //	}
 
-	public void setAnswerFromModal(DialogListEntry dle) {
+	public void setAnswerFromModal(DialogListEntryData dle) {
 		this.dleAnswerFromModal = dle;
 	}
 	
@@ -234,8 +234,8 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 	 * the answer will be null after this
 	 * @return
 	 */
-	public DialogListEntry extractAnswerFromModal(){
-		DialogListEntry dle = dleAnswerFromModal;
+	public DialogListEntryData extractAnswerFromModal(){
+		DialogListEntryData dle = dleAnswerFromModal;
 		dleAnswerFromModal = null;
 		return dle;
 	}
