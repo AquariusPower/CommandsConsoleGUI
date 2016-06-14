@@ -58,6 +58,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 //		public int getReflexFillCfgVariant();
 		public String getCodePrefixVariant();
 		public IReflexFillCfg getOwner();
+		public boolean isReflexing();
 	}
 	
 	public static class ReflexFillCfg{
@@ -124,30 +125,22 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 					if(objFieldValue!=null){
 						if(objExistingFieldValue==objFieldValue)fldFound=fld; //clFound=cl;
 					}else{
-//						if(objExistingFieldValue!=null){
-							if(objExistingFieldValue instanceof IReflexFillCfgVariant){
-								IReflexFillCfg configuredOwner = ((IReflexFillCfgVariant)objExistingFieldValue).getOwner();
+						/**
+						 * validating all fields if parent is configured properly
+						 */
+						if(objExistingFieldValue instanceof IReflexFillCfgVariant){
+							IReflexFillCfgVariant rfcv = (IReflexFillCfgVariant)objExistingFieldValue;
+							if(rfcv.isReflexing()){
+								IReflexFillCfg configuredOwner = rfcv.getOwner();
 								if(configuredOwner != objClassOwningField){
 									throwExceptionAboutMissConfiguration(cl, fld, configuredOwner, objClassOwningField);
-									
-//									throw new NullPointerException(
-//										"The field "+cl.getName()+"."+fld.getName()+"("+cl.getSimpleName()+":0)"+" was configured with an "
-//										+"invalid owner '"+(configuredOwner!=null?configuredOwner.getClass().getName():"null")+"', "
-//										+"at an object of "+objClassOwningField.getClass().getName()+". "
-//										+"Fix it by setting the owner to that object by using 'this' at "+IReflexFillCfg.class.getName()+" configuration parameter.");
-//											"Field "+fld.getName()
-//										+" at "+objClassOwningField.getClass().getName()+" has configured an "
-//										+" invalid owner '"+(configuredOwner!=null?configuredOwner.getClass().getName():"null")+"'. "
-////										+" The configured owner could be: "+objClassOwningField.getClass().getName()+"?");
-//										+" At class "+cl.getName()+", find that field and set the owner to that class 'this' object.");
 								} 
 							}
-//						}
+						}
 					}
 					
 					if(!bWasAccessible)fld.setAccessible(false);
 					if(fldFound!=null)return fldFound;
-//					if(clFound!=null)return clFound;
 				} catch (IllegalArgumentException | IllegalAccessException e) {
 					e.printStackTrace();
 				}
@@ -167,7 +160,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	}
 	
 	private void throwExceptionAboutMissConfiguration(Class<?> cl, Field fld, IReflexFillCfg configuredOwner, Object objClassOwningField){
-		throw new NullPointerException(
+		throw new PrerequisitesNotMetException(
 			"The field "+cl.getName()+"."+fld.getName() + "("+cl.getSimpleName()+".java:0) "
 			+" was configured with an invalid owner "
 			+"'"+(configuredOwner!=null?configuredOwner.getClass().getName():"null")+"', "
@@ -217,16 +210,9 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		
 		String strFieldName=fld.getName();
 		
-//		boolean bFinal=false;
-//		if(Modifier.isFinal(fld.getModifiers()))bFinal=true;
-//		boolean bMakePretty=bFinal;
-//		boolean bMakePretty=false;
 		boolean bMakePretty=!strFieldName.matches(".*[a-z].*");
-//		if(strFieldName.matches(".*[a-z].*"))bMakePretty=false; //if it has lower case, it is already prettied
-//		if(!strFieldName.matches(".*[a-z].*"))bMakePretty=true; //if it has lower case, it is already prettied
 		
 		String strCodeTypePrefix = rfcfg.strCodingStyleFieldNamePrefix;
-//		if(bFinal)strCodeTypePrefix = rfcfg.strCodingStyleFinalFieldNamePrefix;
 		if(strCodeTypePrefix==null){
 			strCodeTypePrefix=rfcvFieldAtTheOwner.getCodePrefixVariant();
 		}

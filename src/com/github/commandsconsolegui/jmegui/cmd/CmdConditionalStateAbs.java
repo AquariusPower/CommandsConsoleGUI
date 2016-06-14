@@ -29,10 +29,12 @@ package com.github.commandsconsolegui.jmegui.cmd;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.ConditionalStateAbs;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -47,9 +49,14 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 public abstract class CmdConditionalStateAbs extends ConditionalStateAbs implements IConsoleCommandListener, IReflexFillCfg {
 	private CommandsDelegator cd;
 	
-	private String	strCmdIdentifier;
+	private StringCmdField cmdToggleState = null;
+//	private String	strCmdIdentifier;
 	protected String strCmdPrefix="toggle";
 	protected String strCmdSuffix="State";
+	
+	public CmdConditionalStateAbs() {
+		// TODO Auto-generated constructor stub
+	}
 	
 	public CommandsDelegator getCmdDelegator(){
 		return cd();
@@ -59,7 +66,8 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 	}
 	
 	public String getCmd(){
-		return strCmdIdentifier;
+		return cmdToggleState.toString();
+//		return strCmdIdentifier;
 	}
 	
 //	@Deprecated
@@ -86,10 +94,11 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 		cd=GlobalCommandsDelegatorI.i();
 		
 		if(cfg.strId==null || cfg.strId.isEmpty())throw new NullPointerException("invalid cmd id");
-		this.strCmdIdentifier="";
-		if(!cfg.bIgnorePrefixAndSuffix)this.strCmdIdentifier+=strCmdPrefix;
-		this.strCmdIdentifier+=cfg.strId;
-		if(!cfg.bIgnorePrefixAndSuffix)this.strCmdIdentifier+=strCmdSuffix;
+		String strCmdIdentifier = "";
+		if(!cfg.bIgnorePrefixAndSuffix)strCmdIdentifier+=strCmdPrefix;
+		strCmdIdentifier+=cfg.strId;
+		if(!cfg.bIgnorePrefixAndSuffix)strCmdIdentifier+=strCmdSuffix;
+		cmdToggleState = new StringCmdField(strCmdIdentifier,"[bEnabledForce]");
 		
 		cd.addConsoleCommandListener(this);
 		
@@ -107,15 +116,13 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 	
 	@Override
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
+//		if(!isConfigured())throw new PrerequisitesNotMetException("not configured yet! at the inherited of this method, you can skip with "+ECmdReturnStatus.class.getSimpleName()+"."+ECmdReturnStatus.Skip);
+//		if(!isInitializedProperly())throw new PrerequisitesNotMetException("not initialized yet!");
+		
 		boolean bCommandWorked = false;
 		
-		if(cc.checkCmdValidity(this,strCmdIdentifier,"[bEnabledForce]")){
+		if(cc.checkCmdValidity(this,cmdToggleState,null)){
 			Boolean bEnabledForce = cc.paramBoolean(1);
-//			if(!isInitializedProperly() && bEnabledForce){
-////				if(!preInitRequest()){
-//					cc.dumpWarnEntry("unable to initialize "+strCmdIdentifier);
-////				}
-//			}
 			
 			if(bEnabledForce!=null){
 				setEnabledRequest(bEnabledForce);

@@ -44,7 +44,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
  *
  * @author AquariusPower <https://github.com/AquariusPower>
  */
-public class FloatDoubleVarField implements IReflexFillCfgVariant, IVarIdValueOwner{
+public class FloatDoubleVarField extends VarCmdFieldAbs{
 	protected static boolean	bConfigured;
 	protected static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	protected static String	strCodePrefixVariant = "fdv";
@@ -76,6 +76,7 @@ public class FloatDoubleVarField implements IReflexFillCfgVariant, IVarIdValueOw
 		this.rfcfgOwner=rfcfgOwnerUseThis;
 		this.dValue=dInitialValue;
 		this.strHelp=strHelp;
+		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
 	}
 	
 	@Override
@@ -152,4 +153,5 @@ public class FloatDoubleVarField implements IReflexFillCfgVariant, IVarIdValueOw
 	public String getHelp() {
 		return strHelp==null?"":strHelp;
 	}
+
 }

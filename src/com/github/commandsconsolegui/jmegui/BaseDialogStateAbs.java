@@ -52,7 +52,9 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 	
 	protected BaseDialogStateAbs modalParent;
 	protected ArrayList<BaseDialogStateAbs> aModalChildList = new ArrayList<BaseDialogStateAbs>();
-	protected DialogListEntryData dleAnswerFromModal;
+	protected DialogListEntryData	dataToCfgReference;
+	protected DialogListEntryData dataCfgValue;
+	private boolean	bRequestedActionSubmit;
 //	private Object[]	aobjModalAnswer;
 	
 	public Spatial getContainerMain(){
@@ -134,6 +136,20 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 	 */
 	protected abstract void actionSubmit();
 	
+	public void requestActionSubmit() {
+		bRequestedActionSubmit=true;
+	}
+	
+	@Override
+	protected boolean updateOrUndo(float tpf) {
+		if(bRequestedActionSubmit){
+			actionSubmit();
+			bRequestedActionSubmit=false;
+		}
+		
+		return super.updateOrUndo(tpf);
+	}
+	
 	@Override
 	protected boolean enableOrUndo() {
 		getNodeGUI().attachChild(sptContainerMain);
@@ -183,7 +199,7 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 		return this;
 	}
 
-	public BaseDialogStateAbs getModalParent(){
+	public BaseDialogStateAbs getParentDialog(){
 		return this.modalParent;
 	}
 	
@@ -226,22 +242,35 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 //		this.aobjModalAnswer=aobjModalAnswer;
 //	}
 
-	public void setAnswerFromModal(DialogListEntryData dle) {
-		this.dleAnswerFromModal = dle;
+	public void setCfgDataValue(DialogListEntryData data) {
+		this.dataCfgValue = data;
 	}
 	
 	/**
 	 * the answer will be null after this
 	 * @return
 	 */
-	public DialogListEntryData extractAnswerFromModal(){
-		DialogListEntryData dle = dleAnswerFromModal;
-		dleAnswerFromModal = null;
-		return dle;
+	public DialogListEntryData getCfgDataValueAndClearIt(){
+		DialogListEntryData data = dataCfgValue;
+		dataCfgValue = null;
+		return data;
 	}
 	
-	public boolean isAnswerFromModalFilled() {
-		return dleAnswerFromModal!=null;
+	public boolean isCfgDataValueSet() {
+		return dataCfgValue!=null;
+	}
+	
+	/**
+	 * this data will have it's value modified
+	 * @param dataToCfg
+	 */
+	protected void setCfgDataReference(DialogListEntryData dataToCfg) {
+		this.dataToCfgReference=dataToCfg;
+	}
+	protected DialogListEntryData getCfgDataRefAndClearIt() {
+		DialogListEntryData data = this.dataToCfgReference;
+		this.dataToCfgReference=null;
+		return data;
 	}
 	
 }

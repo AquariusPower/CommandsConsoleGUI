@@ -46,9 +46,14 @@ public class PrerequisitesNotMetException extends NullPointerException {
 	}
 	
 	private static String join(String str, Object... aobj){
-		for(Object obj:aobj){
-			str+=";"+obj;
+		String strRet=str;
+		for(int i=0;i<aobj.length;i++){
+			Object obj=aobj[i];
+			if(strRet.equals(str)){
+				strRet+=":\n";
+			}
+			strRet+="  [obj="+i+"]"+obj.getClass().getName()+", value:"+obj+"\n";
 		}
-		return str;
+		return strRet;
 	}
 }

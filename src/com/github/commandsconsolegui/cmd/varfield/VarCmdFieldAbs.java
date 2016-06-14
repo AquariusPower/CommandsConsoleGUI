@@ -25,45 +25,22 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.jmegui.extras;
+package com.github.commandsconsolegui.cmd.varfield;
+
+import com.github.commandsconsolegui.cmd.VarIdValueOwnerData.IVarIdValueOwner;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 
 /**
- * 
- * @author AquariusPower <https://github.com/AquariusPower>
+ * TODO migrate most things possible to here
  *
+ * @author AquariusPower <https://github.com/AquariusPower>
+ * 
  */
-public class DialogListEntryData {
-	int iKey;
-	String strText;
-	Object objRef;
-	
-	public int getKey() {
-		return iKey;
-	}
-	public void setKey(int iKey) {
-		this.iKey = iKey;
-	}
-	public String getText() {
-		return strText;
-	}
-	public void setText(String strText) {
-		this.strText = strText;
-	}
-	public Object getRef() {
-		return objRef;
-	}
-	public void setRef(Object objRef) {
-		this.objRef = objRef;
-	}
+public abstract class VarCmdFieldAbs implements IReflexFillCfgVariant, IVarIdValueOwner{
+	protected boolean bReflexingIdentifier = true;
 	
 	@Override
-	public String toString() {
-		return iKey+","+strText+","+objRef;
-	}
-	
-	public void setCfg(DialogListEntryData data) {
-		this.iKey = data.iKey;
-		this.strText = data.strText;
-		this.objRef = data.objRef;
+	public boolean isReflexing() {
+		return bReflexingIdentifier;
 	}
 }

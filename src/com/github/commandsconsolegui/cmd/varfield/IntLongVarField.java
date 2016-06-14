@@ -46,7 +46,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class IntLongVarField implements IReflexFillCfgVariant, IVarIdValueOwner{
+public class IntLongVarField extends VarCmdFieldAbs{
 	protected static boolean	bConfigured;
 	protected static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	protected static String	strCodePrefixVariant = "ilv";
@@ -79,6 +79,7 @@ public class IntLongVarField implements IReflexFillCfgVariant, IVarIdValueOwner{
 		this.rfcfgOwner=rfcfgOwnerUseThis;
 		this.lValue=lInitialValue;
 		this.strHelp=strHelp;
+		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
 	}
 	
 	@Override

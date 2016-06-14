@@ -44,7 +44,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class StringVarField implements IReflexFillCfgVariant, IVarIdValueOwner{
+public class StringVarField extends VarCmdFieldAbs{
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	private static String	strCodePrefixVariant = "sv";
@@ -73,6 +73,7 @@ public class StringVarField implements IReflexFillCfgVariant, IVarIdValueOwner{
 		this.rfcfgOwner=rfcfgOwnerUseThis;
 		this.strValue=strInitialValue;
 		this.strHelp=strHelp;
+		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
 	}
 	
 	@Override
@@ -136,5 +137,5 @@ public class StringVarField implements IReflexFillCfgVariant, IVarIdValueOwner{
 	public String getHelp() {
 		return strHelp==null?"":strHelp;
 	}
-	
+
 }

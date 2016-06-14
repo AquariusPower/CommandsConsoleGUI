@@ -49,7 +49,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
  *
  */
 
-public class TimedDelayVarField implements IReflexFillCfgVariant, IVarIdValueOwner{
+public class TimedDelayVarField extends VarCmdFieldAbs{
 	protected static IHandleExceptions ihe = HandleExceptionsRaw.i();
 	protected static ArrayList<TimedDelayVarField> atdList = new ArrayList<TimedDelayVarField>();
 	
@@ -100,6 +100,7 @@ public class TimedDelayVarField implements IReflexFillCfgVariant, IVarIdValueOwn
 	 */
 	public TimedDelayVarField(float fDelay, String strHelp) {
 		this(null,fDelay,strHelp);
+		this.bReflexingIdentifier=false;
 	}
 	/**
 	 * This constructor is for field variables.
@@ -376,4 +377,5 @@ public class TimedDelayVarField implements IReflexFillCfgVariant, IVarIdValueOwn
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 }

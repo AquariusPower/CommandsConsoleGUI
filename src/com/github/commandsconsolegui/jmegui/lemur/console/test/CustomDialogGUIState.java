@@ -30,6 +30,9 @@ package com.github.commandsconsolegui.jmegui.lemur.console.test;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
@@ -41,6 +44,7 @@ import com.simsilica.lemur.GuiGlobals;
  * @author AquariusPower <https://github.com/AquariusPower>
  */
 public class CustomDialogGUIState extends LemurDialogGUIStateAbs{
+	StringCmdField cmdAddEntries = null;
 //	ArrayList<String> astr;
 //	HashMap<String,String> hmKeyValueTmp = new HashMap<String,String>();
 //	private Object	answerFromModal;
@@ -74,11 +78,7 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs{
 	public CustomDialogGUIState configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
 		
-//		astr = new ArrayList<String>();
-//		hmKeyValueTmp.clear();
 		super.configure(cfg); //params are identical
-//		super.configure(new LemurDialogGUIStateAbs.CfgParm(
-//			cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.nodeGUI, ));
 		
 		/**
 		 * this is just an example as state changes can be delayed
@@ -96,33 +96,41 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs{
 	
 	@Override
 	protected void updateList() {
-		DialogListEntryData dleAnswer = extractAnswerFromModal();
-		if(dleAnswer!=null){
-			if(getSelectedIndex()>=0){
-				adleFullList.set(getSelectedIndex(), dleAnswer);
+		DialogListEntryData dataValue = getCfgDataValueAndClearIt();
+		if(dataValue!=null){
+//			int i = adleFullList.indexOf(getCfgDataRefAndClearIt());
+//			if(getSelectedIndex()>=0){
+			DialogListEntryData dataRef = getCfgDataRefAndClearIt();
+//			if(i>=0){
+			if(dataRef!=null){
+//				adleFullList.set(getSelectedIndex(), dleAnswer);
+//				adleFullList.set(i, dleAnswer);
+				dataRef.setCfg(dataValue);
 			}else{
 				cd().dumpWarnEntry("no entry selected at "+this.getId()+" to apply modal dialog option");
 			}
-//			vlEntriesList.set(getSelectedIndex(), dleAnswer);
-		}else{
-			DialogListEntryData dle = new DialogListEntryData();
-			dle.setText(this.getId()+": New test entry: "+MiscI.i().getDateTimeForFilename(true));
-//			String strEntry = "";
-//			String strValue = "New test entry: "+MiscI.i().getDateTimeForFilename(true);
-//			String strKey = formatEntryKey(strValue);
-//			strEntry+=this.getId()+": ";
-//			strEntry+=strKey+", ";
-//			strEntry+=strValue;
-//			hmKeyValueTmp.put(strKey,strEntry);
-//			if(hmKeyValueTmp.size()>100)hmKeyValueTmp.remo
-//			if(astr.size()>100)astr.remove(0);
-			adleFullList.add(dle);
-			if(adleFullList.size()>100)adleFullList.remove(0);
 		}
+//		else{
+//			addEntry(null);
+//		}
 		
 		updateList(adleFullList);
 		
 		super.updateList();
+	}
+	
+	public void addEntry(String strText){
+		DialogListEntryData dle = new DialogListEntryData();
+		if(strText==null){
+			strText=this.getId()+": New test entry: "
+				+MiscI.i().getDateTimeForFilename(true)
+				+", "+System.nanoTime();
+		}
+		dle.setText(strText);
+		adleFullList.add(dle);
+		if(adleFullList.size()>100)adleFullList.remove(0);
+		
+		requestRefreshList();
 	}
 	
 //	@Override
@@ -135,6 +143,12 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs{
 		if(GuiGlobals.getInstance()==null)return false;
 		
 		return super.initCheckPrerequisites();
+	}
+	
+	@Override
+	protected boolean initOrUndo() {
+		for(int i=0;i<10;i++)addEntry(null); //some test data
+		return super.initOrUndo();
 	}
 	
 //	@Override
@@ -163,4 +177,24 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs{
 //		answerFromModal = aobj[1];
 //	}
 	
+	@Override
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
+		if(cmdAddEntries==null){
+			cmdAddEntries = new StringCmdField(getId()+"AddEntry","[strText]");
+		}
+//		if(!isConfigured())return ECmdReturnStatus.Skip;
+		
+		boolean bCommandWorked = false;
+		
+		if(cc.checkCmdValidity(this,cmdAddEntries,null)){
+			String strText = cc.paramString(1);
+			addEntry(strText);
+			bCommandWorked = true;
+		}else
+		{
+			return super.execConsoleCommand(cc);
+		}
+		
+		return cc.cmdFoundReturnStatus(bCommandWorked);
+	}
 }

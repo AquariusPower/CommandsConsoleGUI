@@ -27,6 +27,7 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
+import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -38,7 +39,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class StringCmdField implements IReflexFillCfgVariant{
+public class StringCmdField extends VarCmdFieldAbs{
 //	String str = "ERROR: NOT SET"; // hashcode depends on it not being null
 	protected String strCmdIdentifier = null;
 	protected IReflexFillCfg rfcfgOwner;
@@ -62,6 +63,7 @@ public class StringCmdField implements IReflexFillCfgVariant{
 	public StringCmdField(String strCmdIdentifier, String strHelpComment){
 		this.strCmdIdentifier=strCmdIdentifier;
 		this.strHelpComment = strHelpComment;
+		this.bReflexingIdentifier = false;
 	}
 	
 	/**
@@ -146,4 +148,41 @@ public class StringCmdField implements IReflexFillCfgVariant{
 	public IReflexFillCfg getOwner() {
 		return rfcfgOwner;
 	}
+
+	@Override
+	public void setObjectValue(Object objValue) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getReport() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getVarId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object getValueRaw() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getHelp() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -35,6 +35,7 @@ import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.ECell;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.event.CursorButtonEvent;
@@ -59,9 +60,20 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 			case Action1Click:
 				if(iClickCount==1){
 					Cell cell = (Cell)capture.getUserData(ECell.CellClassRef.toString());
-					if(cell.isCfgButton(capture)){
+					if(cell!=null){
 						LemurDialogGUIStateAbs diag = LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
-						diag.openCfgDiag();
+						if(cell.isCfgButton(capture)){
+							diag.openCfgDataDialog(cell.getData());
+						}else
+						if(cell.isTextButton(capture)){
+							diag.selectEntry(cell.getData());
+						}else
+						if(cell.isSelectButton(capture)){
+							diag.selectEntry(cell.getData());
+							diag.requestActionSubmit();
+						}else{
+							throw new PrerequisitesNotMetException("missing support for element "+capture.getName(), diag, capture, cell);
+						}
 					}
 				}else
 				if(iClickCount>=2){

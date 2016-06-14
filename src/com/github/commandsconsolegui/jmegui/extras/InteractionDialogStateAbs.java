@@ -53,6 +53,7 @@ public abstract class InteractionDialogStateAbs extends BaseDialogStateAbs{
 	protected boolean bOptionSelectionMode = false;
 	protected DialogListEntryData	dleLastSelected;
 //	private V	valueOptionSelected;
+	private boolean	bRequestedRefreshList;
 
 	public abstract void clearSelection();
 	
@@ -97,7 +98,7 @@ public abstract class InteractionDialogStateAbs extends BaseDialogStateAbs{
 	 */
 	protected abstract void updateInputField();
 	
-	public abstract DialogListEntryData getSelectedEntry();
+	public abstract DialogListEntryData getSelectedEntryData();
 //		Integer i = getSelectedIndex();
 //		if(i==null)return null;
 //		return aEntryList.get(i);
@@ -126,6 +127,10 @@ public abstract class InteractionDialogStateAbs extends BaseDialogStateAbs{
 	
 	protected abstract void updateTextInfo();
 	
+	public void requestRefreshList(){
+		bRequestedRefreshList=true;
+	}
+	
 	protected String getTextInfo(){
 		String str="Info: Type a list filter at input text area and hit Enter.\n";
 		
@@ -143,11 +148,16 @@ public abstract class InteractionDialogStateAbs extends BaseDialogStateAbs{
 	protected boolean updateOrUndo(float tpf) {
 //		String str = getSelectedEntryKey();
 //		if(str!=null)strLastSelectedKey=str;
-		DialogListEntryData dle = getSelectedEntry();
+		DialogListEntryData dle = getSelectedEntryData();
 		if(dle!=null)dleLastSelected = dle;
 		
-		if(isAnswerFromModalFilled()){
+		if(isCfgDataValueSet()){
 			updateAllParts();
+		}
+		
+		if(bRequestedRefreshList){
+			updateList();
+			bRequestedRefreshList=false;
 		}
 		
 		return super.updateOrUndo(tpf);
@@ -184,10 +194,10 @@ public abstract class InteractionDialogStateAbs extends BaseDialogStateAbs{
 		if(bOptionSelectionMode){
 			
 //			if(getInputText().isEmpty()){ // was cleared
-				DialogListEntryData dle = getSelectedEntry(); //this value is in this console variable now
-				getModalParent().setAnswerFromModal(dle);
-				if(dle!=null){
-					cd().dumpInfoEntry(this.getId()+": Option Selected: "+dle.toString());
+				DialogListEntryData dataSelected = getSelectedEntryData(); //this value is in this console variable now
+				getParentDialog().setCfgDataValue(dataSelected);
+				if(dataSelected!=null){
+					cd().dumpInfoEntry(this.getId()+": Option Selected: "+dataSelected.toString());
 					requestDisable(); //close if there is one entry selected
 				}
 //			}else{

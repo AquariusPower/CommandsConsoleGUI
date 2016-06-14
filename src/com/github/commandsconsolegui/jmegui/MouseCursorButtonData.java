@@ -182,7 +182,7 @@ public class MouseCursorButtonData{
 				if(MouseCursorCentralI.i().isClickDelay(lDelay)){
 					clicks.addClick(new MouseButtonClick(eButton, target, capture));
 					iTmpLastClickCount = clicks.getMultiClickCountFor(eButton);
-					GlobalCommandsDelegatorI.i().dumpDevInfoEntry("MultiClick:"+eButton+","+iTmpLastClickCount);
+					GlobalCommandsDelegatorI.i().dumpDebugEntry("MultiClick:"+eButton+","+iTmpLastClickCount);
 				}
 			}else{
 				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("null delay, already released button");

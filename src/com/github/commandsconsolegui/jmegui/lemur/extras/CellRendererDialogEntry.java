@@ -27,14 +27,16 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.github.commandsconsolegui.jmegui.lemur.extras;
 
+import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
-import com.jme3.math.Vector3f;
+import com.jme3.font.LineWrapMode;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.component.BorderLayout;
+import com.simsilica.lemur.component.BorderLayout.Position;
 import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.list.CellRenderer;
 
@@ -47,46 +49,103 @@ public class CellRendererDialogEntry implements CellRenderer<DialogListEntryData
 	public enum ECell{
 		CellClassRef
 	}
+
+	private String	strStyle;
+	private boolean	bOptionChoiceMode;
 	
-	public CellRendererDialogEntry() {
-		
+	public CellRendererDialogEntry(String strStyle, boolean bOptionChoiceMode) {
+		this.strStyle=strStyle;
+		this.bOptionChoiceMode=bOptionChoiceMode;
 	}
 	
 	public static class Cell extends Container{
 		private Button	btnText;
 		private Button	btnCfg;
-
-		public Cell(DialogListEntryData data){
+		private Button btnSelect;
+		private DialogListEntryData	data;
+		private CellRendererDialogEntry	assignedCellRenderer;
+		
+		public DialogListEntryData getData(){
+			return data;
+		}
+		
+		public Cell(CellRendererDialogEntry parentCellRenderer, DialogListEntryData data){
 			super(new BorderLayout());
 			
-			btnText = new Button(data.getText());
-			btnText.setName("CellText");
-			btnText.setUserData(ECell.CellClassRef.toString(),this);
-			addChild(btnText,BorderLayout.Position.Center);
+			this.assignedCellRenderer=parentCellRenderer;
+			this.data=data;
 			
-			btnCfg = new Button("Cfg");
-			btnCfg.setName("CellCfg");
-			btnCfg.setUserData(ECell.CellClassRef.toString(),this);
-//			btnCfg.setSize(new Vector3f(30,20,0)); //TODO use font metrics...
-			CursorEventControl.addListenersToSpatial(btnCfg, DialogMouseCursorListenerI.i());
-			addChild(btnCfg,BorderLayout.Position.East);
+			btnText = createButton("Text", data.getText(), Position.Center);
+//			btnText = new Button(data.getText(),parent.strStyle);
+//			btnText.setName("CellText");
+//			btnText.setUserData(ECell.CellClassRef.toString(),this);
+//			CursorEventControl.addListenersToSpatial(btnText, DialogMouseCursorListenerI.i());
+//			addChild(btnText,BorderLayout.Position.Center);
+			
+			Position p = Position.East;
+			if(assignedCellRenderer.bOptionChoiceMode){
+				btnSelect = createButton(null, "Select", p);
+//				btnSelect = new Button("Select",assignedCellRenderer.strStyle);
+//				btnSelect.setName("CellSelect");
+//				btnSelect.setUserData(ECell.CellClassRef.toString(),this);
+//	//			btnCfg.setSize(new Vector3f(30,20,0)); //TODO use font metrics...
+//				CursorEventControl.addListenersToSpatial(btnSelect, DialogMouseCursorListenerI.i());
+//				addChild(btnSelect,BorderLayout.Position.East);
+			}else{
+				btnCfg = createButton(null, "Cfg", p);
+//				btnCfg = new Button("Cfg",parent.strStyle);
+//				btnCfg.setName("CellCfg");
+//				btnCfg.setUserData(ECell.CellClassRef.toString(),this);
+//	//			btnCfg.setSize(new Vector3f(30,20,0)); //TODO use font metrics...
+//				CursorEventControl.addListenersToSpatial(btnCfg, DialogMouseCursorListenerI.i());
+//				addChild(btnCfg,BorderLayout.Position.East);
+			}
+		}
+		
+		/**
+		 * 
+		 * @param strId if null, will be the label 
+		 * @param strLabel
+		 * @param p
+		 * @return
+		 */
+		protected Button createButton(String strId, String strLabel, Position p){
+			if(strId==null)strId=strLabel;
+			Button btn = new Button(strLabel,assignedCellRenderer.strStyle);
+			MiscJmeI.i().retrieveBitmapTextFor(btn).setLineWrapMode(LineWrapMode.NoWrap);
+			btn.setName("Cell"+strId);
+			btn.setUserData(ECell.CellClassRef.toString(),this);
+			CursorEventControl.addListenersToSpatial(btn, DialogMouseCursorListenerI.i());
+			addChild(btn,p);
+			return btn;
 		}
 		
 		public void update(DialogListEntryData data){
+			this.data=data;
 			btnText.setText(data.getText());
 		}
 
 		public boolean isCfgButton(Spatial spt) {
 			return spt==btnCfg;
 		}
+		
+		public boolean isTextButton(Spatial spt){
+			return spt==btnText;
+		}
+		
+		public boolean isSelectButton(Spatial spt){
+			return spt==btnSelect;
+		}
+		
+		
 	}
 	
 	@Override
-	public Panel getView(DialogListEntryData value, boolean selected, Panel existing) {
+	public Panel getView(DialogListEntryData data, boolean selected, Panel existing) {
     if( existing == null ) {
-      existing = new Cell(value);
+      existing = new Cell(this,data);
 	  } else {
-      ((Cell)existing).update(value);
+      ((Cell)existing).update(data);
 	  }
 	  return existing;
 	}

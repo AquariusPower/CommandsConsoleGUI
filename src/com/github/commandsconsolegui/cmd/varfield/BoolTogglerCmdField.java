@@ -50,7 +50,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class BoolTogglerCmdField implements IReflexFillCfgVariant, IVarIdValueOwner{
+public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	public static final String strTogglerCodePrefix="btg";
 	protected static ArrayList<BoolTogglerCmdField> abtgList = new ArrayList<BoolTogglerCmdField>();
 	private static boolean	bConfigured;
