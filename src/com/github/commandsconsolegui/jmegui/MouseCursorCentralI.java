@@ -71,7 +71,7 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 	}
 	
 	@Deprecated
-	public MouseCursorButtonsControl  createButtonsInstance(Object objParent){
+	public MouseCursorButtonsControl createButtonsInstance(Object objParent){
 		MouseCursorButtonsControl mcab = new MouseCursorButtonsControl(ccSelf,objParent);
 		amcabList.add(mcab);
 		return mcab;
@@ -88,6 +88,8 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 	public void configure(Long lClickDelayMilis) {
 		if(lClickDelayMilis!=null)ilvClickMaxDelayMilis.setObjectValue(lClickDelayMilis);
 		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
+		
+		MultiClickCondStateI.i().configure(new MultiClickCondStateI.CfgParm());
 	}
 	
 	public static class MouseCursorUpdatedValues{
@@ -147,10 +149,10 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 	}
 	
-	public boolean isMultiClickDelayFrom(Long lFromMilis) {
-		return isMultiClickDelay(System.currentTimeMillis()-lFromMilis);
+	public boolean isMultiClickDelayWithinLimitFrom(Long lFromMilis) {
+		return isMultiClickDelayWithinLimit(System.currentTimeMillis()-lFromMilis);
 	}
-	public boolean isMultiClickDelay(Long lDelayMilis) {
+	public boolean isMultiClickDelayWithinLimit(Long lDelayMilis) {
 		return lDelayMilis <= ilvMultiClickMaxDelayMilis.getLong();
 	}
 	

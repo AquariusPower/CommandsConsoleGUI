@@ -32,7 +32,10 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
+import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 
 /**
  * This class would be useful to a non Lemur dialog too.
@@ -56,6 +59,10 @@ public abstract class InteractionDialogStateAbs extends BaseDialogStateAbs{
 	private boolean	bRequestedRefreshList;
 
 	public abstract void clearSelection();
+	
+	public boolean isOptionSelectionMode(){
+		return bOptionSelectionMode;
+	}
 	
 //	public V getOptionSelected(){
 //		return valueOptionSelected;

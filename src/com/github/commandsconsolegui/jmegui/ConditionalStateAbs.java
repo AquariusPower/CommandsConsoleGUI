@@ -93,12 +93,6 @@ public abstract class ConditionalStateAbs implements Savable{
 		boolean canRetryNow(){
 			return getUpdatedTime() > (lStartMilis+lDelayMilis);
 		}
-//		private boolean canRetryEnableNow(){
-//			return updateTime() > (lEnableRetryStartMilis+lEnableRetryDelayMilis);
-//		}
-//		private boolean canRetryDisableNow(){
-//			return updateTime() > (lDisableRetryStartMilis+lDisableRetryDelayMilis);
-//		}
 
 		public void resetStartTime() {
 			lStartMilis=getUpdatedTime();
@@ -109,12 +103,6 @@ public abstract class ConditionalStateAbs implements Savable{
 	protected Retry rEnable = new Retry();
 	protected Retry rDisable = new Retry();
 	protected Retry rDiscard = new Retry();
-//	private long lInitRetryStartMilis;
-//	/** 0 means retry at every update*/
-//	protected long lInitRetryDelayMilis;
-//	private long lCleanupRequestMilis;
-//	/** 0 means retry at every queue processing step*/
-//	protected long lCleanupRetryDelayMilis;
 	
 	// PROPERLY INIT
 	private boolean	bProperlyInitialized;
@@ -144,39 +132,19 @@ public abstract class ConditionalStateAbs implements Savable{
 
 	private boolean	bDiscarded;
 	
-//	public static class TimedDelay{
-//		long lTimeStart;
-//		long lDelay;
-//		public boolean isReadyUpdate(){
-//			
-//		}
-//	}
-///**
-//* This method, and all similar configure() ones, are to be kept protected until the
-//* last sub class that will be instantiated, then it can be made public.
-//* 
-//* If the configure() signature is changed, it must be: Overriden, deprecated and
-//* throw exception if used by a sub class!
-//* 
-//* Configure simple references assignments and variable values.
-//* Must be used before initialization.
-//* Put here only things that will not change on {@link #cleanupProperly()} !
-//* 
-//* @param app
-//*/
-	
-	
-	
 	/**
-	 * Each subclass can have the same name "CfgParm".
-	 * 
-	 * Just reference the CfgParm of the superclass directly ex.: 
-	 * 	new ConditionalAppStateAbs.CfgParm()
-	 * 
-	 * This is also very important when restarting (configuring a new and fresh robust instance) 
+	 * Each subclass can have the same name "CfgParm".<br>
+	 * <br>
+	 * Just reference the CfgParm of the superclass directly ex.:<br> 
+	 * 	new ConditionalAppStateAbs.CfgParm()<br>
+	 * <br>
+	 * This is also very important when restarting (configuring a new and fresh robust instance)<br> 
 	 */
 	public static interface ICfgParm{}
 	
+	/**
+	 * see {@link ICfgParm}
+	 */
 	public static class CfgParm implements ICfgParm{
 		Application app;
 		String strId;
@@ -191,9 +159,11 @@ public abstract class ConditionalStateAbs implements Savable{
 	private boolean	bRestartRequested;
 
 	/**
-	 * Configure simple references assignments and variable values.
-	 * Must be used before initialization.
-	 * Put here only things that will not change on {@link #cleanupProperly()} !
+	 * Configure simple references assignments and variable values.<br>
+	 * Must be used before initialization.<br>
+	 * Put here only things that will not change on {@link #cleanupProperly()} !<br>
+	 * Each sub-class must implement its own {@link CfgParm} ({@link ICfgParm}) to keep coding-flow 
+	 * clear.<br>
 	 * 
 	 * @param cp
 	 */
@@ -282,53 +252,9 @@ public abstract class ConditionalStateAbs implements Savable{
 		return app;
 	}
 	
-	
-//	/**
-//	 * This will self configure/add to state manager.
-//	 * This is to be called after a {@link #cleanupProperly()}.
-//	 * 
-//	 * @return
-//	 */
-//	protected boolean preInitRequest() {
-//		assertIsConfigured();
-//		
-//		if(bPreInitialized)return true;
-//		
-//		if(!bPreInitHold){
-//			if(!ConditionalAppStateManagerI.i().attach(this)){
-////			if(!app.getStateManager().attach(this)){
-//				throw new NullPointerException("state already attached: "+this.getClass().getName()+"; "+this);
-//			}
-//			
-//			bPreInitialized=true;
-//			
-//			msgDbg("pre-init",bPreInitialized);
-//			
-//			return bPreInitialized;
-//		}
-//		
-//		return false;
-//	}
-	
 	protected void assertIsConfigured() {
 		if(!isConfigured())throw new PrerequisitesNotMetException("not configured yet!");
 	}
-	
-//	protected void assertIsPreInitialized() {
-//		if(!bPreInitialized)throw new NullPointerException("not pre-initialized yet!");
-//	}
-//
-//	public boolean isPreInitHold() {
-//		return bPreInitHold;
-//	}
-//
-//	public void setPreInitHold(boolean bPreInitHold) {
-//		this.bPreInitHold = bPreInitHold;
-//	}
-//	
-//	public boolean isPreInitialized(){
-//		return bPreInitialized;
-//	}
 	
 	public boolean isInitializedProperly(){
 		return bProperlyInitialized;
@@ -565,23 +491,11 @@ public abstract class ConditionalStateAbs implements Savable{
 	
 	enum ELogAction{
 		discard,
-		
 	}
 	
 	public boolean isDiscarded(){
 		return bDiscarded;
 	}
-	
-//	@Override public void stateAttached(AppStateManager stateManager) {
-//		if(asmParent!=null)throw new NullPointerException("already attached to "+asmParent+"; requested attach to "+stateManager);
-//		asmParent = stateManager;
-//	}
-//	
-//	@Override public void stateDetached(AppStateManager stateManager) {
-//		if(asmParent==null)throw new NullPointerException("not attached but still requested detach from "+stateManager+"?");
-//		if(!asmParent.equals(stateManager))throw new NullPointerException("attached to another "+asmParent+" and being detached from "+stateManager+"?");
-//		asmParent = null;
-//	}
 	
 	public boolean isAttachedToManager(){
 		return asmParent!=null;
@@ -600,10 +514,6 @@ public abstract class ConditionalStateAbs implements Savable{
 		this.nodeGUI = nodeGUI;
 	}
 	
-//	public boolean reattachPrepareAndValidateStep(ERecreateConsoleSteps ercs){
-//		return true;
-//	}
-
 	public void setAppStateManagingThis(ConditionalStateManagerI.CompositeControl cc,ConditionalStateManagerI asmParent) {
 		cc.assertSelfNotNull();
 //		assertCompositeControlNotNull(cc);
@@ -612,10 +522,6 @@ public abstract class ConditionalStateAbs implements Savable{
 		this.asmParent=asmParent;
 	}
 
-//	private void assertCompositeControlNotNull(ConditionalAppStateManagerI.CompositeControl cc) {
-//		if(cc==null)throw new NullPointerException("the "+ConditionalAppStateManagerI.CompositeControl.class.getName()+" access restrictor is required!");
-//	}
-	
 	public void requestDiscard(){
 		bDiscardRequested = true;
 	}
@@ -657,99 +563,6 @@ public abstract class ConditionalStateAbs implements Savable{
 		if(strCaseInsensitiveId==null)throw new PrerequisitesNotMetException("id cant be null");
 		return strCaseInsensitiveId;
 	}
-	
-//	Long	lInitializationCompletedMilis;
-////	long	lInitializationStartedMilis;
-////	long	lInitializationMaxDelayMilis=1000;
-////	long	lMessageCoolDownDelayMilis=3000;
-////	long	lLastMessageMilis;
-//	
-//	TimedDelayVarField tdDebugMessageDelay = new TimedDelayVarField(this,3.0f);
-//	TimedDelayVarField tdInitDelayLimit = new TimedDelayVarField(this,5.0f);
-//	private boolean	bConfigured;
-//	private boolean bInitializedAfterPrerequisites = false;
-//
-//	protected CommandsDelegatorI	cd;
-//
-//	protected SimpleApplication	sapp;
-//	
-//	public void configure(){
-//		if(bConfigured)throw new NullPointerException("already configured.");
-//
-//		this.sapp = GlobalSappRefI.i().get();
-//	//	if(!this.sapp.getStateManager().attach(this))throw new NullPointerException("state already attached...");
-//		this.sapp.getStateManager().attach(this);
-//		
-//		this.cd = GlobalCommandsDelegatorI.i().get();
-//		this.cd.addConsoleCommandListener(this);
-//		
-//		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
-//		
-//		bConfigured=true;
-//	}
-//	
-//	public abstract boolean initPrerequisitesCheck();
-//	
-//	public void initOnEnable(){
-//		if(!bConfigured)throw new NullPointerException("not configured yet");
-//		tdInitDelayLimit.setActive(true);
-//		CheckInitAndCleanupI.i().assertStateNotAlreadyInitializedAtInitializer(this);
-//	}
-//	
-//	@Override
-//	protected void onEnable() {
-//		if(!bInitializedAfterPrerequisites){
-//			if(!initPrerequisitesCheck())return;
-//			bInitializedAfterPrerequisites=true;
-//		}
-//		
-//		initOnEnable();
-//		
-//		// more code can go here...
-//	}
-//	
-//	/**
-//	 * after the cleanup, the state will be removed from the state manager!!!
-//	 */
-//	@Override
-//	protected void cleanup(Application app) {
-//		CheckInitAndCleanupI.i().assertStateIsInitializedAtCleanup(this);
-//		bInitializedAfterPrerequisites=false;
-//	}
-//	
-//	/**
-//	 * put at the end of the initialization of the instantiated class
-//	 */
-//	@Override
-//	public void initializationCompleted(){
-//		this.lInitializationCompletedMilis=updateTime();
-//	}
-//	
-//	@Override
-//	public boolean isInitializationCompleted(){
-//		if(lInitializationCompletedMilis==null){
-//			if(tdInitDelayLimit.isReady()){
-//				tdDebugMessageDelay.setActive(true);
-//				if(tdDebugMessageDelay.isReady(true)){
-//					System.err.println("Warn: ["+tdInitDelayLimit.getCurrentDelayNano()+"] initialization is taking too long for "+this);
-////					long lTimeMilis = updateTime();
-////					if(lTimeMilis > (lLastMessageMilis+lMessageCoolDownDelayMilis)){
-////						if(lTimeMilis > (lInitializationStartedMilis+lInitializationMaxDelayMilis)){
-////							System.err.println("Warn: ["+lTimeMilis+"] initialization is taking too long for "+this);
-////							lLastMessageMilis = lTimeMilis;
-////						}
-////					}
-//				}
-//			}
-//		}
-//		
-//		return lInitializationCompletedMilis!=null;
-//	}
-//
-//	@Override
-//	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
-//		return GlobalCommandsDelegatorI.i().get().getReflexFillCfg(rfcv);
-//	}
 	
 	/**
 	 * each state can have its delay value set individually also.

@@ -64,6 +64,7 @@ public class CellRendererDialogEntry implements CellRenderer<DialogListEntryData
 		private Button btnSelect;
 		private DialogListEntryData	data;
 		private CellRendererDialogEntry	assignedCellRenderer;
+		private String	strPrefix = "Cell";
 		
 		public DialogListEntryData getData(){
 			return data;
@@ -71,6 +72,8 @@ public class CellRendererDialogEntry implements CellRenderer<DialogListEntryData
 		
 		public Cell(CellRendererDialogEntry parentCellRenderer, DialogListEntryData data){
 			super(new BorderLayout());
+			
+			this.setName(strPrefix+"MainContainer");
 			
 			this.assignedCellRenderer=parentCellRenderer;
 			this.data=data;
@@ -113,7 +116,7 @@ public class CellRendererDialogEntry implements CellRenderer<DialogListEntryData
 			if(strId==null)strId=strLabel;
 			Button btn = new Button(strLabel,assignedCellRenderer.strStyle);
 			MiscJmeI.i().retrieveBitmapTextFor(btn).setLineWrapMode(LineWrapMode.NoWrap);
-			btn.setName("Cell"+strId);
+			btn.setName(strPrefix +strId);
 			btn.setUserData(ECell.CellClassRef.toString(),this);
 			CursorEventControl.addListenersToSpatial(btn, DialogMouseCursorListenerI.i());
 			addChild(btn,p);

@@ -28,9 +28,12 @@
 package com.github.commandsconsolegui.jmegui.lemur;
 
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
 
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
+import com.github.commandsconsolegui.jmegui.MultiClickCondStateI;
+import com.github.commandsconsolegui.jmegui.MultiClickCondStateI.ECallMode;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.ECell;
@@ -56,36 +59,61 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 		
 		// missing ones are ignored so each element can consume it properly
 		boolean bConsumed = false;
+		final LemurDialogGUIStateAbs diag = LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
 		switch(buttonData.getActivatorType()){
 			case Action1Click:
-				if(iClickCount==1){
-					Cell cell = (Cell)capture.getUserData(ECell.CellClassRef.toString());
+//				if(iClickCount==1){
+					final Cell cell = (Cell)capture.getUserData(ECell.CellClassRef.toString());
 					if(cell!=null){
-						LemurDialogGUIStateAbs diag = LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
 						if(cell.isCfgButton(capture)){
 							diag.openCfgDataDialog(cell.getData());
+							bConsumed=true;
 						}else
 						if(cell.isTextButton(capture)){
-							diag.selectEntry(cell.getData());
+							switch(MultiClickCondStateI.i().getActivatorNextUpdateIndex(capture)){
+								case 1:
+									MultiClickCondStateI.i().updateActivator(ECallMode.OncePromptly, capture, new Callable<Boolean>() {
+										@Override public Boolean call() throws Exception {
+											diag.selectEntry(cell.getData());
+											return true;
+										}
+									});
+									bConsumed=true;
+									break;
+								case 2:
+									if(diag.isOptionSelectionMode()){
+										diag.selectAndChoseOption(cell.getData());
+									}else{
+										MultiClickCondStateI.i().updateActivator(ECallMode.AfterDelay, capture, new Callable<Boolean>() {
+											@Override public Boolean call() throws Exception {
+												diag.openCfgDataDialog(cell.getData());
+												return true;
+											}
+										});
+									}
+									bConsumed=true;
+									break;
+							}
 						}else
 						if(cell.isSelectButton(capture)){
-							diag.selectEntry(cell.getData());
-							diag.requestActionSubmit();
+							diag.selectAndChoseOption(cell.getData());
+//							diag.selectEntry(cell.getData());
+//							diag.requestActionSubmit();
+							bConsumed=true;
 						}else{
 							throw new PrerequisitesNotMetException("missing support for element "+capture.getName(), diag, capture, cell);
 						}
 					}
-				}else
-				if(iClickCount>=2){
-					LemurDialogGUIStateAbs diag = LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
-					bConsumed = diag.actionMultiClick(buttonData,capture,iClickCount);
-				}
+//				}else
+//				if(iClickCount>=2){
+//					bConsumed = diag.actionMultiClick(buttonData,capture,iClickCount);
+//				}
 				break;
 			case ScrollClick:
 				bConsumed = LemurFocusHelperStateI.i().lowerDialogFocusPriority(capture);
 				break;
 			case ContextPropertiesClick:
-				LemurDialogGUIStateAbs diag = LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
+//				LemurDialogGUIStateAbs diag = LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
 				bConsumed = diag.openPropertiesDialogFor(capture);
 				break;
 		}

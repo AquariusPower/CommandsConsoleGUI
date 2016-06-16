@@ -137,6 +137,14 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		return storeCfgAndReturnSelf(icfg);
 	}
 	
+	public void selectAndChoseOption(DialogListEntryData data){
+		if(!isOptionSelectionMode())throw new PrerequisitesNotMetException("not option mode");
+		if(data==null)throw new PrerequisitesNotMetException("invalid null data");
+		
+		selectEntry(data);
+		requestActionSubmit();
+	}
+
 	public boolean isMyChild(Spatial spt){
 		return getContainerMain().hasChild(spt); //this is actually recursive!!!
 	}
@@ -451,7 +459,7 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 			/**
 			 * multi click actions execution must be delayed by the multi click delay limit 
 			 */
-			if(!MouseCursorCentralI.i().isMultiClickDelayFrom(lClickActionMilis)){
+			if(!MouseCursorCentralI.i().isMultiClickDelayWithinLimitFrom(lClickActionMilis)){
 				boolean bConsumed=false;
 				switch(eMultiClickAction){
 					case OpenConfigDialog:
