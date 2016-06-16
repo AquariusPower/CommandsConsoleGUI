@@ -30,7 +30,6 @@ package com.github.commandsconsolegui.jmegui;
 import java.util.HashMap;
 
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.jmegui.MouseCursorButtonClicks.MouseButtonClick;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.math.Vector3f;
@@ -48,7 +47,7 @@ import com.jme3.scene.Spatial;
 public class MouseCursorButtonData{
 	EMouseCursorButton eButton = null;
 	
-	MouseCursorButtonClicks clicks=null;
+//	MouseCursorButtonClicks clicks=null;
 	
 	Long lPressedMilis = null;
 //	Long lReleasedMilis = null;
@@ -84,12 +83,12 @@ public class MouseCursorButtonData{
 	
 	public MouseCursorButtonData(EMouseCursorButton e) {
 		this.eButton=e;
-		this.clicks = new MouseCursorButtonClicks(e);
+//		this.clicks = new MouseCursorButtonClicks(e);
 	}
 	
-	public MouseCursorButtonClicks getClicks(){
-		return clicks;
-	}
+//	public MouseCursorButtonClicks getClicks(){
+//		return clicks;
+//	}
 	
 	void reset(){
 		lPressedMilis = null;
@@ -174,24 +173,24 @@ public class MouseCursorButtonData{
 		return eButton;
 	}
 	
-	public int setReleasedAndRetrieveClickCount(Object objEventRef, Spatial target, Spatial capture) {
-		if(hmEventRef.get(EMethodCall.setReleasedAndRetrieveClickCount)!=objEventRef){
-			iTmpLastClickCount=0;
-			Long lDelay = setReleasedAndGetDelay(objEventRef);
-			if(lDelay!=null){
-				if(MouseCursorCentralI.i().isClickDelay(lDelay)){
-					clicks.addClick(new MouseButtonClick(eButton, target, capture));
-					iTmpLastClickCount = clicks.getMultiClickCountFor(eButton);
-					GlobalCommandsDelegatorI.i().dumpDebugEntry("MultiClick:"+eButton+","+iTmpLastClickCount);
-				}
-			}else{
-				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("null delay, already released button");
-			}
-			
-			hmEventRef.put(EMethodCall.setReleasedAndRetrieveClickCount,objEventRef);
-		}
-		
-		return iTmpLastClickCount;
-	}
+//	public int setReleasedAndRetrieveClickCount(Object objEventRef, Spatial target, Spatial capture) {
+//		if(hmEventRef.get(EMethodCall.setReleasedAndRetrieveClickCount)!=objEventRef){
+//			iTmpLastClickCount=0;
+//			Long lDelay = setReleasedAndGetDelay(objEventRef);
+//			if(lDelay!=null){
+//				if(MouseCursorCentralI.i().isClickDelay(lDelay)){
+//					clicks.addClick(new MouseButtonClick(eButton, target, capture));
+//					iTmpLastClickCount = clicks.getMultiClickCountFor(eButton);
+//					GlobalCommandsDelegatorI.i().dumpDebugEntry("MultiClick:"+eButton+","+iTmpLastClickCount);
+//				}
+//			}else{
+//				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("null delay, already released button");
+//			}
+//			
+//			hmEventRef.put(EMethodCall.setReleasedAndRetrieveClickCount,objEventRef);
+//		}
+//		
+//		return iTmpLastClickCount;
+//	}
 
 }

@@ -123,7 +123,7 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 //	}
 	
 	@Override
-	public boolean click(MouseCursorButtonData button, CursorButtonEvent eventButton, Spatial target,Spatial capture,int iClickCount) {
+	public boolean click(MouseCursorButtonData button, CursorButtonEvent eventButton, Spatial target,Spatial capture) {
 		debugReport(null, eventButton, target, capture);
 		
 //		if(!button.isPressed()){ //on release
@@ -141,6 +141,6 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 		}
 //		}
 		
-		return super.click(button, eventButton, target, capture,iClickCount);
+		return super.click(button, eventButton, target, capture);
 	}
 }

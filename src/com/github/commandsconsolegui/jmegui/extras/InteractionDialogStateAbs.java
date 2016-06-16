@@ -143,6 +143,7 @@ public abstract class InteractionDialogStateAbs extends BaseDialogStateAbs{
 		
 		if(bOptionSelectionMode){
 			str+="Option Mode: when hitting Enter, if an entry is selected, it's value will be chosen.\n";
+			str+="Configuring: "+getParentDialog().getCfgDataRefReport()+"\n";
 		}
 		
 		return str;

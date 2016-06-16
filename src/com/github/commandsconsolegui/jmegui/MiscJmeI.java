@@ -67,7 +67,7 @@ public class MiscJmeI {
 	/**
 	 * 
 	 * @param sptStart
-	 * @return parentest spatial, least top nodes
+	 * @return parentest spatial, least top nodes like RootNode and GuiNode
 	 */
 	public Node getParentestFrom(Spatial sptStart){
 		Spatial sptParentest = sptStart;

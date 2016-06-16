@@ -66,4 +66,12 @@ public class DialogListEntryData {
 		this.strText = data.strText;
 		this.objRef = data.objRef;
 	}
+	
+	/**
+	 * TODO should be a more refined string
+	 * @return
+	 */
+	public String report() {
+		return this.toString();
+	}
 }

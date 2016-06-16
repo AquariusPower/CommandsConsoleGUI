@@ -92,8 +92,9 @@ public class MultiClickCondStateI extends ConditionalStateAbs {
 			
 			boolean bRunNow = false;
 			boolean bRemoveNow = false;
+			Callable<Boolean> callCmd = mc.callCmd;
 			switch(mc.eCallMode){
-				case AfterDelay:
+				case OnceAfterDelay:
 					bRemoveNow = bRunNow = bTimedOut;
 					break;
 				case EveryFrame:
@@ -104,11 +105,16 @@ public class MultiClickCondStateI extends ConditionalStateAbs {
 					if(mc.iRunCount==0)bRunNow = true;
 					bRemoveNow = bTimedOut;
 					break;
+				case JustSkip: 
+					bRunNow = true;
+					callCmd = null;
+					bRemoveNow = bTimedOut;
+					break;
 			}
 			
 			if(bRunNow){
 				try {
-					if(mc.callCmd==null || mc.callCmd.call().booleanValue()){
+					if(callCmd==null || callCmd.call().booleanValue()){
 						mc.iRunCount++;
 					}
 				} catch (Exception e) {
@@ -139,7 +145,7 @@ public class MultiClickCondStateI extends ConditionalStateAbs {
 	}
 	
 	public static enum ECallMode{
-		AfterDelay,
+		OnceAfterDelay,
 		
 		/**
 		 * This is actually not that useful, but good in case to make everything execute from here instead of the code point using it.
@@ -147,7 +153,24 @@ public class MultiClickCondStateI extends ConditionalStateAbs {
 		 */
 		OncePromptly,
 		
-		EveryFrame,
+		EveryFrame, 
+		
+		/**
+		 * this will override a set cmd caller
+		 */
+		JustSkip, 
+	}
+	
+	/**
+	 * this can be used to repeat the previous command
+	 * 
+	 * @param objActivator
+	 * @return
+	 */
+	public Callable<Boolean> getActivatorCurrentCallCmd(Object objActivator){
+		MultiClick mc = hmActivatorCmd.get(objActivator);
+		if(mc==null)return null;
+		return mc.callCmd;
 	}
 	
 	/**
@@ -164,7 +187,7 @@ public class MultiClickCondStateI extends ConditionalStateAbs {
 		}
 		mc.eCallMode = e;
 		mc.lLastRequestMilis=System.currentTimeMillis();
-		mc.callCmd = callCmd;
+		mc.callCmd = callCmd; //can be null here, acts like a skipper
 		mc.iClickCount++;
 	}
 }

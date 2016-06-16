@@ -71,7 +71,7 @@ public class CellRendererDialogEntry implements CellRenderer<DialogListEntryData
 		}
 		
 		public Cell(CellRendererDialogEntry parentCellRenderer, DialogListEntryData data){
-			super(new BorderLayout());
+			super(new BorderLayout(), parentCellRenderer.strStyle);
 			
 			this.setName(strPrefix+"MainContainer");
 			

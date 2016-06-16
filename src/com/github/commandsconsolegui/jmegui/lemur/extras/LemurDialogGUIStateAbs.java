@@ -453,35 +453,35 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		return true;
 	}
 	
-	@Deprecated
-	private void multiClickAction() {
-		if(eMultiClickAction!=null){
-			/**
-			 * multi click actions execution must be delayed by the multi click delay limit 
-			 */
-			if(!MouseCursorCentralI.i().isMultiClickDelayWithinLimitFrom(lClickActionMilis)){
-				boolean bConsumed=false;
-				switch(eMultiClickAction){
-					case OpenConfigDialog:
-						openCfgDataDialog(null); //TODO usage is wrong 
-						bConsumed=true;
-						break;
-					case OptionModeSubmit:
-						actionSubmit();
-						bConsumed=true;
-						break;
-					case DebugTestMultiClickAction3times:
-						cd().dumpDebugEntry(eMultiClickAction+" at "+getId());
-						bConsumed=true;
-						break;
-				}
-				
-				if(bConsumed){
-					consumeAndResetMultiClickAction();
-				}
-			}
-		}
-	}
+//	@Deprecated
+//	private void multiClickAction() {
+//		if(eMultiClickAction!=null){
+//			/**
+//			 * multi click actions execution must be delayed by the multi click delay limit 
+//			 */
+//			if(!MouseCursorCentralI.i().isMultiClickDelayWithinLimitFrom(lClickActionMilis)){
+//				boolean bConsumed=false;
+//				switch(eMultiClickAction){
+//					case OpenConfigDialog:
+//						openCfgDataDialog(null); //TODO usage is wrong 
+//						bConsumed=true;
+//						break;
+//					case OptionModeSubmit:
+//						actionSubmit();
+//						bConsumed=true;
+//						break;
+//					case DebugTestMultiClickAction3times:
+//						cd().dumpDebugEntry(eMultiClickAction+" at "+getId());
+//						bConsumed=true;
+//						break;
+//				}
+//				
+//				if(bConsumed){
+//					consumeAndResetMultiClickAction();
+//				}
+//			}
+//		}
+//	}
 
 	public void openCfgDataDialog(DialogListEntryData dataToCfg){
 		LemurDialogGUIStateAbs diag = hmModals.get(EModalDiagType.ListEntryConfig);
@@ -493,13 +493,13 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		}
 	}
 	
-	@Deprecated
-	enum EMultiClickAction{
-		OptionModeSubmit,
-		OpenConfigDialog, 
-		DebugTestMultiClickAction3times,
-	}
-	EMultiClickAction eMultiClickAction = null;
+//	@Deprecated
+//	enum EMultiClickAction{
+//		OptionModeSubmit,
+//		OpenConfigDialog, 
+//		DebugTestMultiClickAction3times,
+//	}
+//	EMultiClickAction eMultiClickAction = null;
 	
 	/**
 	 * default is the class name, will look like the dialog title
@@ -644,56 +644,56 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		hmModals.put(e,diagModal);
 	}
 	
-	/**
-	 * this will override older request if set fast enough
-	 * @param e
-	 */
-	@Deprecated
-	protected void setMultiClickAction(MouseCursorButtonData buttonData, EMultiClickAction e){
-		/**
-		 * DO NOT CHECK if eClickAction != null
-		 * it is to be overriden!!!
-		 */
-		this.eMultiClickAction=e;
-		this.lClickActionMilis=System.currentTimeMillis();
-		this.buttonData=buttonData;
-	}
-	@Deprecated
-	protected void consumeAndResetMultiClickAction(){
-		eMultiClickAction=null;
-		
-		lClickActionMilis=null;
-		
-		buttonData.getClicks().clearClicks();
-		buttonData=null;
-	}
+//	/**
+//	 * this will override older request if set fast enough
+//	 * @param e
+//	 */
+//	@Deprecated
+//	protected void setMultiClickAction(MouseCursorButtonData buttonData, EMultiClickAction e){
+//		/**
+//		 * DO NOT CHECK if eClickAction != null
+//		 * it is to be overriden!!!
+//		 */
+//		this.eMultiClickAction=e;
+//		this.lClickActionMilis=System.currentTimeMillis();
+//		this.buttonData=buttonData;
+//	}
+//	@Deprecated
+//	protected void consumeAndResetMultiClickAction(){
+//		eMultiClickAction=null;
+//		
+//		lClickActionMilis=null;
+//		
+//		buttonData.getClicks().clearClicks();
+//		buttonData=null;
+//	}
 	
-	@Deprecated
-	public boolean actionMultiClick(MouseCursorButtonData buttonData, Spatial capture, int iClickCount) {
-		switch(iClickCount){
-			case 2:
-				if(isListBoxEntry(capture)){
-					if(bOptionSelectionMode){
-						setMultiClickAction(buttonData, EMultiClickAction.OptionModeSubmit);
-						return true;
-					}else{
-						setMultiClickAction(buttonData, EMultiClickAction.OpenConfigDialog);
-//						LemurDialogGUIStateAbs diag = hmModals.get(EModalDiagType.ListEntryConfig);
-//						if(diag!=null){
-//							diag.requestEnable();
-//							return true;
-//						}
-					}
-					return true;
-				}
-				break;
-			case 3:
-				setMultiClickAction(buttonData, EMultiClickAction.DebugTestMultiClickAction3times);
-				break;
-		}
-		
-		return false;
-	}
+//	@Deprecated
+//	public boolean actionMultiClick(MouseCursorButtonData buttonData, Spatial capture, int iClickCount) {
+//		switch(iClickCount){
+//			case 2:
+//				if(isListBoxEntry(capture)){
+//					if(bOptionSelectionMode){
+//						setMultiClickAction(buttonData, EMultiClickAction.OptionModeSubmit);
+//						return true;
+//					}else{
+//						setMultiClickAction(buttonData, EMultiClickAction.OpenConfigDialog);
+////						LemurDialogGUIStateAbs diag = hmModals.get(EModalDiagType.ListEntryConfig);
+////						if(diag!=null){
+////							diag.requestEnable();
+////							return true;
+////						}
+//					}
+//					return true;
+//				}
+//				break;
+//			case 3:
+//				setMultiClickAction(buttonData, EMultiClickAction.DebugTestMultiClickAction3times);
+//				break;
+//		}
+//		
+//		return false;
+//	}
 	
 	public boolean openPropertiesDialogFor(Spatial capture) {
 		if(isListBoxEntry(capture)){

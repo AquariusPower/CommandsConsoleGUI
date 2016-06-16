@@ -123,8 +123,9 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs{
 		DialogListEntryData dle = new DialogListEntryData();
 		if(strText==null){
 			strText=this.getId()+": New test entry: "
-				+MiscI.i().getDateTimeForFilename(true)
-				+", "+System.nanoTime();
+//				+MiscI.i().getDateTimeForFilename(true)
+//				+", "
+				+System.nanoTime();
 		}
 		dle.setText(strText);
 		adleFullList.add(dle);

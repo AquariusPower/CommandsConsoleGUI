@@ -32,6 +32,7 @@ import java.util.Collections;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.globals.GlobalGUINodeI;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
@@ -65,10 +66,11 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	
 	ArrayList<FocusTarget> aftZOrderList = new ArrayList<FocusTarget>();
 	ArrayList<Spatial> asptFocusRequestList = new ArrayList<Spatial>();
-	private FocusManagerState focusState;
+	protected FocusManagerState focusState;
 //	private SimpleApplication	sapp;
 //	private CommandsDelegatorI	cc;
-	private Float	fBaseZ = 0f;
+	FloatDoubleVarField fdvDialogBazeZ = new FloatDoubleVarField(this, 20f, "the starting point at Z axis to place dialogs");
+	FloatDoubleVarField fdvDialogDisplacement = new FloatDoubleVarField(this, 10f, "the displacement between dialogs in the Z axis, to let one be shown properly above another.");
 	
 //	public void configure(){
 //		this.sapp=GlobalSappRefI.i().get();
@@ -94,7 +96,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	public LemurFocusHelperStateI configure(ICfgParm icfg) {
 //	public void configure(Float fBaseZ){
 		CfgParm cfg = (CfgParm)icfg;
-		if(cfg.fBaseZ!=null)this.fBaseZ = cfg.fBaseZ;
+		if(cfg.fBaseZ!=null)this.fdvDialogBazeZ.setObjectValue(cfg.fBaseZ);
 		super.configure(new CmdConditionalStateAbs.CfgParm(
 			LemurFocusHelperStateI.class.getSimpleName(), false));
 //		configure();
@@ -294,11 +296,16 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 		/**
 		 * organize in Z
 		 */
-		float fDisplacement=0.1f;
 		for(int i=aftZOrderList.size()-1;i>=0;i--){
 			FocusTarget ft = aftZOrderList.get(i);
 //			if(ftSorting instanceof GuiControl){
-				float fZ = fBaseZ + (i*fDisplacement)+fDisplacement; //so will always be above all other GUI elements that are expectedly at 0
+			
+				/**
+				 * so will always be above all other GUI elements that are expectedly at 0
+				 */
+				float fZ = fdvDialogBazeZ.getFloat() 
+					+ (i*fdvDialogDisplacement.floatValue())
+					+ fdvDialogDisplacement.floatValue(); 
 				
 				GuiControl gct = (GuiControl)ft;
 				Spatial spt = MiscJmeI.i().getParentestFrom(gct.getSpatial());
@@ -310,6 +317,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 				spt.removeFromParent();
 				spt.getLocalTranslation().z=fZ;
 				nodeParent.attachChild(spt);
+				
 //				parentestApplyZ(gct.getSpatial(), fZ);
 //				gct.getSpatial().getLocalTranslation().z = (i*0.1f)+0.1f; //so will always be above all other GUI elements that are expectedly at 0
 //			}
@@ -346,7 +354,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
 		boolean bCmdEndedGracefully = false;
 		
-		if(cc.checkCmdValidity(this,"debugFocusReport","")){
+		if(cc.checkCmdValidity(this,"debugFocusSortZOrderReport","")){
 			for(String str:debugReport())cc.dumpSubEntry(str);
 			bCmdEndedGracefully = true;
 		}else

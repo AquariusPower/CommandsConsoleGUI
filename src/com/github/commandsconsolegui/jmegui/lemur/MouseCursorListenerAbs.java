@@ -78,7 +78,8 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 					mcbd.setReleasedAndGetDelay(eventButton);
 					bCancelNextMouseReleased=false;
 				}else{
-					int iClickCount=mcbd.setReleasedAndRetrieveClickCount(eventButton, target, capture);
+					mcbd.setReleasedAndGetDelay(eventButton);
+//					int iClickCount=mcbd.setReleasedAndRetrieveClickCount(eventButton, target, capture);
 					
 	//				if(MouseCursor.i().isClickDelay(getMouseCursor().getMouseCursorDataFor(emcb).setReleasedAndGetDelay())){
 	//					MouseCursor.i().addClick(
@@ -86,16 +87,16 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 	//					
 	//					int iClickCount=MouseCursor.i().getMultiClickCountFor(emcb);
 					
-					if(iClickCount>0){
+//					if(iClickCount>0){
 						/**
 						 * In this case, any displacement will be ignored.
 						 * TODO could the minimal displacement it be used in some way?
 						 */
-		      	if(click(mcbd, eventButton, target, capture, iClickCount)){
+		      	if(click(mcbd, eventButton, target, capture)){
 		      		eventButton.setConsumed();
 //		      		mcbd.getClicks().clearClicks();
 		      	}
-					}
+//					}
 				}
 //			}
 		}
@@ -108,7 +109,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 	 * @param capture
 	 * @return if it is to be consumed
 	 */
-	public boolean click(MouseCursorButtonData buttonData, CursorButtonEvent eventButton, Spatial target,	Spatial capture, int iClickCount){
+	public boolean click(MouseCursorButtonData buttonData, CursorButtonEvent eventButton, Spatial target,	Spatial capture){
 		return false;
 	}
 	

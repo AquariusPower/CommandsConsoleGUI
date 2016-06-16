@@ -54,7 +54,7 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 	public static DialogMouseCursorListenerI i(){return instance;}
 	
 	@Override
-	public boolean click(MouseCursorButtonData buttonData, CursorButtonEvent eventButton, Spatial target,Spatial capture, int iClickCount) {
+	public boolean click(MouseCursorButtonData buttonData, CursorButtonEvent eventButton, Spatial target,Spatial capture) {
 		LemurFocusHelperStateI.i().requestDialogFocus(capture);
 		
 		// missing ones are ignored so each element can consume it properly
@@ -81,16 +81,21 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 									bConsumed=true;
 									break;
 								case 2:
-									if(diag.isOptionSelectionMode()){
-										diag.selectAndChoseOption(cell.getData());
-									}else{
-										MultiClickCondStateI.i().updateActivator(ECallMode.AfterDelay, capture, new Callable<Boolean>() {
-											@Override public Boolean call() throws Exception {
+									MultiClickCondStateI.i().updateActivator(ECallMode.OnceAfterDelay, capture, new Callable<Boolean>() {
+										@Override public Boolean call() throws Exception {
+											if(diag.isOptionSelectionMode()){
+												diag.selectAndChoseOption(cell.getData());
+											}else{
 												diag.openCfgDataDialog(cell.getData());
-												return true;
 											}
-										});
-									}
+											return true;
+										}
+									});
+									bConsumed=true;
+									break;
+								case 3: //skipper
+									MultiClickCondStateI.i().updateActivator(
+										ECallMode.JustSkip, capture, null);
 									bConsumed=true;
 									break;
 							}
@@ -120,7 +125,7 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 		
 		if(bConsumed)return true;
 		
-		return super.click(buttonData, eventButton, target, capture, iClickCount);
+		return super.click(buttonData, eventButton, target, capture);
 	}
 	
 	@Override

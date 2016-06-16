@@ -272,5 +272,8 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 		this.dataToCfgReference=null;
 		return data;
 	}
+	public String getCfgDataRefReport() {
+		return this.dataToCfgReference.report();
+	}
 	
 }
