@@ -13,4 +13,4 @@ ConsoleCommands
 ## Extras
 - FPS limiter
 - Single Application Instance
-- (WIP) Dialogs to easy configurations and be used as a quick start for interactions.
+- Dialogs to easy configurations and be used as a quick start for interactions.
