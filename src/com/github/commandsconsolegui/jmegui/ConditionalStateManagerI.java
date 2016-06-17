@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.jmegui;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.globals.GlobalAppRefI;
+import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.app.Application;
@@ -70,6 +71,8 @@ public class ConditionalStateManagerI extends AbstractAppState {
 	@Override
 	public void update(float tpf) {
 		super.update(tpf);
+		
+		CallQueueI.i().update(tpf);
 		
 		ArrayList<ConditionalStateAbs> aToDiscard = null;
 		for(ConditionalStateAbs cas:aCondStateList){

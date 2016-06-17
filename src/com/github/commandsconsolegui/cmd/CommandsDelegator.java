@@ -30,12 +30,12 @@ package com.github.commandsconsolegui.cmd;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -107,7 +107,6 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public final BoolTogglerCmdField	btgEngineStatsFps = new BoolTogglerCmdField(this,false);
 	public final BoolTogglerCmdField	btgShowMiliseconds=new BoolTogglerCmdField(this,false);
 //	public final BoolTogglerCmdField	btgStringContainsFuzzyFilter=new BoolTogglerCmdField(this,true);
-	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
 	public final BoolTogglerCmdField	btgConsoleCpuRest=new BoolTogglerCmdField(this,false,null,
 		"Console update steps will be skipped if this is enabled.");
 	public final BoolTogglerCmdField	btgAutoScroll=new BoolTogglerCmdField(this,true);
@@ -2399,7 +2398,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		if(!icui.isInitializationCompleted())return;
 		
 		updateNewDay();
-		updateToggles();
+//		updateToggles();
 		updateExecPreQueuedCmdsBlockDispatcher(); //before exec queue 
 		updateExecConsoleCmdQueue(); // after pre queue
 		updateDumpQueueEntry();
@@ -2415,13 +2414,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}
 	}
 
-	protected void updateToggles() {
-		if(btgEngineStatsView.checkChangedAndUpdate())icui.updateEngineStats();
-		if(btgEngineStatsFps.checkChangedAndUpdate())icui.updateEngineStats();
-//		if(btgFpsLimit.checkChangedAndUpdate())fpslState.setEnabled(btgFpsLimit.b());
-		if(btgConsoleCpuRest.checkChangedAndUpdate())tdLetCpuRest.setActive(btgConsoleCpuRest.b());
-//		if(btgPreQueue.checkChangedAndUpdate())bUsePreQueue=btgPreQueue.b();
-	}
+//	protected void updateToggles() {
+//		if(btgEngineStatsView.isChangedAndRefresh())icui.updateEngineStats();
+//		if(btgEngineStatsFps.isChangedAndRefresh())icui.updateEngineStats();
+////		if(btgFpsLimit.checkChangedAndUpdate())fpslState.setEnabled(btgFpsLimit.b());
+//		if(btgConsoleCpuRest.isChangedAndRefresh())tdLetCpuRest.setActive(btgConsoleCpuRest.b());
+////		if(btgPreQueue.checkChangedAndUpdate())bUsePreQueue=btgPreQueue.b();
+//	}
 
 	protected void addCmdListOneByOneToQueue(ArrayList<String> astrCmdList, boolean bPrepend, boolean bShowExecIndex){
 		ArrayList<String> astrCmdListCopy = new ArrayList<String>(astrCmdList);
@@ -2876,6 +2875,24 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		tdDumpQueuedSlowEntry.updateTime();
 		
+		Callable<Boolean> call = new Callable<Boolean>() {
+			@Override
+			public Boolean call() throws Exception {
+				icui.updateEngineStats();
+				return true;
+			}
+		};
+		btgEngineStatsView.setCallOnChange(call);
+		btgEngineStatsFps.setCallOnChange(call);
+		
+		btgConsoleCpuRest.setCallOnChange(new Callable<Boolean>() {
+			@Override
+			public Boolean call() throws Exception {
+				tdLetCpuRest.setActive(btgConsoleCpuRest.b());
+				return true;
+			}
+		});
+	
 		// init dump file, MUST BE THE FIRST!
 		flLastDump = new File(fileNamePrepareLog(strFileLastDump,false));
 		flLastDump.delete(); //each run will have a new file

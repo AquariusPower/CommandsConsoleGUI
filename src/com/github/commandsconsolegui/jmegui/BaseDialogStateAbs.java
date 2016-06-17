@@ -90,7 +90,10 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 		
 //		bEnabled=cfg.bInitiallyEnabled;
 //		if(!cfg.bInitiallyEnabled)requestDisable();
-		if(!cfg.bInitiallyEnabled)initiallyDisabled();
+		if(!cfg.bInitiallyEnabled){
+			initiallyDisabled();
+			btgState.set(false,false);
+		}
 		
 //		MouseCursor.i().configure(cfg.lMouseCursorClickDelayMilis);
 		

@@ -28,17 +28,18 @@
 package com.github.commandsconsolegui.cmd.varfield;
 
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
-import com.github.commandsconsolegui.cmd.VarIdValueOwnerData.IVarIdValueOwner;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 
 /**
  * This class can provide automatic boolean console command options to be toggled.<br>
@@ -65,6 +66,8 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	private String	strReflexFillCfgCodePrefixVariant;
 	private VarIdValueOwnerData	vivo;
 	private String	strVarId;
+	private Callable<Boolean>	caller;
+	private boolean	bConstructed;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
@@ -112,6 +115,8 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 		this.rfcfgOwner=rfcfgOwnerUseThis;
 		this.strHelp=strHelp;
 		set(bInitialValue);
+		
+		this.bConstructed=true;
 	}
 //	public BoolTogglerCmd(boolean bInitValue, String strCustomCmdId){
 //		this();
@@ -141,22 +146,31 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 		return strHelp==null?"":strHelp;
 	}
 	
+	/** same as {@link #b()}*/
 	public boolean get(){return bCurrent;}
-	public boolean getBoolean(){return bCurrent;}
+	/** same as {@link #b()} but returns in Boolean */
+	public Boolean getBoolean(){return bCurrent;}
+	/** same as {@link #b()}*/
 	public boolean getBool(){return bCurrent;}
+	/** same as {@link #b()}*/
 	public boolean is(){return bCurrent;}
+	/** same as {@link #b()}*/
 	public boolean b(){return bCurrent;}
 	
 	/**
 	 * 
 	 * @return true once if value changed, and update the reference to wait for next change
 	 */
-	public boolean checkChangedAndUpdate(){
-		if(bCurrent != bPrevious){
+	protected boolean isChangedAndRefresh(){
+//		DebugI.i().conditionalBreakpoint(strCommand.equals("cmd_TestDialog_CmdConditionalStateAbs_State_Toggle"));
+		if(bCurrent && bPrevious)return false;
+		if(!bCurrent && !bPrevious)return false;
+		
+//		if(Boolean.compare(bCurrent,bPrevious)!=0){
 			bPrevious=bCurrent;
 			return true;
-		}
-		return false;
+//		}
+//		return false;
 	}
 	
 	
@@ -203,7 +217,20 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	}
 
 	public void set(boolean b){
+		set(b,true);
+	}
+	public void set(boolean b, boolean bUseCallQueue){
 		this.bCurrent=b;
+		
+		if(bConstructed){
+			if(isChangedAndRefresh()){
+				if(this.caller==null){
+					throw new PrerequisitesNotMetException("null caller for "+this.getReport());
+				}
+				
+				CallQueueI.i().appendCall(this.caller);
+			}
+		}
 	}
 	
 	@Override
@@ -239,4 +266,8 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 //		// TODO Auto-generated method stub
 //		return null;
 //	}
+	
+	public void setCallOnChange(Callable<Boolean> caller){
+		this.caller=caller;
+	}
 }

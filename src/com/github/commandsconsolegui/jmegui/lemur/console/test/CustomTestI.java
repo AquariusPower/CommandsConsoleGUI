@@ -193,8 +193,9 @@ public class CustomTestI extends SimpleConsoleAppAbs implements IReflexFillCfg{
 		 * just call it!
 		 * Remember to set the same variant!
 		 */
-		if(rfcfg==null)rfcfg = cd.getReflexFillCfg(rfcv);
+		if(rfcfg==null)rfcfg = super.getReflexFillCfg(rfcv);//cd.getReflexFillCfg(rfcv);
 		
 		return rfcfg;
 	}
+	
 }	

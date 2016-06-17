@@ -27,7 +27,10 @@
 
 package com.github.commandsconsolegui.jmegui.lemur.console.test;
 
+import java.util.concurrent.Callable;
+
 import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegator;
+import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -38,6 +41,8 @@ import com.github.commandsconsolegui.misc.ReflexFillI;
  *
  */
 public class CustomCommands extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
+//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
+
 	public CustomCommands(){
 		super();
 		
@@ -47,11 +52,24 @@ public class CustomCommands extends ScriptingCommandsDelegator{ //use ConsoleCom
 		ReflexFillI.i().setUseDefaultCfgIfMissing(true);
 	}
 	
-	@Override
-	public void updateToggles() {
-		if(btgFpsLimit.checkChangedAndUpdate())FpsLimiterStateI.i().setEnabledRequest(btgFpsLimit.b());
-		super.updateToggles();
-	}
+//	@Override
+//	public void updateToggles() {
+//		if(btgFpsLimit.isChangedAndRefresh())FpsLimiterStateI.i().setEnabledRequest(btgFpsLimit.b());
+//		super.updateToggles();
+//	}
+	
+//	@Override
+//		public void initialize() {
+//			btgFpsLimit.setCallOnChange(new Callable<Boolean>() {
+//				@Override
+//				public Boolean call() throws Exception {
+//					FpsLimiterStateI.i().setEnabledRequest(btgFpsLimit.b());
+//					return true;
+//				}
+//			});
+//			
+//			super.initialize();
+//		}
 	
 	@Override
 	public String prepareStatsFieldText() {

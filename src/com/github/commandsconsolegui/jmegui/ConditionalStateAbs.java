@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.jmegui;
 //import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ERecreateConsoleSteps;
 import java.io.IOException;
 
+import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.app.Application;
@@ -355,13 +356,13 @@ public abstract class ConditionalStateAbs implements Savable{
 				if(!doItInitializeProperly(tpf))return false;
 			}
 		}else{
-			if(!doItEnableOrDisableProperly(tpf))return false;
+			if(!doItUpdateOrEnableOrDisableProperly(tpf))return false;
 		}
 		
 		return true;
 	};
 	
-	private boolean doItEnableOrDisableProperly(float tpf) {
+	private boolean doItUpdateOrEnableOrDisableProperly(float tpf) {
 		if(bEnabledRequested && !bEnabled){
 			if(bHoldEnable)return false;
 			if(!rEnable.canRetryNow())return false;
@@ -582,5 +583,9 @@ public abstract class ConditionalStateAbs implements Savable{
   @Override
 	public void read(JmeImporter im) throws IOException{
   	
-  };
+  }
+
+//	public boolean applyBoolTogglerChange(BoolTogglerCmdField btgSource) {
+//		return false;
+//	};
 }

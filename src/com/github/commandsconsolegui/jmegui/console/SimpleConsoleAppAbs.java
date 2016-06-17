@@ -27,8 +27,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.github.commandsconsolegui.jmegui.console;
 
+import java.util.concurrent.Callable;
+
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.extras.SingleAppInstanceI;
 import com.github.commandsconsolegui.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.GlobalConsoleGuiI;
@@ -38,6 +41,9 @@ import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CommandsBackgroundStateI;
 import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.app.SimpleApplication;
 
 
@@ -46,7 +52,8 @@ import com.jme3.app.SimpleApplication;
 * @author AquariusPower <https://github.com/AquariusPower>
 *
 */
-public abstract class SimpleConsoleAppAbs extends SimpleApplication implements IConsoleCommandListener {
+public abstract class SimpleConsoleAppAbs extends SimpleApplication implements IConsoleCommandListener, IReflexFillCfg {
+	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
 	protected boolean bHideSettings=true; 
 	
 	protected CommandsDelegator	cd;
@@ -67,6 +74,14 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 		FpsLimiterStateI.i().configure(new FpsLimiterStateI.CfgParm());
 		UngrabMouseStateI.i().configure(new UngrabMouseStateI.CfgParm(null,null));
 		
+		btgFpsLimit.setCallOnChange(new Callable<Boolean>() {
+			@Override
+			public Boolean call() throws Exception {
+				FpsLimiterStateI.i().setEnabledRequest(btgFpsLimit.b());
+				return true;
+			}
+		});
+		
 		cd.addConsoleCommandListener(this);
 		
 //	SingleInstanceState.i().configureBeforeInitializing(this,true);
@@ -79,5 +94,10 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 //		ConditionalStateManagerI.i().applicationIsExiting();
 //		UngrabMouseStateI.i().applicationIsExiting();
 		super.stop(waitFor);
+	}
+	
+	@Override
+	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+		return cd.getReflexFillCfg(rfcv);
 	}
 }	

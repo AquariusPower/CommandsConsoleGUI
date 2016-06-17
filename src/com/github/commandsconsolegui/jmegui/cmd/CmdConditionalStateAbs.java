@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.jmegui.cmd;
 
+import java.util.concurrent.Callable;
+
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
@@ -53,7 +55,7 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 	
 	StringCmdField scfRestart = new StringCmdField(this,null);
 //	private StringCmdField cmdState = null;
-	BoolTogglerCmdField btgState = new BoolTogglerCmdField(this, true, null, "toggles the state (enabled/disabled)");
+	protected BoolTogglerCmdField btgState = new BoolTogglerCmdField(this, true, null, "toggles the state (enabled/disabled)");
 //	private String	strCmdIdentifier;
 	protected String strCmdPrefix="toggle";
 	protected String strCmdSuffix="State";
@@ -107,6 +109,14 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 		
 		cd.addConsoleCommandListener(this);
 		
+		btgState.setCallOnChange(new Callable<Boolean>() {
+			@Override
+			public Boolean call() throws Exception {
+				setEnabledRequest(btgState.b());
+				return true;
+			}
+		});
+		
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 		
 //		return isConfigured();
@@ -119,18 +129,35 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 		return super.initCheckPrerequisites();
 	}
 	
-	@Override
-	protected boolean updateOrUndo(float tpf) {
-		if(!super.updateOrUndo(tpf))return false;
-		
-		updateToggles();
-		
-		return true;
-	}
+//	@Override
+//	protected boolean updateOrUndo(float tpf) {
+//		if(!super.updateOrUndo(tpf))return false;
+//		
+//		updateToggles();
+//		
+//		return true;
+//	}
 	
-	public void updateToggles() {
-		if(btgState.checkChangedAndUpdate())setEnabledRequest(btgState.b());
-	}
+//	@Override
+//	protected boolean initOrUndo() {
+//		if(!super.initOrUndo())return false;
+//		
+//		return true;
+//	}
+	
+////	@Override
+//	public boolean applyBoolTogglerChange(BoolTogglerCmdField btgSource) {
+//		if(btgSource.equals(btgState)){
+//			if(btgState.isChangedAndRefresh()){
+//				setEnabledRequest(btgState.b());
+//				return true;
+//			}
+//		}else{
+//			throw new PrerequisitesNotMetException("missing code support to "+btgSource.getReport());
+//		}
+//		
+//		return false;
+//	}
 
 	
 //	@Override
@@ -192,6 +219,8 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
 	@Override
 	protected boolean disableOrUndo() {
 		if(!super.disableOrUndo())return false;
+		
+		btgState.set(false,false);
 		
 		cd.dumpInfoEntry(getCmd()+" disabled");
 		
