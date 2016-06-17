@@ -99,7 +99,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 	public ConsoleLemurStateI(){
 		setDumpEntriesSlowedQueue(new VersionedList<String>());
 		vlstrDumpEntries = new VersionedList<String>();
-//		super.bPrefixCmdWithIdToo = true;
+		super.bPrefixCmdWithIdToo = true;
 	}
 	
 //	@Override
@@ -145,6 +145,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 		
 //		super.icfgOfInstance = icfg;
 		
+		if(cfg.strUIId==null)cfg.strUIId=ConsoleLemurStateI.class.getSimpleName();
 		super.configure(new ConsoleStateAbs.CfgParm(
 			cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.iToggleConsoleKey, cfg.nodeGUI));
 		

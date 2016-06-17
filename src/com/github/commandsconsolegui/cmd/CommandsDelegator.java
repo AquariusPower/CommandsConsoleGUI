@@ -272,7 +272,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		if(rfcv.getClass().isAssignableFrom(BoolTogglerCmdField.class)){
 			if(BoolTogglerCmdField.strTogglerCodePrefix.equals(rfcv.getCodePrefixVariant())){
-				rfcfg = new ReflexFillCfg();
+				rfcfg = new ReflexFillCfg(rfcv);
 				rfcfg.setSuffix("Toggle");
 			}
 			
@@ -280,14 +280,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}else
 		if(rfcv.getClass().isAssignableFrom(StringCmdField.class)){
 			if(strFinalCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
-				rfcfg = new ReflexFillCfg();
+				rfcfg = new ReflexFillCfg(rfcv);
 			}else
 			if(strFinalFieldRestrictedCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
-				rfcfg = new ReflexFillCfg();
+				rfcfg = new ReflexFillCfg(rfcv);
 				rfcfg.setPrefix(""+RESTRICTED_TOKEN);
 			}else
 			if(StringCmdField.strCodePrefix.equals(rfcv.getCodePrefixVariant())){
-				rfcfg = new ReflexFillCfg();
+				rfcfg = new ReflexFillCfg(rfcv);
 			}
 			
 			rfcfg.setAsCommandToo(true);
@@ -301,9 +301,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		if(rfcfg!=null){
 			if(rfcfg.isCommandToo()){
-				Field field = ReflexFillI.i().assertAndGetField(rfcv.getOwner(), rfcv);
-				Class<?> cl = field.getDeclaringClass();
-				rfcfg.setPrefix("cmd"+cl.getSimpleName());
+				rfcfg.setPrefix("cmd");
+//				Field field = ReflexFillI.i().assertAndGetField(rfcv.getOwner(), rfcv);
+////			rfcfg.setPrefix("cmd"+cl.getSimpleName());
+//				rfcfg.setPrefixDeclaringClass(field.getDeclaringClass().getSimpleName());
+//				rfcfg.setPrefixInstancedClass(rfcv.getOwner().getClass().getSimpleName());
 				rfcfg.setFirstLetterUpperCase(true);
 			}
 		}

@@ -206,14 +206,15 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
 		
 		ReflexFillCfg rfcfgBase = cd.getReflexFillCfg(rfcv);
 		if(rfcfgBase!=null){
-			rfcfg = new ReflexFillCfg(rfcfgBase);
+			rfcfg = new ReflexFillCfg(rfcfgBase,rfcv);
 			
 			if(rfcfg.isCommandToo() && bPrefixCmdWithIdToo){
-				rfcfg.setPrefix(rfcfgBase.getPrefix()+getId());
-				rfcfg.setFirstLetterUpperCase(true);
+//				rfcfg.setPrefix(rfcfgBase.getPrefix()+getId());
+				rfcfg.setPrefixCustomId(getId());
+//				rfcfg.setFirstLetterUpperCase(true);
 			}
 		}else{
-			rfcfg = new ReflexFillCfg();
+			rfcfg = new ReflexFillCfg(rfcv);
 		}
 		
 		return rfcfg;

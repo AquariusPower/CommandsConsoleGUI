@@ -52,9 +52,9 @@ import com.jme3.system.AppSettings;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFillCfg{
-	private static CustomConsoleTestI instance = new CustomConsoleTestI();
-	public static CustomConsoleTestI i(){return instance;}
+public class CustomTestI extends SimpleConsoleAppAbs implements IReflexFillCfg{
+	private static CustomTestI instance = new CustomTestI();
+	public static CustomTestI i(){return instance;}
 	
 	protected boolean bHideSettings=true; 
 	
@@ -84,7 +84,7 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 
 //	private String	strOptionSelected;
 	
-	public CustomConsoleTestI() {
+	public CustomTestI() {
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 	}
 	
@@ -108,7 +108,7 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 		// the conole UI
 		GlobalConsoleGuiI.iGlobal().set(ConsoleLemurStateI.i());
 		ConsoleLemurStateI.i().configure(new ConsoleLemurStateI.CfgParm(
-			CustomConsoleTestI.class.getSimpleName(), false, KeyInput.KEY_F10, getGuiNode()));
+			null, false, KeyInput.KEY_F10, getGuiNode()));
 		
 		// this dialog, after closed, may have diag2.getOptionSelected() available
 		diagCfg = new CustomDialogGUIState().configure(new CustomDialogGUIState.CfgParm(
@@ -134,8 +134,8 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 	}
 	
 	public static void main( String... args ) {
-		CustomConsoleTestI main = (CustomConsoleTestI) GlobalAppRefI.iGlobal().set(
-			CustomConsoleTestI.i());
+		CustomTestI main = (CustomTestI) GlobalAppRefI.iGlobal().set(
+			CustomTestI.i());
 		
 		if(main.bHideSettings){
 			AppSettings as = new AppSettings(true);
@@ -176,13 +176,13 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 		
 		if(rfcv.getClass().isAssignableFrom(StringCmdField.class)){
 			if(strFieldCodePrefix.equals(rfcv.getCodePrefixVariant())){
-				rfcfg = new ReflexFillCfg();
+				rfcfg = new ReflexFillCfg(rfcv);
 				rfcfg.setPrefix("Niceprefix");
 				rfcfg.setSuffix("Nicesuffix");
 				rfcfg.setFirstLetterUpperCase(true);
 			}else
 			if(strFieldCodePrefixLess.equals(rfcv.getCodePrefixVariant())){
-				rfcfg = new ReflexFillCfg();
+				rfcfg = new ReflexFillCfg(rfcv);
 				rfcfg.setCodingStyleFieldNamePrefix(null);
 				rfcfg.setFirstLetterUpperCase(true);
 			}

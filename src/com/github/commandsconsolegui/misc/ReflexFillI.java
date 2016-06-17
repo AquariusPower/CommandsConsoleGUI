@@ -40,6 +40,9 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 //	private static IHandleExceptions	ihe;
 	
 	private boolean bUseDefaultCfgIfMissing=false;
+	private String	strCommandPartSeparator = "_";
+	
+	
 	
 	/**
 	 * the owner class will have the configurations for each
@@ -63,10 +66,21 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	
 	public static class ReflexFillCfg{
 		/**
+		 * these shall not be copied/cloned
+		 */
+		IReflexFillCfgVariant rfcv;
+		private boolean bUsePrefixDeclaringClass=true;
+		String	strPrefixDeclaringClass="";
+		boolean bUsePrefixInstancedClass=false;
+		String	strPrefixInstancedClass="";
+		
+		/**
 		 * to validate and also be removed from the identifier string
+		 * these can be copied/cloned
 		 */
 		String	strCodingStyleFieldNamePrefix=null;
 		String	strPrefix="";
+		String	strPrefixCustomId="";
 		String	strSuffix="";
 		boolean bFirstLetterUpperCase = false;
 		boolean	bIsCommandToo = false;
@@ -104,17 +118,19 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 			this.bFirstLetterUpperCase = bFirstLetterUpperCase;
 		}
 
-		public ReflexFillCfg() {
+		public ReflexFillCfg(IReflexFillCfgVariant rfcv) {
 			super();
+			this.rfcv = rfcv;
 		}
 		
-		public ReflexFillCfg(ReflexFillCfg other) {
-			super();
-			this.strCodingStyleFieldNamePrefix = other.strCodingStyleFieldNamePrefix;
-			this.strPrefix = other.strPrefix;
-			this.strSuffix = other.strSuffix;
-			this.bFirstLetterUpperCase = other.bFirstLetterUpperCase;
-			this.bIsCommandToo = other.bIsCommandToo;
+		public ReflexFillCfg(ReflexFillCfg otherCopyBasicDataFrom, IReflexFillCfgVariant rfcv) {
+			this(rfcv);
+			
+			this.strCodingStyleFieldNamePrefix = otherCopyBasicDataFrom.strCodingStyleFieldNamePrefix;
+			this.strPrefix = otherCopyBasicDataFrom.strPrefix;
+			this.strSuffix = otherCopyBasicDataFrom.strSuffix;
+			this.bFirstLetterUpperCase = otherCopyBasicDataFrom.bFirstLetterUpperCase;
+			this.bIsCommandToo = otherCopyBasicDataFrom.bIsCommandToo;
 		}
 
 		public void setAsCommandToo(boolean b) {
@@ -123,6 +139,46 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		
 		public boolean isCommandToo() {
 			return this.bIsCommandToo;
+		}
+
+		public String getPrefixDeclaringClass() {
+			return strPrefixDeclaringClass;
+		}
+
+		public void setPrefixDeclaringClass(String strPrefixDeclaringClass) {
+			this.strPrefixDeclaringClass = strPrefixDeclaringClass;
+		}
+
+		public String getPrefixInstancedClass() {
+			return strPrefixInstancedClass;
+		}
+
+		public void setPrefixInstancedClass(String strPrefixInstancedClass) {
+			this.strPrefixInstancedClass = strPrefixInstancedClass;
+		}
+
+		public String getPrefixCustomId() {
+			return strPrefixCustomId;
+		}
+
+		public void setPrefixCustomId(String strPrefixCustomId) {
+			this.strPrefixCustomId = strPrefixCustomId;
+		}
+
+		public boolean isUsePrefixInstancedClass() {
+			return bUsePrefixInstancedClass;
+		}
+		
+		public void setUsePrefixInstancedClass(boolean bUsePrefixInstancedClass) {
+			this.bUsePrefixInstancedClass = bUsePrefixInstancedClass;
+		}
+
+		public boolean isUsePrefixDeclaringClass() {
+			return bUsePrefixDeclaringClass;
+		}
+
+		public void setUsePrefixDeclaringClass(boolean bUsePrefixDeclaringClass) {
+			this.bUsePrefixDeclaringClass = bUsePrefixDeclaringClass;
 		}
 		
 		
@@ -247,7 +303,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		ReflexFillCfg rfcfg = rfcfgOwnerOfField.getReflexFillCfg(rfcvFieldAtTheOwner);
 		if(rfcfg==null){
 			if(bUseDefaultCfgIfMissing){
-				rfcfg = new ReflexFillCfg();
+				rfcfg = new ReflexFillCfg(rfcvFieldAtTheOwner);
 			}else{
 				throw new NullPointerException("Configuration is missing for "
 					+rfcfgOwnerOfField.getClass().getName()
@@ -270,15 +326,15 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 			strCodeTypePrefix=rfcvFieldAtTheOwner.getCodePrefixVariant();
 		}
 		
-		String strCommand = strFieldName;
+		String strCommandCore = strFieldName;
 		if(strCodeTypePrefix==null || strFieldName.startsWith(strCodeTypePrefix)){
 			if(strCodeTypePrefix!=null){
 				//remove prefix
-				strCommand=strCommand.substring(strCodeTypePrefix.length());
+				strCommandCore=strCommandCore.substring(strCodeTypePrefix.length());
 			}
 			
 			if(bMakePretty){
-				strCommand=MiscI.i().makePretty(strCommand, rfcfg.bFirstLetterUpperCase);
+				strCommandCore=MiscI.i().makePretty(strCommandCore, rfcfg.bFirstLetterUpperCase);
 //				/**
 //				 * upper case with underscores
 //				 */
@@ -299,11 +355,81 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 				/**
 				 * Already nice to read field name.
 				 */
-				strCommand=MiscI.i().firstLetter(strCommand,rfcfg.bFirstLetterUpperCase);
+				strCommandCore=MiscI.i().firstLetter(strCommandCore,rfcfg.bFirstLetterUpperCase);
 			}
 		}
-		strCommand=rfcfg.strPrefix+strCommand+rfcfg.strSuffix;
-		return strCommand;
+		
+		return prepareFullCommand(strCommandCore, rfcfg);
+	}
+	
+	/**
+	 * all these concatenated identifiers are good to make sure all commands are unique,
+	 * but... command's size get huge...
+	 * 
+	 * @param strCommandCore
+	 * @param rfcfg
+	 * @return
+	 */
+	private String prepareFullCommand(String strCommandCore, ReflexFillCfg rfcfg){
+	//	strCommand=rfcfg.strPrefix+strCommand+rfcfg.strSuffix;
+		String strFullCommand=preparePart(rfcfg.getPrefix());
+		
+		boolean bUseCustomId=true;
+		
+		String strPrefixDeclaring="";
+		if(rfcfg.isUsePrefixDeclaringClass()){
+			if(rfcfg.getPrefixDeclaringClass().isEmpty()){
+				Field field = assertAndGetField(rfcfg.rfcv.getOwner(), rfcfg.rfcv);
+				rfcfg.setPrefixDeclaringClass(field.getDeclaringClass().getSimpleName());
+			}
+			
+			strPrefixDeclaring=preparePart(rfcfg.getPrefixDeclaringClass());
+			
+			if(rfcfg.getPrefixCustomId().equalsIgnoreCase(rfcfg.getPrefixDeclaringClass())){
+				bUseCustomId=false;
+			}
+		}
+		
+		String strPrefixInstanced="";
+		if(rfcfg.isUsePrefixInstancedClass()){
+			if(rfcfg.getPrefixInstancedClass().isEmpty()){
+				rfcfg.setPrefixInstancedClass(rfcfg.rfcv.getOwner().getClass().getSimpleName());
+			}
+			
+			if(!rfcfg.getPrefixDeclaringClass().equalsIgnoreCase(rfcfg.getPrefixInstancedClass())){
+				strPrefixInstanced=preparePart(rfcfg.getPrefixInstancedClass());
+				
+				if(rfcfg.getPrefixCustomId().equalsIgnoreCase(rfcfg.getPrefixInstancedClass())){
+					bUseCustomId=false;
+				}
+			}
+		}
+		
+		String strPrefixCustomId="";
+		if(bUseCustomId)strPrefixCustomId=preparePart(rfcfg.getPrefixCustomId());
+		
+		/**
+		 * this order is good for sorting, from more specific to more generic
+		 */
+		strFullCommand+=strPrefixCustomId+strPrefixInstanced+strPrefixDeclaring;
+				
+		strFullCommand+=strCommandCore;
+		
+		strFullCommand+=preparePart(rfcfg.getSuffix(),true);
+		
+		return strFullCommand;
+	}
+	
+	private String preparePart(String str){
+		return preparePart(str, false);
+	}
+	private String preparePart(String str, boolean bPrependSeparator){
+		if(str==null || str.isEmpty())return "";
+		if(bPrependSeparator){
+			return strCommandPartSeparator+str;
+		}else{
+			return str+strCommandPartSeparator;
+		}
 	}
 	
 	public boolean isbUseDefaultCfgIfMissing() {
@@ -371,5 +497,14 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		Field field = assertAndGetField(objClassOwningField,objFieldValue);
 		Class<?> clWhereFieldIsActuallyDeclared = field.getDeclaringClass();
 		return clWhereFieldIsActuallyDeclared;
+	}
+
+	public String getCommandPartSeparator() {
+		return strCommandPartSeparator;
+	}
+
+	public void setCommandPartSeparator(String strCommandPartSeparator) {
+		this.strCommandPartSeparator = strCommandPartSeparator;
+		if(this.strCommandPartSeparator==null)throw new PrerequisitesNotMetException("use empty intead of null separator!");
 	}
 }
