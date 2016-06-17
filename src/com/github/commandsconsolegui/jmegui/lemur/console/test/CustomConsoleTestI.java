@@ -177,8 +177,8 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 		if(rfcv.getClass().isAssignableFrom(StringCmdField.class)){
 			if(strFieldCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
-				rfcfg.setCommandPrefix("Niceprefix");
-				rfcfg.setCommandSuffix("Nicesuffix");
+				rfcfg.setPrefix("Niceprefix");
+				rfcfg.setSuffix("Nicesuffix");
 				rfcfg.setFirstLetterUpperCase(true);
 			}else
 			if(strFieldCodePrefixLess.equals(rfcv.getCodePrefixVariant())){

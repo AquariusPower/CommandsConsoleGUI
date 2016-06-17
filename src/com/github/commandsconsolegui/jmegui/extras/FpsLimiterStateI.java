@@ -55,6 +55,10 @@ public class FpsLimiterStateI extends CmdConditionalStateAbs{
 	private long	lNanoDelayLimit;
 	private int	iMaxFPS;
 	
+	public FpsLimiterStateI() {
+		super.bPrefixCmdWithIdToo=true;
+	}
+	
 	public static class CfgParm implements ICfgParm{} //look at super class
 	@Override
 	public FpsLimiterStateI configure(ICfgParm icfg) {

@@ -1804,12 +1804,12 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 		if(rfcv.getClass().isAssignableFrom(StringCmdField.class)){
 			if(strFinalFieldInputCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
-				rfcfg.setCommandPrefix("CONSOLEGUISTATE_");
+				rfcfg.setPrefix("CONSOLEGUISTATE_");
 				rfcfg.setFirstLetterUpperCase(true);
 			}else
-			if(cd().strFinalFieldRestrictedCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
+			if(CommandsDelegator.strFinalFieldRestrictedCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
-				rfcfg.setCommandPrefix(""+cd().RESTRICTED_TOKEN);
+				rfcfg.setPrefix(""+CommandsDelegator.RESTRICTED_TOKEN);
 				rfcfg.setFirstLetterUpperCase(true);
 			}
 			
@@ -1824,7 +1824,8 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 //			}
 		}
 		
-		if(rfcfg==null)rfcfg = cd().getReflexFillCfg(rfcv);
+//		if(rfcfg==null)rfcfg = cd().getReflexFillCfg(rfcv);
+		if(rfcfg==null)rfcfg = super.getReflexFillCfg(rfcv);
 		
 		return rfcfg;
 	}

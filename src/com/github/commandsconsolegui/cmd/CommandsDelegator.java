@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.cmd;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -163,8 +164,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * this char indicates something that users (non developers) 
 	 * should not have direct access.
 	 */
-	public final Character	RESTRICTED_TOKEN	= '&';
-	public final String strFinalFieldRestrictedCmdCodePrefix="RESTRICTED_CMD_";
+	public static final Character	RESTRICTED_TOKEN	= '&';
+	public static final String strFinalFieldRestrictedCmdCodePrefix="RESTRICTED_CMD_";
 	public final StringCmdField	RESTRICTED_CMD_SKIP_CURRENT_COMMAND	= new StringCmdField(this,strFinalFieldRestrictedCmdCodePrefix);
 	public final StringCmdField	RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE	= new StringCmdField(this,strFinalFieldRestrictedCmdCodePrefix);
 	public final StringCmdField	RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS	= new StringCmdField(this,strFinalFieldRestrictedCmdCodePrefix);
@@ -269,14 +270,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		ReflexFillCfg rfcfg = null;
 		
-		boolean bIsCommand = false;
 		if(rfcv.getClass().isAssignableFrom(BoolTogglerCmdField.class)){
 			if(BoolTogglerCmdField.strTogglerCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
-				rfcfg.setCommandSuffix("Toggle");
+				rfcfg.setSuffix("Toggle");
 			}
 			
-			bIsCommand=true;
+			rfcfg.setAsCommandToo(true);
 		}else
 		if(rfcv.getClass().isAssignableFrom(StringCmdField.class)){
 			if(strFinalCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
@@ -284,15 +284,26 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			}else
 			if(strFinalFieldRestrictedCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
-				rfcfg.setCommandPrefix(""+RESTRICTED_TOKEN);
+				rfcfg.setPrefix(""+RESTRICTED_TOKEN);
+			}else
+			if(StringCmdField.strCodePrefix.equals(rfcv.getCodePrefixVariant())){
+				rfcfg = new ReflexFillCfg();
 			}
 			
-			bIsCommand=true;
+			rfcfg.setAsCommandToo(true);
 		}
+//		else
+//		if(rfcv.getClass().isAssignableFrom(TimedDelayVarField.class)){
+//			if(TimedDelayVarField.strCodePrefixVariant.equals(rfcv.getCodePrefixVariant())){
+//				rfcfg = new ReflexFillCfg();
+//			}
+//		}
 		
 		if(rfcfg!=null){
-			if(bIsCommand){
-				rfcfg.setCommandPrefix("cmd");
+			if(rfcfg.isCommandToo()){
+				Field field = ReflexFillI.i().assertAndGetField(rfcv.getOwner(), rfcv);
+				Class<?> cl = field.getDeclaringClass();
+				rfcfg.setPrefix("cmd"+cl.getSimpleName());
 				rfcfg.setFirstLetterUpperCase(true);
 			}
 		}
@@ -438,7 +449,17 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			return "ROOT";
 		}
 		
-		return iccl.getClass().getSimpleName();
+		String strClassTree="";
+		Class<?> cl = iccl.getClass();
+		while(!cl.toString().equals(Object.class.toString())){
+			if(!strClassTree.isEmpty())strClassTree+=",";
+			strClassTree+=cl.getSimpleName();
+			cl=cl.getSuperclass();
+		}
+		
+//		return iccl.getClass().getSimpleName();
+//		ReflexFillI.i().assertAndGetField(iccl., objFieldValue)
+		return strClassTree;
 	}
 	
 	public IConsoleCommandListener getPseudoListener(){
@@ -551,6 +572,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		//this will let it fill the commands list for this listener
 		bFillCommandList=true;
 		icc.execConsoleCommand(this); 
+		checkCmdValidityBoolTogglers(); //so new ones will be added properly too.
 		bFillCommandList=false;
 	}
 	
@@ -781,7 +803,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		if(checkCmdValidity(icclPseudo,"statsFieldToggle","[bEnable] toggle simple stats field visibility")){
 			bCmdWorked=icui.statsFieldToggle();
 		}else
-		if(checkCmdValidity(icclPseudo,"statsShowAll","show all console stats")){
+		if(checkCmdValidity(icclPseudo,"statsShowAll","sho)w all console stats")){
 			dumpAllStats();
 			bCmdWorked=true;
 		}else
@@ -1208,7 +1230,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			 * conflict check
 			 */
 			for(CommandData cmdd:acmdList){
-				if(CommandData.getCmdComparator().compare(cmdd, cmddNew)==0){
+				if(cmdd.getBaseCmd().equalsIgnoreCase(cmddNew.getBaseCmd())){
+					if(cmdd.identicalTo(cmddNew))return; //already set from same origin, just skip.
+//				if(CommandData.getCmdComparator().compare(cmdd, cmddNew)==0){
 					throw new PrerequisitesNotMetException("conflicting commands id "
 						+"'"+cmdd.getBaseCmd()+"'"
 						+" for "

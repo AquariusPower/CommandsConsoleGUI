@@ -98,6 +98,10 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 
 //	private int	iMoveCaratTo;
 	
+	public LemurMiscHelpersStateI() {
+		super.bPrefixCmdWithIdToo = true;
+	}
+	
 	public Geometry getTextCursorFrom(TextField tf){
 		return (Geometry) getBitmapTextFrom(tf).getChild("cursor");
 //				
@@ -236,10 +240,10 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		return cc.cmdFoundReturnStatus(bCmdEndedGracefully);
 	}
 
-	@Override
-	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
-		return cd().getReflexFillCfg(rfcv);
-	}
+//	@Override
+//	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+//		return cd().getReflexFillCfg(rfcv);
+//	}
 	
 //	private String strCaratNewPosition = "CaratNewPosition";
 //	/**

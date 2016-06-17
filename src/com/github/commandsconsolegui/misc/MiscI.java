@@ -47,6 +47,7 @@ import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -345,5 +346,24 @@ public class MiscI {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * use Arrays.deepEquals(asteA, asteB);
+	 * 
+	 * @param asteA
+	 * @param asteB
+	 * @return
+	 */
+	@Deprecated
+	public boolean compareStackTraces(StackTraceElement[] asteA, StackTraceElement[] asteB){
+		for(int i=0;i<asteA.length;i++){
+			StackTraceElement ste = asteA[i];
+			if(!ste.equals(asteB[i])){
+//			if(!ste.toString().equals(asteB[i].toString())){
+				return false;
+			}
+		}
+		return true;
 	}
 }

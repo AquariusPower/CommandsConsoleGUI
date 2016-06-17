@@ -99,6 +99,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 	public ConsoleLemurStateI(){
 		setDumpEntriesSlowedQueue(new VersionedList<String>());
 		vlstrDumpEntries = new VersionedList<String>();
+//		super.bPrefixCmdWithIdToo = true;
 	}
 	
 //	@Override

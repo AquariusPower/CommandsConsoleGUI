@@ -27,9 +27,11 @@
 
 package com.github.commandsconsolegui.cmd;
 
+import java.util.Arrays;
 import java.util.Comparator;
 
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 
 /**
@@ -74,6 +76,8 @@ public class CommandData {
 		return cmp;
 	}
 	
+	
+	
 	public String asHelp() {
 		return strBaseCmd+" "
 				+strComment+" "
@@ -84,6 +88,19 @@ public class CommandData {
 //			+"("+(icclOwner!=null ? 
 //					icclOwner.getClass().getSimpleName() : 
 //					GlobalCommandsDelegatorI.i().get().getSelfRootListenerId())+")";
+	}
+	
+	public boolean identicalTo(CommandData cmddNew) {
+		return 
+//			MiscI.i().compareStackTraces(asteCodeTrackUniqueId, cmddNew.asteCodeTrackUniqueId)
+//			Arrays.deepEquals(asteCodeTrackUniqueId, cmddNew.asteCodeTrackUniqueId)
+//			&&
+			this.getOwner()==cmddNew.getOwner()
+			&&
+			this.getBaseCmd().equalsIgnoreCase(cmddNew.getBaseCmd())
+			&&
+			this.getComment().equalsIgnoreCase(cmddNew.getComment())
+			;
 	}
 	
 }

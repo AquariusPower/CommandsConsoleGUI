@@ -148,7 +148,8 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	public boolean b(){return bCurrent;}
 	
 	/**
-	 * @return true if value changed
+	 * 
+	 * @return true once if value changed, and update the reference to wait for next change
 	 */
 	public boolean checkChangedAndUpdate(){
 		if(bCurrent != bPrevious){

@@ -79,6 +79,10 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 //		cc.addConsoleCommandListener(this);
 //	}
 	
+	public LemurFocusHelperStateI() {
+		super.bPrefixCmdWithIdToo = true;
+	}
+	
 	public static class CfgParm implements ICfgParm{
 		Float fBaseZ;
 		public CfgParm(Float fBaseZ) {

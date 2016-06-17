@@ -84,24 +84,24 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 	private SelectionModel	selectionModel;
 	BoolTogglerCmdField btgAutoScroll = new BoolTogglerCmdField(this, true);
 	
-	@Override
-	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
-//		ReflexFillCfg rfcfg = null;
-		
-		ReflexFillCfg rfcfg = new ReflexFillCfg(super.getReflexFillCfg(rfcv));
-		rfcfg.setCommandPrefix(getId());
-		rfcfg.setFirstLetterUpperCase(true);
-//		ReflexFillCfg rfcfgSuper = super.getReflexFillCfg(rfcv);
-//		if(rfcv.getClass().isAssignableFrom(BoolTogglerCmdField.class)){
-//			rfcfg = new ReflexFillCfg(rfcfgSuper);
-//			rfcfg.setCommandPrefix(getId());
-//		}
+//	@Override
+//	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+////		ReflexFillCfg rfcfg = null;
 //		
-//		if(rfcfg==null)rfcfg = rfcfgSuper;
-		
-		return rfcfg;
-	}
-
+//		ReflexFillCfg rfcfg = new ReflexFillCfg(super.getReflexFillCfg(rfcv));
+//		rfcfg.setCommandPrefix(rfcfg.getCommandPrefix()+getId());
+//		rfcfg.setFirstLetterUpperCase(true);
+////		ReflexFillCfg rfcfgSuper = super.getReflexFillCfg(rfcv);
+////		if(rfcv.getClass().isAssignableFrom(BoolTogglerCmdField.class)){
+////			rfcfg = new ReflexFillCfg(rfcfgSuper);
+////			rfcfg.setCommandPrefix(getId());
+////		}
+////		
+////		if(rfcfg==null)rfcfg = rfcfgSuper;
+//		
+//		return rfcfg;
+//	}
+//
 	
 	@Override
 	public Container getContainerMain(){
@@ -634,7 +634,9 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		boolean bCommandWorked = false;
 		
 		if(cc.checkCmdValidity(this,"showDialogKeyBinds"+getId(),"")){
-			cc.dumpSubEntry("ESC - close; Up/Down - nav. list entry; Enter - accept/submit choice;");
+			cc.dumpSubEntry("ESC - close; Up/Down - nav. list entry");
+			cc.dumpSubEntry("Enter - accept/submit choice (at config dialog)");
+			cc.dumpSubEntry("DoubleClick - config or accept/submit choice");
 			bCommandWorked = true;
 		}else
 		{

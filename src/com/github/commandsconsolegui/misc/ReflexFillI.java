@@ -66,14 +66,10 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		 * to validate and also be removed from the identifier string
 		 */
 		String	strCodingStyleFieldNamePrefix=null;
-//		String	strCodingStyleFieldNamePrefix=null;
-//		String	strCodingStyleFinalFieldNamePrefix=null;
-		
-		String	strCommandPrefix="";
-		
-		String	strCommandSuffix="";
-		
+		String	strPrefix="";
+		String	strSuffix="";
 		boolean bFirstLetterUpperCase = false;
+		boolean	bIsCommandToo = false;
 		
 		public String getCodingStyleFieldNamePrefix() {
 			return strCodingStyleFieldNamePrefix;
@@ -84,20 +80,20 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 			this.strCodingStyleFieldNamePrefix = strCodingStyleFieldNamePrefix;
 		}
 
-		public String getCommandPrefix() {
-			return strCommandPrefix;
+		public String getPrefix() {
+			return strPrefix;
 		}
 
-		public void setCommandPrefix(String strCommandPrefix) {
-			this.strCommandPrefix = strCommandPrefix;
+		public void setPrefix(String strCommandPrefix) {
+			this.strPrefix = strCommandPrefix;
 		}
 
-		public String getCommandSuffix() {
-			return strCommandSuffix;
+		public String getSuffix() {
+			return strSuffix;
 		}
 
-		public void setCommandSuffix(String strCommandSuffix) {
-			this.strCommandSuffix = strCommandSuffix;
+		public void setSuffix(String strCommandSuffix) {
+			this.strSuffix = strCommandSuffix;
 		}
 
 		public boolean isFirstLetterUpperCase() {
@@ -115,10 +111,20 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		public ReflexFillCfg(ReflexFillCfg other) {
 			super();
 			this.strCodingStyleFieldNamePrefix = other.strCodingStyleFieldNamePrefix;
-			this.strCommandPrefix = other.strCommandPrefix;
-			this.strCommandSuffix = other.strCommandSuffix;
+			this.strPrefix = other.strPrefix;
+			this.strSuffix = other.strSuffix;
 			this.bFirstLetterUpperCase = other.bFirstLetterUpperCase;
+			this.bIsCommandToo = other.bIsCommandToo;
 		}
+
+		public void setAsCommandToo(boolean b) {
+			this.bIsCommandToo = b;
+		}
+		
+		public boolean isCommandToo() {
+			return this.bIsCommandToo;
+		}
+		
 		
 	}
 
@@ -253,6 +259,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		}
 		
 		Field fld = assertAndGetField(rfcfgOwnerOfField, rfcvFieldAtTheOwner);
+		Class<?> cl = fld.getDeclaringClass();
 		
 		String strFieldName=fld.getName();
 		
@@ -295,82 +302,8 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 				strCommand=MiscI.i().firstLetter(strCommand,rfcfg.bFirstLetterUpperCase);
 			}
 		}
-		strCommand=rfcfg.strCommandPrefix+strCommand+rfcfg.strCommandSuffix;
+		strCommand=rfcfg.strPrefix+strCommand+rfcfg.strSuffix;
 		return strCommand;
-		
-//		Class<?> cl = rfcfgOwnerOfField.getClass();
-//		String strExceptionLog="Field object not found at: ";
-//		while(true){
-//			strExceptionLog+=cl.getName();
-//			if(cl.getName().equals(Object.class.getName())){
-//				strExceptionLog+="";
-//				break;
-//			}else{
-//				strExceptionLog+=" <= ";
-//			}
-//			
-//			for(Field fld:cl.getDeclaredFields()){
-//				try {
-//					boolean bWasAccessible = fld.isAccessible();
-//					if(!bWasAccessible)fld.setAccessible(true);
-//					if(fld.get(rfcfgOwnerOfField)==rfcvFieldAtTheOwner){ // same object
-//						String strFieldName=fld.getName();
-//						
-//						boolean bFinal=false;
-//						if(Modifier.isFinal(fld.getModifiers()))bFinal=true;
-//						
-//						String strCodeTypePrefix = rfcfg.strCodingStyleFieldNamePrefix;
-////						if(bFinal)strCodeTypePrefix = rfcfg.strCodingStyleFinalFieldNamePrefix;
-//						if(strCodeTypePrefix==null){
-//							strCodeTypePrefix=rfcvFieldAtTheOwner.getCodePrefixVariant();
-//						}
-//						
-//						String strCommand = strFieldName;
-//						if(strCodeTypePrefix==null || strFieldName.startsWith(strCodeTypePrefix)){
-//							if(strCodeTypePrefix!=null){
-//								//remove prefix
-//								strCommand=strCommand.substring(strCodeTypePrefix.length());
-//							}
-//							
-//							if(bFinal){
-//								/**
-//								 * upper case with underscores
-//								 */
-//								String strCmdNew = null;
-//								for(String strWord : strCommand.split("_")){
-//									if(strCmdNew==null){
-//										if(rfcfg.bFirstLetterUpperCase){
-//											strCmdNew=firstLetter(strWord.toLowerCase(),true);
-//										}else{
-//											strCmdNew=strWord.toLowerCase();
-//										}
-//									}else{
-//										strCmdNew+=firstLetter(strWord.toLowerCase(),true);
-//									}
-//								}
-//								strCommand=strCmdNew;
-//							}else{
-//								/**
-//								 * Already nice to read field name.
-//								 */
-//								strCommand=firstLetter(strCommand,rfcfg.bFirstLetterUpperCase);
-//							}
-//						}
-//						strCommand=rfcfg.strCommandPrefix+strCommand+rfcfg.strCommandSuffix;
-//						return strCommand;
-//					}
-//					if(!bWasAccessible)fld.setAccessible(false);
-//				} catch (IllegalArgumentException | IllegalAccessException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//			
-//			cl=cl.getSuperclass();
-//		}
-//		
-//		throw new NullPointerException("Failed to automatically set command id. "
-//			+"Was "+rfcvFieldAtTheOwner.getClass()+" object owner properly set to the class where it is instantiated? "
-//			+strExceptionLog);
 	}
 	
 	public boolean isbUseDefaultCfgIfMissing() {

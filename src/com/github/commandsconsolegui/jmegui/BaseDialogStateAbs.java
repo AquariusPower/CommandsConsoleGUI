@@ -103,7 +103,7 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 		strCmdSuffix = "";
 		
 //		ConditionalStateManagerI.i().
-		if(cfg.strUIId==null || cfg.strUIId.isEmpty())throw new NullPointerException("invalid UI identifier");
+		if(cfg.strUIId==null || cfg.strUIId.isEmpty())throw new PrerequisitesNotMetException("invalid UI identifier");
 		this.strCaseInsensitiveId=cfg.strUIId;
 		
 //		this.strCmd=strCmdPrefix+strUIId+strCmdSuffix;
@@ -185,10 +185,10 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 		this.strTitle = str;
 	}
 	
-	@Override
-	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
-		return cd().getReflexFillCfg(rfcv);
-	}
+//	@Override
+//	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+//		return cd().getReflexFillCfg(rfcv);
+//	}
 
 	public Spatial getIntputField() {
 		return sptIntputField;

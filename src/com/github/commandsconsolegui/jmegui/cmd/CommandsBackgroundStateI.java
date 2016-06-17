@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.jmegui.cmd;
 
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleUI;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 
@@ -46,6 +48,10 @@ public class CommandsBackgroundStateI extends CmdConditionalStateAbs {
 		"Will continue running console commands even if console is closed.");
 	
 	private IConsoleUI	cgsaGraphicalConsoleUI;
+	
+	public CommandsBackgroundStateI() {
+		super.bPrefixCmdWithIdToo = true;
+	}
 	
 	public static class CfgParm implements ICfgParm{
 		IConsoleUI icui;
@@ -85,4 +91,5 @@ public class CommandsBackgroundStateI extends CmdConditionalStateAbs {
 		if(!cd().isInitialized())return false;
 		return super.initCheckPrerequisites();
 	}
+
 }

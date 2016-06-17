@@ -47,6 +47,7 @@ public class StringCmdField extends VarCmdFieldAbs{
 	protected String	strReflexFillCfgCodePrefixVariant;
 	private String	strHelpComment;
 	protected static boolean bIgnoreCaseOnComparison = true;
+	public static final String strCodePrefix="scf"; //ex.: scfTestCommand
 	
 	/**
 	 * default is true, useful for easy lowercase user typed commands comparison
@@ -60,6 +61,11 @@ public class StringCmdField extends VarCmdFieldAbs{
 //		this(rfcfgOwner,0);
 //	}
 	
+	/**
+	 * 
+	 * @param strCmdIdentifier overrides auto-identifier thru reflection
+	 * @param strHelpComment
+	 */
 	public StringCmdField(String strCmdIdentifier, String strHelpComment){
 		this.strCmdIdentifier=strCmdIdentifier;
 		this.strHelpComment = strHelpComment;
@@ -76,6 +82,9 @@ public class StringCmdField extends VarCmdFieldAbs{
 		
 //		this.iReflexFillCfgVariant=iReflexFillCfgVariant;
 		this.strReflexFillCfgCodePrefixVariant = strReflexFillCfgCodePrefixVariant;
+		if(this.strReflexFillCfgCodePrefixVariant==null){
+			this.strReflexFillCfgCodePrefixVariant=StringCmdField.strCodePrefix;
+		}
 		
 //		ReflexFill.assertAndGetField(rfcfgOwner, this);
 		

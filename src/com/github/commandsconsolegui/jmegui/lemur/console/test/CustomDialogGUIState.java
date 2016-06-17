@@ -44,7 +44,7 @@ import com.simsilica.lemur.GuiGlobals;
  * @author AquariusPower <https://github.com/AquariusPower>
  */
 public class CustomDialogGUIState extends LemurDialogGUIStateAbs{
-	StringCmdField cmdAddEntries = null;
+	StringCmdField scfAddEntry = new StringCmdField(this,null,"[strEntryText]");
 //	ArrayList<String> astr;
 //	HashMap<String,String> hmKeyValueTmp = new HashMap<String,String>();
 //	private Object	answerFromModal;
@@ -73,6 +73,10 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs{
 	}
 
 	protected ArrayList<DialogListEntryData>	adleFullList = new ArrayList<DialogListEntryData>();
+	
+	public CustomDialogGUIState() {
+		super.bPrefixCmdWithIdToo = true;
+	}
 	
 	@Override
 	public CustomDialogGUIState configure(ICfgParm icfg) {
@@ -180,14 +184,14 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs{
 	
 	@Override
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
-		if(cmdAddEntries==null){
-			cmdAddEntries = new StringCmdField(getId()+"AddEntry","[strText]");
-		}
+//		if(cmdAddEntries==null){
+//			cmdAddEntries = new StringCmdField(getId()+"AddEntry","[strText]");
+//		}
 //		if(!isConfigured())return ECmdReturnStatus.Skip;
 		
 		boolean bCommandWorked = false;
 		
-		if(cc.checkCmdValidity(this,cmdAddEntries,null)){
+		if(cc.checkCmdValidity(this,scfAddEntry,null)){
 			String strText = cc.paramString(1);
 			addEntry(strText);
 			bCommandWorked = true;
