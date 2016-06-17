@@ -323,4 +323,27 @@ public class MiscI {
 //		}
 //		return sptParentest;
 //	}
+
+	public boolean containsFuzzyMatch(String strToCheck, String strFuzzyMatcher, boolean bNormalContainsMode, boolean bIgnoreCase){
+		if(bIgnoreCase){
+			strToCheck=strToCheck.toLowerCase();
+			strFuzzyMatcher=strFuzzyMatcher.toLowerCase();
+		}
+		
+		if(bNormalContainsMode){
+			return strToCheck.contains(strFuzzyMatcher);
+		}
+		
+		int iFuzzyIndex = 0;
+		for(char c : strToCheck.toCharArray()){
+			if(c == strFuzzyMatcher.charAt(iFuzzyIndex)){
+				iFuzzyIndex++;
+				if(strFuzzyMatcher.length()==iFuzzyIndex){
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
 }

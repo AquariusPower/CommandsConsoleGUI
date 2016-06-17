@@ -62,8 +62,9 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 	private final String strFieldCodePrefix="sf";
 	private final String strFieldCodePrefixLess = "VariantAsPrefixLess";
 	
-	public final StringCmdField CMD_END_DEVELOPER_COMMAND_TEST = new StringCmdField(
-		this,CustomCommands.strFinalCmdCodePrefix);
+//	public final StringCmdField CMD_END_DEVELOPER_COMMAND_TEST = new StringCmdField(
+//		this,CustomCommands.strFinalCmdCodePrefix);
+	public final StringCmdField scfEndDeveloperCommandTest = new StringCmdField(this,"scf");
 	
 	/**
 	 * these below were not implemented as commands here, 
@@ -155,9 +156,13 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator	cc) {
 		boolean bCommandWorked = false;
 		
-		if(cc.checkCmdValidity(this,CMD_END_DEVELOPER_COMMAND_TEST,"[iHowMany] users working?")){
+		if(cc.checkCmdValidity(this,scfEndDeveloperCommandTest,"[iHowMany] users working?")){
 			bCommandWorked = endDevCustomMethod(cc.paramInt(1));
 		}else
+//		if(cc.checkCmdValidity(this,"conflictTest123","")){
+//		}else
+//		if(cc.checkCmdValidity(this,"conflictTest123","")){
+//		}else
 		{
 			return ECmdReturnStatus.NotFound;
 		}

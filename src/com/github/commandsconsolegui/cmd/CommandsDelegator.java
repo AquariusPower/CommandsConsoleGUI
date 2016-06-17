@@ -105,6 +105,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public final BoolTogglerCmdField	btgEngineStatsView = new BoolTogglerCmdField(this,false);
 	public final BoolTogglerCmdField	btgEngineStatsFps = new BoolTogglerCmdField(this,false);
 	public final BoolTogglerCmdField	btgShowMiliseconds=new BoolTogglerCmdField(this,false);
+//	public final BoolTogglerCmdField	btgStringContainsFuzzyFilter=new BoolTogglerCmdField(this,true);
 	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
 	public final BoolTogglerCmdField	btgConsoleCpuRest=new BoolTogglerCmdField(this,false,null,
 		"Console update steps will be skipped if this is enabled.");
@@ -172,17 +173,18 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	/**
 	 * more tokens
 	 */
-	protected Character	chCommandDelimiter = ';';
-	protected Character	chAliasPrefix = '$';
-	protected Character	chVariableExpandPrefix = chAliasPrefix;
-	protected Character	chFilterToken = '~';
-	protected	Character chAliasBlockedToken = '-';
-	protected Character	chAliasAllowedToken = '+';
-	protected	Character chVarDeleteToken = '-';
-	protected	Character	chCommentPrefix='#';
-	protected	Character	chCommandPrefix='/';
-	protected char chCopyRangeIndicator=182;
-	protected String strCopyRangeIndicator=""+chCopyRangeIndicator;
+	private char	chCommandDelimiter;
+	private char	chAliasPrefix;
+	private char	chVariableExpandPrefix;
+	/** any place that accepts a filter, when starting with this token, will run as fuzzy filter */
+	private char	chFuzzyFilterModeToken;
+	private	char chAliasBlockedToken;
+	private char	chAliasAllowedToken;
+	private	char chVarDeleteToken;
+	private	char	chCommentPrefix;
+	private	char	chCommandPrefix;
+	private char chCopyRangeIndicator;
+	private String strCopyRangeIndicator;
 	
 	/**
 	 * etc
@@ -249,6 +251,20 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	protected ArrayList<AliasData> aAliasList = new ArrayList<AliasData>();
 	protected ArrayList<CommandData> acmdList = new ArrayList<CommandData>();
 	
+	public CommandsDelegator() {
+		setCommandDelimiter(';');
+		setAliasPrefix('$');
+		setVariableExpandPrefix(chAliasPrefix);
+		/** any place that accepts a filter, when starting with this token, will run as fuzzy filter */
+		setFuzzyFilterModeToken('~');
+		setAliasBlockedToken('-');
+		setAliasAllowedToken('+');
+		setVarDeleteToken('-');
+		setCommentPrefix('#');
+		setCommandPrefix('/');
+		setCopyRangeIndicator((char)182); //TODO describe what char is this...
+	}
+
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		ReflexFillCfg rfcfg = null;
@@ -284,48 +300,60 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		return rfcfg;
 	}
 	
+	public void assertValidToken(char ch){
+		if(Character.isDigit(ch) || Character.isWhitespace(ch) || Character.isLowerCase(ch) || Character.isUpperCase(ch)){
+			throw new PrerequisitesNotMetException("invalid token "+ch);
+		}
+	}
+	
 	public Character getCommandDelimiter() {
 		return chCommandDelimiter;
 	}
 	public String getCommandDelimiterStr() {
 		return ""+chCommandDelimiter;
 	}
-	protected CommandsDelegator setCommandDelimiter(Character chCommandDelimiter) {
+	protected CommandsDelegator setCommandDelimiter(char chCommandDelimiter) {
+		assertValidToken(chCommandDelimiter);
 		this.chCommandDelimiter = chCommandDelimiter;
 		return this;
 	}
 	public Character getAliasPrefix() {
 		return chAliasPrefix;
 	}
-	protected CommandsDelegator setAliasPrefix(Character chAliasPrefix) {
+	protected CommandsDelegator setAliasPrefix(char chAliasPrefix) {
+		assertValidToken(chAliasPrefix);
 		this.chAliasPrefix = chAliasPrefix;
 		return this;
 	}
 	public Character getVariableExpandPrefix() {
 		return chVariableExpandPrefix;
 	}
-	protected CommandsDelegator setVariableExpandPrefix(Character chVariableExpandPrefix) {
+	protected CommandsDelegator setVariableExpandPrefix(char chVariableExpandPrefix) {
+		assertValidToken(chVariableExpandPrefix);
 		this.chVariableExpandPrefix = chVariableExpandPrefix;
 		return this;
 	}
-	public Character getFilterToken() {
-		return chFilterToken;
+	public Character getFuzzyFilterModeToken() {
+		return chFuzzyFilterModeToken;
 	}
-	protected CommandsDelegator setFilterToken(Character chFilterToken) {
-		this.chFilterToken = chFilterToken;
+	protected CommandsDelegator setFuzzyFilterModeToken(char chFilterToken) {
+		assertValidToken(chFilterToken);
+		this.chFuzzyFilterModeToken = chFilterToken;
 		return this;
 	}
 	public Character getAliasBlockedToken() {
 		return chAliasBlockedToken;
 	}
-	protected CommandsDelegator setAliasBlockedToken(Character chAliasBlockedToken) {
+	protected CommandsDelegator setAliasBlockedToken(char chAliasBlockedToken) {
+		assertValidToken(chAliasBlockedToken);
 		this.chAliasBlockedToken = chAliasBlockedToken;
 		return this;
 	}
 	public Character getAliasAllowedToken() {
 		return chAliasAllowedToken;
 	}
-	protected CommandsDelegator setAliasAllowedToken(Character chAliasAllowedToken) {
+	protected CommandsDelegator setAliasAllowedToken(char chAliasAllowedToken) {
+		assertValidToken(chAliasAllowedToken);
 		this.chAliasAllowedToken = chAliasAllowedToken;
 		return this;
 	}
@@ -335,23 +363,36 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public String getVarDeleteTokenStr() {
 		return ""+chVarDeleteToken;
 	}
-	protected CommandsDelegator setVarDeleteToken(Character chVarDeleteToken) {
+	protected CommandsDelegator setVarDeleteToken(char chVarDeleteToken) {
+		assertValidToken(chVarDeleteToken);
 		this.chVarDeleteToken = chVarDeleteToken;
 		return this;
 	}
 	public Character getCommentPrefix() {
 		return chCommentPrefix;
 	}
-	protected CommandsDelegator setCommentPrefix(Character chCommentPrefix) {
+	protected CommandsDelegator setCommentPrefix(char chCommentPrefix) {
+		assertValidToken(chCommentPrefix);
 		this.chCommentPrefix = chCommentPrefix;
 		return this;
 	}
 	public Character getCommandPrefix() {
 		return chCommandPrefix;
 	}
-	protected CommandsDelegator setCommandPrefix(Character chCommandPrefix) {
+	protected CommandsDelegator setCommandPrefix(char chCommandPrefix) {
+		assertValidToken(chCommandPrefix);
 		this.chCommandPrefix = chCommandPrefix;
 		return this;
+	}
+	
+	public char getChCopyRangeIndicator() {
+		return chCopyRangeIndicator;
+	}
+
+	public void setCopyRangeIndicator(char chCopyRangeIndicator) {
+		assertValidToken(chCopyRangeIndicator);
+		this.chCopyRangeIndicator = chCopyRangeIndicator;
+		this.strCopyRangeIndicator=""+chCopyRangeIndicator;
 	}
 	
 	public String commentToAppend(String strText){
@@ -489,6 +530,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	
 	/**
 	 * Any class can attach it's command interpreter.
+	 * 
+	 * It will promptly call the listener in a safe way, 
+	 * to let it fill the recognized commands list with it's own commands. 
+	 * 
 	 * @param icc
 	 */
 	public void addConsoleCommandListener(IConsoleCommandListener icc){
@@ -667,7 +712,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				if(iIndex!=null && iIndex.intValue()!=i)continue;
 				
 				ImportantMsgData imsg = astrImportantMsgBufferList.get(i);
-				if(iIndex==null && strFilter!=null && !imsg.strMsg.toLowerCase().contains(strFilter.toLowerCase()))continue;
+				if(iIndex==null && !containsFilterString(imsg.strMsg,strFilter))continue;
 				
 				dumpSubEntry(""+i+": "+imsg.strMsg);
 				if(iIndex!=null && (imsg.ex!=null||imsg.aste!=null)){
@@ -1144,7 +1189,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	protected void addCmdToValidList(IConsoleCommandListener iccl, String strNew, boolean bSkipSortCheck){
-		String strConflict=null;
+//		String strConflict=null;
 		
 		if(iccl==null)throw new PrerequisitesNotMetException("listener reference cannot be null");
 			
@@ -1157,34 +1202,40 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				strComment= strNew.substring(strBaseCmdNew.length());
 			}
 			
+			CommandData cmddNew = new CommandData(iccl, strBaseCmdNew, strComment);
+			
 			/**
 			 * conflict check
 			 */
-			for(CommandData cmd:acmdList){
-//			for(String strBase:astrBaseCmdValidList){
-				if(cmd.getBaseCmd().equalsIgnoreCase(strBaseCmdNew)){
-					strConflict="";
-					
-					String strOwner = getListenerId(cmd.getOwner());
-//					if(cmd.getOwner()!=null)strOwner = cmd.getOwner().getClass().getSimpleName();
-					strConflict+="("+strOwner+":"+cmd.getBaseCmd()+")";
-					
-					strConflict+=" x ";
-					
-//					if(iccl.equals(icclSelfRoot)){
-//						strOwner = getSelfRootListenerId();
-//					}else{
-//						strOwner = iccl.getClass().getSimpleName();
-//					}
-					
-					strConflict+="("+strOwner+":"+strBaseCmdNew+")";
-					
-					break;
+			for(CommandData cmdd:acmdList){
+				if(CommandData.getCmdComparator().compare(cmdd, cmddNew)==0){
+					throw new PrerequisitesNotMetException("conflicting commands id "
+						+"'"+cmdd.getBaseCmd()+"'"
+						+" for "
+						+"'"+getListenerId(cmdd.getOwner())+"'"
+						+" vs "
+						+"'"+getListenerId(cmddNew.getOwner())+"'"
+					);
 				}
 			}
+//			for(CommandData cmd:acmdList){
+//				if(cmd.getBaseCmd().equalsIgnoreCase(strBaseCmdNew)){
+//					strConflict="";
+//					
+//					String strOwner = getListenerId(cmd.getOwner());
+////					if(cmd.getOwner()!=null)strOwner = cmd.getOwner().getClass().getSimpleName();
+//					strConflict+="("+strOwner+":"+cmd.getBaseCmd()+")";
+//					
+//					strConflict+=" x ";
+//					
+//					strConflict+="("+strOwner+":"+strBaseCmdNew+")";
+//					
+//					break;
+//				}
+//			}
 			
-			if(strConflict==null){
-				acmdList.add(new CommandData(iccl, strBaseCmdNew, strComment));
+//			if(strConflict==null){
+				acmdList.add(cmddNew);
 //				astrBaseCmdValidList.add(strBaseCmdNew);
 //				astrCmdWithCmtValidList.add(strNew);
 				
@@ -1198,13 +1249,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 						dumpDevWarnEntry("sorting required, last '"+strLast+"' new '"+strBaseCmdNew+"'");
 					}
 				}
-			}
+//			}
 		}
 //		}
 		
-		if(strConflict!=null){
-			dumpExceptionEntry(new NullPointerException("ConflictCmdId: "+strConflict));
-		}
+//		if(strConflict!=null){
+//			dumpExceptionEntry(new PrerequisitesNotMetException("ConflictCmdId: "+strConflict));
+//		}
 	}
 	
 	protected boolean isCommentedLine(){
@@ -1239,7 +1290,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			/**
 			 * empty filter will work too.
 			 */
-			if(strVarId.toLowerCase().contains(strFilter.toLowerCase())){
+			if(containsFilterString(strVarId,strFilter)){
 				astr.add(strVarId);
 			}
 		}
@@ -1437,10 +1488,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	protected String getAliasHelp() {
-		return "[<identifier> <commands>] | [<+|->identifier] | ["+getFilterToken()+"filter]\n"
+		return "[<identifier> <commands>] | [<+|->identifier] | ["+getFuzzyFilterModeToken()+"filter]\n"
 			+"\t\tCreates an alias to run a in-line commands block (each separated by '"+getCommandDelimiter()+"')\n"
 			+"\t\tWithout params, will list all aliases\n"
-			+"\t\t"+getFilterToken()+"filter - will filter (contains) the alias list\n"
+			+"\t\t"+getFuzzyFilterModeToken()+"filter - will filter (contains) the alias list\n"
 			+"\t\t-identifier - will block that alias execution\n"
 			+"\t\t+identifier - will un-block that alias execution\n"
 			+"\t\tObs.: to execute an alias, "
@@ -1458,7 +1509,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			bOk=aliasBlock(strAliasId.substring(1),true);
 		}else{
 			String strFilter=null;
-			if(strAliasId!=null && strAliasId.startsWith(""+getFilterToken())){
+			if(strAliasId!=null && strAliasId.startsWith(""+getFuzzyFilterModeToken())){
 				if(strAliasId.length()>1)strFilter = strAliasId.substring(1);
 				strAliasId=null;
 			}
@@ -1468,7 +1519,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				 * will list all aliases (or filtered)
 				 */
 				for(AliasData alias:aAliasList){
-					if(strFilter!=null && !alias.toString().toLowerCase().contains(strFilter.toLowerCase()))continue;
+					if(!containsFilterString(alias.toString(),strFilter))continue;
 					dumpSubEntry(alias.toString());
 				}
 				dumpSubEntry(commentToAppend("AliasListHashCode="+aAliasList.hashCode()));
@@ -1481,12 +1532,35 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		return bOk;
 	}
 	
+	/**
+	 * 
+	 * @param strText
+	 * @param strFilter if null, means it is to skip the filter, means "match all", so returns true
+	 * @return
+	 */
+	protected boolean containsFilterString(String strText, String strFilter){
+		if(strFilter==null)return true;
+		
+		boolean bFuzzyMatch=false;
+		if(strFilter.startsWith(""+getFuzzyFilterModeToken())){
+			bFuzzyMatch=true;
+			if(strFilter.length()>1){
+				strFilter=strFilter.substring(1);
+			}else{
+				strFilter=null;
+			}
+		}
+		
+//		return MiscI.i().containsFuzzyMatch(strText, strFilter, !btgStringContainsFuzzyFilter.b(), true);
+		return MiscI.i().containsFuzzyMatch(strText, strFilter, !bFuzzyMatch, true);
+	}
+	
 	protected boolean cmdShowHistory() {
 		String strFilter = paramString(1);
 		ArrayList<String> astrToDump = new ArrayList<String>();
 		if(strFilter!=null){
 			for(String str:astrCmdHistory){
-				if(!str.toLowerCase().contains(strFilter.toLowerCase()))continue;
+				if(!containsFilterString(str,strFilter))continue;
 				str=str.trim(); // to prevent fail of unique check by spaces presence
 				if(!astrToDump.contains(str))astrToDump.add(str);
 				Collections.sort(astrToDump);
@@ -1922,7 +1996,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public String varReportPrepare(String strVarId) {
-		VarIdValueOwnerData vivo = selectVarSource(strVarId).get(strVarId);
+		VarIdValueOwnerData vivod = selectVarSource(strVarId).get(strVarId);
 		String str="";
 		
 		// as reusable command
@@ -1931,16 +2005,16 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		str+=" ";
 		str+=strVarId;
 		str+=" ";
-		if(vivo!=null){
-			str+="\""+vivo.objValue+"\"";
+		if(vivod!=null){
+			str+="\""+vivod.objValue+"\"";
 			str+=" ";
 		}
 		
 		// comments
 		str+="#";
 		// var type
-		if(vivo!=null){
-			str+=vivo.objValue.getClass().getSimpleName();
+		if(vivod!=null){
+			str+=vivod.objValue.getClass().getSimpleName();
 		}else{
 			str+="(ValueNotSet)";
 		}
@@ -1949,13 +2023,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		str+=(isRestricted(strVarId)?"(Restricted)":"(User)");
 		// dev info
 		if(btgShowDeveloperInfo.b()){
-			if(vivo.owner!=null && vivo.rfcfgClassHoldingTheOwner!=null){
+			if(vivod.owner!=null && vivod.rfcfgClassHoldingTheOwner!=null){
 				str+=" ";
-				str+="["+vivo.rfcfgClassHoldingTheOwner.getClass().getName()+"]";
+//				str+="["+vivo.rfcfgClassHoldingTheOwner.getClass().getName()+"]";
+				str+="["+ReflexFillI.i().getDeclaringClass(vivod.rfcfgClassHoldingTheOwner, vivod.owner).getName()+"]";
 			}
 		}
 		str+=" ";
-		str+=vivo.getHelp();
+		str+=vivod.getHelp();
 		
 		return str;
 	}
@@ -2173,10 +2248,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			dumpInfoEntry("Help for '"+strFilter+"':");
 		}
 		
-		Collections.sort(acmdList, CommandData.comparator());
+		Collections.sort(acmdList, CommandData.getCmdComparator());
 		for(CommandData cmd:acmdList){
-//			if(strFilter!=null && !cmd.getBaseCmd().toLowerCase().contains(strFilter.toLowerCase()))continue;
-			if(strFilter!=null && !cmd.asHelp().toLowerCase().contains(strFilter.toLowerCase()))continue;
+			if(!containsFilterString(cmd.asHelp(),strFilter))continue;
 			dumpSubEntry(getCommandPrefix()+cmd.asHelp());
 		}
 	}
@@ -3214,4 +3288,5 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		if(!bInitialized)MsgI.i().msgDbg("is ini", false, this);
 		return bInitialized;
 	}
+
 }

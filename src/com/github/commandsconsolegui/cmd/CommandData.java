@@ -41,6 +41,7 @@ public class CommandData {
 	String strBaseCmd;
 	String strComment;
 	IConsoleCommandListener icclOwner;
+	StackTraceElement[] asteCodeTrackUniqueId;
 	
 	public String getBaseCmd() {
 		return strBaseCmd;
@@ -57,21 +58,22 @@ public class CommandData {
 		this.icclOwner = icclOwner;
 		this.strBaseCmd = strBaseCmd;
 		this.strComment = strComment;
+		this.asteCodeTrackUniqueId = Thread.currentThread().getStackTrace();
 		
 		if(this.icclOwner==null)throw new PrerequisitesNotMetException("listener cannot be null");
 	}
 	
-	public static CommandComparator comparator(){
-		return cmp;
-	}
-	
-	private static CommandComparator cmp = new CommandComparator();
-	private static class CommandComparator implements Comparator<CommandData>{
+	public static class CommandComparator implements Comparator<CommandData>{
 		@Override
 		public int compare(CommandData c1, CommandData c2){
 			return c1.strBaseCmd.compareToIgnoreCase(c2.strBaseCmd);
 		}
 	}
+	private static CommandComparator cmp = new CommandComparator();
+	public static CommandComparator getCmdComparator(){
+		return cmp;
+	}
+	
 	public String asHelp() {
 		return strBaseCmd+" "
 				+strComment+" "

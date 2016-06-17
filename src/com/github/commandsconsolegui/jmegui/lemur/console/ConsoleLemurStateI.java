@@ -31,6 +31,7 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
@@ -89,7 +90,9 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 	protected Button	btnClipboardShow;
 	protected Button	btnCut;
 	protected Label	lblStats;
-
+	
+	public final StringCmdField CMD_SHOW_BINDS = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
+	
 	private ColorRGBA	colorConsoleStyleBackground;
 	private TextEntryComponent	tecInputField;
 	
@@ -1003,7 +1006,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
 		boolean bCommandWorked = false;
 		
-		if(cc.checkCmdValidity(this,"showBinds","")){
+		if(cc.checkCmdValidity(this,CMD_SHOW_BINDS,"")){
 			cc.dumpInfoEntry("Key bindings: ");
 			cc.dumpSubEntry("Ctrl+C - copy");
 			cc.dumpSubEntry("Ctrl+X - cut");
@@ -1018,6 +1021,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 			cc.dumpSubEntry("Ctrl+TAB - autocomplete (contains)");
 			cc.dumpSubEntry("Ctrl+/ - toggle input field comment");
 			cc.dumpSubEntry("HintListFill: Ctrl (contains mode) or Ctrl+Shift (overrides existing hint list with contains mode)");
+			cc.dumpSubEntry("Filter: for any command that accepts a filter, if such filter starts with '"+cd().getFuzzyFilterModeToken()+"', the filtering will be fuzzy.");
 			bCommandWorked=true;
 		}else
 		{
