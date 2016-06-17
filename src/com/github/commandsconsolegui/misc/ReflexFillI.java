@@ -65,15 +65,61 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		/**
 		 * to validate and also be removed from the identifier string
 		 */
-		public String	strCodingStyleFieldNamePrefix=null;
+		String	strCodingStyleFieldNamePrefix=null;
 //		String	strCodingStyleFieldNamePrefix=null;
 //		String	strCodingStyleFinalFieldNamePrefix=null;
 		
-		public String	strCommandPrefix="";
+		String	strCommandPrefix="";
 		
-		public String	strCommandSuffix="";
+		String	strCommandSuffix="";
 		
-		public boolean bFirstLetterUpperCase = false;
+		boolean bFirstLetterUpperCase = false;
+		
+		public String getCodingStyleFieldNamePrefix() {
+			return strCodingStyleFieldNamePrefix;
+		}
+
+		public void setCodingStyleFieldNamePrefix(
+				String strCodingStyleFieldNamePrefix) {
+			this.strCodingStyleFieldNamePrefix = strCodingStyleFieldNamePrefix;
+		}
+
+		public String getCommandPrefix() {
+			return strCommandPrefix;
+		}
+
+		public void setCommandPrefix(String strCommandPrefix) {
+			this.strCommandPrefix = strCommandPrefix;
+		}
+
+		public String getCommandSuffix() {
+			return strCommandSuffix;
+		}
+
+		public void setCommandSuffix(String strCommandSuffix) {
+			this.strCommandSuffix = strCommandSuffix;
+		}
+
+		public boolean isFirstLetterUpperCase() {
+			return bFirstLetterUpperCase;
+		}
+
+		public void setFirstLetterUpperCase(boolean bFirstLetterUpperCase) {
+			this.bFirstLetterUpperCase = bFirstLetterUpperCase;
+		}
+
+		public ReflexFillCfg() {
+			super();
+		}
+		
+		public ReflexFillCfg(ReflexFillCfg other) {
+			super();
+			this.strCodingStyleFieldNamePrefix = other.strCodingStyleFieldNamePrefix;
+			this.strCommandPrefix = other.strCommandPrefix;
+			this.strCommandSuffix = other.strCommandSuffix;
+			this.bFirstLetterUpperCase = other.bFirstLetterUpperCase;
+		}
+		
 	}
 
 	private static boolean	bAllowHK = true;
@@ -355,24 +401,42 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	
 	/**
 	 * 
-	 * @param rfcfgOwner
+	 * @param rfcfgOwningValue
 	 * @param strCodePrefixVariant
-	 * @param irfcv
+	 * @param irfcvValue
 	 * @param iOnlyFirstLettersCount see {@link MiscI#makePretty(Class, boolean, Integer)}
 	 * @return
 	 */
-	public String getVarId(IReflexFillCfg rfcfgOwner, String strCodePrefixVariant, IReflexFillCfgVariant irfcv, Integer iOnlyFirstLettersCount) {
-		if(rfcfgOwner==null){
+	public String getVarId(IReflexFillCfg rfcfgOwningValue, String strCodePrefixVariant, IReflexFillCfgVariant irfcvValue, Integer iOnlyFirstLettersCount) {
+		if(rfcfgOwningValue==null){
 			throw new NullPointerException("Invalid usage, "
 				+IReflexFillCfg.class.getName()+" owner is null, is this a local (non field) variable?");
 		}
 		
+//		Field field = assertAndGetField(rfcfgOwningValue,irfcvValue);
+//		Class<?> clWhereFieldIsActuallyDeclared = field.getDeclaringClass();
+		
 		String strVarId = strCodePrefixVariant
-			+MiscI.i().makePretty(rfcfgOwner.getClass(), false, iOnlyFirstLettersCount)
+//			+rfcfgOwner.getClass().getSimpleName()
+//			+clWhereFieldIsActuallyDeclared.getSimpleName()
+				+getDeclaringClass(rfcfgOwningValue,irfcvValue).getSimpleName()
+//			+MiscI.i().makePretty(rfcfgOwner.getClass(), false, iOnlyFirstLettersCount)
 			+MiscI.i().firstLetter(
-				ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,irfcv),
+				ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwningValue,irfcvValue),
 				true);
 		
 		return strVarId;
+	}
+	
+	/**
+	 * 
+	 * @param objClassOwningField
+	 * @param objFieldValue
+	 * @return the (super) class that contains a field storing the specified value 
+	 */
+	public Class<?> getDeclaringClass(Object objClassOwningField, Object objFieldValue){
+		Field field = assertAndGetField(objClassOwningField,objFieldValue);
+		Class<?> clWhereFieldIsActuallyDeclared = field.getDeclaringClass();
+		return clWhereFieldIsActuallyDeclared;
 	}
 }

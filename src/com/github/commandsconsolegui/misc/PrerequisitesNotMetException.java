@@ -35,6 +35,7 @@ package com.github.commandsconsolegui.misc;
  */
 public class PrerequisitesNotMetException extends NullPointerException {
 	private static final long	serialVersionUID	= 1342052861109804737L;
+	private static boolean	bRequestExit;
 
 	public PrerequisitesNotMetException() {
 		super();
@@ -43,6 +44,7 @@ public class PrerequisitesNotMetException extends NullPointerException {
 
 	public PrerequisitesNotMetException(String str, Object... aobj) {
 		super(join(str,aobj));
+		PrerequisitesNotMetException.bRequestExit=true;
 	}
 	
 	private static String join(String str, Object... aobj){
@@ -55,5 +57,9 @@ public class PrerequisitesNotMetException extends NullPointerException {
 			strRet+="  [obj="+i+"]"+obj.getClass().getName()+", value:"+obj+"\n";
 		}
 		return strRet;
+	}
+	
+	public static boolean isExitRequested(){
+		return bRequestExit;
 	}
 }

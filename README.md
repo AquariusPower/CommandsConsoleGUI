@@ -14,3 +14,5 @@ ConsoleCommands
 - FPS limiter
 - Single Application Instance
 - Dialogs to easy configurations and be used as a quick start for interactions.
+
+PS.: When it is no more a pre-release, use public methods at will, but protected members with caution, as I may change them even if I don't like the naming :)

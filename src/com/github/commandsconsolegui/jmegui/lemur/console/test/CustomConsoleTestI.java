@@ -172,14 +172,14 @@ public class CustomConsoleTestI extends SimpleConsoleAppAbs implements IReflexFi
 		if(rfcv.getClass().isAssignableFrom(StringCmdField.class)){
 			if(strFieldCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
-				rfcfg.strCommandPrefix = "Niceprefix";
-				rfcfg.strCommandSuffix = "Nicesuffix";
-				rfcfg.bFirstLetterUpperCase = true;
+				rfcfg.setCommandPrefix("Niceprefix");
+				rfcfg.setCommandSuffix("Nicesuffix");
+				rfcfg.setFirstLetterUpperCase(true);
 			}else
 			if(strFieldCodePrefixLess.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
-				rfcfg.strCodingStyleFieldNamePrefix=null;
-				rfcfg.bFirstLetterUpperCase = true;
+				rfcfg.setCodingStyleFieldNamePrefix(null);
+				rfcfg.setFirstLetterUpperCase(true);
 			}
 		}
 		

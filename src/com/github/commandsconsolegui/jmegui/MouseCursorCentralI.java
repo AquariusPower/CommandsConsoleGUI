@@ -53,7 +53,7 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 	private static MouseCursorCentralI instance = new MouseCursorCentralI();
 	public static MouseCursorCentralI i(){return instance;}
 	
-	public static class CompositeControl extends CompositeControlAbs<MouseCursorCentralI>{
+	public static final class CompositeControl extends CompositeControlAbs<MouseCursorCentralI>{
 		private CompositeControl(MouseCursorCentralI casm){super(casm);};
 	}
 	private CompositeControl ccSelf = new CompositeControl(this);
@@ -63,19 +63,19 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 	IntLongVarField ilvClickMaxDelayMilis = new IntLongVarField(this,300,"the delay between button pressed and button released");
 	IntLongVarField ilvMultiClickMaxDelayMilis = new IntLongVarField(this,500,"the delay between each subsequent click (button released moment)");
 	
-	ArrayList<MouseCursorButtonsControl> amcabList = new ArrayList<MouseCursorButtonsControl>();
+//	ArrayList<MouseCursorButtonsControl> amcabList = new ArrayList<MouseCursorButtonsControl>();
 	
 	MouseCursorButtonsControl mcbcSingleInstance = new MouseCursorButtonsControl(ccSelf,this);
 	public MouseCursorButtonsControl getButtonsInstance(){
 		return mcbcSingleInstance;
 	}
 	
-	@Deprecated
-	public MouseCursorButtonsControl createButtonsInstance(Object objParent){
-		MouseCursorButtonsControl mcab = new MouseCursorButtonsControl(ccSelf,objParent);
-		amcabList.add(mcab);
-		return mcab;
-	}
+//	@Deprecated
+//	public MouseCursorButtonsControl createButtonsInstance(Object objParent){
+//		MouseCursorButtonsControl mcab = new MouseCursorButtonsControl(ccSelf,objParent);
+//		amcabList.add(mcab);
+//		return mcab;
+//	}
 	
 //	protected long lClickDelayMilis;
 	
@@ -168,20 +168,19 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 		boolean bCommandWorked = false;
 		
 		if(cc.checkCmdValidity(this,CMD_FIX_RESETING_MOUSE_CURSOR,null)){
-			String strBefore = report();
-			cc.dumpSubEntry(cc.getCommentPrefixStr()+"Before:\n"+report());
+			String strBefore = getButtonsInstance().report();
+//			cc.dumpSubEntry(cc.getCommentPrefixStr()+"Before:\n"+strBefore);
 			
-			for(MouseCursorButtonsControl mcab:amcabList){
-				mcab.resetFixingAllButtonsState();
-			}
+			getButtonsInstance().resetFixingAllButtonsState();
 			
-			String strAfter = report();
+			String strAfter = getButtonsInstance().report();
 			String[] aBefore = strBefore.split("\n");
 			String[] aAfter = strAfter.split("\n");
 			boolean bChanged=false;
 			for(int i=0;i<aBefore.length;i++){
 				if(!aBefore[i].equals(aAfter[i])){
-					cc.dumpSubEntry(cc.getCommentPrefixStr()+"Changed: "+aAfter[i]);
+					cc.dumpSubEntry(cc.getCommentPrefixStr()+"Before: "+aBefore[i]);
+					cc.dumpSubEntry(cc.getCommentPrefixStr()+"After:  "+aAfter[i]);
 					bChanged = true;
 				}
 			}
@@ -190,9 +189,7 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 			bCommandWorked=true;
 		}else
 		if(cc.checkCmdValidity(this,"mouseCursorReport","")){
-			for(MouseCursorButtonsControl mcab:amcabList){
-				cc.dumpSubEntry(mcab.report());
-			}
+			cc.dumpSubEntry(getButtonsInstance().report());
 			bCommandWorked=true;
 		}else
 		{
@@ -202,13 +199,52 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 		
 		return cc.cmdFoundReturnStatus(bCommandWorked);
 	}
+//	@Override
+//	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
+//		boolean bCommandWorked = false;
+//		
+//		if(cc.checkCmdValidity(this,CMD_FIX_RESETING_MOUSE_CURSOR,null)){
+//			String strBefore = report();
+//			cc.dumpSubEntry(cc.getCommentPrefixStr()+"Before:\n"+report());
+//			
+//			for(MouseCursorButtonsControl mcab:amcabList){
+//				mcab.resetFixingAllButtonsState();
+//			}
+//			
+//			String strAfter = report();
+//			String[] aBefore = strBefore.split("\n");
+//			String[] aAfter = strAfter.split("\n");
+//			boolean bChanged=false;
+//			for(int i=0;i<aBefore.length;i++){
+//				if(!aBefore[i].equals(aAfter[i])){
+//					cc.dumpSubEntry(cc.getCommentPrefixStr()+"Changed: "+aAfter[i]);
+//					bChanged = true;
+//				}
+//			}
+//			if(!bChanged)cc.dumpSubEntry(cc.getCommentPrefixStr()+"Nothing changed...");
+//			
+//			bCommandWorked=true;
+//		}else
+//			if(cc.checkCmdValidity(this,"mouseCursorReport","")){
+//				for(MouseCursorButtonsControl mcab:amcabList){
+//					cc.dumpSubEntry(mcab.report());
+//				}
+//				bCommandWorked=true;
+//			}else
+//			{
+////			return cc.executePreparedCommandRoot();
+//				return ECmdReturnStatus.NotFound;
+//			}
+//		
+//		return cc.cmdFoundReturnStatus(bCommandWorked);
+//	}
 
-	private String report() {
-		String str="";
-		for(MouseCursorButtonsControl m:amcabList){
-			str+=m.report();
-		}
-		return str;
-	}
+//	private String report() {
+//		String str="";
+//		for(MouseCursorButtonsControl m:amcabList){
+//			str+=m.report();
+//		}
+//		return str;
+//	}
 
 }

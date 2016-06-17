@@ -32,6 +32,8 @@ import java.util.HashMap;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
@@ -42,6 +44,8 @@ import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.input.KeyInput;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -78,6 +82,26 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 	private Vector3f	v3fEntryListSize;
 	private Container	cntrEntryCfg;
 	private SelectionModel	selectionModel;
+	BoolTogglerCmdField btgAutoScroll = new BoolTogglerCmdField(this, true);
+	
+	@Override
+	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+//		ReflexFillCfg rfcfg = null;
+		
+		ReflexFillCfg rfcfg = new ReflexFillCfg(super.getReflexFillCfg(rfcv));
+		rfcfg.setCommandPrefix(getId());
+		rfcfg.setFirstLetterUpperCase(true);
+//		ReflexFillCfg rfcfgSuper = super.getReflexFillCfg(rfcv);
+//		if(rfcv.getClass().isAssignableFrom(BoolTogglerCmdField.class)){
+//			rfcfg = new ReflexFillCfg(rfcfgSuper);
+//			rfcfg.setCommandPrefix(getId());
+//		}
+//		
+//		if(rfcfg==null)rfcfg = rfcfgSuper;
+		
+		return rfcfg;
+	}
+
 	
 	@Override
 	public Container getContainerMain(){
@@ -428,26 +452,31 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		return vlEntriesList.indexOf(dleLastSelected);
 	}
 	
-	@Override
-	protected boolean updateOrUndo(float tpf) {
-		if(!super.updateOrUndo(tpf))return false;
-		
+	protected void autoScroll(){
 		Integer iSelected = getSelectedIndex();
 		if(iSelected!=null){ //TODO this is buggy...
 			int iTopEntryIndex = getTopEntryIndex();
 			int iBottomItemIndex = getBottomEntryIndex();
 			Integer iScrollTo=null;
+			
 			if(iSelected>=iBottomItemIndex){
 				iScrollTo=iSelected-iBottomItemIndex+iTopEntryIndex;
 			}else
 			if(iSelected<=iTopEntryIndex){
 				iScrollTo=iSelected-1;
 			}
+			
 			if(iScrollTo!=null){
 				scrollTo(iScrollTo);
 			}
 		}
+	}
+	
+	@Override
+	protected boolean updateOrUndo(float tpf) {
+		if(!super.updateOrUndo(tpf))return false;
 		
+		if(btgAutoScroll.b())autoScroll();
 //		multiClickAction();
 		
 		return true;
@@ -521,7 +550,9 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 	 * @return max-1 (if total 1, max index 0)
 	 */
 	protected int getMaxIndex(){
-		return (int)lstbxEntriesToSelect.getSlider().getModel().getMaximum()-1;
+//		return lstbxEntriesToSelect.getVisibleItems()
+		return vlEntriesList.size()-1;
+//			+( ((int)lstbxEntriesToSelect.getSlider().getModel().getMaximum()) -1);
 	}
 	
 	protected int getTopEntryIndex(){
@@ -751,7 +782,9 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		iSel+=iAddIndex;
 		
 		if(iSel<0)iSel=0;
-		if(iSel>iMaxIndex)iSel=iMaxIndex;
+		if(iSel>iMaxIndex){
+			iSel=iMaxIndex;
+		}
 //		
 //			if(iMax>0){
 //				iSel=0;
@@ -763,7 +796,9 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		selectionModel.setSelection(iSel);
 		
 //		iSel = selectionModel.getSelection();
-		cd().dumpDebugEntry(getId()+":SelectedEntry:"+iSel);
+		cd().dumpDebugEntry(getId()+":"
+			+"SelectedEntry="+iSel+","
+			+"SliderValue="+MiscI.i().fmtFloat(lstbxEntriesToSelect.getSlider().getModel().getValue()));
 		return iSel;
 //		return iSel==null?-1:iSel;
 	}

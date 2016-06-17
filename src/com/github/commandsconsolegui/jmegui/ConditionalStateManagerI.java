@@ -46,7 +46,7 @@ public class ConditionalStateManagerI extends AbstractAppState {
 	private static ConditionalStateManagerI instance = new ConditionalStateManagerI();
 	public static ConditionalStateManagerI i(){return instance;}
 	
-	public static class CompositeControl extends CompositeControlAbs<ConditionalStateManagerI>{
+	public static final class CompositeControl extends CompositeControlAbs<ConditionalStateManagerI>{
 		private CompositeControl(ConditionalStateManagerI casm){super(casm);};
 	}
 	private CompositeControl ccSelf = new CompositeControl(this);

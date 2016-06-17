@@ -64,6 +64,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 
 	private String	strReflexFillCfgCodePrefixVariant;
 	private VarIdValueOwnerData	vivo;
+	private String	strVarId;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
@@ -86,7 +87,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	 * 
 	 * @param rfcfgOwnerUseThis always pass as "this", the very class must implement it.
 	 * @param bInitValue
-	 * @param strReflexFillCfgCodePrefixVariant
+	 * @param strReflexFillCfgCodePrefixVariant if null, will be default. Can be emtpy "".
 	 */
 	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitValue, String strReflexFillCfgCodePrefixVariant){
 		this( rfcfgOwnerUseThis,  bInitValue,  strReflexFillCfgCodePrefixVariant, "");
@@ -95,7 +96,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	 * 
 	 * @param rfcfgOwnerUseThis always pass as "this", the very class must implement it.
 	 * @param bInitialValue
-	 * @param strReflexFillCfgCodePrefixVariant
+	 * @param strReflexFillCfgCodePrefixVariant if null, will be default. Can be emtpy "".
 	 * @param strHelp
 	 */
 	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitialValue, String strReflexFillCfgCodePrefixVariant, String strHelp){
@@ -104,6 +105,10 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 //		ReflexFill.assertAndGetField(rfcfgOwnerUseThis, this);
 		
 		this.strReflexFillCfgCodePrefixVariant=strReflexFillCfgCodePrefixVariant;
+		if(this.strReflexFillCfgCodePrefixVariant==null){
+			this.strReflexFillCfgCodePrefixVariant=BoolTogglerCmdField.strTogglerCodePrefix;
+		}
+		
 		this.rfcfgOwner=rfcfgOwnerUseThis;
 		this.strHelp=strHelp;
 		set(bInitialValue);
@@ -208,7 +213,11 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 
 	@Override
 	public String getVarId() {
-		return getCmdId();
+		if(strVarId!=null)return strVarId;
+		strVarId = ReflexFillI.i().getVarId(
+				rfcfgOwner, BoolTogglerCmdField.strTogglerCodePrefix, this, -1);
+//		return getCmdId();
+		return strVarId;
 	}
 
 	@Override

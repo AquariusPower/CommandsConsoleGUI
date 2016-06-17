@@ -78,7 +78,7 @@ public class MouseCursorButtonsControl {
 	public String report(){
 		String str="";
 		for(EMouseCursorButton e:EMouseCursorButton.values()){
-			str+=""+objParent.getClass().getSimpleName()
+			str+=""//+objParent.getClass().getSimpleName()
 				+e+": "
 				+getMouseCursorDataFor(e).toString()
 				+"\n";

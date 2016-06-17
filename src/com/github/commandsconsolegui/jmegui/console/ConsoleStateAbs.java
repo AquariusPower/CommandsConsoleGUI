@@ -1804,13 +1804,13 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 		if(rfcv.getClass().isAssignableFrom(StringCmdField.class)){
 			if(strFinalFieldInputCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
-				rfcfg.strCommandPrefix = "CONSOLEGUISTATE_";
-				rfcfg.bFirstLetterUpperCase = true;
+				rfcfg.setCommandPrefix("CONSOLEGUISTATE_");
+				rfcfg.setFirstLetterUpperCase(true);
 			}else
 			if(cd().strFinalFieldRestrictedCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
-				rfcfg.strCommandPrefix = ""+cd().RESTRICTED_TOKEN;
-				rfcfg.bFirstLetterUpperCase = true;
+				rfcfg.setCommandPrefix(""+cd().RESTRICTED_TOKEN);
+				rfcfg.setFirstLetterUpperCase(true);
 			}
 			
 			

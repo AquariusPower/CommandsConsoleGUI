@@ -45,6 +45,7 @@ import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDbgKey;
@@ -94,21 +95,21 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 */
 //	public final BoolToggler	btgAcceptExternalExitRequests = new BoolToggler(this,false,strTogglerCodePrefix, 
 //		"if a ");
-	public final BoolTogglerCmdField	btgDbAutoBkp = new BoolTogglerCmdField(this,false,BoolTogglerCmdField.strTogglerCodePrefix, 
+	public final BoolTogglerCmdField	btgDbAutoBkp = new BoolTogglerCmdField(this,false,null, 
 		"whenever a save happens, if the DB was modified, a backup will be created of the old file");
 	public final BoolTogglerCmdField	btgShowWarn = new BoolTogglerCmdField(this,true);
 	public final BoolTogglerCmdField	btgShowInfo = new BoolTogglerCmdField(this,true);
 	public final BoolTogglerCmdField	btgShowException = new BoolTogglerCmdField(this,true);
-	public final BoolTogglerCmdField	btgDumpToTerminal = new BoolTogglerCmdField(this,true,BoolTogglerCmdField.strTogglerCodePrefix,
+	public final BoolTogglerCmdField	btgDumpToTerminal = new BoolTogglerCmdField(this,true,null,
 		"The system terminal where the application is being run, will also receive "+CommandsDelegator.class.getSimpleName()+" output.");
 	public final BoolTogglerCmdField	btgEngineStatsView = new BoolTogglerCmdField(this,false);
 	public final BoolTogglerCmdField	btgEngineStatsFps = new BoolTogglerCmdField(this,false);
 	public final BoolTogglerCmdField	btgShowMiliseconds=new BoolTogglerCmdField(this,false);
 	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
-	public final BoolTogglerCmdField	btgConsoleCpuRest=new BoolTogglerCmdField(this,false,BoolTogglerCmdField.strTogglerCodePrefix,
+	public final BoolTogglerCmdField	btgConsoleCpuRest=new BoolTogglerCmdField(this,false,null,
 		"Console update steps will be skipped if this is enabled.");
 	public final BoolTogglerCmdField	btgAutoScroll=new BoolTogglerCmdField(this,true);
-	public final BoolTogglerCmdField	btgUseFixedLineWrapModeForAllFonts=new BoolTogglerCmdField(this,false,BoolTogglerCmdField.strTogglerCodePrefix,
+	public final BoolTogglerCmdField	btgUseFixedLineWrapModeForAllFonts=new BoolTogglerCmdField(this,false,null,
 		"If enabled, this will use a fixed line wrap column even for non mono spaced fonts, "
 		+"based on the width of the 'W' character. Otherwise it will dynamically guess the best "
 		+"fitting string size.");
@@ -143,6 +144,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //	public final StringField CMD_CONSOLE_SCROLL_BOTTOM = new StringField(this,strFinalCmdCodePrefix);
 //	public final StringField CMD_CONSOLE_STYLE = new StringField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_CONSOLE_SCROLL_BOTTOM = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_CLEAR_COMMANDS_HISTORY = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_DB = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_ECHO = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_FIX_LINE_WRAP = new StringCmdField(this,strFinalCmdCodePrefix);
@@ -154,6 +156,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public final StringCmdField CMD_MESSAGE_REVIEW = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_VAR_SET = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_SLEEP = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_STATS_ENABLE = new StringCmdField(this,strFinalCmdCodePrefix);
 	
 	/**
 	 * this char indicates something that users (non developers) 
@@ -250,11 +253,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		ReflexFillCfg rfcfg = null;
 		
+		boolean bIsCommand = false;
 		if(rfcv.getClass().isAssignableFrom(BoolTogglerCmdField.class)){
 			if(BoolTogglerCmdField.strTogglerCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
-				rfcfg.strCommandSuffix="Toggle";
+				rfcfg.setCommandSuffix("Toggle");
 			}
+			
+			bIsCommand=true;
 		}else
 		if(rfcv.getClass().isAssignableFrom(StringCmdField.class)){
 			if(strFinalCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
@@ -262,7 +268,16 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			}else
 			if(strFinalFieldRestrictedCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg();
-				rfcfg.strCommandPrefix=""+RESTRICTED_TOKEN;
+				rfcfg.setCommandPrefix(""+RESTRICTED_TOKEN);
+			}
+			
+			bIsCommand=true;
+		}
+		
+		if(rfcfg!=null){
+			if(bIsCommand){
+				rfcfg.setCommandPrefix("cmd");
+				rfcfg.setFirstLetterUpperCase(true);
 			}
 		}
 		
@@ -523,7 +538,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		if(checkCmdValidity(icclPseudo,"alias",getAliasHelp(),true)){
 			bCmdWorked=cmdAlias();
 		}else
-		if(checkCmdValidity(icclPseudo,"clearCommandsHistory")){
+		if(checkCmdValidity(icclPseudo,CMD_CLEAR_COMMANDS_HISTORY,"")){
 			astrCmdHistory.clear();
 			bCmdWorked=true;
 		}else
@@ -698,7 +713,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			}
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,"statsEnable","[idToEnable [bEnable]] empty for a list. bEnable empty to toggle.")){
+		if(checkCmdValidity(icclPseudo,CMD_STATS_ENABLE,"[idToEnable [bEnable]] empty for a list. bEnable empty to toggle.")){
 			bCmdWorked=true;
 			String strId=paramString(1);
 			Boolean bValue=paramBoolean(2);
@@ -2276,6 +2291,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public void update(float tpf) {
 		if(!bConfigured)throw new NullPointerException("not configured yet");
 		if(!bInitialized)throw new NullPointerException("not initialized yet");
+		if(PrerequisitesNotMetException.isExitRequested())cmdExit();
 		
 		this.fTPF = tpf;
 		if(tdLetCpuRest.isActive() && !tdLetCpuRest.isReady(true))return;
@@ -2510,6 +2526,34 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		setupVars(true);
 	}
 	
+	protected void setupVarsAllFrom(ArrayList<VarCmdFieldAbs> avcf){
+//		ArrayList<IVarIdValueOwner> a2 = new ArrayList<IVarIdValueOwner>(a);
+		
+		for(VarCmdFieldAbs vcf:avcf.toArray(new VarCmdFieldAbs[0])){
+			for(VarCmdFieldAbs vcf2:avcf.toArray(new VarCmdFieldAbs[0])){
+				if(vcf==vcf2)continue;
+				if(vcf.getVarId().equalsIgnoreCase(vcf2.getVarId())){
+					throw new PrerequisitesNotMetException("conflicting var id"
+						+"'"+vcf.getVarId()+"'"
+						+" for "
+						+"'"+(ReflexFillI.i().getDeclaringClass(vcf.getOwner(),vcf)).getName()
+							+"#"+vcf.getOwner().hashCode()+"'"
+//						+"'"+vcf.getOwner().getClass().getName()+"#"+vcf.getOwner().hashCode()+"'"
+						+" vs "
+						+"'"+(ReflexFillI.i().getDeclaringClass(vcf2.getOwner(),vcf2)).getName()
+							+"#"+vcf2.getOwner().hashCode()+"'"
+//						+"'"+vcf2.getOwner().getClass().getName()+"#"+vcf2.getOwner().hashCode()+"'");
+//					avcf.remove(vcf2);
+					);
+				}
+			}
+		}
+		
+		for(VarCmdFieldAbs vcf:avcf){
+			varSet(vcf,false);
+		}
+	}
+	
 	protected void setupVars(boolean bSave){
 		varSet(""+RESTRICTED_TOKEN+ERestrictedSetupLoadableVars.userVariableListHashcode,
 			""+tmUserVariables.hashCode(),
@@ -2519,25 +2563,39 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			""+aAliasList.hashCode(),
 			false);
 		
-		for(BoolTogglerCmdField btg:BoolTogglerCmdField.getListCopy()){
-			varSet(btg,false);
-		}
+		ArrayList<VarCmdFieldAbs> avivoAllVarsList = new ArrayList<VarCmdFieldAbs>();
+		avivoAllVarsList.addAll(BoolTogglerCmdField.getListCopy());
+		avivoAllVarsList.addAll(TimedDelayVarField.getListCopy());
+		avivoAllVarsList.addAll(FloatDoubleVarField.getListCopy());
+		avivoAllVarsList.addAll(IntLongVarField.getListCopy());
+		avivoAllVarsList.addAll(StringVarField.getListCopy());
+		setupVarsAllFrom(avivoAllVarsList);
 		
-		for(TimedDelayVarField td:TimedDelayVarField.getListCopy()){
-			varSet(td,false);
-		}
+//		setupVarsAllFrom(BoolTogglerCmdField.getListCopy());
+//		setupVarsAllFrom(TimedDelayVarField.getListCopy());
+//		setupVarsAllFrom(FloatDoubleVarField.getListCopy());
+//		setupVarsAllFrom(IntLongVarField.getListCopy());
+//		setupVarsAllFrom(StringVarField.getListCopy());
 		
-		for(FloatDoubleVarField fdv:FloatDoubleVarField.getListCopy()){
-			varSet(fdv,false);
-		}
-		
-		for(IntLongVarField ilv:IntLongVarField.getListCopy()){
-			varSet(ilv,false);
-		}
-		
-		for(StringVarField sv:StringVarField.getListCopy()){
-			varSet(sv,false);
-		}
+//		for(BoolTogglerCmdField btg:BoolTogglerCmdField.getListCopy()){
+//			varSet(btg,false);
+//		}
+//		
+//		for(TimedDelayVarField td:TimedDelayVarField.getListCopy()){
+//			varSet(td,false);
+//		}
+//		
+//		for(FloatDoubleVarField fdv:FloatDoubleVarField.getListCopy()){
+//			varSet(fdv,false);
+//		}
+//		
+//		for(IntLongVarField ilv:IntLongVarField.getListCopy()){
+//			varSet(ilv,false);
+//		}
+//		
+//		for(StringVarField sv:StringVarField.getListCopy()){
+//			varSet(sv,false);
+//		}
 		
 		if(bSave)varSaveSetupFile();
 	}
