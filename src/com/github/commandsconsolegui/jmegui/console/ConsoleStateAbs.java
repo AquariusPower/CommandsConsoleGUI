@@ -1336,11 +1336,17 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 		if(isHintActive()){
 			String strHintCmd = getSelectedHint();
 			if(strHintCmd!=null){
-				strHintCmd=cd().getCommandPrefix()+cd().extractCommandPart(strHintCmd,0)+" ";
-				if(!getInputText().equals(strHintCmd)){
-					setInputFieldText(strHintCmd);
-					return true;
-				}
+				strHintCmd=cd().getCommandPrefix()
+					+cd().extractCommandPart(strHintCmd,0)+" "
+					+String.join(" ", cd().convertToCmdParamsList(getInputText(),1));
+//					+cd().extractCommandPart(getInputText(),1)
+				setInputFieldText(strHintCmd);
+				return true;
+//				if(!getInputText().equals(strHintCmd)){
+//					editInsertAtCaratPosition(strHintCmd);
+////					setInputFieldText(strHintCmd);
+//					return true;
+//				}
 			}
 		}
 		

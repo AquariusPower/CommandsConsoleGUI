@@ -158,6 +158,15 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public final StringCmdField CMD_VAR_SET = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_SLEEP = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_STATS_ENABLE = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_REPEAT = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final  StringCmdField	CMD_STATS_FIELD_TOGGLE  = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final  StringCmdField	CMD_STATS_SHOW_ALL = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final  StringCmdField	CMD_TEST = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final  StringCmdField	CMD_VAR_ADD = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final  StringCmdField	CMD_VAR_SET_CMP = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final  StringCmdField	CMD_VAR_SHOW = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final  StringCmdField	CMD_RESET = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final  StringCmdField	CMD_SHOW_SETUP = new StringCmdField(this,strFinalCmdCodePrefix);
 	
 	/**
 	 * this char indicates something that users (non developers) 
@@ -750,11 +759,21 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			cmdExit();
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,"reset","will reset the console (restart it)")){
+		if(checkCmdValidity(icclPseudo,CMD_REPEAT,"<iTimes> <strOtherCommand> will repeat other command iTimes")){
+			Integer iTimes = paramInt(1);
+			if(iTimes!=null && iTimes>=0){ // 0 or 1 is accepted in case iTimes is the result of some variable.
+				String strOtherCmd = paramStringConcatenateAllFrom(2);
+				if(strOtherCmd!=null){
+					for(int i=0;i<iTimes;i++)addCmdToQueue(strOtherCmd);
+					bCmdWorked=true;
+				}
+			}
+		}else
+		if(checkCmdValidity(icclPseudo,CMD_RESET,"will reset the console (restart it)")){
 			cmdResetConsole();
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,"showSetup","show restricted variables")){
+		if(checkCmdValidity(icclPseudo,CMD_SHOW_SETUP,"show restricted variables")){
 			for(String str:MiscI.i().fileLoad(flSetup)){
 				dumpSubEntry(str);
 			}
@@ -801,18 +820,18 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				}
 			}
 		}else
-		if(checkCmdValidity(icclPseudo,"statsFieldToggle","[bEnable] toggle simple stats field visibility")){
+		if(checkCmdValidity(icclPseudo,CMD_STATS_FIELD_TOGGLE,"[bEnable] toggle simple stats field visibility")){
 			bCmdWorked=icui.statsFieldToggle();
 		}else
-		if(checkCmdValidity(icclPseudo,"statsShowAll","sho)w all console stats")){
+		if(checkCmdValidity(icclPseudo,CMD_STATS_SHOW_ALL,"sho)w all console stats")){
 			dumpAllStats();
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,"test","[...] temporary developer tests")){
+		if(checkCmdValidity(icclPseudo,CMD_TEST,"[...] temporary developer tests")){
 			cmdTest();
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,"varAdd","<varId> <[-]value>")){
+		if(checkCmdValidity(icclPseudo,CMD_VAR_ADD,"<varId> <[-]value>")){
 			bCmdWorked=cmdVarAdd(paramString(1),paramString(2),true,false);
 		}else
 		if(
@@ -826,10 +845,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		){
 			bCmdWorked=cmdVarSet();
 		}else
-		if(checkCmdValidity(icclPseudo,"varSetCmp","<varIdBool> <value> <cmp> <value>")){
+		if(checkCmdValidity(icclPseudo,CMD_VAR_SET_CMP,"<varIdBool> <value> <cmp> <value>")){
 			bCmdWorked=cmdVarSetCmp();
 		}else
-		if(checkCmdValidity(icclPseudo,"varShow","[["+RESTRICTED_TOKEN+"]filter] list user or restricted variables.")){
+		if(checkCmdValidity(icclPseudo,CMD_VAR_SHOW,"[["+RESTRICTED_TOKEN+"]filter] list user or restricted variables.")){
 			bCmdWorked=cmdVarShow();
 		}else
 		if(checkCmdValidity(icclPseudo,TOKEN_CMD_NOT_WORKING_YET+"zDisabledCommand"," just to show how to use it")){
@@ -1784,8 +1803,15 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @param strFullCmdLine
 	 * @return
 	 */
-	protected ArrayList<String> convertToCmdParamsList(String strFullCmdLine){
+	public ArrayList<String> convertToCmdParamsList(String strFullCmdLine){
+		return convertToCmdParamsList(strFullCmdLine, null, null);
+	}
+	public ArrayList<String> convertToCmdParamsList(String strFullCmdLine, Integer iBeginIndexInclusive){
+		return convertToCmdParamsList(strFullCmdLine, iBeginIndexInclusive, null);
+	}
+	public ArrayList<String> convertToCmdParamsList(String strFullCmdLine, Integer iBeginIndexInclusive, Integer iEndIndexExclusive){
 		ArrayList<String> astrCmdParams = new ArrayList<String>();
+		
 //		astrCmdAndParams.clear();
 		
 		/**
@@ -1804,8 +1830,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			}
 		}
 		
+		if(iBeginIndexInclusive==null)iBeginIndexInclusive=0;
+		if(iEndIndexExclusive==null)iEndIndexExclusive=astrCmdParams.size();
+		
 //		return strFullCmdLine;
-		return astrCmdParams;
+		return new ArrayList<String>(
+			astrCmdParams.subList(iBeginIndexInclusive, iEndIndexExclusive));
 	}
 	
 	/**

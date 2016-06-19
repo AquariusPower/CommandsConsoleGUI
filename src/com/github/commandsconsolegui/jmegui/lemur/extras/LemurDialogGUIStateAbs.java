@@ -82,7 +82,7 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 	private Vector3f	v3fEntryListSize;
 	private Container	cntrEntryCfg;
 	private SelectionModel	selectionModel;
-	BoolTogglerCmdField btgAutoScroll = new BoolTogglerCmdField(this, true);
+	BoolTogglerCmdField btgAutoScroll = new BoolTogglerCmdField(this, true).setCallNothingOnChange();
 	
 //	@Override
 //	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
@@ -556,17 +556,28 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 	}
 	
 	protected int getTopEntryIndex(){
-		int iTopEntryIndex = (int)(
-			getMaxIndex()-lstbxEntriesToSelect.getSlider().getModel().getValue());
+		int iVisibleItems = lstbxEntriesToSelect.getVisibleItems();
+		int iTotEntries = vlEntriesList.size();
+		if(iVisibleItems>iTotEntries){
+			return 0; //is not overflowing the max visible items amount
+		}
+		
+		int iSliderInvertedIndex=(int)lstbxEntriesToSelect.getSlider().getModel().getValue();
+		int iTopEntryIndex = (int)(iTotEntries -iSliderInvertedIndex -iVisibleItems);
+		
 		return iTopEntryIndex;
 	}
 	
 	protected int getBottomEntryIndex(){
-		return getTopEntryIndex()+iVisibleRows;
+		return getTopEntryIndex()+iVisibleRows-1;
 	}
 	
 	protected void scrollTo(int iIndex){
-		lstbxEntriesToSelect.getSlider().getModel().setValue(getMaxIndex()-iIndex);
+		//lstbxEntriesToSelect.getSlider().getModel().getValue();
+//		lstbxEntriesToSelect.getSlider().getModel().setValue(getMaxIndex()-iIndex);
+		lstbxEntriesToSelect.getSlider().getModel().setValue(
+			vlEntriesList.size()-lstbxEntriesToSelect.getVisibleItems()-iIndex);
+		
 	}
 	
 	@Override

@@ -63,11 +63,12 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	protected IReflexFillCfg	rfcfgOwner;
 	protected String strHelp="";
 
-	private String	strReflexFillCfgCodePrefixVariant;
-	private VarIdValueOwnerData	vivo;
-	private String	strVarId;
-	private Callable<Boolean>	caller;
-	private boolean	bConstructed;
+	protected String	strReflexFillCfgCodePrefixVariant;
+	protected VarIdValueOwnerData	vivo;
+	protected String	strVarId;
+	protected boolean bDoCallOnChange = true;
+	protected Callable<Boolean>	caller;
+	protected boolean	bConstructed;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
@@ -224,11 +225,13 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 		
 		if(bConstructed){
 			if(isChangedAndRefresh()){
-				if(this.caller==null){
-					throw new PrerequisitesNotMetException("null caller for "+this.getReport());
+				if(bDoCallOnChange){
+					if(this.caller==null){
+						throw new PrerequisitesNotMetException("null caller for "+this.getReport());
+					}
+					
+					CallQueueI.i().appendCall(this.caller);
 				}
-				
-				CallQueueI.i().appendCall(this.caller);
 			}
 		}
 	}
@@ -267,7 +270,17 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 //		return null;
 //	}
 	
-	public void setCallOnChange(Callable<Boolean> caller){
+	public BoolTogglerCmdField setCallOnChange(Callable<Boolean> caller){
 		this.caller=caller;
+		return this;
+	}
+	
+	/**
+	 * In case just the boolean status will be necessary.
+	 * @return 
+	 */
+	public BoolTogglerCmdField setCallNothingOnChange(){
+		bDoCallOnChange=false;
+		return this;
 	}
 }
