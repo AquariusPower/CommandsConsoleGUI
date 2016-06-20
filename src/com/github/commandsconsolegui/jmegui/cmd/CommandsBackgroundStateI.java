@@ -27,8 +27,6 @@
 
 package com.github.commandsconsolegui.jmegui.cmd;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegator;
-import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleUI;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 
@@ -45,7 +43,7 @@ public class CommandsBackgroundStateI extends CmdConditionalStateAbs {
 	public static CommandsBackgroundStateI i(){return instance;}
 	
 	protected BoolTogglerCmdField	btgExecCommandsInBackground=new BoolTogglerCmdField(this, true, null,
-		"Will continue running console commands even if console is closed.");
+		"Will continue running console commands even if console is closed.").setCallNothingOnChange();
 	
 	private IConsoleUI	cgsaGraphicalConsoleUI;
 	

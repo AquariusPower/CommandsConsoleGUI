@@ -63,10 +63,6 @@ public class TimedDelayVarField extends VarCmdFieldAbs{
 	protected float	fDelayLimitSeconds;
 	protected long	lDelayLimitNano;
 
-	protected IReflexFillCfg	rfcfgOwner;
-	protected VarIdValueOwnerData	vivo;
-	protected String	strHelp;
-
 	public static final String	strCodePrefixVariant = "td";
 	
 	public static void configure(IHandleExceptions ihe){

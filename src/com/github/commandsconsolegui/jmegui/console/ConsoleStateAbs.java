@@ -662,7 +662,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 	
 	@Override
 	public boolean cmdEditCopyOrCut(boolean bCut) {
-		String strParam1 = cd().paramString(1);
+		String strParam1 = cd().getCurrentCommandLine().paramString(1);
 		boolean bUseCommandDelimiterInsteadOfNewLine=false;
 		if(strParam1!=null){
 			switch(strParam1){
@@ -1636,8 +1636,8 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 	
 	@Override
 	public boolean statsFieldToggle() {
-		if(cd().paramBooleanCheckForToggle(1)){
-			Boolean bEnable = cd().paramBoolean(1);
+		if(cd().getCurrentCommandLine().paramBooleanCheckForToggle(1)){
+			Boolean bEnable = cd().getCurrentCommandLine().paramBoolean(1);
 			
 			boolean bIsVisible = ctnrStatsAndControls.getParent()!=null;
 			boolean bSetVisible = !bIsVisible; //toggle
@@ -1837,16 +1837,16 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 	}
 
 	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegator	cc){
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator	cd){
 		boolean bCommandWorked = false;
 		
-		if(cc.checkCmdValidity(this,CMD_CLOSE_CONSOLE,"like the bound key to do it")){
+		if(cd.checkCmdValidity(this,CMD_CLOSE_CONSOLE,"like the bound key to do it")){
 			setEnabledRequest(false);
 			bKeepInitiallyInvisibleUntilFirstClosed =false;
 			bCommandWorked=true;
 		}else
-		if(cc.checkCmdValidity(this,CMD_CONSOLE_HEIGHT,"[fPercent] of the application window")){
-			Float f = cc.paramFloat(1);
+		if(cd.checkCmdValidity(this,CMD_CONSOLE_HEIGHT,"[fPercent] of the application window")){
+			Float f = cd.getCurrentCommandLine().paramFloat(1);
 			modifyConsoleHeight(f);
 			bCommandWorked=true;
 		}else
@@ -1854,19 +1854,19 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 //			scrollToBottomRequest();
 //			bCommandWorked=true;
 //		}else
-		if(cc.checkCmdValidity(this,CMD_CONSOLE_STYLE,"[strStyleName] changes the style of the console on the fly, empty for a list")){
-			String strStyle = cc.paramString(1);
+		if(cd.checkCmdValidity(this,CMD_CONSOLE_STYLE,"[strStyleName] changes the style of the console on the fly, empty for a list")){
+			String strStyle = cd.getCurrentCommandLine().paramString(1);
 			if(strStyle==null)strStyle="";
 			bCommandWorked=cmdStyleApply(strStyle);
 		}else
-		if(cc.checkCmdValidity(this,CMD_DEFAULT,"will revert to default values/config/setup (use if something goes wrong)")){
+		if(cd.checkCmdValidity(this,CMD_DEFAULT,"will revert to default values/config/setup (use if something goes wrong)")){
 			//TODO apply all basic settings here, like font size etc
 			svUserFontOption.setObjectValue(strDefaultFont);
 			ilvFontSize.setObjectValue(iDefaultFontSize);
 			bCommandWorked=cmdStyleApply(STYLE_CONSOLE);
 		}else
-		if(cc.checkCmdValidity(this,CMD_FONT_LIST,"[strFilter] use 'all' as filter to show all, otherwise only monospaced will be the default filter")){
-			String strFilter = cc.paramString(1);
+		if(cd.checkCmdValidity(this,CMD_FONT_LIST,"[strFilter] use 'all' as filter to show all, otherwise only monospaced will be the default filter")){
+			String strFilter = cd.getCurrentCommandLine().paramString(1);
 			if(strFilter==null){
 				strFilter="mono";
 			}else{
@@ -1874,15 +1874,15 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 					strFilter=null;
 				}
 			}
-			for(String str:getSystemFontList(strFilter))cc.dumpSubEntry(str);
+			for(String str:getSystemFontList(strFilter))cd.dumpSubEntry(str);
 			bCommandWorked=true;
 		}else
 		{
-			return super.execConsoleCommand(cc);
+			return super.execConsoleCommand(cd);
 //			return ECmdReturnStatus.NotFound;
 		}
 		
-		return cc.cmdFoundReturnStatus(bCommandWorked);
+		return cd.cmdFoundReturnStatus(bCommandWorked);
 	}
 	
 	@Override
@@ -2121,7 +2121,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 		}
 		
 		ArrayList<String> astr = AutoCompleteI.i().autoComplete(
-			strInputText, cd().getBaseCommandsWithComment(), bKeyControlIsPressed, true);
+			strInputText, cd().getBaseCommands(), bKeyControlIsPressed, true);
 		
 		boolean bShowHint = false;
 		

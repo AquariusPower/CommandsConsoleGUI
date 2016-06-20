@@ -130,23 +130,23 @@ public class FpsLimiterStateI extends CmdConditionalStateAbs{
 	}
 	
 	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 		boolean bCommandWorked = false;
 		
-		if(cc.checkCmdValidity(this,"fpsLimit","[iMaxFps]")){
-			Integer iMaxFps = cc.paramInt(1);
+		if(cd.checkCmdValidity(this,"fpsLimit",null,"[iMaxFps]")){
+			Integer iMaxFps = cd.getCurrentCommandLine().paramInt(1);
 			if(iMaxFps!=null){
 				FpsLimiterStateI.i().setMaxFps(iMaxFps);
 				bCommandWorked=true;
 			}
-			cc.dumpSubEntry("FpsLimit = "+FpsLimiterStateI.i().getFpsLimit());
+			cd.dumpSubEntry("FpsLimit = "+FpsLimiterStateI.i().getFpsLimit());
 		}else
 		{
 //			return cc.executePreparedCommandRoot();
 			return ECmdReturnStatus.NotFound;
 		}
 		
-		return cc.cmdFoundReturnStatus(bCommandWorked);
+		return cd.cmdFoundReturnStatus(bCommandWorked);
 	}
 	
 	public String getSimpleStatsReport(float fTPF){

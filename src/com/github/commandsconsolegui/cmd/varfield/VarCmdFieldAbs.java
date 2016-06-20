@@ -27,7 +27,10 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
+import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData.IVarIdValueOwner;
+import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
 
@@ -43,6 +46,9 @@ public abstract class VarCmdFieldAbs implements IReflexFillCfgVariant, IVarIdVal
 	protected String strCmdId = null;
 	protected String strCoreId = null;
 	protected String strDebugErrorHelper = "ERROR: "+this.getClass().getName()+" not yet properly initialized!!!";
+	protected IReflexFillCfg	rfcfgOwner;
+	protected VarIdValueOwnerData	vivo;
+	protected String strHelp="";
 	
 	@Override
 	public boolean isReflexing() {
@@ -96,6 +102,20 @@ public abstract class VarCmdFieldAbs implements IReflexFillCfgVariant, IVarIdVal
 
 	@Override
 	public String getCoreId() {
+		if(strCmdId==null)getCmdId();//just to init
 		return strCoreId;
+	}
+
+	public String getCmdId(){
+		if(strCmdId==null){
+			setId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this,false));
+		}
+		
+		return strCmdId;
+	}
+	
+	@Override
+	public String getHelp(){
+		return strHelp;
 	}
 }

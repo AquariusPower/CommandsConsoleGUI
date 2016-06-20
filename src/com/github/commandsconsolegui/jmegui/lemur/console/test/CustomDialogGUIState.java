@@ -183,7 +183,7 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs{
 //	}
 	
 	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 //		if(cmdAddEntries==null){
 //			cmdAddEntries = new StringCmdField(getId()+"AddEntry","[strText]");
 //		}
@@ -191,15 +191,15 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs{
 		
 		boolean bCommandWorked = false;
 		
-		if(cc.checkCmdValidity(this,scfAddEntry,null)){
-			String strText = cc.paramString(1);
+		if(cd.checkCmdValidity(this,scfAddEntry,null)){
+			String strText = cd.getCurrentCommandLine().paramString(1);
 			addEntry(strText);
 			bCommandWorked = true;
 		}else
 		{
-			return super.execConsoleCommand(cc);
+			return super.execConsoleCommand(cd);
 		}
 		
-		return cc.cmdFoundReturnStatus(bCommandWorked);
+		return cd.cmdFoundReturnStatus(bCommandWorked);
 	}
 }

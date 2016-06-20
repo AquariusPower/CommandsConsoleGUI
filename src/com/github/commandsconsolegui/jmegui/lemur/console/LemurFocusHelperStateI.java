@@ -358,7 +358,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
 		boolean bCmdEndedGracefully = false;
 		
-		if(cc.checkCmdValidity(this,"debugFocusSortZOrderReport","")){
+		if(cc.checkCmdValidity(this,"debugFocusSortZOrderReport",null,"")){
 			for(String str:debugReport())cc.dumpSubEntry(str);
 			bCmdEndedGracefully = true;
 		}else

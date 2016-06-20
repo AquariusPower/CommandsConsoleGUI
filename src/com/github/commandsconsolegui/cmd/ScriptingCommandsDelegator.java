@@ -49,6 +49,8 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 	public final StringCmdField CMD_FUNCTION = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_FUNCTION_CALL = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_FUNCTION_END = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField scfFunctionList = new StringCmdField(this);
+	public final StringCmdField scfFunctionShow = new StringCmdField(this);
 	/**
 	 * conditional user coding
 	 */
@@ -68,15 +70,15 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 //		super(icg);
 //	}
 	public boolean checkFuncExecEnd() {
-		if(strCmdLineOriginal==null)return false;
-		return strCmdLineOriginal.startsWith(RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS.toString());
+		if(ccl.strCmdLineOriginal==null)return false;
+		return ccl.strCmdLineOriginal.startsWith(RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS.toString());
 	}
 	public boolean checkFuncExecStart() {
-		if(strCmdLineOriginal==null)return false;
-		return strCmdLineOriginal.startsWith(RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS.toString());
+		if(ccl.strCmdLineOriginal==null)return false;
+		return ccl.strCmdLineOriginal.startsWith(RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS.toString());
 	}
 	public boolean cmdFunctionCall() {
-		String strFunctionId = paramString(1);
+		String strFunctionId = ccl.paramString(1);
 		
 		/**
 		 * put cmds block at queue
@@ -94,7 +96,7 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 			ArrayList<String> astrFuncParams = new ArrayList<String>();
 			int i=2;
 			while(true){
-				String strParamValue = paramString(i);
+				String strParamValue = ccl.paramString(i);
 				if(strParamValue==null)break;
 				String strParamId=strFunctionId+"_"+(i-1);
 				astrFuncParams.add(strParamId);
@@ -136,7 +138,7 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 		return true;
 	}
 	public boolean cmdFunctionBegin() {
-		String strFunctionId = paramString(1);
+		String strFunctionId = ccl.paramString(1);
 		
 		if(!isValidIdentifierCmdVarAliasFuncString(strFunctionId))return false;
 		
@@ -194,8 +196,8 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 			if(checkCmdValidity(icclPseudo,CMD_FUNCTION_END,"ends a function block")){
 				bCommandWorked=cmdFunctionEnd();
 			}else
-			if(checkCmdValidity(icclPseudo,"functionList","[filter]")){
-				String strFilter = paramString(1);
+			if(checkCmdValidity(icclPseudo,scfFunctionList,"[filter]")){
+				String strFilter = ccl.paramString(1);
 				ArrayList<String> astr = Lists.newArrayList(tmFunctions.keySet().iterator());
 				for(String str:astr){
 					if(strFilter!=null && !str.toLowerCase().contains(strFilter.toLowerCase()))continue;
@@ -203,8 +205,8 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 				}
 				bCommandWorked=true;
 			}else
-			if(checkCmdValidity(icclPseudo,"functionShow","<functionId>")){
-				String strFuncId = paramString(1);
+			if(checkCmdValidity(icclPseudo,scfFunctionShow,"<functionId>")){
+				String strFuncId = ccl.paramString(1);
 				if(strFuncId!=null){
 					ArrayList<String> astr = tmFunctions.get(strFuncId);
 					if(astr!=null){
@@ -259,26 +261,26 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 				bCmdFoundAndWorked=true;
 			}else
 			if(strPrepareFunctionBlockForId!=null){
-				if(bCmdFoundAndWorked==null)bCmdFoundAndWorked = functionEndCheck(strCmdLineOriginal); //before feed
-				if(bCmdFoundAndWorked==null)bCmdFoundAndWorked = functionFeed(strCmdLineOriginal);
+				if(bCmdFoundAndWorked==null)bCmdFoundAndWorked = functionEndCheck(ccl.strCmdLineOriginal); //before feed
+				if(bCmdFoundAndWorked==null)bCmdFoundAndWorked = functionFeed(ccl.strCmdLineOriginal);
 			}else
 			if(bIfConditionExecCommands!=null && !bIfConditionExecCommands){
 				/**
 				 * These are capable of stopping the skipping.
 				 */
-				if(CMD_ELSE_IF.equals(paramString(0))){
+				if(CMD_ELSE_IF.equals(ccl.paramString(0))){
 					if(bCmdFoundAndWorked==null)bCmdFoundAndWorked = cmdElseIf();
 				}else
-				if(CMD_ELSE.equals(paramString(0))){
+				if(CMD_ELSE.equals(ccl.paramString(0))){
 					if(bCmdFoundAndWorked==null)bCmdFoundAndWorked = cmdElse();
 				}else
-				if(CMD_IF_END.equals(paramString(0))){
+				if(CMD_IF_END.equals(ccl.paramString(0))){
 					if(bCmdFoundAndWorked==null)bCmdFoundAndWorked = cmdIfEnd();
 				}else{
 					/**
 					 * The if condition resulted in false, therefore commands must be skipped.
 					 */
-					dumpInfoEntry("ConditionalSkip: "+strCmdLinePrepared);
+					dumpInfoEntry("ConditionalSkip: "+ccl.strCmdLinePrepared);
 					if(bCmdFoundAndWorked==null)bCmdFoundAndWorked = true;
 				}
 			}
@@ -286,7 +288,7 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 		
 		if(bCmdFoundAndWorked==null){
 			if(bFuncCmdLineRunning && bFuncCmdLineSkipTilEnd){
-				dumpWarnEntry("SkippingRemainingFunctionCmds: "+strCmdLinePrepared);
+				dumpWarnEntry("SkippingRemainingFunctionCmds: "+ccl.strCmdLinePrepared);
 				bCmdFoundAndWorked = true; //this just means that the skip worked
 			}
 		}
@@ -329,7 +331,7 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 	public boolean cmdIf(boolean bSkipNesting) {
 		bIfConditionIsValid=false;
 		
-		String strCondition = paramString(1);
+		String strCondition = ccl.paramString(1);
 		
 		boolean bNegate = false;
 		if(strCondition.startsWith("!")){
@@ -347,7 +349,7 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 			return false;
 		}
 		
-		String strCmds = paramStringConcatenateAllFrom(2);
+		String strCmds = ccl.paramStringConcatenateAllFrom(2);
 		if(strCmds==null)strCmds="";
 		strCmds.trim();
 		if(strCmds.isEmpty() || strCmds.startsWith(getCommentPrefixStr())){

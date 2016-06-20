@@ -60,11 +60,8 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	
 	protected boolean bPrevious;
 	protected boolean bCurrent;
-	protected IReflexFillCfg	rfcfgOwner;
-	protected String strHelp="";
 
 	protected String	strReflexFillCfgCodePrefixVariant;
-	protected VarIdValueOwnerData	vivo;
 	protected boolean bDoCallOnChange = true;
 	protected Callable<Boolean>	caller;
 	protected boolean	bConstructed;
@@ -138,13 +135,20 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 		
 		super.setId(new IdTmp(false, strCmd, strCmd));
 	}
-	public String getCmdId(){
-		if(super.strCmdId==null){
-			super.setId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this,false));
-		}
-		
-		return super.strCmdId;
-	}
+	
+//	public String getCmdId(){
+//		if(super.strCmdId==null){
+//			super.setId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this,false));
+//		}
+//		
+//		return super.strCmdId;
+//	}
+	
+//	@Override
+//	public String getCoreId() {
+//		if(super.strCmdId==null)getCmdId();
+//		return super.getCoreId();
+//	}
 	
 	@Override
 	public String getHelp(){
@@ -274,15 +278,30 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 //	}
 	
 	public BoolTogglerCmdField setCallOnChange(Callable<Boolean> caller){
+		if(!bDoCallOnChange){
+			// to avoid developer forgotten behavior misconfiguration
+			throw new PrerequisitesNotMetException("was set to call nothing already!",this,getHelp());
+		}
+		
 		this.caller=caller;
 		return this;
 	}
 	
 	/**
-	 * In case just the boolean status will be necessary.
+	 * In case just the main boolean value will be used.
 	 * @return 
 	 */
 	public BoolTogglerCmdField setCallNothingOnChange(){
+		if(caller!=null){
+			// to avoid developer forgotten behavior misconfiguration
+			throw new PrerequisitesNotMetException("caller already set!",this,getHelp());
+		}
+		
+		if(!bDoCallOnChange){
+			// to avoid double call
+			throw new PrerequisitesNotMetException("will already call nothing!",this,getHelp());
+		}
+		
 		bDoCallOnChange=false;
 		return this;
 	}

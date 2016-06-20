@@ -50,9 +50,6 @@ public class FloatDoubleVarField extends VarCmdFieldAbs{
 	protected static String	strCodePrefixVariant = "fdv";
 	protected static ArrayList<FloatDoubleVarField> afdvList = new ArrayList<FloatDoubleVarField>();
 	protected Double dValue;
-	protected IReflexFillCfg	rfcfgOwner;
-	protected VarIdValueOwnerData	vivo;
-	protected String	strHelp;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP

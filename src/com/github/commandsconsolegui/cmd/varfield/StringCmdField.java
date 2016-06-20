@@ -42,10 +42,9 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
 public class StringCmdField extends VarCmdFieldAbs{
 //	String str = "ERROR: NOT SET"; // hashcode depends on it not being null
 //	protected String strCmdId = null;
-	protected IReflexFillCfg rfcfgOwner;
 //	protected int	iReflexFillCfgVariant;
 	protected String	strReflexFillCfgCodePrefixVariant;
-	private String	strHelpComment;
+//	private String	strHelpComment;
 	protected static boolean bIgnoreCaseOnComparison = true;
 	public static final String strCodePrefix="scf"; //ex.: scfTestCommand
 	
@@ -68,7 +67,7 @@ public class StringCmdField extends VarCmdFieldAbs{
 	 */
 	public StringCmdField(String strCmdId, String strHelpComment){
 		super.setId(new IdTmp(false, strCmdId, strCmdId));
-		this.strHelpComment = strHelpComment;
+		this.strHelp = strHelpComment;
 		this.bReflexingIdentifier = false;
 	}
 	
@@ -94,6 +93,9 @@ public class StringCmdField extends VarCmdFieldAbs{
 			throw new NullPointerException("cant be null for: "+IReflexFillCfg.class.getName());
 		}
 	}
+	public StringCmdField(IReflexFillCfg rfcfgOwner){
+		this(rfcfgOwner, null, null);
+	}
 	public StringCmdField(IReflexFillCfg rfcfgOwner, String strReflexFillCfgCodePrefixVariant){
 		this(rfcfgOwner, strReflexFillCfgCodePrefixVariant, null);
 	}
@@ -107,9 +109,9 @@ public class StringCmdField extends VarCmdFieldAbs{
 		return this.strCmdId;
 	}
 	
-	public String getHelpComment(){
-		return strHelpComment;
-	}
+//	public String getHelpComment(){
+//		return strHelp;
+//	}
 	
 	protected void initialize(){
 		/**

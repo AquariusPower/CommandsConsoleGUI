@@ -30,12 +30,10 @@ package com.github.commandsconsolegui.jmegui.lemur.console.test;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
-import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.extras.SingleAppInstanceI;
 import com.github.commandsconsolegui.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalConsoleGuiI;
-import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
 import com.github.commandsconsolegui.jmegui.console.SimpleConsoleAppAbs;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs.EModalDiagType;
@@ -44,7 +42,6 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.input.KeyInput;
-import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
 
 /**
@@ -64,7 +61,8 @@ public class CustomTestI extends SimpleConsoleAppAbs implements IReflexFillCfg{
 	
 //	public final StringCmdField CMD_END_DEVELOPER_COMMAND_TEST = new StringCmdField(
 //		this,CustomCommands.strFinalCmdCodePrefix);
-	public final StringCmdField scfEndDeveloperCommandTest = new StringCmdField(this,"scf");
+	public final StringCmdField scfEndDeveloperCommandTest = new StringCmdField(this);
+	public final StringCmdField scfHelp = new StringCmdField(this);
 	
 	/**
 	 * these below were not implemented as commands here, 
@@ -153,21 +151,23 @@ public class CustomTestI extends SimpleConsoleAppAbs implements IReflexFillCfg{
 	}
 
 	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegator	cc) {
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator	cd) {
 		boolean bCommandWorked = false;
 		
-		if(cc.checkCmdValidity(this,scfEndDeveloperCommandTest,"[iHowMany] users working?")){
-			bCommandWorked = endDevCustomMethod(cc.paramInt(1));
+		if(cd.checkCmdValidity(this,scfEndDeveloperCommandTest,"[iHowMany] users working?")){
+			bCommandWorked = endDevCustomMethod(cd.getCurrentCommandLine().paramInt(1));
 		}else
-//		if(cc.checkCmdValidity(this,"conflictTest123","")){
-//		}else
+		if(cd.checkCmdValidity(this,scfHelp,"specific custom help")){
+			cd.dumpSubEntry("custom help");
+			bCommandWorked = true;
+		}else
 //		if(cc.checkCmdValidity(this,"conflictTest123","")){
 //		}else
 		{
 			return ECmdReturnStatus.NotFound;
 		}
 			
-		return cc.cmdFoundReturnStatus(bCommandWorked);
+		return cd.cmdFoundReturnStatus(bCommandWorked);
 	}
 	
 	@Override

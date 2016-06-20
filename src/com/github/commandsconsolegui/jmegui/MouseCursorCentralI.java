@@ -59,6 +59,7 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 	private CompositeControl ccSelf = new CompositeControl(this);
 	
 	public final StringCmdField CMD_FIX_RESETING_MOUSE_CURSOR = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
+	public final StringCmdField scfMouseCursorReport = new StringCmdField(this);
 	
 	IntLongVarField ilvClickMaxDelayMilis = new IntLongVarField(this,300,"the delay between button pressed and button released");
 	IntLongVarField ilvMultiClickMaxDelayMilis = new IntLongVarField(this,500,"the delay between each subsequent click (button released moment)");
@@ -188,7 +189,7 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 			
 			bCommandWorked=true;
 		}else
-		if(cc.checkCmdValidity(this,"mouseCursorReport","")){
+		if(cc.checkCmdValidity(this,scfMouseCursorReport,"")){
 			cc.dumpSubEntry(getButtonsInstance().report());
 			bCommandWorked=true;
 		}else

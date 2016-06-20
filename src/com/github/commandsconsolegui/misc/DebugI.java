@@ -84,15 +84,15 @@ public class DebugI implements IConsoleCommandListener{
 	}
 
 	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegator	cc) {
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator	cd) {
 		boolean bCmdWorked=false;
 		
-		if(cc.checkCmdValidity(this,"debug","[optionToToggle] [force:true|false] empty for a list")){
-			String str = cc.paramString(1);
-			Boolean bForce = cc.paramBoolean(2);
+		if(cd.checkCmdValidity(this,"debug",null,"[optionToToggle] [force:true|false] empty for a list")){
+			String str = cd.getCurrentCommandLine().paramString(1);
+			Boolean bForce = cd.getCurrentCommandLine().paramBoolean(2);
 			if(str==null){
 				for(EDbgKey ek:EDbgKey.values()){
-					cc.dumpSubEntry(""+ek+" "+ek.b);
+					cd.dumpSubEntry(""+ek+" "+ek.b);
 				}
 			}else{
 				try{
@@ -104,7 +104,7 @@ public class DebugI implements IConsoleCommandListener{
 					}
 					bCmdWorked=true;
 				}catch(IllegalArgumentException ex){
-					cc.dumpExceptionEntry(ex);
+					cd.dumpExceptionEntry(ex);
 				}
 			}
 		}else
@@ -112,7 +112,7 @@ public class DebugI implements IConsoleCommandListener{
 			return ECmdReturnStatus.NotFound;
 		}
 		
-		return cc.cmdFoundReturnStatus(bCmdWorked);
+		return cd.cmdFoundReturnStatus(bCmdWorked);
 	}
 
 	public boolean isInIDEdebugMode() {

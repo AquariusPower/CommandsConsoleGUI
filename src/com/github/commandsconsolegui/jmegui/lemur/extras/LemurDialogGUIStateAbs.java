@@ -644,7 +644,7 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
 		boolean bCommandWorked = false;
 		
-		if(cc.checkCmdValidity(this,"showDialogKeyBinds"+getId(),"")){
+		if(cc.checkCmdValidity(this,"showDialogKeyBinds"+getId(),null,"")){
 			cc.dumpSubEntry("ESC - close; Up/Down - nav. list entry");
 			cc.dumpSubEntry("Enter - accept/submit choice (at config dialog)");
 			cc.dumpSubEntry("DoubleClick - config or accept/submit choice");

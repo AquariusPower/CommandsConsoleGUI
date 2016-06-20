@@ -33,7 +33,10 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
@@ -88,6 +91,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	// not protected... development token... 
 	public final String	TOKEN_CMD_NOT_WORKING_YET = "[NOTWORKINGYET]";
 	
+	CurrentCommandLine ccl = new CurrentCommandLine(this);
+	
 	/**
 	 * Togglers:
 	 * 
@@ -97,32 +102,31 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //	public final BoolToggler	btgAcceptExternalExitRequests = new BoolToggler(this,false,strTogglerCodePrefix, 
 //		"if a ");
 	public final BoolTogglerCmdField	btgDbAutoBkp = new BoolTogglerCmdField(this,false,null, 
-		"whenever a save happens, if the DB was modified, a backup will be created of the old file");
-	public final BoolTogglerCmdField	btgShowWarn = new BoolTogglerCmdField(this,true);
-	public final BoolTogglerCmdField	btgShowInfo = new BoolTogglerCmdField(this,true);
-	public final BoolTogglerCmdField	btgShowException = new BoolTogglerCmdField(this,true);
+		"whenever a save happens, if the DB was modified, a backup will be created of the old file").setCallNothingOnChange();
+	public final BoolTogglerCmdField	btgShowWarn = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
+	public final BoolTogglerCmdField	btgShowInfo = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
+	public final BoolTogglerCmdField	btgShowException = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 	public final BoolTogglerCmdField	btgDumpToTerminal = new BoolTogglerCmdField(this,true,null,
-		"The system terminal where the application is being run, will also receive "+CommandsDelegator.class.getSimpleName()+" output.");
+		"The system terminal where the application is being run, will also receive "+CommandsDelegator.class.getSimpleName()+" output.").setCallNothingOnChange();
 	public final BoolTogglerCmdField	btgEngineStatsView = new BoolTogglerCmdField(this,false);
 	public final BoolTogglerCmdField	btgEngineStatsFps = new BoolTogglerCmdField(this,false);
-	public final BoolTogglerCmdField	btgShowMiliseconds=new BoolTogglerCmdField(this,false);
+	public final BoolTogglerCmdField	btgShowMiliseconds=new BoolTogglerCmdField(this,false).setCallNothingOnChange();
 //	public final BoolTogglerCmdField	btgStringContainsFuzzyFilter=new BoolTogglerCmdField(this,true);
 	public final BoolTogglerCmdField	btgConsoleCpuRest=new BoolTogglerCmdField(this,false,null,
 		"Console update steps will be skipped if this is enabled.");
-	public final BoolTogglerCmdField	btgAutoScroll=new BoolTogglerCmdField(this,true);
+	public final BoolTogglerCmdField	btgAutoScroll=new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 	public final BoolTogglerCmdField	btgUseFixedLineWrapModeForAllFonts=new BoolTogglerCmdField(this,false,null,
 		"If enabled, this will use a fixed line wrap column even for non mono spaced fonts, "
 		+"based on the width of the 'W' character. Otherwise it will dynamically guess the best "
-		+"fitting string size.");
-	
+		+"fitting string size.").setCallNothingOnChange();
 	/**
 	 * Developer vars, keep together!
 	 * Initialy true, the default init will disable them.
 	 */
-	public final BoolTogglerCmdField	btgShowDebugEntries=new BoolTogglerCmdField(this,true);
-	public final BoolTogglerCmdField	btgShowDeveloperInfo=new BoolTogglerCmdField(this,true);
-	public final BoolTogglerCmdField	btgShowDeveloperWarn=new BoolTogglerCmdField(this,true);
-	public final BoolTogglerCmdField	btgShowExecQueuedInfo=new BoolTogglerCmdField(this,true);
+	public final BoolTogglerCmdField	btgShowDebugEntries=new BoolTogglerCmdField(this,true).setCallNothingOnChange();
+	public final BoolTogglerCmdField	btgShowDeveloperInfo=new BoolTogglerCmdField(this,true).setCallNothingOnChange();
+	public final BoolTogglerCmdField	btgShowDeveloperWarn=new BoolTogglerCmdField(this,true).setCallNothingOnChange();
+	public final BoolTogglerCmdField	btgShowExecQueuedInfo=new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 	
 	/**
 	 * keep delayers together!
@@ -167,6 +171,16 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public final  StringCmdField	CMD_VAR_SHOW = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final  StringCmdField	CMD_RESET = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final  StringCmdField	CMD_SHOW_SETUP = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField scfClearDumpArea = new StringCmdField(this);
+	public final StringCmdField scfAlias = new StringCmdField(this);
+	public final StringCmdField scfFileShowData = new StringCmdField(this);
+	public final StringCmdField scfExit = new StringCmdField(this);
+	public final StringCmdField scfExecBatchCmdsFromFile = new StringCmdField(this);
+	public final StringCmdField scfEditCut = new StringCmdField(this);
+	public final StringCmdField scfEditCopy = new StringCmdField(this);
+	public final StringCmdField scfEditShowClipboad = new StringCmdField(this);
+	public final StringCmdField scfShowCommandsCoreIdConflicts = new StringCmdField(this);
+	public final StringCmdField scfQuit = new StringCmdField(this);
 	
 	/**
 	 * this char indicates something that users (non developers) 
@@ -228,11 +242,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	protected String	strFileDatabase = strFilePrefix+"-DB";
 	protected IntLongVarField ilvMaxCmdHistSize = new IntLongVarField(this,1000,null);
 	protected IntLongVarField ilvMaxDumpEntriesAmount = new IntLongVarField(this,100000,"max dump area list size before older ones get removed");
-	protected ArrayList<String>	astrCmdAndParams = new ArrayList<String>();
+//	protected ArrayList<String>	astrCmdAndParams = new ArrayList<String>();
 	protected ArrayList<ImportantMsgData>	astrImportantMsgBufferList = new ArrayList<ImportantMsgData>();
 	protected ArrayList<String>	astrExecConsoleCmdsQueue = new ArrayList<String>();
 	protected ArrayList<PreQueueCmdsBlockSubListData>	astrExecConsoleCmdsPreQueue = new ArrayList<PreQueueCmdsBlockSubListData>();
-	protected String	strCmdLinePrepared = "";
+//	protected String	strCmdLinePrepared = "";
 	protected TreeMap<String,VarIdValueOwnerData> tmUserVariables = 
 		new TreeMap<String, VarIdValueOwnerData>(String.CASE_INSENSITIVE_ORDER);
 	protected TreeMap<String,VarIdValueOwnerData> tmRestrictedVariables =
@@ -253,12 +267,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	protected Boolean	bIfConditionExecCommands;
 	protected ArrayList<ConditionalNestedData> aIfConditionNestedList = new ArrayList<ConditionalNestedData>();
 	protected Boolean	bIfConditionIsValid;
-	protected String	strCmdLineOriginal;
+//	protected String	strCmdLineOriginal;
 	protected ArrayList<String> astrCmdHistory = new ArrayList<String>();
 //	protected ArrayList<String> astrCmdWithCmtValidList = new ArrayList<String>();
 //	protected ArrayList<String> astrBaseCmdValidList = new ArrayList<String>();
 	protected ArrayList<AliasData> aAliasList = new ArrayList<AliasData>();
-	protected ArrayList<CommandData> acmdList = new ArrayList<CommandData>();
+//	protected ArrayList<CommandData> acmdList = new ArrayList<CommandData>();
+	protected TreeMap<String,CommandData> trmCmds = new TreeMap<String,CommandData>(String.CASE_INSENSITIVE_ORDER);
+	
 	
 	public CommandsDelegator() {
 		setCommandDelimiter(';');
@@ -438,7 +454,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	protected boolean checkCmdValidityBoolTogglers(){
 		btgReferenceMatched=null;
 		for(BoolTogglerCmdField btg : BoolTogglerCmdField.getListCopy()){
-			if(checkCmdValidity(btg.getOwnerAsCmdListener(), btg.getCmdId(), "[bEnable] "+btg.getHelp(), true)){
+			String strCoreId = btg.getCoreId();
+			if(!strCoreId.endsWith("Toggle"))strCoreId+="Toggle";
+			if(checkCmdValidity(btg.getOwnerAsCmdListener(), btg.getCmdId(), strCoreId, "[bEnable] "+btg.getHelp(), true)){
 				btgReferenceMatched = btg;
 				break;
 			}
@@ -477,44 +495,49 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strValidCmd){
-		return checkCmdValidity(iccl, strValidCmd, null);
+		return checkCmdValidity(iccl, strValidCmd, null, null);
 	}
 	public boolean checkCmdValidity(IConsoleCommandListener iccl, StringCmdField strfValidCmd, String strComment){
 		if(strComment==null){
-			strComment = strfValidCmd.getHelpComment();
+			strComment = strfValidCmd.getHelp();
 		}else{
-			if(strfValidCmd.getHelpComment()!=null){
-				strComment+="\n"+strfValidCmd.getHelpComment();
+			if(strfValidCmd.getHelp()!=null){
+				strComment+="\n"+strfValidCmd.getHelp();
 			}
 		}
-		return checkCmdValidity(iccl, strfValidCmd.toString(), strComment);
+		return checkCmdValidity(iccl, strfValidCmd.toString(), strfValidCmd.getCoreId(), strComment);
 	}
-	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strValidCmd, String strComment){
-		return checkCmdValidity(iccl, strValidCmd, strComment, false);
+	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strValidCmd, String strCoreCmdId, String strComment){
+		return checkCmdValidity(iccl, strValidCmd, strCoreCmdId, strComment, false);
 	}
-	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strValidCmd, String strComment, boolean bSkipSortCheck){
+	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strValidCmd, String strCoreCmdId, String strComment, boolean bSkipSortCheck){
 //		if(strCmdLinePrepared==null){
 		if(bFillCommandList){
 			if(strComment!=null){
 				strValidCmd+=commentToAppend(strComment);
 			}
 			
-			addCmdToValidList(iccl,strValidCmd,bSkipSortCheck);
+			if(strCoreCmdId==null)strCoreCmdId=strValidCmd;
+			addCmdToValidList(iccl,strValidCmd,strCoreCmdId,bSkipSortCheck);
 			
 			return false;
 		}
 		
-		if(RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(strCmdLinePrepared))return false;
-		if(isCommentedLine())return false;
-		if(strCmdLinePrepared.trim().isEmpty())return false;
+		if(RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(ccl.strCmdLinePrepared))return false;
+		if(ccl.isCommentedLine())return false;
+		if(ccl.strCmdLinePrepared.trim().isEmpty())return false;
 		
 //		String strCheck = strPreparedCmdLine;
 //		strCheck = strCheck.trim().split(" ")[0];
 		strValidCmd = strValidCmd.trim().split(" ")[0];
 		
 //		return strCheck.equalsIgnoreCase(strValidCmd);
-		return paramCommand().equalsIgnoreCase(strValidCmd);
+		return ccl.paramCommand().equalsIgnoreCase(strValidCmd);
 	}
+	
+//	protected boolean matchCommand(String strValidCmd){
+//		
+//	}
 	
 	protected boolean cmdEcho() {
 		String strToEcho="";
@@ -523,7 +546,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		while(strPart!=null){
 			strToEcho+=strPart;
 			strToEcho+=" ";
-			strPart = paramString(iParam++);
+			strPart = ccl.paramString(iParam++);
 		}
 		strToEcho=strToEcho.trim();
 		
@@ -538,7 +561,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 
 	protected boolean	bConfigured;
 
-	protected ArrayList<String>	astrBaseCmdCacheList = new ArrayList<String>();
+//	protected ArrayList<String>	astrBaseCmdCacheList = new ArrayList<String>();
 	protected ArrayList<String>	astrBaseCmdCmtCacheList = new ArrayList<String>();
 
 	private String	strLastTypedUserCommand;
@@ -550,6 +573,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	private boolean	bFillCommandList;
 
 	private boolean	bInitialized;
+
+	private CommandData	cmddLastAdded;
 
 
 //	private ECmdReturnStatus	ecrsCurrentCommandReturnStatus;
@@ -603,23 +628,31 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @return
 	 */
 	protected ECmdReturnStatus executePreparedCommandRoot(){
-		if(RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(strCmdLinePrepared)){
+		if(RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(ccl.strCmdLinePrepared)){
 			return ECmdReturnStatus.Skip;
 		}
 		
+		ccl.paramCommand(true);
+//		if(!ccl.paramString(0).equalsIgnoreCase(ccl.paramCommand())){
+////			dumpInfoEntry("Converted "+strMainCmd+" to "+strConvertedTo);
+//			dumpInfoEntry("Command converted to "+ccl.paramCommand());
+//		}
+		
 		Boolean bCmdWorked = null; //must be filled with true or false to have been found!
+		
+//		convertCommandIfPossible();
 		
 		if(checkCmdValidityBoolTogglers()){
 			bCmdWorked=toggle(btgReferenceMatched);
 		}else
-		if(checkCmdValidity(icclPseudo,"alias",getAliasHelp(),true)){
+		if(checkCmdValidity(icclPseudo,scfAlias,getAliasHelp())){
 			bCmdWorked=cmdAlias();
 		}else
 		if(checkCmdValidity(icclPseudo,CMD_CLEAR_COMMANDS_HISTORY,"")){
 			astrCmdHistory.clear();
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,"clearDumpArea")){
+		if(checkCmdValidity(icclPseudo,scfClearDumpArea,"")){
 			icui.getDumpEntries().clear();
 			bCmdWorked=true;
 		}else
@@ -633,8 +666,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		if(checkCmdValidity(icclPseudo,CMD_ECHO," simply echo something")){
 			bCmdWorked=cmdEcho();
 		}else
-		if(checkCmdValidity(icclPseudo,"editShowClipboad","--noNL")){
-			String strParam1 = paramString(1);
+		if(checkCmdValidity(icclPseudo,scfEditShowClipboad,"--noNL")){
+			String strParam1 = ccl.paramString(1);
 			boolean bShowNL=true;
 			if(strParam1!=null){
 				if(strParam1.equals("--noNL")){
@@ -644,26 +677,26 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			showClipboard(bShowNL);
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,"editCopy","-d end lines with command delimiter instead of NL;")){
+		if(checkCmdValidity(icclPseudo,scfEditCopy,"-d end lines with command delimiter instead of NL;")){
 			bCmdWorked=icui.cmdEditCopyOrCut(false);
 		}else
-		if(checkCmdValidity(icclPseudo,"editCut","like copy, but cut :)")){
+		if(checkCmdValidity(icclPseudo,scfEditCut,"like copy, but cut :)")){
 			bCmdWorked=icui.cmdEditCopyOrCut(true);
 		}else
-		if(checkCmdValidity(icclPseudo,"execBatchCmdsFromFile ","<strFileName>")){
-			String strFile = paramString(1);
+		if(checkCmdValidity(icclPseudo,scfExecBatchCmdsFromFile,"<strFileName>")){
+			String strFile = ccl.paramString(1);
 			if(strFile!=null){
 				addCmdListOneByOneToQueue(MiscI.i().fileLoad(strFile),false,false);
 //				astrExecConsoleCmdsQueue.addAll(Misc.i().fileLoad(strFile));
 				bCmdWorked=true;
 			}
 		}else
-		if(checkCmdValidity(icclPseudo,"exit","the application")){
+		if(checkCmdValidity(icclPseudo,scfExit,"the application")){
 			cmdExit();
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,"fileShowData ","<ini|setup|CompleteFileName> show contents of file at dump area")){
-			String strOpt = paramString(1);
+		if(checkCmdValidity(icclPseudo,scfFileShowData,"<ini|setup|CompleteFileName> show contents of file at dump area")){
+			String strOpt = ccl.paramString(1);
 			
 			if(strOpt!=null){
 				File fl = null;
@@ -696,12 +729,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			bCmdWorked = true;
 		}else
 		if(checkCmdValidity(icclPseudo,CMD_FIX_VISIBLE_ROWS_AMOUNT,"[iAmount] in case it is not showing as many rows as it should")){
-			icui.setVisibleRowsAdjustRequest(paramInt(1));
+			icui.setVisibleRowsAdjustRequest(ccl.paramInt(1));
 			if(!icui.isVisibleRowsAdjustRequested())icui.setVisibleRowsAdjustRequest(0);
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(icclPseudo,CMD_HELP,"[strFilter] show (filtered) available commands")){
-			cmdShowHelp(paramString(1));
+			cmdShowHelp(ccl.paramString(1));
 			/**
 			 * ALWAYS return TRUE here, to avoid infinite loop when improving some failed command help info!
 			 */
@@ -718,7 +751,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //			}
 //		}else
 		if(checkCmdValidity(icclPseudo,CMD_LINE_WRAP_AT,"[iMaxChars] 0 = wrap will be automatic")){
-			Integer i = paramInt(1);
+			Integer i = ccl.paramInt(1);
 			if(i!=null && i>=0){ // a value was supplied
 				ilvConsoleMaxWidthInCharsForLineWrap.setObjectValue(i);
 //				if(i==-1){
@@ -734,10 +767,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(icclPseudo,CMD_MESSAGE_REVIEW,"[filter]|[index [stackLimit]] if filter is an index, and it has an exception, the complete exception will be dumped.")){
-			String strFilter = paramString(1);
-			Integer iIndex = paramInt(1,true);
+			String strFilter = ccl.paramString(1);
+			Integer iIndex = ccl.paramInt(1,true);
 			
-			Integer iStackLimit = paramInt(2,true);
+			Integer iStackLimit = ccl.paramInt(2,true);
 			
 //			for(ImportantMsg imsg:astrImportantMsgBufferList){
 			for(int i=0;i<astrImportantMsgBufferList.size();i++){
@@ -755,14 +788,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			dumpSubEntry("Total: "+astrImportantMsgBufferList.size());
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,"quit","the application")){
+		if(checkCmdValidity(icclPseudo,scfQuit,"the application")){
 			cmdExit();
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(icclPseudo,CMD_REPEAT,"<iTimes> <strOtherCommand> will repeat other command iTimes")){
-			Integer iTimes = paramInt(1);
+			Integer iTimes = ccl.paramInt(1);
 			if(iTimes!=null && iTimes>=0){ // 0 or 1 is accepted in case iTimes is the result of some variable.
-				String strOtherCmd = paramStringConcatenateAllFrom(2);
+				String strOtherCmd = ccl.paramStringConcatenateAllFrom(2);
 				if(strOtherCmd!=null){
 					for(int i=0;i<iTimes;i++)addCmdToQueue(strOtherCmd);
 					bCmdWorked=true;
@@ -779,9 +812,53 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			}
 			bCmdWorked=true;
 		}else
+		if(checkCmdValidity(icclPseudo,scfShowCommandsCoreIdConflicts,"")){
+			ArrayList<CommandData> aC = new ArrayList<CommandData>();
+			for(CommandData cmdd:trmCmds.values()){
+//				aC.addAll(cmdd.getCoreIdConflictListClone());
+				for(CommandData cmddC:cmdd.getCoreIdConflictListClone()){
+					if(!aC.contains(cmddC))aC.add(cmddC);
+				}
+			}
+			
+			Collections.sort(aC, new Comparator<CommandData>() {
+				@Override
+				public int compare(CommandData o1, CommandData o2) {
+					if(o1.getCoreCmdId().equalsIgnoreCase(o2.getCoreCmdId())){
+						return o1.getUniqueCmdId().compareTo(o2.getUniqueCmdId());
+					}
+					return o1.getCoreCmdId().compareTo(o2.getCoreCmdId());
+				}
+			});
+			
+//			/**
+//			 * this removes dups
+//			 */
+//			LinkedHashSet<CommandData> lhs = new LinkedHashSet<CommandData>(aC);
+			
+			if(aC.size()>0){
+				String strLastCoreId=null;
+				for(CommandData cmddC:aC){//.toArray(new CommandData[0])){
+					String strCurrentCoreId=cmddC.getCoreCmdId();
+					
+					if(!strCurrentCoreId.equalsIgnoreCase(strLastCoreId)){
+						dumpSubEntry("CoreId: "+strCurrentCoreId);
+						strLastCoreId=strCurrentCoreId;
+					}
+					
+					dumpSubEntry(strSubEntryPrefix+cmddC.getUniqueCmdId());
+					
+//					if(strLastCoreId==null){
+//						strLastCoreId=strCurrentCoreId;
+//					}
+				}
+			}
+			
+			bCmdWorked=true;
+		}else
 		if(checkCmdValidity(icclPseudo,CMD_SLEEP,"<fDelay> [singleCmd] will wait before executing next command in the command block; alternatively will wait before executing command in-line, but then it will not sleep the block it is in!")){
-			Float fSleep = paramFloat(1);
-			String strCmds = paramStringConcatenateAllFrom(2);
+			Float fSleep = ccl.paramFloat(1);
+			String strCmds = ccl.paramStringConcatenateAllFrom(2);
 			
 			if(strCmds!=null){
 				/**
@@ -802,8 +879,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}else
 		if(checkCmdValidity(icclPseudo,CMD_STATS_ENABLE,"[idToEnable [bEnable]] empty for a list. bEnable empty to toggle.")){
 			bCmdWorked=true;
-			String strId=paramString(1);
-			Boolean bValue=paramBoolean(2);
+			String strId=ccl.paramString(1);
+			Boolean bValue=ccl.paramBoolean(2);
 			if(strId!=null){
 				EStats e=null;
 				try{e=EStats.valueOf(strId);}catch(IllegalArgumentException ex){
@@ -832,7 +909,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(icclPseudo,CMD_VAR_ADD,"<varId> <[-]value>")){
-			bCmdWorked=cmdVarAdd(paramString(1),paramString(2),true,false);
+			bCmdWorked=cmdVarAdd(ccl.paramString(1), ccl.paramString(2),true,false);
 		}else
 		if(
 				checkCmdValidity(icclPseudo,CMD_VAR_SET,
@@ -851,7 +928,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		if(checkCmdValidity(icclPseudo,CMD_VAR_SHOW,"[["+RESTRICTED_TOKEN+"]filter] list user or restricted variables.")){
 			bCmdWorked=cmdVarShow();
 		}else
-		if(checkCmdValidity(icclPseudo,TOKEN_CMD_NOT_WORKING_YET+"zDisabledCommand"," just to show how to use it")){
+		if(checkCmdValidity(icclPseudo,TOKEN_CMD_NOT_WORKING_YET+"zDisabledCommand",null," just to show how to use it")){
 			// keep this as reference
 		}else
 		{
@@ -877,6 +954,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		return cmdFoundReturnStatus(bCmdWorked);
 	}
 	
+//	private void convertCommandIfPossible() {
+//		paramCommand()
+//	}
+
 	public void cmdResetConsole() {
 		icui.requestRestart();
 //		icui.recreateConsoleGui();
@@ -885,9 +966,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	protected ECmdReturnStatus cmdRawLineCheckAlias(){
 		bLastAliasCreatedSuccessfuly=false;
 		
-		if(strCmdLineOriginal==null)return ECmdReturnStatus.NotFound;
+		if(ccl.strCmdLineOriginal==null)return ECmdReturnStatus.NotFound;
 		
-		String strCmdLine = strCmdLineOriginal.trim();
+		String strCmdLine = ccl.strCmdLineOriginal.trim();
 		String strExecAliasPrefix = ""+getCommandPrefix()+getAliasPrefix();
 		if(strCmdLine.startsWith(getCommandPrefix()+"alias ")){
 			/**
@@ -1230,31 +1311,37 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}
 	}
 	
-	protected void addCmdToValidList(IConsoleCommandListener iccl, String strNew, boolean bSkipSortCheck){
+	protected void addCmdToValidList(IConsoleCommandListener iccl, String strCmdNew, String strCoreCmdId, boolean bSkipSortCheck){
 //		String strConflict=null;
 		
 		if(iccl==null)throw new PrerequisitesNotMetException("listener reference cannot be null");
 			
 //		if(!astrCmdWithCmtValidList.contains(strNew)){
-		if(!strNew.startsWith(TOKEN_CMD_NOT_WORKING_YET)){
+		if(!strCmdNew.startsWith(TOKEN_CMD_NOT_WORKING_YET)){
 //			String strBaseCmdNew = extractCommandPart(strNew,0);
-			String strBaseCmdNew = strNew.split(" ")[0];
+			String strBaseCmdNew = strCmdNew.split(" ")[0];
+			
 			String strComment = "";
-			if(strNew.length()>strBaseCmdNew.length()){
-				strComment= strNew.substring(strBaseCmdNew.length());
+			if(strCmdNew.length()>strBaseCmdNew.length()){
+				strComment= strCmdNew.substring(strBaseCmdNew.length()).trim();
 			}
 			
-			CommandData cmddNew = new CommandData(iccl, strBaseCmdNew, strComment);
+			CommandData cmddNew = new CommandData(iccl, strBaseCmdNew, strCoreCmdId, strComment);
 			
 			/**
-			 * conflict check
+			 * conflict check, will discard in case it is identical origin
 			 */
-			for(CommandData cmdd:acmdList){
-				if(cmdd.getBaseCmd().equalsIgnoreCase(cmddNew.getBaseCmd())){
-					if(cmdd.identicalTo(cmddNew))return; //already set from same origin, just skip.
+			for(CommandData cmdd:trmCmds.values()){
+				if(cmdd.getUniqueCmdId().equalsIgnoreCase(cmddNew.getUniqueCmdId())){
+					/**
+					 * already set from same origin, just skip.
+					 * TODO explain clearly WHY this is not a problem...
+					 */
+					if(cmdd.identicalTo(cmddNew))return;
+					
 //				if(CommandData.getCmdComparator().compare(cmdd, cmddNew)==0){
 					throw new PrerequisitesNotMetException("conflicting commands id "
-						+"'"+cmdd.getBaseCmd()+"'"
+						+"'"+cmdd.getUniqueCmdId()+"'"
 						+" for "
 						+"'"+getListenerId(cmdd.getOwner())+"'"
 						+" vs "
@@ -1262,53 +1349,46 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 					);
 				}
 			}
-//			for(CommandData cmd:acmdList){
-//				if(cmd.getBaseCmd().equalsIgnoreCase(strBaseCmdNew)){
-//					strConflict="";
-//					
-//					String strOwner = getListenerId(cmd.getOwner());
-////					if(cmd.getOwner()!=null)strOwner = cmd.getOwner().getClass().getSimpleName();
-//					strConflict+="("+strOwner+":"+cmd.getBaseCmd()+")";
-//					
-//					strConflict+=" x ";
-//					
-//					strConflict+="("+strOwner+":"+strBaseCmdNew+")";
-//					
-//					break;
-//				}
-//			}
 			
-//			if(strConflict==null){
-				acmdList.add(cmddNew);
-//				astrBaseCmdValidList.add(strBaseCmdNew);
-//				astrCmdWithCmtValidList.add(strNew);
-				
-				/**
-				 * coded sorting check (unnecessary actually), just useful for developers
-				 * be more organized. 
-				 */
-				if(!bSkipSortCheck && acmdList.size()>0){
-					String strLast = acmdList.get(acmdList.size()-1).getBaseCmd();
-					if(strLast.compareToIgnoreCase(strBaseCmdNew)>0){
-						dumpDevWarnEntry("sorting required, last '"+strLast+"' new '"+strBaseCmdNew+"'");
-					}
+			/**
+			 * Core conflict must be here, after the discarding happens to not store
+			 * discarded objects
+			 */
+			for(CommandData cmdd:trmCmds.values()){
+				if(cmdd.getCoreCmdId().equalsIgnoreCase(cmddNew.getCoreCmdId())){
+					cmdd.addCoreIdConflict(cmddNew);
+					cmddNew.addCoreIdConflict(cmdd);
+//					aAllCmdConflictList.add(cmddNew);
 				}
-//			}
+			}
+			
+//			acmdList.add(cmddNew);
+			trmCmds.put(cmddNew.getUniqueCmdId(), cmddNew);
+			cmddLastAdded = cmddNew;
+			
+			/**
+			 * coded sorting check (unnecessary actually), just useful for developers
+			 * be more organized. 
+			 */
+			if(!bSkipSortCheck && trmCmds.size()>0){
+//				String strLast = acmdList.get(acmdList.size()-1).getBaseCmd();
+				String strLast = cmddLastAdded.getUniqueCmdId();
+				if(strLast.compareToIgnoreCase(strBaseCmdNew)>0){
+					dumpDevWarnEntry("sorting required, last '"+strLast+"' new '"+strBaseCmdNew+"'");
+				}
+			}
 		}
-//		}
-		
-//		if(strConflict!=null){
-//			dumpExceptionEntry(new PrerequisitesNotMetException("ConflictCmdId: "+strConflict));
-//		}
 	}
 	
-	protected boolean isCommentedLine(){
-		if(strCmdLinePrepared==null)return false;
-		return strCmdLinePrepared.trim().startsWith(""+getCommentPrefix());
+	public CurrentCommandLine getCurrentCommandLine(){
+		return ccl;
 	}
-
+//	public CurrentCommandLine getCCL(){
+//		return ccl;
+//	}
+	
 	protected boolean cmdVarShow() {
-		String strFilter = paramString(1);
+		String strFilter = ccl.paramString(1);
 		if(strFilter==null)strFilter="";
 		strFilter=strFilter.trim();
 		
@@ -1366,8 +1446,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @return
 	 */
 	protected boolean cmdVarSet() {
-		String strVarId = paramString(1);
-		String strValue = paramString(2);
+		String strVarId = ccl.paramString(1);
+		String strValue = ccl.paramString(2);
 		
 		if(strVarId==null)return false;
 		
@@ -1398,12 +1478,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	protected boolean cmdVarSetCmp() {
-		String strVarId = paramString(1);
+		String strVarId = ccl.paramString(1);
 		if(isRestrictedAndDoesNotExist(strVarId))return false;
 		
-		String strValueLeft = paramString(2);
-		String strCmp = paramString(3);
-		String strValueRight = paramString(4);
+		String strValueLeft = ccl.paramString(2);
+		String strCmp = ccl.paramString(3);
+		String strValueRight = ccl.paramString(4);
 		
 		if(strCmp.equals("==")){
 			return varSet(strVarId, ""+strValueLeft.equals(strValueRight), true);
@@ -1545,7 +1625,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	
 	protected boolean cmdAlias() {
 		boolean bOk=false;
-		String strAliasId = paramString(1);
+		String strAliasId = ccl.paramString(1);
 		if(strAliasId!=null && strAliasId.startsWith(""+getAliasAllowedToken())){
 			bOk=aliasBlock(strAliasId.substring(1),false);
 		}else
@@ -1600,7 +1680,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	protected boolean cmdShowHistory() {
-		String strFilter = paramString(1);
+		String strFilter = ccl.paramString(1);
 		ArrayList<String> astrToDump = new ArrayList<String>();
 		if(strFilter!=null){
 			for(String str:astrCmdHistory){
@@ -1626,7 +1706,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	protected boolean cmdDb() {
-		String strOpt = paramString(1);
+		String strOpt = ccl.paramString(1);
 		if(strOpt!=null){
 			EDataBaseOperations edb = null;
 			try {edb = EDataBaseOperations.valueOf(strOpt);}catch(IllegalArgumentException e){}
@@ -1659,122 +1739,73 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @return false if toggle failed
 	 */
 	protected boolean toggle(BoolTogglerCmdField btg){
-		if(paramBooleanCheckForToggle(1)){
-			Boolean bEnable = paramBoolean(1);
+		if(ccl.paramBooleanCheckForToggle(1)){
+			Boolean bEnable = ccl.paramBoolean(1);
 			btg.set(bEnable==null ? !btg.get() : bEnable); //overrider
 			varSet(btg,true);
-			dumpInfoEntry("Toggle, setting "+paramString(0)+" to "+btg.get());
+			dumpInfoEntry("Toggle, setting "+ccl.paramString(0)+" to "+btg.get());
 			return true;
 		}
 		return false;
 	}
 	
-	public Boolean paramBooleanCheckForToggle(int iIndex){
-		String str = paramString(iIndex);
-		if(str==null)return true; //if there was no param, will work like toggle
+	protected void prepareCmdAndParams(){
+		String strCleaningCmdLine = ccl.strCmdLineOriginal; //dont touch the original...
 		
-		Boolean b = paramBoolean(iIndex);
-		if(b==null)return false; //if there was a param but it is invalid, will prevent toggle
-		
-		return true; // if reach here, will not be toggle, will be a set override
-	}
-	public Boolean paramBoolean(int iIndex){
-		String str = paramString(iIndex);
-		if(str==null)return null;
-		/**
-		 *	Not using java default method because it is permissive towards "false", ex.:
-		 *	if user type "tre" instead of "true", it will result in `false`.
-		 *	But false may be an undesired option.
-		 *	Instead, user will be warned of the wrong typed value "tre".
-		 *	KEEP THIS COMMENTED CODE AS A WARNING!
-		return Boolean.parseBoolean(str);
-		 */
-		if(str.equals("0"))return false;
-		if(str.equals("1"))return true;
-		if(str.equalsIgnoreCase("false"))return false;
-		if(str.equalsIgnoreCase("true"))return true;
-		
-		dumpExceptionEntry(new NumberFormatException("invalid string to boolean: "+str));
-		
-		return null;
-	}
-	public Integer paramInt(int iIndex){
-		return paramInt(iIndex,false);
-	}
-	public Integer paramInt(int iIndex, boolean bNullOnParseFail){
-		String str = paramString(iIndex);
-		if(str==null)return null;
-		try{return Integer.parseInt(str);}catch(NumberFormatException ex){
-			if(!bNullOnParseFail)throw ex;
-		};
-		return null;
-	}
-	public Float paramFloat(int iIndex){
-		return paramFloat(iIndex,false);
-	}
-	public Float paramFloat(int iIndex, boolean bNullOnParseFail){
-		String str = paramString(iIndex);
-		if(str==null)return null;
-		try{return Float.parseFloat(str);}catch(NumberFormatException ex){
-			if(!bNullOnParseFail)throw ex;
-		};
-		return null;
-	}
-	
-	protected String prepareCmdAndParams(String strFullCmdLine){
-		if(strFullCmdLine!=null){
-			strFullCmdLine = strFullCmdLine.trim();
+		if(strCleaningCmdLine!=null){
+			strCleaningCmdLine = strCleaningCmdLine.trim();
 			
-			if(strFullCmdLine.isEmpty())return null; //dummy line
+			if(strCleaningCmdLine.isEmpty())return; // null; //dummy line
 			
 			// a comment shall not create any warning based on false return value...
-			if(strFullCmdLine.startsWith(""+getCommentPrefix()))return null; //comment is a "dummy command"
+			if(strCleaningCmdLine.startsWith(""+getCommentPrefix()))return; // null; //comment is a "dummy command"
 			
 			// now it is possibly a command
 			
-			strFullCmdLine = strFullCmdLine.trim();
-			if(strFullCmdLine.startsWith(getCommandPrefixStr())){
-				strFullCmdLine = strFullCmdLine.substring(1); //cmd prefix 1 char
+			strCleaningCmdLine = strCleaningCmdLine.trim();
+			if(strCleaningCmdLine.startsWith(getCommandPrefixStr())){
+				strCleaningCmdLine = strCleaningCmdLine.substring(1); //cmd prefix 1 char
 			}
 			
-			if(strFullCmdLine.endsWith(getCommentPrefixStr())){
-				strFullCmdLine=strFullCmdLine.substring(0,strFullCmdLine.length()-1); //-1 getCommentPrefix()Char
+			if(strCleaningCmdLine.endsWith(getCommentPrefixStr())){
+				strCleaningCmdLine=strCleaningCmdLine.substring(0,strCleaningCmdLine.length()-1); //-1 getCommentPrefix()Char
 			}
 			
-			return prepareAndCleanMultiCommandsLine(strFullCmdLine);
+//			return 
+			prepareAndCleanMultiCommandsLine(strCleaningCmdLine);
 		}
 		
-		return null;
+//		return null;
 	}
 	
-	protected String getPreparedCmdLine(){
-		return strCmdLinePrepared;
-	}
+//	protected String getPreparedCmdLine(){
+//		return strCmdLinePrepared;
+//	}
 	
 	/**
 	 * Cleans from comments.
 	 * Queues multi commands line, will return a command skipper in this case.
 	 * 
-	 * @param strFullCmdLine
+	 * @param strCleaningCmdLine
 	 * @return the prepared and cleaned single command line, or a skipper
 	 */
-	protected String prepareAndCleanMultiCommandsLine(String strFullCmdLine){
+	protected void prepareAndCleanMultiCommandsLine(String strCleaningCmdLine){
 		/**
 		 * remove comment
 		 */
-		int iCommentAt = strFullCmdLine.indexOf(getCommentPrefix());
+		int iCommentAt = strCleaningCmdLine.indexOf(getCommentPrefix());
 		String strComment = "";
 		if(iCommentAt>=0){
-			strComment=strFullCmdLine.substring(iCommentAt);
-			strFullCmdLine=strFullCmdLine.substring(0,iCommentAt);
+			strComment=strCleaningCmdLine.substring(iCommentAt);
+			strCleaningCmdLine=strCleaningCmdLine.substring(0,iCommentAt);
 		}
 		
 		/**
 		 * queue multicommands line
 		 */
-		if(strFullCmdLine.contains(""+getCommandDelimiter())){
+		if(strCleaningCmdLine.contains(""+getCommandDelimiter())){
 			ArrayList<String> astrMulti = new ArrayList<String>();
-			astrMulti.addAll(Arrays.asList(strFullCmdLine.split(""+getCommandDelimiter())));
+			astrMulti.addAll(Arrays.asList(strCleaningCmdLine.split(""+getCommandDelimiter())));
 			for(int i=0;i<astrMulti.size();i++){
 				/**
 				 * replace by propagating the existing comment to each part that will be executed
@@ -1785,18 +1816,23 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				);
 //				astrMulti.set(i, astrMulti.get(i).trim()+" "+getCommentPrefix()+"SplitCmdLine "+strComment);
 			}
+			
 			addCmdListOneByOneToQueue(astrMulti,true,true);
-			return RESTRICTED_CMD_SKIP_CURRENT_COMMAND.toString();
+			
+			ccl.strCmdLinePrepared = RESTRICTED_CMD_SKIP_CURRENT_COMMAND.toString();
+//			return RESTRICTED_CMD_SKIP_CURRENT_COMMAND.toString();
 		}
 		
-		astrCmdAndParams.clear(); //make sure it is emptied
-		astrCmdAndParams.addAll(convertToCmdParamsList(strFullCmdLine));
-		return String.join(" ",astrCmdAndParams);
+//		astrCmdAndParams.clear(); 
+//		clearPreparedCommandLine(); //make sure it is emptied
+//		astrCmdAndParams.addAll(convertToCmdParamsList(strCleaningCmdLine));
+		ccl.updateFrom(strCleaningCmdLine);
+//		return String.join(" ",astrCmdAndParams);
 	}
 	
-	public ArrayList<String> getPreparedCmdParamsListCopy(){
-		return new ArrayList<String>(astrCmdAndParams);
-	}
+//	public ArrayList<String> getPreparedCmdParamsListCopy(){
+//		return new ArrayList<String>(astrCmdAndParams);
+//	}
 	
 	/**
 	 * Each param can be enclosed within double quotes (")
@@ -1836,46 +1872,6 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //		return strFullCmdLine;
 		return new ArrayList<String>(
 			astrCmdParams.subList(iBeginIndexInclusive, iEndIndexExclusive));
-	}
-	
-	/**
-	 * 
-	 * @return the first "word" in the command line, is the command
-	 */
-	public String paramCommand(){
-		return paramString(0);
-	}
-	
-	/**
-	 * 
-	 * @param iIndex 0 is the command, >=1 are parameters
-	 * @return
-	 */
-	public String paramString(int iIndex){
-		if(iIndex<astrCmdAndParams.size()){
-			String str=astrCmdAndParams.get(iIndex);
-			str = applyVariablesValues(str);
-			return str;
-		}
-		return null;
-	}
-	public String paramStringConcatenateAllFrom(int iStartIndex){
-		String str=null;
-		while(iStartIndex<astrCmdAndParams.size()){
-			if(str!=null){
-				str+=" ";
-			}else{
-				str="";
-			}
-			
-			str+=astrCmdAndParams.get(iStartIndex++);
-		}
-		
-		if(str!=null){
-			str = applyVariablesValues(str);
-		}
-		
-		return str;
 	}
 	
 	/**
@@ -2298,38 +2294,39 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	public void cmdShowHelp(String strFilter) {
 		if(strFilter==null){
-			dumpInfoEntry("Available Commands ("+acmdList.size()+"):");
+			dumpInfoEntry("Available Commands ("+trmCmds.size()+"):");
 		}else{
 			dumpInfoEntry("Help for '"+strFilter+"':");
 		}
 		
-		Collections.sort(acmdList, CommandData.getCmdComparator());
-		for(CommandData cmd:acmdList){
+//		Collections.sort(acmdList, CommandData.getCmdComparator());
+		for(CommandData cmd:trmCmds.values()){
 			if(!containsFilterString(cmd.asHelp(),strFilter))continue;
 			dumpSubEntry(getCommandPrefix()+cmd.asHelp());
 		}
 	}
 	
-	public ArrayList<String> getBaseCommandsWithComment() {
-		if(astrBaseCmdCmtCacheList.size()!=acmdList.size()){
-			astrBaseCmdCmtCacheList.clear();
-			for(CommandData cmd:acmdList){
-				astrBaseCmdCmtCacheList.add(cmd.getBaseCmd()+" "+cmd.getComment());
-				Collections.sort(astrBaseCmdCmtCacheList);
-			}
-		}
-		return astrBaseCmdCmtCacheList;
-	}
+//	public ArrayList<String> getBaseCommandsWithComment() {
+//		if(astrBaseCmdCmtCacheList.size()!=acmdList.size()){
+//			astrBaseCmdCmtCacheList.clear();
+//			for(CommandData cmd:acmdList){
+//				astrBaseCmdCmtCacheList.add(cmd.getBaseCmd()+" "+cmd.getComment());
+//				Collections.sort(astrBaseCmdCmtCacheList);
+//			}
+//		}
+//		return astrBaseCmdCmtCacheList;
+//	}
 	
 	public ArrayList<String> getBaseCommands(){
-		if(astrBaseCmdCacheList.size()!=acmdList.size()){
-			astrBaseCmdCacheList.clear();
-			for(CommandData cmd:acmdList){
-				astrBaseCmdCacheList.add(cmd.getBaseCmd());
-				Collections.sort(astrBaseCmdCacheList);
-			}
-		}
-		return astrBaseCmdCacheList;
+		return new ArrayList<String>(Arrays.asList(trmCmds.keySet().toArray(new String[0])));
+//		if(astrBaseCmdCacheList.size()!=hmCmds.size()){
+//			astrBaseCmdCacheList.clear();
+//			for(CommandData cmd:hmCmds.values()){ //keys would suffice tho
+//				astrBaseCmdCacheList.add(cmd.getBaseCmd());
+//				Collections.sort(astrBaseCmdCacheList);
+//			}
+//		}
+//		return astrBaseCmdCacheList;
 	}
 	
 	protected ECmdReturnStatus stillExecutingCommand(){
@@ -2359,7 +2356,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		ECmdReturnStatus ecrs = ECmdReturnStatus.NotFound;
 		
-		strCmdLineOriginal = strFullCmdLineOriginal;
+		ccl.setOriginalLine(strFullCmdLineOriginal);
+//		strCmdLineOriginal = strFullCmdLineOriginal;
 		
 //		boolean bCommandFound = false;
 		
@@ -2372,7 +2370,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				/**
 				 * we will have a prepared line after below
 				 */
-				strCmdLinePrepared = prepareCmdAndParams(strCmdLineOriginal);
+//				strCmdLinePrepared = prepareCmdAndParams(strCmdLineOriginal);
+				prepareCmdAndParams();
 			}
 			
 			if(!isFound(ecrs))ecrs=stillExecutingCommand();
@@ -2390,18 +2389,19 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //			bCmdFoundAndApplied=false;
 //		}
 		
-		/**
-		 * clear prepared line to mark end of command execution attempt
-		 */
-		clearPreparedCommandLine();
+//		/**
+//		 * clear prepared line to mark end of command execution attempt
+//		 */
+//		ccl.clear();//clearPreparedCommandLine();
+		ccl = new CurrentCommandLine(this); //prepare for a fresh new command
 		
 		return ecrs;
 	}
 	
-	protected void clearPreparedCommandLine() {
-		strCmdLinePrepared = null;
-		astrCmdAndParams.clear();
-	}
+//	protected void clearPreparedCommandLine() {
+//		strCmdLinePrepared = null;
+//		astrCmdAndParams.clear();
+//	}
 
 	public void dumpEntry(String strLineOriginal){
 		dumpEntry(true, true, false, strLineOriginal);
@@ -2978,7 +2978,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	protected void cmdTest(){
 		dumpInfoEntry("testing...");
-		String strOption = paramString(1);
+		String strOption = ccl.paramString(1);
 		
 		if(strOption==null){
 			dumpSubEntry(Arrays.toString(ETest.values()));
@@ -2996,7 +2996,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				}
 				break;
 			case stats:
-				strDebugTest=paramString(2);
+				strDebugTest=ccl.paramString(2);
 //				dumpDevInfoEntry("lblTxtSize="+csaTmp.lblStats.getText().length());
 				break;
 			case exception:
@@ -3050,7 +3050,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 
 	protected ECmdReturnStatus cmdRawLineCheckEndOfStartupCmdQueue() {
-		if(RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE.equals(strCmdLineOriginal)){
+		if(RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE.equals(ccl.strCmdLineOriginal)){
 			bStartupCmdQueueDone=true;
 			return ECmdReturnStatus.FoundAndWorked;
 		}
@@ -3360,6 +3360,44 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public boolean isInitialized() {
 		if(!bInitialized)MsgI.i().msgDbg("is ini", false, this);
 		return bInitialized;
+	}
+
+	public boolean isFullCmd(String strMainCmd) {
+		return trmCmds.containsKey(strMainCmd);
+	}
+
+//	public boolean isCoreCmd(String strMainCmd) {
+//		// TODO Auto-generated method stub
+//		return false;
+//	}
+//
+//	public String getFullCmdFromCore(String strMainCmd) {
+//		return null;
+//	}
+	
+	public String convertToFullCmdIfItIsCoreCmd(String strCmd, boolean bDumpMessages) {
+		for(Entry<String, CommandData> entry:trmCmds.entrySet()){
+			CommandData cmdd = entry.getValue();
+			if(cmdd.getCoreCmdId().equalsIgnoreCase(strCmd)){
+				ArrayList<CommandData> acmddConflictList = cmdd.getCoreIdConflictListClone();
+				if(acmddConflictList.size()>0){
+					if(bDumpMessages){
+						dumpWarnEntry("Unable to converto core command '"+cmdd.getCoreCmdId()+"', it has conflicts:");
+						dumpSubEntry(cmdd.asHelp());
+						for(CommandData cmddC:acmddConflictList){
+							dumpSubEntry(cmddC.asHelp());
+						}
+					}
+					return strCmd;
+				}
+				
+				String strConvertedTo=cmdd.getUniqueCmdId(); //entry.getKey()
+				if(bDumpMessages)dumpInfoEntry("Converted '"+strCmd+"' to '"+strConvertedTo+"'");
+				return strConvertedTo;
+			}
+		}
+		
+		return strCmd;
 	}
 
 }

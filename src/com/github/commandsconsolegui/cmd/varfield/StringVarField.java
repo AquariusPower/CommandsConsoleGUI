@@ -49,10 +49,8 @@ public class StringVarField extends VarCmdFieldAbs{
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	private static String	strCodePrefixVariant = "sv";
 	private static ArrayList<StringVarField> ailvList = new ArrayList<StringVarField>();
+	
 	String strValue;
-	private IReflexFillCfg	rfcfgOwner;
-	private VarIdValueOwnerData	vivo;
-	private String	strHelp;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP

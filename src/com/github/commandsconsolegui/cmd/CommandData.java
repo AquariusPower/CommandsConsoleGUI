@@ -27,11 +27,9 @@
 
 package com.github.commandsconsolegui.cmd;
 
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.ArrayList;
 
 import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 
 /**
@@ -40,13 +38,30 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
  *
  */
 public class CommandData {
-	String strBaseCmd;
-	String strComment;
-	IConsoleCommandListener icclOwner;
-	StackTraceElement[] asteCodeTrackUniqueId;
+	/** 
+	 * Core IDs are simple short commands.
+	 * They may conflict, but it is not critical as the full command is what matters. 
+	 */
+	private String strCoreCmdId;
 	
-	public String getBaseCmd() {
-		return strBaseCmd;
+	/**
+	 * Fully qualified, unique, using classes names etc.
+	 * Must NOT conflict!
+	 */
+	private String strUniqueCmdId;
+	
+	private String strComment;
+	private IConsoleCommandListener icclOwner;
+	private StackTraceElement[] asteCodeTrackUniqueId;
+
+	private ArrayList<CommandData>	acmddCoreIdConflicts = new ArrayList<CommandData>();
+	
+	public String getCoreCmdId(){
+		return strCoreCmdId;
+	}
+	
+	public String getUniqueCmdId() {
+		return strUniqueCmdId;
 	}
 	public String getComment() {
 		return strComment;
@@ -55,26 +70,27 @@ public class CommandData {
 		return icclOwner;
 	}
 	
-	public CommandData(IConsoleCommandListener icclOwner, String strBaseCmd, String strComment) {
+	public CommandData(IConsoleCommandListener icclOwner, String strBaseCmd, String strCoreCmdId, String strComment) {
 		super();
 		this.icclOwner = icclOwner;
-		this.strBaseCmd = strBaseCmd;
+		this.strUniqueCmdId = strBaseCmd;
+		this.strCoreCmdId=strCoreCmdId;
 		this.strComment = strComment;
 		this.asteCodeTrackUniqueId = Thread.currentThread().getStackTrace();
 		
 		if(this.icclOwner==null)throw new PrerequisitesNotMetException("listener cannot be null");
 	}
 	
-	public static class CommandComparator implements Comparator<CommandData>{
-		@Override
-		public int compare(CommandData c1, CommandData c2){
-			return c1.strBaseCmd.compareToIgnoreCase(c2.strBaseCmd);
-		}
-	}
-	private static CommandComparator cmp = new CommandComparator();
-	public static CommandComparator getCmdComparator(){
-		return cmp;
-	}
+//	public static class CommandComparator implements Comparator<CommandData>{
+//		@Override
+//		public int compare(CommandData c1, CommandData c2){
+//			return c1.strBaseCmd.compareToIgnoreCase(c2.strBaseCmd);
+//		}
+//	}
+//	private static CommandComparator cmp = new CommandComparator();
+//	public static CommandComparator getCmdComparator(){
+//		return cmp;
+//	}
 	
 	
 	
@@ -84,7 +100,7 @@ public class CommandData {
 			strCommentOk=GlobalCommandsDelegatorI.i().getCommentPrefixStr()+strCommentOk;
 		}
 		
-		return strBaseCmd+" "
+		return strUniqueCmdId+" "
 			+strCommentOk
 			+"("+GlobalCommandsDelegatorI.i().getListenerId(icclOwner)+")";
 		
@@ -102,10 +118,20 @@ public class CommandData {
 //			&&
 			this.getOwner()==cmddNew.getOwner()
 			&&
-			this.getBaseCmd().equalsIgnoreCase(cmddNew.getBaseCmd())
+			this.getUniqueCmdId().equalsIgnoreCase(cmddNew.getUniqueCmdId())
 			&&
 			this.getComment().equalsIgnoreCase(cmddNew.getComment())
 			;
+	}
+	
+	public void addCoreIdConflict(CommandData cmdd){
+		if(!acmddCoreIdConflicts.contains(cmdd)){
+			acmddCoreIdConflicts.add(cmdd);
+		}
+	}
+	
+	public ArrayList<CommandData> getCoreIdConflictListClone() {
+		return new ArrayList<CommandData>(acmddCoreIdConflicts);
 	}
 	
 }

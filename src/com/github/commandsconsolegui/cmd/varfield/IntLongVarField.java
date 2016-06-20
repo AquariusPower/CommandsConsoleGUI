@@ -52,9 +52,6 @@ public class IntLongVarField extends VarCmdFieldAbs{
 	protected static String	strCodePrefixVariant = "ilv";
 	protected static ArrayList<IntLongVarField> ailvList = new ArrayList<IntLongVarField>();
 	
-	protected IReflexFillCfg	rfcfgOwner;
-	protected VarIdValueOwnerData	vivo;
-	protected String	strHelp;
 	protected Long lValue;
 	
 	public static void configure(IHandleExceptions ihe){

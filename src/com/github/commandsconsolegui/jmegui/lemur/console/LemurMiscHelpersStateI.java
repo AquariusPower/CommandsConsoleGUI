@@ -63,8 +63,9 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	private static LemurMiscHelpersStateI instance = new LemurMiscHelpersStateI(); 
 	public static LemurMiscHelpersStateI i(){return instance;}
 	
-	public final BoolTogglerCmdField	btgTextCursorPulseFadeBlinkMode = new BoolTogglerCmdField(this,true);
-	public final BoolTogglerCmdField	btgTextCursorLarge = new BoolTogglerCmdField(this,true);
+	public final BoolTogglerCmdField	btgTextCursorPulseFadeBlinkMode = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
+	public final BoolTogglerCmdField	btgTextCursorLarge = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
+	
 	public final StringCmdField CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringCmdField(this, CommandsDelegator.strFinalCmdCodePrefix);
 
 //	private SimpleApplication	sapp;
