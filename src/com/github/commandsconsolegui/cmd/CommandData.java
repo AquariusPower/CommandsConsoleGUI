@@ -37,7 +37,7 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class CommandData {
+public class CommandData implements Comparable<CommandData>{
 	/** 
 	 * Core IDs are simple short commands.
 	 * They may conflict, but it is not critical as the full command is what matters. 
@@ -100,9 +100,17 @@ public class CommandData {
 			strCommentOk=GlobalCommandsDelegatorI.i().getCommentPrefixStr()+strCommentOk;
 		}
 		
-		return strUniqueCmdId+" "
+		String strCmdToShow = getCoreCmdId();
+		String strInfoShow = " ("+strUniqueCmdId+")";
+		if(isCoreCmdIdConflicting()){
+			strCmdToShow=strUniqueCmdId;
+			strInfoShow=" (Conflict:"+getCoreCmdId()+")";
+		}
+		
+		return strCmdToShow+" "
 			+strCommentOk
-			+"("+GlobalCommandsDelegatorI.i().getListenerId(icclOwner)+")";
+//			+"(Listener:"+GlobalCommandsDelegatorI.i().getListenerId(icclOwner)+")"
+			+strInfoShow;
 		
 //		return strBaseCmd+" "
 //			+strComment+" "
@@ -130,8 +138,26 @@ public class CommandData {
 		}
 	}
 	
+	public boolean isCoreCmdIdConflicting(){
+		return acmddCoreIdConflicts.size()>0;
+	}
+	
 	public ArrayList<CommandData> getCoreIdConflictListClone() {
 		return new ArrayList<CommandData>(acmddCoreIdConflicts);
+	}
+
+	@Override
+	public int compareTo(CommandData o) {
+//		if(
+//			this.getCoreCmdId().equalsIgnoreCase(o.getCoreCmdId())
+//			||
+//			this.isCoreCmdIdConflicting()
+//			||
+//			o.isCoreCmdIdConflicting()
+//		){
+//			return this.getUniqueCmdId().compareTo(o.getUniqueCmdId());
+//		}
+		return this.getCoreCmdId().toLowerCase().compareTo(o.getCoreCmdId().toLowerCase());
 	}
 	
 }

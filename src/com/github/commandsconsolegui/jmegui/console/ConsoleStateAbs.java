@@ -1177,7 +1177,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 				if(bKeyControlIsPressed){
 					String strCmdChk = cd().editCopyOrCut(true,false,true); //vlstrDumpEntries.get(getDumpAreaSelectedIndex()).trim();
 					strCmdChk=strCmdChk.trim();
-					if(cd().validateBaseCommand(strCmdChk)){
+					if(cd().validateUniqueCommand(strCmdChk)){
 						if(!strCmdChk.startsWith(""+cd().getCommandPrefix()))strCmdChk=cd().getCommandPrefix()+strCmdChk;
 						dumpAndClearInputField();
 //						int iCommentBegin = strCmdChk.indexOf(cc.getCommentPrefix());
@@ -1493,9 +1493,9 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 //				-lstbxDumpArea.getSlider().getModel().getValue();
 //	}
 	
-	protected String autoCompleteInputField(){
-		return autoCompleteInputField(false);
-	}
+//	protected String autoCompleteInputField(){
+//		return autoCompleteInputField(false);
+//	}
 	protected String autoCompleteInputField(boolean bMatchContains){
 		String strCmdPart = getInputText();
 		String strCmdAfterCarat="";
@@ -1601,26 +1601,24 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 		strCmdPart=strCmdPart.trim();
 		
 		// no command typed
-		if(strCmdPart.equalsIgnoreCase(""+cd().getCommandPrefix()) || strCmdPart.isEmpty())
+		if(strCmdPart.equalsIgnoreCase(""+cd().getCommandPrefix()) || strCmdPart.isEmpty()){
 			return strCmdPartOriginal;
+		}
 		
 		strCmdPart=strCmdPart.replaceFirst("^"+cd().getCommandPrefix(), "");
 		
 		// do not allow invalid chars
-		if(!cd().isValidIdentifierCmdVarAliasFuncString(strCmdPart))
-//		if(!strCmdPart.matches("["+strValidCmdCharsRegex+"]*"))
+		if(!cd().isValidIdentifierCmdVarAliasFuncString(strCmdPart)){
 			return strCmdPartOriginal;
+		}
 		
-		ArrayList<String> astr = AutoCompleteI.i().autoComplete(strCmdPart, cd().getBaseCommands(), bMatchContains);
+		ArrayList<String> astr = AutoCompleteI.i().autoComplete(
+			strCmdPart, cd().getAllPossibleCommands(), bMatchContains);
 		String strFirst=astr.get(0); //the actual stored command may come with comments appended
 		String strAppendSpace = "";
-		if(astr.size()==1 && cd().validateBaseCommand(strFirst)){
+		if(astr.size()==1 && cd().validateUniqueCommand(strFirst)){
 			strAppendSpace=" "; //found an exact command valid match, so add space
 		}
-////		if(astr.size()==1 && extractCommandPart(strFirst,0).length() > strCmdPart.length()){
-//		if(astr.size()==1 && strFirst.length() > strCmdPart.length()){
-//			strAppendSpace=" "; //found an exact command valid match, so add space
-//		}
 		
 		// many possible matches
 		if(astr.size()>1){
@@ -2121,7 +2119,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 		}
 		
 		ArrayList<String> astr = AutoCompleteI.i().autoComplete(
-			strInputText, cd().getBaseCommands(), bKeyControlIsPressed, true);
+			strInputText, cd().getAllPossibleCommands(), bKeyControlIsPressed, true);
 		
 		boolean bShowHint = false;
 		

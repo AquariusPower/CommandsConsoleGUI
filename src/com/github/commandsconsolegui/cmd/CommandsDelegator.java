@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -821,15 +822,16 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				}
 			}
 			
-			Collections.sort(aC, new Comparator<CommandData>() {
-				@Override
-				public int compare(CommandData o1, CommandData o2) {
-					if(o1.getCoreCmdId().equalsIgnoreCase(o2.getCoreCmdId())){
-						return o1.getUniqueCmdId().compareTo(o2.getUniqueCmdId());
-					}
-					return o1.getCoreCmdId().compareTo(o2.getCoreCmdId());
-				}
-			});
+			Collections.sort(aC);
+//			Collections.sort(aC, new Comparator<CommandData>() {
+//				@Override
+//				public int compare(CommandData o1, CommandData o2) {
+//					if(o1.getCoreCmdId().equalsIgnoreCase(o2.getCoreCmdId())){
+//						return o1.getUniqueCmdId().compareTo(o2.getUniqueCmdId());
+//					}
+//					return o1.getCoreCmdId().compareTo(o2.getCoreCmdId());
+//				}
+//			});
 			
 //			/**
 //			 * this removes dups
@@ -2300,9 +2302,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}
 		
 //		Collections.sort(acmdList, CommandData.getCmdComparator());
-		for(CommandData cmd:trmCmds.values()){
+		
+		ArrayList<CommandData> cmdList = new ArrayList<CommandData>(trmCmds.values());
+		Collections.sort(cmdList);
+		
+		for(CommandData cmd:cmdList){//trmCmds.values()){
 			if(!containsFilterString(cmd.asHelp(),strFilter))continue;
 			dumpSubEntry(getCommandPrefix()+cmd.asHelp());
+			dumpSubEntry(""); //for readability
 		}
 	}
 	
@@ -2317,7 +2324,20 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //		return astrBaseCmdCmtCacheList;
 //	}
 	
-	public ArrayList<String> getBaseCommands(){
+	public ArrayList<String> getAllPossibleCommands(){
+		ArrayList<String> a = new ArrayList<String>();
+		
+		for(CommandData cmdd:trmCmds.values()){
+			if(!a.contains(cmdd.getCoreCmdId()))a.add(cmdd.getCoreCmdId());
+			a.add(cmdd.getUniqueCmdId());
+		}
+		
+		Collections.sort(a);
+		
+		return a;
+	}
+	
+	public ArrayList<String> getUniqueCommands(){
 		return new ArrayList<String>(Arrays.asList(trmCmds.keySet().toArray(new String[0])));
 //		if(astrBaseCmdCacheList.size()!=hmCmds.size()){
 //			astrBaseCmdCacheList.clear();
@@ -2611,7 +2631,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	protected void showHelpForFailedCommand(String strFullCmdLine){
-		if(validateBaseCommand(strFullCmdLine)){
+		if(validateUniqueCommand(strFullCmdLine)){
 //			addToExecConsoleCommandQueue(CMD_HELP+" "+extractCommandPart(strFullCmdLine,0));
 			cmdShowHelp(extractCommandPart(strFullCmdLine,0));
 		}else{
@@ -2784,15 +2804,15 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	/**
 	 * Validates if the first extracted word is a valid command.
 	 * 
-	 * @param strCmdFullChk can be the full command line here
+	 * @param strUniqueCmdChk can be the full command line here
 	 * @return
 	 */
-	public boolean validateBaseCommand(String strCmdFullChk){
-		strCmdFullChk = extractCommandPart(strCmdFullChk,0);
+	public boolean validateUniqueCommand(String strUniqueCmdChk){
+		strUniqueCmdChk = extractCommandPart(strUniqueCmdChk,0);
 //		if(strCmdFullChk.startsWith(strCommandPrefixChar)){
 //			strCmdFullChk=strCmdFullChk.substring(strCommandPrefixChar.length());
 //		}
-		return getBaseCommands().contains(strCmdFullChk);
+		return getUniqueCommands().contains(strUniqueCmdChk);
 	}
 	
 	protected static enum EStats{
