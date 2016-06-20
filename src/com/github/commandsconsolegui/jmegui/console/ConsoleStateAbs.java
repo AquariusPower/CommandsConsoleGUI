@@ -39,6 +39,7 @@ import truetypefontlite.TrueTypeFont;
 import truetypefontlite.TrueTypeKey;
 import truetypefontlite.TrueTypeLoader;
 
+import com.github.commandsconsolegui.cmd.CommandData;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.DumpEntryData;
@@ -1496,7 +1497,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 //	protected String autoCompleteInputField(){
 //		return autoCompleteInputField(false);
 //	}
-	protected String autoCompleteInputField(boolean bMatchContains){
+	protected String autoCompleteInputFieldWithCmd(boolean bMatchContains){
 		String strCmdPart = getInputText();
 		String strCmdAfterCarat="";
 		
@@ -1507,7 +1508,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 			strCmdPart = strCmdPart.substring(0, iCaratPosition);
 		}
 		
-		String strCompletedCmd = autoCompleteWork(strCmdPart,bMatchContains);
+		String strCompletedCmd = autoCompleteCmdMoreWork(strCmdPart,bMatchContains);
 		
 		/**
 		 * parameters completion!
@@ -1596,7 +1597,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 	protected ArrayList<String> getStyleListClone() {
 		return new ArrayList<String>(astrStyleList);
 	}
-	protected String autoCompleteWork(String strCmdPart, boolean bMatchContains){
+	protected String autoCompleteCmdMoreWork(String strCmdPart, boolean bMatchContains){
 		String strCmdPartOriginal = strCmdPart;
 		strCmdPart=strCmdPart.trim();
 		
@@ -1614,7 +1615,26 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 		
 		ArrayList<String> astr = AutoCompleteI.i().autoComplete(
 			strCmdPart, cd().getAllPossibleCommands(), bMatchContains);
+		/**
+		 * Adjust the autocomplete result based on core and unique cmds:
+		 * 0 - is partially typed
+		 * 1 - is core or unique cmd
+		 * 2 - is core or unique cmd
+		 * In this case, there is no core cmds conflicts.
+		 */
+		if(astr.size()==3){
+			CommandData cmdd = cd().getCmdDataIfSame(astr.get(1), astr.get(2));
+			if(cmdd!=null){
+//			CommandData cmdd = cd().getCmdDataFor(astr.get(1));
+////			if(cmdd==null)cmdd=cd().getCmdDataFor(astr.get(1));
+//			if(cmdd.equals(cd().getCmdDataFor(astr.get(2)))){
+				astr.clear();
+				astr.add(cmdd.getCoreCmdId());
+			}
+		}
+		
 		String strFirst=astr.get(0); //the actual stored command may come with comments appended
+		
 		String strAppendSpace = "";
 		if(astr.size()==1 && cd().validateUniqueCommand(strFirst)){
 			strAppendSpace=" "; //found an exact command valid match, so add space

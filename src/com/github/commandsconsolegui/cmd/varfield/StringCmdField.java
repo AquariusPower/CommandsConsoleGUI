@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
+import java.util.ArrayList;
+
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -47,6 +49,12 @@ public class StringCmdField extends VarCmdFieldAbs{
 //	private String	strHelpComment;
 	protected static boolean bIgnoreCaseOnComparison = true;
 	public static final String strCodePrefix="scf"; //ex.: scfTestCommand
+	protected static ArrayList<StringCmdField> ascfList = new ArrayList<StringCmdField>();
+	
+	public static ArrayList<StringCmdField> getListCopy(){
+		return new ArrayList<StringCmdField>(ascfList);
+	}
+	
 	
 	/**
 	 * default is true, useful for easy lowercase user typed commands comparison
@@ -69,6 +77,7 @@ public class StringCmdField extends VarCmdFieldAbs{
 		super.setId(new IdTmp(false, strCmdId, strCmdId));
 		this.strHelp = strHelpComment;
 		this.bReflexingIdentifier = false;
+		StringCmdField.ascfList.add(this);
 	}
 	
 	/**

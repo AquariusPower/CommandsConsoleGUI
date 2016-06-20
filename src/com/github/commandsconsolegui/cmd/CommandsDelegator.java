@@ -32,11 +32,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
@@ -1364,6 +1361,15 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				}
 			}
 			
+			ArrayList<VarCmdFieldAbs> avcf = new ArrayList<VarCmdFieldAbs>();
+			avcf.addAll(BoolTogglerCmdField.getListCopy());
+			avcf.addAll(StringCmdField.getListCopy());
+			for(VarCmdFieldAbs vcf:avcf){
+				if(vcf.getCmdId().equalsIgnoreCase(cmddNew.getUniqueCmdId())){
+					vcf.setCmdData(cmddNew);
+				}
+			}
+			
 //			acmdList.add(cmddNew);
 			trmCmds.put(cmddNew.getUniqueCmdId(), cmddNew);
 			cmddLastAdded = cmddNew;
@@ -2054,7 +2060,17 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		// as reusable command
 		str+=getCommandPrefix();
-		str+=CMD_VAR_SET.toString();
+		
+		if(CMD_VAR_SET.getCmdData()!=null){
+			if(CMD_VAR_SET.getCmdData().isCoreCmdIdConflicting()){
+				str+=CMD_VAR_SET.getCmdData().getUniqueCmdId();
+			}else{
+				str+=CMD_VAR_SET.getCmdData().getCoreCmdId();
+			}
+		}else{
+			str+=CMD_VAR_SET.toString();
+		}
+		
 		str+=" ";
 		str+=strVarId;
 		str+=" ";
@@ -2095,6 +2111,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}else{
 			dumpSubEntry(strVarId+" is not set...");
 		}
+		dumpSubEntry("");//for readability
 	}
 	
 	public boolean varSet(StringCmdField sfId, String strValue, boolean bSave) {
@@ -3418,6 +3435,47 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}
 		
 		return strCmd;
+	}
+	
+	/**
+	 * If both cmds refere to the same command, and such has no conflicts, return it's data.
+	 * 
+	 * @param strCmdId1 core or unique cmd id
+	 * @param strCmdId2 core or unique cmd id
+	 * @return 
+	 */
+	public CommandData getCmdDataIfSame(String strCmdId1,String strCmdId2){
+		CommandData cmdd1 = trmCmds.get(strCmdId1);
+		CommandData cmdd2 = trmCmds.get(strCmdId2);
+		
+		if(cmdd1!=null){
+			if(cmdd1.getCoreCmdId().equalsIgnoreCase(strCmdId2)){
+				if(!cmdd1.isCoreCmdIdConflicting())return cmdd1;
+			}
+		}
+		
+		if(cmdd2!=null){
+			if(cmdd2.getCoreCmdId().equalsIgnoreCase(strCmdId1)){
+				if(!cmdd2.isCoreCmdIdConflicting())return cmdd2;
+			}
+		}
+		
+		return null;
+	}
+	
+	public CommandData getCmdDataFor(String strCmdId) {
+		CommandData cmdd = trmCmds.get(strCmdId);
+		if(cmdd==null){
+			for(CommandData cmddTmp:trmCmds.values()){
+				if(cmddTmp.isCoreCmdIdConflicting())continue; //only allow precise match
+				
+				if(cmddTmp.getCoreCmdId().equalsIgnoreCase(strCmdId)){
+					cmdd=cmddTmp;
+					break;
+				}
+			}
+		}
+		return cmdd;
 	}
 
 }

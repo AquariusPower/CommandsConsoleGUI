@@ -536,7 +536,7 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 						actionSubmit(getInputText());
 						break;
 					case KeyInput.KEY_TAB:
-						autoCompleteInputField(bControl);
+						autoCompleteInputFieldWithCmd(bControl);
 						break;
 					case KeyInput.KEY_DELETE:
 						if(bControl){
@@ -863,8 +863,8 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 	}
 	
 	@Override
-	protected String autoCompleteInputField(boolean bMatchContains) {
-		String strCompletedCmd = super.autoCompleteInputField(bMatchContains);
+	protected String autoCompleteInputFieldWithCmd(boolean bMatchContains) {
+		String strCompletedCmd = super.autoCompleteInputFieldWithCmd(bMatchContains);
 		LemurMiscHelpersStateI.i().setCaratPosition(getInputField(), strCompletedCmd.length());
 		return strCompletedCmd;
 	}

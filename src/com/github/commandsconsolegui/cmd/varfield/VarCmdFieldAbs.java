@@ -27,6 +27,7 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
+import com.github.commandsconsolegui.cmd.CommandData;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData.IVarIdValueOwner;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -49,6 +50,22 @@ public abstract class VarCmdFieldAbs implements IReflexFillCfgVariant, IVarIdVal
 	protected IReflexFillCfg	rfcfgOwner;
 	protected VarIdValueOwnerData	vivo;
 	protected String strHelp="";
+	protected CommandData	cmdd;
+	
+	public CommandData getCmdData(){
+		return this.cmdd;
+	}
+	
+	public void setCmdData(CommandData cmdd){
+		this.cmdd=cmdd;
+	}
+	
+	public void setVarData(VarIdValueOwnerData	vivo){
+		this.vivo=vivo;
+	}
+	public VarIdValueOwnerData getVarData(){
+		return this.vivo;
+	}
 	
 	@Override
 	public boolean isReflexing() {
