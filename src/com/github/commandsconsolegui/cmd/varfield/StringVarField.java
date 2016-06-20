@@ -51,7 +51,6 @@ public class StringVarField extends VarCmdFieldAbs{
 	private static ArrayList<StringVarField> ailvList = new ArrayList<StringVarField>();
 	String strValue;
 	private IReflexFillCfg	rfcfgOwner;
-	private String	strVarId;
 	private VarIdValueOwnerData	vivo;
 	private String	strHelp;
 	
@@ -104,7 +103,10 @@ public class StringVarField extends VarCmdFieldAbs{
 	
 	@Override
 	public String getVarId() {
-		if(strVarId==null)strVarId=ReflexFillI.i().getVarId(rfcfgOwner, strCodePrefixVariant, this, -1);
+		if(strVarId==null){
+			super.setId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner, this, true));
+		}
+		
 		return strVarId;
 	}
 
@@ -136,6 +138,11 @@ public class StringVarField extends VarCmdFieldAbs{
 	@Override
 	public String getHelp() {
 		return strHelp==null?"":strHelp;
+	}
+
+	@Override
+	public String getVariablePrefix() {
+		return "String";
 	}
 
 }

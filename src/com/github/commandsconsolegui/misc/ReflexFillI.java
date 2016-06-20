@@ -62,6 +62,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		public String getCodePrefixVariant();
 		public IReflexFillCfg getOwner();
 		public boolean isReflexing();
+		public String getVariablePrefix();
 	}
 	
 	public static class ReflexFillCfg{
@@ -71,7 +72,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		IReflexFillCfgVariant rfcv;
 		private boolean bUsePrefixDeclaringClass=true;
 		String	strPrefixDeclaringClass="";
-		boolean bUsePrefixInstancedClass=false;
+		boolean bUsePrefixInstancedClass=true;
 		String	strPrefixInstancedClass="";
 		
 		/**
@@ -79,7 +80,8 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		 * these can be copied/cloned
 		 */
 		String	strCodingStyleFieldNamePrefix=null;
-		String	strPrefix="";
+		String	strPrefixCmd="cmd";
+		String	strPrefixVar="var";
 		String	strPrefixCustomId="";
 		String	strSuffix="";
 		boolean bFirstLetterUpperCase = false;
@@ -94,12 +96,24 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 			this.strCodingStyleFieldNamePrefix = strCodingStyleFieldNamePrefix;
 		}
 
-		public String getPrefix() {
-			return strPrefix;
+		public String getPrefixVar() {
+			return strPrefixVar;
 		}
-
-		public void setPrefix(String strCommandPrefix) {
-			this.strPrefix = strCommandPrefix;
+		public void setPrefixVar(String strVarPrefix) {
+			this.strPrefixVar = strVarPrefix;
+		}
+		public void appendPrefixVar(String str) {
+			this.strPrefixVar+=str;
+		}
+		
+		public String getPrefixCmd() {
+			return strPrefixCmd;
+		}
+		public void setPrefixCmd(String strCommandPrefix) {
+			this.strPrefixCmd = strCommandPrefix;
+		}
+		public void appendPrefixCmd(String str) {
+			this.strPrefixCmd+=str;
 		}
 
 		public String getSuffix() {
@@ -127,7 +141,8 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 			this(rfcv);
 			
 			this.strCodingStyleFieldNamePrefix = otherCopyBasicDataFrom.strCodingStyleFieldNamePrefix;
-			this.strPrefix = otherCopyBasicDataFrom.strPrefix;
+			this.strPrefixCmd = otherCopyBasicDataFrom.strPrefixCmd;
+			this.strPrefixVar = otherCopyBasicDataFrom.strPrefixVar;
 			this.strSuffix = otherCopyBasicDataFrom.strSuffix;
 			this.bFirstLetterUpperCase = otherCopyBasicDataFrom.bFirstLetterUpperCase;
 			this.bIsCommandToo = otherCopyBasicDataFrom.bIsCommandToo;
@@ -287,6 +302,19 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 			+" ");
 	}
 	
+	public static class IdTmp{
+		public String strFull;
+		public String strCore;
+		public boolean	bIsVariable;
+		public IdTmp() {
+		}
+		public IdTmp(boolean bIsVariable, String strCore, String strFull) {
+			this.strFull = strFull;
+			this.strCore = strCore;
+			this.bIsVariable = bIsVariable;
+		}
+	}
+	
 	/**
 	 * Works on reflected variable name.
 	 * If it is all uppercase, it will be prettyfied.
@@ -297,9 +325,15 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	 * 
 	 * @param rfcfgOwnerOfField
 	 * @param rfcvFieldAtTheOwner
+	 * @param bIsVariable otherwise is a command
 	 * @return
 	 */
-	public String createIdentifierWithFieldName(IReflexFillCfg rfcfgOwnerOfField, IReflexFillCfgVariant rfcvFieldAtTheOwner){
+	public IdTmp createIdentifierWithFieldName(IReflexFillCfg rfcfgOwnerOfField, IReflexFillCfgVariant rfcvFieldAtTheOwner, boolean bIsVariable){
+		if(rfcfgOwnerOfField==null){
+			throw new NullPointerException("Invalid usage, "
+				+IReflexFillCfg.class.getName()+" owner is null, is this a local (non field) variable?");
+		}
+		
 		ReflexFillCfg rfcfg = rfcfgOwnerOfField.getReflexFillCfg(rfcvFieldAtTheOwner);
 		if(rfcfg==null){
 			if(bUseDefaultCfgIfMissing){
@@ -359,20 +393,30 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 			}
 		}
 		
-		return prepareFullCommand(strCommandCore, rfcfg);
+		IdTmp id = new IdTmp();
+		id.strFull = prepareFullCommand(strCommandCore, rfcfg, bIsVariable);
+		id.strCore = strCommandCore;
+		id.bIsVariable=bIsVariable;
+		return id;
 	}
 	
 	/**
-	 * all these concatenated identifiers are good to make sure all commands are unique,
-	 * but... command's size get huge...
+	 * All these concatenated identifiers are good to make sure all commands are unique,
+	 * but... command's size get huge!
+	 * 
+	 * Also, there is redundancy cleaner, avoiding identifiers duplicity mess.
 	 * 
 	 * @param strCommandCore
 	 * @param rfcfg
 	 * @return
 	 */
-	private String prepareFullCommand(String strCommandCore, ReflexFillCfg rfcfg){
+	private String prepareFullCommand(String strCommandCore, ReflexFillCfg rfcfg, boolean bIsVariable){
+//		DebugI.i().conditionalBreakpoint(rfcfg.getPrefixCustomId().equals("ConfigDialog"));
+		
 	//	strCommand=rfcfg.strPrefix+strCommand+rfcfg.strSuffix;
-		String strFullCommand=preparePart(rfcfg.getPrefix());
+		String strFullCommand=preparePart(bIsVariable?
+			rfcfg.getPrefixVar()+rfcfg.rfcv.getVariablePrefix():
+			rfcfg.getPrefixCmd());
 		
 		boolean bUseCustomId=true;
 		
@@ -457,35 +501,6 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 //			
 //		return bCommandWorked;
 //	}
-	
-	/**
-	 * 
-	 * @param rfcfgOwningValue
-	 * @param strCodePrefixVariant
-	 * @param irfcvValue
-	 * @param iOnlyFirstLettersCount see {@link MiscI#makePretty(Class, boolean, Integer)}
-	 * @return
-	 */
-	public String getVarId(IReflexFillCfg rfcfgOwningValue, String strCodePrefixVariant, IReflexFillCfgVariant irfcvValue, Integer iOnlyFirstLettersCount) {
-		if(rfcfgOwningValue==null){
-			throw new NullPointerException("Invalid usage, "
-				+IReflexFillCfg.class.getName()+" owner is null, is this a local (non field) variable?");
-		}
-		
-//		Field field = assertAndGetField(rfcfgOwningValue,irfcvValue);
-//		Class<?> clWhereFieldIsActuallyDeclared = field.getDeclaringClass();
-		
-		String strVarId = strCodePrefixVariant
-//			+rfcfgOwner.getClass().getSimpleName()
-//			+clWhereFieldIsActuallyDeclared.getSimpleName()
-				+getDeclaringClass(rfcfgOwningValue,irfcvValue).getSimpleName()
-//			+MiscI.i().makePretty(rfcfgOwner.getClass(), false, iOnlyFirstLettersCount)
-			+MiscI.i().firstLetter(
-				ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwningValue,irfcvValue),
-				true);
-		
-		return strVarId;
-	}
 	
 	/**
 	 * 

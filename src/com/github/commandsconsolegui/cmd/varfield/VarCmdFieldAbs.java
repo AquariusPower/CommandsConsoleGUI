@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.cmd.varfield;
 
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData.IVarIdValueOwner;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
 
 /**
  * TODO migrate most things possible to here
@@ -38,9 +39,63 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
  */
 public abstract class VarCmdFieldAbs implements IReflexFillCfgVariant, IVarIdValueOwner{
 	protected boolean bReflexingIdentifier = true;
+	protected String strVarId = null;
+	protected String strCmdId = null;
+	protected String strCoreId = null;
+	protected String strDebugErrorHelper = "ERROR: "+this.getClass().getName()+" not yet properly initialized!!!";
 	
 	@Override
 	public boolean isReflexing() {
 		return bReflexingIdentifier;
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected <T extends VarCmdFieldAbs> T setId(IdTmp id){
+		String strExceptionId = null;
+		
+		/**
+		 * must be an exception as it can have already been read/collected with automatic value.
+		 */
+		if(id.bIsVariable){
+			if(strVarId!=null){
+				strExceptionId=strVarId;
+			}else{
+				strVarId=id.strFull;
+			}
+		}else{
+			if(strCmdId!=null){
+				strExceptionId=strCmdId;
+			}else{
+				strCmdId=id.strFull;
+			}
+		}
+		
+		if(strExceptionId!=null){
+			throw new NullPointerException("asked for '"+id.strFull+"' but was already set to: "+strExceptionId);
+		}
+		
+		strCoreId = id.strCore;
+		
+		strDebugErrorHelper=null; //clear error helper
+		
+		return (T)this;
+	}
+	
+	/**
+	 * sets the command identifier that user will type in the console
+	 * 
+	 * @param strId
+	 * @param bIsVariable
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	protected <T extends VarCmdFieldAbs> T setCustomId(String strId, boolean bIsVariable){
+		setId(new IdTmp(bIsVariable,strId,strId));
+		return (T)this;
+	}
+
+	@Override
+	public String getCoreId() {
+		return strCoreId;
 	}
 }

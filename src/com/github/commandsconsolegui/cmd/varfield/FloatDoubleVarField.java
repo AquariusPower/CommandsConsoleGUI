@@ -51,7 +51,6 @@ public class FloatDoubleVarField extends VarCmdFieldAbs{
 	protected static ArrayList<FloatDoubleVarField> afdvList = new ArrayList<FloatDoubleVarField>();
 	protected Double dValue;
 	protected IReflexFillCfg	rfcfgOwner;
-	protected String	strVarId;
 	protected VarIdValueOwnerData	vivo;
 	protected String	strHelp;
 	
@@ -124,7 +123,11 @@ public class FloatDoubleVarField extends VarCmdFieldAbs{
 	
 	@Override
 	public String getVarId() {
-		if(strVarId==null)strVarId=ReflexFillI.i().getVarId(rfcfgOwner, strCodePrefixVariant, this, -1);
+//		if(strVarId==null)strVarId=ReflexFillI.i().getVarId(rfcfgOwner, strCodePrefixVariant, this, -1);
+		if(strVarId==null){
+			super.setId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner, this, true));
+		}
+		
 		return strVarId;
 	}
 
@@ -152,6 +155,11 @@ public class FloatDoubleVarField extends VarCmdFieldAbs{
 	@Override
 	public String getHelp() {
 		return strHelp==null?"":strHelp;
+	}
+
+	@Override
+	public String getVariablePrefix() {
+		return "Float";
 	}
 
 }

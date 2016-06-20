@@ -53,7 +53,6 @@ public class IntLongVarField extends VarCmdFieldAbs{
 	protected static ArrayList<IntLongVarField> ailvList = new ArrayList<IntLongVarField>();
 	
 	protected IReflexFillCfg	rfcfgOwner;
-	protected String	strVarId;
 	protected VarIdValueOwnerData	vivo;
 	protected String	strHelp;
 	protected Long lValue;
@@ -133,7 +132,11 @@ public class IntLongVarField extends VarCmdFieldAbs{
 	
 	@Override
 	public String getVarId() {
-		if(strVarId==null)strVarId=ReflexFillI.i().getVarId(rfcfgOwner, strCodePrefixVariant, this, -1);
+//		if(strVarId==null)strVarId=ReflexFillI.i().getVarId(rfcfgOwner, strCodePrefixVariant, this, -1);
+		if(strVarId==null){
+			super.setId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner, this, true));
+		}
+		
 		return strVarId;
 	}
 
@@ -156,6 +159,11 @@ public class IntLongVarField extends VarCmdFieldAbs{
 	public String toString() {
 		if(lValue==null)return null;
 		return ""+lValue;
+	}
+
+	@Override
+	public String getVariablePrefix() {
+		return "Int";
 	}
 	
 }

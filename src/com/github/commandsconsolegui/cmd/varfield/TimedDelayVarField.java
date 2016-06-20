@@ -63,8 +63,6 @@ public class TimedDelayVarField extends VarCmdFieldAbs{
 	protected float	fDelayLimitSeconds;
 	protected long	lDelayLimitNano;
 
-	protected String strVarId;
-
 	protected IReflexFillCfg	rfcfgOwner;
 	protected VarIdValueOwnerData	vivo;
 	protected String	strHelp;
@@ -312,22 +310,13 @@ public class TimedDelayVarField extends VarCmdFieldAbs{
 		return new ArrayList<TimedDelayVarField>(atdList);
 	}
 
+	@Override
 	public String getVarId() {
-		if(strVarId==null)strVarId=ReflexFillI.i().getVarId(rfcfgOwner, strCodePrefixVariant, this, -1);
+		if(strVarId==null){
+			super.setId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner, this, true));
+		}
+		
 		return strVarId;
-//		if(strVarId!=null)return strVarId;
-//		if(rfcfgOwner==null){
-//			throw new NullPointerException("Invalid usage, "
-//				+IReflexFillCfg.class.getName()+" owner is null, is this a local (non field) variable?");
-//		}
-//		
-//		strVarId = strCodePrefixVariant
-//			+Misc.i().makePretty(rfcfgOwner.getClass(),false)
-//			+Misc.i().firstLetter(
-//				ReflexFill.i().createIdentifierWithFieldName(rfcfgOwner,this),
-//				true);
-//		
-//		return strVarId;
 	}
 
 	@Override
@@ -376,6 +365,11 @@ public class TimedDelayVarField extends VarCmdFieldAbs{
 	public String getHelp() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public String getVariablePrefix() {
+		return "TimedDelay";
 	}
 
 }

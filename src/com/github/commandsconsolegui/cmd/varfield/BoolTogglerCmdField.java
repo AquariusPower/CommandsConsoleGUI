@@ -40,6 +40,7 @@ import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
 
 /**
  * This class can provide automatic boolean console command options to be toggled.<br>
@@ -59,13 +60,11 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	
 	protected boolean bPrevious;
 	protected boolean bCurrent;
-	protected String strCommand;
 	protected IReflexFillCfg	rfcfgOwner;
 	protected String strHelp="";
 
 	protected String	strReflexFillCfgCodePrefixVariant;
 	protected VarIdValueOwnerData	vivo;
-	protected String	strVarId;
 	protected boolean bDoCallOnChange = true;
 	protected Callable<Boolean>	caller;
 	protected boolean	bConstructed;
@@ -133,13 +132,18 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 		/**
 		 * must be an exception as it can have already been read/collected with automatic value.
 		 */
-		if(this.strCommand!=null)throw new NullPointerException("asked for '"+strCmd+"' but was already set to: "+this.strCommand);
-		this.strCommand=strCmd;
+		if(super.strCmdId!=null){
+			throw new NullPointerException("asked for '"+strCmd+"' but was already set to: "+this.strCmdId);
+		}
+		
+		super.setId(new IdTmp(false, strCmd, strCmd));
 	}
 	public String getCmdId(){
-		if(strCommand!=null)return strCommand;
-		strCommand = ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this);
-		return strCommand;
+		if(super.strCmdId==null){
+			super.setId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this,false));
+		}
+		
+		return super.strCmdId;
 	}
 	
 	@Override
@@ -244,10 +248,9 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 
 	@Override
 	public String getVarId() {
-		if(strVarId!=null)return strVarId;
-		strVarId = ReflexFillI.i().getVarId(
-				rfcfgOwner, BoolTogglerCmdField.strTogglerCodePrefix, this, -1);
-//		return getCmdId();
+		if(strVarId==null){
+			super.setId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner, this, true));
+		}
 		return strVarId;
 	}
 
@@ -282,5 +285,10 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	public BoolTogglerCmdField setCallNothingOnChange(){
 		bDoCallOnChange=false;
 		return this;
+	}
+
+	@Override
+	public String getVariablePrefix() {
+		return "Bool";
 	}
 }

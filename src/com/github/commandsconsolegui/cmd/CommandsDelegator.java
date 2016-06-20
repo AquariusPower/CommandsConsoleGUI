@@ -292,7 +292,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			}else
 			if(strFinalFieldRestrictedCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg(rfcv);
-				rfcfg.setPrefix(""+RESTRICTED_TOKEN);
+				rfcfg.setPrefixCmd(""+RESTRICTED_TOKEN);
 			}else
 			if(StringCmdField.strCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg(rfcv);
@@ -309,7 +309,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		if(rfcfg!=null){
 			if(rfcfg.isCommandToo()){
-				rfcfg.setPrefix("cmd");
+				rfcfg.setPrefixCmd("cmd");
 //				Field field = ReflexFillI.i().assertAndGetField(rfcv.getOwner(), rfcv);
 ////			rfcfg.setPrefix("cmd"+cl.getSimpleName());
 //				rfcfg.setPrefixDeclaringClass(field.getDeclaringClass().getSimpleName());
@@ -513,7 +513,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		strValidCmd = strValidCmd.trim().split(" ")[0];
 		
 //		return strCheck.equalsIgnoreCase(strValidCmd);
-		return paramString(0).equalsIgnoreCase(strValidCmd);
+		return paramCommand().equalsIgnoreCase(strValidCmd);
 	}
 	
 	protected boolean cmdEcho() {

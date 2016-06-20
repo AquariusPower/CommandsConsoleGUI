@@ -42,6 +42,7 @@ public class VarIdValueOwnerData {
 		public abstract Object getValueRaw();
 		public abstract void setConsoleVarLink(VarIdValueOwnerData vivo);
 		public abstract String getHelp();
+		public abstract String getCoreId();
 	}
 	
 	protected String strId;

@@ -40,32 +40,54 @@ public class AutoCompleteI {
 	public static AutoCompleteI instance = new AutoCompleteI();
 	public static AutoCompleteI i(){return instance;}
 	
+	public ArrayList<String> autoComplete(String strPart, ArrayList<String> astrAllPossibilities, boolean bMatchContains){
+		return autoComplete(strPart, astrAllPossibilities, bMatchContains, false);
+	}
 	/**
 	 * Matching is case insensitive.
 	 * 
 	 * @param strPart partial match
 	 * @param astrAllPossibilities all possible values to check for a match
+	 * @param bMatchContains
+	 * @param bAllowFuzzyFallBack if list ends empty, fuzzy will be tried, requires bMatchContains
 	 * @return 
 	 * 	If it has more than one entry, the first one will be an improved partial match.
 	 * 	If it has only one entry, or it will be the unmodified part, 
 	 *		or (if its length is bigger) it will be an exact match!
 	 */
-	public ArrayList<String> autoComplete(String strPart, ArrayList<String> astrAllPossibilities, boolean bMatchContains){
+	public ArrayList<String> autoComplete(String strPart, ArrayList<String> astrAllPossibilities, boolean bMatchContains, boolean bAllowFuzzyFallBack){
 		ArrayList<String> astrPossibleMatches = new ArrayList<String>();
 		
 		strPart=strPart.trim();
 		if(strPart.isEmpty())return astrPossibleMatches;
 //		if(strPart.matches("[^"+strValidCmdCharsRegex+"]"))return astrPossibleMatches;
-		for(String str:astrAllPossibilities){
-			if(bMatchContains){
-				if(str.toLowerCase().contains(strPart.toLowerCase())){
-					astrPossibleMatches.add(str);
-				}
-			}else{
-				if(str.toLowerCase().startsWith(strPart.toLowerCase())){
-					astrPossibleMatches.add(str);
+		for(int i=1;i<=2;i++){ //2nd pass, only if 1st ended empty, is for fuzzy
+			for(String strFull:astrAllPossibilities){
+				if(bMatchContains){
+					switch(i){
+						case 1:
+							if(strFull.toLowerCase().contains(strPart.toLowerCase())){
+								astrPossibleMatches.add(strFull);
+							}
+							break;
+						case 2:
+							if(bAllowFuzzyFallBack){
+								if(MiscI.i().containsFuzzyMatch(strFull, strPart, false, true)){
+									astrPossibleMatches.add(strFull);
+								}
+							}
+							break;
+					}
+				}else{
+					if(strFull.toLowerCase().startsWith(strPart.toLowerCase())){
+						astrPossibleMatches.add(strFull);
+					}
 				}
 			}
+			
+			if(astrPossibleMatches.size()>0)break;
+			
+			if(!bAllowFuzzyFallBack)break;
 		}
 		
 		// found single possibility

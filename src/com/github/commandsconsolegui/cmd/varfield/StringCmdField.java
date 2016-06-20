@@ -30,7 +30,7 @@ package com.github.commandsconsolegui.cmd.varfield;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
 
 /**
  * Represents a class field.
@@ -41,7 +41,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
  */
 public class StringCmdField extends VarCmdFieldAbs{
 //	String str = "ERROR: NOT SET"; // hashcode depends on it not being null
-	protected String strCmdIdentifier = null;
+//	protected String strCmdId = null;
 	protected IReflexFillCfg rfcfgOwner;
 //	protected int	iReflexFillCfgVariant;
 	protected String	strReflexFillCfgCodePrefixVariant;
@@ -63,11 +63,11 @@ public class StringCmdField extends VarCmdFieldAbs{
 	
 	/**
 	 * 
-	 * @param strCmdIdentifier overrides auto-identifier thru reflection
+	 * @param strCmdId overrides auto-identifier thru reflection
 	 * @param strHelpComment
 	 */
-	public StringCmdField(String strCmdIdentifier, String strHelpComment){
-		this.strCmdIdentifier=strCmdIdentifier;
+	public StringCmdField(String strCmdId, String strHelpComment){
+		super.setId(new IdTmp(false, strCmdId, strCmdId));
 		this.strHelpComment = strHelpComment;
 		this.bReflexingIdentifier = false;
 	}
@@ -103,8 +103,8 @@ public class StringCmdField extends VarCmdFieldAbs{
 	 */
 	@Override
 	public String toString() {
-		if(strCmdIdentifier==null)initialize();
-		return this.strCmdIdentifier;
+		if(strCmdId==null)initialize();
+		return this.strCmdId;
 	}
 	
 	public String getHelpComment(){
@@ -116,31 +116,31 @@ public class StringCmdField extends VarCmdFieldAbs{
 		 * This basically prevents recursive infinite loop,
 		 * if this is called at reflex fill method.
 		 */
-		strCmdIdentifier=errorMessage();
-		this.strCmdIdentifier = ReflexFillI.i().createIdentifierWithFieldName(this.rfcfgOwner, this);
+//		super.strCmdId=errorMessage();
+		super.setId(ReflexFillI.i().createIdentifierWithFieldName(this.rfcfgOwner, this, false));
 //		throw new NullPointerException("not initialized properly: "+this);
 	}
-	
-	private String errorMessage(){
-		return "ERROR: "+StringCmdField.class.getName()+" not yet properly initialized!";
-	}
+//	
+//	private String errorMessage(){
+//		return "ERROR: "+StringCmdField.class.getName()+" not yet properly initialized!";
+//	}
 	
 	@Override
 	public boolean equals(Object obj) {
-//		if(strCmdIdentifier==null)throw new NullPointerException(errorMessage());
-		if(strCmdIdentifier==null)initialize();
+//		if(strCmdId==null)throw new NullPointerException(errorMessage());
+		if(strCmdId==null)initialize();
 		if(bIgnoreCaseOnComparison){
-			return this.strCmdIdentifier.equalsIgnoreCase(""+obj);
+			return this.strCmdId.equalsIgnoreCase(""+obj);
 		}else{
-			return this.strCmdIdentifier.equals(obj);
+			return this.strCmdId.equals(obj);
 		}
 	}
 	
 	@Override
 	public int hashCode() {
-//		if(strCmdIdentifier==null)throw new NullPointerException(errorMessage());
-		if(strCmdIdentifier==null)initialize();
-		return strCmdIdentifier.hashCode();
+//		if(strCmdId==null)throw new NullPointerException(errorMessage());
+		if(strCmdId==null)initialize();
+		return strCmdId.hashCode();
 	}
 	
 //	@Override
@@ -192,6 +192,11 @@ public class StringCmdField extends VarCmdFieldAbs{
 	public String getHelp() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public String getVariablePrefix() {
+		return "StringCmd";
 	}
 
 }

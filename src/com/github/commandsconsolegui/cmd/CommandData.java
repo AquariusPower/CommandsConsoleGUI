@@ -79,9 +79,14 @@ public class CommandData {
 	
 	
 	public String asHelp() {
+		String strCommentOk = strComment;
+		if(!strCommentOk.trim().startsWith(GlobalCommandsDelegatorI.i().getCommentPrefixStr())){
+			strCommentOk=GlobalCommandsDelegatorI.i().getCommentPrefixStr()+strCommentOk;
+		}
+		
 		return strBaseCmd+" "
-				+strComment+" "
-				+"("+GlobalCommandsDelegatorI.i().getListenerId(icclOwner)+")";
+			+strCommentOk
+			+"("+GlobalCommandsDelegatorI.i().getListenerId(icclOwner)+")";
 		
 //		return strBaseCmd+" "
 //			+strComment+" "

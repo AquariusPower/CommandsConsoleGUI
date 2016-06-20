@@ -1810,12 +1810,12 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 		if(rfcv.getClass().isAssignableFrom(StringCmdField.class)){
 			if(strFinalFieldInputCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg(rfcv);
-				rfcfg.setPrefix("CONSOLEGUISTATE_");
+				rfcfg.setPrefixCmd("CONSOLEGUISTATE_");
 				rfcfg.setFirstLetterUpperCase(true);
 			}else
 			if(CommandsDelegator.strFinalFieldRestrictedCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg(rfcv);
-				rfcfg.setPrefix(""+CommandsDelegator.RESTRICTED_TOKEN);
+				rfcfg.setPrefixCmd(""+CommandsDelegator.RESTRICTED_TOKEN);
 				rfcfg.setFirstLetterUpperCase(true);
 			}
 			
@@ -2121,7 +2121,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 		}
 		
 		ArrayList<String> astr = AutoCompleteI.i().autoComplete(
-			strInputText, cd().getBaseCommandsWithComment(), bKeyControlIsPressed);
+			strInputText, cd().getBaseCommandsWithComment(), bKeyControlIsPressed, true);
 		
 		boolean bShowHint = false;
 		
