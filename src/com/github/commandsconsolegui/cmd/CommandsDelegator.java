@@ -2614,7 +2614,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		if(strFullCmdLine.startsWith(""+getCommentPrefix()))return;
 		if(strFullCmdLine.isEmpty())return;
-		if(strFullCmdLine.equals(""+getCommandPrefix()))return;
+		if(strFullCmdLine.equals(""+getCommandPrefix()))return; //the token alone, is like empty
 		
 		if(!strFullCmdLine.startsWith(""+RESTRICTED_TOKEN)){
 			if(!strFullCmdLine.startsWith(""+getCommandPrefix())){
@@ -3087,9 +3087,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 
 	protected ECmdReturnStatus cmdRawLineCheckEndOfStartupCmdQueue() {
-		if(RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE.equals(ccl.strCmdLineOriginal)){
-			bStartupCmdQueueDone=true;
-			return ECmdReturnStatus.FoundAndWorked;
+		if(!bStartupCmdQueueDone){
+			String strCmd = getCommandPrefixStr()+RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE.getCmdId();
+			if(strCmd.equalsIgnoreCase(ccl.getOriginalLine())){
+//			if(RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE.equals(ccl.strCmdLineOriginal)){
+				bStartupCmdQueueDone=true;
+				return ECmdReturnStatus.FoundAndWorked;
+			}
 		}
 		
 		return ECmdReturnStatus.NotFound;

@@ -48,6 +48,10 @@ public class CurrentCommandLine {
 		this.cd=cd;
 	}
 	
+	public String getOriginalLine(){
+		return strCmdLineOriginal;
+	}
+	
 	public void updateFrom(String strFullCmdLine) {
 		clear();
 		astrCmdAndParams.addAll(cd.convertToCmdParamsList(strFullCmdLine));

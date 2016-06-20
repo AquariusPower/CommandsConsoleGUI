@@ -143,7 +143,7 @@ public class StringCmdField extends VarCmdFieldAbs{
 		if(bIgnoreCaseOnComparison){
 			return this.strCmdId.equalsIgnoreCase(""+obj);
 		}else{
-			return this.strCmdId.equals(obj);
+			return this.strCmdId.equals(""+obj);
 		}
 	}
 	
