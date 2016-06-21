@@ -588,33 +588,29 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 				boolean bControl = key.hasModifier(KeyAction.CONTROL_DOWN); //0x1
 	//		boolean bShift = key.hasModifier(0x01);
 				
-//				Integer iSel = selectionModel.getSelection();
-//				int iMax = getMaxIndex();
-//				if(iSel==null){
-//					if(iMax>0){
-//						iSel=0;
-//					}else{
-//						iSel=-1;
-//					}
-//				}
-					
 				switch(key.getKeyCode()){
 					case KeyInput.KEY_ESCAPE:
 						setEnabledRequest(false);
 						break;
 					case KeyInput.KEY_UP:
-//						if(iSel>0){
 							selectRelativeEntry(-1);
-//							selectionModel.setSelection(iSel-1);
-//							cd().dumpDebugEntry(getId()+":SelectedEntry:"+selectionModel.getSelection());
-//						}
 						break;
 					case KeyInput.KEY_DOWN:
-//						if(iSel<iMax){
 							selectRelativeEntry(1);
-//							selectionModel.setSelection(iSel+1);
-//							cd().dumpDebugEntry(getId()+":SelectedEntry:"+selectionModel.getSelection());
-//						}
+						break;
+					case KeyInput.KEY_PGUP:
+						selectRelativeEntry(-lstbxEntriesToSelect.getVisibleItems());
+						break;
+					case KeyInput.KEY_PGDN:
+						selectRelativeEntry(lstbxEntriesToSelect.getVisibleItems());
+						break;
+					case KeyInput.KEY_HOME:
+						selectRelativeEntry(-vlEntriesList.size()); //uses underflow protection
+//						if(bControl)selectEntry(vlEntriesList.get(0));
+						break;
+					case KeyInput.KEY_END:
+						selectRelativeEntry(vlEntriesList.size()); //uses overflow protection
+//						if(bControl)selectEntry(vlEntriesList.get(vlEntriesList.size()-1));
 						break;
 					case KeyInput.KEY_NUMPADENTER:
 					case KeyInput.KEY_RETURN:
@@ -631,6 +627,10 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 	
 		};
 		
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_HOME,KeyAction.CONTROL_DOWN), actSimpleActions);
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_END,KeyAction.CONTROL_DOWN), actSimpleActions);
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_PGUP), actSimpleActions);
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_PGDN), actSimpleActions);
 		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_RETURN), actSimpleActions);
 		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_NUMPADENTER), actSimpleActions);
 		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_ESCAPE), actSimpleActions);
@@ -645,9 +645,10 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		boolean bCommandWorked = false;
 		
 		if(cc.checkCmdValidity(this,"showDialogKeyBinds"+getId(),null,"")){
-			cc.dumpSubEntry("ESC - close; Up/Down - nav. list entry");
-			cc.dumpSubEntry("Enter - accept/submit choice (at config dialog)");
-			cc.dumpSubEntry("DoubleClick - config or accept/submit choice");
+			cc.dumpSubEntry("ESC - close");
+			cc.dumpSubEntry("Up/Down/PgUp/PgDn/Ctrl+Home|End - nav. list entry");
+			cc.dumpSubEntry("Enter - accept selected choice at config dialog");
+			cc.dumpSubEntry("DoubleClick - open config/accept choice at config dialog");
 			bCommandWorked = true;
 		}else
 		{
@@ -781,7 +782,7 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 	
 	/**
 	 * 
-	 * @param iAddIndex can be negative
+	 * @param iAddIndex (down), can be negative (up)
 	 * @return
 	 */
 	public Integer selectRelativeEntry(int iAddIndex){
