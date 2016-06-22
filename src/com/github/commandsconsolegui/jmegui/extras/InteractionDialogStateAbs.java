@@ -47,7 +47,7 @@ import com.jme3.scene.Spatial;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class InteractionDialogStateAbs extends BaseDialogStateAbs{
+public abstract class InteractionDialogStateAbs<T> extends BaseDialogStateAbs<T>{
 	protected Node cntrNorth;
 	protected Node cntrSouth;
 	protected String	strLastFilter = "";
@@ -200,19 +200,14 @@ public abstract class InteractionDialogStateAbs extends BaseDialogStateAbs{
 		updateAllParts();
 		
 		if(bOptionSelectionMode){
-			
-//			if(getInputText().isEmpty()){ // was cleared
-				DialogListEntryData dataSelected = getSelectedEntryData(); //this value is in this console variable now
-				getParentDialog().setCfgDataValue(dataSelected);
-				if(dataSelected!=null){
-					cd().dumpInfoEntry(this.getId()+": Option Selected: "+dataSelected.toString());
-					requestDisable(); //close if there is one entry selected
-				}
-//			}else{
-//				getInputField().setText(""); //clear input field
-//			}
-			
-//			}
+			DialogListEntryData dataSelected = getSelectedEntryData(); //this value is in this console variable now
+			if(getParentDialog()!=null)getParentDialog().setCfgDataValue(dataSelected);
+			if(dataSelected!=null){
+				cd().dumpInfoEntry(this.getId()+": Option Selected: "+dataSelected.toString());
+				requestDisable(); //close if there is one entry selected
+			}
+		}else{
+			int i=0;
 		}
 		
 	}

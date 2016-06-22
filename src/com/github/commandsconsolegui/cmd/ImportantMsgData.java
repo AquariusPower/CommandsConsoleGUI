@@ -38,6 +38,7 @@ public class ImportantMsgData{
 	String strMsg;
 	Exception ex;
 	StackTraceElement[] aste;
+	DumpEntryData de;
 	
 //	/**
 //	 * for warnings
@@ -55,14 +56,28 @@ public class ImportantMsgData{
 //	public ImportantMsg(String str, Exception ex) {
 //		this(str, ex, ex.getStackTrace());
 //	}
-	public ImportantMsgData(String str, Exception ex, StackTraceElement[] aste) {
-		this.strMsg=str;
-//		if(ex==null){
-//			ex=new Exception("(no real exception, just the stack trace)");
-//			ex.setStackTrace(aste);
-//		}
-		this.ex=ex;
-		this.aste=aste;
+	
+//	public ImportantMsgData(String str, Exception ex, StackTraceElement[] aste) {
+//		this.strMsg=str;
+////		if(ex==null){
+////			ex=new Exception("(no real exception, just the stack trace)");
+////			ex.setStackTrace(aste);
+////		}
+//		this.ex=ex;
+//		this.aste=aste;
+//	}
+	
+	public ImportantMsgData(DumpEntryData de) {
+//		this(de.getKey(),de.getException(),de.getException().getStackTrace());
+		this.de=de;
+		
+		this.strMsg=de.getKey();
+//	if(ex==null){
+//		ex=new Exception("(no real exception, just the stack trace)");
+//		ex.setStackTrace(aste);
+//	}
+		this.ex=de.getException();
+		this.aste=de.getException().getStackTrace();
 	}
 	
 	@Override
@@ -93,4 +108,7 @@ public class ImportantMsgData{
 		return true;
 	}
 	
+	public DumpEntryData getDumpEntryData(){
+		return de;
+	}
 }

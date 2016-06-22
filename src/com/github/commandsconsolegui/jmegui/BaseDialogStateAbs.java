@@ -35,8 +35,6 @@ import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
@@ -45,15 +43,15 @@ import com.jme3.scene.Spatial;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implements IReflexFillCfg{
+public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs implements IReflexFillCfg{
 	protected Spatial	sptContainerMain;
 	protected Spatial	sptIntputField;
 	protected String	strTitle;
 	
-	protected BaseDialogStateAbs modalParent;
-	protected ArrayList<BaseDialogStateAbs> aModalChildList = new ArrayList<BaseDialogStateAbs>();
-	protected DialogListEntryData	dataToCfgReference;
-	protected DialogListEntryData dataCfgValue;
+	protected BaseDialogStateAbs<T> modalParent;
+	protected ArrayList<BaseDialogStateAbs<T>> aModalChildList = new ArrayList<BaseDialogStateAbs<T>>();
+	protected DialogListEntryData<T>	dataToCfgReference;
+	protected DialogListEntryData<T> dataCfgValue;
 	private boolean	bRequestedActionSubmit;
 //	private Object[]	aobjModalAnswer;
 	
@@ -61,19 +59,19 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 		return sptContainerMain;
 	}
 	
-	protected BaseDialogStateAbs setContainerMain(Spatial spt){
+	protected BaseDialogStateAbs<T> setContainerMain(Spatial spt){
 		this.sptContainerMain=spt;
 		return this;
 	}
 	
-	public static class CfgParm implements ICfgParm{
+	public static class CfgParm<T> implements ICfgParm{
 		String strUIId;
 		boolean bIgnorePrefixAndSuffix;
 		Node nodeGUI;
 		boolean bInitiallyEnabled;
-		BaseDialogStateAbs modalParent;
+		BaseDialogStateAbs<T> modalParent;
 //		Long lMouseCursorClickDelayMilis;
-		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI, boolean bInitiallyEnabled, BaseDialogStateAbs modalParent){//, Long lMouseCursorClickDelayMilis) {
+		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI, boolean bInitiallyEnabled, BaseDialogStateAbs<T> modalParent){//, Long lMouseCursorClickDelayMilis) {
 			super();
 			this.strUIId = strUIId;
 			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
@@ -82,10 +80,15 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 			this.modalParent=modalParent;
 //			this.lMouseCursorClickDelayMilis=lMouseCursorClickDelayMilis;
 		}
+		public void setUIId(String strUIId){
+			if(this.strUIId!=null)throw new PrerequisitesNotMetException("UI Id already set",this.strUIId,strUIId);
+			this.strUIId=strUIId;
+		}
 	}
 	@Override
-	public BaseDialogStateAbs configure(ICfgParm icfg) {
-		CfgParm cfg = (CfgParm)icfg;
+	public BaseDialogStateAbs<T> configure(ICfgParm icfg) {
+		@SuppressWarnings("unchecked")
+		CfgParm<T> cfg = (CfgParm<T>)icfg;
 //	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
 		
 //		bEnabled=cfg.bInitiallyEnabled;
@@ -197,26 +200,26 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 		return sptIntputField;
 	}
 
-	protected BaseDialogStateAbs setIntputField(Spatial sptIntputField) {
+	protected BaseDialogStateAbs<T> setIntputField(Spatial sptIntputField) {
 		this.sptIntputField = sptIntputField;
 		return this;
 	}
 
-	public BaseDialogStateAbs getParentDialog(){
+	public BaseDialogStateAbs<T> getParentDialog(){
 		return this.modalParent;
 	}
 	
-	public void setModalParent(LemurDialogGUIStateAbs modalParent) {
+	public void setModalParent(LemurDialogGUIStateAbs<T> modalParent) {
 		if(this.modalParent!=null)throw new PrerequisitesNotMetException("modal parente already set",this.modalParent,modalParent);
 		this.modalParent=modalParent;
 	}
 	
 //	public abstract void setAnswerFromModalChild(Object... aobj);
 	
-	public ArrayList<BaseDialogStateAbs> getModalChildListCopy() {
-		return new ArrayList<BaseDialogStateAbs>(aModalChildList);
+	public ArrayList<BaseDialogStateAbs<T>> getModalChildListCopy() {
+		return new ArrayList<BaseDialogStateAbs<T>>(aModalChildList);
 	}
-	protected void updateModalChild(boolean bAdd, BaseDialogStateAbs modal) {
+	protected void updateModalChild(boolean bAdd, BaseDialogStateAbs<T> modal) {
 //		if(this.modalParent==null)return;
 			
 		if(bAdd){
@@ -245,7 +248,7 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 //		this.aobjModalAnswer=aobjModalAnswer;
 //	}
 
-	public void setCfgDataValue(DialogListEntryData data) {
+	public void setCfgDataValue(DialogListEntryData<T> data) {
 		this.dataCfgValue = data;
 	}
 	
@@ -253,8 +256,8 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 	 * the answer will be null after this
 	 * @return
 	 */
-	public DialogListEntryData getCfgDataValueAndClearIt(){
-		DialogListEntryData data = dataCfgValue;
+	public DialogListEntryData<T> getCfgDataValueAndClearIt(){
+		DialogListEntryData<T> data = dataCfgValue;
 		dataCfgValue = null;
 		return data;
 	}
@@ -267,11 +270,11 @@ public abstract class BaseDialogStateAbs extends CmdConditionalStateAbs implemen
 	 * this data will have it's value modified
 	 * @param dataToCfg
 	 */
-	protected void setCfgDataReference(DialogListEntryData dataToCfg) {
+	protected void setCfgDataReference(DialogListEntryData<T> dataToCfg) {
 		this.dataToCfgReference=dataToCfg;
 	}
-	protected DialogListEntryData getCfgDataRefAndClearIt() {
-		DialogListEntryData data = this.dataToCfgReference;
+	protected DialogListEntryData<T> getCfgDataRefAndClearIt() {
+		DialogListEntryData<T> data = this.dataToCfgReference;
 		this.dataToCfgReference=null;
 		return data;
 	}

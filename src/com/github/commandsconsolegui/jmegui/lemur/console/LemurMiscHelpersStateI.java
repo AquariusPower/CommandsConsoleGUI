@@ -467,4 +467,9 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 //		source.
 //	}
 
+	public void insertTextAtCaratPosition(TextField tf, String str) {
+		DocumentModel dm = tf.getDocumentModel();
+		for(int i=0;i<str.length();i++)dm.insert(str.charAt(i));
+		LemurMiscHelpersStateI.i().bugFix(EBugFix.UpdateTextFieldTextAndCaratVisibility, tf);
+	}
 }

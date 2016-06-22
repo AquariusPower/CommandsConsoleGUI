@@ -28,22 +28,25 @@
 package com.github.commandsconsolegui.jmegui.lemur.console.test;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
+import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
-import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
+import com.simsilica.lemur.Button;
+import com.simsilica.lemur.Command;
 import com.simsilica.lemur.GuiGlobals;
 
 /**
  * @author AquariusPower <https://github.com/AquariusPower>
  */
-public class CustomDialogGUIState extends LemurDialogGUIStateAbs{
+public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialogGUIStateAbs<T>{
 	StringCmdField scfAddEntry = new StringCmdField(this,null,"[strEntryText]");
 //	ArrayList<String> astr;
 //	HashMap<String,String> hmKeyValueTmp = new HashMap<String,String>();
@@ -60,27 +63,36 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs{
 //	this.nodeGUI =nodeGUI;
 //}
 //}
+	
+	public static enum EDiag{
+		Cfg,
+		List,
+		;
+	}
+	EDiag ediag = null;
+	
+	protected ArrayList<DialogListEntryData>	adleFullList = new ArrayList<DialogListEntryData>();
+	
+	public CustomDialogGUIState(EDiag ediag) {
+		this.ediag=ediag;
+		super.bPrefixCmdWithIdToo = true;
+	}
+	
 	public static class CfgParm extends LemurDialogGUIStateAbs.CfgParm{
-		public CfgParm(boolean	bOptionSelectionMode,String strUIId, boolean bIgnorePrefixAndSuffix,
+		public CfgParm(boolean	bOptionSelectionMode,boolean bIgnorePrefixAndSuffix,
 				Node nodeGUI, Float fDialogHeightPercentOfAppWindow,
 				Float fDialogWidthPercentOfAppWindow, Float fInfoHeightPercentOfDialog,
 				Integer iEntryHeightPixels, BaseDialogStateAbs modalParent) {
-			super(bOptionSelectionMode,strUIId, bIgnorePrefixAndSuffix, nodeGUI,
+			super(bOptionSelectionMode,null, bIgnorePrefixAndSuffix, nodeGUI,
 					fDialogHeightPercentOfAppWindow, fDialogWidthPercentOfAppWindow,
 					fInfoHeightPercentOfDialog, iEntryHeightPixels, modalParent);
 			// TODO Auto-generated constructor stub
 		}
 	}
-
-	protected ArrayList<DialogListEntryData>	adleFullList = new ArrayList<DialogListEntryData>();
-	
-	public CustomDialogGUIState() {
-		super.bPrefixCmdWithIdToo = true;
-	}
-	
 	@Override
 	public CustomDialogGUIState configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
+		cfg.setUIId(ediag.toString());
 		
 		super.configure(cfg); //params are identical
 		
@@ -123,15 +135,76 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs{
 		super.updateList();
 	}
 	
+	public DialogListEntryData<T> getDataFrom(Spatial spt){
+		String strKey = DialogListEntryData.class.getName();
+		Object data = spt.getUserData(strKey);
+		if(data==null)throw new PrerequisitesNotMetException("missing user object "+strKey);
+		return (DialogListEntryData<T>) data;
+	}
+	
+	public class CommandCfg implements Command<Button>{
+		@Override
+		public void execute(Button btn) {
+//			EButtonAction.valueOf(btn.getUserData(EButtonAction.class.getSimpleName()));
+//			DialogListEntryData<Command<Button>> data = btn.getUserData(DialogListEntryData.class.getName());
+//			CustomDialogGUIState.this.openDialog(EDiag.Cfg.toString(),getDataFrom(btn));
+			CustomDialogGUIState.this.openCfgDialog(getDataFrom(btn));
+		}
+	}
+	CommandCfg cmdCfg = new CommandCfg();
+	
+	public class CommandDel implements Command<Button>{
+		@Override
+		public void execute(Button btn) {
+//			DialogListEntryData<Command<Button>> data = btn.getUserData(DialogListEntryData.class.getName());
+//			DialogListEntryData<T> data = getDataFrom(btn);
+//			if(!CustomDialogGUIState.this.adleFullList.remove(data)){
+//				throw new PrerequisitesNotMetException("missing data at list", getDataFrom(btn));
+//			}
+			CustomDialogGUIState.this.removeEntry(getDataFrom(btn));
+		}
+	}
+	CommandDel cmdDel = new CommandDel();
+	
+	public void removeEntry(DialogListEntryData<T> data){
+		if(!adleFullList.remove(data)){
+			throw new PrerequisitesNotMetException("missing data at list", data);
+		}
+		requestRefreshList();
+	}
+	
+	public void openCfgDialog(DialogListEntryData<T> data){
+		CustomDialogGUIState.this.openDialog(EDiag.Cfg.toString(),data);
+	}
+	
+	public class CommandSel implements Command<Button>{
+		@Override
+		public void execute(Button btn) {
+			CustomDialogGUIState.this.selectAndChoseOption(getDataFrom(btn));
+		}
+	}
+	CommandSel cmdSel = new CommandSel();
+	
 	public void addEntry(String strText){
-		DialogListEntryData dle = new DialogListEntryData();
+		DialogListEntryData<T> dle = new DialogListEntryData<T>();
 		if(strText==null){
 			strText=this.getId()+": New test entry: "
 //				+MiscI.i().getDateTimeForFilename(true)
 //				+", "
 				+System.nanoTime();
 		}
-		dle.setText(strText);
+		dle.setText(strText,(T)cmdCfg);
+		
+		if(bOptionSelectionMode){
+			dle.addLabelAction("<-",(T)cmdSel);
+		}else{
+			/**
+			 * this order matters
+			 */
+			dle.addLabelAction("Cfg",(T)cmdCfg);
+			dle.addLabelAction("X",(T)cmdDel);
+		}
+		
 		adleFullList.add(dle);
 		if(adleFullList.size()>100)adleFullList.remove(0);
 		
@@ -201,5 +274,26 @@ public class CustomDialogGUIState extends LemurDialogGUIStateAbs{
 		}
 		
 		return cd.cmdFoundReturnStatus(bCommandWorked);
+	}
+
+	@Override
+	public boolean execTextDoubleClickActionFor(DialogListEntryData<T> data) {
+		if(isOptionSelectionMode())throw new PrerequisitesNotMetException("Option mode should not reach this method.");
+		
+		openCfgDialog(data);
+//		data.getActionTextDoubleClick().execute(null);
+		
+		return true;
+	}
+
+	@Override
+	public boolean execActionFor(EMouseCursorButton e, Spatial sptSource) {
+		switch(e){
+			default:
+				cd().dumpDevInfoEntry("no action for "+e+" "+sptSource.getName());
+				break;
+		}
+		
+		return true;
 	}
 }

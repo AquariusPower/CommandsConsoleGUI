@@ -44,9 +44,14 @@ public class DumpEntryData{
 	boolean bApplyNewLineRequests = false; //this is a special behavior, disabled by default
 	boolean bDumpToConsole = true;
 	boolean bUseSlowQueue = false;
-	String strLineOriginal = null;
-	private String strLineBaking = null;
-	private PrintStream	ps = System.out;
+//	String strLineOriginal = null;
+	String strLineBaking = null;
+	PrintStream	ps = System.out;
+	Object[]	aobj;
+	String	strType;
+	String	strKey = null;
+	Exception	ex;
+	boolean	bImportant;
 	
 	public boolean isApplyNewLineRequests() {
 		return bApplyNewLineRequests;
@@ -69,11 +74,29 @@ public class DumpEntryData{
 		this.bUseSlowQueue = bUseQueue;
 		return this;
 	}
-	public String getLineOriginal() {
-		return strLineOriginal;
+//	public String getLineOriginal() {
+//		return strLineOriginal;
+//	}
+	
+	public String getLineFinal() {
+		String str = strKey;
+		for(int i=0;i<aobj.length;i++){
+			Object obj = aobj[i];
+			if(str.equals(strKey)){
+				str+="\n";
+			}
+			str+="\t["+i+"]("+obj.getClass().getName()+":"+obj.toString()+")\n";
+		}
+		return str;
 	}
-	public DumpEntryData setLineOriginal(String strLineOriginal) {
-		this.strLineOriginal = strLineOriginal;
+	
+	/**
+	 * The message as key is important to help on avoiding duplicates.
+	 * @param strLineOriginal
+	 * @return
+	 */
+	public DumpEntryData setKey(String strLineOriginal) {
+		this.strKey = strLineOriginal;
 		return this;
 	}
 	public String getLineBaking() {
@@ -93,6 +116,29 @@ public class DumpEntryData{
 	}
 	public void sendToPrintStream(String strOutput){
 		if(this.ps!=null)this.ps.println(strOutput);
+	}
+	public DumpEntryData setDumpObjects(Object[] aobj) {
+		this.aobj=aobj;
+		return this;
+	}
+	public DumpEntryData setImportant(String strType, String strKey, Exception ex) {
+		this.strType=strType;
+		this.strKey=strKey;
+		this.ex=ex;
+		this.bImportant=true;
+		return this;
+	}
+	public boolean isImportant() {
+		return bImportant;
+	}
+	public String getType() {
+		return strType;
+	}
+	public String getKey() {
+		return strKey;
+	}
+	public Exception getException() {
+		return ex;
 	}
 	
 }

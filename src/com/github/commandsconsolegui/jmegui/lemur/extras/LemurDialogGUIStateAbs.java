@@ -33,24 +33,24 @@ import java.util.HashMap;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
-import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
-import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
+import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.InteractionDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
+import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.input.KeyInput;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.simsilica.lemur.Button;
+import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.ListBox;
@@ -72,36 +72,19 @@ import com.simsilica.lemur.list.SelectionModel;
 * @author AquariusPower <https://github.com/AquariusPower>
 *
 */
-public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
+public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAbs<T> {
 	private Label	lblTitle;
 	private Label	lblTextInfo;
-	private ListBox<DialogListEntryData>	lstbxEntriesToSelect;
-	private VersionedList<DialogListEntryData>	vlEntriesList = new VersionedList<DialogListEntryData>();
+	private ListBox<DialogListEntryData<Command<Button>>>	lstbxEntriesToSelect;
+	private VersionedList<DialogListEntryData<Command<Button>>>	vlEntriesList = new VersionedList<DialogListEntryData<Command<Button>>>();
 	private int	iVisibleRows;
 	private Integer	iEntryHeightPixels;
 	private Vector3f	v3fEntryListSize;
 	private Container	cntrEntryCfg;
 	private SelectionModel	selectionModel;
 	BoolTogglerCmdField btgAutoScroll = new BoolTogglerCmdField(this, true).setCallNothingOnChange();
-	
-//	@Override
-//	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
-////		ReflexFillCfg rfcfg = null;
-//		
-//		ReflexFillCfg rfcfg = new ReflexFillCfg(super.getReflexFillCfg(rfcv));
-//		rfcfg.setCommandPrefix(rfcfg.getCommandPrefix()+getId());
-//		rfcfg.setFirstLetterUpperCase(true);
-////		ReflexFillCfg rfcfgSuper = super.getReflexFillCfg(rfcv);
-////		if(rfcv.getClass().isAssignableFrom(BoolTogglerCmdField.class)){
-////			rfcfg = new ReflexFillCfg(rfcfgSuper);
-////			rfcfg.setCommandPrefix(getId());
-////		}
-////		
-////		if(rfcfg==null)rfcfg = rfcfgSuper;
-//		
-//		return rfcfg;
-//	}
-//
+//	private ButtonCommand	bc;
+	private boolean	bRefreshScroll;
 	
 	@Override
 	public Container getContainerMain(){
@@ -173,6 +156,27 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		return getContainerMain().hasChild(spt); //this is actually recursive!!!
 	}
 	
+//	public static enum EButtonAction{
+//		OpenDialog,
+//		PlaySound,
+//		PauseSound,
+//		StopSound,
+//		ShowProperties,
+//		;
+//	}
+//	
+//	public static class ButtonCommand implements Command<Button>{
+//		@Override
+//		public void execute(Button btn) {
+//			EButtonAction.valueOf(btn.getUserData(EButtonAction.class.getSimpleName()));
+//			
+//		}
+//	}
+//	
+//	public void setButtonCommand(ButtonCommand bc){
+//		this.bc=bc;
+//	}
+	
 //	@Override
 //	protected boolean initGUI(){
 //		return initGUI(0.75f, 0.75f, 0.25f, null);
@@ -235,9 +239,10 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		float fListPerc = 1.0f - cfg.fInfoHeightPercentOfDialog;
 		v3fEntryListSize = v3fDiagWindowSize.clone();
 		v3fEntryListSize.y *= fListPerc;
-		lstbxEntriesToSelect = new ListBox<DialogListEntryData>(
-			new VersionedList<DialogListEntryData>(), 
-			new CellRendererDialogEntry(strStyle, bOptionSelectionMode), strStyle);
+		lstbxEntriesToSelect = new ListBox<DialogListEntryData<Command<Button>>>(
+			new VersionedList<DialogListEntryData<Command<Button>>>(), 
+			new CellRendererDialogEntry<Command<Button>>(strStyle),// bOptionSelectionMode), 
+			strStyle);
 		selectionModel = lstbxEntriesToSelect.getSelectionModel();
 		lstbxEntriesToSelect.setName(getId()+"_EntriesList");
 		lstbxEntriesToSelect.setSize(v3fEntryListSize); //not preferred, so the input field can fit properly
@@ -245,7 +250,7 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		getContainerMain().addChild(lstbxEntriesToSelect, BorderLayout.Position.Center);
 		
 //		vlstrEntriesList.add("(Empty list)");
-		lstbxEntriesToSelect.setModel((VersionedList<DialogListEntryData>)vlEntriesList);
+		lstbxEntriesToSelect.setModel((VersionedList<DialogListEntryData<Command<Button>>>)vlEntriesList);
 		
 		iEntryHeightPixels = cfg.iEntryHeightPixels;
 		
@@ -376,23 +381,14 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 	@Override
 	protected void updateList(){
 		// update visible rows
-//		if(iEntryHeightPixels==null){
-//			if(vlEntriesList.size()>0){
-//				if(vlEntriesList.get(0) instanceof String){
-//					Float fEntryHeight = LemurMiscHelpersStateI.i().guessEntryHeight(lstbxEntriesToSelect);
-//					if(fEntryHeight!=null){
-//						iEntryHeightPixels=fEntryHeight.intValue(); //calc based on entry (or font) height and listbox height
-//						cd().dumpInfoEntry("entry height "+iEntryHeightPixels);
-//					}else{
-//						iEntryHeightPixels=20; //blind placeholder
-//						cd().dumpWarnEntry("blind entry height "+iEntryHeightPixels);
-//					}
-//				}
-//			}
-//		}
 		iEntryHeightPixels=20; //blind placeholder
 		iVisibleRows = (int) (v3fEntryListSize.y/iEntryHeightPixels);
 		lstbxEntriesToSelect.setVisibleItems(iVisibleRows);
+		if(vlEntriesList.size()>0){
+			if(getSelectedEntryData()==null){
+				selectRelativeEntry(0);
+			}
+		}
 	}
 	
 	/**
@@ -453,6 +449,8 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 	}
 	
 	protected void autoScroll(){
+		if(!btgAutoScroll.b())return;
+		
 		Integer iSelected = getSelectedIndex();
 		if(iSelected!=null){ //TODO this is buggy...
 			int iTopEntryIndex = getTopEntryIndex();
@@ -470,65 +468,26 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 				scrollTo(iScrollTo);
 			}
 		}
+		
+		bRefreshScroll=false;
 	}
 	
 	@Override
 	protected boolean updateOrUndo(float tpf) {
 		if(!super.updateOrUndo(tpf))return false;
 		
-		if(btgAutoScroll.b())autoScroll();
+		if(bRefreshScroll)autoScroll();
+//		if(btgAutoScroll.b())autoScroll();
 //		multiClickAction();
+		
+		if(!getInputText().equalsIgnoreCase(super.strLastFilter)){
+			super.strLastFilter=getInputText();
+			applyListKeyFilter();
+			updateList();
+		}
 		
 		return true;
 	}
-	
-//	@Deprecated
-//	private void multiClickAction() {
-//		if(eMultiClickAction!=null){
-//			/**
-//			 * multi click actions execution must be delayed by the multi click delay limit 
-//			 */
-//			if(!MouseCursorCentralI.i().isMultiClickDelayWithinLimitFrom(lClickActionMilis)){
-//				boolean bConsumed=false;
-//				switch(eMultiClickAction){
-//					case OpenConfigDialog:
-//						openCfgDataDialog(null); //TODO usage is wrong 
-//						bConsumed=true;
-//						break;
-//					case OptionModeSubmit:
-//						actionSubmit();
-//						bConsumed=true;
-//						break;
-//					case DebugTestMultiClickAction3times:
-//						cd().dumpDebugEntry(eMultiClickAction+" at "+getId());
-//						bConsumed=true;
-//						break;
-//				}
-//				
-//				if(bConsumed){
-//					consumeAndResetMultiClickAction();
-//				}
-//			}
-//		}
-//	}
-
-	public void openCfgDataDialog(DialogListEntryData dataToCfg){
-		LemurDialogGUIStateAbs diag = hmModals.get(EModalDiagType.ListEntryConfig);
-		if(diag!=null){
-			this.setCfgDataReference(dataToCfg);
-			diag.requestEnable();
-		}else{
-//			throw new PrerequisitesNotMetException("no cfg dialog set");
-		}
-	}
-	
-//	@Deprecated
-//	enum EMultiClickAction{
-//		OptionModeSubmit,
-//		OpenConfigDialog, 
-//		DebugTestMultiClickAction3times,
-//	}
-//	EMultiClickAction eMultiClickAction = null;
 	
 	/**
 	 * default is the class name, will look like the dialog title
@@ -618,8 +577,10 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 						break;
 					case KeyInput.KEY_V: 
 						if(bControl){
-							getInputField().setText(getInputField().getText()
-								+MiscI.i().retrieveClipboardString(true));
+							LemurMiscHelpersStateI.i().insertTextAtCaratPosition(getInputField(),
+								MiscI.i().retrieveClipboardString(true));
+//							getInputField().setText(getInputField().getText()
+//								+MiscI.i().retrieveClipboardString(true));
 						}
 						break;
 				}
@@ -664,15 +625,9 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		return getInputField().getText();
 	}
 	
-	public static enum EModalDiagType{
-		ListEntryConfig,
-		ListEntryProperties,
-		HintHelp, //generic
-	}
-	
-	protected HashMap<EModalDiagType, LemurDialogGUIStateAbs> hmModals = new HashMap<EModalDiagType, LemurDialogGUIStateAbs>();
+	protected HashMap<String, LemurDialogGUIStateAbs<T>> hmModals = new HashMap<String, LemurDialogGUIStateAbs<T>>();
 	protected Long	lClickActionMilis;
-	private MouseCursorButtonData	buttonData;
+//	private MouseCursorButtonData	buttonData;
 	
 //	public static class ModalDiag{
 //		EModalDiagType e;
@@ -684,9 +639,9 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 //		}
 //	}
 	
-	public void configModalDialog(EModalDiagType e, LemurDialogGUIStateAbs diagModal){
+	public void configModalDialog(LemurDialogGUIStateAbs diagModal){
 		diagModal.setModalParent(this);
-		hmModals.put(e,diagModal);
+		hmModals.put(diagModal.getId(),diagModal);
 	}
 	
 //	/**
@@ -740,19 +695,28 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 //		return false;
 //	}
 	
-	public boolean openPropertiesDialogFor(Spatial capture) {
-		if(isListBoxEntry(capture)){
-			LemurDialogGUIStateAbs diag = hmModals.get(EModalDiagType.ListEntryProperties);
-			if(diag!=null){
-				diag.requestEnable();
-				return true;
-			}else{
-//				throw new PrerequisitesNotMetException("no properties dialog set");
-			}
+	public void openDialog(String strDialogId, DialogListEntryData dataToCfg){
+		LemurDialogGUIStateAbs<T> diag = hmModals.get(strDialogId);
+		if(diag!=null){
+			this.setCfgDataReference(dataToCfg);
+			diag.requestEnable();
+		}else{
+//			throw new PrerequisitesNotMetException("no cfg dialog set");
 		}
-		
-		return false;
 	}
+//	public boolean openPropertiesDialogFor(Spatial capture) {
+//		if(isListBoxEntry(capture)){
+//			LemurDialogGUIStateAbs diag = hmModals.get(EModalDiagType.ListEntryProperties);
+//			if(diag!=null){
+//				diag.requestEnable();
+//				return true;
+//			}else{
+////				throw new PrerequisitesNotMetException("no properties dialog set");
+//			}
+//		}
+//		
+//		return false;
+//	}
 	
 	public boolean isListBoxEntry(Spatial spt){
 		if(getSelectedIndex()>=0){
@@ -770,7 +734,7 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		return false;
 	}
 
-	public void selectEntry(DialogListEntryData data) {
+	public void selectEntry(DialogListEntryData<T> data) {
 		int i=vlEntriesList.indexOf(data);
 		if(i>=0){
 			selectionModel.setSelection(i);
@@ -789,7 +753,7 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		Integer iSel = selectionModel.getSelection();
 		
 		int iMaxIndex=getMaxIndex();
-		if(iMaxIndex==0)return null;
+		if(iMaxIndex<0)return null;
 		
 		if(iSel==null)iSel=0;
 		
@@ -808,6 +772,7 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 //		}
 		
 		selectionModel.setSelection(iSel);
+		bRefreshScroll=true;
 		
 //		iSel = selectionModel.getSelection();
 		cd().dumpDebugEntry(getId()+":"
@@ -816,5 +781,9 @@ public abstract class LemurDialogGUIStateAbs extends InteractionDialogStateAbs {
 		return iSel;
 //		return iSel==null?-1:iSel;
 	}
+
+	public abstract boolean execTextDoubleClickActionFor(DialogListEntryData<T> data);
+
+	public abstract boolean execActionFor(EMouseCursorButton e, Spatial capture);
 
 }

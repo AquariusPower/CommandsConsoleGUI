@@ -232,7 +232,8 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 		LemurDialogGUIStateAbs diag = retrieveDialogFromSpatial(sptChild);
 		
 		BaseDialogStateAbs diagFocus = diag;
-		for(BaseDialogStateAbs diagModal:diag.getModalChildListCopy()){
+		for(Object objDiagModal:diag.getModalChildListCopy()){
+			BaseDialogStateAbs diagModal = (BaseDialogStateAbs) objDiagModal;
 			diagFocus = diagModal;
 			break;
 		}

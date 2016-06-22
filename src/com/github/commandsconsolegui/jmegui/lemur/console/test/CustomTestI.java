@@ -36,7 +36,6 @@ import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.GlobalConsoleGuiI;
 import com.github.commandsconsolegui.jmegui.console.SimpleConsoleAppAbs;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
-import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs.EModalDiagType;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -109,15 +108,19 @@ public class CustomTestI extends SimpleConsoleAppAbs implements IReflexFillCfg{
 			null, false, KeyInput.KEY_F10, getGuiNode()));
 		
 		// this dialog, after closed, may have diag2.getOptionSelected() available
-		diagCfg = new CustomDialogGUIState().configure(new CustomDialogGUIState.CfgParm(
-			true, "ConfigDialog", false, getGuiNode(), 0.5f, 0.6f, null, null, null
-		));
+		diagCfg = new CustomDialogGUIState(CustomDialogGUIState.EDiag.Cfg).configure(
+			new CustomDialogGUIState.CfgParm(
+				true, false, getGuiNode(), 0.5f, 0.6f, null, null, null
+			)
+		);
 		
 		// test dialogs
-		diag = new CustomDialogGUIState().configure(new CustomDialogGUIState.CfgParm(
-			false, "TestDialog", false, getGuiNode(), null, null, null, null, null
-		));
-		diag.configModalDialog(EModalDiagType.ListEntryConfig, diagCfg);
+		diag = new CustomDialogGUIState(CustomDialogGUIState.EDiag.List).configure(
+			new CustomDialogGUIState.CfgParm(
+				false, false, getGuiNode(), null, null, null, null, null
+			)
+		);
+		diag.configModalDialog(diagCfg);
 		
 		// other basic initializations
 		super.simpleInitApp();

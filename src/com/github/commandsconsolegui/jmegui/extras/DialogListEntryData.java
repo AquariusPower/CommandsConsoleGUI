@@ -27,15 +27,45 @@
 
 package com.github.commandsconsolegui.jmegui.extras;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map.Entry;
+
+import com.jme3.export.JmeExporter;
+import com.jme3.export.JmeImporter;
+import com.jme3.export.Savable;
+
 /**
+ * Each list entry can show differently, they could be:
+ * - blank spacer
+ * - simple section title
+ * - an option that can be cofigured
+ * - a sound that can play/pause/stop (buttons)
+ * - a check box to simply enable/disable
+ * - etc...
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class DialogListEntryData {
+public class DialogListEntryData<T> implements Savable{
 	int iKey;
 	String strText;
 	Object objRef;
+	HashMap<String,T> hmLabelAction = new HashMap<String,T>();
+	T	actionTextDoubleClick;
+	
+	public DialogListEntryData<T> addLabelAction(String strId, T action){
+		hmLabelAction.put(strId,action);
+		return this;
+	}
+	
+//	@SuppressWarnings("unchecked")
+//	public Entry<String,T>[] getLabelActionListCopy(){
+//		return (Entry<String,T>[])hmLabelAction.entrySet().toArray();
+//	}
+	public Entry[] getLabelActionListCopy(){
+		return hmLabelAction.entrySet().toArray(new Entry[0]);
+	}
 	
 	public int getKey() {
 		return iKey;
@@ -46,8 +76,12 @@ public class DialogListEntryData {
 	public String getText() {
 		return strText;
 	}
-	public void setText(String strText) {
+	public T getActionTextDoubleClick(){
+		return this.actionTextDoubleClick;
+	}
+	public void setText(String strText, T actionDoubleClick) {
 		this.strText = strText;
+		this.actionTextDoubleClick=actionDoubleClick;
 	}
 	public Object getRef() {
 		return objRef;
@@ -73,5 +107,17 @@ public class DialogListEntryData {
 	 */
 	public String report() {
 		return this.toString();
+	}
+
+	@Override
+	public void write(JmeExporter ex) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void read(JmeImporter im) throws IOException {
+		// TODO Auto-generated method stub
+		
 	}
 }

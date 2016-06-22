@@ -720,16 +720,11 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 //	}
 	@Override
 	protected boolean editInsertAtCaratPosition(String str) {
-//		if(isInputTextFieldEmpty() && cd().isCommandString(str)){
-//			setInputFieldText(str.trim());
-//		}else{
-			DocumentModel dm = getInputField().getDocumentModel();
-			for(int i=0;i<str.length();i++)dm.insert(str.charAt(i));
-			LemurMiscHelpersStateI.i().bugFix(EBugFix.UpdateTextFieldTextAndCaratVisibility, getInputField());
-//		}
-//		LemurMiscHelpersStateI.i().resetCursorPosition(getInputField());
-//		setInputFieldText(getInputText());
-		return true; //getInputField().getText()
+		LemurMiscHelpersStateI.i().insertTextAtCaratPosition(getInputField(), str);
+//		DocumentModel dm = getInputField().getDocumentModel();
+//		for(int i=0;i<str.length();i++)dm.insert(str.charAt(i));
+//		LemurMiscHelpersStateI.i().bugFix(EBugFix.UpdateTextFieldTextAndCaratVisibility, getInputField());
+		return true;
 	}
 	
 //	public boolean isBlank(char c){
