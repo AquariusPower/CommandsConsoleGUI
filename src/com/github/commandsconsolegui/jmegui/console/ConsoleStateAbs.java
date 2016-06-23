@@ -1629,7 +1629,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 ////			if(cmdd==null)cmdd=cd().getCmdDataFor(astr.get(1));
 //			if(cmdd.equals(cd().getCmdDataFor(astr.get(2)))){
 				astr.clear();
-				astr.add(cmdd.getCoreCmdId());
+				astr.add(cmdd.getSimpleCmdId());
 			}
 		}
 		

@@ -42,7 +42,7 @@ public class CommandData implements Comparable<CommandData>{
 	 * Core IDs are simple short commands.
 	 * They may conflict, but it is not critical as the full command is what matters. 
 	 */
-	private String strCoreCmdId;
+	private String strSimpleCmdId;
 	
 	/**
 	 * Fully qualified, unique, using classes names etc.
@@ -56,8 +56,8 @@ public class CommandData implements Comparable<CommandData>{
 
 	private ArrayList<CommandData>	acmddCoreIdConflicts = new ArrayList<CommandData>();
 	
-	public String getCoreCmdId(){
-		return strCoreCmdId;
+	public String getSimpleCmdId(){
+		return strSimpleCmdId;
 	}
 	
 	public String getUniqueCmdId() {
@@ -70,29 +70,16 @@ public class CommandData implements Comparable<CommandData>{
 		return icclOwner;
 	}
 	
-	public CommandData(IConsoleCommandListener icclOwner, String strBaseCmd, String strCoreCmdId, String strComment) {
+	public CommandData(IConsoleCommandListener icclOwner, String strBaseCmd, String strSimpleCmdId, String strComment) {
 		super();
 		this.icclOwner = icclOwner;
 		this.strUniqueCmdId = strBaseCmd;
-		this.strCoreCmdId=strCoreCmdId;
+		this.strSimpleCmdId=strSimpleCmdId;
 		this.strComment = strComment;
 		this.asteCodeTrackUniqueId = Thread.currentThread().getStackTrace();
 		
 		if(this.icclOwner==null)throw new PrerequisitesNotMetException("listener cannot be null");
 	}
-	
-//	public static class CommandComparator implements Comparator<CommandData>{
-//		@Override
-//		public int compare(CommandData c1, CommandData c2){
-//			return c1.strBaseCmd.compareToIgnoreCase(c2.strBaseCmd);
-//		}
-//	}
-//	private static CommandComparator cmp = new CommandComparator();
-//	public static CommandComparator getCmdComparator(){
-//		return cmp;
-//	}
-	
-	
 	
 	public String asHelp() {
 		String strCommentOk = strComment;
@@ -100,30 +87,20 @@ public class CommandData implements Comparable<CommandData>{
 			strCommentOk=GlobalCommandsDelegatorI.i().getCommentPrefixStr()+strCommentOk;
 		}
 		
-		String strCmdToShow = getCoreCmdId();
+		String strCmdToShow = getSimpleCmdId();
 		String strInfoShow = " ("+strUniqueCmdId+")";
-		if(isCoreCmdIdConflicting()){
+		if(isSimpleCmdIdConflicting()){
 			strCmdToShow=strUniqueCmdId;
-			strInfoShow=" (Conflict:"+getCoreCmdId()+")";
+			strInfoShow=" (Conflict:"+getSimpleCmdId()+")";
 		}
 		
 		return strCmdToShow+" "
 			+strCommentOk
-//			+"(Listener:"+GlobalCommandsDelegatorI.i().getListenerId(icclOwner)+")"
 			+strInfoShow;
-		
-//		return strBaseCmd+" "
-//			+strComment+" "
-//			+"("+(icclOwner!=null ? 
-//					icclOwner.getClass().getSimpleName() : 
-//					GlobalCommandsDelegatorI.i().get().getSelfRootListenerId())+")";
 	}
 	
 	public boolean identicalTo(CommandData cmddNew) {
 		return 
-//			MiscI.i().compareStackTraces(asteCodeTrackUniqueId, cmddNew.asteCodeTrackUniqueId)
-//			Arrays.deepEquals(asteCodeTrackUniqueId, cmddNew.asteCodeTrackUniqueId)
-//			&&
 			this.getOwner()==cmddNew.getOwner()
 			&&
 			this.getUniqueCmdId().equalsIgnoreCase(cmddNew.getUniqueCmdId())
@@ -138,7 +115,7 @@ public class CommandData implements Comparable<CommandData>{
 		}
 	}
 	
-	public boolean isCoreCmdIdConflicting(){
+	public boolean isSimpleCmdIdConflicting(){
 		return acmddCoreIdConflicts.size()>0;
 	}
 	
@@ -148,16 +125,27 @@ public class CommandData implements Comparable<CommandData>{
 
 	@Override
 	public int compareTo(CommandData o) {
-//		if(
-//			this.getCoreCmdId().equalsIgnoreCase(o.getCoreCmdId())
-//			||
-//			this.isCoreCmdIdConflicting()
-//			||
-//			o.isCoreCmdIdConflicting()
-//		){
-//			return this.getUniqueCmdId().compareTo(o.getUniqueCmdId());
+		return this.getSimpleCmdId().toLowerCase().compareTo(o.getSimpleCmdId().toLowerCase());
+	}
+
+	public void fixSimpleCmdIdConflict(CommandsDelegator.CompositeControl ccCd, String strNewSimpleCmdId){//, Collection<CommandData> cmdListToClearConflicts) {
+		ccCd.assertSelfNotNull();
+		
+		if(!isSimpleCmdIdConflicting())throw new PrerequisitesNotMetException("can only be directly set if it has conflicts");
+		
+		// clear conflicts
+		for(CommandData dataOther:acmddCoreIdConflicts.toArray(new CommandData[0])){
+			dataOther.acmddCoreIdConflicts.remove(this);
+			this.acmddCoreIdConflicts.remove(dataOther);
+		}
+		
+//		for(CommandData dataOther:cmdListToClearConflicts){
+//			if(dataOther.getSimpleCmdId().equalsIgnoreCase(this.strSimpleCmdId)){
+//				dataOther.acmddCoreIdConflicts.remove(this);
+//			}
 //		}
-		return this.getCoreCmdId().toLowerCase().compareTo(o.getCoreCmdId().toLowerCase());
+		
+		this.strSimpleCmdId=strNewSimpleCmdId;
 	}
 	
 }
