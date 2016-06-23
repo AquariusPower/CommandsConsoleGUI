@@ -177,13 +177,13 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 		dle.setText(strText,(T)cmdCfg);
 		
 		if(bOptionSelectionMode){
-			dle.addLabelAction("<-",(T)cmdSel);
+			dle.addCustomButtonAction("<-",(T)cmdSel);
 		}else{
 			/**
 			 * this order matters
 			 */
-			dle.addLabelAction("Cfg",(T)cmdCfg);
-			dle.addLabelAction("X",(T)cmdDel);
+			dle.addCustomButtonAction("Cfg",(T)cmdCfg);
+			dle.addCustomButtonAction("X",(T)cmdDel);
 		}
 		
 		super.addEntry(dle);

@@ -60,15 +60,15 @@ public class DialogListEntryData<T> implements Savable{
 //	EEntryType eType = EEntryType.NormalData;
 	ArrayList<DialogListEntryData<T>> aChildList = new ArrayList<DialogListEntryData<T>>();
 	
-	HashMap<String,T> hmLabelAction = new HashMap<String,T>();
+	HashMap<String,T> hmCustomButtonsActions = new HashMap<String,T>();
 	T	actionTextDoubleClick;
 	
 	int iKey;
 	String strText;
 	Object objRef;
 	
-	public DialogListEntryData<T> addLabelAction(String strId, T action){
-		hmLabelAction.put(strId,action);
+	public DialogListEntryData<T> addCustomButtonAction(String strLabelTextId, T action){
+		hmCustomButtonsActions.put(strLabelTextId,action);
 		return this;
 	}
 	
@@ -76,8 +76,9 @@ public class DialogListEntryData<T> implements Savable{
 //	public Entry<String,T>[] getLabelActionListCopy(){
 //		return (Entry<String,T>[])hmLabelAction.entrySet().toArray();
 //	}
-	public Entry[] getLabelActionListCopy(){
-		return hmLabelAction.entrySet().toArray(new Entry[0]);
+	@SuppressWarnings("rawtypes")
+	public Entry[] getCustomButtonsActionsListCopy(){
+		return hmCustomButtonsActions.entrySet().toArray(new Entry[0]);
 	}
 	
 	public int getKey() {

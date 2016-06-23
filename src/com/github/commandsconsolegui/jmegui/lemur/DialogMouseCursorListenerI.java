@@ -58,6 +58,8 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 	
 	@Override
 	public boolean click(MouseCursorButtonData buttonData, CursorButtonEvent eventButton, Spatial target,Spatial capture) {
+		if(capture==null)return false; //TODO ??? if(capture==null)capture=target; ??? 
+		
 		LemurFocusHelperStateI.i().requestDialogFocus(capture);
 		
 		// missing ones are ignored so each element can consume it properly

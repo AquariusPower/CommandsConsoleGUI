@@ -74,7 +74,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		private DialogListEntryData<T>	data;
 		private CellRendererDialogEntry<T>	assignedCellRenderer;
 		private String	strPrefix = "Cell";
-		private Container	cntrButtons;
+		private Container	cntrCustomButtons;
 		
 		public DialogListEntryData<T> getData(){
 			return data;
@@ -88,7 +88,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			// tree depth
 			DialogListEntryData<T> dataParent = data.getParent();
 			while(dataParent!=null){
-				str=">"+str;
+				str="_"+str;
 				dataParent = dataParent.getParent();
 			}
 			
@@ -105,33 +105,77 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			this.data=dataToSet;
 			
 			btnTree = createButton("Tree", "?", this, Position.West);
-			if(this.data.isParent()){
-				btnTree.addCommands(ButtonAction.Click, new Command<Button>(){
-					@Override
-					public void execute(Button source) {
-						data.toggleExpanded();
-						updateTreeButton();
-						assignedCellRenderer.diagParent.requestRefreshList();
-					}
-				});
-			}
-			updateTreeButton();
+			btnTree.addCommands(ButtonAction.Click, ctt);
+			btnTree.setUserData(Cell.class.getName(), this);
 			
 			btnText = createButton("Text", this.data.getText(), this, Position.Center);
 			
-			cntrButtons = new Container(new SpringGridLayout(),assignedCellRenderer.strStyle);
-			Entry[] eList = this.data.getLabelActionListCopy();
-			for(int i=eList.length-1;i>=0;i--){
-				Entry<String, T> entry = eList[i];
-				createButton(entry.getKey(), "["+entry.getKey()+"]", cntrButtons, i)
-					.addCommands(ButtonAction.Click, (Command<Button>)entry.getValue());
-			}
-			addChild(cntrButtons,Position.East);
+			cntrCustomButtons = new Container(new SpringGridLayout(),assignedCellRenderer.strStyle);
+			addChild(cntrCustomButtons,Position.East);
+			
+			update(this.data);
 		}
 		
+		static class CommandTreeToggle implements Command<Button>{
+			@Override
+			public void execute(Button source) {
+				@SuppressWarnings("rawtypes")
+				Cell cell = (Cell)source.getUserData(Cell.class.getName());
+				
+				if(cell.data.isParent()){
+					cell.data.toggleExpanded();
+					cell.assignedCellRenderer.diagParent.requestRefreshList();
+				}
+				cell.updateTreeButton();
+			}
+		}
+		CommandTreeToggle ctt = new CommandTreeToggle();
+		
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public void update(DialogListEntryData<T> data){
+			DialogListEntryData<T> dataOld = this.data;
 			this.data=data;
+			
+			// tree button
+			updateTreeButton();
+			
+			// entry text
 			btnText.setText(data.getText());
+			
+			// custom buttons
+			boolean bButtonsChanged = false;
+			
+			if(this.data.equals(dataOld))bButtonsChanged=true;//1st update is self
+			
+			if(!bButtonsChanged){
+				Entry[] entryOldList = dataOld.getCustomButtonsActionsListCopy();
+				Entry[] entryList = this.data.getCustomButtonsActionsListCopy();
+				if(entryOldList.length==entryList.length){
+					for(int i=0;i<entryList.length;i++){
+						Entry entryOld = entryOldList[i];
+						Entry entry = entryList[i];
+						if(
+							!entry.getKey().equals(entryOld.getKey()) ||
+							!entry.getValue().equals(entryOld.getValue())
+						){
+							bButtonsChanged = true;
+							break;
+						}
+					}				
+				}else{
+					bButtonsChanged=true;
+				}
+			}
+			
+			if(bButtonsChanged){
+				Entry[] eList = this.data.getCustomButtonsActionsListCopy();
+				cntrCustomButtons.clearChildren();
+				for(int i=eList.length-1;i>=0;i--){
+					Entry<String, T> entry = eList[i];
+					createButton(entry.getKey(), "["+entry.getKey()+"]", cntrCustomButtons, i)
+						.addCommands(ButtonAction.Click, (Command<Button>)entry.getValue());
+				}
+			}
 		}
 		
 		/**
