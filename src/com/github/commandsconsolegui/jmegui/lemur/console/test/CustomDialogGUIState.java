@@ -27,8 +27,6 @@
 
 package com.github.commandsconsolegui.jmegui.lemur.console.test;
 
-import java.util.ArrayList;
-
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
@@ -71,8 +69,6 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 	}
 	EDiag ediag = null;
 	
-	protected ArrayList<DialogListEntryData>	adleFullList = new ArrayList<DialogListEntryData>();
-	
 	public CustomDialogGUIState(EDiag ediag) {
 		this.ediag=ediag;
 		super.bPrefixCmdWithIdToo = true;
@@ -112,25 +108,17 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 	
 	@Override
 	protected void updateList() {
-		DialogListEntryData dataValue = getCfgDataValueAndClearIt();
+		DialogListEntryData<T> dataValue = getCfgDataValueAndClearIt();
 		if(dataValue!=null){
-//			int i = adleFullList.indexOf(getCfgDataRefAndClearIt());
-//			if(getSelectedIndex()>=0){
-			DialogListEntryData dataRef = getCfgDataRefAndClearIt();
-//			if(i>=0){
+			DialogListEntryData<T> dataRef = getCfgDataRefAndClearIt();
 			if(dataRef!=null){
-//				adleFullList.set(getSelectedIndex(), dleAnswer);
-//				adleFullList.set(i, dleAnswer);
 				dataRef.setCfg(dataValue);
 			}else{
 				cd().dumpWarnEntry("no entry selected at "+this.getId()+" to apply modal dialog option");
 			}
 		}
-//		else{
-//			addEntry(null);
-//		}
 		
-		updateList(adleFullList);
+//		super.updateList(adleFullList);
 		
 		super.updateList();
 	}
@@ -166,13 +154,6 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 	}
 	CommandDel cmdDel = new CommandDel();
 	
-	public void removeEntry(DialogListEntryData<T> data){
-		if(!adleFullList.remove(data)){
-			throw new PrerequisitesNotMetException("missing data at list", data);
-		}
-		requestRefreshList();
-	}
-	
 	public void openCfgDialog(DialogListEntryData<T> data){
 		CustomDialogGUIState.this.openDialog(EDiag.Cfg.toString(),data);
 	}
@@ -185,7 +166,7 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 	}
 	CommandSel cmdSel = new CommandSel();
 	
-	public void addEntry(String strText){
+	public DialogListEntryData<T> addEntryQuick(String strText){
 		DialogListEntryData<T> dle = new DialogListEntryData<T>();
 		if(strText==null){
 			strText=this.getId()+": New test entry: "
@@ -205,12 +186,15 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 			dle.addLabelAction("X",(T)cmdDel);
 		}
 		
-		adleFullList.add(dle);
-		if(adleFullList.size()>100)adleFullList.remove(0);
+		super.addEntry(dle);
+		
+//		if(adleFullList.size()>100)adleFullList.remove(0);
 		
 		requestRefreshList();
+		
+		return dle;
 	}
-	
+
 //	@Override
 //	protected String getSelectedEntryKey() {
 //		return hmKeyValueTmp.get(formatEntryKey(getSelectedEntryValue()));
@@ -225,48 +209,39 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 	
 	@Override
 	protected boolean initOrUndo() {
-		for(int i=0;i<10;i++)addEntry(null); //some test data
+		addEntryQuick(null);
+		addEntryQuick(null);
+		
+		DialogListEntryData<T> dleS1 = addEntryQuick("section 1");
+		addEntryQuick(null).setParent(dleS1);
+		addEntryQuick(null).setParent(dleS1);
+		addEntryQuick(null).setParent(dleS1);
+		
+		DialogListEntryData<T> dleS2 = addEntryQuick("section 2");
+		addEntryQuick(null).setParent(dleS2);
+		addEntryQuick(null).setParent(dleS2);
+		DialogListEntryData<T> dleS21 = addEntryQuick("section 2.1").setParent(dleS2);
+		addEntryQuick(null).setParent(dleS21);
+		addEntryQuick(null).setParent(dleS21);
+		addEntryQuick(null).setParent(dleS21);
+		
+		addEntryQuick("S2 child").setParent(dleS2); //ok, will be placed properly
+		
+		addEntryQuick("S1 child").setParent(dleS1); //out of order for test
+		addEntryQuick("S21 child").setParent(dleS21); //out of order for test
+		
+//		for(int i=0;i<10;i++)addEntry(null); //some test data
+		
 		return super.initOrUndo();
 	}
 	
-//	@Override
-//	protected boolean disableOrUndo() {
-//		if(!super.disableOrUndo())return false;
-//		
-//		getModalParent().setAnswerFromModal(getOptionSelected());
-//		
-//		return true;
-//	}
-	
-//	@Override
-//	public String formatEntryKey(String val) {
-//		return "Entry: "+val;
-//	}
-
-//	@Override
-//	protected String getSelectedKey() {
-//		return null;
-//	}
-
-//	@Override
-//	public void setAnswerFromModalChild(Object... aobj) {
-//		if(aobj.length==0)return;
-//		
-//		answerFromModal = aobj[1];
-//	}
-	
 	@Override
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
-//		if(cmdAddEntries==null){
-//			cmdAddEntries = new StringCmdField(getId()+"AddEntry","[strText]");
-//		}
-//		if(!isConfigured())return ECmdReturnStatus.Skip;
-		
 		boolean bCommandWorked = false;
 		
 		if(cd.checkCmdValidity(this,scfAddEntry,null)){
 			String strText = cd.getCurrentCommandLine().paramString(1);
-			addEntry(strText);
+			addEntryQuick(strText);
 			bCommandWorked = true;
 		}else
 		{

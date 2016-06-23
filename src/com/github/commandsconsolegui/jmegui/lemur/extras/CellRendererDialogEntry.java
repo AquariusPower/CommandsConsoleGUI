@@ -56,50 +56,82 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 	}
 
 	private String	strStyle;
+	private LemurDialogGUIStateAbs<T>	diagParent;
 //	private boolean	bOptionChoiceMode;
 	
-	public CellRendererDialogEntry(String strStyle){//, boolean bOptionChoiceMode) {
+	public CellRendererDialogEntry(String strStyle, LemurDialogGUIStateAbs<T> diag){//, boolean bOptionChoiceMode) {
 		this.strStyle=strStyle;
+		this.diagParent=diag;
 //		this.bOptionChoiceMode=bOptionChoiceMode;
 	}
 	
 	public static class Cell<T> extends Container{
 		private Button	btnText;
+		private Button	btnTree;
+		
 //		private Button	btnCfg;
 //		private Button btnSelect;
 		private DialogListEntryData<T>	data;
 		private CellRendererDialogEntry<T>	assignedCellRenderer;
 		private String	strPrefix = "Cell";
+		private Container	cntrButtons;
 		
 		public DialogListEntryData<T> getData(){
 			return data;
 		}
 		
-		public Cell(CellRendererDialogEntry<T> parentCellRenderer, DialogListEntryData<T> data){
+		protected void updateTreeButton(){
+			String str = "";
+			
+			if(data.isParent())str+=data.isTreeExpanded()?"[-]":"[+]";
+			
+			// tree depth
+			DialogListEntryData<T> dataParent = data.getParent();
+			while(dataParent!=null){
+				str=">"+str;
+				dataParent = dataParent.getParent();
+			}
+			
+			btnTree.setText(str);
+		}
+		
+		@SuppressWarnings("unchecked")
+		public Cell(CellRendererDialogEntry<T> parentCellRenderer, DialogListEntryData<T> dataToSet){
 			super(new BorderLayout(), parentCellRenderer.strStyle);
 			
 			this.setName(strPrefix+"MainContainer");
 			
 			this.assignedCellRenderer=parentCellRenderer;
-			this.data=data;
+			this.data=dataToSet;
 			
-			btnText = createButton("Text", data.getText(), this, Position.Center);
+			btnTree = createButton("Tree", "?", this, Position.West);
+			if(this.data.isParent()){
+				btnTree.addCommands(ButtonAction.Click, new Command<Button>(){
+					@Override
+					public void execute(Button source) {
+						data.toggleExpanded();
+						updateTreeButton();
+						assignedCellRenderer.diagParent.requestRefreshList();
+					}
+				});
+			}
+			updateTreeButton();
 			
-			Position p = Position.East;
-//			if(assignedCellRenderer.bOptionChoiceMode){
-//				btnSelect = createButton(null, "Select", p);
-//			}else{
-//				btnCfg = createButton(null, "Cfg", p);
-//			}
+			btnText = createButton("Text", this.data.getText(), this, Position.Center);
 			
-			Container cntrButtons = new Container(new SpringGridLayout(),assignedCellRenderer.strStyle);
-			Entry[] eList = data.getLabelActionListCopy();
+			cntrButtons = new Container(new SpringGridLayout(),assignedCellRenderer.strStyle);
+			Entry[] eList = this.data.getLabelActionListCopy();
 			for(int i=eList.length-1;i>=0;i--){
 				Entry<String, T> entry = eList[i];
 				createButton(entry.getKey(), "["+entry.getKey()+"]", cntrButtons, i)
 					.addCommands(ButtonAction.Click, (Command<Button>)entry.getValue());
 			}
-			addChild(cntrButtons,p);
+			addChild(cntrButtons,Position.East);
+		}
+		
+		public void update(DialogListEntryData<T> data){
+			this.data=data;
+			btnText.setText(data.getText());
 		}
 		
 		/**
@@ -119,11 +151,6 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			CursorEventControl.addListenersToSpatial(btn, DialogMouseCursorListenerI.i());
 			cntr.addChild(btn,aobjConstraints);
 			return btn;
-		}
-		
-		public void update(DialogListEntryData<T> data){
-			this.data=data;
-			btnText.setText(data.getText());
 		}
 
 //		public boolean isCfgButton(Spatial spt) {

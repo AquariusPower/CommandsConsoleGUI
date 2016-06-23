@@ -94,7 +94,8 @@ public class CommandData implements Comparable<CommandData>{
 			strInfoShow=" (Conflict:"+getSimpleCmdId()+")";
 		}
 		
-		return strCmdToShow+" "
+		return GlobalCommandsDelegatorI.i().getCommandPrefixStr()
+			+strCmdToShow+" "
 			+strCommentOk
 			+strInfoShow;
 	}

@@ -28,6 +28,7 @@
 package com.github.commandsconsolegui.jmegui.extras;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
@@ -48,11 +49,23 @@ import com.jme3.export.Savable;
  *
  */
 public class DialogListEntryData<T> implements Savable{
+//	public static enum EEntryType{
+//		NormalData,
+//		BlankSeparator,
+//		SectionTitleParent, //so it may contain children
+//	}
+	
+	DialogListEntryData<T> parent; //it must be set as the parent type too
+	boolean bTreeExpanded = false; 
+//	EEntryType eType = EEntryType.NormalData;
+	ArrayList<DialogListEntryData<T>> aChildList = new ArrayList<DialogListEntryData<T>>();
+	
+	HashMap<String,T> hmLabelAction = new HashMap<String,T>();
+	T	actionTextDoubleClick;
+	
 	int iKey;
 	String strText;
 	Object objRef;
-	HashMap<String,T> hmLabelAction = new HashMap<String,T>();
-	T	actionTextDoubleClick;
 	
 	public DialogListEntryData<T> addLabelAction(String strId, T action){
 		hmLabelAction.put(strId,action);
@@ -70,8 +83,9 @@ public class DialogListEntryData<T> implements Savable{
 	public int getKey() {
 		return iKey;
 	}
-	public void setKey(int iKey) {
+	public DialogListEntryData<T> setKey(int iKey) {
 		this.iKey = iKey;
+		return this;
 	}
 	public String getText() {
 		return strText;
@@ -79,15 +93,17 @@ public class DialogListEntryData<T> implements Savable{
 	public T getActionTextDoubleClick(){
 		return this.actionTextDoubleClick;
 	}
-	public void setText(String strText, T actionDoubleClick) {
+	public DialogListEntryData<T> setText(String strText, T actionDoubleClick) {
 		this.strText = strText;
 		this.actionTextDoubleClick=actionDoubleClick;
+		return this;
 	}
 	public Object getRef() {
 		return objRef;
 	}
-	public void setRef(Object objRef) {
+	public DialogListEntryData<T> setRef(Object objRef) {
 		this.objRef = objRef;
+		return this;
 	}
 	
 	@Override
@@ -119,5 +135,59 @@ public class DialogListEntryData<T> implements Savable{
 	public void read(JmeImporter im) throws IOException {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public DialogListEntryData<T> getParent() {
+		return parent;
+	}
+	
+	/**
+	 * 
+	 * @param parent if null, will just remove from existing parent
+	 * @return
+	 */
+	public DialogListEntryData<T> setParent(DialogListEntryData<T> parent) {
+		if(this.parent!=null){
+			this.parent.aChildList.remove(this);
+		}
+		
+		this.parent = parent;
+		
+		if(this.parent!=null){
+			this.parent.aChildList.add(this);
+		}
+		
+		return this;
+	}
+
+//	public EEntryType geteType() {
+//		return eType;
+//	}
+//
+//	public DialogListEntryData<T> setType(EEntryType eType) {
+//		this.eType = eType;
+//		return this;
+//	}
+
+	public boolean isTreeExpanded() {
+		return bTreeExpanded;
+	}
+
+	public DialogListEntryData<T> setTreeExpanded(boolean bTreeExpanded) {
+		this.bTreeExpanded = bTreeExpanded;
+		return this;
+	}
+	
+	public boolean toggleExpanded() {
+		this.bTreeExpanded = !this.bTreeExpanded;
+		return this.bTreeExpanded; 
+	}
+
+	public boolean isParent() {
+		return aChildList.size()>0;
+	}
+
+	public ArrayList<DialogListEntryData<T>> getChildrenCopy() {
+		return new ArrayList<DialogListEntryData<T>>(aChildList);
 	}
 }
