@@ -30,8 +30,8 @@ package com.github.commandsconsolegui.jmegui.lemur;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
-import com.github.commandsconsolegui.globals.GlobalAppRefI;
-import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;

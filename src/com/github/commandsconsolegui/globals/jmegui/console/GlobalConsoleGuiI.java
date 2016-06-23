@@ -25,27 +25,18 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.globals;
+package com.github.commandsconsolegui.globals.jmegui.console;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.globals.GlobalHolderAbs;
+import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class GlobalCommandsDelegatorI extends GlobalHolderAbs<CommandsDelegator> {
-	private static GlobalCommandsDelegatorI instance = new GlobalCommandsDelegatorI();
-	
-	/**
-	 * This global holder class.
-	 * @return
-	 */
-	public static GlobalCommandsDelegatorI iGlobal(){return instance;}
-	
-	/**
-	 * The referenced class instance.
-	 * @return
-	 */
-	public static CommandsDelegator i(){return iGlobal().get();}
+public class GlobalConsoleGuiI extends GlobalHolderAbs<ConsoleStateAbs>{
+	private static GlobalConsoleGuiI instance = new GlobalConsoleGuiI();
+	public static GlobalConsoleGuiI iGlobal(){return instance;}
+	public static ConsoleStateAbs i(){return iGlobal().get();}
 }

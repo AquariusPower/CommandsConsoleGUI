@@ -37,14 +37,12 @@ public class PrerequisitesNotMetException extends NullPointerException {
 	private static final long	serialVersionUID	= 1342052861109804737L;
 	private static boolean	bRequestExit;
 
-	public PrerequisitesNotMetException() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
-
-	public PrerequisitesNotMetException(String str, Object... aobj) {
+	public PrerequisitesNotMetException(boolean bExitApplication, String str, Object... aobj) {
 		super(join(str,aobj));
-		PrerequisitesNotMetException.bRequestExit=true;
+		PrerequisitesNotMetException.bRequestExit=bExitApplication;
+	}
+	public PrerequisitesNotMetException(String str, Object... aobj) {
+		this(true,str,aobj);
 	}
 	
 	private static String join(String str, Object... aobj){

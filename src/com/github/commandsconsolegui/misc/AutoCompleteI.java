@@ -40,8 +40,21 @@ public class AutoCompleteI {
 	public static AutoCompleteI instance = new AutoCompleteI();
 	public static AutoCompleteI i(){return instance;}
 	
+	public static class AutoCompleteResult{
+		public String strImprovedPart;
+		public ArrayList<String> astr;
+		public boolean bUsingFuzzy;
+		public AutoCompleteResult(String strImprovedPart, ArrayList<String> astr,
+				boolean bUsingFuzzy) {
+			super();
+			this.strImprovedPart = strImprovedPart;
+			this.astr = astr;
+			this.bUsingFuzzy = bUsingFuzzy;
+		}
+	}
+	
 	public ArrayList<String> autoComplete(String strPart, ArrayList<String> astrAllPossibilities, boolean bMatchContains){
-		return autoComplete(strPart, astrAllPossibilities, bMatchContains, false);
+		return autoComplete(strPart, astrAllPossibilities, bMatchContains, false).astr;
 	}
 	/**
 	 * Matching is case insensitive.
@@ -55,11 +68,12 @@ public class AutoCompleteI {
 	 * 	If it has only one entry, or it will be the unmodified part, 
 	 *		or (if its length is bigger) it will be an exact match!
 	 */
-	public ArrayList<String> autoComplete(String strPart, ArrayList<String> astrAllPossibilities, boolean bMatchContains, boolean bAllowFuzzyFallBack){
+	public AutoCompleteResult autoComplete(String strPart, ArrayList<String> astrAllPossibilities, boolean bMatchContains, boolean bAllowFuzzyFallBack){
 		ArrayList<String> astrPossibleMatches = new ArrayList<String>();
 		
+		boolean bUsingFuzzy=false;
 		strPart=strPart.trim();
-		if(strPart.isEmpty())return astrPossibleMatches;
+		if(strPart.isEmpty())return new AutoCompleteResult(strPart,astrPossibleMatches,bUsingFuzzy);
 //		if(strPart.matches("[^"+strValidCmdCharsRegex+"]"))return astrPossibleMatches;
 		for(int i=1;i<=2;i++){ //2nd pass, only if 1st ended empty, is for fuzzy
 			for(String strFull:astrAllPossibilities){
@@ -74,6 +88,7 @@ public class AutoCompleteI {
 							if(bAllowFuzzyFallBack){
 								if(MiscI.i().containsFuzzyMatch(strFull, strPart, false, true)){
 									astrPossibleMatches.add(strFull);
+									bUsingFuzzy=true;
 								}
 							}
 							break;
@@ -91,8 +106,9 @@ public class AutoCompleteI {
 		}
 		
 		// found single possibility
-		if(astrPossibleMatches.size()==1)
-			return astrPossibleMatches;
+		if(astrPossibleMatches.size()==1){
+			return new AutoCompleteResult(strPart,astrPossibleMatches,bUsingFuzzy);
+		}
 		
 		if(!bMatchContains){
 			lbMatch:while(true){
@@ -121,6 +137,6 @@ public class AutoCompleteI {
 		// prepend improved partial match (or it can be simply the unmodified part...)
 		astrPossibleMatches.add(0,strPart);
 		
-		return astrPossibleMatches;
+		return new AutoCompleteResult(strPart,astrPossibleMatches,bUsingFuzzy);
 	}
 }

@@ -54,7 +54,7 @@ public interface IConsoleUI extends ICheckInitAndCleanupI{
 
 	public abstract AbstractList<String> getDumpEntries();
 
-	public abstract AbstractList<String> getAutoCompleteHint();
+	public abstract AbstractList<String> getAutoCompleteHintList();
 
 	public abstract String getInputText();
 

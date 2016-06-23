@@ -123,7 +123,7 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 		}
 	}
 	@Override
-	public LemurDialogGUIStateAbs configure(ICfgParm icfg) {
+	public LemurDialogGUIStateAbs<T> configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
 		
 //		DialogMouseCursorListenerI.i().configure(null);
@@ -156,39 +156,20 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 		return getContainerMain().hasChild(spt); //this is actually recursive!!!
 	}
 	
-//	public static enum EButtonAction{
-//		OpenDialog,
-//		PlaySound,
-//		PauseSound,
-//		StopSound,
-//		ShowProperties,
-//		;
-//	}
-//	
-//	public static class ButtonCommand implements Command<Button>{
-//		@Override
-//		public void execute(Button btn) {
-//			EButtonAction.valueOf(btn.getUserData(EButtonAction.class.getSimpleName()));
-//			
-//		}
-//	}
-//	
-//	public void setButtonCommand(ButtonCommand bc){
-//		this.bc=bc;
-//	}
+	protected float sizePercOrPixels(float fSizeBase, float fPercOrPixels){
+		if(Float.compare(fPercOrPixels, 1.0f)<=0){ //percent
+			fSizeBase *= fPercOrPixels;
+		}else{ // >1.0f is in pixels
+			fSizeBase = fPercOrPixels;
+		}
+		
+		return fSizeBase;
+	}
 	
-//	@Override
-//	protected boolean initGUI(){
-//		return initGUI(0.75f, 0.75f, 0.25f, null);
-//	}
-//protected boolean initGUI(float fDialogHeightPercentOfAppWindow, float fDialogWidthPercentOfAppWindow, float fInfoHeightPercentOfDialog, Integer iEntryHeightPixels){
 	/**
 	 * The input field will not require height, will be small on south edge.
 	 * @param fDialogPerc the percentual width/height to cover the application screen/window 
 	 * @param fInfoPerc the percentual height to show informational text, the list and input field will properly use the remaining space
-	 */
-	/**
-	 * The input field will not require height, will be small on south edge.
 	 */
 	@Override
 	protected boolean initGUI(){
@@ -208,15 +189,26 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 		
 //		Vector3f v3fDiagWindowSize = v3fApplicationWindowSize.mult(fDialogPerc);
 		Vector3f v3fDiagWindowSize = new Vector3f(v3fApplicationWindowSize);
-		v3fDiagWindowSize.y *= cfg.fDialogHeightPercentOfAppWindow;
-		v3fDiagWindowSize.x *= cfg.fDialogWidthPercentOfAppWindow;
+		v3fDiagWindowSize.y = sizePercOrPixels(v3fDiagWindowSize.y,cfg.fDialogHeightPercentOfAppWindow);
+//		if(Float.compare(cfg.fDialogHeightPercentOfAppWindow, 1.0f)<=0){
+//			v3fDiagWindowSize.y *= cfg.fDialogHeightPercentOfAppWindow;
+//		}else{ // >1.0f is in pixels
+//			v3fDiagWindowSize.y = cfg.fDialogHeightPercentOfAppWindow;
+//		}
+		v3fDiagWindowSize.x = sizePercOrPixels(v3fDiagWindowSize.x,cfg.fDialogWidthPercentOfAppWindow);
+//		if(Float.compare(v3fDiagWindowSize.x, 1.0f)<=0){
+//			v3fDiagWindowSize.x *= cfg.fDialogWidthPercentOfAppWindow;
+//		}else{
+//			v3fDiagWindowSize.x = cfg.fDialogWidthPercentOfAppWindow;
+//		}
 		getContainerMain().setPreferredSize(v3fDiagWindowSize);
 		
 		///////////////////////// NORTH (info/help)
 		cntrNorth = new Container(new BorderLayout(), strStyle);
 		getNorthContainer().setName(getId()+"_NorthContainer");
 		Vector3f v3fNorthSize = v3fDiagWindowSize.clone();
-		v3fNorthSize.y *= cfg.fInfoHeightPercentOfDialog;
+		float fInfoHeightPixels = sizePercOrPixels(v3fNorthSize.y, cfg.fInfoHeightPercentOfDialog);
+		v3fNorthSize.y = fInfoHeightPixels;
 		getNorthContainer().setPreferredSize(v3fNorthSize);
 		
 		//title 
@@ -236,9 +228,10 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 		
 		//////////////////////////// CENTER (list)
 		// list
-		float fListPerc = 1.0f - cfg.fInfoHeightPercentOfDialog;
 		v3fEntryListSize = v3fDiagWindowSize.clone();
-		v3fEntryListSize.y *= fListPerc;
+//		float fListPerc = 1.0f - cfg.fInfoHeightPercentOfDialog;
+//		v3fEntryListSize.y *= fListPerc;
+		v3fEntryListSize.y -= fInfoHeightPixels;
 		lstbxEntriesToSelect = new ListBox<DialogListEntryData<Command<Button>>>(
 			new VersionedList<DialogListEntryData<Command<Button>>>(), 
 			new CellRendererDialogEntry<Command<Button>>(strStyle),// bOptionSelectionMode), 

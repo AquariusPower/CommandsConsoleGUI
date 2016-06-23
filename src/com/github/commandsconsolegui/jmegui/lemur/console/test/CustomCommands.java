@@ -31,7 +31,7 @@ import java.util.concurrent.Callable;
 
 import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegator;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
-import com.github.commandsconsolegui.globals.GlobalAppRefI;
+import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 

@@ -29,7 +29,7 @@ package com.github.commandsconsolegui.cmd;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 
 /**

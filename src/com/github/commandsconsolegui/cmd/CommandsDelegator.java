@@ -48,7 +48,7 @@ import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
-import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI.CompositeControl;
 import com.github.commandsconsolegui.misc.DebugI;
@@ -116,6 +116,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public final BoolTogglerCmdField	btgEngineStatsView = new BoolTogglerCmdField(this,false);
 	public final BoolTogglerCmdField	btgEngineStatsFps = new BoolTogglerCmdField(this,false);
 	public final BoolTogglerCmdField	btgShowMiliseconds=new BoolTogglerCmdField(this,false).setCallNothingOnChange();
+	public final BoolTogglerCmdField	btgShowConvertedCommandInfo=new BoolTogglerCmdField(this,false).setCallNothingOnChange();
 //	public final BoolTogglerCmdField	btgStringContainsFuzzyFilter=new BoolTogglerCmdField(this,true);
 	public final BoolTogglerCmdField	btgConsoleCpuRest=new BoolTogglerCmdField(this,false,null,
 		"Console update steps will be skipped if this is enabled.");
@@ -678,12 +679,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			
 			CommandData data = getCmdDataFor(strUniqueCmdIdWithSimpleConflict,false);
 			if(!data.isSimpleCmdIdConflicting()){
-				throw new PrerequisitesNotMetException("cmd has no conflicts: "+data.getUniqueCmdId(), data.asHelp());
+				throw new PrerequisitesNotMetException(false,"cmd has no conflicts: "+data.getUniqueCmdId(), data.asHelp());
 			}
 			
 			CommandData dataFromSimple = getCmdDataFor(strNewSimpleCmdId,true);
 			if(dataFromSimple!=null){
-				throw new PrerequisitesNotMetException("cmd simple already used: "+strNewSimpleCmdId, dataFromSimple.asHelp());
+				throw new PrerequisitesNotMetException(false,"cmd simple already used: "+strNewSimpleCmdId, dataFromSimple.asHelp());
 			}
 			
 			data.fixSimpleCmdIdConflict(ccSelf, strNewSimpleCmdId);//, trmCmds.values());
@@ -2838,6 +2839,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @return
 	 */
 	public String extractCommandPart(String strCmdFull, int iPart){
+		strCmdFull=strCmdFull.trim();
 		if(strCmdFull.startsWith(""+getCommandPrefix())){
 			strCmdFull=strCmdFull.substring(1); //1 getCommandPrefix()Char
 		}
@@ -2848,7 +2850,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //		}
 		ArrayList<String> astr = convertToCmdParamsList(strCmdFull);
 		if(iPart>=0 && astr.size()>iPart){
-			return astr.get(iPart);
+			String strCmdPart = astr.get(iPart);
+			if(strCmdPart.endsWith(getCommandDelimiterStr())){
+				strCmdPart = strCmdPart.substring(0, strCmdPart.length()-getCommandDelimiterStr().length());
+			}
+			return strCmdPart;
 		}
 		
 		return null;
@@ -3499,7 +3505,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				}
 				
 				String strConvertedTo=cmdd.getUniqueCmdId(); //entry.getKey()
-				if(bDumpMessages)dumpInfoEntry("Converted '"+strCmd+"' to '"+strConvertedTo+"'");
+				if(bDumpMessages && btgShowConvertedCommandInfo.b()){
+					dumpInfoEntry("Converted '"+strCmd+"' to '"+strConvertedTo+"'");
+				}
 				return strConvertedTo;
 			}
 		}

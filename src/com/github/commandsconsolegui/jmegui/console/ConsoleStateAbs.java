@@ -55,6 +55,7 @@ import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI.CompositeCo
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 //import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersState;
 import com.github.commandsconsolegui.misc.AutoCompleteI;
+import com.github.commandsconsolegui.misc.AutoCompleteI.AutoCompleteResult;
 import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDbgKey;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
@@ -1947,7 +1948,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 	}
 	
 	@Override
-	public AbstractList<String> getAutoCompleteHint() {
+	public AbstractList<String> getAutoCompleteHintList() {
 		return vlstrAutoCompleteHint;
 	}
 
@@ -1959,7 +1960,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 				||
 				(cd().getCmdHistoryCurrentIndex()+1) >= cd().getCmdHistorySize() // end of cmd history
 		){
-			int iMaxIndex = getAutoCompleteHint().size()-1;
+			int iMaxIndex = vlstrAutoCompleteHint.size()-1;
 			if(iMaxIndex<0)return false;
 			
 			Integer iCurrentIndex = getHintIndex();
@@ -2138,15 +2139,19 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 			if(strInputTextPrevious.equals(strInputText))return;
 		}
 		
-		ArrayList<String> astr = AutoCompleteI.i().autoComplete(
+		AutoCompleteResult acr = AutoCompleteI.i().autoComplete(
 			strInputText, cd().getAllPossibleCommands(), bKeyControlIsPressed, true);
+		
+//		if(acr.bUsingFuzzy){
+//			cd().dumpWarnEntry("using FUZZY match for: "+strInputText);
+//		}
 		
 		boolean bShowHint = false;
 		
-		if(astr.size()==0){
+		if(acr.astr.size()==0){
 			bShowHint=false; // empty string, or simply no matches
 		}else
-		if(astr.size()==1 && strInputText.equals(cd().extractCommandPart(astr.get(0),0))){
+		if(acr.astr.size()==1 && strInputText.equals(cd().extractCommandPart(acr.astr.get(0),0))){
 			// no extra matches found, only what was already typed was returned
 			bShowHint=false;
 		}else{
@@ -2154,16 +2159,23 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 		}
 		
 		if(bShowHint){
-			for(int i=0;i<astr.size();i++){
-				String str=astr.get(i);
+			for(int i=0;i<acr.astr.size();i++){
+				String str=acr.astr.get(i);
 				int iNL = str.indexOf("\n");
 				if(iNL>=0){
-					astr.set(i,str.substring(0,iNL));
+					acr.astr.set(i,str.substring(0,iNL));
 				}
 			}
 			
-			getAutoCompleteHint().clear();
-			getAutoCompleteHint().addAll(astr);
+			if(acr.bUsingFuzzy){
+				for(int i=0;i<acr.astr.size();i++){
+					acr.astr.set(i, 
+						acr.astr.get(i)+" "+cd().getCommentPrefixStr()+cd().getFuzzyFilterModeToken());
+				}
+			}
+			
+			vlstrAutoCompleteHint.clear();
+			vlstrAutoCompleteHint.addAll(acr.astr);
 			clearHintSelection();
 			
 			Node nodeParent = getNodeGUI();
@@ -2180,7 +2192,7 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 			float fAvailableHeight = v3fApplicationWindowSize.y -v3fConsoleSize.y -fEntryHeightGUESSED;
 			int iVisibleItems = (int) (fAvailableHeight/fEntryHeightGUESSED);
 			if(iVisibleItems==0)iVisibleItems=1;
-			if(iVisibleItems>getAutoCompleteHint().size())iVisibleItems=getAutoCompleteHint().size();
+			if(iVisibleItems>vlstrAutoCompleteHint.size())iVisibleItems=vlstrAutoCompleteHint.size();
 			float fHintHeight = fEntryHeightGUESSED*iVisibleItems;
 			if(fHintHeight>fAvailableHeight){
 				cd().dumpDevWarnEntry("fHintHeight="+fHintHeight+",fAvailableHeight="+fAvailableHeight);

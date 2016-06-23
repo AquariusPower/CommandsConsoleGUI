@@ -30,7 +30,7 @@ package com.github.commandsconsolegui.jmegui;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
-import com.github.commandsconsolegui.globals.GlobalAppRefI;
+import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 
 /**
  * Dispatches multi-click cmds when they are ready.

@@ -29,7 +29,7 @@ package com.github.commandsconsolegui.jmegui;
 
 import java.util.HashMap;
 
-import com.github.commandsconsolegui.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.math.Vector3f;

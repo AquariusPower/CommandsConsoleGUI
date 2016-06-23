@@ -29,7 +29,7 @@ package com.github.commandsconsolegui.jmegui.extras;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.globals.GlobalAppRefI;
+import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.jmegui.ConditionalStateAbs;
 
 /**

@@ -33,8 +33,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.BufferUnderflowException;
 
-import com.github.commandsconsolegui.globals.GlobalGUINodeI;
-import com.github.commandsconsolegui.globals.GlobalRootNodeI;
+import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
+import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.jme3.font.BitmapText;
 import com.jme3.input.MouseInput;

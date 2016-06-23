@@ -25,8 +25,9 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.globals;
+package com.github.commandsconsolegui.globals.jmegui;
 
+import com.github.commandsconsolegui.globals.GlobalHolderAbs;
 import com.jme3.scene.Node;
 
 /**
