@@ -1047,4 +1047,10 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		return cc.cmdFoundReturnStatus(bCommandWorked);
 	}
 
+	@Override
+	protected void actionCustomAtEntry(DialogListEntryData<T> dataSelected) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -408,9 +408,10 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 		applyListKeyFilter();
 		updateAllParts();
 		
+		DialogListEntryData<T> dataSelected = getSelectedEntryData(); //this value is in this console variable now
+		
 		if(bOptionChoiceSelectionMode){
 			adataChosenEntriesList.clear();
-			DialogListEntryData<T> dataSelected = getSelectedEntryData(); //this value is in this console variable now
 			if(dataSelected!=null){
 				adataChosenEntriesList.add(dataSelected); //TODO could be many, use a checkbox for multi-selection
 //			if(getParentDialog()!=null)getParentDialog().setModalChosenData(dataSelected);
@@ -418,10 +419,19 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 				cd().dumpInfoEntry(this.getId()+": Option Selected: "+dataSelected.toString());
 				requestDisable(); //close if there is one entry selected
 			}
+		}else{
+			if(dataSelected.isParent()){
+				dataSelected.toggleExpanded();
+				requestRefreshList();
+			}else{
+				actionCustomAtEntry(dataSelected);
+			}
 		}
 		
 	}
 	
+	protected abstract void actionCustomAtEntry(DialogListEntryData<T> dataSelected);
+
 	protected void updateAllParts(){
 		updateTextInfo();
 		

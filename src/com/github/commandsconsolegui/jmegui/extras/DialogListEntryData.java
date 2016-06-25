@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.export.Savable;
@@ -50,6 +51,16 @@ import com.jme3.export.Savable;
  * @param <T> is the action class for buttons
  */
 public class DialogListEntryData<T> implements Savable{
+	protected static String strLastUId = "0";
+	
+	private String	strUId;
+	
+	public DialogListEntryData() {
+		this.strUId = DialogListEntryData.strLastUId = (MiscI.i().getNextUniqueId(strLastUId));
+	}
+	
+	
+	
 //	public static enum EEntryType{
 //		NormalData,
 //		BlankSeparator,
@@ -115,7 +126,7 @@ public class DialogListEntryData<T> implements Savable{
 	@Override
 	public String toString() {
 //		return iKey+","+strText+","+objRef;
-		return strText;
+		return "UId="+getUId()+","+strText;
 	}
 	
 //	public void setCfg(DialogListEntryData data) {
@@ -186,6 +197,8 @@ public class DialogListEntryData<T> implements Savable{
 	}
 	
 	public boolean toggleExpanded() {
+//		if(!isParent())return false;
+		
 		this.bTreeExpanded = !this.bTreeExpanded;
 		return this.bTreeExpanded; 
 	}
@@ -197,4 +210,12 @@ public class DialogListEntryData<T> implements Savable{
 	public ArrayList<DialogListEntryData<T>> getChildrenCopy() {
 		return new ArrayList<DialogListEntryData<T>>(aChildList);
 	}
+
+	public String getUId() {
+		return strUId;
+	}
+
+//	public void setUId(String strUId) {
+//		this.strUId = strUId;
+//	}
 }

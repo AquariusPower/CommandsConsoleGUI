@@ -86,6 +86,7 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 	protected HashMap<String, LemurDialogGUIStateAbs<T>> hmModals = new HashMap<String, LemurDialogGUIStateAbs<T>>();
 	protected Long	lClickActionMilis;
 //	private DialogListEntryData<T>	dataSelectRequested;
+	private Label	lblSelectedEntryStatus;
 	
 	@Override
 	public Container getContainerMain(){
@@ -247,6 +248,10 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 //		cntrEntryCfg = new Container(new BorderLayout(), strStyle);
 //		cntrEntryCfg.setName(getId()+"_EntryConfig");
 //		getSouthContainer().addChild(cntrEntryCfg, Bor)
+		
+		// status line, about the currently selected entry on the list
+		lblSelectedEntryStatus = new Label("Selected Entry Status",strStyle);
+		getSouthContainer().addChild(lblSelectedEntryStatus, BorderLayout.Position.North);
 		
 		// mainly used as a list filter
 		setIntputField(new TextField("",strStyle));
@@ -566,6 +571,9 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 						selectRelativeEntry(vlVisibleEntriesList.size()); //uses overflow protection
 //						if(bControl)selectEntry(vlEntriesList.get(vlEntriesList.size()-1));
 						break;
+					case KeyInput.KEY_DELETE:
+						if(bControl)getInputField().setText("");
+						break;
 					case KeyInput.KEY_NUMPADENTER:
 					case KeyInput.KEY_RETURN:
 						actionSubmit();
@@ -585,6 +593,7 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 		
 		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_HOME,KeyAction.CONTROL_DOWN), actSimpleActions);
 		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_END,KeyAction.CONTROL_DOWN), actSimpleActions);
+		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_DELETE,KeyAction.CONTROL_DOWN), actSimpleActions);
 		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_PGUP), actSimpleActions);
 		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_PGDN), actSimpleActions);
 		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_RETURN), actSimpleActions);
@@ -676,6 +685,15 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 		if(i>getMaxIndex())i=getMaxIndex();
 		selectionModel.setSelection(i);
 //		dleLastSelected = vlEntriesList.get(i);
+		
+		DialogListEntryData<T> dle = vlVisibleEntriesList.get(i);
+		DialogListEntryData<T> dleParent = dle.getParent();
+		lblSelectedEntryStatus.setText(""
+			+"i="+i+", "
+			+"uid="+dle.getUId()+", "
+			+"puid="+(dleParent==null?"(ROOT)":dleParent.getUId())+", "
+			+"'"+dle.getText()+"'"
+		);
 	}
 	public void selectEntry(DialogListEntryData<T> dataSelectRequested) {
 //		this.dataSelectRequested = data;
@@ -773,6 +791,8 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 			CallQueueI.i().appendCall(new Callable<Boolean>() {
 				@Override
 				public Boolean call() throws Exception {
+					if(!vlVisibleEntriesList.contains(dataAbove))return true;
+					
 					if(getSelectedEntryData().equals(dataAbove)){
 						selectRelativeEntry(+1);
 						return true;

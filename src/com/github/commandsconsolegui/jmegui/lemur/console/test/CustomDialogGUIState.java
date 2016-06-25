@@ -296,9 +296,23 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 		boolean bCommandWorked = false;
 		
-		if(cd.checkCmdValidity(this,scfAddEntry,null)){
+		if(cd.checkCmdValidity(this,scfAddEntry,"[strText] [strParenUId]")){
 			String strText = cd.getCurrentCommandLine().paramString(1);
-			addEntryQuick(strText);
+			String strParentUId = cd.getCurrentCommandLine().paramString(2);
+			
+			DialogListEntryData<T> dleParent = null;
+			for(DialogListEntryData<T> dle:adleCompleteEntriesList){
+				if(dle.getUId().equalsIgnoreCase(strParentUId)){
+					dleParent=dle;
+					break;
+				}
+			}
+			
+			DialogListEntryData<T> dleNew = addEntryQuick(strText);
+			if(dleParent!=null){
+				dleNew.setParent(dleParent);
+			}
+			
 			bCommandWorked = true;
 		}else
 		{
@@ -313,7 +327,7 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 	public boolean execTextDoubleClickActionFor(DialogListEntryData<T> data) {
 		if(isOptionSelectionMode())throw new PrerequisitesNotMetException("Option mode should not reach this method.");
 		
-		openModalDialog(EDiag.Cfg.toString(),data,(T)cmdCfg);
+		openModalDialog(EDiag.Cfg.toString(), data, (T)cmdCfg);
 //		data.getActionTextDoubleClick().execute(null);
 		
 		return true;
@@ -328,5 +342,10 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 		}
 		
 		return true;
+	}
+
+	@Override
+	protected void actionCustomAtEntry(DialogListEntryData<T> dataSelected) {
+		openModalDialog(EDiag.Cfg.toString(), dataSelected, (T)cmdCfg);
 	}
 }
