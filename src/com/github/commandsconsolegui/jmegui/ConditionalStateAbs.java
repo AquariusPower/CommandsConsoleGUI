@@ -147,8 +147,8 @@ public abstract class ConditionalStateAbs implements Savable{
 	 * see {@link ICfgParm}
 	 */
 	public static class CfgParm implements ICfgParm{
-		Application app;
-		String strId;
+		protected Application app;
+		protected String strId;
 		public CfgParm(Application app, String strId) {
 			super();
 			this.app = app;

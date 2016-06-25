@@ -47,6 +47,7 @@ import com.jme3.export.Savable;
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
+ * @param <T> is the action class for buttons
  */
 public class DialogListEntryData<T> implements Savable{
 //	public static enum EEntryType{
@@ -63,9 +64,9 @@ public class DialogListEntryData<T> implements Savable{
 	HashMap<String,T> hmCustomButtonsActions = new HashMap<String,T>();
 	T	actionTextDoubleClick;
 	
-	int iKey;
+//	int iKey;
 	String strText;
-	Object objRef;
+//	Object objRef;
 	
 	public DialogListEntryData<T> addCustomButtonAction(String strLabelTextId, T action){
 		hmCustomButtonsActions.put(strLabelTextId,action);
@@ -81,42 +82,47 @@ public class DialogListEntryData<T> implements Savable{
 		return hmCustomButtonsActions.entrySet().toArray(new Entry[0]);
 	}
 	
-	public int getKey() {
-		return iKey;
-	}
-	public DialogListEntryData<T> setKey(int iKey) {
-		this.iKey = iKey;
-		return this;
-	}
+//	public int getKey() {
+//		return iKey;
+//	}
+//	public DialogListEntryData<T> setKey(int iKey) {
+//		this.iKey = iKey;
+//		return this;
+//	}
 	public String getText() {
 		return strText;
 	}
 	public T getActionTextDoubleClick(){
 		return this.actionTextDoubleClick;
 	}
+	public DialogListEntryData<T> updateTextTo(String strText) {
+		this.strText=strText;
+		return this;
+	}
 	public DialogListEntryData<T> setText(String strText, T actionDoubleClick) {
 		this.strText = strText;
 		this.actionTextDoubleClick=actionDoubleClick;
 		return this;
 	}
-	public Object getRef() {
-		return objRef;
-	}
-	public DialogListEntryData<T> setRef(Object objRef) {
-		this.objRef = objRef;
-		return this;
-	}
+//	public Object getRef() {
+//		return objRef;
+//	}
+//	public DialogListEntryData<T> setRef(Object objRef) {
+//		this.objRef = objRef;
+//		return this;
+//	}
 	
 	@Override
 	public String toString() {
-		return iKey+","+strText+","+objRef;
+//		return iKey+","+strText+","+objRef;
+		return strText;
 	}
 	
-	public void setCfg(DialogListEntryData data) {
-		this.iKey = data.iKey;
-		this.strText = data.strText;
-		this.objRef = data.objRef;
-	}
+//	public void setCfg(DialogListEntryData data) {
+////		this.iKey = data.iKey;
+//		this.strText = data.strText;
+////		this.objRef = data.objRef;
+//	}
 	
 	/**
 	 * TODO should be a more refined string

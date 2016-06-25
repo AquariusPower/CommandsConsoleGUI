@@ -42,13 +42,15 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.input.KeyInput;
 import com.jme3.system.AppSettings;
+import com.simsilica.lemur.Button;
+import com.simsilica.lemur.Command;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class CustomTestI extends SimpleConsoleAppAbs implements IReflexFillCfg{
+public class CustomTestI<T extends Command<Button>> extends SimpleConsoleAppAbs implements IReflexFillCfg{
 	private static CustomTestI instance = new CustomTestI();
 	public static CustomTestI i(){return instance;}
 	
@@ -75,9 +77,11 @@ public class CustomTestI extends SimpleConsoleAppAbs implements IReflexFillCfg{
 //	private StringVarField svfOptionSelectedDialog2 = new StringVarField(this,"");
 	
 	// generic dialog
-	private CustomDialogGUIState	diagCfg;
+	private CustomDialogGUIState<T>	diagCfg;
 
-	private CustomDialogGUIState	diag;
+	private CustomDialogGUIState<T>	diag;
+
+	private CustomDialogGUIState<T>	diagConfirm;
 
 //	private String	strOptionSelected;
 	
@@ -99,31 +103,32 @@ public class CustomTestI extends SimpleConsoleAppAbs implements IReflexFillCfg{
 	
 	@Override
 	public void simpleInitApp() {
+		//////////////////////// GLOBALS
 		// the commands pipe
 		cd = GlobalCommandsDelegatorI.iGlobal().set(new CustomCommands());
 		
 		// the conole UI
 		GlobalConsoleGuiI.iGlobal().set(ConsoleLemurStateI.i());
 		ConsoleLemurStateI.i().configure(new ConsoleLemurStateI.CfgParm(
-			null, false, KeyInput.KEY_F10, getGuiNode()));
+				null, false, KeyInput.KEY_F10, getGuiNode()));
 		
-		// this dialog, after closed, may have diag2.getOptionSelected() available
-		diagCfg = new CustomDialogGUIState(CustomDialogGUIState.EDiag.Cfg).configure(
-			new CustomDialogGUIState.CfgParm(
-				true, false, getGuiNode(), 0.5f, 0.6f, null, null, null
-			)
-		);
+		//////////////////////// super init depends on globals
+		super.simpleInitApp(); // basic initializations
+		
+		//////////////////////// config this test
 		
 		// test dialogs
-		diag = new CustomDialogGUIState(CustomDialogGUIState.EDiag.List).configure(
-			new CustomDialogGUIState.CfgParm(
-				false, false, getGuiNode(), null, null, null, null, null
-			)
-		);
-		diag.configModalDialog(diagCfg);
+		diagCfg = new CustomDialogGUIState<T>(CustomDialogGUIState.EDiag.Cfg).configure(
+			new CustomDialogGUIState.CfgParm<T>(true, false, 0.6f, 0.5f, null, null));//, null));
 		
-		// other basic initializations
-		super.simpleInitApp();
+		diagConfirm = new CustomDialogGUIState<T>(CustomDialogGUIState.EDiag.Confirm).configure(
+			new CustomDialogGUIState.CfgParm<T>(true, false, 500f, 300f, null, null));//, diag));
+		
+		diag = new CustomDialogGUIState<T>(CustomDialogGUIState.EDiag.List).configure(
+			new CustomDialogGUIState.CfgParm<T>(false, false, null, null, null, null))//, null))
+			.addModalDialog(diagCfg)
+			.addModalDialog(diagConfirm);
+		
 	}
 	
 	/**
@@ -135,22 +140,21 @@ public class CustomTestI extends SimpleConsoleAppAbs implements IReflexFillCfg{
 	}
 	
 	public static void main( String... args ) {
-		CustomTestI main = (CustomTestI) GlobalAppRefI.iGlobal().set(
-			CustomTestI.i());
+		GlobalAppRefI.iGlobal().set(CustomTestI.i());
 		
-		if(main.bHideSettings){
+		if(CustomTestI.i().bHideSettings){
 			AppSettings as = new AppSettings(true);
 			as.setResizable(true);
 			as.setWidth(1024);
 			as.setHeight(768);
 			//as.setFrameRate(30); //TODO are we unable to change this on-the-fly after starting the application?
-			main.setSettings(as);
-			main.setShowSettings(false);
+			CustomTestI.i().setSettings(as);
+			CustomTestI.i().setShowSettings(false);
 		}
 		
 		SingleAppInstanceI.i().configureOptionalAtMainMethod();
 		
-		main.start();
+		CustomTestI.i().start();
 	}
 
 	@Override

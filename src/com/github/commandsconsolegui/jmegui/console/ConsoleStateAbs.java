@@ -52,6 +52,7 @@ import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI.CompositeControl;
+import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 //import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersState;
 import com.github.commandsconsolegui.misc.AutoCompleteI;
@@ -93,7 +94,7 @@ import com.jme3.texture.Texture2D;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements IConsoleUI, IWorkAroundBugFix {
+public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implements IConsoleUI, IWorkAroundBugFix {
 //	protected FpsLimiterState fpslState = new FpsLimiterState();
 	
 //	ReattachSafelyState rss;
@@ -380,24 +381,33 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 //	protected void configure(String strCmdIdentifier,	boolean bIgnorePrefixAndSuffix) {
 //		throw new NullPointerException("deprecated!!!");
 //	}
-	public static class CfgParm implements ICfgParm{
-		String strUIId;
-		boolean bIgnorePrefixAndSuffix;
-		int iToggleConsoleKey;
-		Node nodeGUI;
-		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix,
-				int iToggleConsoleKey, Node nodeGUI) {
-			super();
-			this.strUIId = strUIId;
-			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
+	
+//	public static class CfgParm implements ICfgParm{
+//		String strUIId;
+//		boolean bIgnorePrefixAndSuffix;
+//		int iToggleConsoleKey;
+//		Node nodeGUI;
+//		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix,
+//				int iToggleConsoleKey, Node nodeGUI) {
+//			super();
+//			this.strUIId = strUIId;
+//			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
+//			this.iToggleConsoleKey = iToggleConsoleKey;
+//			this.nodeGUI = nodeGUI;
+//		}
+//	}
+	public static class CfgParm<T> extends BaseDialogStateAbs.CfgParm<T>{
+		protected int iToggleConsoleKey;
+		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI, int iToggleConsoleKey) {
+			super(false, strUIId, bIgnorePrefixAndSuffix, nodeGUI);//, null);
 			this.iToggleConsoleKey = iToggleConsoleKey;
-			this.nodeGUI = nodeGUI;
 		}
-	}
+	}	
 	@Override
-	public ConsoleStateAbs configure(ICfgParm icfg) {
+	public ConsoleStateAbs<T> configure(ICfgParm icfg) {
 //	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,int iToggleConsoleKey, Node nodeGUI) {
-		CfgParm cfg = (CfgParm)icfg;
+		@SuppressWarnings("unchecked")
+		CfgParm<T> cfg = (CfgParm<T>)icfg;
 		
 		/**
 		 * The console is a special dialog.
@@ -406,8 +416,9 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 		 */
 		boolean bConsoleDialogInitiallyEnabled=true;
 		
-		super.configure(new BaseDialogStateAbs.CfgParm(
-			cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.nodeGUI, bConsoleDialogInitiallyEnabled, null));
+//		super.configure(new BaseDialogStateAbs.CfgParm(
+//			false, cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.nodeGUI, bConsoleDialogInitiallyEnabled, null));
+		super.configure(cfg);
 		
 //		rss = new ReattachSafelyState();
 //		rss.configure(new ReattachSafelyState.CfgParm(this));
@@ -2590,6 +2601,36 @@ public abstract class ConsoleStateAbs extends BaseDialogStateAbs implements ICon
 	
 	public Node getStatsAndControls() {
 		return ctnrStatsAndControls;
+	}
+
+	@Override
+	public void clearSelection() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void updateInputField() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public DialogListEntryData<T> getSelectedEntryData() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected void updateList() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void updateTextInfo() {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

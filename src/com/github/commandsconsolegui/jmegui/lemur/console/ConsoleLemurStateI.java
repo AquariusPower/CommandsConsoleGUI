@@ -39,6 +39,7 @@ import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI.CompositeControl;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
+import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI.EBugFix;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.font.BitmapCharacter;
@@ -80,7 +81,7 @@ import com.simsilica.lemur.style.Styles;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleLemurStateI extends ConsoleStateAbs{
+public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateAbs<T>{
 	protected static ConsoleLemurStateI instance=new ConsoleLemurStateI();
 	public static ConsoleLemurStateI i(){return instance;}
 	
@@ -126,29 +127,44 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 		return super.initOrUndo();
 	}
 	
-	public static class CfgParm implements ICfgParm{
-		String strUIId;
-		boolean bIgnorePrefixAndSuffix;
-		int iToggleConsoleKey;
-		Node nodeGUI;
-		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix,
-				int iToggleConsoleKey, Node nodeGUI) {
-			super();
-			this.strUIId = strUIId;
-			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
-			this.iToggleConsoleKey = iToggleConsoleKey;
-			this.nodeGUI = nodeGUI;
+//	public static class CfgParm implements ICfgParm{
+//		String strUIId;
+//		boolean bIgnorePrefixAndSuffix;
+//		int iToggleConsoleKey;
+//		Node nodeGUI;
+//		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix,
+//				int iToggleConsoleKey, Node nodeGUI) {
+//			super();
+//			this.strUIId = strUIId;
+//			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
+//			this.iToggleConsoleKey = iToggleConsoleKey;
+//			this.nodeGUI = nodeGUI;
+//		}
+//	}
+	public static class CfgParm<T> extends ConsoleStateAbs.CfgParm<T>{
+		public CfgParm(
+			String strUIId, 
+			boolean bIgnorePrefixAndSuffix,
+			int iToggleConsoleKey,
+			Node nodeGUI
+		) {
+			super(
+				strUIId==null ? strUIId=ConsoleLemurStateI.class.getSimpleName() : strUIId, 
+				bIgnorePrefixAndSuffix, nodeGUI, iToggleConsoleKey);
+			super.bInitiallyEnabled=true; // the console must be initially enabled to startup properly
 		}
 	}
 	@Override
-	public ConsoleLemurStateI configure(ICfgParm icfg) {
-		CfgParm cfg = (CfgParm)icfg;
+	public ConsoleLemurStateI<T> configure(ICfgParm icfg) {
+		@SuppressWarnings("unchecked")
+		CfgParm<T> cfg = (CfgParm<T>)icfg;
 		
 //		super.icfgOfInstance = icfg;
 		
-		if(cfg.strUIId==null)cfg.strUIId=ConsoleLemurStateI.class.getSimpleName();
-		super.configure(new ConsoleStateAbs.CfgParm(
-			cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.iToggleConsoleKey, cfg.nodeGUI));
+//		super.configure(new ConsoleStateAbs.CfgParm(
+//			cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.iToggleConsoleKey, cfg.nodeGUI));
+		super.configure(cfg);
+//		btgState.set
 		
 		GuiGlobals.initialize(GlobalAppRefI.i());
 		
@@ -220,8 +236,10 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 //			attrs.set("background", new QuadBackgroundComponent(new ColorRGBA(0,1,0,1)));
 		
 		attrs = styles.getSelector(Button.ELEMENT_ID, STYLE_CONSOLE);
-		attrs.set("color", new ColorRGBA(0,1,0.5f,1));
-		clBg = new ColorRGBA(0,0,0.125f,1);
+//		attrs.set("color", new ColorRGBA(0,1,0.5f,1));
+//		clBg = new ColorRGBA(0,0,0.125f,1);
+		attrs.set("color", ColorRGBA.Cyan.clone());
+		clBg = new ColorRGBA(0,0.25f,0,1);
 		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
 		attrs = styles.getSelector(TextField.ELEMENT_ID, STYLE_CONSOLE);
@@ -1029,9 +1047,4 @@ public class ConsoleLemurStateI extends ConsoleStateAbs{
 		return cc.cmdFoundReturnStatus(bCommandWorked);
 	}
 
-//	@Override
-//	public void setAnswerFromModalChild(Object... aobj) {
-//		// TODO Auto-generated method stub
-//		
-//	}
 }

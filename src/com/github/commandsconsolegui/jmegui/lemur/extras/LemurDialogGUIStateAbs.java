@@ -28,17 +28,16 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.github.commandsconsolegui.jmegui.lemur.extras;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.concurrent.Callable;
 
+import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
-import com.github.commandsconsolegui.jmegui.extras.InteractionDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
@@ -65,17 +64,17 @@ import com.simsilica.lemur.list.SelectionModel;
 
 /**
 * 
-* More info at {@link InteractionDialogStateAbs}
+* More info at {@link BaseDialogStateAbs}
 *	TODO implement docking dialogs, a small icon will be created at app window edges
 * 
 * @author AquariusPower <https://github.com/AquariusPower>
 *
 */
-public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAbs<T> {
+public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 	protected Label	lblTitle;
 	protected Label	lblTextInfo;
 	protected ListBox<DialogListEntryData<T>>	lstbxEntriesToSelect;
-	protected VersionedList<DialogListEntryData<T>>	vlEntriesList = new VersionedList<DialogListEntryData<T>>();
+	protected VersionedList<DialogListEntryData<T>>	vlVisibleEntriesList = new VersionedList<DialogListEntryData<T>>();
 	protected int	iVisibleRows;
 	protected Integer	iEntryHeightPixels; //TODO this is init is failing why? = 20; 
 	protected Vector3f	v3fEntryListSize;
@@ -84,19 +83,20 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 	protected BoolTogglerCmdField btgAutoScroll = new BoolTogglerCmdField(this, true).setCallNothingOnChange();
 //	protected ButtonCommand	bc;
 	protected boolean	bRefreshScroll;
-	protected ArrayList<DialogListEntryData<T>>	adleFullList = new ArrayList<DialogListEntryData<T>>();
-	private ArrayList<DialogListEntryData<T>>	adleTmp;
+	protected HashMap<String, LemurDialogGUIStateAbs<T>> hmModals = new HashMap<String, LemurDialogGUIStateAbs<T>>();
+	protected Long	lClickActionMilis;
+//	private DialogListEntryData<T>	dataSelectRequested;
 	
 	@Override
 	public Container getContainerMain(){
 		return (Container)super.getContainerMain();
 	}
 	
-	public static class CfgParm extends InteractionDialogStateAbs.CfgParm{
-		Float fDialogHeightPercentOfAppWindow;
-		Float fDialogWidthPercentOfAppWindow;
-		Float fInfoHeightPercentOfDialog;
-		Integer iEntryHeightPixels;
+	public static class CfgParm<T> extends BaseDialogStateAbs.CfgParm<T>{
+		protected Float fDialogHeightPercentOfAppWindow;
+		protected Float fDialogWidthPercentOfAppWindow;
+		protected Float fInfoHeightPercentOfDialog;
+		protected Integer iEntryHeightPixels;
 //		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI) {
 //			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI);
 //		}
@@ -111,11 +111,11 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 		 * @param iEntryHeightPixels
 		 */
 		public CfgParm(boolean	bOptionSelectionMode,String strUIId, boolean bIgnorePrefixAndSuffix,
-				Node nodeGUI, Float fDialogHeightPercentOfAppWindow,
-				Float fDialogWidthPercentOfAppWindow, Float fInfoHeightPercentOfDialog,
-				Integer iEntryHeightPixels, BaseDialogStateAbs modalParent)
+				Node nodeGUI, Float fDialogWidthPercentOfAppWindow,
+				Float fDialogHeightPercentOfAppWindow, Float fInfoHeightPercentOfDialog,
+				Integer iEntryHeightPixels)//, BaseDialogStateAbs<T> modalParent)
 		{
-			super(bOptionSelectionMode,strUIId, bIgnorePrefixAndSuffix, nodeGUI, modalParent);
+			super(bOptionSelectionMode,strUIId, bIgnorePrefixAndSuffix, nodeGUI);//, modalParent);
 			
 			this.fDialogHeightPercentOfAppWindow = fDialogHeightPercentOfAppWindow;
 			this.fDialogWidthPercentOfAppWindow = fDialogWidthPercentOfAppWindow;
@@ -125,7 +125,8 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 	}
 	@Override
 	public LemurDialogGUIStateAbs<T> configure(ICfgParm icfg) {
-		CfgParm cfg = (CfgParm)icfg;
+		@SuppressWarnings("unchecked")
+		CfgParm<T> cfg = (CfgParm<T>)icfg;
 		
 //		DialogMouseCursorListenerI.i().configure(null);
 		
@@ -145,7 +146,7 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 		return storeCfgAndReturnSelf(icfg);
 	}
 	
-	public void selectAndChoseOption(DialogListEntryData data){
+	public void selectAndChoseOption(DialogListEntryData<T> data){
 		if(!isOptionSelectionMode())throw new PrerequisitesNotMetException("not option mode");
 		if(data==null)throw new PrerequisitesNotMetException("invalid null data");
 		
@@ -174,7 +175,8 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 	 */
 	@Override
 	protected boolean initGUI(){
-		CfgParm cfg = (CfgParm)getCfg();
+		@SuppressWarnings("unchecked")
+		CfgParm<T> cfg = (CfgParm<T>)getCfg();
 		
 		String strStyle = ConsoleLemurStateI.i().STYLE_CONSOLE; //TODO make it custom
 		
@@ -188,27 +190,16 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 		LemurFocusHelperStateI.i().prepareDialogToBeFocused(this);
 		CursorEventControl.addListenersToSpatial(getContainerMain(), DialogMouseCursorListenerI.i());
 		
-//		Vector3f v3fDiagWindowSize = v3fApplicationWindowSize.mult(fDialogPerc);
 		Vector3f v3fDiagWindowSize = new Vector3f(v3fApplicationWindowSize);
 		v3fDiagWindowSize.y = sizePercOrPixels(v3fDiagWindowSize.y,cfg.fDialogHeightPercentOfAppWindow);
-//		if(Float.compare(cfg.fDialogHeightPercentOfAppWindow, 1.0f)<=0){
-//			v3fDiagWindowSize.y *= cfg.fDialogHeightPercentOfAppWindow;
-//		}else{ // >1.0f is in pixels
-//			v3fDiagWindowSize.y = cfg.fDialogHeightPercentOfAppWindow;
-//		}
 		v3fDiagWindowSize.x = sizePercOrPixels(v3fDiagWindowSize.x,cfg.fDialogWidthPercentOfAppWindow);
-//		if(Float.compare(v3fDiagWindowSize.x, 1.0f)<=0){
-//			v3fDiagWindowSize.x *= cfg.fDialogWidthPercentOfAppWindow;
-//		}else{
-//			v3fDiagWindowSize.x = cfg.fDialogWidthPercentOfAppWindow;
-//		}
 		getContainerMain().setPreferredSize(v3fDiagWindowSize);
 		
-		///////////////////////// NORTH (info/help)
+		///////////////////////// NORTH (title + info/help)
 		cntrNorth = new Container(new BorderLayout(), strStyle);
 		getNorthContainer().setName(getId()+"_NorthContainer");
 		Vector3f v3fNorthSize = v3fDiagWindowSize.clone();
-		float fInfoHeightPixels = sizePercOrPixels(v3fNorthSize.y, cfg.fInfoHeightPercentOfDialog);
+		float fInfoHeightPixels = sizePercOrPixels(v3fDiagWindowSize.y, cfg.fInfoHeightPercentOfDialog);
 		v3fNorthSize.y = fInfoHeightPixels;
 		getNorthContainer().setPreferredSize(v3fNorthSize);
 		
@@ -244,7 +235,7 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 		getContainerMain().addChild(lstbxEntriesToSelect, BorderLayout.Position.Center);
 		
 //		vlstrEntriesList.add("(Empty list)");
-		lstbxEntriesToSelect.setModel((VersionedList<DialogListEntryData<T>>)vlEntriesList);
+		lstbxEntriesToSelect.setModel((VersionedList<DialogListEntryData<T>>)vlVisibleEntriesList);
 		
 		iEntryHeightPixels = cfg.iEntryHeightPixels;
 		
@@ -283,11 +274,6 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 	
 	protected Container getSouthContainer() {
 		return (Container)cntrSouth;
-	}
-	
-	@Override
-	public void clearSelection() {
-		selectionModel.setSelection(-1); //clear selection
 	}
 	
 //	@Override
@@ -329,10 +315,10 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 	}
 	
 	@Override
-	public DialogListEntryData getSelectedEntryData() {
+	public DialogListEntryData<T> getSelectedEntryData() {
 		Integer iSel = selectionModel.getSelection();
 		if(iSel==null)return null;
-		return	vlEntriesList.get(iSel);
+		return	vlVisibleEntriesList.get(iSel);
 	}
 	
 	/**
@@ -340,13 +326,13 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 	 */
 	@Override
 	protected void updateList(){
-		updateList(adleFullList);
+		updateList(adleCompleteEntriesList);
 		
 		// update visible rows
 		updateEntryHeight();
 		iVisibleRows = (int) (v3fEntryListSize.y/iEntryHeightPixels);
 		lstbxEntriesToSelect.setVisibleItems(iVisibleRows);
-		if(vlEntriesList.size()>0){
+		if(vlVisibleEntriesList.size()>0){
 			if(getSelectedEntryData()==null){
 				selectRelativeEntry(0);
 			}
@@ -362,8 +348,9 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 	 * override ex. to avoid reseting
 	 */
 	protected void resetList(){
-		vlEntriesList.clear();
-		selectionModel.setSelection(-1);
+		vlVisibleEntriesList.clear();
+		clearSelection();
+//		selectionModel.setSelection(-1);
 	}
 	
 	/**
@@ -372,48 +359,40 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 	 * @param aValueList
 	 */
 	protected void updateList(ArrayList<DialogListEntryData<T>> adle){
+		DialogListEntryData<T> dleLastSelectedTmp = dleLastSelected;
+		
 		resetList();
 		
 		sortEntries();
-//		Collections.sort(adle,new Comparator<DialogListEntryData<T>>(){
-//			@Override
-//			public int compare(DialogListEntryData<T> d1, DialogListEntryData<T> d2) {
-//				if(d1.getParent()==null && d2.getParent()==null){
-//					return d1.getText().compareTo(d2.getText());
-//				}
-//				
-//				if(d1.getParent().equals(d2.getParent())){
-//					
-//				}
-//				
-//				int i = d1.getText().compareTo(d2.getText());
-//				if(i!=0)return i;
-//				return 0;
-//			}
-//		});
 		
 		for(DialogListEntryData<T> dle:adle){
 			if(!strLastFilter.isEmpty()){
 				if(dle.getText().toLowerCase().contains(strLastFilter)){
-					vlEntriesList.add(dle);
+					vlVisibleEntriesList.add(dle);
 				}
 			}else{
 				if(dle.getParent()==null){
-					vlEntriesList.add(dle); //root entries
+					vlVisibleEntriesList.add(dle); //root entries
 				}else{
 					if(checkAllParentTreesExpanded(dle)){
-						vlEntriesList.add(dle);
+						vlVisibleEntriesList.add(dle);
 					}
 				}
 			}
 		}
 		
-		if(dleLastSelected!=null){
-			int i = getSelectedIndex();
-			if(i>-1)selectionModel.setSelection(i);
+		if(dleLastSelectedTmp!=null){
+//			int i = getSelectedIndex();
+			int i = vlVisibleEntriesList.indexOf(dleLastSelectedTmp);
+			if(i>=0)setSelectedEntryIndex(i);//selectionModel.setSelection(i);
 		}
 	}
 	
+	/**
+	 * for entry visibility
+	 * @param dle
+	 * @return
+	 */
 	protected boolean checkAllParentTreesExpanded(DialogListEntryData<T> dle){
 		DialogListEntryData<T> dleParent = dle.getParent();
 		while(dleParent!=null){
@@ -423,62 +402,37 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 		return true;
 	}
 	
+	/**
+	 * for proper sorting
+	 * @param dle
+	 */
 	protected void recursiveAddEntries(DialogListEntryData<T> dle){
 		adleTmp.remove(dle);
-		adleFullList.add(dle);
+		adleCompleteEntriesList.add(dle);
 		if(dle.isParent()){
 			for(DialogListEntryData<T> dleChild:dle.getChildrenCopy()){
+				if(!dleChild.getParent().equals(dle)){
+					throw new PrerequisitesNotMetException("invalid parent", dle, dleChild);
+				}
 				recursiveAddEntries(dleChild);
 			}
 		}
 	}
 	
 	protected void sortEntries(){
-		adleTmp = new ArrayList<DialogListEntryData<T>>(adleFullList);
-		adleFullList.clear();
+		adleTmp = new ArrayList<DialogListEntryData<T>>(adleCompleteEntriesList);
+		adleCompleteEntriesList.clear();
 		
 		for(DialogListEntryData<T> dle:new ArrayList<DialogListEntryData<T>>(adleTmp)){
 			if(dle.getParent()==null){ //root ones
 				recursiveAddEntries(dle);
 			}
 		}
-		
-//		for(DialogListEntryData<T> dle:adleRootList){
-//			for(DialogListEntryData<T> dleIn:new ArrayList<DialogListEntryData<T>>(adleTmp)){
-//				if(dleIn.getParent().equals(dle)){
-//					
-//				}
-//			}
-//		}
-		
-//		for(DialogListEntryData<T> dle:new ArrayList<DialogListEntryData<T>>(adleTmp)){
-//			int i = adleFullList.size();
-//			
-//			/**
-//			 * sort
-//			 */
-//			if(dle.getParent()!=null){
-//				DialogListEntryData<T> dleAfterMe = null;
-//				for(DialogListEntryData<T> dleChk:adleFullList){
-//					if(dle.getParent().equals(dleChk)){ //the very parent
-//						dleAfterMe = dleChk;
-//					}
-//					if(dle.getParent().equals(dleChk.getParent())){ //a brother
-//						dleAfterMe = dleChk;
-//					}
-//				}
-//				
-//				i = adleFullList.indexOf(dleAfterMe);
-//				if(i==-1)throw new PrerequisitesNotMetException("last parent missing?", dle, dleAfterMe);
-//				i++;
-//			}
-//			
-//			adleFullList.add(i,dle);
-//		}
 	}
 	
 	protected void addEntry(DialogListEntryData<T> dle) {
-		adleFullList.add(dle);
+		if(dle==null)throw new PrerequisitesNotMetException("data cant be null!");
+		adleCompleteEntriesList.add(dle);
 	}
 
 	/**
@@ -486,7 +440,7 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 	 * @return -1 if none
 	 */
 	public int getSelectedIndex(){
-		return vlEntriesList.indexOf(dleLastSelected);
+		return vlVisibleEntriesList.indexOf(dleLastSelected);
 	}
 	
 	protected void autoScroll(){
@@ -518,8 +472,8 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 		if(!super.updateOrUndo(tpf))return false;
 		
 		if(bRefreshScroll)autoScroll();
-//		if(btgAutoScroll.b())autoScroll();
-//		multiClickAction();
+		
+//		updateSelectEntryRequested();
 		
 		if(!getInputText().equalsIgnoreCase(super.strLastFilter)){
 			super.strLastFilter=getInputText();
@@ -551,13 +505,13 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 	 */
 	protected int getMaxIndex(){
 //		return lstbxEntriesToSelect.getVisibleItems()
-		return vlEntriesList.size()-1;
+		return vlVisibleEntriesList.size()-1;
 //			+( ((int)lstbxEntriesToSelect.getSlider().getModel().getMaximum()) -1);
 	}
 	
 	protected int getTopEntryIndex(){
 		int iVisibleItems = lstbxEntriesToSelect.getVisibleItems();
-		int iTotEntries = vlEntriesList.size();
+		int iTotEntries = vlVisibleEntriesList.size();
 		if(iVisibleItems>iTotEntries){
 			return 0; //is not overflowing the max visible items amount
 		}
@@ -576,7 +530,7 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 		//lstbxEntriesToSelect.getSlider().getModel().getValue();
 //		lstbxEntriesToSelect.getSlider().getModel().setValue(getMaxIndex()-iIndex);
 		lstbxEntriesToSelect.getSlider().getModel().setValue(
-			vlEntriesList.size()-lstbxEntriesToSelect.getVisibleItems()-iIndex);
+			vlVisibleEntriesList.size()-lstbxEntriesToSelect.getVisibleItems()-iIndex);
 		
 	}
 	
@@ -605,11 +559,11 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 						selectRelativeEntry(lstbxEntriesToSelect.getVisibleItems());
 						break;
 					case KeyInput.KEY_HOME:
-						selectRelativeEntry(-vlEntriesList.size()); //uses underflow protection
+						selectRelativeEntry(-vlVisibleEntriesList.size()); //uses underflow protection
 //						if(bControl)selectEntry(vlEntriesList.get(0));
 						break;
 					case KeyInput.KEY_END:
-						selectRelativeEntry(vlEntriesList.size()); //uses overflow protection
+						selectRelativeEntry(vlVisibleEntriesList.size()); //uses overflow protection
 //						if(bControl)selectEntry(vlEntriesList.get(vlEntriesList.size()-1));
 						break;
 					case KeyInput.KEY_NUMPADENTER:
@@ -666,98 +620,35 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 		return getInputField().getText();
 	}
 	
-	protected HashMap<String, LemurDialogGUIStateAbs<T>> hmModals = new HashMap<String, LemurDialogGUIStateAbs<T>>();
-	protected Long	lClickActionMilis;
-//	private MouseCursorButtonData	buttonData;
-	
-//	public static class ModalDiag{
-//		EModalDiagType e;
-//		LemurDialogGUIStateAbs diagModal;
-//		public ModalDiag(EModalDiagType e, LemurDialogGUIStateAbs diagModal) {
-//			super();
-//			this.e = e;
-//			this.diagModal = diagModal;
-//		}
-//	}
-	
-	public void configModalDialog(LemurDialogGUIStateAbs diagModal){
-		diagModal.setModalParent(this);
+	@SuppressWarnings("unchecked")
+	public <S extends LemurDialogGUIStateAbs<T>> S addModalDialog(LemurDialogGUIStateAbs<T> diagModal){
+		diagModal.setDiagParent(this);
 		hmModals.put(diagModal.getId(),diagModal);
+		return (S)this;
 	}
 	
-//	/**
-//	 * this will override older request if set fast enough
-//	 * @param e
-//	 */
-//	@Deprecated
-//	protected void setMultiClickAction(MouseCursorButtonData buttonData, EMultiClickAction e){
-//		/**
-//		 * DO NOT CHECK if eClickAction != null
-//		 * it is to be overriden!!!
-//		 */
-//		this.eMultiClickAction=e;
-//		this.lClickActionMilis=System.currentTimeMillis();
-//		this.buttonData=buttonData;
-//	}
-//	@Deprecated
-//	protected void consumeAndResetMultiClickAction(){
-//		eMultiClickAction=null;
-//		
-//		lClickActionMilis=null;
-//		
-//		buttonData.getClicks().clearClicks();
-//		buttonData=null;
-//	}
+	public DiagModalInfo<T> getDiagModalCurrent(){
+		return dmi;
+	}
 	
-//	@Deprecated
-//	public boolean actionMultiClick(MouseCursorButtonData buttonData, Spatial capture, int iClickCount) {
-//		switch(iClickCount){
-//			case 2:
-//				if(isListBoxEntry(capture)){
-//					if(bOptionSelectionMode){
-//						setMultiClickAction(buttonData, EMultiClickAction.OptionModeSubmit);
-//						return true;
-//					}else{
-//						setMultiClickAction(buttonData, EMultiClickAction.OpenConfigDialog);
-////						LemurDialogGUIStateAbs diag = hmModals.get(EModalDiagType.ListEntryConfig);
-////						if(diag!=null){
-////							diag.requestEnable();
-////							return true;
-////						}
-//					}
-//					return true;
-//				}
-//				break;
-//			case 3:
-//				setMultiClickAction(buttonData, EMultiClickAction.DebugTestMultiClickAction3times);
-//				break;
-//		}
-//		
-//		return false;
-//	}
-	
-	public void openDialog(String strDialogId, DialogListEntryData dataToCfg){
-		LemurDialogGUIStateAbs<T> diag = hmModals.get(strDialogId);
-		if(diag!=null){
-			this.setCfgDataReference(dataToCfg);
-			diag.requestEnable();
+//	public void openModalDialog(String strDialogId, DialogListEntryData<T> dataToAssignModalTo, T cmd){
+	public void openModalDialog(String strDialogId, DialogListEntryData<T> dataToAssignModalTo, T cmd){
+		LemurDialogGUIStateAbs<T> diagModalCurrent = hmModals.get(strDialogId);
+		if(diagModalCurrent!=null){
+			dmi = new DiagModalInfo(diagModalCurrent,cmd,dataToAssignModalTo);
+			diagModalCurrent.requestEnable();
 		}else{
-//			throw new PrerequisitesNotMetException("no cfg dialog set");
+			throw new PrerequisitesNotMetException("no dialog set for id: "+strDialogId);
 		}
 	}
-//	public boolean openPropertiesDialogFor(Spatial capture) {
-//		if(isListBoxEntry(capture)){
-//			LemurDialogGUIStateAbs diag = hmModals.get(EModalDiagType.ListEntryProperties);
-//			if(diag!=null){
-//				diag.requestEnable();
-//				return true;
-//			}else{
-////				throw new PrerequisitesNotMetException("no properties dialog set");
-//			}
-//		}
-//		
-//		return false;
-//	}
+	
+	public void applyResultsFromModalDialog(){
+		if(dmi==null)throw new PrerequisitesNotMetException("no modal active");
+		
+		dmi.getDiagModal().resetChoice();
+//		dmi.getDiagModal().adataSelectedEntriesList.clear();
+		dmi = null;
+	}
 	
 	public boolean isListBoxEntry(Spatial spt){
 		if(getSelectedIndex()>=0){
@@ -775,13 +666,32 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 		return false;
 	}
 
-	public void selectEntry(DialogListEntryData<T> data) {
-		int i=vlEntriesList.indexOf(data);
+	@Override
+	public void clearSelection() {
+		selectionModel.setSelection(-1); //clear selection
+//		setSelectedEntryIndex(-1);
+	}
+	public void setSelectedEntryIndex(int i){
+		if(i<0)i=0;
+		if(i>getMaxIndex())i=getMaxIndex();
+		selectionModel.setSelection(i);
+//		dleLastSelected = vlEntriesList.get(i);
+	}
+	public void selectEntry(DialogListEntryData<T> dataSelectRequested) {
+//		this.dataSelectRequested = data;
+//	}
+//	
+//	public void updateSelectEntryRequested() {
+//		if(dataSelectRequested==null)return;
+//		
+		int i=vlVisibleEntriesList.indexOf(dataSelectRequested);
 		if(i>=0){
-			selectionModel.setSelection(i);
-			cd().dumpDebugEntry(getId()+",SelectIndex="+i+","+data.toString());
+			setSelectedEntryIndex(i);
+//			selectionModel.setSelection(i);
+//			dataSelectRequested=null;
+			cd().dumpDebugEntry(getId()+",SelectIndex="+i+","+dataSelectRequested.toString());
 		}else{
-			throw new PrerequisitesNotMetException("data not present on the list", data, lstbxEntriesToSelect);
+			throw new PrerequisitesNotMetException("data not present on the list", dataSelectRequested, lstbxEntriesToSelect);
 		}
 	}
 	
@@ -812,7 +722,8 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 //			}
 //		}
 		
-		selectionModel.setSelection(iSel);
+		setSelectedEntryIndex(iSel);
+//		selectionModel.setSelection(iSel);
 		bRefreshScroll=true;
 		
 //		iSel = selectionModel.getSelection();
@@ -828,16 +739,54 @@ public abstract class LemurDialogGUIStateAbs<T> extends InteractionDialogStateAb
 	public abstract boolean execActionFor(EMouseCursorButton e, Spatial capture);
 
 	public void removeEntry(DialogListEntryData<T> data){
+		int iDataAboveIndex = -1;
+		DialogListEntryData<T> dataAboveTmp = null;
+		if(getSelectedEntryData().equals(data)){
+			iDataAboveIndex = adleCompleteEntriesList.indexOf(data)-1;
+			if(iDataAboveIndex>=0)dataAboveTmp = adleCompleteEntriesList.get(iDataAboveIndex);
+		}
+		final DialogListEntryData<T> dataAbove = dataAboveTmp;
+		
 		for(DialogListEntryData<T> dataChild:data.getChildrenCopy()){
 			removeEntry(dataChild);
 		}
 		
-		if(!adleFullList.remove(data)){
+		if(!adleCompleteEntriesList.remove(data)){
 			throw new PrerequisitesNotMetException("missing data at list", data);
 		}
 		
 		data.setParent(null);
 		
+		if(dataAbove!=null){
+//			int iNext = iDataAboveIndex+1;
+//			if(iNext<vlEntriesList.size()){
+//				dleLastSelected = (vlEntriesList.get(iNext));
+//			}
+			
+//			setSelectedEntryIndex(iDataAboveIndex+1);
+			
+//			selectEntry(dataAbove);
+//			
+			/**
+			 * need to wait it actually get selected
+			 */
+			CallQueueI.i().appendCall(new Callable<Boolean>() {
+				@Override
+				public Boolean call() throws Exception {
+					if(getSelectedEntryData().equals(dataAbove)){
+						selectRelativeEntry(+1);
+						return true;
+					}
+					
+					selectEntry(dataAbove);
+					
+					return false; //will retry
+				}
+			});
+			
+		}
+		
 		requestRefreshList();
 	}
+	
 }

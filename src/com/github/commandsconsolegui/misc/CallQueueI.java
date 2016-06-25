@@ -63,7 +63,7 @@ public class CallQueueI {
 		return i;
 	}
 
-	public void appendCall(Callable<Boolean> caller) {
+	public synchronized void appendCall(Callable<Boolean> caller) {
 		addCall(caller, false);
 	}
 	

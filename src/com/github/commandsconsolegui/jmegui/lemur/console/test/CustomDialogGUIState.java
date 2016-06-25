@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.jmegui.lemur.console.test;
 
+import java.util.ArrayList;
+
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
@@ -35,7 +37,6 @@ import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButt
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
@@ -46,25 +47,11 @@ import com.simsilica.lemur.GuiGlobals;
  */
 public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialogGUIStateAbs<T>{
 	StringCmdField scfAddEntry = new StringCmdField(this,null,"[strEntryText]");
-//	ArrayList<String> astr;
-//	HashMap<String,String> hmKeyValueTmp = new HashMap<String,String>();
-//	private Object	answerFromModal;
-	
-//public static class CfgParm implements ICfgParm{
-//String strUIId;
-//boolean bIgnorePrefixAndSuffix;
-//Node nodeGUI;
-//public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
-//	super();
-//	this.strUIId = strUIId;
-//	this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
-//	this.nodeGUI =nodeGUI;
-//}
-//}
 	
 	public static enum EDiag{
 		Cfg,
 		List,
+		Confirm,
 		;
 	}
 	EDiag ediag = null;
@@ -74,20 +61,21 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 		super.bPrefixCmdWithIdToo = true;
 	}
 	
-	public static class CfgParm extends LemurDialogGUIStateAbs.CfgParm{
+	public static class CfgParm<T> extends LemurDialogGUIStateAbs.CfgParm<T>{
 		public CfgParm(boolean	bOptionSelectionMode,boolean bIgnorePrefixAndSuffix,
-				Node nodeGUI, Float fDialogHeightPercentOfAppWindow,
-				Float fDialogWidthPercentOfAppWindow, Float fInfoHeightPercentOfDialog,
-				Integer iEntryHeightPixels, BaseDialogStateAbs modalParent) {
-			super(bOptionSelectionMode,null, bIgnorePrefixAndSuffix, nodeGUI,
-					fDialogHeightPercentOfAppWindow, fDialogWidthPercentOfAppWindow,
-					fInfoHeightPercentOfDialog, iEntryHeightPixels, modalParent);
+				Float fDialogWidthPercentOfAppWindow,
+				Float fDialogHeightPercentOfAppWindow, Float fInfoHeightPercentOfDialog,
+				Integer iEntryHeightPixels){//, BaseDialogStateAbs<T> modalParent) {
+			super(bOptionSelectionMode, null, bIgnorePrefixAndSuffix, null,
+					fDialogWidthPercentOfAppWindow, fDialogHeightPercentOfAppWindow,
+					fInfoHeightPercentOfDialog, iEntryHeightPixels);//, modalParent);
 			// TODO Auto-generated constructor stub
 		}
 	}
 	@Override
-	public CustomDialogGUIState configure(ICfgParm icfg) {
-		CfgParm cfg = (CfgParm)icfg;
+	public CustomDialogGUIState<T> configure(ICfgParm icfg) {
+		@SuppressWarnings("unchecked")
+		CfgParm<T> cfg = (CfgParm<T>)icfg;
 		cfg.setUIId(ediag.toString());
 		
 		super.configure(cfg); //params are identical
@@ -106,23 +94,83 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 		return super.getTextInfo()+"Custom Dialog: Test.";
 	};
 	
+//	@Override
+//	protected void updateList() {
+//		DialogListEntryData<T> dataValue = getModalChosenDataAndClearIt();
+//		if(dataValue!=null){
+//			DialogListEntryData<T> dataRef = getDataToApplyModalChoiceAndClearIt();
+//			if(dataRef!=null){
+//				switch(ediag){
+//					case Cfg:
+//						break;
+//					case Confirm:
+//						break;
+//					case List:
+//						dataRef.updateTextTo(dataValue.getText());
+//						break;
+//				}
+//			}else{
+//				cd().dumpWarnEntry("no entry selected at "+this.getId()+" to apply modal dialog option");
+//			}
+//		}
+//		
+////		super.updateList(adleFullList);
+//		
+//		super.updateList();
+//	}
+	
 	@Override
-	protected void updateList() {
-		DialogListEntryData<T> dataValue = getCfgDataValueAndClearIt();
-		if(dataValue!=null){
-			DialogListEntryData<T> dataRef = getCfgDataRefAndClearIt();
-			if(dataRef!=null){
-				dataRef.setCfg(dataValue);
-			}else{
-				cd().dumpWarnEntry("no entry selected at "+this.getId()+" to apply modal dialog option");
+	protected boolean updateOrUndo(float tpf) {
+		if(getDiagModalCurrent()!=null){
+			if(getDiagModalCurrent().getDiagModal().isChoiceMade()){
+				applyResultsFromModalDialog();
 			}
 		}
 		
-//		super.updateList(adleFullList);
-		
-		super.updateList();
+		return super.updateOrUndo(tpf);
 	}
 	
+//	@Override
+//	public CustomDialogGUIState<T> getDiagModalCurrent() {
+//		return (CustomDialogGUIState<T>) super.getDiagModalCurrent();
+//	}
+	
+	@Override
+	public void applyResultsFromModalDialog() {
+		CustomDialogGUIState<T> diagModal = getDiagModalCurrent().getDiagModal();
+		T cmdAtParent = getDiagModalCurrent().getCmdAtParent();
+		ArrayList<DialogListEntryData<T>> adataToApplyResultsList = getDiagModalCurrent().getDataReferenceAtParentListCopy();
+		
+		boolean bChangesMade = false;
+		for(DialogListEntryData<T> dataAtModal:diagModal.getDataSelectionListCopy()){
+			switch(ediag){
+				case List:
+					if(cmdAtParent.equals(cmdDel)){
+						if(dataAtModal.equals(diagModal.dataYes)){
+							for(DialogListEntryData<T> dataToApplyResults:adataToApplyResultsList){
+								removeEntry(dataToApplyResults);
+								bChangesMade=true;
+							}
+						}
+					}else
+					if(cmdAtParent.equals(cmdCfg)){
+						for(DialogListEntryData<T> dataToCfg:adataToApplyResultsList){
+							dataToCfg.updateTextTo(dataAtModal.getText());
+							bChangesMade=true;
+						}
+					}
+					break;
+			}
+		}
+	
+		if(bChangesMade){
+			requestRefreshList();
+		}
+		
+		super.applyResultsFromModalDialog();
+	}
+	
+	@SuppressWarnings("unchecked")
 	public DialogListEntryData<T> getDataFrom(Spatial spt){
 		String strKey = DialogListEntryData.class.getName();
 		Object data = spt.getUserData(strKey);
@@ -131,32 +179,29 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 	}
 	
 	public class CommandCfg implements Command<Button>{
+		@SuppressWarnings("unchecked")
 		@Override
 		public void execute(Button btn) {
-//			EButtonAction.valueOf(btn.getUserData(EButtonAction.class.getSimpleName()));
-//			DialogListEntryData<Command<Button>> data = btn.getUserData(DialogListEntryData.class.getName());
-//			CustomDialogGUIState.this.openDialog(EDiag.Cfg.toString(),getDataFrom(btn));
-			CustomDialogGUIState.this.openCfgDialog(getDataFrom(btn));
+			CustomDialogGUIState.this.openModalDialog(EDiag.Cfg.toString(),getDataFrom(btn),(T)this);
 		}
 	}
 	CommandCfg cmdCfg = new CommandCfg();
 	
 	public class CommandDel implements Command<Button>{
+		@SuppressWarnings("unchecked")
 		@Override
 		public void execute(Button btn) {
-//			DialogListEntryData<Command<Button>> data = btn.getUserData(DialogListEntryData.class.getName());
-//			DialogListEntryData<T> data = getDataFrom(btn);
-//			if(!CustomDialogGUIState.this.adleFullList.remove(data)){
-//				throw new PrerequisitesNotMetException("missing data at list", getDataFrom(btn));
-//			}
-			CustomDialogGUIState.this.removeEntry(getDataFrom(btn));
+			DialogListEntryData<T> data = getDataFrom(btn);
+			
+			if(data.isParent()){
+//				CustomDialogGUIState.this.setDataToApplyModalChoice(data);
+				CustomDialogGUIState.this.openModalDialog(EDiag.Confirm.toString(), data, (T)this);
+			}else{
+				CustomDialogGUIState.this.removeEntry(data);
+			}
 		}
 	}
 	CommandDel cmdDel = new CommandDel();
-	
-	public void openCfgDialog(DialogListEntryData<T> data){
-		CustomDialogGUIState.this.openDialog(EDiag.Cfg.toString(),data);
-	}
 	
 	public class CommandSel implements Command<Button>{
 		@Override
@@ -165,7 +210,10 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 		}
 	}
 	CommandSel cmdSel = new CommandSel();
+	private DialogListEntryData<T>	dataYes;
+	private DialogListEntryData<T>	dataNo;
 	
+	@SuppressWarnings("unchecked")
 	public DialogListEntryData<T> addEntryQuick(String strText){
 		DialogListEntryData<T> dle = new DialogListEntryData<T>();
 		if(strText==null){
@@ -176,7 +224,7 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 		}
 		dle.setText(strText,(T)cmdCfg);
 		
-		if(bOptionSelectionMode){
+		if(bOptionChoiceSelectionMode){
 			dle.addCustomButtonAction("<-",(T)cmdSel);
 		}else{
 			/**
@@ -209,28 +257,37 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 	
 	@Override
 	protected boolean initOrUndo() {
-		addEntryQuick(null);
-		addEntryQuick(null);
-		
-		DialogListEntryData<T> dleS1 = addEntryQuick("section 1");
-		addEntryQuick(null).setParent(dleS1);
-		addEntryQuick(null).setParent(dleS1);
-		addEntryQuick(null).setParent(dleS1);
-		
-		DialogListEntryData<T> dleS2 = addEntryQuick("section 2");
-		addEntryQuick(null).setParent(dleS2);
-		addEntryQuick(null).setParent(dleS2);
-		DialogListEntryData<T> dleS21 = addEntryQuick("section 2.1").setParent(dleS2);
-		addEntryQuick(null).setParent(dleS21);
-		addEntryQuick(null).setParent(dleS21);
-		addEntryQuick(null).setParent(dleS21);
-		
-		addEntryQuick("S2 child").setParent(dleS2); //ok, will be placed properly
-		
-		addEntryQuick("S1 child").setParent(dleS1); //out of order for test
-		addEntryQuick("S21 child").setParent(dleS21); //out of order for test
-		
-//		for(int i=0;i<10;i++)addEntry(null); //some test data
+		switch(ediag){
+			case Cfg:
+				for(int i=0;i<10;i++)addEntryQuick(null); //some test data
+				break;
+			case Confirm:
+				dataYes = addEntryQuick("[ yes    ]");
+				dataNo  = addEntryQuick("[     no ]");
+				break;
+			case List:
+				addEntryQuick(null);
+				addEntryQuick(null);
+				
+				DialogListEntryData<T> dleS1 = addEntryQuick("section 1");
+				addEntryQuick(null).setParent(dleS1);
+				addEntryQuick(null).setParent(dleS1);
+				addEntryQuick(null).setParent(dleS1);
+				
+				DialogListEntryData<T> dleS2 = addEntryQuick("section 2");
+				addEntryQuick(null).setParent(dleS2);
+				addEntryQuick(null).setParent(dleS2);
+				DialogListEntryData<T> dleS21 = addEntryQuick("section 2.1").setParent(dleS2);
+				addEntryQuick(null).setParent(dleS21);
+				addEntryQuick(null).setParent(dleS21);
+				addEntryQuick(null).setParent(dleS21);
+				
+				addEntryQuick("S2 child").setParent(dleS2); //ok, will be placed properly
+				
+				addEntryQuick("S1 child").setParent(dleS1); //out of order for test
+				addEntryQuick("S21 child").setParent(dleS21); //out of order for test
+				break;
+		}
 		
 		return super.initOrUndo();
 	}
@@ -251,11 +308,12 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 		return cd.cmdFoundReturnStatus(bCommandWorked);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean execTextDoubleClickActionFor(DialogListEntryData<T> data) {
 		if(isOptionSelectionMode())throw new PrerequisitesNotMetException("Option mode should not reach this method.");
 		
-		openCfgDialog(data);
+		openModalDialog(EDiag.Cfg.toString(),data,(T)cmdCfg);
 //		data.getActionTextDoubleClick().execute(null);
 		
 		return true;
