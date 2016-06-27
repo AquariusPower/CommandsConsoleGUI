@@ -283,7 +283,7 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 	public Spatial getIntputField() {
 		return sptIntputField;
 	}
-
+	
 	protected BaseDialogStateAbs<T> setIntputField(Spatial sptIntputField) {
 		this.sptIntputField = sptIntputField;
 		return this;

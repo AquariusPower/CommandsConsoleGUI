@@ -35,11 +35,11 @@ import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
+import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexHacks;
 import com.jme3.font.BitmapText;
+import com.jme3.input.dummy.DummyKeyInput;
 import com.jme3.material.MatParam;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -51,6 +51,8 @@ import com.simsilica.lemur.DocumentModel;
 import com.simsilica.lemur.ListBox;
 import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.component.TextEntryComponent;
+import com.simsilica.lemur.event.KeyAction;
+import com.simsilica.lemur.event.KeyActionListener;
 import com.simsilica.lemur.focus.FocusManagerState;
 
 /**
@@ -472,4 +474,65 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		for(int i=0;i<str.length();i++)dm.insert(str.charAt(i));
 		LemurMiscHelpersStateI.i().bugFix(EBugFix.UpdateTextFieldTextAndCaratVisibility, tf);
 	}
+
+	/**
+	 * 
+	 * @param strActionPerformedHelp the key code's field name will be reflexed
+	 * @param kal
+	 * @param iKeyCode
+	 * @param aiKeyModifiers
+	 * @return better if stored into some kind of array for further line formatting 
+	 */
+	public BindKey bindKey(TextField tf, KeyActionListener kal, String strActionPerformedHelp, int iKeyCode, int... aiKeyModifiers){
+		KeyAction ka = new KeyAction(iKeyCode, aiKeyModifiers);
+		tf.getActionMap().put(ka, kal);
+		
+		BindKey bk = new BindKey();
+		
+		bk.tfInputTarget = tf;
+		
+		bk.kalAction = kal;
+		
+		bk.iCode = iKeyCode;
+		bk.strName = MiscI.i().getFieldNameForValue(new DummyKeyInput(), iKeyCode, "/", "KEY_", true);
+//		bk.strName = MiscI.i().makePretty(bk.strName, true);
+		
+		bk.strHelp = strActionPerformedHelp;
+		
+		bk.aiModifiers = aiKeyModifiers;
+		
+		for(int i:aiKeyModifiers){
+			if(i==KeyAction.CONTROL_DOWN){
+				bk.strModifiers += "Ctrl+";
+			}else{
+				bk.strModifiers += MiscI.i().getFieldNameForValue(ka, i, "/", null, true)+"+";
+			}
+		}
+		
+		return bk;
+	}
+//	public String prettyKeyName(String strPrefixRemove, String strFullName){
+//		if(strFullName.startsWith(strPrefixRemove)){
+//			strFullName = strFullName.substring(strPrefixRemove.length());
+//		}
+//		return MiscI.i().makePretty(strFullName, true);
+//	}
+	public static class BindKey{
+		TextField tfInputTarget = null;
+		KeyActionListener	kalAction = null;
+		
+		Integer iCode = null;
+		int[] aiModifiers = null;
+		
+		String strName = null;
+		String strModifiers = "";
+		
+		String strHelpContext = null;
+		String strHelp = null;
+		
+		public String getHelp() {
+			return strModifiers+strName+": "+strHelp;
+		}
+	}
+	
 }

@@ -92,7 +92,7 @@ import com.jme3.texture.Texture2D;
  * Project at: https://github.com/AquariusPower/CommandsConsoleGUI
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
- *
+ *	
  */
 public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implements IConsoleUI, IWorkAroundBugFix {
 //	protected FpsLimiterState fpslState = new FpsLimiterState();
@@ -1190,7 +1190,7 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 				if(bKeyControlIsPressed){
 					String strCmdChk = cd().editCopyOrCut(true,false,true); //vlstrDumpEntries.get(getDumpAreaSelectedIndex()).trim();
 					strCmdChk=strCmdChk.trim();
-					if(cd().validateUniqueCommand(strCmdChk)){
+					if(cd().validateCommand(strCmdChk,false)){
 						if(!strCmdChk.startsWith(""+cd().getCommandPrefix()))strCmdChk=cd().getCommandPrefix()+strCmdChk;
 						dumpAndClearInputField();
 //						int iCommentBegin = strCmdChk.indexOf(cc.getCommentPrefix());
@@ -1648,7 +1648,7 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 		String strFirst=astr.get(0); //the actual stored command may come with comments appended
 		
 		String strAppendSpace = "";
-		if(astr.size()==1 && cd().validateUniqueCommand(strFirst)){
+		if(astr.size()==1 && cd().validateCommand(strFirst,true)){
 			strAppendSpace=" "; //found an exact command valid match, so add space
 		}
 		

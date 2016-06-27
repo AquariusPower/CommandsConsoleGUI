@@ -42,8 +42,10 @@ import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
+import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI.BindKey;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.jme3.input.KeyInput;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -85,8 +87,10 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 	protected boolean	bRefreshScroll;
 	protected HashMap<String, LemurDialogGUIStateAbs<T>> hmModals = new HashMap<String, LemurDialogGUIStateAbs<T>>();
 	protected Long	lClickActionMilis;
-//	private DialogListEntryData<T>	dataSelectRequested;
-	private Label	lblSelectedEntryStatus;
+//	protected DialogListEntryData<T>	dataSelectRequested;
+	protected Label	lblSelectedEntryStatus;
+	protected ArrayList<BindKey>	abkList = new ArrayList<BindKey>();
+	private KeyActionListener	actSimpleActions;
 	
 	@Override
 	public Container getContainerMain(){
@@ -541,7 +545,7 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 	
 	@Override
 	protected boolean initKeyMappings(){
-		KeyActionListener actSimpleActions = new KeyActionListener() {
+		actSimpleActions = new KeyActionListener() {
 			@Override
 			public void keyAction(TextEntryComponent source, KeyAction key) {
 				boolean bControl = key.hasModifier(KeyAction.CONTROL_DOWN); //0x1
@@ -591,18 +595,28 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 	
 		};
 		
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_HOME,KeyAction.CONTROL_DOWN), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_END,KeyAction.CONTROL_DOWN), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_DELETE,KeyAction.CONTROL_DOWN), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_PGUP), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_PGDN), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_RETURN), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_NUMPADENTER), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_ESCAPE), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_UP), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_DOWN), actSimpleActions);
+		bindKey("Navigate list to first entry", KeyInput.KEY_HOME, KeyAction.CONTROL_DOWN);
+		bindKey("Navigate list to last entry", KeyInput.KEY_END,KeyAction.CONTROL_DOWN);
+		bindKey("Navigate list to previous page", KeyInput.KEY_PGUP);
+		bindKey("Navigate list to next page", KeyInput.KEY_PGDN);
+		bindKey("Navigate list to previous entry", KeyInput.KEY_UP);
+		bindKey("Navigate list to next entry", KeyInput.KEY_DOWN);
+		
+		bindKey("Clear the input field text", KeyInput.KEY_DELETE,KeyAction.CONTROL_DOWN);
+		
+		bindKey("Accept entry choice (on choice dialogs only)", KeyInput.KEY_RETURN);
+		bindKey("Accept entry choice (on choice dialogs only)", KeyInput.KEY_NUMPADENTER);
+		
+		bindKey("Close dialog", KeyInput.KEY_ESCAPE);
 		
 		return true;
+	}
+	
+	protected BindKey bindKey(String strActionPerformedHelp, int iKeyCode, int... aiKeyModifiers){
+		BindKey bk = LemurMiscHelpersStateI.i().bindKey(getInputField(), actSimpleActions,
+			strActionPerformedHelp, iKeyCode, aiKeyModifiers);
+		abkList.add(bk);
+		return bk;
 	}
 	
 	@Override
@@ -610,10 +624,19 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 		boolean bCommandWorked = false;
 		
 		if(cc.checkCmdValidity(this,"showDialogKeyBinds"+getId(),null,"")){
-			cc.dumpSubEntry("ESC - close");
-			cc.dumpSubEntry("Up/Down/PgUp/PgDn/Ctrl+Home|End - nav. list entry");
-			cc.dumpSubEntry("Enter - accept selected choice at config dialog");
+//			cc.dumpSubEntry("ESC - close");
+//			cc.dumpSubEntry("Up/Down/PgUp/PgDn/Ctrl+Home|End - nav. list entry");
+//			cc.dumpSubEntry("Enter - accept selected choice at config dialog");
 			cc.dumpSubEntry("DoubleClick - open config/accept choice at config dialog");
+			
+			if(abkList.size()==0){
+				cc.dumpWarnEntry("open the dialog first to let keys be bound");
+			}else{
+				for(BindKey bk:abkList){
+					cc.dumpSubEntry(bk.getHelp());
+				}
+			}
+			
 			bCommandWorked = true;
 		}else
 		{

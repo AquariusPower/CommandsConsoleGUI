@@ -27,7 +27,6 @@
 
 package com.github.commandsconsolegui.jmegui.lemur.console;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
@@ -40,7 +39,7 @@ import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI.CompositeCo
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
-import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI.EBugFix;
+import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI.BindKey;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.font.BitmapCharacter;
 import com.jme3.font.BitmapCharacterSet;
@@ -53,7 +52,6 @@ import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
-import com.simsilica.lemur.DocumentModel;
 import com.simsilica.lemur.GridPanel;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.HAlignment;
@@ -92,11 +90,13 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	protected Button	btnClipboardShow;
 	protected Button	btnCut;
 	protected Label	lblStats;
+	protected ArrayList<BindKey>	abkList = new ArrayList<BindKey>();
 	
 	public final StringCmdField CMD_SHOW_BINDS = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
 	
 	private ColorRGBA	colorConsoleStyleBackground;
 	private TextEntryComponent	tecInputField;
+	private KeyActionListener	actSimpleActions;
 	
 	public ConsoleLemurStateI(){
 		setDumpEntriesSlowedQueue(new VersionedList<String>());
@@ -517,7 +517,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	@Override
 	protected boolean mapKeysForInputField(){
 		// simple actions
-		KeyActionListener actSimpleActions = new KeyActionListener() {
+		actSimpleActions = new KeyActionListener() {
 			@Override
 			public void keyAction(TextEntryComponent source, KeyAction key) {
 				setInputFieldTextEntryComponent(source);
@@ -576,19 +576,22 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 			}
 		};
 		
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_TAB), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_TAB,KeyAction.CONTROL_DOWN), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_RETURN), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_NUMPADENTER), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_B,KeyAction.CONTROL_DOWN), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_C,KeyAction.CONTROL_DOWN), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_V,KeyAction.CONTROL_DOWN), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_X,KeyAction.CONTROL_DOWN), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_DELETE,KeyAction.CONTROL_DOWN), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_SLASH,KeyAction.CONTROL_DOWN), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_ESCAPE), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_LEFT,KeyAction.CONTROL_DOWN), actSimpleActions);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_RIGHT,KeyAction.CONTROL_DOWN), actSimpleActions);
+		bindKey("Close", KeyInput.KEY_ESCAPE);
+		
+		bindKey("copy", KeyInput.KEY_C,KeyAction.CONTROL_DOWN);
+		bindKey("cut", KeyInput.KEY_X,KeyAction.CONTROL_DOWN);
+		bindKey("paste", KeyInput.KEY_V,KeyAction.CONTROL_DOWN);
+		
+		bindKey("autocomplete \"starts with\"", KeyInput.KEY_TAB);
+		bindKey("autocomplete \"contains\"", KeyInput.KEY_TAB, KeyAction.CONTROL_DOWN);
+		bindKey("submit command", KeyInput.KEY_RETURN);
+		bindKey("submit command", KeyInput.KEY_NUMPADENTER);
+		bindKey("", KeyInput.KEY_B,KeyAction.CONTROL_DOWN);
+		bindKey("clear input field", KeyInput.KEY_DELETE,KeyAction.CONTROL_DOWN);
+		bindKey("\"/\" toggle input field comment", KeyInput.KEY_SLASH,KeyAction.CONTROL_DOWN);
+		
+		bindKey("navigate to previous word", KeyInput.KEY_LEFT,KeyAction.CONTROL_DOWN);
+		bindKey("navigate to next word", KeyInput.KEY_RIGHT,KeyAction.CONTROL_DOWN);
 		
 		// cmd history select action
 		KeyActionListener actCmdHistoryEntrySelectAction = new KeyActionListener() {
@@ -625,14 +628,24 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 				scrollToBottomRequestSuspend();
 			}
 		};
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_PGUP), actDumpNavigate);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_PGDN), actDumpNavigate);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_HOME, KeyAction.CONTROL_DOWN), actDumpNavigate);
-		getInputField().getActionMap().put(new KeyAction(KeyInput.KEY_END, KeyAction.CONTROL_DOWN), actDumpNavigate);
+		bindKey(actDumpNavigate,"navigate dump area to previous page",KeyInput.KEY_PGUP);
+		bindKey(actDumpNavigate,"navigate dump area to next page",KeyInput.KEY_PGDN);
+		bindKey(actDumpNavigate,"navigate dump area to first entry",KeyInput.KEY_HOME, KeyAction.CONTROL_DOWN);
+		bindKey(actDumpNavigate,"navigate dump area to last/current entry",KeyInput.KEY_END, KeyAction.CONTROL_DOWN);
 		
 		return true;
 	}
-
+	
+	protected BindKey bindKey(String strActionPerformedHelp, int iKeyCode, int... aiKeyModifiers){
+		return bindKey(actSimpleActions,strActionPerformedHelp, iKeyCode, aiKeyModifiers);
+	}
+	protected BindKey bindKey(KeyActionListener act, String strActionPerformedHelp, int iKeyCode, int... aiKeyModifiers){
+		BindKey bk = LemurMiscHelpersStateI.i().bindKey(getInputField(), act,
+			strActionPerformedHelp, iKeyCode, aiKeyModifiers);
+		abkList.add(bk);
+		return bk;
+	}
+	
 	@Override
 	protected void scrollDumpArea(double dIndex){
 		/**
@@ -1018,33 +1031,36 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		}
 	}
 	
+	/**
+	 * 
+	 */
 	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 		boolean bCommandWorked = false;
 		
-		if(cc.checkCmdValidity(this,CMD_SHOW_BINDS,"")){
-			cc.dumpInfoEntry("Key bindings: ");
-			cc.dumpSubEntry("Ctrl+C - copy");
-			cc.dumpSubEntry("Ctrl+X - cut");
-			cc.dumpSubEntry("Ctrl+V - paste");
-			cc.dumpSubEntry("Ctrl+left - navigate to previous word");
-			cc.dumpSubEntry("Ctrl+right - navigate to next word");
-			cc.dumpSubEntry("Shift+Ctrl+V - show clipboard");
-			cc.dumpSubEntry("Shift+Click - marks dump area CopyTo selection marker for copy/cut");
-			cc.dumpSubEntry("Ctrl+Click - if dump area entry is a command, it will overwrite the input field");
-			cc.dumpSubEntry("Ctrl+Del - clear input field");
-			cc.dumpSubEntry("TAB - autocomplete (starting with)");
-			cc.dumpSubEntry("Ctrl+TAB - autocomplete (contains)");
-			cc.dumpSubEntry("Ctrl+/ - toggle input field comment");
-			cc.dumpSubEntry("HintListFill: Ctrl (contains mode) or Ctrl+Shift (overrides existing hint list with contains mode)");
-			cc.dumpSubEntry("Filter: for any command that accepts a filter, if such filter starts with '"+cd().getFuzzyFilterModeToken()+"', the filtering will be fuzzy.");
+		if(cd.checkCmdValidity(this,CMD_SHOW_BINDS,"")){
+			cd.dumpSubEntry("Shift+Ctrl+V - show clipboard");
+			cd.dumpSubEntry("Shift+Click - marks dump area CopyTo selection marker for copy/cut");
+			
+			/**
+			 * see: {@link ConsoleStateAbs#updateInputFieldFillWithSelectedEntry()}
+			 */
+			cd.dumpSubEntry("Ctrl+Click - if dump area entry is a command, it will overwrite the input field");
+			
+			cd.dumpSubEntry("HintListFill: Ctrl (contains mode) or Ctrl+Shift (overrides existing hint list with contains mode)");
+			cd.dumpSubEntry("Filter: for any command that accepts a filter, if such filter starts with '"+cd().getFuzzyFilterModeToken()+"', the filtering will be fuzzy.");
+			
+			for(BindKey bk:abkList){
+				cd.dumpSubEntry(bk.getHelp());
+			}
+			
 			bCommandWorked=true;
 		}else
 		{
-			return super.execConsoleCommand(cc);
+			return super.execConsoleCommand(cd);
 		}
 		
-		return cc.cmdFoundReturnStatus(bCommandWorked);
+		return cd.cmdFoundReturnStatus(bCommandWorked);
 	}
 
 	@Override

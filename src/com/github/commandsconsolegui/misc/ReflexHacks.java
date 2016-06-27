@@ -99,6 +99,36 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 		
 		return objFieldValue;
 	}
+//	/**
+//	 * 
+//	 * @param clazzOfObjectFrom what superclass of the object from is to be used?
+//	 * @param objFrom
+//	 * @param strFieldName will break if changed..
+//	 * @param bAccessPrivateField We shouldnt access private fields/methods as things may break. Any code depending on this must ALWAYS be optional!
+//	 * @param objValueMatch if not null, the 1st field matching this value will return it's name
+//	 * @return field value or name
+//	 */
+//	public Object reflexFieldHK(Class<?> clazzOfObjectFrom, Object objFrom, String strFieldName, boolean bAccessPrivateField, Object objValueMatch){
+//		if(!btgAllowHacks.b())return null;
+//		
+//		Object objFieldData = null;
+//		try{
+//			Field field = clazzOfObjectFrom.getDeclaredField(strFieldName);
+//			
+//			boolean bPrivate = !field.isAccessible();
+//			
+//			if(bAccessPrivateField && bPrivate)field.setAccessible(true);
+//			
+//			objFieldData = field.get(objFrom); // will throw if private, ok!
+//			
+//			if(bPrivate)field.setAccessible(false);
+//		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+//			ihe.handleExceptionThreaded(e);
+//		}
+//		
+//		return objFieldData;
+//	}
+	
 	public Object getFieldValueHK(Object objFrom, String strFieldName){
 		if(!btgAllowHacks.b())return null;
 		

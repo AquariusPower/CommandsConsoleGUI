@@ -41,6 +41,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.nio.BufferUnderflowException;
 import java.nio.file.Files;
@@ -215,7 +216,7 @@ public class MiscI {
 	/**
 	 * make all uppercase and underscored string into a pretty Id
 	 * @param strCommand
-	 * @param bFirstLetterUpperCase
+	 * @param bFirstLetterUpperCase (of each part when words are separated by "_")
 	 * @return
 	 */
 	public String makePretty(String strCommand, boolean bFirstLetterUpperCase){
@@ -224,14 +225,19 @@ public class MiscI {
 		 */
 		String strCmdNew = null;
 		for(String strWord : strCommand.split("_")){
-			if(strCmdNew==null){
-				if(bFirstLetterUpperCase){
-					strCmdNew=firstLetter(strWord.toLowerCase(),true);
+			boolean bIsAllUpperCase = !strWord.matches(".*[a-z].*");
+			if(bIsAllUpperCase){
+				if(strCmdNew==null){
+					if(bFirstLetterUpperCase){
+						strCmdNew=firstLetter(strWord.toLowerCase(),true);
+					}else{
+						strCmdNew=strWord.toLowerCase();
+					}
 				}else{
-					strCmdNew=strWord.toLowerCase();
+					strCmdNew+=firstLetter(strWord.toLowerCase(),true);
 				}
 			}else{
-				strCmdNew+=firstLetter(strWord.toLowerCase(),true);
+				strCmdNew+=firstLetter(strWord,true);
 			}
 		}
 		
@@ -365,5 +371,39 @@ public class MiscI {
 			}
 		}
 		return true;
+	}
+	
+	/**
+	 * This is a safe reflex.
+	 * 
+	 * @param clazzOfObjectFrom what superclass of the object from is to be used?
+	 * @param objValueMatch the 1st field matching this value will return it's name
+	 * @return field name
+	 */
+	public String getFieldNameForValue(Object objFieldDeclaredAt, Object objValueToMatch, String strAllowManySeparator, String strPrefixRemove,  boolean bMakePretty){
+		String str="";
+		boolean bAllowMany = strAllowManySeparator!=null;
+		try{
+			for(Field field:objFieldDeclaredAt.getClass().getFields()){
+				if(objValueToMatch.equals(field.get(objFieldDeclaredAt))){
+					if(!str.isEmpty())str+=strAllowManySeparator;
+					
+					String strName = field.getName();
+					if(strPrefixRemove!=null && strName.startsWith(strPrefixRemove)){
+						strName = strName.substring(strPrefixRemove.length());
+					}
+					
+					if(bMakePretty)strName = MiscI.i().makePretty(strName, true);
+					
+					str += strName;
+					
+					if(!bAllowMany)break;
+				}
+			}
+		} catch (IllegalArgumentException | IllegalAccessException | SecurityException e) {
+			ihe.handleExceptionThreaded(e);
+		}
+		
+		return str.isEmpty()?null:str;
 	}
 }

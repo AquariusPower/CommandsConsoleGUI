@@ -2391,7 +2391,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		for(CommandData cmd:cmdList){//trmCmds.values()){
 			if(!containsFilterString(cmd.asHelp(),strFilter))continue;
-			dumpSubEntry(getCommandPrefix()+cmd.asHelp());
+//			dumpSubEntry(getCommandPrefix()+cmd.asHelp());
+			dumpSubEntry(cmd.asHelp());
 			dumpSubEntry(""); //for readability
 		}
 	}
@@ -2715,7 +2716,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	protected void showHelpForFailedCommand(String strFullCmdLine){
-		if(validateUniqueCommand(strFullCmdLine)){
+		if(validateCommand(strFullCmdLine,true)){
 //			addToExecConsoleCommandQueue(CMD_HELP+" "+extractCommandPart(strFullCmdLine,0));
 			cmdShowHelp(extractCommandPart(strFullCmdLine,0));
 		}else{
@@ -2893,15 +2894,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	/**
 	 * Validates if the first extracted word is a valid command.
 	 * 
-	 * @param strUniqueCmdChk can be the full command line here
+	 * @param strCmdChk can be the full command line here
 	 * @return
 	 */
-	public boolean validateUniqueCommand(String strUniqueCmdChk){
-		strUniqueCmdChk = extractCommandPart(strUniqueCmdChk,0);
-//		if(strCmdFullChk.startsWith(strCommandPrefixChar)){
-//			strCmdFullChk=strCmdFullChk.substring(strCommandPrefixChar.length());
-//		}
-		return getUniqueCommands().contains(strUniqueCmdChk);
+	public boolean validateCommand(String strCmdChk, boolean bOnlyUniques){
+		strCmdChk = extractCommandPart(strCmdChk,0);
+		
+		return (bOnlyUniques?getUniqueCommands():getAllPossibleCommands())
+			.contains(strCmdChk);
 	}
 	
 	protected static enum EStats{
