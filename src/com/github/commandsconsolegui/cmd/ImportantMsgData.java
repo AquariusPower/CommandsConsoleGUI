@@ -80,31 +80,38 @@ public class ImportantMsgData{
 		this.aste=de.getException().getStackTrace();
 	}
 	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + Arrays.hashCode(aste);
-		result = prime * result + ((strMsg == null) ? 0 : strMsg.hashCode());
-		return result;
-	}
+//	@Override
+//	public int hashCode() {
+//		final int prime = 31;
+//		int result = 1;
+//		result = prime * result + Arrays.hashCode(aste);
+//		result = prime * result + ((strMsg == null) ? 0 : strMsg.hashCode());
+//		return result;
+//	}
+//	
+//	@Override
+//	public boolean equals(Object obj) {
+//		if (this == obj)
+//			return true;
+//		if (obj == null)
+//			return false;
+//		if (getClass() != obj.getClass())
+//			return false;
+//		ImportantMsgData other = (ImportantMsgData) obj;
+//		if (!Arrays.equals(aste, other.aste))
+//			return false;
+//		if (strMsg == null) {
+//			if (other.strMsg != null)
+//				return false;
+//		} else if (!strMsg.equals(other.strMsg))
+//			return false;
+//		return true;
+//	}
 	
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ImportantMsgData other = (ImportantMsgData) obj;
-		if (!Arrays.equals(aste, other.aste))
-			return false;
-		if (strMsg == null) {
-			if (other.strMsg != null)
-				return false;
-		} else if (!strMsg.equals(other.strMsg))
-			return false;
+	public boolean identicalTo(ImportantMsgData imdOther){
+		if (!strMsg.equals(imdOther.strMsg))return false; //equals() is faster, and such messages will not have case difference...
+		if (!Arrays.equals(aste, imdOther.aste))return false;
+		
 		return true;
 	}
 	

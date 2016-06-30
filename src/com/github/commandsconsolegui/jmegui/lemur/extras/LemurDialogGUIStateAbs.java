@@ -115,12 +115,12 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 		 * @param fInfoHeightPercentOfDialog (if null will use default) the percentual height to show informational text, the list and input field will properly use the remaining space
 		 * @param iEntryHeightPixels
 		 */
-		public CfgParm(boolean	bOptionSelectionMode,String strUIId, boolean bIgnorePrefixAndSuffix,
+		public CfgParm(boolean	bOptionSelectionMode,String strUIId,
 				Node nodeGUI, Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow, Float fInfoHeightPercentOfDialog,
 				Integer iEntryHeightPixels)//, BaseDialogStateAbs<T> modalParent)
 		{
-			super(bOptionSelectionMode,strUIId, bIgnorePrefixAndSuffix, nodeGUI);//, modalParent);
+			super(bOptionSelectionMode,strUIId, nodeGUI);//, modalParent);
 			
 			this.fDialogHeightPercentOfAppWindow = fDialogHeightPercentOfAppWindow;
 			this.fDialogWidthPercentOfAppWindow = fDialogWidthPercentOfAppWindow;
@@ -148,6 +148,7 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 		}
 		
 		super.configure(icfg);
+		
 		return storeCfgAndReturnSelf(icfg);
 	}
 	

@@ -110,7 +110,7 @@ public class CustomTestI<T extends Command<Button>> extends SimpleConsoleAppAbs 
 		// the conole UI
 		GlobalConsoleGuiI.iGlobal().set(ConsoleLemurStateI.i());
 		ConsoleLemurStateI.i().configure(new ConsoleLemurStateI.CfgParm(
-				null, false, KeyInput.KEY_F10, getGuiNode()));
+				null, KeyInput.KEY_F10, getGuiNode()));
 		
 		//////////////////////// super init depends on globals
 		super.simpleInitApp(); // basic initializations
@@ -119,13 +119,13 @@ public class CustomTestI<T extends Command<Button>> extends SimpleConsoleAppAbs 
 		
 		// test dialogs
 		diagCfg = new CustomDialogGUIState<T>(CustomDialogGUIState.EDiag.Cfg).configure(
-			new CustomDialogGUIState.CfgParm<T>(true, false, 0.6f, 0.5f, null, null));//, null));
+			new CustomDialogGUIState.CfgParm<T>(true, 0.6f, 0.5f, null, null));//, null));
 		
 		diagConfirm = new CustomDialogGUIState<T>(CustomDialogGUIState.EDiag.Confirm).configure(
-			new CustomDialogGUIState.CfgParm<T>(true, false, 500f, 300f, null, null));//, diag));
+			new CustomDialogGUIState.CfgParm<T>(true, 500f, 300f, null, null));//, diag));
 		
 		diag = new CustomDialogGUIState<T>(CustomDialogGUIState.EDiag.List).configure(
-			new CustomDialogGUIState.CfgParm<T>(false, false, null, null, null, null))//, null))
+			new CustomDialogGUIState.CfgParm<T>(false, null, null, null, null))//, null))
 			.addModalDialog(diagCfg)
 			.addModalDialog(diagConfirm);
 		

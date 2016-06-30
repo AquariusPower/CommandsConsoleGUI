@@ -62,14 +62,13 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 	}
 	
 	public static class CfgParm<T> extends LemurDialogGUIStateAbs.CfgParm<T>{
-		public CfgParm(boolean	bOptionSelectionMode,boolean bIgnorePrefixAndSuffix,
+		public CfgParm(boolean	bOptionSelectionMode,
 				Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow, Float fInfoHeightPercentOfDialog,
 				Integer iEntryHeightPixels){//, BaseDialogStateAbs<T> modalParent) {
-			super(bOptionSelectionMode, null, bIgnorePrefixAndSuffix, null,
+			super(bOptionSelectionMode, null, null,
 					fDialogWidthPercentOfAppWindow, fDialogHeightPercentOfAppWindow,
 					fInfoHeightPercentOfDialog, iEntryHeightPixels);//, modalParent);
-			// TODO Auto-generated constructor stub
 		}
 	}
 	@Override

@@ -144,13 +144,12 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	public static class CfgParm<T> extends ConsoleStateAbs.CfgParm<T>{
 		public CfgParm(
 			String strUIId, 
-			boolean bIgnorePrefixAndSuffix,
 			int iToggleConsoleKey,
 			Node nodeGUI
 		) {
 			super(
 				strUIId==null ? strUIId=ConsoleLemurStateI.class.getSimpleName() : strUIId, 
-				bIgnorePrefixAndSuffix, nodeGUI, iToggleConsoleKey);
+				nodeGUI, iToggleConsoleKey);
 			super.bInitiallyEnabled=true; // the console must be initially enabled to startup properly
 		}
 	}

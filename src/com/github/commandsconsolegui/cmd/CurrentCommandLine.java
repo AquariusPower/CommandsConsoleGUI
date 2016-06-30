@@ -52,6 +52,10 @@ public class CurrentCommandLine {
 		return strCmdLineOriginal;
 	}
 	
+	public ArrayList<String> getPreparedCmdParamsListCopy(){
+		return new ArrayList<String>(astrCmdAndParams);
+	}
+	
 	public void updateFrom(String strFullCmdLine) {
 		clear();
 		astrCmdAndParams.addAll(cd.convertToCmdParamsList(strFullCmdLine));

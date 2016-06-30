@@ -78,15 +78,26 @@ public class MiscI {
 	public static MiscI i(){return instance;}
 	
 	public Boolean parseBoolean(String strValue){
-		if(strValue.equalsIgnoreCase("true"))return new Boolean(true);
-		if(strValue.equalsIgnoreCase("1"))return new Boolean(true);
+		if(strValue.equalsIgnoreCase("true"	))return new Boolean(true);
+		if(strValue.equalsIgnoreCase("1"		))return new Boolean(true);
 		if(strValue.equalsIgnoreCase("false"))return new Boolean(false);
-		if(strValue.equalsIgnoreCase("0"))return new Boolean(false);
+		if(strValue.equalsIgnoreCase("0"		))return new Boolean(false);
 		throw new NumberFormatException("invalid boolean value: "+strValue);
 	}
 
 	public String getSimpleTime(boolean bShowMilis){
-		return "["+new SimpleDateFormat("HH:mm:ss"+(bShowMilis?".SSS":"")).format(Calendar.getInstance().getTime())+"]";
+		return getSimpleTime(null, bShowMilis);
+	}
+	public String getSimpleTime(Long lMilis, boolean bShowMilis){
+		Date date = null;
+		
+		if(lMilis==null){
+			date = Calendar.getInstance().getTime();
+		}else{
+			date = new Date(lMilis);
+		}
+		
+		return "["+new SimpleDateFormat("HH:mm:ss"+(bShowMilis?".SSS":"")).format(date)+"]";
 	}
 	
 	public String getDateTimeForFilename(){

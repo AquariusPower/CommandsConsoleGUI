@@ -131,14 +131,14 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 	public static class CfgParm<T> extends CmdConditionalStateAbs.CfgParm{
 		protected boolean	bOptionSelectionMode;
 		protected String strUIId;
-		protected boolean bIgnorePrefixAndSuffix;
+//		protected boolean bIgnorePrefixAndSuffix;
 		protected Node nodeGUI;
 //		protected BaseDialogStateAbs<T> diagParent;
 		protected boolean bInitiallyEnabled = false; //the console needs this "true"
-		public CfgParm(boolean bOptionSelectionMode, String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI){//, BaseDialogStateAbs<T> diagParent) {
-			super(strUIId, bIgnorePrefixAndSuffix);
+		public CfgParm(boolean bOptionSelectionMode, String strUIId, Node nodeGUI){//, BaseDialogStateAbs<T> diagParent) {
+			super(strUIId);
 			this.strUIId = strUIId;
-			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
+//			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
 			this.nodeGUI = nodeGUI;
 			this.bOptionSelectionMode=bOptionSelectionMode;
 //			this.diagParent=diagParent;
@@ -430,6 +430,12 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 		
 	}
 	
+	/**
+	 * Main/default action to be performed on the selected list entry.
+	 * Usually when pressing Enter or double click.
+	 * 
+	 * @param dataSelected
+	 */
 	protected abstract void actionCustomAtEntry(DialogListEntryData<T> dataSelected);
 
 	protected void updateAllParts(){

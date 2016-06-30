@@ -102,7 +102,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 		CfgParm cfg = (CfgParm)icfg;
 		if(cfg.fBaseZ!=null)this.fdvDialogBazeZ.setObjectValue(cfg.fBaseZ);
 		super.configure(new CmdConditionalStateAbs.CfgParm(
-			LemurFocusHelperStateI.class.getSimpleName(), false));
+			LemurFocusHelperStateI.class.getSimpleName()));
 //		configure();
 		
 //		MouseCursor.i().configure(null);

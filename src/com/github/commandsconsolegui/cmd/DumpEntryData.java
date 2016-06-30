@@ -29,6 +29,9 @@ package com.github.commandsconsolegui.cmd;
 
 import java.io.PrintStream;
 
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.misc.MiscI;
+
 /**
  * dump strings will always be logged to file even if disabled.
  * 
@@ -52,6 +55,11 @@ public class DumpEntryData{
 	String	strKey = null;
 	Exception	ex;
 	boolean	bImportant;
+	long	lMilis;
+	
+	public DumpEntryData() {
+		lMilis = System.currentTimeMillis();
+	}
 	
 	public boolean isApplyNewLineRequests() {
 		return bApplyNewLineRequests;
@@ -78,15 +86,21 @@ public class DumpEntryData{
 //		return strLineOriginal;
 //	}
 	
-	public String getLineFinal() {
-		String str = strKey;
-		for(int i=0;i<aobj.length;i++){
-			Object obj = aobj[i];
-			if(str.equals(strKey)){
-				str+="\n";
+	public String getLineFinal(boolean bShowObjects) {
+		String str = MiscI.i().getSimpleTime(lMilis, GlobalCommandsDelegatorI.i().btgShowMiliseconds.get());
+		
+		str+=strKey;
+		
+		if(aobj!=null && bShowObjects){
+			for(int i=0;i<aobj.length;i++){
+				Object obj = aobj[i];
+				if(str.equals(strKey)){
+					str+="\n";
+				}
+				str+="\t["+i+"]("+obj.getClass().getName()+":"+obj.toString()+")\n";
 			}
-			str+="\t["+i+"]("+obj.getClass().getName()+":"+obj.toString()+")\n";
 		}
+		
 		return str;
 	}
 	
@@ -114,7 +128,8 @@ public class DumpEntryData{
 		this.ps=ps;
 		return this;
 	}
-	public void sendToPrintStream(String strOutput){
+	public void sendToPrintStream(){
+		String strOutput=("[CCUI]"+getLineFinal(true).replace("\t","  ")); //remove tabs for better compatibility
 		if(this.ps!=null)this.ps.println(strOutput);
 	}
 	public DumpEntryData setDumpObjects(Object[] aobj) {

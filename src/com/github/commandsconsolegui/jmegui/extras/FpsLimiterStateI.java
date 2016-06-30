@@ -64,7 +64,7 @@ public class FpsLimiterStateI extends CmdConditionalStateAbs{
 	public FpsLimiterStateI configure(ICfgParm icfg) {
 		setMaxFps(60);
 		super.configure(new CmdConditionalStateAbs.CfgParm(
-			FpsLimiterStateI.class.getSimpleName(),false));
+			FpsLimiterStateI.class.getSimpleName()));
 		return storeCfgAndReturnSelf(icfg);
 	}
 	

@@ -114,7 +114,10 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 //							bConsumed=true;
 //						}else
 						{
-							GlobalCommandsDelegatorI.i().dumpDevWarnEntry("missing support for element"+capture.getName(),
+							GlobalCommandsDelegatorI.i().dumpDevWarnEntry("no support for element"+capture.getName()
+									+", but... there are two listeners, this is the mouse one, "
+									+"the cursor one is not consuming the event... "
+									+"see  PickEventSession.buttonEvent()",
 								diag, capture, cell);
 //							throw new PrerequisitesNotMetException("missing support for element "+capture.getName(), diag, capture, cell);
 						}
