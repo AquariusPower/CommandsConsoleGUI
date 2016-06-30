@@ -128,7 +128,7 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 //		}
 //	}
 	
-	public static class CfgParm<T> extends CmdConditionalStateAbs.CfgParm{
+	public static class CfgParm extends CmdConditionalStateAbs.CfgParm{
 		protected boolean	bOptionSelectionMode;
 		protected String strUIId;
 //		protected boolean bIgnorePrefixAndSuffix;
@@ -152,7 +152,7 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 	@Override
 	public BaseDialogStateAbs<T> configure(ICfgParm icfg) {
 		@SuppressWarnings("unchecked")
-		CfgParm<T> cfg = (CfgParm<T>)icfg;
+		CfgParm cfg = (CfgParm)icfg;
 //	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
 		
 		this.bOptionChoiceSelectionMode=cfg.bOptionSelectionMode;

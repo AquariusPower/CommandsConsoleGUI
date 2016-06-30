@@ -97,7 +97,7 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 		return (Container)super.getContainerMain();
 	}
 	
-	public static class CfgParm<T> extends BaseDialogStateAbs.CfgParm<T>{
+	public static class CfgParm extends BaseDialogStateAbs.CfgParm{
 		protected Float fDialogHeightPercentOfAppWindow;
 		protected Float fDialogWidthPercentOfAppWindow;
 		protected Float fInfoHeightPercentOfDialog;
@@ -131,7 +131,7 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 	@Override
 	public LemurDialogGUIStateAbs<T> configure(ICfgParm icfg) {
 		@SuppressWarnings("unchecked")
-		CfgParm<T> cfg = (CfgParm<T>)icfg;
+		CfgParm cfg = (CfgParm)icfg;
 		
 //		DialogMouseCursorListenerI.i().configure(null);
 		
@@ -182,7 +182,7 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 	@Override
 	protected boolean initGUI(){
 		@SuppressWarnings("unchecked")
-		CfgParm<T> cfg = (CfgParm<T>)getCfg();
+		CfgParm cfg = (CfgParm)getCfg();
 		
 		String strStyle = ConsoleLemurStateI.i().STYLE_CONSOLE; //TODO make it custom
 		

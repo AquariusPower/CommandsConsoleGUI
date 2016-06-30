@@ -141,7 +141,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 //			this.nodeGUI = nodeGUI;
 //		}
 //	}
-	public static class CfgParm<T> extends ConsoleStateAbs.CfgParm<T>{
+	public static class CfgParm extends ConsoleStateAbs.CfgParm{
 		public CfgParm(
 			String strUIId, 
 			int iToggleConsoleKey,
@@ -156,7 +156,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	@Override
 	public ConsoleLemurStateI<T> configure(ICfgParm icfg) {
 		@SuppressWarnings("unchecked")
-		CfgParm<T> cfg = (CfgParm<T>)icfg;
+		CfgParm cfg = (CfgParm)icfg;
 		
 //		super.icfgOfInstance = icfg;
 		

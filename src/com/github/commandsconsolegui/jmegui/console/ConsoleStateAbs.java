@@ -396,7 +396,7 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 //			this.nodeGUI = nodeGUI;
 //		}
 //	}
-	public static class CfgParm<T> extends BaseDialogStateAbs.CfgParm<T>{
+	public static class CfgParm extends BaseDialogStateAbs.CfgParm{
 		protected int iToggleConsoleKey;
 		public CfgParm(String strUIId, Node nodeGUI, int iToggleConsoleKey) {
 			super(false, strUIId, nodeGUI);//, null);
@@ -407,7 +407,7 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 	public ConsoleStateAbs<T> configure(ICfgParm icfg) {
 //	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,int iToggleConsoleKey, Node nodeGUI) {
 		@SuppressWarnings("unchecked")
-		CfgParm<T> cfg = (CfgParm<T>)icfg;
+		CfgParm cfg = (CfgParm)icfg;
 		
 		/**
 		 * The console is a special dialog.

@@ -61,7 +61,7 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 		super.bPrefixCmdWithIdToo = true;
 	}
 	
-	public static class CfgParm<T> extends LemurDialogGUIStateAbs.CfgParm<T>{
+	public static class CfgParm extends LemurDialogGUIStateAbs.CfgParm{
 		public CfgParm(boolean	bOptionSelectionMode,
 				Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow, Float fInfoHeightPercentOfDialog,
@@ -74,7 +74,7 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 	@Override
 	public CustomDialogGUIState<T> configure(ICfgParm icfg) {
 		@SuppressWarnings("unchecked")
-		CfgParm<T> cfg = (CfgParm<T>)icfg;
+		CfgParm cfg = (CfgParm)icfg;
 		cfg.setUIId(ediag.toString());
 		
 		super.configure(cfg); //params are identical
