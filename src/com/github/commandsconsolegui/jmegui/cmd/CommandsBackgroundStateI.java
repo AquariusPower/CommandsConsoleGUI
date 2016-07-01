@@ -63,8 +63,8 @@ public class CommandsBackgroundStateI extends CmdConditionalStateAbs {
 		CfgParm cfg = (CfgParm)icfg;
 		if(cfg.icui==null)throw new NullPointerException("invalid instance for "+IConsoleUI.class.getName());
 		this.cgsaGraphicalConsoleUI = cfg.icui;
-		super.configure(new CmdConditionalStateAbs.CfgParm(
-			CommandsBackgroundStateI.class.getSimpleName()));
+//		super.configure(new CmdConditionalStateAbs.CfgParm(CommandsBackgroundStateI.class.getSimpleName()));
+		super.configure(new CmdConditionalStateAbs.CfgParm(null));
 		
 		return storeCfgAndReturnSelf(icfg);
 	}

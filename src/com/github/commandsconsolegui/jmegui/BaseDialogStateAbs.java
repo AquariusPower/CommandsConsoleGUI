@@ -130,23 +130,23 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 	
 	public static class CfgParm extends CmdConditionalStateAbs.CfgParm{
 		protected boolean	bOptionSelectionMode;
-		protected String strUIId;
+//		protected String strUIId;
 //		protected boolean bIgnorePrefixAndSuffix;
 		protected Node nodeGUI;
 //		protected BaseDialogStateAbs<T> diagParent;
 		protected boolean bInitiallyEnabled = false; //the console needs this "true"
 		public CfgParm(boolean bOptionSelectionMode, String strUIId, Node nodeGUI){//, BaseDialogStateAbs<T> diagParent) {
 			super(strUIId);
-			this.strUIId = strUIId;
+//			this.strUIId = strUIId;
 //			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
 			this.nodeGUI = nodeGUI;
 			this.bOptionSelectionMode=bOptionSelectionMode;
 //			this.diagParent=diagParent;
 		}
 		public void setUIId(String strUIId){
-			if(this.strUIId!=null)throw new PrerequisitesNotMetException("UI Id already set",this.strUIId,strUIId);
-			this.strUIId=strUIId;
-			super.strId=this.strUIId;
+			if(this.strId!=null)throw new PrerequisitesNotMetException("UI Id already set",this.strId,strUIId);
+			super.strId=strUIId;
+//			super.strId=this.strUIId;
 		}
 	}
 	@Override
@@ -182,15 +182,14 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 		strCmdSuffix = "";
 		
 //		ConditionalStateManagerI.i().
-		if(cfg.strUIId==null || cfg.strUIId.isEmpty())throw new PrerequisitesNotMetException("invalid UI identifier");
-		this.strCaseInsensitiveId=cfg.strUIId;
+		if(cfg.getId()==null || cfg.getId().isEmpty())throw new PrerequisitesNotMetException("invalid UI identifier");
+//		this.strCaseInsensitiveId=cfg.strUIId;
 		
 //		this.strCmd=strCmdPrefix+strUIId+strCmdSuffix;
-		this.strTitle = "Dialog: "+cfg.strUIId;
+		this.strTitle = "Dialog: "+cfg.getId();
 //		btgShowDialog.setCustomCmdId(this.strCmd);
 		
 		super.configure(cfg);//new CmdConditionalStateAbs.CfgParm(cfg.strUIId, cfg.bIgnorePrefixAndSuffix));
-		
 		return storeCfgAndReturnSelf(icfg);
 	}
 	

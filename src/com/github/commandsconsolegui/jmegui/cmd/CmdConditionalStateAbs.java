@@ -91,6 +91,7 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 	public static class CfgParm implements ICfgParm{
 //		protected boolean bIgnorePrefixAndSuffix;
 		protected String	strId;
+		public String getId(){return strId;}
 		public CfgParm(String strCmdBaseId) {
 			super();
 			this.strId = strCmdBaseId;

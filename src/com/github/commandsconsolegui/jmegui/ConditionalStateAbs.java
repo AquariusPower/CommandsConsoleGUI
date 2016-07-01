@@ -178,15 +178,15 @@ public abstract class ConditionalStateAbs implements Savable{
 		if(cfg.app==null)throw new PrerequisitesNotMetException("app is null");
 		this.app=cfg.app;
 		
-		if(cfg.strId!=null){
-			@SuppressWarnings("unchecked") //so obvious...
-			ConditionalStateAbs csa = ConditionalStateManagerI.i().getConditionalState(
-				(Class<ConditionalStateAbs>)this.getClass(), cfg.strId);
-			
-			if(csa!=null){
-				throw new PrerequisitesNotMetException("conflicting state Id "+cfg.strId);
-			}
+		// the Unique State Id
+		if(cfg.strId==null){
+//			throw new PrerequisitesNotMetException("id cant be null");
+			cfg.strId = this.getClass().getSimpleName();
 		}
+		@SuppressWarnings("unchecked") //so obvious...
+		ConditionalStateAbs csa = ConditionalStateManagerI.i().getConditionalState(
+			(Class<ConditionalStateAbs>)this.getClass(), cfg.strId);
+		if(csa!=null)throw new PrerequisitesNotMetException("conflicting state Id "+cfg.strId);
 		this.strCaseInsensitiveId = cfg.strId;
 		
 		if(!ConditionalStateManagerI.i().attach(this)){
@@ -561,7 +561,6 @@ public abstract class ConditionalStateAbs implements Savable{
 	}
 
 	public String getId() {
-		if(strCaseInsensitiveId==null)throw new PrerequisitesNotMetException("id cant be null");
 		return strCaseInsensitiveId;
 	}
 	
