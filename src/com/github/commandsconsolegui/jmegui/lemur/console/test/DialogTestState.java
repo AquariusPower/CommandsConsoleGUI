@@ -45,7 +45,7 @@ import com.simsilica.lemur.GuiGlobals;
 /**
  * @author AquariusPower <https://github.com/AquariusPower>
  */
-public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialogGUIStateAbs<T>{
+public class DialogTestState<T extends Command<Button>> extends LemurDialogGUIStateAbs<T>{
 	StringCmdField scfAddEntry = new StringCmdField(this,null,"[strEntryText]");
 	
 	public static enum EDiag{
@@ -56,7 +56,7 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 	}
 	EDiag ediag = null;
 	
-	public CustomDialogGUIState(EDiag ediag) {
+	public DialogTestState(EDiag ediag) {
 		this.ediag=ediag;
 		super.bPrefixCmdWithIdToo = true;
 	}
@@ -72,7 +72,7 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 		}
 	}
 	@Override
-	public CustomDialogGUIState<T> configure(ICfgParm icfg) {
+	public DialogTestState<T> configure(ICfgParm icfg) {
 		@SuppressWarnings("unchecked")
 		CfgParm cfg = (CfgParm)icfg;
 		cfg.setUIId(ediag.toString());
@@ -136,7 +136,7 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 	
 	@Override
 	public void applyResultsFromModalDialog() {
-		CustomDialogGUIState<T> diagModal = getDiagModalCurrent().getDiagModal();
+		DialogTestState<T> diagModal = getDiagModalCurrent().getDiagModal();
 		T cmdAtParent = getDiagModalCurrent().getCmdAtParent();
 		ArrayList<DialogListEntryData<T>> adataToApplyResultsList = getDiagModalCurrent().getDataReferenceAtParentListCopy();
 		
@@ -181,7 +181,7 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 		@SuppressWarnings("unchecked")
 		@Override
 		public void execute(Button btn) {
-			CustomDialogGUIState.this.openModalDialog(EDiag.Cfg.toString(),getDataFrom(btn),(T)this);
+			DialogTestState.this.openModalDialog(EDiag.Cfg.toString(),getDataFrom(btn),(T)this);
 		}
 	}
 	CommandCfg cmdCfg = new CommandCfg();
@@ -194,9 +194,9 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 			
 			if(data.isParent()){
 //				CustomDialogGUIState.this.setDataToApplyModalChoice(data);
-				CustomDialogGUIState.this.openModalDialog(EDiag.Confirm.toString(), data, (T)this);
+				DialogTestState.this.openModalDialog(EDiag.Confirm.toString(), data, (T)this);
 			}else{
-				CustomDialogGUIState.this.removeEntry(data);
+				DialogTestState.this.removeEntry(data);
 			}
 		}
 	}
@@ -205,7 +205,7 @@ public class CustomDialogGUIState<T extends Command<Button>> extends LemurDialog
 	public class CommandSel implements Command<Button>{
 		@Override
 		public void execute(Button btn) {
-			CustomDialogGUIState.this.selectAndChoseOption(getDataFrom(btn));
+			DialogTestState.this.selectAndChoseOption(getDataFrom(btn));
 		}
 	}
 	CommandSel cmdSel = new CommandSel();

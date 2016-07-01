@@ -121,6 +121,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		}
 
 		public void setSuffix(String strCommandSuffix) {
+			if(strCommandSuffix==null)throw new PrerequisitesNotMetException("cant be null");
 			this.strSuffix = strCommandSuffix;
 		}
 
@@ -177,6 +178,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		}
 
 		public void setPrefixCustomId(String strPrefixCustomId) {
+			if(strPrefixCustomId==null)throw new PrerequisitesNotMetException("cant be null");
 			this.strPrefixCustomId = strPrefixCustomId;
 		}
 

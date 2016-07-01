@@ -50,9 +50,9 @@ import com.simsilica.lemur.Command;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class CustomTestI<T extends Command<Button>> extends SimpleConsoleAppAbs implements IReflexFillCfg{
-	private static CustomTestI instance = new CustomTestI();
-	public static CustomTestI i(){return instance;}
+public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs implements IReflexFillCfg{
+	private static ConsoleTestI instance = new ConsoleTestI();
+	public static ConsoleTestI i(){return instance;}
 	
 	protected boolean bHideSettings=true; 
 	
@@ -72,20 +72,20 @@ public class CustomTestI<T extends Command<Button>> extends SimpleConsoleAppAbs 
 	private StringCmdField sfTestCommandAutoFillVariant1 = new StringCmdField(this,strFieldCodePrefix);
 	private StringCmdField testCommandAutoFillPrefixLessVariant2 = new StringCmdField(this,strFieldCodePrefixLess);
 	private StringCmdField testCommandAutoFillPrefixLessVariantDefaulted3 = new StringCmdField(this,null);
-	private StringCmdField CMD_TRADITIONAL_PRETTYFIED_0 = new StringCmdField(this,CustomCommands.strFinalCmdCodePrefix);
+	private StringCmdField CMD_TRADITIONAL_PRETTYFIED_0 = new StringCmdField(this,CommandsTest.strFinalCmdCodePrefix);
 	
 //	private StringVarField svfOptionSelectedDialog2 = new StringVarField(this,"");
 	
 	// generic dialog
-	private CustomDialogGUIState<T>	diagCfg;
+	private DialogTestState<T>	diagCfg;
 
-	private CustomDialogGUIState<T>	diag;
+	private DialogTestState<T>	diag;
 
-	private CustomDialogGUIState<T>	diagConfirm;
+	private DialogTestState<T>	diagConfirm;
 
 //	private String	strOptionSelected;
 	
-	public CustomTestI() {
+	public ConsoleTestI() {
 		super();
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 	}
@@ -107,7 +107,7 @@ public class CustomTestI<T extends Command<Button>> extends SimpleConsoleAppAbs 
 	public void simpleInitApp() {
 		//////////////////////// GLOBALS
 		// the commands pipe
-		GlobalCommandsDelegatorI.iGlobal().set(new CustomCommands());
+		GlobalCommandsDelegatorI.iGlobal().set(new CommandsTest());
 		
 		// the conole UI
 		GlobalConsoleGuiI.iGlobal().set(ConsoleLemurStateI.i());
@@ -120,14 +120,14 @@ public class CustomTestI<T extends Command<Button>> extends SimpleConsoleAppAbs 
 		//////////////////////// config this test
 		
 		// test dialogs
-		diagCfg = new CustomDialogGUIState<T>(CustomDialogGUIState.EDiag.Cfg).configure(
-			new CustomDialogGUIState.CfgParm(true, 0.6f, 0.5f, null, null));//, null));
+		diagCfg = new DialogTestState<T>(DialogTestState.EDiag.Cfg).configure(
+			new DialogTestState.CfgParm(true, 0.6f, 0.5f, null, null));//, null));
 		
-		diagConfirm = new CustomDialogGUIState<T>(CustomDialogGUIState.EDiag.Confirm).configure(
-			new CustomDialogGUIState.CfgParm(true, 500f, 300f, null, null));//, diag));
+		diagConfirm = new DialogTestState<T>(DialogTestState.EDiag.Confirm).configure(
+			new DialogTestState.CfgParm(true, 500f, 300f, null, null));//, diag));
 		
-		diag = new CustomDialogGUIState<T>(CustomDialogGUIState.EDiag.List).configure(
-			new CustomDialogGUIState.CfgParm(false, null, null, null, null))//, null))
+		diag = new DialogTestState<T>(DialogTestState.EDiag.List).configure(
+			new DialogTestState.CfgParm(false, null, null, null, null))//, null))
 			.addModalDialog(diagCfg)
 			.addModalDialog(diagConfirm);
 		
@@ -142,21 +142,21 @@ public class CustomTestI<T extends Command<Button>> extends SimpleConsoleAppAbs 
 	}
 	
 	public static void main( String... args ) {
-		GlobalAppRefI.iGlobal().set(CustomTestI.i());
+		GlobalAppRefI.iGlobal().set(ConsoleTestI.i());
 		
-		if(CustomTestI.i().bHideSettings){
+		if(ConsoleTestI.i().bHideSettings){
 			AppSettings as = new AppSettings(true);
 			as.setResizable(true);
 			as.setWidth(1024);
 			as.setHeight(768);
 			//as.setFrameRate(30); //TODO are we unable to change this on-the-fly after starting the application?
-			CustomTestI.i().setSettings(as);
-			CustomTestI.i().setShowSettings(false);
+			ConsoleTestI.i().setSettings(as);
+			ConsoleTestI.i().setShowSettings(false);
 		}
 		
 		SingleAppInstanceI.i().configureOptionalAtMainMethod();
 		
-		CustomTestI.i().start();
+		ConsoleTestI.i().start();
 	}
 
 	@Override

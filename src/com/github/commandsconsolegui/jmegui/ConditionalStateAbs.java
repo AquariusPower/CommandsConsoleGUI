@@ -561,6 +561,7 @@ public abstract class ConditionalStateAbs implements Savable{
 	}
 
 	public String getId() {
+		if(strCaseInsensitiveId==null)throw new PrerequisitesNotMetException("id cant be null");
 		return strCaseInsensitiveId;
 	}
 	

@@ -27,10 +27,7 @@
 
 package com.github.commandsconsolegui.jmegui.lemur.console.test;
 
-import java.util.concurrent.Callable;
-
 import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -40,10 +37,10 @@ import com.github.commandsconsolegui.misc.ReflexFillI;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class CustomCommands extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
+public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
 //	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
 
-	public CustomCommands(){
+	public CommandsTest(){
 		super();
 		
 		/**

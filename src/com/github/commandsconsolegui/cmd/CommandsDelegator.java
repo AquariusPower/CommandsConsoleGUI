@@ -1432,7 +1432,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			}
 			
 			/**
-			 * Core conflict must be here, after the discarding happens to not store
+			 * Simple cmd conflict must be here, after the discarding happens to not store
 			 * discarded objects
 			 */
 			for(CommandData cmdd:trmCmds.values()){
