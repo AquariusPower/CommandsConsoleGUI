@@ -80,8 +80,11 @@ import com.simsilica.lemur.style.Styles;
  *
  */
 public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateAbs<T>{
-	protected static ConsoleLemurStateI instance=new ConsoleLemurStateI();
-	public static ConsoleLemurStateI i(){return instance;}
+	protected static ConsoleLemurStateI instance=null;//new ConsoleLemurStateI();
+	public static ConsoleLemurStateI i(){
+		if(instance==null)instance=new ConsoleLemurStateI<Command<Button>>();
+		return instance;
+	}
 	
 	StringVarField svfBackgroundHexaColorRGBA = new StringVarField(this,"","XXXXXXXX ex.: 'FF12BC4A' Red Green Blue Alpha");
 //	protected ConsoleMouseCursorListenerI consoleCursorListener;

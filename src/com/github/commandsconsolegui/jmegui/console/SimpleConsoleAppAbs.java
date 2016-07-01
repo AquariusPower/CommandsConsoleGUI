@@ -33,6 +33,7 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.extras.SingleAppInstanceI;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
@@ -57,7 +58,7 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
 	protected boolean bHideSettings=true; 
 	
-	protected CommandsDelegator	cd;
+//	protected CommandsDelegator	cd;
 	
 	public SimpleConsoleAppAbs() {
 		super();
@@ -69,7 +70,7 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 	
 	@Override
 	public void simpleInitApp() {
-		MiscJmeI.i().configure(cd);
+		MiscJmeI.i().configure(GlobalCommandsDelegatorI.i());
 		
 		/**
 		 * as you may not be using {@link SimpleApplication#} 
@@ -91,7 +92,7 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 			}
 		});
 		
-		cd.addConsoleCommandListener(this);
+		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
 		
 //	SingleInstanceState.i().configureBeforeInitializing(this,true);
 		SingleAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);
@@ -107,6 +108,6 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 	
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
-		return cd.getReflexFillCfg(rfcv);
+		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 	}
 }	

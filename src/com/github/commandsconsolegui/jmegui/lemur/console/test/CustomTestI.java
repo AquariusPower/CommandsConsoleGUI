@@ -91,6 +91,7 @@ public class CustomTestI<T extends Command<Button>> extends SimpleConsoleAppAbs 
 	}
 	
 	public boolean endDevCustomMethod(Integer i){
+		CommandsDelegator cd = GlobalCommandsDelegatorI.i();
 		cd.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
 		
 		cd.dumpSubEntry("CommandTest0: "+CMD_TRADITIONAL_PRETTYFIED_0);
@@ -106,7 +107,7 @@ public class CustomTestI<T extends Command<Button>> extends SimpleConsoleAppAbs 
 	public void simpleInitApp() {
 		//////////////////////// GLOBALS
 		// the commands pipe
-		cd = GlobalCommandsDelegatorI.iGlobal().set(new CustomCommands());
+		GlobalCommandsDelegatorI.iGlobal().set(new CustomCommands());
 		
 		// the conole UI
 		GlobalConsoleGuiI.iGlobal().set(ConsoleLemurStateI.i());
