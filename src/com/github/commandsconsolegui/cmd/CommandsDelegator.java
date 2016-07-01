@@ -686,21 +686,30 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			String strUniqueCmdIdWithSimpleConflict = ccl.paramString(1);
 			String strNewSimpleCmdId = ccl.paramString(2);
 			
+			boolean bFail=false;
 			CommandData data = getCmdDataFor(strUniqueCmdIdWithSimpleConflict,false);
+			if(data==null){
+				dumpWarnEntry("command not found "+strUniqueCmdIdWithSimpleConflict);
+				bFail=true;
+			}else
 			if(!data.isSimpleCmdIdConflicting()){
-				throw new PrerequisitesNotMetException(false,"cmd has no conflicts: "+data.getUniqueCmdId(), data.asHelp());
+				dumpWarnEntry("cmd has no conflicts: "+data.getUniqueCmdId(), data.asHelp());
+				bFail=true;
+			}else{
+				CommandData dataFromSimple = getCmdDataFor(strNewSimpleCmdId,true);
+				if(dataFromSimple!=null){
+					dumpWarnEntry("cmd simple already used: "+strNewSimpleCmdId, dataFromSimple.asHelp());
+					bFail=true;
+				}
 			}
 			
-			CommandData dataFromSimple = getCmdDataFor(strNewSimpleCmdId,true);
-			if(dataFromSimple!=null){
-				throw new PrerequisitesNotMetException(false,"cmd simple already used: "+strNewSimpleCmdId, dataFromSimple.asHelp());
+			if(!bFail){
+				data.fixSimpleCmdIdConflict(ccSelf, strNewSimpleCmdId);//, trmCmds.values());
+				
+				dumpSubEntry(data.asHelp());
+				
+				bCmdWorked=true;
 			}
-			
-			data.fixSimpleCmdIdConflict(ccSelf, strNewSimpleCmdId);//, trmCmds.values());
-			
-			dumpSubEntry(data.asHelp());
-			
-			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(icclPseudo,scfEditShowClipboad,"--noNL")){
 			String strParam1 = ccl.paramString(1);
