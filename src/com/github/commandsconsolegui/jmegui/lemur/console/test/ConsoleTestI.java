@@ -36,6 +36,7 @@ import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGuiI;
 import com.github.commandsconsolegui.jmegui.console.SimpleConsoleAppAbs;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
+import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -103,14 +104,27 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		return true;
 	}
 	
+	/**
+	 * 
+	 */
 	@Override
 	public void simpleInitApp() {
-		//////////////////////// GLOBALS
-		// the commands pipe
+		/**
+		 * Globals setup are actually very simple, and must come 1st!
+		 * Such classes shall have parameter-less default constructors.
+		 */
 		GlobalCommandsDelegatorI.iGlobal().set(new CommandsTest());
-		
-		// the conole UI
 		GlobalConsoleGuiI.iGlobal().set(ConsoleLemurStateI.i());
+		
+		/**
+		 * Configs:
+		 * 
+		 * Shall be simple enough to not require any exact order.
+		 * 
+		 * Anything more complex can be postponed (from withing the config itself)
+		 * with {@link CallQueueI#appendCall(java.util.concurrent.Callable)}.
+		 */
+		GlobalCommandsDelegatorI.i().configure(ConsoleLemurStateI.i());
 		ConsoleLemurStateI.i().configure(new ConsoleLemurStateI.CfgParm(
 				null, KeyInput.KEY_F10, getGuiNode()));
 		
@@ -118,7 +132,6 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		super.simpleInitApp(); // basic initializations
 		
 		//////////////////////// config this test
-		
 		// test dialogs
 		diagCfg = new DialogTestState<T>(DialogTestState.EDiag.Cfg).configure(
 			new DialogTestState.CfgParm(true, 0.6f, 0.5f, null, null));//, null));

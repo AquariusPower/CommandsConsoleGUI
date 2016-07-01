@@ -82,8 +82,6 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 			GlobalConsoleGuiI.i()));
 		
 		FpsLimiterStateI.i().configure(new FpsLimiterStateI.CfgParm());
-		UngrabMouseStateI.i().configure(new UngrabMouseStateI.CfgParm(null,null));
-		
 		btgFpsLimit.setCallOnChange(new Callable<Boolean>() {
 			@Override
 			public Boolean call() throws Exception {
@@ -91,6 +89,8 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 				return true;
 			}
 		});
+		
+		UngrabMouseStateI.i().configure(new UngrabMouseStateI.CfgParm(null,null));
 		
 		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
 		

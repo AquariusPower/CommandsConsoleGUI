@@ -406,7 +406,7 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 	@Override
 	public ConsoleStateAbs<T> configure(ICfgParm icfg) {
 //	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,int iToggleConsoleKey, Node nodeGUI) {
-		@SuppressWarnings("unchecked")
+//		@SuppressWarnings("unchecked")
 		CfgParm cfg = (CfgParm)icfg;
 		
 		/**
@@ -425,8 +425,12 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 		
 		this.iToggleConsoleKey=cfg.iToggleConsoleKey;
 //		if(cd==null)throw new NullPointerException("Missing "+CommandsDelegatorI.class.getName()+" instance (or a more specialized, like the scripting one)");
-		cd().configure(this);//,sapp);
-		cd().initialize();
+		
+//		if(!cd().isConfigured()){
+//			cd().configure(this);//,sapp);
+//		}
+//		cd().initialize();
+		
 //		cd().addConsoleCommandListener(this);
 //		this.bEnabled=true; //just to let it be initialized at startup by state manager
 //		ReflexFillI.i().assertReflexFillFieldsForOwner(this);

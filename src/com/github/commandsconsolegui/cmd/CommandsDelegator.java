@@ -53,6 +53,7 @@ import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI.CompositeControl;
 import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDbgKey;
+import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -604,8 +605,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * 
 	 * @param icc
 	 */
-	public void addConsoleCommandListener(IConsoleCommandListener icc){
+	public void addConsoleCommandListener(final IConsoleCommandListener icc){
 		if(icc==null)throw new NullPointerException("invalid null commands listener.");
+		
 		if(aConsoleCommandListenerList.contains(icc)){
 			NullPointerException ex = new NullPointerException("listener already added: "+icc.getClass().getName());
 			Throwable tw = new Throwable("Listener added at:");
@@ -613,14 +615,24 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			ex.initCause(tw);
 			throw ex;
 		}
+		
 		hmDebugListenerAddedStack.put(icc,Thread.currentThread().getStackTrace());
 		aConsoleCommandListenerList.add(icc);
 		
-		//this will let it fill the commands list for this listener
-		bFillCommandList=true;
-		icc.execConsoleCommand(this); 
-		checkCmdValidityBoolTogglers(); //so new ones will be added properly too.
-		bFillCommandList=false;
+		/**
+		 * postponed to let configurations run smoothly
+		 */
+		CallQueueI.i().appendCall(new Callable<Boolean>() {
+			@Override
+			public Boolean call() throws Exception {
+				//this will let it fill the commands list for this listener
+				bFillCommandList=true;
+				icc.execConsoleCommand(CommandsDelegator.this); 
+				checkCmdValidityBoolTogglers(); //so new ones will be added properly too.
+				bFillCommandList=false;
+				return true;
+			}
+		});
 	}
 	
 	public boolean isFillingCommandList(){
@@ -3031,11 +3043,22 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		this.icui=icui;
 //		this.sapp=sapp;
 		
+		/**
+		 * postponed to let configuration run smoothly
+		 */
+		CallQueueI.i().appendCall(new Callable<Boolean>() {
+			@Override
+			public Boolean call() throws Exception {
+				return initialize();
+			}
+		});
+		
 		bConfigured=true;
 	}
 	
-	public void initialize(){
+	protected boolean initialize(){
 		if(!bConfigured)throw new NullPointerException("not configured yet");
+		if(bInitialized)throw new NullPointerException("already initialized");
 		
 		tdDumpQueuedSlowEntry.updateTime();
 		
@@ -3102,6 +3125,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //		executeCommand(null); //to populate the array with available commands
 		
 		bInitialized=true;
+		
+		return bInitialized;
 	}
 	
 	enum ETest{
