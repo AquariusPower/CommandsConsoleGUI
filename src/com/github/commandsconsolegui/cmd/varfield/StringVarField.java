@@ -47,7 +47,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 public class StringVarField extends VarCmdFieldAbs{
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
-	private static String	strCodePrefixVariant = "sv";
+	private static String	strCodePrefixVariant = "svf";
 	private static ArrayList<StringVarField> ailvList = new ArrayList<StringVarField>();
 	
 	String strValue;

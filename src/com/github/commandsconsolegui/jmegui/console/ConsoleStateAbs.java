@@ -121,7 +121,7 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 	public final StringCmdField CMD_FONT_LIST = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
 	
 	protected String strDefaultFont = "DroidSansMono";
-	protected StringVarField	svUserFontOption = new StringVarField(this, strDefaultFont, null);
+	protected StringVarField	svfUserFontOption = new StringVarField(this, strDefaultFont, null);
 	protected int iDefaultFontSize = 12;
 	protected IntLongVarField ilvFontSize = new IntLongVarField(this, iDefaultFontSize,null);
 	
@@ -1895,7 +1895,7 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 		}else
 		if(cd.checkCmdValidity(this,CMD_DEFAULT,"will revert to default values/config/setup (use if something goes wrong)")){
 			//TODO apply all basic settings here, like font size etc
-			svUserFontOption.setObjectValue(strDefaultFont);
+			svfUserFontOption.setObjectValue(strDefaultFont);
 			ilvFontSize.setObjectValue(iDefaultFontSize);
 			bCommandWorked=cmdStyleApply(STYLE_CONSOLE);
 		}else
@@ -1921,7 +1921,7 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 	
 	@Override
 	public void dumpAllStats() {
-		cd().dumpEntry(true, cd().btgShowDeveloperInfo.get(), false,	
+		cd().dumpEntry(true, cd().btgShowDeveloperInfo.get(), false, false,	
 			MiscI.i().getSimpleTime(cd().btgShowMiliseconds.get())
 				+cd().getDevInfoEntryPrefix()+"Console stats (Dev): "+"\n"
 			
@@ -2555,7 +2555,7 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 	}
 	
 	public void prepareStyle() {
-		String strFontName=svUserFontOption.getStringValue();
+		String strFontName=svfUserFontOption.getStringValue();
 	//	if(bConsoleStyleCreated)return;
 		
 		font=null;
@@ -2580,7 +2580,7 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 //			strFontName="Console";
 //			font = app().getAssetManager().loadFont("Interface/Fonts/"+strFontName+".fnt");
 //		svUserFontOption.setObjectValue(strFontName);
-			svUserFontOption.setObjectValue(strConsoleDefaultFontName );
+			svfUserFontOption.setObjectValue(strConsoleDefaultFontName );
 		}
 	//	BitmapFont font = app().getAssetManager().loadFont("Interface/Fonts/Console512x.fnt");
 		

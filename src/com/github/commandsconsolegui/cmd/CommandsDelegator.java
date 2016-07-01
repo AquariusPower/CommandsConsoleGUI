@@ -171,14 +171,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public final StringCmdField CMD_SLEEP = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_STATS_ENABLE = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_REPEAT = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final  StringCmdField	CMD_STATS_FIELD_TOGGLE  = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final  StringCmdField	CMD_STATS_SHOW_ALL = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final  StringCmdField	CMD_TEST = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final  StringCmdField	CMD_VAR_ADD = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final  StringCmdField	CMD_VAR_SET_CMP = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final  StringCmdField	CMD_VAR_SHOW = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final  StringCmdField	CMD_RESET = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final  StringCmdField	CMD_SHOW_SETUP = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField	CMD_STATS_FIELD_TOGGLE  = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField	CMD_STATS_SHOW_ALL = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField	CMD_TEST = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField	CMD_VAR_ADD = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField	CMD_VAR_SET_CMP = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField	CMD_VAR_SHOW = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField	CMD_RESET = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField	CMD_SHOW_SETUP = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField scfClearDumpArea = new StringCmdField(this);
 	public final StringCmdField scfAlias = new StringCmdField(this);
 	public final StringCmdField scfFileShowData = new StringCmdField(this);
@@ -1231,7 +1231,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public void dumpInfoEntry(String strMessageKey, Object... aobj){
-		dumpEntry(false, btgShowInfo.get(), false, strInfoEntryPrefix+strMessageKey, aobj);
+		dumpEntry(false, btgShowInfo.get(), false, true, strInfoEntryPrefix+strMessageKey, aobj);
 	}
 	
 	public void dumpWarnEntry(String strMessageKey, Object... aobj){
@@ -1518,7 +1518,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		ArrayList<String> astr = new ArrayList<String>();
 //		if(strFilter!=null)strFilter=strFilter.substring(1);
-		for(String strVarId : getVariablesIdentifiers(true)){
+		ArrayList<String> avar = getVariablesIdentifiers(true);
+		for(String strVarId : avar){
 			if(isRestricted(strVarId) && !bRestrictedOnly)continue;
 			if(!isRestricted(strVarId) && bRestrictedOnly)continue;
 			
@@ -1534,7 +1535,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			varReport(str);
 		}
 		
-		dumpSubEntry(getCommentPrefix()+"UserVarListHashCode="+tmUserVariables.hashCode());
+		dumpSubEntry(getCommentPrefix()
+			+"UserVarListHashCode="+tmUserVariables.hashCode()+", "
+			+"Shown="+astr.size()+", "
+			+"Total="+avar.size());
 		
 		return true;
 	}
@@ -1806,7 +1810,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		for(String str:astrToDump){
 //			dumpSubEntry(str);
-			dumpEntry(false, true, false, str);
+			dumpEntry(false, true, false, false, str);
 		}
 		
 		return true;
@@ -2545,15 +2549,16 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //	}
 
 	public void dumpEntry(String strLineOriginal, Object... aobj){
-		dumpEntry(true, true, false, strLineOriginal, aobj);
+		dumpEntry(true, true, false, false, strLineOriginal, aobj);
 	}
 	
-	public void dumpEntry(boolean bApplyNewLineRequests, boolean bDump, boolean bUseSlowQueue, String strLineOriginal, Object... aobj){
+	public void dumpEntry(boolean bApplyNewLineRequests, boolean bDump, boolean bUseSlowQueue, boolean bShowTime, String strLineOriginal, Object... aobj){
 		DumpEntryData de = new DumpEntryData()
 			.setApplyNewLineRequests(bApplyNewLineRequests)
 			.setDumpToConsole(bDump)
 			.setDumpObjects(aobj)
 			.setUseSlowQueue(bUseSlowQueue)
+			.setShowTime(bShowTime)
 			.setKey(strLineOriginal);
 		
 		dumpEntry(de);
@@ -3188,7 +3193,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		for(int i=0;i<astrLines.length;i++){
 			String strLine=astrLines[i];
 			if(bShowNL && i<(astrLines.length-1))strLine+="\\n";
-			dumpEntry(false,true,false,strLine);
+			dumpEntry(false,true,false,false,strLine);
 		}
 		dumpEntry("<<<Clipboard END "+strFill);
 		if(bAddEmptyLineAfterCommand)dumpEntry("");

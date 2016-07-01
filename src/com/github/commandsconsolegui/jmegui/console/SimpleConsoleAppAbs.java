@@ -72,9 +72,6 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 	public void simpleInitApp() {
 		MiscJmeI.i().configure(GlobalCommandsDelegatorI.i());
 		
-		/**
-		 * as you may not be using {@link SimpleApplication#} 
-		 */
 		GlobalGUINodeI.iGlobal().set(getGuiNode());
 		GlobalRootNodeI.iGlobal().set(getRootNode());
 		

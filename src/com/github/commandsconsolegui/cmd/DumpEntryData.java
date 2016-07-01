@@ -56,6 +56,7 @@ public class DumpEntryData{
 	Exception	ex;
 	boolean	bImportant;
 	long	lMilis;
+	boolean	bShowTime = true;
 	
 	public DumpEntryData() {
 		lMilis = System.currentTimeMillis();
@@ -87,7 +88,11 @@ public class DumpEntryData{
 //	}
 	
 	public String getLineFinal(boolean bShowObjects) {
-		String str = MiscI.i().getSimpleTime(lMilis, GlobalCommandsDelegatorI.i().btgShowMiliseconds.get());
+		String str = "";
+		
+		if(isShowTime()){
+			str+=MiscI.i().getSimpleTime(lMilis, GlobalCommandsDelegatorI.i().btgShowMiliseconds.get());
+		}
 		
 		str+=strKey;
 		
@@ -154,6 +159,15 @@ public class DumpEntryData{
 	}
 	public Exception getException() {
 		return ex;
+	}
+
+	public DumpEntryData setShowTime(boolean bShowTime) {
+		this.bShowTime=bShowTime;
+		return this;
+	}
+	
+	public boolean isShowTime(){
+		return bShowTime;
 	}
 	
 }

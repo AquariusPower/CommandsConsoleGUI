@@ -29,15 +29,22 @@ package com.github.commandsconsolegui.jmegui.lemur.extras;
 
 import java.util.Map.Entry;
 
+import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.cmd.varfield.StringVarField;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.font.LineWrapMode;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Button.ButtonAction;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
+import com.simsilica.lemur.Insets3f;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.BorderLayout.Position;
@@ -50,7 +57,10 @@ import com.simsilica.lemur.list.CellRenderer;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryData<T>> {
+public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryData<T>>, IReflexFillCfg {
+	protected StringVarField svfTreeDepthToken = new StringVarField(this, " ", null);
+	protected BoolTogglerCmdField	btgShowTreeUId=new BoolTogglerCmdField(this,true).setCallNothingOnChange();
+	
 	public enum ECell{
 		CellClassRef
 	}
@@ -81,18 +91,40 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		}
 		
 		protected void updateTreeButton(){
-			String str = "";
+			String strDepth = "";
 			
-			if(data.isParent())str+=data.isTreeExpanded()?"[-]":"[+]";
+			String strTreeAction = data.isParent() ? 
+				(data.isTreeExpanded()?"-":"+") :
+				assignedCellRenderer.svfTreeDepthToken.getStringValue();
+			
+			String strDepthSeparator = "/";
 			
 			// tree depth
 			DialogListEntryData<T> dataParent = data.getParent();
 			while(dataParent!=null){
-				str="_"+str;
+				if(assignedCellRenderer.btgShowTreeUId.b()){
+					strDepth = dataParent.getUId()+strDepthSeparator
+						+strDepth;
+				}else{
+					strDepth = assignedCellRenderer.svfTreeDepthToken.getStringValue()
+						+strDepth;
+				}
 				dataParent = dataParent.getParent();
 			}
 			
-			btnTree.setText(str);
+			if(assignedCellRenderer.btgShowTreeUId.b()){
+				strDepth+=data.getUId()+":";
+			}
+			
+			String str = "["+strTreeAction+strDepth+"]";
+//			if(!strDepth.isEmpty() && strDepth.length()!=strDepth.trim().length()){
+//				strDepth = "["+strDepth+"]";
+//			}
+			
+			btnTree.setText(str); //it seems to auto trim the string...
+			btnTree.setInsets(new Insets3f(0, 0, 0, 10));
+			
+			if(!data.isParent())btnTree.setColor(btnTree.getShadowColor());
 		}
 		
 		@SuppressWarnings("unchecked")
@@ -221,5 +253,10 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
       ((Cell<T>)existing).update(data);
 	  }
 	  return existing;
+	}
+
+	@Override
+	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 	}
 }

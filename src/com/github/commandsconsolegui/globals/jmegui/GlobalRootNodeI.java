@@ -31,6 +31,8 @@ import com.github.commandsconsolegui.globals.GlobalHolderAbs;
 import com.jme3.scene.Node;
 
 /**
+ * As you may not be using {@link SimpleApplication#}.
+ *  
  * @author AquariusPower <https://github.com/AquariusPower>
  */
 public class GlobalRootNodeI extends GlobalHolderAbs<Node> {

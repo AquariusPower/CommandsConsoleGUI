@@ -214,7 +214,7 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 						for(String str:astr){
 							str=strSubEntryPrefix+strSubEntryPrefix+str+getCommandDelimiter();
 //								dumpSubEntry("\t"+str+getCommandDelimiter());
-							dumpEntry(false, true, false, str);
+							dumpEntry(false, true, false, false, str);
 						}
 						dumpSubEntry(getCommandPrefixStr()+CMD_FUNCTION_END+getCommandDelimiter());
 						bCommandWorked=true;
