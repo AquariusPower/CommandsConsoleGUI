@@ -123,9 +123,13 @@ public class ConditionalStateManagerI extends AbstractAppState {
 	@Override
 	public void cleanup() {
 //		if(!bApplicationIsExiting){
-		if(!GlobalAppRefI.iGlobal().isApplicationExiting()){
-			throw new PrerequisitesNotMetException("this state MUST never be terminated/cleaned! "+ConditionalStateManagerI.class.getName());
-		}
+//		if(false){ //dummyfied
+			if(!GlobalAppRefI.iGlobal().isApplicationExiting()){
+				throw new PrerequisitesNotMetException("this state MUST never be terminated/cleaned! "+ConditionalStateManagerI.class.getName());
+			}
+//		}
+		
+//		GlobalAppRefI.iGlobal().setAppExiting();
 	}
 	
 	public boolean attach(ConditionalStateAbs casToAttach){

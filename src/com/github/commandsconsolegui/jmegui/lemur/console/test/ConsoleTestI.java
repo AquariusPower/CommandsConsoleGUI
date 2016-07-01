@@ -220,4 +220,5 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		return rfcfg;
 	}
 	
+	
 }	

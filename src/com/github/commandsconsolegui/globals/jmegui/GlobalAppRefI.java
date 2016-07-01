@@ -57,10 +57,12 @@ public class GlobalAppRefI extends GlobalHolderAbs<Application>{
 //		return super.set(obj);
 //	}
 
-	private boolean	bExiting;
+	private boolean	bExiting=false;
 	
-	public void setAppExiting(boolean b){
-		this.bExiting=b;
+	public void setAppExiting(){
+		System.err.println("Exiting... "+GlobalAppRefI.class.getName());
+//		Thread.dumpStack();
+		this.bExiting=true;
 	}
 	
 	public boolean isApplicationExiting(){

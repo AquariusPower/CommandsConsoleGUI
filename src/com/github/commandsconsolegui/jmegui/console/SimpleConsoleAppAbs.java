@@ -56,7 +56,8 @@ import com.jme3.app.state.AppState;
 */
 public abstract class SimpleConsoleAppAbs extends SimpleApplication implements IConsoleCommandListener, IReflexFillCfg {
 	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
-	protected boolean bHideSettings=true; 
+	protected boolean bHideSettings=true;
+	private boolean	bStopping; 
 	
 //	protected CommandsDelegator	cd;
 	
@@ -95,12 +96,23 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 		SingleAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);
 	}
 	
+	/**
+	 * PUT NOTHING HERE!
+	 * Override just to tell you this: put stuff at {@link #destroy()}
+	 */
 	@Override
 	public void stop(boolean waitFor) {
-		GlobalAppRefI.iGlobal().setAppExiting(true);
-//		ConditionalStateManagerI.i().applicationIsExiting();
-//		UngrabMouseStateI.i().applicationIsExiting();
 		super.stop(waitFor);
+	}
+	
+	/**
+	 * this is called when window is closed using close button too
+	 */
+	@Override
+	public void destroy() {
+		GlobalAppRefI.iGlobal().setAppExiting();
+//		if(!bStopping)stop();//		GlobalAppRefI.iGlobal().setAppExiting();
+		super.destroy();
 	}
 	
 	@Override
