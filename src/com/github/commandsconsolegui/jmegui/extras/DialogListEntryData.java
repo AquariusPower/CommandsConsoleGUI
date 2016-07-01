@@ -51,33 +51,24 @@ import com.jme3.export.Savable;
  * @param <T> is the action class for buttons
  */
 public class DialogListEntryData<T> implements Savable{
-	protected static String strLastUId = "0";
+	protected static String strLastUniqueId = "0";
 	
-	private String	strUId;
+	private String	strUniqueId;
 	
-	public DialogListEntryData() {
-		this.strUId = DialogListEntryData.strLastUId = (MiscI.i().getNextUniqueId(strLastUId));
-	}
-	
-	
-	
-//	public static enum EEntryType{
-//		NormalData,
-//		BlankSeparator,
-//		SectionTitleParent, //so it may contain children
-//	}
+	HashMap<String,T> hmCustomButtonsActions = new HashMap<String,T>();
+	T	objUser;
 	
 	DialogListEntryData<T> parent; //it must be set as the parent type too
 	boolean bTreeExpanded = false; 
-//	EEntryType eType = EEntryType.NormalData;
 	ArrayList<DialogListEntryData<T>> aChildList = new ArrayList<DialogListEntryData<T>>();
-	
-	HashMap<String,T> hmCustomButtonsActions = new HashMap<String,T>();
-	T	actionTextDoubleClick;
 	
 //	int iKey;
 	String strText;
-//	Object objRef;
+//	T objRef;
+	
+	public DialogListEntryData() {
+		this.strUniqueId = DialogListEntryData.strLastUniqueId = (MiscI.i().getNextUniqueId(strLastUniqueId));
+	}
 	
 	public DialogListEntryData<T> addCustomButtonAction(String strLabelTextId, T action){
 		hmCustomButtonsActions.put(strLabelTextId,action);
@@ -103,16 +94,17 @@ public class DialogListEntryData<T> implements Savable{
 	public String getText() {
 		return strText;
 	}
-	public T getActionTextDoubleClick(){
-		return this.actionTextDoubleClick;
+	public T getUserObj(){
+		return this.objUser;
 	}
 	public DialogListEntryData<T> updateTextTo(String strText) {
 		this.strText=strText;
 		return this;
 	}
-	public DialogListEntryData<T> setText(String strText, T actionDoubleClick) {
+	public DialogListEntryData<T> setText(String strText, T objUser) {
 		this.strText = strText;
-		this.actionTextDoubleClick=actionDoubleClick;
+		this.objUser=objUser;
+//		this.objRef=objReference;
 		return this;
 	}
 //	public Object getRef() {
@@ -121,6 +113,10 @@ public class DialogListEntryData<T> implements Savable{
 //	public DialogListEntryData<T> setRef(Object objRef) {
 //		this.objRef = objRef;
 //		return this;
+//	}
+	
+//	public T getAction(){
+//		return objRef;
 //	}
 	
 	@Override
@@ -212,7 +208,7 @@ public class DialogListEntryData<T> implements Savable{
 	}
 
 	public String getUId() {
-		return strUId;
+		return strUniqueId;
 	}
 
 //	public void setUId(String strUId) {

@@ -118,7 +118,7 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 									+", but... there are two listeners, this is the mouse one, "
 									+"the cursor one is not consuming the event... "
 									+"see  PickEventSession.buttonEvent()",
-								diag, capture, cell);
+								diag, capture, cell); //TODO implement multi-click at the other listener flow?
 //							throw new PrerequisitesNotMetException("missing support for element "+capture.getName(), diag, capture, cell);
 						}
 					}

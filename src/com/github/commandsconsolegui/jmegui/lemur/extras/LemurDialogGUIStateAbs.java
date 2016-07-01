@@ -331,24 +331,6 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 		return	vlVisibleEntriesList.get(iSel);
 	}
 	
-	/**
-	 * call {@link #updateList(ArrayList)} from the method overriding this
-	 */
-	@Override
-	protected void updateList(){
-		updateList(adleCompleteEntriesList);
-		
-		// update visible rows
-		updateEntryHeight();
-		iVisibleRows = (int) (v3fEntryListSize.y/iEntryHeightPixels);
-		lstbxEntriesToSelect.setVisibleItems(iVisibleRows);
-		if(vlVisibleEntriesList.size()>0){
-			if(getSelectedEntryData()==null){
-				selectRelativeEntry(0);
-			}
-		}
-	}
-	
 	protected void updateEntryHeight(){
 		//TODO use font height? or button height?
 		iEntryHeightPixels = 20; //blind placeholder
@@ -363,19 +345,20 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 //		selectionModel.setSelection(-1);
 	}
 	
-	/**
-	 * basic functionality
-	 * 
-	 * @param aValueList
-	 */
-	protected void updateList(ArrayList<DialogListEntryData<T>> adle){
+	///**
+	//* call {@link #updateList(ArrayList)} from the method overriding this
+	//*/
+	
+	@Override
+	protected void updateList(){
+//		updateList(adleCompleteEntriesList);
 		DialogListEntryData<T> dleLastSelectedTmp = dleLastSelected;
 		
 		resetList();
 		
 		sortEntries();
 		
-		for(DialogListEntryData<T> dle:adle){
+		for(DialogListEntryData<T> dle:adleCompleteEntriesList){
 			if(!strLastFilter.isEmpty()){
 				if(dle.getText().toLowerCase().contains(strLastFilter)){
 					vlVisibleEntriesList.add(dle);
@@ -391,12 +374,26 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 			}
 		}
 		
-		if(dleLastSelectedTmp!=null){
-//			int i = getSelectedIndex();
-			int i = vlVisibleEntriesList.indexOf(dleLastSelectedTmp);
-			if(i>=0)setSelectedEntryIndex(i);//selectionModel.setSelection(i);
+		updateSelected(dleLastSelectedTmp);
+		
+		// update visible rows
+		updateEntryHeight();
+		iVisibleRows = (int) (v3fEntryListSize.y/iEntryHeightPixels);
+		lstbxEntriesToSelect.setVisibleItems(iVisibleRows);
+		if(vlVisibleEntriesList.size()>0){
+			if(getSelectedEntryData()==null){
+				selectRelativeEntry(0);
+			}
 		}
 	}
+	
+//	/**
+//	 * basic functionality
+//	 * 
+//	 * @param aValueList
+//	 */
+//	protected void updateList(ArrayList<DialogListEntryData<T>> adle){
+//	}
 	
 	/**
 	 * for entry visibility
@@ -781,13 +778,14 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 	public abstract boolean execActionFor(EMouseCursorButton e, Spatial capture);
 
 	public void removeEntry(DialogListEntryData<T> data){
-		int iDataAboveIndex = -1;
+//		int iDataAboveIndex = -1;
 		DialogListEntryData<T> dataAboveTmp = null;
 		if(getSelectedEntryData().equals(data)){
-			iDataAboveIndex = adleCompleteEntriesList.indexOf(data)-1;
-			if(iDataAboveIndex>=0)dataAboveTmp = adleCompleteEntriesList.get(iDataAboveIndex);
+//			iDataAboveIndex = adleCompleteEntriesList.indexOf(data)-1;
+//			if(iDataAboveIndex>=0)dataAboveTmp = adleCompleteEntriesList.get(iDataAboveIndex);
+			dataAboveTmp = getAbove(data);
 		}
-		final DialogListEntryData<T> dataAbove = dataAboveTmp;
+		DialogListEntryData<T> dataParentTmp = data.getParent();
 		
 		for(DialogListEntryData<T> dataChild:data.getChildrenCopy()){
 			removeEntry(dataChild);
@@ -799,38 +797,78 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 		
 		data.setParent(null);
 		
-		if(dataAbove!=null){
-//			int iNext = iDataAboveIndex+1;
-//			if(iNext<vlEntriesList.size()){
-//				dleLastSelected = (vlEntriesList.get(iNext));
-//			}
-			
-//			setSelectedEntryIndex(iDataAboveIndex+1);
-			
-//			selectEntry(dataAbove);
-//			
-			/**
-			 * need to wait it actually get selected
-			 */
-			CallQueueI.i().appendCall(new Callable<Boolean>() {
-				@Override
-				public Boolean call() throws Exception {
-					if(!vlVisibleEntriesList.contains(dataAbove))return true;
+		if(dataAboveTmp!=null){
+			updateSelected(dataAboveTmp,dataParentTmp);
+		}
+		
+		requestRefreshList();
+	}
+	
+	protected DialogListEntryData<T> getAbove(DialogListEntryData<T> data){
+		int iDataAboveIndex = adleCompleteEntriesList.indexOf(data)-1;
+		if(iDataAboveIndex>=0){
+			return adleCompleteEntriesList.get(iDataAboveIndex);
+		}
+		return null;
+	}
+	protected void updateSelected(DialogListEntryData<T> dataPreviouslySelected){
+		if(dataPreviouslySelected==null)return;
+		
+		int i = vlVisibleEntriesList.indexOf(dataPreviouslySelected);
+		if(i>=0){
+			setSelectedEntryIndex(i);//selectionModel.setSelection(i);
+		}else{
+			updateSelected(getAbove(dataPreviouslySelected), dataPreviouslySelected.getParent());
+		}
+	}
+	protected void updateSelected(final DialogListEntryData<T> dataAbove, final DialogListEntryData<T> dataParentTmp){
+		/**
+		 * need to wait it actually get selected
+		 */
+		CallQueueI.i().appendCall(new Callable<Boolean>() {
+			@Override
+			public Boolean call() throws Exception {
+				DialogListEntryData<T> dataParent = dataParentTmp;
+				
+				if(vlVisibleEntriesList.contains(dataAbove)){
+					if(dataAbove.equals(dataParent)){
+						if(!dataParent.isTreeExpanded()){ //was collapsed
+							selectEntry(dataParent);
+							return true;
+						}
+					}
 					
 					if(getSelectedEntryData().equals(dataAbove)){
+						/**
+						 * select the below one
+						 * no problem if it was at the end of the list
+						 */
 						selectRelativeEntry(+1);
 						return true;
 					}
 					
-					selectEntry(dataAbove);
+					selectEntry(dataAbove); //prepare to retry
 					
 					return false; //will retry
+				}else{ //use parent
+					while(true){
+						if(dataParent==null)break;
+						
+						if(vlVisibleEntriesList.contains(dataParent)){
+							/**
+							 * useful when collapsing a tree branch
+							 */
+							selectEntry(dataParent);
+							break;
+						}
+						
+						dataParent = dataParent.getParent();
+					}
+					
+					return true;
 				}
-			});
-			
-		}
-		
-		requestRefreshList();
+			}
+		});
 	}
 	
 }
