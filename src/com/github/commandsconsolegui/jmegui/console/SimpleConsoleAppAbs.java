@@ -45,6 +45,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.app.SimpleApplication;
+import com.jme3.app.state.AppState;
 
 
 /**
@@ -57,6 +58,14 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 	protected boolean bHideSettings=true; 
 	
 	protected CommandsDelegator	cd;
+	
+	public SimpleConsoleAppAbs() {
+		super();
+	}
+	
+  public SimpleConsoleAppAbs(AppState... initialStates) {
+    super(initialStates);
+  }
 	
 	@Override
 	public void simpleInitApp() {

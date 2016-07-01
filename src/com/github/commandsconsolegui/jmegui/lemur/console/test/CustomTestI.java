@@ -86,6 +86,7 @@ public class CustomTestI<T extends Command<Button>> extends SimpleConsoleAppAbs 
 //	private String	strOptionSelected;
 	
 	public CustomTestI() {
+		super();
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 	}
 	

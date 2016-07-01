@@ -352,7 +352,7 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 	@Override
 	protected void updateList(){
 //		updateList(adleCompleteEntriesList);
-		DialogListEntryData<T> dleLastSelectedTmp = dleLastSelected;
+		DialogListEntryData<T> dleLastSelectedBkp = dleLastSelected; 
 		
 		resetList();
 		
@@ -374,7 +374,7 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 			}
 		}
 		
-		updateSelected(dleLastSelectedTmp);
+		updateSelected(dleLastSelectedBkp);
 		
 		// update visible rows
 		updateEntryHeight();
