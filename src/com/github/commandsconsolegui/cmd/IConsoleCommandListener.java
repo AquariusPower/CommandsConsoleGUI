@@ -39,6 +39,13 @@ public interface IConsoleCommandListener{
 	 * Any class can implement commands.
 	 * The main requirement is that the listener is registered with:
 	 * {@link CommandsDelegator#addConsoleCommandListener(IConsoleCommandListener)}
+	 * 
+	 * This will be called in two moments:
+	 *  1) during configuration/initialization of related class. The commands will not be 
+	 *   executed. At this time, the class specific initializations should be skippable.
+	 *   Use {@link CommandsDelegator#isFillingCommandList()} to know if this flow is being run.
+	 *   
+	 *  2) normally when executing a console command.
 	 */
 	public abstract ECmdReturnStatus execConsoleCommand(CommandsDelegator ccRequester);
 }

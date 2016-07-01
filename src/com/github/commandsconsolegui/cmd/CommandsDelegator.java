@@ -623,6 +623,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		bFillCommandList=false;
 	}
 	
+	public boolean isFillingCommandList(){
+		return bFillCommandList;
+	}
+	
 	public static enum ECmdReturnStatus{
 		FoundAndWorked,
 		FoundAndFailedGracefully,

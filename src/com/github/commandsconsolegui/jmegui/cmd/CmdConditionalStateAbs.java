@@ -51,7 +51,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
  *
  */
 public abstract class CmdConditionalStateAbs extends ConditionalStateAbs implements IConsoleCommandListener, IReflexFillCfg {
-	private CommandsDelegator cd;
+//	private CommandsDelegator cd;
 	
 	StringCmdField scfRestart = new StringCmdField(this,null);
 //	private StringCmdField cmdState = null;
@@ -64,11 +64,16 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 		// TODO Auto-generated constructor stub
 	}
 	
-	public CommandsDelegator getCmdDelegator(){
-		return cd();
-	}
+//	public CommandsDelegator getCmdDelegator(){
+//		return cd();
+//	}
+	/**
+	 * short/easy access
+	 * @return
+	 */
 	public CommandsDelegator cd(){
-		return cd;
+//		return cd;
+		return GlobalCommandsDelegatorI.i();
 	}
 	
 	public String getCmd(){
@@ -98,7 +103,7 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 		
 		super.configure(new ConditionalStateAbs.CfgParm(GlobalAppRefI.i(),cfg.strId));
 		
-		cd=GlobalCommandsDelegatorI.i();
+//		cd=GlobalCommandsDelegatorI.i();
 		
 //		if(cfg.strId==null || cfg.strId.isEmpty())throw new NullPointerException("invalid cmd id");
 //		String strCmdIdentifier = "";
@@ -107,7 +112,7 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 //		if(!cfg.bIgnorePrefixAndSuffix)strCmdIdentifier+=strCmdSuffix;
 //		cmdState = new StringCmdField(strCmdIdentifier,"[bEnabledForce]");
 		
-		cd.addConsoleCommandListener(this);
+		cd().addConsoleCommandListener(this);
 		
 		btgState.setCallOnChange(new Callable<Boolean>() {
 			@Override
@@ -125,7 +130,7 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 	
 	@Override
 	protected boolean initCheckPrerequisites() {
-		if(!cd.isInitialized())return false;
+		if(!cd().isInitialized())return false;
 		return super.initCheckPrerequisites();
 	}
 	
@@ -211,7 +216,7 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
 	protected boolean enableOrUndo() {
 		if(!super.enableOrUndo())return false;
 		
-		cd.dumpInfoEntry(getCmd()+" enabled");
+		cd().dumpInfoEntry(getCmd()+" enabled");
 		
 		return true;
 	}
@@ -222,7 +227,7 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
 		
 		btgState.set(false,false);
 		
-		cd.dumpInfoEntry(getCmd()+" disabled");
+		cd().dumpInfoEntry(getCmd()+" disabled");
 		
 		return true;
 	}
@@ -233,7 +238,7 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		ReflexFillCfg rfcfg = null;
 		
-		ReflexFillCfg rfcfgBase = cd.getReflexFillCfg(rfcv);
+		ReflexFillCfg rfcfgBase = cd().getReflexFillCfg(rfcv);
 		if(rfcfgBase!=null){
 			rfcfg = new ReflexFillCfg(rfcfgBase,rfcv);
 			
