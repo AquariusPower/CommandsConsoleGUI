@@ -124,7 +124,9 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			btnTree.setText(str); //it seems to auto trim the string...
 			btnTree.setInsets(new Insets3f(0, 0, 0, 10));
 			
-			if(!data.isParent())btnTree.setColor(btnTree.getShadowColor());
+			if(!assignedCellRenderer.diagParent.isOptionSelectionMode()){
+				if(!data.isParent())btnTree.setColor(btnTree.getShadowColor());
+			}
 		}
 		
 		@SuppressWarnings("unchecked")

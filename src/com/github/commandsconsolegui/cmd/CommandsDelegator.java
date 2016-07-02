@@ -993,6 +993,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			if(!bFillCommandList){ //when each listener is added, they already fill the list!
 				for(IConsoleCommandListener icc:aConsoleCommandListenerList){
 					ECmdReturnStatus ecrs = icc.execConsoleCommand(this);
+						
+					if(ecrs==null){
+						throw new PrerequisitesNotMetException("return status cannot be null", icc);
+					}
+						
 					switch(ecrs){
 						case NotFound:
 						case Skip:
