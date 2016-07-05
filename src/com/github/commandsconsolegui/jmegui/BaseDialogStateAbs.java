@@ -419,11 +419,13 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 				requestDisable(); //close if there is one entry selected
 			}
 		}else{
-			if(dataSelected.isParent()){
-				dataSelected.toggleExpanded();
-				requestRefreshList();
-			}else{
-				actionCustomAtEntry(dataSelected);
+			if(dataSelected!=null){
+				if(dataSelected.isParent()){
+					dataSelected.toggleExpanded();
+					requestRefreshList();
+				}else{
+					actionCustomAtEntry(dataSelected);
+				}
 			}
 		}
 		
