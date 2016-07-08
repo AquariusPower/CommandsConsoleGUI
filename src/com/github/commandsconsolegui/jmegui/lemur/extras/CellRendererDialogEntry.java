@@ -57,7 +57,7 @@ import com.simsilica.lemur.list.CellRenderer;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryData<T>>, IReflexFillCfg {
+public class CellRendererDialogEntry<T extends Command<Button>> implements CellRenderer<DialogListEntryData<T>>, IReflexFillCfg {
 	protected StringVarField svfTreeDepthToken = new StringVarField(this, " ", null);
 	protected BoolTogglerCmdField	btgShowTreeUId=new BoolTogglerCmdField(this,false).setCallNothingOnChange();
 	
@@ -75,7 +75,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 //		this.bOptionChoiceMode=bOptionChoiceMode;
 	}
 	
-	public static class Cell<T> extends Container{
+	public static class Cell<T extends Command<Button>> extends Container{
 		private Button	btnText;
 		private Button	btnTree;
 		
