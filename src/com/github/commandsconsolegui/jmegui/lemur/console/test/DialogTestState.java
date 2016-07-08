@@ -270,7 +270,7 @@ public class DialogTestState<T extends Command<Button>> extends LemurDialogGUISt
 			String strParentUId = cd.getCurrentCommandLine().paramString(2);
 			
 			DialogListEntryData<T> dleParent = null;
-			for(DialogListEntryData<T> dle:adleCompleteEntriesList){
+			for(DialogListEntryData<T> dle:super.getListCopy()){
 				if(dle.getUId().equalsIgnoreCase(strParentUId)){
 					dleParent=dle;
 					break;

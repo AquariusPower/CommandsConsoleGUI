@@ -869,5 +869,13 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 			}
 		});
 	}
+
+	public void clearList() {
+		adleCompleteEntriesList.clear();
+	}
+
+	public ArrayList<DialogListEntryData<T>> getListCopy() {
+		return new ArrayList<DialogListEntryData<T>>(adleCompleteEntriesList);
+	}
 	
 }
