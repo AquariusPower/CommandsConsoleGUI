@@ -191,7 +191,8 @@ public class DialogTestState<T extends Command<Button>> extends LemurDialogGUISt
 //				+", "
 				+System.nanoTime();
 		}
-		dle.setText(strText,(T)cmdCfg);
+//		dle.setText(strText, cmdCfg);
+		dle.setText(strText, null);
 		
 		if(bOptionChoiceSelectionMode){
 			dle.addCustomButtonAction("<-",(T)cmdSel);
@@ -270,7 +271,7 @@ public class DialogTestState<T extends Command<Button>> extends LemurDialogGUISt
 			String strParentUId = cd.getCurrentCommandLine().paramString(2);
 			
 			DialogListEntryData<T> dleParent = null;
-			for(DialogListEntryData<T> dle:adleCompleteEntriesList){
+			for(DialogListEntryData<T> dle:super.getListCopy()){
 				if(dle.getUId().equalsIgnoreCase(strParentUId)){
 					dleParent=dle;
 					break;

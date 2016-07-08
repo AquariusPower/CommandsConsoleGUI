@@ -56,7 +56,7 @@ public class DialogListEntryData<T> implements Savable{
 	private String	strUniqueId;
 	
 	HashMap<String,T> hmCustomButtonsActions = new HashMap<String,T>();
-	T	objUser;
+	Object	objUser;
 	
 	DialogListEntryData<T> parent; //it must be set as the parent type too
 	boolean bTreeExpanded = false; 
@@ -94,14 +94,21 @@ public class DialogListEntryData<T> implements Savable{
 	public String getText() {
 		return strText;
 	}
-	public T getUserObj(){
+	public Object getUserObj(){
 		return this.objUser;
 	}
 	public DialogListEntryData<T> updateTextTo(String strText) {
 		this.strText=strText;
 		return this;
 	}
-	public DialogListEntryData<T> setText(String strText, T objUser) {
+	
+	/**
+	 * 
+	 * @param strText 
+	 * @param objUser the linked object represented by the text
+	 * @return
+	 */
+	public DialogListEntryData<T> setText(String strText, Object objUser) {
 		this.strText = strText;
 		this.objUser=objUser;
 //		this.objRef=objReference;
