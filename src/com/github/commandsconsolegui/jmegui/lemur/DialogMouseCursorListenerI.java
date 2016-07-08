@@ -80,7 +80,7 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 								case 1:
 									MultiClickCondStateI.i().updateActivator(ECallMode.OncePromptly, capture, new Callable<Boolean>() {
 										@Override public Boolean call() throws Exception {
-											diag.selectEntry(cell.getData());
+											diag.selectEntry(cell.getDialogListEntryData());
 											return true;
 										}
 									});
@@ -90,9 +90,9 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 									MultiClickCondStateI.i().updateActivator(ECallMode.OnceAfterDelay, capture, new Callable<Boolean>() {
 										@Override public Boolean call() throws Exception {
 											if(diag.isOptionSelectionMode()){
-												diag.selectAndChoseOption(cell.getData());
+												diag.selectAndChoseOption(cell.getDialogListEntryData());
 											}else{
-												diag.execTextDoubleClickActionFor(cell.getData());
+												diag.execTextDoubleClickActionFor(cell.getDialogListEntryData());
 //												diag.openCfgDataDialog(cell.getData());
 											}
 											return true;

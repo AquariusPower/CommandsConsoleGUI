@@ -59,7 +59,7 @@ import com.simsilica.lemur.list.CellRenderer;
  */
 public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryData<T>>, IReflexFillCfg {
 	protected StringVarField svfTreeDepthToken = new StringVarField(this, " ", null);
-	protected BoolTogglerCmdField	btgShowTreeUId=new BoolTogglerCmdField(this,true).setCallNothingOnChange();
+	protected BoolTogglerCmdField	btgShowTreeUId=new BoolTogglerCmdField(this,false).setCallNothingOnChange();
 	
 	public enum ECell{
 		CellClassRef
@@ -81,39 +81,39 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		
 //		private Button	btnCfg;
 //		private Button btnSelect;
-		private DialogListEntryData<T>	data;
+		private DialogListEntryData<T>	dled;
 		private CellRendererDialogEntry<T>	assignedCellRenderer;
 		private String	strPrefix = "Cell";
 		private Container	cntrCustomButtons;
 		
-		public DialogListEntryData<T> getData(){
-			return data;
+		public DialogListEntryData<T> getDialogListEntryData(){
+			return dled;
 		}
 		
 		protected void updateTreeButton(){
 			String strDepth = "";
 			
-			String strTreeAction = data.isParent() ? 
-				(data.isTreeExpanded()?"-":"+") :
+			String strTreeAction = dled.isParent() ? 
+				(dled.isTreeExpanded()?"-":"+") :
 				assignedCellRenderer.svfTreeDepthToken.getStringValue();
 			
 			String strDepthSeparator = "/";
 			
 			// tree depth
-			DialogListEntryData<T> dataParent = data.getParent();
-			while(dataParent!=null){
+			DialogListEntryData<T> dledParent = dled.getParent();
+			while(dledParent!=null){
 				if(assignedCellRenderer.btgShowTreeUId.b()){
-					strDepth = dataParent.getUId()+strDepthSeparator
+					strDepth = dledParent.getUId()+strDepthSeparator
 						+strDepth;
 				}else{
 					strDepth = assignedCellRenderer.svfTreeDepthToken.getStringValue()
 						+strDepth;
 				}
-				dataParent = dataParent.getParent();
+				dledParent = dledParent.getParent();
 			}
 			
 			if(assignedCellRenderer.btgShowTreeUId.b()){
-				strDepth+=data.getUId()+":";
+				strDepth+=dled.getUId();//+":";
 			}
 			
 			String str = "["+strTreeAction+strDepth+"]";
@@ -125,29 +125,29 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			btnTree.setInsets(new Insets3f(0, 0, 0, 10));
 			
 			if(!assignedCellRenderer.diagParent.isOptionSelectionMode()){
-				if(!data.isParent())btnTree.setColor(btnTree.getShadowColor());
+				if(!dled.isParent())btnTree.setColor(btnTree.getShadowColor());
 			}
 		}
 		
 		@SuppressWarnings("unchecked")
-		public Cell(CellRendererDialogEntry<T> parentCellRenderer, DialogListEntryData<T> dataToSet){
+		public Cell(CellRendererDialogEntry<T> parentCellRenderer, DialogListEntryData<T> dledToSet){
 			super(new BorderLayout(), parentCellRenderer.strStyle);
 			
 			this.setName(strPrefix+"MainContainer");
 			
 			this.assignedCellRenderer=parentCellRenderer;
-			this.data=dataToSet;
+			this.dled=dledToSet;
 			
 			btnTree = createButton("Tree", "?", this, Position.West);
 			btnTree.addCommands(ButtonAction.Click, ctt);
 			btnTree.setUserData(Cell.class.getName(), this);
 			
-			btnText = createButton("Text", this.data.getText(), this, Position.Center);
+			btnText = createButton("Text", this.dled.getText(), this, Position.Center);
 			
 			cntrCustomButtons = new Container(new SpringGridLayout(),assignedCellRenderer.strStyle);
 			addChild(cntrCustomButtons,Position.East);
 			
-			update(this.data);
+			update(this.dled);
 		}
 		
 		static class CommandTreeToggle implements Command<Button>{
@@ -156,8 +156,8 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 				@SuppressWarnings("rawtypes")
 				Cell cell = (Cell)source.getUserData(Cell.class.getName());
 				
-				if(cell.data.isParent()){
-					cell.data.toggleExpanded();
+				if(cell.dled.isParent()){
+					cell.dled.toggleExpanded();
 					cell.assignedCellRenderer.diagParent.requestRefreshList();
 				}
 				cell.updateTreeButton();
@@ -166,24 +166,24 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		CommandTreeToggle ctt = new CommandTreeToggle();
 		
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public void update(DialogListEntryData<T> data){
-			DialogListEntryData<T> dataOld = this.data;
-			this.data=data;
+		public void update(DialogListEntryData<T> dled){
+			DialogListEntryData<T> dataOld = this.dled;
+			this.dled=dled;
 			
 			// tree button
 			updateTreeButton();
 			
 			// entry text
-			btnText.setText(data.getText());
+			btnText.setText(dled.getText());
 			
 			// custom buttons
 			boolean bButtonsChanged = false;
 			
-			if(this.data.equals(dataOld))bButtonsChanged=true;//1st update is self
+			if(this.dled.equals(dataOld))bButtonsChanged=true;//1st update is self
 			
 			if(!bButtonsChanged){
 				Entry[] entryOldList = dataOld.getCustomButtonsActionsListCopy();
-				Entry[] entryList = this.data.getCustomButtonsActionsListCopy();
+				Entry[] entryList = this.dled.getCustomButtonsActionsListCopy();
 				if(entryOldList.length==entryList.length){
 					for(int i=0;i<entryList.length;i++){
 						Entry entryOld = entryOldList[i];
@@ -202,7 +202,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			}
 			
 			if(bButtonsChanged){
-				Entry[] eList = this.data.getCustomButtonsActionsListCopy();
+				Entry[] eList = this.dled.getCustomButtonsActionsListCopy();
 				cntrCustomButtons.clearChildren();
 				for(int i=eList.length-1;i>=0;i--){
 					Entry<String, T> entry = eList[i];
@@ -225,7 +225,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			MiscJmeI.i().retrieveBitmapTextFor(btn).setLineWrapMode(LineWrapMode.NoWrap);
 			btn.setName(strPrefix+"Button"+strId);
 			btn.setUserData(ECell.CellClassRef.toString(),this);
-			btn.setUserData(data.getClass().getName(), data);
+			btn.setUserData(dled.getClass().getName(), dled);
 			CursorEventControl.addListenersToSpatial(btn, DialogMouseCursorListenerI.i());
 			cntr.addChild(btn,aobjConstraints);
 			return btn;
@@ -248,11 +248,11 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public Panel getView(DialogListEntryData<T> data, boolean selected, Panel existing) {
+	public Panel getView(DialogListEntryData<T> dled, boolean selected, Panel existing) {
     if( existing == null ) {
-      existing = new Cell<T>(this,data);
+      existing = new Cell<T>(this,dled);
 	  } else {
-      ((Cell<T>)existing).update(data);
+      ((Cell<T>)existing).update(dled);
 	  }
 	  return existing;
 	}

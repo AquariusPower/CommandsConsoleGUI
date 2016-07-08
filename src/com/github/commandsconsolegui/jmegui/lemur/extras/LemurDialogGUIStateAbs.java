@@ -130,7 +130,6 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 	}
 	@Override
 	public LemurDialogGUIStateAbs<T> configure(ICfgParm icfg) {
-		@SuppressWarnings("unchecked")
 		CfgParm cfg = (CfgParm)icfg;
 		
 //		DialogMouseCursorListenerI.i().configure(null);
@@ -352,29 +351,29 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 	@Override
 	protected void updateList(){
 //		updateList(adleCompleteEntriesList);
-		DialogListEntryData<T> dleLastSelectedBkp = dleLastSelected; 
+		DialogListEntryData<T> dledLastSelectedBkp = dleLastSelected; 
 		
 		resetList();
 		
 		sortEntries();
 		
-		for(DialogListEntryData<T> dle:adleCompleteEntriesList){
+		for(DialogListEntryData<T> dled:adleCompleteEntriesList){
 			if(!strLastFilter.isEmpty()){
-				if(dle.getText().toLowerCase().contains(strLastFilter)){
-					vlVisibleEntriesList.add(dle);
+				if(dled.getText().toLowerCase().contains(strLastFilter)){
+					vlVisibleEntriesList.add(dled);
 				}
 			}else{
-				if(dle.getParent()==null){
-					vlVisibleEntriesList.add(dle); //root entries
+				if(dled.getParent()==null){
+					vlVisibleEntriesList.add(dled); //root entries
 				}else{
-					if(checkAllParentTreesExpanded(dle)){
-						vlVisibleEntriesList.add(dle);
+					if(checkAllParentTreesExpanded(dled)){
+						vlVisibleEntriesList.add(dled);
 					}
 				}
 			}
 		}
 		
-		updateSelected(dleLastSelectedBkp);
+		updateSelected(dledLastSelectedBkp);
 		
 		// update visible rows
 		updateEntryHeight();
@@ -397,31 +396,31 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 	
 	/**
 	 * for entry visibility
-	 * @param dle
+	 * @param dled
 	 * @return
 	 */
-	protected boolean checkAllParentTreesExpanded(DialogListEntryData<T> dle){
-		DialogListEntryData<T> dleParent = dle.getParent();
-		while(dleParent!=null){
-			if(!dleParent.isTreeExpanded())return false;
-			dleParent = dleParent.getParent();
+	protected boolean checkAllParentTreesExpanded(DialogListEntryData<T> dled){
+		DialogListEntryData<T> dledParent = dled.getParent();
+		while(dledParent!=null){
+			if(!dledParent.isTreeExpanded())return false;
+			dledParent = dledParent.getParent();
 		}
 		return true;
 	}
 	
 	/**
 	 * for proper sorting
-	 * @param dle
+	 * @param dled
 	 */
-	protected void recursiveAddEntries(DialogListEntryData<T> dle){
-		adleTmp.remove(dle);
-		adleCompleteEntriesList.add(dle);
-		if(dle.isParent()){
-			for(DialogListEntryData<T> dleChild:dle.getChildrenCopy()){
-				if(!dleChild.getParent().equals(dle)){
-					throw new PrerequisitesNotMetException("invalid parent", dle, dleChild);
+	protected void recursiveAddEntries(DialogListEntryData<T> dled){
+		adleTmp.remove(dled);
+		adleCompleteEntriesList.add(dled);
+		if(dled.isParent()){
+			for(DialogListEntryData<T> dledChild:dled.getChildrenCopy()){
+				if(!dledChild.getParent().equals(dled)){
+					throw new PrerequisitesNotMetException("invalid parent", dled, dledChild);
 				}
-				recursiveAddEntries(dleChild);
+				recursiveAddEntries(dledChild);
 			}
 		}
 	}
@@ -438,7 +437,7 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 	}
 	
 	protected void addEntry(DialogListEntryData<T> dle) {
-		if(dle==null)throw new PrerequisitesNotMetException("data cant be null!");
+		if(dle==null)throw new PrerequisitesNotMetException("cant be null!");
 		adleCompleteEntriesList.add(dle);
 	}
 
@@ -707,30 +706,30 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 		selectionModel.setSelection(i);
 //		dleLastSelected = vlEntriesList.get(i);
 		
-		DialogListEntryData<T> dle = vlVisibleEntriesList.get(i);
-		DialogListEntryData<T> dleParent = dle.getParent();
+		DialogListEntryData<T> dled = vlVisibleEntriesList.get(i);
+		DialogListEntryData<T> dledParent = dled.getParent();
 		lblSelectedEntryStatus.setText(""
 			+"i="+i+", "
-			+"uid="+dle.getUId()+", "
-			+"puid="+(dleParent==null?"(ROOT)":dleParent.getUId())+", "
-			+"'"+dle.getText()+"'"
+			+"uid="+dled.getUId()+", "
+			+"puid="+(dledParent==null?"(ROOT)":dledParent.getUId())+", "
+			+"'"+dled.getText()+"'"
 		);
 	}
-	public void selectEntry(DialogListEntryData<T> dataSelectRequested) {
+	public void selectEntry(DialogListEntryData<T> dledSelectRequested) {
 //		this.dataSelectRequested = data;
 //	}
 //	
 //	public void updateSelectEntryRequested() {
 //		if(dataSelectRequested==null)return;
 //		
-		int i=vlVisibleEntriesList.indexOf(dataSelectRequested);
+		int i=vlVisibleEntriesList.indexOf(dledSelectRequested);
 		if(i>=0){
 			setSelectedEntryIndex(i);
 //			selectionModel.setSelection(i);
 //			dataSelectRequested=null;
-			cd().dumpDebugEntry(getId()+",SelectIndex="+i+","+dataSelectRequested.toString());
+			cd().dumpDebugEntry(getId()+",SelectIndex="+i+","+dledSelectRequested.toString());
 		}else{
-			throw new PrerequisitesNotMetException("data not present on the list", dataSelectRequested, lstbxEntriesToSelect);
+			throw new PrerequisitesNotMetException("data not present on the list", dledSelectRequested, lstbxEntriesToSelect);
 		}
 	}
 	
@@ -773,72 +772,72 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 //		return iSel==null?-1:iSel;
 	}
 
-	public abstract boolean execTextDoubleClickActionFor(DialogListEntryData<T> data);
+	public abstract boolean execTextDoubleClickActionFor(DialogListEntryData<T> dled);
 
 	public abstract boolean execActionFor(EMouseCursorButton e, Spatial capture);
 
-	public void removeEntry(DialogListEntryData<T> data){
+	public void removeEntry(DialogListEntryData<T> dled){
 //		int iDataAboveIndex = -1;
-		DialogListEntryData<T> dataAboveTmp = null;
-		if(getSelectedEntryData().equals(data)){
+		DialogListEntryData<T> dledAboveTmp = null;
+		if(getSelectedEntryData().equals(dled)){
 //			iDataAboveIndex = adleCompleteEntriesList.indexOf(data)-1;
 //			if(iDataAboveIndex>=0)dataAboveTmp = adleCompleteEntriesList.get(iDataAboveIndex);
-			dataAboveTmp = getAbove(data);
+			dledAboveTmp = getAbove(dled);
 		}
-		DialogListEntryData<T> dataParentTmp = data.getParent();
+		DialogListEntryData<T> dledParentTmp = dled.getParent();
 		
-		for(DialogListEntryData<T> dataChild:data.getChildrenCopy()){
-			removeEntry(dataChild);
-		}
-		
-		if(!adleCompleteEntriesList.remove(data)){
-			throw new PrerequisitesNotMetException("missing data at list", data);
+		for(DialogListEntryData<T> dledChild:dled.getChildrenCopy()){
+			removeEntry(dledChild);
 		}
 		
-		data.setParent(null);
+		if(!adleCompleteEntriesList.remove(dled)){
+			throw new PrerequisitesNotMetException("missing data at list", dled);
+		}
 		
-		if(dataAboveTmp!=null){
-			updateSelected(dataAboveTmp,dataParentTmp);
+		dled.setParent(null);
+		
+		if(dledAboveTmp!=null){
+			updateSelected(dledAboveTmp,dledParentTmp);
 		}
 		
 		requestRefreshList();
 	}
 	
-	protected DialogListEntryData<T> getAbove(DialogListEntryData<T> data){
-		int iDataAboveIndex = adleCompleteEntriesList.indexOf(data)-1;
+	protected DialogListEntryData<T> getAbove(DialogListEntryData<T> dled){
+		int iDataAboveIndex = adleCompleteEntriesList.indexOf(dled)-1;
 		if(iDataAboveIndex>=0){
 			return adleCompleteEntriesList.get(iDataAboveIndex);
 		}
 		return null;
 	}
-	protected void updateSelected(DialogListEntryData<T> dataPreviouslySelected){
-		if(dataPreviouslySelected==null)return;
+	protected void updateSelected(DialogListEntryData<T> dledPreviouslySelected){
+		if(dledPreviouslySelected==null)return;
 		
-		int i = vlVisibleEntriesList.indexOf(dataPreviouslySelected);
+		int i = vlVisibleEntriesList.indexOf(dledPreviouslySelected);
 		if(i>=0){
 			setSelectedEntryIndex(i);//selectionModel.setSelection(i);
 		}else{
-			updateSelected(getAbove(dataPreviouslySelected), dataPreviouslySelected.getParent());
+			updateSelected(getAbove(dledPreviouslySelected), dledPreviouslySelected.getParent());
 		}
 	}
-	protected void updateSelected(final DialogListEntryData<T> dataAbove, final DialogListEntryData<T> dataParentTmp){
+	protected void updateSelected(final DialogListEntryData<T> dledAbove, final DialogListEntryData<T> dledParentTmp){
 		/**
 		 * need to wait it actually get selected
 		 */
 		CallQueueI.i().appendCall(new Callable<Boolean>() {
 			@Override
 			public Boolean call() throws Exception {
-				DialogListEntryData<T> dataParent = dataParentTmp;
+				DialogListEntryData<T> dledParent = dledParentTmp;
 				
-				if(vlVisibleEntriesList.contains(dataAbove)){
-					if(dataAbove.equals(dataParent)){
-						if(!dataParent.isTreeExpanded()){ //was collapsed
-							selectEntry(dataParent);
+				if(vlVisibleEntriesList.contains(dledAbove)){
+					if(dledAbove.equals(dledParent)){
+						if(!dledParent.isTreeExpanded()){ //was collapsed
+							selectEntry(dledParent);
 							return true;
 						}
 					}
 					
-					if(getSelectedEntryData().equals(dataAbove)){
+					if(getSelectedEntryData().equals(dledAbove)){
 						/**
 						 * select the below one
 						 * no problem if it was at the end of the list
@@ -847,22 +846,22 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 						return true;
 					}
 					
-					selectEntry(dataAbove); //prepare to retry
+					selectEntry(dledAbove); //prepare to retry
 					
 					return false; //will retry
 				}else{ //use parent
 					while(true){
-						if(dataParent==null)break;
+						if(dledParent==null)break;
 						
-						if(vlVisibleEntriesList.contains(dataParent)){
+						if(vlVisibleEntriesList.contains(dledParent)){
 							/**
 							 * useful when collapsing a tree branch
 							 */
-							selectEntry(dataParent);
+							selectEntry(dledParent);
 							break;
 						}
 						
-						dataParent = dataParent.getParent();
+						dledParent = dledParent.getParent();
 					}
 					
 					return true;

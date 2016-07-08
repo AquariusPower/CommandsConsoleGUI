@@ -30,7 +30,6 @@ package com.github.commandsconsolegui.jmegui;
 //import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ERecreateConsoleSteps;
 import java.io.IOException;
 
-import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.app.Application;
@@ -422,6 +421,12 @@ public abstract class ConditionalStateAbs implements Savable{
 //		assertIsPreInitialized();
 		
 		if(bEnabledRequested){
+			/**
+			 * this exception must be here because this request will only be listened if the state
+			 * is configured (threfore added to the state list).
+			 */
+			if(!this.bConfigured)throw new PrerequisitesNotMetException("not configured yet: "+this);
+			
 			this.bEnabledRequested = true;
 			this.bDisabledRequested = false;
 		}else{

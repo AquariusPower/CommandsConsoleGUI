@@ -93,31 +93,6 @@ public class DialogTestState<T extends Command<Button>> extends LemurDialogGUISt
 		return super.getTextInfo()+"Custom Dialog: Test.";
 	};
 	
-//	@Override
-//	protected void updateList() {
-//		DialogListEntryData<T> dataValue = getModalChosenDataAndClearIt();
-//		if(dataValue!=null){
-//			DialogListEntryData<T> dataRef = getDataToApplyModalChoiceAndClearIt();
-//			if(dataRef!=null){
-//				switch(ediag){
-//					case Cfg:
-//						break;
-//					case Confirm:
-//						break;
-//					case List:
-//						dataRef.updateTextTo(dataValue.getText());
-//						break;
-//				}
-//			}else{
-//				cd().dumpWarnEntry("no entry selected at "+this.getId()+" to apply modal dialog option");
-//			}
-//		}
-//		
-////		super.updateList(adleFullList);
-//		
-//		super.updateList();
-//	}
-	
 	@Override
 	protected boolean updateOrUndo(float tpf) {
 		if(getDiagModalCurrent()!=null){
@@ -128,11 +103,6 @@ public class DialogTestState<T extends Command<Button>> extends LemurDialogGUISt
 		
 		return super.updateOrUndo(tpf);
 	}
-	
-//	@Override
-//	public CustomDialogGUIState<T> getDiagModalCurrent() {
-//		return (CustomDialogGUIState<T>) super.getDiagModalCurrent();
-//	}
 	
 	@Override
 	public void applyResultsFromModalDialog() {
