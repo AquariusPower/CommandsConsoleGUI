@@ -181,7 +181,6 @@ public abstract class LemurDialogGUIStateAbs<T extends Command<Button>> extends 
 	 */
 	@Override
 	protected boolean initGUI(){
-		@SuppressWarnings("unchecked")
 		CfgParm cfg = (CfgParm)getCfg();
 		
 		String strStyle = ConsoleLemurStateI.i().STYLE_CONSOLE; //TODO make it custom
@@ -205,6 +204,9 @@ public abstract class LemurDialogGUIStateAbs<T extends Command<Button>> extends 
 		cntrNorth = new Container(new BorderLayout(), strStyle);
 		getNorthContainer().setName(getId()+"_NorthContainer");
 		Vector3f v3fNorthSize = v3fDiagWindowSize.clone();
+		/**
+		 * TODO info height should be automatic. Or Info should be a list with vertical scroll bar, and constrainted to >= 1 lines.
+		 */
 		float fInfoHeightPixels = sizePercOrPixels(v3fDiagWindowSize.y, cfg.fInfoHeightPercentOfDialog);
 		v3fNorthSize.y = fInfoHeightPixels;
 		getNorthContainer().setPreferredSize(v3fNorthSize);
@@ -243,6 +245,9 @@ public abstract class LemurDialogGUIStateAbs<T extends Command<Button>> extends 
 //		vlstrEntriesList.add("(Empty list)");
 		lstbxEntriesToSelect.setModel((VersionedList<DialogListEntryData<T>>)vlVisibleEntriesList);
 		
+		/**
+		 * TODO entry height should be automatic... may be each entry could have its own height.
+		 */
 		iEntryHeightPixels = cfg.iEntryHeightPixels;
 		
 		//////////////////////////////// SOUTH (typing/config)
