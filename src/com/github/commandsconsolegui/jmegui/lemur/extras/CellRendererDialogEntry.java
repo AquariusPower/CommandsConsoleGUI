@@ -39,6 +39,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.font.LineWrapMode;
+import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Button.ButtonAction;
@@ -85,6 +86,7 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 		private CellRendererDialogEntry<T>	assignedCellRenderer;
 		private String	strPrefix = "Cell";
 		private Container	cntrCustomButtons;
+		private String	strColorFgBkpKey = "ColorFgBkp";
 		
 		public DialogListEntryData<T> getDialogListEntryData(){
 			return dled;
@@ -124,6 +126,7 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 			btnTree.setText(str); //it seems to auto trim the string...
 			btnTree.setInsets(new Insets3f(0, 0, 0, 10));
 			
+			btnTree.setColor((ColorRGBA) btnTree.getUserData(strColorFgBkpKey));
 			if(!assignedCellRenderer.diagParent.isOptionSelectionMode()){
 				if(!dled.isParent())btnTree.setColor(btnTree.getShadowColor());
 			}
@@ -141,6 +144,7 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 			btnTree = createButton("Tree", "?", this, Position.West);
 			btnTree.addCommands(ButtonAction.Click, ctt);
 			btnTree.setUserData(Cell.class.getName(), this);
+			btnTree.setUserData(strColorFgBkpKey , btnTree.getColor());
 			
 			btnText = createButton("Text", this.dled.getText(), this, Position.Center);
 			
