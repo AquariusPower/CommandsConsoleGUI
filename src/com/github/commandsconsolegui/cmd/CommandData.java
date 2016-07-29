@@ -106,7 +106,7 @@ public class CommandData implements Comparable<CommandData>{
 			&&
 			this.getUniqueCmdId().equalsIgnoreCase(cmddNew.getUniqueCmdId())
 			&&
-			this.getComment().equalsIgnoreCase(cmddNew.getComment())
+			this.getComment().equalsIgnoreCase(cmddNew.getComment()) //TODO may be a stack of the code spot where the command was created, would be preferable than this "comment difference guessed uniqueness"?
 			;
 	}
 	

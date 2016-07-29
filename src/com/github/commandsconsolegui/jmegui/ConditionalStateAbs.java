@@ -30,6 +30,8 @@ package com.github.commandsconsolegui.jmegui;
 //import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ERecreateConsoleSteps;
 import java.io.IOException;
 
+import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.app.Application;
@@ -170,6 +172,8 @@ public abstract class ConditionalStateAbs implements Savable{
 	public ConditionalStateAbs configure(ICfgParm icfg){
 		CfgParm cfg = (CfgParm)icfg;
 		
+		if(isDiscarded())throw new PrerequisitesNotMetException("cannot re-use after discarded");
+		
 //	protected void configure(Application app){
 		if(this.bConfigured)throw new PrerequisitesNotMetException("already configured");
 		
@@ -182,6 +186,7 @@ public abstract class ConditionalStateAbs implements Savable{
 //			throw new PrerequisitesNotMetException("id cant be null");
 			cfg.strId = this.getClass().getSimpleName();
 		}
+		
 		@SuppressWarnings("unchecked") //so obvious...
 		ConditionalStateAbs csa = ConditionalStateManagerI.i().getConditionalState(
 			(Class<ConditionalStateAbs>)this.getClass(), cfg.strId);
@@ -527,13 +532,21 @@ public abstract class ConditionalStateAbs implements Savable{
 			"already managed by "+this.asmParent+"; request made to attach at "+asmParent);
 		this.asmParent=asmParent;
 	}
-
+	
+	/**
+	 * Discard the state object is better because:
+	 * It is a sure vanilla instance of the object to be properly initialized.
+	 * No unwanted child (fields) state will remain.
+	 * 
+	 * If anything is required to be on the new instance, just copy it's value.
+	 */
 	public void requestDiscard(){
 		bDiscardRequested = true;
 	}
 	
 	/**
-	 * everything that is not configured can be copied thru this method
+	 * Everything that is not initially configured can be copied thru this method,
+	 * like the current state/value of anything.
 	 * 
 	 * @param cas
 	 * @return
@@ -546,7 +559,7 @@ public abstract class ConditionalStateAbs implements Savable{
 		try {
 			return this.getClass().newInstance().configure(icfgOfInstance).copyCurrentValuesFrom(this);
 		} catch (InstantiationException | IllegalAccessException e) {
-			NullPointerException npe = new NullPointerException("object copy failed");
+			NullPointerException npe = new NullPointerException("new instance configuration failed");
 			npe.initCause(e);
 			throw npe;
 		}

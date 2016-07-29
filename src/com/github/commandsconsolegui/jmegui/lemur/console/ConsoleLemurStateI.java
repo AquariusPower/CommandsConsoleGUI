@@ -158,7 +158,6 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	}
 	@Override
 	public ConsoleLemurStateI<T> configure(ICfgParm icfg) {
-		@SuppressWarnings("unchecked")
 		CfgParm cfg = (CfgParm)icfg;
 		
 //		super.icfgOfInstance = icfg;
@@ -171,17 +170,25 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		GuiGlobals.initialize(GlobalAppRefI.i());
 		
 		// misc cfg
-		LemurMiscHelpersStateI.i().configure(new LemurMiscHelpersStateI.CfgParm());
+		if(!LemurMiscHelpersStateI.i().isConfigured()){ //in case of restarting the console
+			LemurMiscHelpersStateI.i().configure(new LemurMiscHelpersStateI.CfgParm());
+		}
 		
 //		LemurMiscHelpersStateI.i().initialize(app().getStateManager(), sapp);
 //		if(!app().getStateManager().attach(LemurMiscHelpersStateI.i())){
 //			throw new NullPointerException("already attached state "+LemurMiscHelpersStateI.class.getName());
 //		}
-		LemurFocusHelperStateI.i().configure(new LemurFocusHelperStateI.CfgParm(null));
+		if(!LemurFocusHelperStateI.i().isConfigured()){
+			LemurFocusHelperStateI.i().configure(new LemurFocusHelperStateI.CfgParm(null));
+		}
 		
-		ConditionalStateManagerI.i().configure(GlobalAppRefI.i());
+		if(!ConditionalStateManagerI.i().isConfigured()){
+			ConditionalStateManagerI.i().configure(GlobalAppRefI.i());
+		}
 		
-		ConsoleMouseCursorListenerI.i().configure();
+		if(!ConsoleMouseCursorListenerI.i().isConfigured()){
+			ConsoleMouseCursorListenerI.i().configure();
+		}
 		
 		return storeCfgAndReturnSelf(icfg);
 	}

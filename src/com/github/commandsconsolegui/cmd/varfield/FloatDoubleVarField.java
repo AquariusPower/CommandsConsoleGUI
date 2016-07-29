@@ -27,16 +27,12 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import java.util.ArrayList;
-
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
-import com.github.commandsconsolegui.cmd.VarIdValueOwnerData.IVarIdValueOwner;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 
 /**
  * This class is intended to be used only as class field variables.
@@ -48,7 +44,7 @@ public class FloatDoubleVarField extends VarCmdFieldAbs{
 	protected static boolean	bConfigured;
 	protected static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	protected static String	strCodePrefixVariant = "fdv";
-	protected static ArrayList<FloatDoubleVarField> afdvList = new ArrayList<FloatDoubleVarField>();
+//	protected static ArrayList<FloatDoubleVarField> afdvList = new ArrayList<FloatDoubleVarField>();
 	protected Double dValue;
 	
 	public static void configure(IHandleExceptions ihe){
@@ -68,7 +64,8 @@ public class FloatDoubleVarField extends VarCmdFieldAbs{
 	 * @param dInitialValue if null, the variable will be removed from console vars.
 	 */
 	public FloatDoubleVarField(IReflexFillCfg rfcfgOwnerUseThis, Double dInitialValue, String strHelp) {
-		if(rfcfgOwnerUseThis!=null)afdvList.add(this); //only fields allowed
+//		if(rfcfgOwnerUseThis!=null)afdvList.add(this); //only fields allowed
+		super(rfcfgOwnerUseThis!=null); //only fields allowed
 		this.rfcfgOwner=rfcfgOwnerUseThis;
 		this.dValue=dInitialValue;
 		this.strHelp=strHelp;
@@ -114,9 +111,9 @@ public class FloatDoubleVarField extends VarCmdFieldAbs{
 		return dValue.doubleValue();
 	}
 	
-	public static ArrayList<FloatDoubleVarField> getListCopy(){
-		return new ArrayList<FloatDoubleVarField>(afdvList);
-	}
+//	public static ArrayList<FloatDoubleVarField> getListCopy(){
+//		return new ArrayList<FloatDoubleVarField>(afdvList);
+//	}
 	
 	@Override
 	public String getVarId() {

@@ -54,7 +54,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
  */
 public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	public static final String strTogglerCodePrefix="btg";
-	protected static ArrayList<BoolTogglerCmdField> abtgList = new ArrayList<BoolTogglerCmdField>();
+//	protected static ArrayList<BoolTogglerCmdField> abtgList = new ArrayList<BoolTogglerCmdField>();
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	
@@ -73,12 +73,15 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 		bConfigured=true;
 	}
 	
-	public static ArrayList<BoolTogglerCmdField> getListCopy(){
-		return new ArrayList<BoolTogglerCmdField>(abtgList);
-	}
+//	public static ArrayList<BoolTogglerCmdField> getListCopy(){
+//		ArrayList<BoolTogglerCmdField> a = VarCmdFieldAbs.getListCopy(BoolTogglerCmdField.class);
+//		return a;
+////		return new ArrayList<BoolTogglerCmdField>(abtgList);
+//	}
 	
 	private BoolTogglerCmdField(){
-		abtgList.add(this);
+		super(true);
+//		abtgList.add(this);
 	}
 	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitValue){
 		this( rfcfgOwnerUseThis,  bInitValue, BoolTogglerCmdField.strTogglerCodePrefix, "");
@@ -310,4 +313,8 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	public String getVariablePrefix() {
 		return "Bool";
 	}
+
+//	public static void removeFromList(BoolTogglerCmdField bt) {
+//		abtgList.remove(bt);
+//	}
 }

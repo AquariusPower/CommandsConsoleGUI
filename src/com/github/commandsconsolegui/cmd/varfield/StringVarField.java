@@ -48,7 +48,7 @@ public class StringVarField extends VarCmdFieldAbs{
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	private static String	strCodePrefixVariant = "svf";
-	private static ArrayList<StringVarField> ailvList = new ArrayList<StringVarField>();
+//	private static ArrayList<StringVarField> ailvList = new ArrayList<StringVarField>();
 	
 	String strValue;
 	
@@ -66,7 +66,8 @@ public class StringVarField extends VarCmdFieldAbs{
 	 * @param lInitialValue if null, the variable will be removed from console vars.
 	 */
 	public StringVarField(IReflexFillCfg rfcfgOwnerUseThis, String strInitialValue,String strHelp) {
-		if(rfcfgOwnerUseThis!=null)ailvList.add(this); //only fields allowed
+//		if(rfcfgOwnerUseThis!=null)ailvList.add(this); //only fields allowed
+		super(rfcfgOwnerUseThis!=null); //only fields allowed
 		this.rfcfgOwner=rfcfgOwnerUseThis;
 		this.strValue=strInitialValue;
 		this.strHelp=strHelp;
@@ -95,9 +96,9 @@ public class StringVarField extends VarCmdFieldAbs{
 		return rfcfgOwner;
 	}
 
-	public static ArrayList<StringVarField> getListCopy(){
-		return new ArrayList<StringVarField>(ailvList);
-	}
+//	public static ArrayList<StringVarField> getListCopy(){
+//		return new ArrayList<StringVarField>(ailvList);
+//	}
 	
 	@Override
 	public String getVarId() {

@@ -29,6 +29,8 @@ package com.github.commandsconsolegui.jmegui;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
@@ -47,6 +49,9 @@ public class ConditionalStateManagerI extends AbstractAppState {
 	private static ConditionalStateManagerI instance = new ConditionalStateManagerI();
 	public static ConditionalStateManagerI i(){return instance;}
 	
+	/**
+	 * restricted access to public methods, helper
+	 */
 	public static final class CompositeControl extends CompositeControlAbs<ConditionalStateManagerI>{
 		private CompositeControl(ConditionalStateManagerI casm){super(casm);};
 	}
@@ -54,10 +59,13 @@ public class ConditionalStateManagerI extends AbstractAppState {
 	
 	ArrayList<ConditionalStateAbs> aCondStateList = new ArrayList<ConditionalStateAbs>();
 
+	private boolean	bConfigured;
+
 //	private boolean	bApplicationIsExiting;
 	
 	public void configure(Application app){
 		app.getStateManager().attach(this);
+		bConfigured=true;
 	}
 	
 	public boolean isAttached(ConditionalStateAbs cas){
@@ -78,28 +86,31 @@ public class ConditionalStateManagerI extends AbstractAppState {
 		for(ConditionalStateAbs cas:aCondStateList){
 			if(!cas.doItAllProperly(ccSelf,tpf))continue;
 			
-			if(cas.isRestartRequested()){
-				if(cas.isEnabled()){
-					cas.requestDisable();
-				}else{
-					cas.requestDiscard();
-				}
-			}else
 			if(cas.isDiscarding()){
 				if(aToDiscard==null)aToDiscard=new ArrayList<ConditionalStateAbs>();
 				aToDiscard.add(cas);
+			}else{
+				if(cas.isRestartRequested()){
+					if(cas.isEnabled()){
+						cas.requestDisable();
+					}else{
+						cas.requestDiscard();
+					}
+				}
 			}
 		}
 		
 		if(aToDiscard!=null){
 			for(ConditionalStateAbs cas:aToDiscard){
 				if(cas.prepareAndCheckIfReadyToDiscard(ccSelf)){
+					if(cas instanceof IConsoleCommandListener){
+						GlobalCommandsDelegatorI.i().removeListener((IConsoleCommandListener)cas);
+					}
+					
 					aCondStateList.remove(cas);
 					cas.applyDiscardedStatus(ccSelf);
 					
-					if(cas.isRestartRequested()){
-						cas.createAndConfigureSelfCopy(); //this will add the new one to manager too
-					}
+					cas.createAndConfigureSelfCopy(); //this will add the new one to manager too
 				}
 			}
 		}
@@ -191,6 +202,10 @@ public class ConditionalStateManagerI extends AbstractAppState {
 		}
 		
 		return null;
+	}
+
+	public boolean isConfigured() {
+		return bConfigured;
 	}
 	
 }

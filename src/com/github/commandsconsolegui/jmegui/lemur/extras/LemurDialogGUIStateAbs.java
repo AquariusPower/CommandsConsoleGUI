@@ -435,16 +435,16 @@ public abstract class LemurDialogGUIStateAbs<T extends Command<Button>> extends 
 		adleTmp = new ArrayList<DialogListEntryData<T>>(adleCompleteEntriesList);
 		adleCompleteEntriesList.clear();
 		
-		for(DialogListEntryData<T> dle:new ArrayList<DialogListEntryData<T>>(adleTmp)){
-			if(dle.getParent()==null){ //root ones
-				recursiveAddEntries(dle);
+		for(DialogListEntryData<T> dled:new ArrayList<DialogListEntryData<T>>(adleTmp)){
+			if(dled.getParent()==null){ //root ones
+				recursiveAddEntries(dled);
 			}
 		}
 	}
 	
-	protected void addEntry(DialogListEntryData<T> dle) {
-		if(dle==null)throw new PrerequisitesNotMetException("cant be null!");
-		adleCompleteEntriesList.add(dle);
+	protected void addEntry(DialogListEntryData<T> dled) {
+		if(dled==null)throw new PrerequisitesNotMetException("cant be null!");
+		adleCompleteEntriesList.add(dled);
 	}
 
 	/**

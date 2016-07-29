@@ -51,7 +51,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 
 public class TimedDelayVarField extends VarCmdFieldAbs{
 	protected static IHandleExceptions ihe = HandleExceptionsRaw.i();
-	protected static ArrayList<TimedDelayVarField> atdList = new ArrayList<TimedDelayVarField>();
+//	protected static ArrayList<TimedDelayVarField> atdList = new ArrayList<TimedDelayVarField>();
 	
 	protected static Long lCurrentTimeNano;
 	protected static boolean	bConfigured;
@@ -104,7 +104,8 @@ public class TimedDelayVarField extends VarCmdFieldAbs{
 	 * @param fDelay
 	 */
 	public TimedDelayVarField(IReflexFillCfg rfcfgOwnerUseThis, float fDelay, String strHelp) {
-		if(rfcfgOwnerUseThis!=null)atdList.add(this); //only fields allowed
+//		if(rfcfgOwnerUseThis!=null)atdList.add(this); //only fields allowed
+		super(rfcfgOwnerUseThis!=null); //only fields allowed
 		this.rfcfgOwner=rfcfgOwnerUseThis;
 		setDelayLimitSeconds(fDelay);
 		this.strHelp=strHelp;
@@ -302,9 +303,9 @@ public class TimedDelayVarField extends VarCmdFieldAbs{
 //		}
 //	}
 	
-	public static ArrayList<TimedDelayVarField> getListCopy(){
-		return new ArrayList<TimedDelayVarField>(atdList);
-	}
+//	public static ArrayList<TimedDelayVarField> getListCopy(){
+//		return new ArrayList<TimedDelayVarField>(atdList);
+//	}
 
 	@Override
 	public String getVarId() {

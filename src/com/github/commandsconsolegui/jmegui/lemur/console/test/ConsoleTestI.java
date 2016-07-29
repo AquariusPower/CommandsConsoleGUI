@@ -37,6 +37,7 @@ import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGuiI;
 import com.github.commandsconsolegui.jmegui.console.SimpleConsoleAppAbs;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.misc.CallQueueI;
+import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -109,6 +110,8 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 	 */
 	@Override
 	public void simpleInitApp() {
+		MsgI.bDebug=true;
+		
 		/**
 		 * Globals setup are actually very simple, and must come 1st!
 		 * Such classes shall have parameter-less default constructors.

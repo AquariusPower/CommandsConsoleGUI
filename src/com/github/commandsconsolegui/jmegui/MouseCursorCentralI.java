@@ -67,6 +67,9 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 //	ArrayList<MouseCursorButtonsControl> amcabList = new ArrayList<MouseCursorButtonsControl>();
 	
 	MouseCursorButtonsControl mcbcSingleInstance = new MouseCursorButtonsControl(ccSelf,this);
+
+	private boolean	bConfigured;
+	
 	public MouseCursorButtonsControl getButtonsInstance(){
 		return mcbcSingleInstance;
 	}
@@ -90,7 +93,11 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 		if(lClickDelayMilis!=null)ilvClickMaxDelayMilis.setObjectValue(lClickDelayMilis);
 		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
 		
-		MultiClickCondStateI.i().configure(new MultiClickCondStateI.CfgParm());
+		if(!MultiClickCondStateI.i().isConfigured()){
+			MultiClickCondStateI.i().configure(new MultiClickCondStateI.CfgParm());
+		}
+		
+		bConfigured=true;
 	}
 	
 	public static class MouseCursorUpdatedValues{
@@ -239,6 +246,10 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 //		
 //		return cc.cmdFoundReturnStatus(bCommandWorked);
 //	}
+
+	public boolean isConfigured() {
+		return bConfigured;
+	}
 
 //	private String report() {
 //		String str="";

@@ -39,7 +39,17 @@ public class MsgI {
 	private static MsgI instance = new MsgI();
 	public static MsgI i(){return instance;}
 	
+	public static boolean bDebug=false;
+	
+	/**
+	 * 
+	 * @param str
+	 * @param bSuccess
+	 * @param objOwner use "this"
+	 */
 	public void msgDbg(String str, boolean bSuccess, Object objOwner){
+		if(!bDebug)return;
+		
 		if(!bSuccess){
 			int i,i2=0;
 			i=i2;i2=i;
@@ -47,7 +57,7 @@ public class MsgI {
 		
 		System.err.println("DBG: "
 			+new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()))+": "
-			+objOwner.getClass().getName()+": "
+			+(objOwner!=null ? objOwner.getClass().getName()+": " : "")
 			+(bSuccess?"ok":"FAIL")+": "
 			+str);
 	}

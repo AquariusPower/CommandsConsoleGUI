@@ -30,9 +30,8 @@ package com.github.commandsconsolegui.jmegui.lemur.console;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGuiI;
-import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
 import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
-import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
+import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
 import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.MouseCursorListenerAbs;
 import com.jme3.scene.Spatial;
@@ -49,15 +48,20 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 	private static ConsoleMouseCursorListenerI instance = new ConsoleMouseCursorListenerI();
 	public static ConsoleMouseCursorListenerI i(){return instance;}
 	
-	ConsoleStateAbs csa;
-	private CommandsDelegator	cd;
-	private ConsoleStateAbs	cgui;
+	protected ConsoleStateAbs<?> csa;
+	protected CommandsDelegator	cd;
+	protected ConsoleStateAbs<?>	cgui;
+	protected boolean	bConfigured;
 	
 	public void configure(){
 		this.cd=GlobalCommandsDelegatorI.i();
 		this.cgui=GlobalConsoleGuiI.i();
 		
-		MouseCursorCentralI.i().configure(null);
+		if(!MouseCursorCentralI.i().isConfigured()){
+			MouseCursorCentralI.i().configure(null);
+		}
+		
+		bConfigured=true;
 	}
 
 	protected String debugPart(Panel pnl){
@@ -142,5 +146,9 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 //		}
 		
 		return super.click(button, eventButton, target, capture);
+	}
+
+	public boolean isConfigured() {
+		return bConfigured;
 	}
 }

@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
@@ -49,12 +50,10 @@ import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
-import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI.CompositeControl;
-import com.github.commandsconsolegui.misc.DebugI;
-import com.github.commandsconsolegui.misc.DebugI.EDbgKey;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
+import com.github.commandsconsolegui.misc.DebugI;
+import com.github.commandsconsolegui.misc.DebugI.EDbgKey;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
@@ -287,6 +286,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	protected ArrayList<AliasData> aAliasList = new ArrayList<AliasData>();
 //	protected ArrayList<CommandData> acmdList = new ArrayList<CommandData>();
 	protected TreeMap<String,CommandData> trmCmds = new TreeMap<String,CommandData>(String.CASE_INSENSITIVE_ORDER);
+//	LinkedHashMap<String,CommandData> asdf = new LinkedHashMap<String,CommandData>(String.CASE_INSENSITIVE_ORDER);
 	
 	
 	public CommandsDelegator() {
@@ -466,7 +466,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	
 	protected boolean checkCmdValidityBoolTogglers(){
 		btgReferenceMatched=null;
-		for(BoolTogglerCmdField btg : BoolTogglerCmdField.getListCopy()){
+		for(BoolTogglerCmdField btg : VarCmdFieldAbs.getListCopy(BoolTogglerCmdField.class)){
 			String strCoreId = btg.getCoreId();
 			if(!strCoreId.endsWith("Toggle"))strCoreId+="Toggle";
 			if(checkCmdValidity(btg.getOwnerAsCmdListener(), btg.getCmdId(), strCoreId, "[bEnable] "+btg.getHelp(), true)){
@@ -595,6 +595,24 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	protected void assertConfigured(){
 		if(bConfigured)return;
 		throw new NullPointerException(CommandsDelegator.class.getName()+" was not configured!");
+	}
+	
+	public void removeListener(IConsoleCommandListener iccl){
+		if(!aConsoleCommandListenerList.contains(iccl)){
+			throw new PrerequisitesNotMetException("listener already removed?", iccl);
+		}
+		
+		removeAllCmdsFor(iccl);
+		
+		//remove all fields from the list
+		for(VarCmdFieldAbs vcf:VarCmdFieldAbs.getListFullCopy()){
+			if(vcf.getOwner()==iccl){
+				vcf.discardSelf(ccSelf);
+			}
+		}
+		
+		hmDebugListenerAddedStack.remove(iccl);
+		aConsoleCommandListenerList.remove(iccl);
 	}
 	
 	/**
@@ -1418,6 +1436,54 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}
 	}
 	
+	/**
+	 * use with caution!
+	 * TODO remove all BoolTogglers, and other field CMDs
+	 * @param iccl
+	 */
+	protected void removeAllCmdsFor(IConsoleCommandListener iccl){
+		MsgI.i().msgDbg("WARNING: Removing all registered commands for: "+iccl.getClass().getName(), true, this);
+//		System.err.println("WARNING: Removing all registered commands for: "+iccl.getClass().getName());
+		
+//		for(CommandData cmdd:trmCmds.values().toArray(new CommandData[0])){
+//			if(cmdd.getOwner()==iccl){
+//				if(trmCmds.remove(cmdd.getUniqueCmdId()) != cmdd){
+//					throw new PrerequisitesNotMetException("Inconsistent tree");
+//				}
+//				
+//				if(cmddLastAdded==cmdd)cmddLastAdded=null;
+//			}
+//		}
+		
+		ArrayList<String> astr = getAllCommandFor(iccl);
+		MsgI.i().msgDbg("WARNING: removing: "+astr.toString(), true, this);
+//		System.err.println("WARNING: removing: "+astr.toString());
+		
+		for(String strUCmd:astr){
+			if(trmCmds.remove(strUCmd) == null){
+				throw new PrerequisitesNotMetException("Inconsistent tree");
+			}
+		}
+		
+//		System.err.println("DBG: "+getAllCommandFor(iccl));
+		
+		if(trmCmds.get(cmddLastAdded.getUniqueCmdId())==null){
+			cmddLastAdded=null;
+		}
+		
+		Thread.dumpStack();
+	}
+	
+	public ArrayList<String> getAllCommandFor(IConsoleCommandListener iccl){
+		ArrayList<String> astr = new ArrayList<String>();
+		for(CommandData cmdd:trmCmds.values().toArray(new CommandData[0])){
+			if(cmdd.getOwner()==iccl){
+				astr.add(cmdd.getUniqueCmdId());
+			}
+		}
+		return astr;
+	}
+	
 	protected void addCmdToValidList(IConsoleCommandListener iccl, String strCmdNew, String strCoreCmdId, boolean bSkipSortCheck){
 //		String strConflict=null;
 		
@@ -1442,7 +1508,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				if(cmdd.getUniqueCmdId().equalsIgnoreCase(cmddNew.getUniqueCmdId())){
 					/**
 					 * already set from same origin, just skip.
-					 * TODO explain clearly WHY this is not a problem...
+					 * TODO explain clearly (after debug) WHY this is not a problem...
 					 */
 					if(cmdd.identicalTo(cmddNew))return;
 					
@@ -1470,8 +1536,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			}
 			
 			ArrayList<VarCmdFieldAbs> avcf = new ArrayList<VarCmdFieldAbs>();
-			avcf.addAll(BoolTogglerCmdField.getListCopy());
-			avcf.addAll(StringCmdField.getListCopy());
+			avcf.addAll(VarCmdFieldAbs.getListCopy(BoolTogglerCmdField.class));
+			avcf.addAll(BoolTogglerCmdField.getListCopy(StringCmdField.class));
 			for(VarCmdFieldAbs vcf:avcf){
 				if(vcf.getCmdId().equalsIgnoreCase(cmddNew.getUniqueCmdId())){
 					vcf.setCmdData(cmddNew);
@@ -1481,6 +1547,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //			acmdList.add(cmddNew);
 			trmCmds.put(cmddNew.getUniqueCmdId(), cmddNew);
 			cmddLastAdded = cmddNew;
+			MsgI.i().msgDbg(cmddNew.getOwner().getClass().getSimpleName()+":"+cmddNew.getUniqueCmdId(), true, this);
 			
 			/**
 			 * coded sorting check (unnecessary actually), just useful for developers
@@ -2845,11 +2912,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			false);
 		
 		ArrayList<VarCmdFieldAbs> avivoAllVarsList = new ArrayList<VarCmdFieldAbs>();
-		avivoAllVarsList.addAll(BoolTogglerCmdField.getListCopy());
-		avivoAllVarsList.addAll(TimedDelayVarField.getListCopy());
-		avivoAllVarsList.addAll(FloatDoubleVarField.getListCopy());
-		avivoAllVarsList.addAll(IntLongVarField.getListCopy());
-		avivoAllVarsList.addAll(StringVarField.getListCopy());
+		avivoAllVarsList.addAll(VarCmdFieldAbs.getListCopy(BoolTogglerCmdField.class));
+		avivoAllVarsList.addAll(VarCmdFieldAbs.getListCopy(TimedDelayVarField.class));
+		avivoAllVarsList.addAll(VarCmdFieldAbs.getListCopy(FloatDoubleVarField.class));
+		avivoAllVarsList.addAll(VarCmdFieldAbs.getListCopy(IntLongVarField.class));
+		avivoAllVarsList.addAll(VarCmdFieldAbs.getListCopy(StringVarField.class));
 		setupVarsAllFrom(avivoAllVarsList);
 		
 //		setupVarsAllFrom(BoolTogglerCmdField.getListCopy());
@@ -2924,7 +2991,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 //		dumpSubEntry("Previous Second FPS  = "+lPreviousSecondFPS);
 		
-		for(BoolTogglerCmdField btg : BoolTogglerCmdField.getListCopy()){
+		for(BoolTogglerCmdField btg : VarCmdFieldAbs.getListCopy(BoolTogglerCmdField.class)){
 			dumpSubEntry(btg.getReport());
 		}
 		

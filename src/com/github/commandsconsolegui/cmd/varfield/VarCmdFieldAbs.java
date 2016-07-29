@@ -27,7 +27,10 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
+import java.util.ArrayList;
+
 import com.github.commandsconsolegui.cmd.CommandData;
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData.IVarIdValueOwner;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -51,6 +54,29 @@ public abstract class VarCmdFieldAbs implements IReflexFillCfgVariant, IVarIdVal
 	protected VarIdValueOwnerData	vivo;
 	protected String strHelp="";
 	protected CommandData	cmdd;
+	
+	private static ArrayList<VarCmdFieldAbs> avcfList = new ArrayList<VarCmdFieldAbs>();
+	public static ArrayList<VarCmdFieldAbs> getListFullCopy(){
+		return new ArrayList<VarCmdFieldAbs>(VarCmdFieldAbs.avcfList);
+	}
+	public static <T extends VarCmdFieldAbs> ArrayList<T> getListCopy(Class<T> clFilter){
+		ArrayList<T> a = new ArrayList<T>();
+		for(VarCmdFieldAbs vcf:VarCmdFieldAbs.avcfList){
+			if(clFilter.isInstance(vcf)){
+				a.add((T)vcf);
+			}
+		}
+		
+		return a;
+	}
+	
+	public VarCmdFieldAbs(boolean bAddToList){
+		if(bAddToList)VarCmdFieldAbs.avcfList.add(this);
+	}
+	
+	public void discardSelf(CommandsDelegator.CompositeControl ccSelf) {
+		VarCmdFieldAbs.avcfList.remove(this);
+	}
 	
 	public CommandData getCmdData(){
 		return this.cmdd;

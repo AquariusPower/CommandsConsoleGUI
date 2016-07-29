@@ -50,7 +50,7 @@ public class IntLongVarField extends VarCmdFieldAbs{
 	protected static boolean	bConfigured;
 	protected static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	protected static String	strCodePrefixVariant = "ilv";
-	protected static ArrayList<IntLongVarField> ailvList = new ArrayList<IntLongVarField>();
+//	protected static ArrayList<IntLongVarField> ailvList = new ArrayList<IntLongVarField>();
 	
 	protected Long lValue;
 	
@@ -71,7 +71,8 @@ public class IntLongVarField extends VarCmdFieldAbs{
 	 * @param lInitialValue if null, the variable will be removed from console vars.
 	 */
 	public IntLongVarField(IReflexFillCfg rfcfgOwnerUseThis, Long lInitialValue, String strHelp) {
-		if(rfcfgOwnerUseThis!=null)ailvList.add(this); //only fields allowed
+//		if(rfcfgOwnerUseThis!=null)ailvList.add(this); //only fields allowed
+		super(rfcfgOwnerUseThis!=null); //only fields allowed
 		this.rfcfgOwner=rfcfgOwnerUseThis;
 		this.lValue=lInitialValue;
 		this.strHelp=strHelp;
@@ -123,9 +124,9 @@ public class IntLongVarField extends VarCmdFieldAbs{
 		return lValue.longValue();
 	}
 	
-	public static ArrayList<IntLongVarField> getListCopy(){
-		return new ArrayList<IntLongVarField>(ailvList);
-	}
+//	public static ArrayList<IntLongVarField> getListCopy(){
+//		return new ArrayList<IntLongVarField>(ailvList);
+//	}
 	
 	@Override
 	public String getVarId() {

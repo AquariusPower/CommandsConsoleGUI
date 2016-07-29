@@ -49,11 +49,11 @@ public class StringCmdField extends VarCmdFieldAbs{
 //	private String	strHelpComment;
 	protected static boolean bIgnoreCaseOnComparison = true;
 	public static final String strCodePrefix="scf"; //ex.: scfTestCommand
-	protected static ArrayList<StringCmdField> ascfList = new ArrayList<StringCmdField>();
+//	protected static ArrayList<StringCmdField> ascfList = new ArrayList<StringCmdField>();
 	
-	public static ArrayList<StringCmdField> getListCopy(){
-		return new ArrayList<StringCmdField>(ascfList);
-	}
+//	public static ArrayList<StringCmdField> getListCopy(){
+//		return new ArrayList<StringCmdField>(ascfList);
+//	}
 	
 	
 	/**
@@ -74,10 +74,11 @@ public class StringCmdField extends VarCmdFieldAbs{
 	 * @param strHelpComment
 	 */
 	public StringCmdField(String strCmdId, String strHelpComment){
+		super(true);
 		super.setId(new IdTmp(false, strCmdId, strCmdId));
 		this.strHelp = strHelpComment;
 		this.bReflexingIdentifier = false;
-		StringCmdField.ascfList.add(this);
+//		StringCmdField.ascfList.add(this);
 	}
 	
 	/**
