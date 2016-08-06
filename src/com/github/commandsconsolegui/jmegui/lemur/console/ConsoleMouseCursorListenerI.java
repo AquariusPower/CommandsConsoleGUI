@@ -29,7 +29,7 @@ package com.github.commandsconsolegui.jmegui.lemur.console;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGuiI;
+import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGUII;
 import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
 import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
@@ -85,11 +85,11 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 	}
 	
 	protected void cursorMoveEvent(CursorMotionEvent event, Spatial target,	Spatial capture) {
-		if(!GlobalConsoleGuiI.i().isScrollRequestTarget(target)){ //detect changed
+		if(!GlobalConsoleGUII.i().isScrollRequestTarget(target)){ //detect changed
 			debugReport(event, null, target, capture);
 		}
 		
-		GlobalConsoleGuiI.i().setScrollRequestTarget(target);
+		GlobalConsoleGUII.i().setScrollRequestTarget(target);
 	}
 	
 	@Override
@@ -133,8 +133,8 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 //		if(!button.isPressed()){ //on release
 		switch(button.getActivatorType()){
 			case Action1Click:
-				if(GlobalConsoleGuiI.i().isHintBox(target)){
-					GlobalConsoleGuiI.i().checkAndApplyHintAtInputField();
+				if(GlobalConsoleGUII.i().isHintBox(target)){
+					GlobalConsoleGUII.i().checkAndApplyHintAtInputField();
 					return true;
 				}
 				break;

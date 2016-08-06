@@ -35,8 +35,14 @@ import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class GlobalConsoleGuiI extends GlobalHolderAbs<ConsoleStateAbs<?>>{
-	private static GlobalConsoleGuiI instance = new GlobalConsoleGuiI();
-	public static GlobalConsoleGuiI iGlobal(){return instance;}
+public class GlobalConsoleGUII extends GlobalHolderAbs<ConsoleStateAbs<?>>{
+	private static GlobalConsoleGUII instance = new GlobalConsoleGUII();
+	public static GlobalConsoleGUII iGlobal(){return instance;}
 	public static ConsoleStateAbs<?> i(){return iGlobal().get();}
+	
+	@Override
+	public ConsoleStateAbs<?> set(ConsoleStateAbs<?> obj) {
+		GlobalConsoleUII.iGlobal().set(obj);
+		return super.set(obj);
+	}
 }

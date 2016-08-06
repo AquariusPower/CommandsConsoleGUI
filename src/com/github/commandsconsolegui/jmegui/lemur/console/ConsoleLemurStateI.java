@@ -34,7 +34,7 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
-import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGuiI;
+import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGUII;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI.CompositeControl;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
@@ -162,8 +162,8 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		CfgParm cfg = (CfgParm)icfg;
 		
 		// for restarting functionality
-		GlobalConsoleGuiI.iGlobal().validate();
-		GlobalConsoleGuiI.iGlobal().set(this);
+//		GlobalConsoleGuiI.iGlobal().validate();
+		GlobalConsoleGUII.iGlobal().set(this);
 		
 		super.configure(cfg);
 		

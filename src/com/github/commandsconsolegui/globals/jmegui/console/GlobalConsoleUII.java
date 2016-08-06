@@ -35,8 +35,8 @@ import com.github.commandsconsolegui.globals.GlobalHolderAbs;
 * @author AquariusPower <https://github.com/AquariusPower>
 *
 */
-public class GlobalConsoleUserInterfaceI extends GlobalHolderAbs<IConsoleUI>{
-	private static GlobalConsoleUserInterfaceI instance = new GlobalConsoleUserInterfaceI();
-	public static GlobalConsoleUserInterfaceI iGlobal(){return instance;}
+public class GlobalConsoleUII extends GlobalHolderAbs<IConsoleUI>{
+	private static GlobalConsoleUII instance = new GlobalConsoleUII();
+	public static GlobalConsoleUII iGlobal(){return instance;}
 	public static IConsoleUI i(){return iGlobal().get();}
 }

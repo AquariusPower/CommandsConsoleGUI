@@ -29,7 +29,7 @@ package com.github.commandsconsolegui.jmegui.cmd;
 
 import com.github.commandsconsolegui.cmd.IConsoleUI;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
-import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGuiI;
+import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGUII;
 
 /**
  * This is not a thread.
@@ -75,7 +75,7 @@ public class CommandsBackgroundStateI extends CmdConditionalStateAbs {
 	protected boolean updateOrUndo(float tpf) {
 		if(!btgExecCommandsInBackground.b())return true; //this is an OK state, no failure!
 		
-		if(GlobalConsoleGuiI.i().isEnabled())return true; //will be foreground execution, this is an OK state, no failure!
+		if(GlobalConsoleGUII.i().isEnabled())return true; //will be foreground execution, this is an OK state, no failure!
 		
 		/**
 		 * This way, being controlled by JME state update, the commands will happen in the same 

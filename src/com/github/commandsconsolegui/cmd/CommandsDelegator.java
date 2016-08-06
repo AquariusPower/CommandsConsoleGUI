@@ -50,6 +50,7 @@ import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleUII;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.DebugI;
@@ -227,7 +228,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	protected HashMap<IConsoleCommandListener,StackTraceElement[]> hmDebugListenerAddedStack = new HashMap<IConsoleCommandListener,StackTraceElement[]>();
 	
 	protected boolean	bAddEmptyLineAfterCommand = true;
-	protected IConsoleUI	icui;
+//	protected IConsoleUI	icui;
 	protected boolean bStartupCmdQueueDone = false; 
 	protected CharSequence	strReplaceTAB = "  ";
 	protected int	iCopyFrom = -1;
@@ -699,11 +700,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(icclPseudo,scfClearDumpArea,"")){
-			icui.getDumpEntries().clear();
+			icui().getDumpEntries().clear();
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(icclPseudo,CMD_CONSOLE_SCROLL_BOTTOM,"")){
-			icui.scrollToBottomRequest();
+			icui().scrollToBottomRequest();
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(icclPseudo,CMD_DB,EDataBaseOperations.help())){
@@ -753,10 +754,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(icclPseudo,scfEditCopy,"-d end lines with command delimiter instead of NL;")){
-			bCmdWorked=icui.cmdEditCopyOrCut(false);
+			bCmdWorked=icui().cmdEditCopyOrCut(false);
 		}else
 		if(checkCmdValidity(icclPseudo,scfEditCut,"like copy, but cut :)")){
-			bCmdWorked=icui.cmdEditCopyOrCut(true);
+			bCmdWorked=icui().cmdEditCopyOrCut(true);
 		}else
 		if(checkCmdValidity(icclPseudo,scfExecBatchCmdsFromFile,"<strFileName>")){
 			String strFile = ccl.paramString(1);
@@ -800,12 +801,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(icclPseudo,CMD_FIX_LINE_WRAP ,"in case words are overlapping")){
-			icui.cmdLineWrapDisableDumpArea();
+			icui().cmdLineWrapDisableDumpArea();
 			bCmdWorked = true;
 		}else
 		if(checkCmdValidity(icclPseudo,CMD_FIX_VISIBLE_ROWS_AMOUNT,"[iAmount] in case it is not showing as many rows as it should")){
-			icui.setVisibleRowsAdjustRequest(ccl.paramInt(1));
-			if(!icui.isVisibleRowsAdjustRequested())icui.setVisibleRowsAdjustRequest(0);
+			icui().setVisibleRowsAdjustRequest(ccl.paramInt(1));
+			if(!icui().isVisibleRowsAdjustRequested())icui().setVisibleRowsAdjustRequest(0);
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(icclPseudo,CMD_HELP,"[strFilter] show (filtered) available commands")){
@@ -821,7 +822,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //		if(checkCmdValidity(icclPseudo,CMD_HK_TOGGLE ,"[bEnable] allow hacks to provide workarounds")){
 //			if(paramBooleanCheckForToggle(1)){
 //				Boolean bEnable = paramBoolean(1);
-//				icui.setHKenabled(bEnable);
+//				icui().setHKenabled(bEnable);
 //				bCmdEndedGracefully=true;
 //			}
 //		}else
@@ -974,7 +975,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			}
 		}else
 		if(checkCmdValidity(icclPseudo,CMD_STATS_FIELD_TOGGLE,"[bEnable] toggle simple stats field visibility")){
-			bCmdWorked=icui.statsFieldToggle();
+			bCmdWorked=icui().statsFieldToggle();
 		}else
 		if(checkCmdValidity(icclPseudo,CMD_STATS_SHOW_ALL,"sho)w all console stats")){
 			dumpAllStats();
@@ -1038,10 +1039,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //	private void convertCommandIfPossible() {
 //		paramCommand()
 //	}
-
+	
+	protected IConsoleUI icui(){
+		return GlobalConsoleUII.i();
+	}
+	
 	public void cmdResetConsole() {
-		icui.requestRestart();
-//		icui.recreateConsoleGui();
+		icui().requestRestart();
+//		icui().recreateConsoleGui();
 	}
 
 	protected ECmdReturnStatus cmdRawLineCheckAlias(){
@@ -1136,7 +1141,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			de.sendToPrintStream(); 
 		}
 		
-		if(!icui.isInitializationCompleted()){
+		if(!icui().isInitializationCompleted()){
 			adeDumpEntryFastQueue.add(de);
 			return;
 		}
@@ -1171,7 +1176,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			int iWrapAt = ilvConsoleMaxWidthInCharsForLineWrap.intValue();
 //			if(iConsoleMaxWidthInCharsForLineWrap==null){
 			if(iWrapAt==0){ //updateFontStuff();
-				iWrapAt = icui.getLineWrapAt();
+				iWrapAt = icui().getLineWrapAt();
 //				if(STYLE_CONSOLE.equals(strStyle)){ //TODO is faster?
 //					iWrapAt = (int) (widthForDumpEntryField() / fWidestCharForCurrentStyleFont ); //'W' but any char will do for monospaced font
 //				}
@@ -1207,7 +1212,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				}
 				
 			}else{ 
-				astrDumpLineList.addAll(icui.wrapLineDynamically(de));
+				astrDumpLineList.addAll(icui().wrapLineDynamically(de));
 			}
 		}
 		
@@ -1231,9 +1236,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 
 	protected void applyDumpEntryOrPutToSlowQueue(boolean bUseSlowQueue, String str) {
 		if(bUseSlowQueue){
-			icui.getDumpEntriesSlowedQueue().add(str);
+			icui().getDumpEntriesSlowedQueue().add(str);
 		}else{
-			icui.getDumpEntries().add(str);
+			icui().getDumpEntries().add(str);
 		}
 	}
 	
@@ -1244,11 +1249,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			
 		if(!tdDumpQueuedSlowEntry.isReady(true))return;
 		
-		if(icui.getDumpEntriesSlowedQueue().size()>0){
-			icui.getDumpEntries().add(icui.getDumpEntriesSlowedQueue().remove(0));
+		if(icui().getDumpEntriesSlowedQueue().size()>0){
+			icui().getDumpEntries().add(icui().getDumpEntriesSlowedQueue().remove(0));
 			
-			while(icui.getDumpEntries().size() > ilvMaxDumpEntriesAmount.getLong()){
-				icui.getDumpEntries().remove(0);
+			while(icui().getDumpEntries().size() > ilvMaxDumpEntriesAmount.getLong()){
+				icui().getDumpEntries().remove(0);
 			}
 		}
 	}
@@ -2644,7 +2649,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		this.fTPF = tpf;
 		if(tdLetCpuRest.isActive() && !tdLetCpuRest.isReady(true))return;
 		
-		if(!icui.isInitializationCompleted())return;
+		if(!icui().isInitializationCompleted())return;
 		
 		updateNewDay();
 //		updateToggles();
@@ -2664,8 +2669,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 
 //	protected void updateToggles() {
-//		if(btgEngineStatsView.isChangedAndRefresh())icui.updateEngineStats();
-//		if(btgEngineStatsFps.isChangedAndRefresh())icui.updateEngineStats();
+//		if(btgEngineStatsView.isChangedAndRefresh())icui().updateEngineStats();
+//		if(btgEngineStatsFps.isChangedAndRefresh())icui().updateEngineStats();
 ////		if(btgFpsLimit.checkChangedAndUpdate())fpslState.setEnabled(btgFpsLimit.b());
 //		if(btgConsoleCpuRest.isChangedAndRefresh())tdLetCpuRest.setActive(btgConsoleCpuRest.b());
 ////		if(btgPreQueue.checkChangedAndUpdate())bUsePreQueue=btgPreQueue.b();
@@ -2984,7 +2989,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	protected void dumpAllStats(){
-		icui.dumpAllStats();
+		icui().dumpAllStats();
 		
 		dumpSubEntry("Database User Variables Count = "+getVariablesIdentifiers(false).size());
 		dumpSubEntry("Database User Aliases Count = "+aAliasList.size());
@@ -3077,7 +3082,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 						
 					// less important (mainly for debug)
 		if(EStats.ConsoleSliderControl.b){
-			strStatsLast+=icui.getDumpAreaSliderStatInfo();
+			strStatsLast+=icui().getDumpAreaSliderStatInfo();
 		}
 					
 //		if(EStats.TimePerFrame.b){
@@ -3101,7 +3106,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @param icui
 	 * @param sapp
 	 */
-	public void configure(IConsoleUI icui){//, SimpleApplication sapp){
+	public void configure(){ //IConsoleUI icui){//, SimpleApplication sapp){
 		if(bConfigured)throw new NullPointerException("already configured.");		// KEEP ON TOP
 		
 //		Init.i().initialize(sapp, this);
@@ -3116,8 +3121,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 //		CommandsBackgroundState.i().configure(sapp, icui, this);
 		
-		if(icui==null)throw new NullPointerException("invalid "+IConsoleUI.class.getName()+" instance");
-		this.icui=icui;
+//		if(icui==null)throw new NullPointerException("invalid "+IConsoleUI.class.getName()+" instance");
+//		this.icui=icui;
+		
 //		this.sapp=sapp;
 		
 		/**
@@ -3142,7 +3148,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		Callable<Boolean> call = new Callable<Boolean>() {
 			@Override
 			public Boolean call() throws Exception {
-				icui.updateEngineStats();
+				icui().updateEngineStats();
 				return true;
 			}
 		};
@@ -3270,7 +3276,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		dumpEntry("<<<Clipboard END "+strFill);
 		if(bAddEmptyLineAfterCommand)dumpEntry("");
 	//	dumpEntry("");
-		icui.scrollToBottomRequest();
+		icui().scrollToBottomRequest();
 	}
 
 	protected String fileNamePrepare(String strFileBaseName, String strFileType, boolean bAddDateTime){
@@ -3299,13 +3305,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 
 	public void toggleLineCommentOrCommand() {
-		String str = icui.getInputText();
+		String str = icui().getInputText();
 		if(str.startsWith(""+getCommentPrefix())){
 			str=str.substring(1);
 		}else{
 			str=getCommentPrefix()+str;
 		}
-		icui.setInputFieldText(str);
+		icui().setInputFieldText(str);
 	}
 
 	@Override
@@ -3357,9 +3363,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	  	int iMax=Math.max(iCpFrom,iCpTo);
 	  	for(int i=iMin;i<=iMax;i++){
 	  		if(bApply){
-		  		icui.getDumpEntries().set(i,strCopyRangeIndicator+icui.getDumpEntries().get(i));
+		  		icui().getDumpEntries().set(i,strCopyRangeIndicator+icui().getDumpEntries().get(i));
 	  		}else{
-		  		icui.getDumpEntries().set(i,icui.getDumpEntries().get(i)
+		  		icui().getDumpEntries().set(i,icui().getDumpEntries().get(i)
 		  			.replaceFirst("^["+strCopyRangeIndicator+"]",""));
 	  		}
 	  	}
@@ -3397,10 +3403,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			
 			strTextToCopy="";
 			while(true){ //multi-line copy
-				if(iCopyFromWork>=icui.getDumpEntries().size())break;
+				if(iCopyFromWork>=icui().getDumpEntries().size())break;
 				
-				String strEntry =	bCut ? icui.getDumpEntries().remove(iCopyFromWork) :
-					icui.getDumpEntries().get(iCopyFromWork);
+				String strEntry =	bCut ? icui().getDumpEntries().remove(iCopyFromWork) :
+					icui().getDumpEntries().get(iCopyFromWork);
 	//			strEntry=strEntry.replace("\\n","\n"); //translate in-between newline requests into newline
 				
 				boolean bJoinWithNext = false;
@@ -3446,7 +3452,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			if(!bJustCollectText){
 				MiscI.i().putStringToClipboard(strTextToCopy);
 				
-				icui.clearDumpAreaSelection();
+				icui().clearDumpAreaSelection();
 //				lstbxDumpArea.getSelectionModel().setSelection(-1); //clear selection
 			}
 		}else{
@@ -3454,7 +3460,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			 * nothing selected at dump area,
 			 * use text input field as source
 			 */
-			String str = icui.getInputText();
+			String str = icui().getInputText();
 			if(!str.trim().equals(""+chCommandPrefix))MiscI.i().putStringToClipboard(str);
 		}
 		
@@ -3487,7 +3493,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 */
 	public boolean actionSubmitCommand(final String strCmd){
 		if(strCmd.isEmpty() || strCmd.trim().equals(""+getCommandPrefix())){
-			icui.clearInputTextField(); 
+			icui().clearInputTextField(); 
 			return false;
 		}
 		
@@ -3512,7 +3518,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //		String strTime = new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime())+": ";
 		if(bShowInfo)dumpInfoEntry(strType+": "+strCmd);
 		
-		icui.clearInputTextField(); 
+		icui().clearInputTextField(); 
 		
 		// history
 		boolean bAdd=true;
@@ -3554,7 +3560,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			}
 		}
 		
-		icui.scrollToBottomRequest();
+		icui().scrollToBottomRequest();
 		
 		return bIsCmd;
 	}

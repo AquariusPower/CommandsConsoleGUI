@@ -33,7 +33,7 @@ import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.extras.SingleAppInstanceI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
-import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGuiI;
+import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGUII;
 import com.github.commandsconsolegui.jmegui.console.SimpleConsoleAppAbs;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.misc.CallQueueI;
@@ -127,7 +127,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		 * Anything more complex can be postponed (from withing the config itself)
 		 * with {@link CallQueueI#appendCall(java.util.concurrent.Callable)}.
 		 */
-		GlobalCommandsDelegatorI.i().configure(ConsoleLemurStateI.i());
+		GlobalCommandsDelegatorI.i().configure();//ConsoleLemurStateI.i());
 		ConsoleLemurStateI.i().configure(new ConsoleLemurStateI.CfgParm(
 			null, KeyInput.KEY_F10, getGuiNode()));
 		
