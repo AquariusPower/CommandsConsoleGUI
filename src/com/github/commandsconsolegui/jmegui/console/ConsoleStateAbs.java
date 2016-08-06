@@ -405,8 +405,6 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 	}	
 	@Override
 	public ConsoleStateAbs<T> configure(ICfgParm icfg) {
-//	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,int iToggleConsoleKey, Node nodeGUI) {
-//		@SuppressWarnings("unchecked")
 		CfgParm cfg = (CfgParm)icfg;
 		
 		/**
@@ -414,70 +412,13 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 		 * Many things depend on it.
 		 * Even if initially enabled, for the looks it will be made invisible.
 		 */
-		boolean bConsoleDialogInitiallyEnabled=true;
 		
-//		super.configure(new BaseDialogStateAbs.CfgParm(
-//			false, cfg.strUIId, cfg.bIgnorePrefixAndSuffix, cfg.nodeGUI, bConsoleDialogInitiallyEnabled, null));
 		super.configure(cfg);
 		
-//		rss = new ReattachSafelyState();
-//		rss.configure(new ReattachSafelyState.CfgParm(this));
-		
 		this.iToggleConsoleKey=cfg.iToggleConsoleKey;
-//		if(cd==null)throw new NullPointerException("Missing "+CommandsDelegatorI.class.getName()+" instance (or a more specialized, like the scripting one)");
 		
-//		if(!cd().isConfigured()){
-//			cd().configure(this);//,sapp);
-//		}
-//		cd().initialize();
-		
-//		cd().addConsoleCommandListener(this);
-//		this.bEnabled=true; //just to let it be initialized at startup by state manager
-//		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
-		
-//		if(!app().getStateManager().attach(this))throw new NullPointerException("already attached state "+this.getClass().getName());
-		
-//		bConfigured=true;
-//		return true;
 		return storeCfgAndReturnSelf(icfg);
 	}
-	
-//	protected ConsoleGuiStateAbs(ConsoleCommands cc) {
-//		if(instance==null)instance=this;
-////		this.cc = cc==null ? new ConsoleScriptCommands() : cc;
-//		this.cc = cc;
-//		if(cc==null)throw new NullPointerException("Missing "+ConsoleCommands.class.getName()+" instance (or a more specialized, like the scripting one)");
-//		cc.addConsoleCommandListener(this);
-////		this.cc.csaTmp=this;
-//	}
-//	protected ConsoleGuiStateAbs(int iToggleConsoleKey, ConsoleCommands cc) {
-//		this(cc);
-//		this.bEnabled=true; //just to let it be initialized at startup by state manager
-//		this.iToggleConsoleKey=iToggleConsoleKey;
-//		ReflexFill.assertReflexFillFieldsForOwner(this);
-//	}
-//	protected ConsoleGuiStateAbs(int iToggleConsoleKey) {
-//		this(iToggleConsoleKey,null);
-//	}
-	
-//	protected String fileNamePrepare(String strFileBaseName, String strFileType, boolean bAddDateTime){
-//		return strFileBaseName
-//				+(bAddDateTime?"-"+Misc.i().getDateTimeForFilename():"")
-//				+"."+strFileType;
-//	}
-//	protected String fileNamePrepareCfg(String strFileBaseName, boolean bAddDateTime){
-//		return fileNamePrepare(strFileBaseName, strFileTypeConfig, bAddDateTime);
-//	}
-//	protected String fileNamePrepareLog(String strFileBaseName, boolean bAddDateTime){
-//		return fileNamePrepare(strFileBaseName, strFileTypeLog, bAddDateTime);
-//	}
-	
-//	public void initializePre(){
-////		if(isInitialized())throw new NullPointerException("already initialized...");
-//		
-////		astrStyleList.clear();
-//		addStyle(STYLE_CONSOLE);
-//	}
 	
 	protected void addStyle(String strStyleId){
 		if(!astrStyleList.contains(strStyleId)){

@@ -30,8 +30,7 @@ package com.github.commandsconsolegui.jmegui;
 //import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ERecreateConsoleSteps;
 import java.io.IOException;
 
-import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
-import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.GlobalHolderAbs.IGlobalOpt;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.app.Application;
@@ -58,7 +57,7 @@ import com.jme3.scene.Node;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class ConditionalStateAbs implements Savable{
+public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 	
 	/**
 	 * This Id is only required if there is more than one state of the same class.
@@ -504,6 +503,7 @@ public abstract class ConditionalStateAbs implements Savable{
 		discard,
 	}
 	
+	@Override
 	public boolean isDiscarded(){
 		return bDiscarded;
 	}

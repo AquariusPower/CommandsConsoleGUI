@@ -50,12 +50,12 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 	
 	protected ConsoleStateAbs<?> csa;
 	protected CommandsDelegator	cd;
-	protected ConsoleStateAbs<?>	cgui;
+//	protected ConsoleStateAbs<?>	cgui;
 	protected boolean	bConfigured;
 	
 	public void configure(){
 		this.cd=GlobalCommandsDelegatorI.i();
-		this.cgui=GlobalConsoleGuiI.i();
+//		this.cgui=GlobalConsoleGuiI.i();
 		
 		if(!MouseCursorCentralI.i().isConfigured()){
 			MouseCursorCentralI.i().configure(null);
@@ -85,11 +85,11 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 	}
 	
 	protected void cursorMoveEvent(CursorMotionEvent event, Spatial target,	Spatial capture) {
-		if(!cgui.isScrollRequestTarget(target)){ //detect changed
+		if(!GlobalConsoleGuiI.i().isScrollRequestTarget(target)){ //detect changed
 			debugReport(event, null, target, capture);
 		}
 		
-		cgui.setScrollRequestTarget(target);
+		GlobalConsoleGuiI.i().setScrollRequestTarget(target);
 	}
 	
 	@Override
@@ -133,8 +133,8 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 //		if(!button.isPressed()){ //on release
 		switch(button.getActivatorType()){
 			case Action1Click:
-				if(cgui.isHintBox(target)){
-					cgui.checkAndApplyHintAtInputField();
+				if(GlobalConsoleGuiI.i().isHintBox(target)){
+					GlobalConsoleGuiI.i().checkAndApplyHintAtInputField();
 					return true;
 				}
 				break;

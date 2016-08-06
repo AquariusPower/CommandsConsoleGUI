@@ -117,7 +117,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		 * Such classes shall have parameter-less default constructors.
 		 */
 		GlobalCommandsDelegatorI.iGlobal().set(new CommandsTest());
-		GlobalConsoleGuiI.iGlobal().set(ConsoleLemurStateI.i());
+//		GlobalConsoleGuiI.iGlobal().set(ConsoleLemurStateI.i());
 		
 		/**
 		 * Configs:
@@ -129,7 +129,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		 */
 		GlobalCommandsDelegatorI.i().configure(ConsoleLemurStateI.i());
 		ConsoleLemurStateI.i().configure(new ConsoleLemurStateI.CfgParm(
-				null, KeyInput.KEY_F10, getGuiNode()));
+			null, KeyInput.KEY_F10, getGuiNode()));
 		
 		//////////////////////// super init depends on globals
 		super.simpleInitApp(); // basic initializations

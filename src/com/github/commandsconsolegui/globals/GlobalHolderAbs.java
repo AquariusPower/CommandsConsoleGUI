@@ -39,15 +39,18 @@ import com.github.commandsconsolegui.misc.CheckInitAndCleanupI;
  * @param <T>
  */
 public abstract class GlobalHolderAbs<T> { //not abstract methods yet tho...
+	/**
+	 * optional to improve functionality
+	 */
+	public static interface IGlobalOpt{
+		public boolean isDiscarded();
+	}
+	
 	T obj;
 	
 	protected void setAssertingNotAlreadySet(T objNew){
-//		if(this.obj!=null){
+		validate();
 		this.obj = CheckInitAndCleanupI.i().assertGlobalIsNull(this.obj, objNew);
-//			this.obj = InitTraceI.i().getAssertValidatingIsNull(this.obj, obj);
-//			throw new NullPointerException("already set: "+obj);
-//		}
-//		this.obj=obj;
 	}
 	
 	/**
@@ -55,8 +58,21 @@ public abstract class GlobalHolderAbs<T> { //not abstract methods yet tho...
 	 * @return
 	 */
 	public T get(){
-		if(obj==null)throw new NullPointerException("global not set yet...");
+		if(!isSet())throw new NullPointerException("global not set yet...");
 		return obj;
+	}
+	
+	public void validate(){
+		if(obj instanceof IGlobalOpt){
+			if(((IGlobalOpt)obj).isDiscarded()){
+				obj=null;
+			}
+		}
+	}
+	
+	public boolean isSet(){
+		validate();
+		return obj!=null;
 	}
 	
 	public T set(T obj){
