@@ -1803,7 +1803,7 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 //		tdTextCursorBlinkHK.reset();
 		
 		if(getContainerMain().getChildren().size()>0){
-			System.err.println("WARN: console container should have been cleaned using specific gui methods by overriding this method.");
+			System.err.println("WARN: console container should have been properly/safely cleaned using specific gui methods by overriding this method.");
 			getContainerMain().detachAllChildren();
 		}
 //		ctnrMainTopSubWindow.clearChildren();
@@ -1811,13 +1811,14 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 		lstbxAutoCompleteHint.removeFromParent();
 		getContainerMain().removeFromParent();
 		
-    /**
-     * IMPORTANT!!!
-     * Toggle console must be kept! Re-initialization depends on it!
-     * TODO should keymappings be at setEnabled() ?
-		app().getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_TOGGLE);
+		//TODO should keymappings be at setEnabled() ?
+//    /**
+//     * IMPORTANT!!!
+//     * Toggle console must be kept! Re-initialization depends on it!
+//     * 
+		app().getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_TOGGLE.toString());
     app().getInputManager().removeListener(alConsoleToggle);
-     */
+//     */
     app().getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_SCROLL_UP+"");
     app().getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_SCROLL_DOWN+"");
     app().getInputManager().removeListener(alConsoleScroll);

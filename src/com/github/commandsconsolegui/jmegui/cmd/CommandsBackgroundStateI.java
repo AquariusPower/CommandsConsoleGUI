@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.jmegui.cmd;
 
 import com.github.commandsconsolegui.cmd.IConsoleUI;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGuiI;
 
 /**
  * This is not a thread.
@@ -45,24 +46,25 @@ public class CommandsBackgroundStateI extends CmdConditionalStateAbs {
 	protected BoolTogglerCmdField	btgExecCommandsInBackground=new BoolTogglerCmdField(this, true, null,
 		"Will continue running console commands even if console is closed.").setCallNothingOnChange();
 	
-	private IConsoleUI	cgsaGraphicalConsoleUI;
+//	private IConsoleUI	icui;
 	
 	public CommandsBackgroundStateI() {
 		super.bPrefixCmdWithIdToo = true;
 	}
 	
 	public static class CfgParm implements ICfgParm{
-		IConsoleUI icui;
-		public CfgParm(IConsoleUI icui) {
-			super();
-			this.icui = icui;
-		}
+//		IConsoleUI icui;
+//		public CfgParm(IConsoleUI icui) {
+//			super();
+//			this.icui = icui;
+//		}
 	}
 	@Override
 	public CommandsBackgroundStateI configure(ICfgParm icfg){
+		@SuppressWarnings("unused")
 		CfgParm cfg = (CfgParm)icfg;
-		if(cfg.icui==null)throw new NullPointerException("invalid instance for "+IConsoleUI.class.getName());
-		this.cgsaGraphicalConsoleUI = cfg.icui;
+//		if(cfg.icui==null)throw new NullPointerException("invalid instance for "+IConsoleUI.class.getName());
+//		this.icui = cfg.icui;
 //		super.configure(new CmdConditionalStateAbs.CfgParm(CommandsBackgroundStateI.class.getSimpleName()));
 		super.configure(new CmdConditionalStateAbs.CfgParm(null));
 		
@@ -73,7 +75,7 @@ public class CommandsBackgroundStateI extends CmdConditionalStateAbs {
 	protected boolean updateOrUndo(float tpf) {
 		if(!btgExecCommandsInBackground.b())return true; //this is an OK state, no failure!
 		
-		if(cgsaGraphicalConsoleUI.isEnabled())return true; //will be foreground execution, this is an OK state, no failure!
+		if(GlobalConsoleGuiI.i().isEnabled())return true; //will be foreground execution, this is an OK state, no failure!
 		
 		/**
 		 * This way, being controlled by JME state update, the commands will happen in the same 

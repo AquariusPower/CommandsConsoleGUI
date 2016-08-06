@@ -76,8 +76,8 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 		GlobalGUINodeI.iGlobal().set(getGuiNode());
 		GlobalRootNodeI.iGlobal().set(getRootNode());
 		
-		CommandsBackgroundStateI.i().configure(new CommandsBackgroundStateI.CfgParm(
-			GlobalConsoleGuiI.i()));
+//		CommandsBackgroundStateI.i().configure(new CommandsBackgroundStateI.CfgParm(GlobalConsoleGuiI.i()));
+		CommandsBackgroundStateI.i().configure(new CommandsBackgroundStateI.CfgParm());
 		
 		FpsLimiterStateI.i().configure(new FpsLimiterStateI.CfgParm());
 		btgFpsLimit.setCallOnChange(new Callable<Boolean>() {

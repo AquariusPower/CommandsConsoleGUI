@@ -102,7 +102,7 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 	public CmdConditionalStateAbs configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
 		
-		super.configure(new ConditionalStateAbs.CfgParm(GlobalAppRefI.i(),cfg.strId));
+		super.configure(new ConditionalStateAbs.CfgParm(GlobalAppRefI.i(), cfg.strId));
 		
 //		cd=GlobalCommandsDelegatorI.i();
 		

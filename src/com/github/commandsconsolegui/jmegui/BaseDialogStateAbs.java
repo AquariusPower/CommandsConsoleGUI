@@ -151,7 +151,6 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 	}
 	@Override
 	public BaseDialogStateAbs<T> configure(ICfgParm icfg) {
-		@SuppressWarnings("unchecked")
 		CfgParm cfg = (CfgParm)icfg;
 //	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
 		

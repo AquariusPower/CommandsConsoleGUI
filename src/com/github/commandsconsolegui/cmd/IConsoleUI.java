@@ -37,6 +37,7 @@ import com.github.commandsconsolegui.misc.CheckInitAndCleanupI.ICheckInitAndClea
  * This is a "functionality requester" general class for UI.
  * It must depend in almost nothing outside this package.
  * It shall provide direct access to object's safe methods.
+ * It's methods may be identical to other interfaces or super classes.
  * 
  * TODO can this be done in a better way? global class simple fields? local flags that other classes will listen to?
  * 
