@@ -132,11 +132,11 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 		/**
 		 * must be an exception as it can have already been read/collected with automatic value.
 		 */
-		if(super.strCmdId!=null){
-			throw new NullPointerException("asked for '"+strCmd+"' but was already set to: "+this.strCmdId);
+		if(super.strUniqueCmdId!=null){
+			throw new NullPointerException("asked for '"+strCmd+"' but was already set to: "+this.strUniqueCmdId);
 		}
 		
-		super.setId(new IdTmp(false, strCmd, strCmd));
+		super.setUniqueCmdId(new IdTmp(false, strCmd, strCmd));
 	}
 	
 //	public String getCmdId(){
@@ -203,7 +203,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	}
 	
 	public String getCmdIdAsCommand(boolean bForceState) {
-		return getCmdId()+" "+bForceState;
+		return getUniqueCmdId()+" "+bForceState;
 	}
 
 	@Override
@@ -225,7 +225,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 
 	@Override
 	public String getReport() {
-		return getCmdId()+" = "+bCurrent;
+		return getUniqueCmdId()+" = "+bCurrent;
 	}
 
 	public void set(boolean b){
@@ -256,7 +256,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	@Override
 	public String getVarId() {
 		if(strVarId==null){
-			super.setId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner, this, true));
+			super.setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner, this, true));
 		}
 		return strVarId;
 	}

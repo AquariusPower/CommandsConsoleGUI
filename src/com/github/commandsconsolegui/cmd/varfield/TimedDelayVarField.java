@@ -310,7 +310,7 @@ public class TimedDelayVarField extends VarCmdFieldAbs{
 	@Override
 	public String getVarId() {
 		if(strVarId==null){
-			super.setId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner, this, true));
+			super.setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner, this, true));
 		}
 		
 		return strVarId;

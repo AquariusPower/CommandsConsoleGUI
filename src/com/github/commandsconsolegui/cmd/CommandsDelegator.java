@@ -468,9 +468,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	protected boolean checkCmdValidityBoolTogglers(){
 		btgReferenceMatched=null;
 		for(BoolTogglerCmdField btg : VarCmdFieldAbs.getListCopy(BoolTogglerCmdField.class)){
-			String strCoreId = btg.getCoreId();
-			if(!strCoreId.endsWith("Toggle"))strCoreId+="Toggle";
-			if(checkCmdValidity(btg.getOwnerAsCmdListener(), btg.getCmdId(), strCoreId, "[bEnable] "+btg.getHelp(), true)){
+			String strSimpleCmdId = btg.getSimpleCmdId();
+			if(!strSimpleCmdId.endsWith("Toggle"))strSimpleCmdId+="Toggle";
+			if(checkCmdValidity(btg.getOwnerAsCmdListener(), btg.getUniqueCmdId(), strSimpleCmdId, "[bEnable] "+btg.getHelp(), true)){
 				btgReferenceMatched = btg;
 				break;
 			}
@@ -508,31 +508,40 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		return icclPseudo;
 	}
 	
-	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strValidCmd){
-		return checkCmdValidity(iccl, strValidCmd, null, null);
+	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strUniqueCmdId){
+		return checkCmdValidity(iccl, strUniqueCmdId, null, null);
 	}
-	public boolean checkCmdValidity(IConsoleCommandListener iccl, StringCmdField strfValidCmd, String strComment){
+	public boolean checkCmdValidity(IConsoleCommandListener iccl, StringCmdField scf, String strComment){
 		if(strComment==null){
-			strComment = strfValidCmd.getHelp();
+			strComment = scf.getHelp();
 		}else{
-			if(strfValidCmd.getHelp()!=null){
-				strComment+="\n"+strfValidCmd.getHelp();
+			if(scf.getHelp()!=null){
+				strComment+="\n"+scf.getHelp();
 			}
 		}
-		return checkCmdValidity(iccl, strfValidCmd.toString(), strfValidCmd.getCoreId(), strComment);
+		return checkCmdValidity(iccl, scf.toString(), scf.getSimpleCmdId(), strComment);
 	}
-	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strValidCmd, String strCoreCmdId, String strComment){
-		return checkCmdValidity(iccl, strValidCmd, strCoreCmdId, strComment, false);
+	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strUniqueCmdId, String strSimpleCmdId, String strComment){
+		return checkCmdValidity(iccl, strUniqueCmdId, strSimpleCmdId, strComment, false);
 	}
-	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strValidCmd, String strCoreCmdId, String strComment, boolean bSkipSortCheck){
+	/**
+	 * 
+	 * @param iccl
+	 * @param strUniqueCmdId
+	 * @param strSimpleCmdId (can be null)
+	 * @param strComment (can be null)
+	 * @param bSkipSortCheck
+	 * @return
+	 */
+	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strUniqueCmdId, String strSimpleCmdId, String strComment, boolean bSkipSortCheck){
 //		if(strCmdLinePrepared==null){
 		if(bFillCommandList){
 			if(strComment!=null){
-				strValidCmd+=commentToAppend(strComment);
+				strUniqueCmdId+=commentToAppend(strComment);
 			}
 			
-			if(strCoreCmdId==null)strCoreCmdId=strValidCmd;
-			addCmdToValidList(iccl,strValidCmd,strCoreCmdId,bSkipSortCheck);
+			if(strSimpleCmdId==null)strSimpleCmdId=strUniqueCmdId;
+			addCmdToValidList(iccl,strUniqueCmdId,strSimpleCmdId,bSkipSortCheck);
 			
 			return false;
 		}
@@ -543,10 +552,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 //		String strCheck = strPreparedCmdLine;
 //		strCheck = strCheck.trim().split(" ")[0];
-		strValidCmd = strValidCmd.trim().split(" ")[0];
+		strUniqueCmdId = strUniqueCmdId.trim().split(" ")[0];
 		
 //		return strCheck.equalsIgnoreCase(strValidCmd);
-		return ccl.paramCommand().equalsIgnoreCase(strValidCmd);
+		return ccl.paramCommand().equalsIgnoreCase(strUniqueCmdId);
 	}
 	
 //	protected boolean matchCommand(String strValidCmd){
@@ -1489,22 +1498,22 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		return astr;
 	}
 	
-	protected void addCmdToValidList(IConsoleCommandListener iccl, String strCmdNew, String strCoreCmdId, boolean bSkipSortCheck){
+	protected void addCmdToValidList(IConsoleCommandListener iccl, String strUniqueCmdIdNew, String strSimpleCmdIdNew, boolean bSkipSortCheck){
 //		String strConflict=null;
 		
 		if(iccl==null)throw new PrerequisitesNotMetException("listener reference cannot be null");
 			
 //		if(!astrCmdWithCmtValidList.contains(strNew)){
-		if(!strCmdNew.startsWith(TOKEN_CMD_NOT_WORKING_YET)){
+		if(!strUniqueCmdIdNew.startsWith(TOKEN_CMD_NOT_WORKING_YET)){
 //			String strBaseCmdNew = extractCommandPart(strNew,0);
-			String strBaseCmdNew = strCmdNew.split(" ")[0];
+			String strBaseCmdNew = strUniqueCmdIdNew.split(" ")[0];
 			
 			String strComment = "";
-			if(strCmdNew.length()>strBaseCmdNew.length()){
-				strComment= strCmdNew.substring(strBaseCmdNew.length()).trim();
+			if(strUniqueCmdIdNew.length()>strBaseCmdNew.length()){
+				strComment=strUniqueCmdIdNew.substring(strBaseCmdNew.length()).trim();
 			}
 			
-			CommandData cmddNew = new CommandData(iccl, strBaseCmdNew, strCoreCmdId, strComment);
+			CommandData cmddNew = new CommandData(iccl, strBaseCmdNew, strSimpleCmdIdNew, strComment);
 			
 			/**
 			 * conflict check, will discard in case it is identical origin
@@ -1544,7 +1553,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			avcf.addAll(VarCmdFieldAbs.getListCopy(BoolTogglerCmdField.class));
 			avcf.addAll(BoolTogglerCmdField.getListCopy(StringCmdField.class));
 			for(VarCmdFieldAbs vcf:avcf){
-				if(vcf.getCmdId().equalsIgnoreCase(cmddNew.getUniqueCmdId())){
+				if(vcf.getUniqueCmdId().equalsIgnoreCase(cmddNew.getUniqueCmdId())){
 					vcf.setCmdData(cmddNew);
 				}
 			}
@@ -3293,7 +3302,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 
 	protected ECmdReturnStatus cmdRawLineCheckEndOfStartupCmdQueue() {
 		if(!bStartupCmdQueueDone){
-			String strCmd = getCommandPrefixStr()+RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE.getCmdId();
+			String strCmd = getCommandPrefixStr()+RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE.getUniqueCmdId();
 			if(strCmd.equalsIgnoreCase(ccl.getOriginalLine())){
 //			if(RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE.equals(ccl.strCmdLineOriginal)){
 				bStartupCmdQueueDone=true;

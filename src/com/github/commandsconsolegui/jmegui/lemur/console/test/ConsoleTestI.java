@@ -81,7 +81,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 	// generic dialog
 	private DialogTestState<T>	diagCfg;
 
-	private DialogTestState<T>	diag;
+	private DialogTestState<T>	diagList;
 
 	private DialogTestState<T>	diagConfirm;
 
@@ -142,7 +142,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		diagConfirm = new DialogTestState<T>(DialogTestState.EDiag.Confirm).configure(
 			new DialogTestState.CfgParm(true, 500f, 300f, null, null));//, diag));
 		
-		diag = new DialogTestState<T>(DialogTestState.EDiag.List).configure(
+		diagList = new DialogTestState<T>(DialogTestState.EDiag.List).configure(
 			new DialogTestState.CfgParm(false, null, null, null, null))//, null))
 			.addModalDialog(diagCfg)
 			.addModalDialog(diagConfirm);
@@ -184,6 +184,10 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		}else
 		if(cd.checkCmdValidity(this,scfHelp,"specific custom help")){
 			cd.dumpSubEntry("custom help");
+			bCommandWorked = true;
+		}else
+		if(cd.checkCmdValidity(this,"testDialog")){
+			diagList.requestEnable();
 			bCommandWorked = true;
 		}else
 //		if(cc.checkCmdValidity(this,"conflictTest123","")){

@@ -75,7 +75,7 @@ public class StringCmdField extends VarCmdFieldAbs{
 	 */
 	public StringCmdField(String strCmdId, String strHelpComment){
 		super(true);
-		super.setId(new IdTmp(false, strCmdId, strCmdId));
+		super.setUniqueCmdId(new IdTmp(false, strCmdId, strCmdId));
 		this.strHelp = strHelpComment;
 		this.bReflexingIdentifier = false;
 //		StringCmdField.ascfList.add(this);
@@ -115,8 +115,8 @@ public class StringCmdField extends VarCmdFieldAbs{
 	 */
 	@Override
 	public String toString() {
-		if(strCmdId==null)initialize();
-		return this.strCmdId;
+		if(strUniqueCmdId==null)initialize();
+		return this.strUniqueCmdId;
 	}
 	
 //	public String getHelpComment(){
@@ -129,7 +129,7 @@ public class StringCmdField extends VarCmdFieldAbs{
 		 * if this is called at reflex fill method.
 		 */
 //		super.strCmdId=errorMessage();
-		super.setId(ReflexFillI.i().createIdentifierWithFieldName(this.rfcfgOwner, this, false));
+		super.setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(this.rfcfgOwner, this, false));
 //		throw new NullPointerException("not initialized properly: "+this);
 	}
 //	
@@ -140,19 +140,19 @@ public class StringCmdField extends VarCmdFieldAbs{
 	@Override
 	public boolean equals(Object obj) {
 //		if(strCmdId==null)throw new NullPointerException(errorMessage());
-		if(strCmdId==null)initialize();
+		if(strUniqueCmdId==null)initialize();
 		if(bIgnoreCaseOnComparison){
-			return this.strCmdId.equalsIgnoreCase(""+obj);
+			return this.strUniqueCmdId.equalsIgnoreCase(""+obj);
 		}else{
-			return this.strCmdId.equals(""+obj);
+			return this.strUniqueCmdId.equals(""+obj);
 		}
 	}
 	
 	@Override
 	public int hashCode() {
 //		if(strCmdId==null)throw new NullPointerException(errorMessage());
-		if(strCmdId==null)initialize();
-		return strCmdId.hashCode();
+		if(strUniqueCmdId==null)initialize();
+		return strUniqueCmdId.hashCode();
 	}
 	
 //	@Override

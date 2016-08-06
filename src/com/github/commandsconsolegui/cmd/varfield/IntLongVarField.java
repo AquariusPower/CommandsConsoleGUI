@@ -132,7 +132,7 @@ public class IntLongVarField extends VarCmdFieldAbs{
 	public String getVarId() {
 //		if(strVarId==null)strVarId=ReflexFillI.i().getVarId(rfcfgOwner, strCodePrefixVariant, this, -1);
 		if(strVarId==null){
-			super.setId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner, this, true));
+			super.setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner, this, true));
 		}
 		
 		return strVarId;

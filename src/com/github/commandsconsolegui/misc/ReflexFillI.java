@@ -305,14 +305,14 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	}
 	
 	public static class IdTmp{
-		public String strFull;
-		public String strCore;
+		public String strUniqueCmdId;
+		public String strSimpleCmdId;
 		public boolean	bIsVariable;
 		public IdTmp() {
 		}
 		public IdTmp(boolean bIsVariable, String strCore, String strFull) {
-			this.strFull = strFull;
-			this.strCore = strCore;
+			this.strUniqueCmdId = strFull;
+			this.strSimpleCmdId = strCore;
 			this.bIsVariable = bIsVariable;
 		}
 	}
@@ -396,8 +396,8 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		}
 		
 		IdTmp id = new IdTmp();
-		id.strFull = prepareFullCommand(strCommandCore, rfcfg, bIsVariable);
-		id.strCore = strCommandCore;
+		id.strUniqueCmdId = prepareFullCommand(strCommandCore, rfcfg, bIsVariable);
+		id.strSimpleCmdId = strCommandCore;
 		id.bIsVariable=bIsVariable;
 		return id;
 	}

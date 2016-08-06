@@ -77,7 +77,7 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 	}
 	
 	public String getCmd(){
-		return btgState.getCmdId();
+		return btgState.getUniqueCmdId();
 //		return cmdState.toString();
 //		return strCmdIdentifier;
 	}

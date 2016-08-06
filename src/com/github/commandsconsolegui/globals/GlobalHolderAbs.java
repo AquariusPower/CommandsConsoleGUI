@@ -30,9 +30,11 @@ package com.github.commandsconsolegui.globals;
 import com.github.commandsconsolegui.misc.CheckInitAndCleanupI;
 
 /**
- * "centralizing" objects to easy coding.
- * 
  * Global Reference Holder
+ * 
+ * To lower as much as possible the dependencies.
+ * To easily access what can/should be globally accessible.
+ * The same object may be present in more than one global, scope dependency range.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  * 

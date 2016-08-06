@@ -47,8 +47,8 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
 public abstract class VarCmdFieldAbs implements IReflexFillCfgVariant, IVarIdValueOwner{
 	protected boolean bReflexingIdentifier = true;
 	protected String strVarId = null;
-	protected String strCmdId = null;
-	protected String strCoreId = null;
+	protected String strUniqueCmdId = null;
+	protected String strSimpleCmdId = null;
 	protected String strDebugErrorHelper = "ERROR: "+this.getClass().getName()+" not yet properly initialized!!!";
 	protected IReflexFillCfg	rfcfgOwner;
 	protected VarIdValueOwnerData	vivo;
@@ -99,7 +99,7 @@ public abstract class VarCmdFieldAbs implements IReflexFillCfgVariant, IVarIdVal
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected <T extends VarCmdFieldAbs> T setId(IdTmp id){
+	protected <T extends VarCmdFieldAbs> T setUniqueCmdId(IdTmp id){
 		String strExceptionId = null;
 		
 		/**
@@ -109,21 +109,21 @@ public abstract class VarCmdFieldAbs implements IReflexFillCfgVariant, IVarIdVal
 			if(strVarId!=null){
 				strExceptionId=strVarId;
 			}else{
-				strVarId=id.strFull;
+				strVarId=id.strUniqueCmdId;
 			}
 		}else{
-			if(strCmdId!=null){
-				strExceptionId=strCmdId;
+			if(strUniqueCmdId!=null){
+				strExceptionId=strUniqueCmdId;
 			}else{
-				strCmdId=id.strFull;
+				strUniqueCmdId=id.strUniqueCmdId;
 			}
 		}
 		
 		if(strExceptionId!=null){
-			throw new NullPointerException("asked for '"+id.strFull+"' but was already set to: "+strExceptionId);
+			throw new NullPointerException("asked for '"+id.strUniqueCmdId+"' but was already set to: "+strExceptionId);
 		}
 		
-		strCoreId = id.strCore;
+		strSimpleCmdId = id.strSimpleCmdId;
 		
 		strDebugErrorHelper=null; //clear error helper
 		
@@ -133,28 +133,31 @@ public abstract class VarCmdFieldAbs implements IReflexFillCfgVariant, IVarIdVal
 	/**
 	 * sets the command identifier that user will type in the console
 	 * 
-	 * @param strId
+	 * @param strUniqueCmdId
 	 * @param bIsVariable
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T extends VarCmdFieldAbs> T setCustomId(String strId, boolean bIsVariable){
-		setId(new IdTmp(bIsVariable,strId,strId));
+	protected <T extends VarCmdFieldAbs> T setCustomUniqueCmdId(String strUniqueCmdId, boolean bIsVariable){
+		setUniqueCmdId(new IdTmp(bIsVariable,strUniqueCmdId,strUniqueCmdId));
 		return (T)this;
 	}
 
 	@Override
-	public String getCoreId() {
-		if(strCmdId==null)getCmdId();//just to init
-		return strCoreId;
+	public String getSimpleCmdId() {
+		chkAndInit();
+		return strSimpleCmdId;
 	}
-
-	public String getCmdId(){
-		if(strCmdId==null){
-			setId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this,false));
+	
+	protected void chkAndInit(){
+		if(strUniqueCmdId==null){
+			setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this,false));
 		}
-		
-		return strCmdId;
+	}
+	
+	public String getUniqueCmdId(){
+		chkAndInit();
+		return strUniqueCmdId;
 	}
 	
 	@Override
