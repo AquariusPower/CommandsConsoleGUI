@@ -1456,7 +1456,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @param iccl
 	 */
 	protected void removeAllCmdsFor(IConsoleCommandListener iccl){
-		MsgI.i().msgDbg("WARNING: Removing all registered commands for: "+iccl.getClass().getName(), true, this);
+		MsgI.i().dbg("WARNING: Removing all registered commands for: "+iccl.getClass().getName(), true, this);
 //		System.err.println("WARNING: Removing all registered commands for: "+iccl.getClass().getName());
 		
 //		for(CommandData cmdd:trmCmds.values().toArray(new CommandData[0])){
@@ -1470,7 +1470,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //		}
 		
 		ArrayList<String> astr = getAllCommandFor(iccl);
-		MsgI.i().msgDbg("WARNING: removing: "+astr.toString(), true, this);
+		MsgI.i().dbg("WARNING: removing: "+astr.toString(), true, this);
 //		System.err.println("WARNING: removing: "+astr.toString());
 		
 		for(String strUCmd:astr){
@@ -1561,7 +1561,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //			acmdList.add(cmddNew);
 			trmCmds.put(cmddNew.getUniqueCmdId(), cmddNew);
 			cmddLastAdded = cmddNew;
-			MsgI.i().msgDbg(cmddNew.getOwner().getClass().getSimpleName()+":"+cmddNew.getUniqueCmdId(), true, this);
+			MsgI.i().dbg(cmddNew.getOwner().getClass().getSimpleName()+":"+cmddNew.getUniqueCmdId(), true, this);
 			
 			/**
 			 * coded sorting check (unnecessary actually), just useful for developers
@@ -3608,12 +3608,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 
 	public boolean isConfigured() {
-		if(!bConfigured)MsgI.i().msgDbg("is cfg", false, this);
+		if(!bConfigured)MsgI.i().dbg("is cfg", false, this);
 		return bConfigured;
 	}
 
 	public boolean isInitialized() {
-		if(!bInitialized)MsgI.i().msgDbg("is ini", false, this);
+		if(!bInitialized)MsgI.i().dbg("is ini", false, this);
 		return bInitialized;
 	}
 

@@ -181,6 +181,7 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 	/**
 	 * For now, this is just a dummy method to allow this class {@link BoolToggler#} 
 	 * fields to be indicated as owned by this class. 
+	 * TODO confirm this...
 	 */
 	@Override
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {

@@ -227,7 +227,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 	}
 	
 	protected void msgDbg(String str, boolean bSuccess) {
-		MsgI.i().msgDbg(str, bSuccess, this);
+		MsgI.i().dbg(str, bSuccess, this);
 	}
 
 	public boolean isConfigured(){

@@ -47,7 +47,7 @@ public class MsgI {
 	 * @param bSuccess
 	 * @param objOwner use "this"
 	 */
-	public void msgDbg(String str, boolean bSuccess, Object objOwner){
+	public void dbg(String str, boolean bSuccess, Object objOwner){
 		if(!bDebug)return;
 		
 		if(!bSuccess){
@@ -55,11 +55,18 @@ public class MsgI {
 			i=i2;i2=i;
 		}
 		
-		System.err.println("DBG: "
+		System.err.println(MsgI.class.getName()+":DBG: "
 			+new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()))+": "
 			+(objOwner!=null ? objOwner.getClass().getName()+": " : "")
 			+(bSuccess?"ok":"FAIL")+": "
 			+str);
+	}
+	
+	public void warn(String str, Object... aobj){
+		System.err.println(MsgI.class.getName()+":WARN: "
+			+new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()))+": "
+			+str+": "
+			+aobj);
 	}
 	
 }

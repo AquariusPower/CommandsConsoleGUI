@@ -29,14 +29,22 @@ package com.github.commandsconsolegui.jmegui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.TreeMap;
 
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
+import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
+import com.github.commandsconsolegui.misc.CallQueueI;
+import com.github.commandsconsolegui.misc.MsgI;
 //import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.jme3.audio.AudioData.DataType;
+import com.jme3.audio.AudioNode;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
@@ -313,41 +321,6 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 		}
 	}
 
-//	public void setModalChosenData(DialogListEntryData<T> data) {
-//		this.dataFromModal = data;
-//	}
-	
-//	/**
-//	 * the answer will be null after this
-//	 * @return
-//	 */
-//	public DialogListEntryData<T> getModalChosenDataAndClearIt(){
-//		DialogListEntryData<T> data = dataFromModal;
-//		dataFromModal = null;
-//		return data;
-//	}
-	
-//	public boolean isCfgDataValueSet() {
-//		return dataFromModal!=null;
-//	}
-	
-//	/**
-//	 * this data will have it's value modified
-//	 * @param dataToCfg
-//	 */
-//	protected void setDataToApplyModalChoice(DialogListEntryData<T> dataToCfg) {
-//		if(!adleFullList.contains(dataToCfg))throw new PrerequisitesNotMetException("data is not on the list", dataToCfg);
-//		this.dataToCfgReference=dataToCfg;
-//	}
-//	protected DialogListEntryData<T> getDataToApplyModalChoiceAndClearIt() {
-//		DialogListEntryData<T> data = this.dataToCfgReference;
-//		this.dataToCfgReference=null;
-//		return data;
-//	}
-//	public String getCfgDataRefReport() {
-//		return this.dataToCfgReference.report();
-//	}
-	
 	public abstract void clearSelection();
 	
 	public boolean isOptionSelectionMode(){
@@ -362,9 +335,6 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 	
 	public abstract DialogListEntryData<T> getSelectedEntryData();
 	
-	/**
-	 * 
-	 */
 	protected abstract void updateList();
 	
 	protected abstract void updateTextInfo();
@@ -416,6 +386,7 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 //				lChoiceMadeAtMilis=System.currentTimeMillis();
 				cd().dumpInfoEntry(this.getId()+": Option Selected: "+dataSelected.toString());
 				requestDisable(); //close if there is one entry selected
+				AudioUII.i().playAudio(AudioUII.EAudio.SubmitCfgChoice);
 			}
 		}else{
 			if(dataSelected!=null){
@@ -424,11 +395,12 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 					requestRefreshList();
 				}else{
 					actionCustomAtEntry(dataSelected);
+					AudioUII.i().playAudio(AudioUII.EAudio.SubmitSelection);
 				}
 			}
 		}
-		
 	}
+	
 	
 	/**
 	 * Main/default action to be performed on the selected list entry.
@@ -446,23 +418,10 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 		updateInputField();
 	}
 	
-//	protected void setDataReferenceAtParent(DialogListEntryData<T> dataReferenceAtParent) {
-//		this.dataReferenceAtParent=dataReferenceAtParent;
-//	}
-//
-//	protected void setCommandAtParent(T cmdAtParent) {
-//		this.cmdAtParent = cmdAtParent;
-//	}
-//	
-//	protected T getCommandAtParent() {
-//		return this.cmdAtParent;
-//	}
-	
 	public ArrayList<DialogListEntryData<T>> getDataSelectionListCopy() {
 		return new ArrayList<DialogListEntryData<T>>(adataChosenEntriesList);
 	}
 	
-
 	protected class DiagModalInfo<T>{
 		protected BaseDialogStateAbs<T>	diagChildModal;
 		
