@@ -225,6 +225,7 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 	@Override
 	protected boolean updateOrUndo(float tpf) {
 		DialogListEntryData<T> dle = getSelectedEntryData();
+		if(dle!=dleLastSelected)AudioUII.i().playAudio(AudioUII.EAudio.HoverActivator);
 		if(dle!=null)dleLastSelected = dle;
 		
 //		if(isCfgDataValueSet()){

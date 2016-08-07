@@ -29,6 +29,9 @@ package com.github.commandsconsolegui.jmegui;
 
 import java.util.TreeMap;
 
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
@@ -47,13 +50,13 @@ import com.jme3.audio.AudioNode;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class AudioUII implements IReflexFillCfg {
+public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 	private static AudioUII instance = new AudioUII();
 	public static AudioUII i(){return instance;}
 	
 	TreeMap<String,AudioNode> tmAudio = new TreeMap<String,AudioNode>();
 
-	public final BoolTogglerCmdField btgMute = new BoolTogglerCmdField(this,false);
+	public final BoolTogglerCmdField btgMute = new BoolTogglerCmdField(this,false).setCallNothingOnChange();
 	
 	static String strBasePath="Sounds/Effects/UI/";
 	public static enum EAudio{
@@ -126,6 +129,16 @@ public class AudioUII implements IReflexFillCfg {
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
+	}
+	
+	@Override
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator ccRequester) {
+		return ECmdReturnStatus.NotFound;
+	}
+
+	public void configure() {
+		// this will register the bool togglers commands too. 
+		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
 	}
 
 }

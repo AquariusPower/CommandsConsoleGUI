@@ -38,6 +38,7 @@ import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
 import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGUII;
+import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CommandsBackgroundStateI;
 import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
@@ -89,6 +90,8 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 		});
 		
 		UngrabMouseStateI.i().configure(new UngrabMouseStateI.CfgParm(null,null));
+		
+		AudioUII.i().configure();
 		
 		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
 		
