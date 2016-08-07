@@ -34,6 +34,8 @@ import java.util.concurrent.Callable;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.jmegui.AudioUII;
+import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
@@ -131,7 +133,7 @@ public abstract class LemurDialogGUIStateAbs<T extends Command<Button>> extends 
 	}
 	@Override
 	public LemurDialogGUIStateAbs<T> configure(ICfgParm icfg) {
-		CfgParm cfg = (CfgParm)icfg;
+		CfgParm cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
 		
 //		DialogMouseCursorListenerI.i().configure(null);
 		
@@ -667,10 +669,10 @@ public abstract class LemurDialogGUIStateAbs<T extends Command<Button>> extends 
 	}
 	
 //	public void openModalDialog(String strDialogId, DialogListEntryData<T> dataToAssignModalTo, T cmd){
-	public void openModalDialog(String strDialogId, DialogListEntryData<T> dataToAssignModalTo, T cmd){
+	public void openModalDialog(String strDialogId, DialogListEntryData<T> dledToAssignModalTo, T cmd){
 		LemurDialogGUIStateAbs<T> diagModalCurrent = hmModals.get(strDialogId);
 		if(diagModalCurrent!=null){
-			dmi = new DiagModalInfo(diagModalCurrent,cmd,dataToAssignModalTo);
+			dmi = new DiagModalInfo(diagModalCurrent,cmd,dledToAssignModalTo);
 			diagModalCurrent.requestEnable();
 		}else{
 			throw new PrerequisitesNotMetException("no dialog set for id: "+strDialogId);
@@ -783,6 +785,9 @@ public abstract class LemurDialogGUIStateAbs<T extends Command<Button>> extends 
 	public abstract boolean execActionFor(EMouseCursorButton e, Spatial capture);
 
 	public void removeEntry(DialogListEntryData<T> dled){
+		removeEntry(dled, null);
+	}
+	protected void removeEntry(DialogListEntryData<T> dled, DialogListEntryData<T> dledParent){
 //		int iDataAboveIndex = -1;
 		DialogListEntryData<T> dledAboveTmp = null;
 		if(getSelectedEntryData().equals(dled)){
@@ -792,11 +797,19 @@ public abstract class LemurDialogGUIStateAbs<T extends Command<Button>> extends 
 		}
 		DialogListEntryData<T> dledParentTmp = dled.getParent();
 		
-		for(DialogListEntryData<T> dledChild:dled.getChildrenCopy()){
-			removeEntry(dledChild);
+		ArrayList<DialogListEntryData<T>> dledChildren = dled.getChildrenCopy();
+		boolean bIsParent=false;
+		if(dledChildren.size()>0)bIsParent=true;
+		for(DialogListEntryData<T> dledChild:dledChildren){
+			removeEntry(dledChild,dled);
 		}
 		
-		if(!adleCompleteEntriesList.remove(dled)){
+		if(adleCompleteEntriesList.remove(dled)){
+			if(dledParent==null){ //play sound only for the initial entry
+				AudioUII.i().playAudio(bIsParent?
+					EAudio.RemoveSubTreeEntry : EAudio.RemoveListEntry);
+			}
+		}else{
 			throw new PrerequisitesNotMetException("missing data at list", dled);
 		}
 		

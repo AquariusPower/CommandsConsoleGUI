@@ -28,10 +28,14 @@
 # jme requires vorbis mono format to work properly
 
 astrFileList=(
+	220189__gameaudio__blip-squeak.wav
 	220197__gameaudio__click-basic.wav
 	220183__gameaudio__click-casual.wav
+	220194__gameaudio__click-heavy.wav
+	220195__gameaudio__click-wooden-1.wav
 	220172__gameaudio__flourish-spacey-2.wav
-	220189__gameaudio__blip-squeak.wav
+	220177__gameaudio__quick-ui-or-event-deep.wav
+	220205__gameaudio__teleport-darker.wav
 )
 
 for strFile in "${astrFileList[@]}";do

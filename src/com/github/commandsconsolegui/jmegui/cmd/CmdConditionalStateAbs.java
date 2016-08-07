@@ -100,7 +100,7 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 	}
 	@Override
 	public CmdConditionalStateAbs configure(ICfgParm icfg) {
-		CfgParm cfg = (CfgParm)icfg;
+		CfgParm cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
 		
 		super.configure(new ConditionalStateAbs.CfgParm(GlobalAppRefI.i(), cfg.strId));
 		

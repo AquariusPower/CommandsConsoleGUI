@@ -653,10 +653,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		CallQueueI.i().appendCall(new Callable<Boolean>() {
 			@Override
 			public Boolean call() throws Exception {
+				if(!CommandsDelegator.this.bInitialized)return false; //wait its initialization
+				
 				//this will let it fill the commands list for this listener
 				bFillCommandList=true;
 				icc.execConsoleCommand(CommandsDelegator.this); 
-				checkCmdValidityBoolTogglers(); //so new ones will be added properly too.
+				checkCmdValidityBoolTogglers(); //update cmd list with new booltoggler commands
+				setupVars(false); //update var list with all kinds of vars (booltogglers too)
 				bFillCommandList=false;
 				return true;
 			}
@@ -2932,32 +2935,6 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		avivoAllVarsList.addAll(VarCmdFieldAbs.getListCopy(IntLongVarField.class));
 		avivoAllVarsList.addAll(VarCmdFieldAbs.getListCopy(StringVarField.class));
 		setupVarsAllFrom(avivoAllVarsList);
-		
-//		setupVarsAllFrom(BoolTogglerCmdField.getListCopy());
-//		setupVarsAllFrom(TimedDelayVarField.getListCopy());
-//		setupVarsAllFrom(FloatDoubleVarField.getListCopy());
-//		setupVarsAllFrom(IntLongVarField.getListCopy());
-//		setupVarsAllFrom(StringVarField.getListCopy());
-		
-//		for(BoolTogglerCmdField btg:BoolTogglerCmdField.getListCopy()){
-//			varSet(btg,false);
-//		}
-//		
-//		for(TimedDelayVarField td:TimedDelayVarField.getListCopy()){
-//			varSet(td,false);
-//		}
-//		
-//		for(FloatDoubleVarField fdv:FloatDoubleVarField.getListCopy()){
-//			varSet(fdv,false);
-//		}
-//		
-//		for(IntLongVarField ilv:IntLongVarField.getListCopy()){
-//			varSet(ilv,false);
-//		}
-//		
-//		for(StringVarField sv:StringVarField.getListCopy()){
-//			varSet(sv,false);
-//		}
 		
 		if(bSave)varSaveSetupFile();
 	}

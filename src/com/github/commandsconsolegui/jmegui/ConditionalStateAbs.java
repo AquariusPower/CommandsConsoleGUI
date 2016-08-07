@@ -169,7 +169,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 	 * @param cp
 	 */
 	public ConditionalStateAbs configure(ICfgParm icfg){
-		CfgParm cfg = (CfgParm)icfg;
+		CfgParm cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
 		
 		if(isDiscarded())throw new PrerequisitesNotMetException("cannot re-use after discarded");
 		

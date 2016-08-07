@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
+import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
@@ -73,8 +74,7 @@ public class DialogTestState<T extends Command<Button>> extends LemurDialogGUISt
 	}
 	@Override
 	public DialogTestState<T> configure(ICfgParm icfg) {
-		@SuppressWarnings("unchecked")
-		CfgParm cfg = (CfgParm)icfg;
+		CfgParm cfg = (CfgParm)icfg; //this also validates if icfg is the CfgParam of this class
 		cfg.setUIId(ediag.toString());
 		
 		super.configure(cfg); //params are identical
@@ -151,22 +151,30 @@ public class DialogTestState<T extends Command<Button>> extends LemurDialogGUISt
 		@SuppressWarnings("unchecked")
 		@Override
 		public void execute(Button btn) {
-			DialogTestState.this.openModalDialog(EDiag.Cfg.toString(),getDataFrom(btn),(T)this);
+//			DialogTestState.this.openModalDialog(EDiag.Cfg.toString(), getDataFrom(btn), (T)this);
+			actionCustomAtEntry(getDataFrom(btn));
+//			DialogTestState.this.actionSubmit();
 		}
 	}
 	CommandCfg cmdCfg = new CommandCfg();
+	
+//	enum EAudio{
+//		RemoveListEntry,
+//		RemoveSubTreeEntry,
+//		;
+//	}
 	
 	public class CommandDel implements Command<Button>{
 		@SuppressWarnings("unchecked")
 		@Override
 		public void execute(Button btn) {
-			DialogListEntryData<T> data = getDataFrom(btn);
+			DialogListEntryData<T> dled = getDataFrom(btn);
 			
-			if(data.isParent()){
+			if(dled.isParent()){
 //				CustomDialogGUIState.this.setDataToApplyModalChoice(data);
-				DialogTestState.this.openModalDialog(EDiag.Confirm.toString(), data, (T)this);
+				DialogTestState.this.openModalDialog(EDiag.Confirm.toString(), dled, (T)this);
 			}else{
-				DialogTestState.this.removeEntry(data);
+				DialogTestState.this.removeEntry(dled);
 			}
 		}
 	}
@@ -297,7 +305,8 @@ public class DialogTestState<T extends Command<Button>> extends LemurDialogGUISt
 	public boolean execTextDoubleClickActionFor(DialogListEntryData<T> data) {
 		if(isOptionSelectionMode())throw new PrerequisitesNotMetException("Option mode should not reach this method.");
 		
-		openModalDialog(EDiag.Cfg.toString(), data, (T)cmdCfg);
+		actionCustomAtEntry(data);
+//		openModalDialog(EDiag.Cfg.toString(), data, (T)cmdCfg);
 //		data.getActionTextDoubleClick().execute(null);
 		
 		return true;
@@ -316,6 +325,7 @@ public class DialogTestState<T extends Command<Button>> extends LemurDialogGUISt
 
 	@Override
 	protected void actionCustomAtEntry(DialogListEntryData<T> dataSelected) {
+		super.actionCustomAtEntry(dataSelected);
 		openModalDialog(EDiag.Cfg.toString(), dataSelected, (T)cmdCfg);
 	}
 }

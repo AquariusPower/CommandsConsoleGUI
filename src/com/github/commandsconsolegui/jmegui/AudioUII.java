@@ -33,6 +33,7 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
@@ -57,13 +58,18 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 	TreeMap<String,AudioNode> tmAudio = new TreeMap<String,AudioNode>();
 
 	public final BoolTogglerCmdField btgMute = new BoolTogglerCmdField(this,false).setCallNothingOnChange();
+	public final FloatDoubleVarField fdvVolumeGain = new FloatDoubleVarField(this,1.0,"").setMin(0.0).setMax(1.0); 
 	
 	static String strBasePath="Sounds/Effects/UI/";
 	public static enum EAudio{
 		SubmitCfgChoice			(strBasePath+"220172__gameaudio__flourish-spacey-2.mono.ogg"),
 		SubmitSelection			(strBasePath+"220183__gameaudio__click-casual.mono.ogg"),
 		EntrySelect					(strBasePath+"220197__gameaudio__click-basic.mono.ogg" ),
-		HoverOverActivators	(strBasePath+"220189__gameaudio__blip-squeak.mono.ogg" ),
+		HoverOverActivators	(strBasePath+"220189__gameaudio__blip-squeak.cut.mono.ogg" ), 
+		RemoveListEntry			(strBasePath+"220177__gameaudio__quick-ui-or-event-deep.mono.ogg"),
+		RemoveSubTreeEntry	(strBasePath+"220205__gameaudio__teleport-darker.mono.ogg"),
+		ExpandSubTree				(strBasePath+"220195__gameaudio__click-wooden-1.mono.ogg"), 
+		ShrinkSubTree				(strBasePath+"220194__gameaudio__click-heavy.mono.ogg"), 
 		;
 		
 		private String	strFile;
@@ -91,6 +97,7 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 		}
 		
 		if(an!=null){
+			an.setVolume(fdvVolumeGain.f());
 			an.playInstance();
 		}else{
 			GlobalCommandsDelegatorI.i().dumpWarnEntry("audio not set", strAudioId);
@@ -100,8 +107,10 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 	public AudioNode setAudio(String strAudioId, String strFile){
 		AudioNode an = tmAudio.get(strAudioId);
 		
+		if(!strFile.contains("/"))strFile=strBasePath+strFile;
+		
 		if(an!=null){
-			MsgI.i().warn("audio already set",strAudioId, an.getKey().getName(), strFile);
+			MsgI.i().warn("audio already set",strAudioId, an, strFile);
 			GlobalRootNodeI.i().detachChild(an);
 		}
 		
@@ -133,8 +142,22 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 	}
 	
 	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegator ccRequester) {
-		return ECmdReturnStatus.NotFound;
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
+		boolean bCommandWorked = false;
+		
+		if(cd.checkCmdValidity(this,"refreshSounds",null,"mainly to let developer dinamically update sound files")){
+			/**
+			 * TODO this is not working because of the jme assets cache right?
+			 */
+			tmAudio.clear();
+			
+			bCommandWorked=true;
+		}else
+		{
+			return ECmdReturnStatus.NotFound;
+		}
+		
+		return cd.cmdFoundReturnStatus(bCommandWorked);
 	}
 
 	public void configure() {

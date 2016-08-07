@@ -1077,8 +1077,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 
 	@Override
 	protected void actionCustomAtEntry(DialogListEntryData<T> dataSelected) {
-		// TODO Auto-generated method stub
-		
+		super.actionCustomAtEntry(dataSelected);
 	}
 
 }

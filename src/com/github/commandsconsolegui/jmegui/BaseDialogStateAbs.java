@@ -159,7 +159,7 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 	}
 	@Override
 	public BaseDialogStateAbs<T> configure(ICfgParm icfg) {
-		CfgParm cfg = (CfgParm)icfg;
+		CfgParm cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
 //	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
 		
 		this.bOptionChoiceSelectionMode=cfg.bOptionSelectionMode;
@@ -226,7 +226,8 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 	protected boolean updateOrUndo(float tpf) {
 		DialogListEntryData<T> dle = getSelectedEntryData();
 		if(dle!=dleLastSelected)AudioUII.i().playAudio(AudioUII.EAudio.EntrySelect);
-		if(dle!=null)dleLastSelected = dle;
+//		if(dle!=null)
+		dleLastSelected = dle;
 		
 //		if(isCfgDataValueSet()){
 //			updateAllParts();
@@ -383,20 +384,23 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 			adataChosenEntriesList.clear();
 			if(dataSelected!=null){
 				adataChosenEntriesList.add(dataSelected); //TODO could be many, use a checkbox for multi-selection
+				AudioUII.i().playAudio(AudioUII.EAudio.SubmitCfgChoice);
+				
 //			if(getParentDialog()!=null)getParentDialog().setModalChosenData(dataSelected);
 //				lChoiceMadeAtMilis=System.currentTimeMillis();
 				cd().dumpInfoEntry(this.getId()+": Option Selected: "+dataSelected.toString());
 				requestDisable(); //close if there is one entry selected
-				AudioUII.i().playAudio(AudioUII.EAudio.SubmitCfgChoice);
 			}
 		}else{
 			if(dataSelected!=null){
 				if(dataSelected.isParent()){
 					dataSelected.toggleExpanded();
+					AudioUII.i().playAudio(dataSelected.isTreeExpanded() ?
+						AudioUII.EAudio.ExpandSubTree : AudioUII.EAudio.ShrinkSubTree);
+					
 					requestRefreshList();
 				}else{
 					actionCustomAtEntry(dataSelected);
-					AudioUII.i().playAudio(AudioUII.EAudio.SubmitSelection);
 				}
 			}
 		}
@@ -409,7 +413,9 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 	 * 
 	 * @param dataSelected
 	 */
-	protected abstract void actionCustomAtEntry(DialogListEntryData<T> dataSelected);
+	protected void actionCustomAtEntry(DialogListEntryData<T> dataSelected){
+		AudioUII.i().playAudio(AudioUII.EAudio.SubmitSelection);
+	}
 
 	protected void updateAllParts(){
 		updateTextInfo();
@@ -427,17 +433,17 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 		protected BaseDialogStateAbs<T>	diagChildModal;
 		
 		protected T	actionAtParent;
-		protected ArrayList<DialogListEntryData<T>>	adataToPerformResultOfActionAtParentList;
+		protected ArrayList<DialogListEntryData<T>>	adledToPerformResultOfActionAtParentList;
 		
 		public DiagModalInfo(
 			BaseDialogStateAbs<T> diagModalCurrent,
 			T cmdAtParent,
-			DialogListEntryData<T>... adataReferenceAtParent 
+			DialogListEntryData<T>... adledReferenceAtParent 
 		) {
 			super();
 			this.diagChildModal = diagModalCurrent;
-			this.adataToPerformResultOfActionAtParentList = new ArrayList<DialogListEntryData<T>>(
-				Arrays.asList(adataReferenceAtParent));
+			this.adledToPerformResultOfActionAtParentList = new ArrayList<DialogListEntryData<T>>(
+				Arrays.asList(adledReferenceAtParent));
 			this.actionAtParent = cmdAtParent;
 		}
 		
@@ -449,7 +455,7 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 //			this.diagChildModal = diagModal;
 //		}
 		public ArrayList<DialogListEntryData<T>> getDataReferenceAtParentListCopy() {
-			return new ArrayList<DialogListEntryData<T>>(adataToPerformResultOfActionAtParentList);
+			return new ArrayList<DialogListEntryData<T>>(adledToPerformResultOfActionAtParentList);
 		}
 //		public void setDataReferenceAtParent(DialogListEntryData<T> dataReferenceAtParent) {
 //			this.dataSelectedAtParent = dataReferenceAtParent;

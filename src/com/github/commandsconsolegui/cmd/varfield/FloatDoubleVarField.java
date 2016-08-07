@@ -46,6 +46,8 @@ public class FloatDoubleVarField extends VarCmdFieldAbs{
 	protected static String	strCodePrefixVariant = "fdv";
 //	protected static ArrayList<FloatDoubleVarField> afdvList = new ArrayList<FloatDoubleVarField>();
 	protected Double dValue;
+	protected Double dMin;
+	protected Double dMax;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
@@ -84,6 +86,9 @@ public class FloatDoubleVarField extends VarCmdFieldAbs{
 			dValue = ((Float)objValue).doubleValue();
 		}
 		
+		if(dMin!=null && dValue<dMin)dValue=dMin;
+		if(dMax!=null && dValue>dMax)dValue=dMax;
+		
 		if(vivo!=null)vivo.setObjectValue(objValue);
 	}
 
@@ -104,6 +109,10 @@ public class FloatDoubleVarField extends VarCmdFieldAbs{
 	public float floatValue(){
 		return dValue.floatValue();
 	}
+	public float f() {
+		return getFloat();
+	}
+	
 	public Double getDouble(){
 		return dValue;
 	}
@@ -154,6 +163,16 @@ public class FloatDoubleVarField extends VarCmdFieldAbs{
 	@Override
 	public String getVariablePrefix() {
 		return "Float";
+	}
+
+	public FloatDoubleVarField setMin(Double dMin) {
+		this.dMin=dMin;
+		return this;
+	}
+
+	public FloatDoubleVarField setMax(Double dMax) {
+		this.dMax=dMax;
+		return this;
 	}
 
 }

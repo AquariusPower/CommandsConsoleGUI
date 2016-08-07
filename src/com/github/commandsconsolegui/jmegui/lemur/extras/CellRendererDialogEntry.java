@@ -40,6 +40,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.font.LineWrapMode;
 import com.jme3.math.ColorRGBA;
+import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Button.ButtonAction;
@@ -85,8 +86,8 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 		private DialogListEntryData<T>	dled;
 		private CellRendererDialogEntry<T>	assignedCellRenderer;
 		private String	strPrefix = "Cell";
-		private Container	cntrCustomButtons;
 		private String	strColorFgBkpKey = "ColorFgBkp";
+		private Container	cntrCustomButtons;
 		
 		public DialogListEntryData<T> getDialogListEntryData(){
 			return dled;
