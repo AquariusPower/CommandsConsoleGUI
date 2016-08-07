@@ -62,7 +62,6 @@ import com.simsilica.lemur.ListBox;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.RangedValueModel;
 import com.simsilica.lemur.TextField;
-import com.simsilica.lemur.Button.ButtonAction;
 import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.component.TextEntryComponent;

@@ -36,20 +36,19 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.math.BigInteger;
-import java.nio.BufferUnderflowException;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 
 /**
@@ -417,4 +416,52 @@ public class MiscI {
 		
 		return str.isEmpty()?null:str;
 	}
+
+	public ArrayList<File> listFiles(String strPath) throws FileNotFoundException {
+		ArrayList<File> aflList = new ArrayList<File>();
+		
+		if(!strPath.startsWith("./") && !strPath.startsWith("/")){
+			strPath="./"+strPath;
+		}
+		
+		File flFolder = new File(strPath);
+		if(!flFolder.exists()){
+			throw new FileNotFoundException(strPath);
+		}
+		
+		aflList.addAll(Arrays.asList(flFolder.listFiles()));
+		
+//		File[] afl = flFolder.listFiles();
+//		
+//		for(File fl:afl){
+//			if(fl.isDirectory())aflList.add(fl);
+//		}
+//		
+//		for(File fl:afl){
+//			if(fl.isFile())aflList.add(fl);
+//		}
+		
+		Collections.sort(aflList,cmpFiles);
+		
+		return aflList;
+	}
+	
+	Comparator<File> cmpFiles = new Comparator<File>() {
+		@Override
+		public int compare(File o1, File o2) {
+			if(
+				o1.isDirectory() && o2.isDirectory()
+				||
+				o1.isFile() && o2.isFile()
+			){
+				return o1.compareTo(o2);
+			}else{
+				if(o1.isDirectory() && o2.isFile())return -1;
+				if(o1.isFile() && o2.isDirectory())return 1;
+			}
+			
+			return 0; //TODO what reaches here?
+		}
+	};
+	
 }

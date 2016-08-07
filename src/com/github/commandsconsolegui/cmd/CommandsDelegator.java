@@ -28,6 +28,7 @@
 package com.github.commandsconsolegui.cmd;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -159,6 +160,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public final StringCmdField CMD_CLEAR_COMMANDS_HISTORY = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_DB = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_ECHO = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField scfListFiles = new StringCmdField(this);
 	public final StringCmdField scfChangeCommandSimpleId = new StringCmdField(this);
 	public final StringCmdField CMD_FIX_LINE_WRAP = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_FIX_VISIBLE_ROWS_AMOUNT = new StringCmdField(this,strFinalCmdCodePrefix);
@@ -821,8 +823,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			if(!icui().isVisibleRowsAdjustRequested())icui().setVisibleRowsAdjustRequest(0);
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_HELP,"[strFilter] show (filtered) available commands")){
-			cmdShowHelp(ccl.paramString(1));
+		if(checkCmdValidity(icclPseudo,CMD_HELP,"[strFilter...] show (filtered) available commands")){
+			String strFilter=null;
+			int iParamIndex=1;
+			while((strFilter=ccl.paramString(iParamIndex++))!=null){
+				cmdShowHelp(strFilter);
+			}
 			/**
 			 * ALWAYS return TRUE here, to avoid infinite loop when improving some failed command help info!
 			 */
@@ -853,6 +859,22 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			}
 //			csaTmp.updateFontStuff();
 			bCmdWorked=true;
+		}else
+		if(checkCmdValidity(icclPseudo,scfListFiles,"<strPath> list files on directory")){
+			String strPath = ccl.paramString(1);
+			
+			try {
+				ArrayList<File> afl = MiscI.i().listFiles(strPath);
+				
+				for(File fl:afl){
+					dumpSubEntry(fl.isDirectory() ? fl.getPath()+"/" : fl.getName());
+				}
+				
+				bCmdWorked=true;
+			} catch (FileNotFoundException ex) {
+				dumpExceptionEntry(ex, strPath);
+			}
+			
 		}else
 		if(checkCmdValidity(icclPseudo,CMD_MESSAGE_REVIEW,"[filter]|[index [stackLimit]] if filter is an index, and it has an exception, the complete exception will be dumped.")){
 			String strFilter = ccl.paramString(1);

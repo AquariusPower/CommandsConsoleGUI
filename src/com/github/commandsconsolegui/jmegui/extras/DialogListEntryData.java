@@ -205,7 +205,7 @@ public class DialogListEntryData<T> implements Savable{
 		
 		this.bTreeExpanded = !this.bTreeExpanded;
 		
-		AudioUII.i().playAudio(isTreeExpanded() ?
+		AudioUII.i().playOnUserAction(isTreeExpanded() ?
 				AudioUII.EAudio.ExpandSubTree : AudioUII.EAudio.ShrinkSubTree);
 		
 		return this.bTreeExpanded; 

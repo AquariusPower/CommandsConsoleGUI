@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.jmegui;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.TreeMap;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
@@ -34,10 +36,12 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
 import com.github.commandsconsolegui.misc.MsgI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -58,11 +62,18 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 	TreeMap<String,AudioNode> tmAudio = new TreeMap<String,AudioNode>();
 
 	public final BoolTogglerCmdField btgMute = new BoolTogglerCmdField(this,false).setCallNothingOnChange();
-	public final FloatDoubleVarField fdvVolumeGain = new FloatDoubleVarField(this,1.0,"").setMin(0.0).setMax(1.0); 
+	public final FloatDoubleVarField fdvVolumeGain = new FloatDoubleVarField(this,1.0,"").setMin(0.0).setMax(1.0);
+
+	protected ArrayList<Class<?>>	aclassUserActionStackList = new ArrayList<Class<?>>(); 
 	
-	static String strBasePath="Sounds/Effects/UI/";
+	public enum EUserData{
+		FileName,
+		;
+	}
+	
+	static String strBasePath="Sounds/Effects/UI/13940__gameaudio__game-audio-ui-sfx/";
 	public static enum EAudio{
-		SubmitCfgChoice			(strBasePath+"220172__gameaudio__flourish-spacey-2.mono.ogg"),
+		SubmitChosen			(strBasePath+"220172__gameaudio__flourish-spacey-2.mono.ogg"),
 		SubmitSelection			(strBasePath+"220183__gameaudio__click-casual.mono.ogg"),
 		EntrySelect					(strBasePath+"220197__gameaudio__click-basic.mono.ogg" ),
 		HoverOverActivators	(strBasePath+"220189__gameaudio__blip-squeak.cut.mono.ogg" ), 
@@ -81,12 +92,33 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 		public String getFile(){return strFile;} 
 	}
 	
-	public void playAudio(EAudio ea) {
-		playAudio(ea.toString());
+	public boolean isUserActionStack(){
+		for(StackTraceElement ste:Thread.currentThread().getStackTrace()){
+			for(Class<?> cl:aclassUserActionStackList){
+				if(ste.getClassName().startsWith(cl.getName())){
+					return true;
+				}
+			}
+		}
+		
+		return false;
 	}
 	
-	public void playAudio(String strAudioId) {
-		if(btgMute.b())return;
+	public boolean playOnUserAction(EAudio ea) {
+		return playOnUserAction(ea.toString());
+	}
+	public boolean playOnUserAction(String strAudioId) {
+		if(isUserActionStack()){
+			return play(strAudioId);
+		}
+		return false;
+	}
+	
+	public boolean play(EAudio ea) {
+		return play(ea.toString());
+	}
+	public boolean play(String strAudioId) {
+		if(btgMute.b())return false;
 		
 		AudioNode an = tmAudio.get(strAudioId);
 		
@@ -99,12 +131,19 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 		if(an!=null){
 			an.setVolume(fdvVolumeGain.f());
 			an.playInstance();
+			return true;
 		}else{
 			GlobalCommandsDelegatorI.i().dumpWarnEntry("audio not set", strAudioId);
 		}
+		
+		return false;
 	}
 	
 	public AudioNode setAudio(String strAudioId, String strFile){
+		if(strAudioId.isEmpty()){
+			throw new PrerequisitesNotMetException("invalid id", strAudioId);
+		}
+		
 		AudioNode an = tmAudio.get(strAudioId);
 		
 		if(!strFile.contains("/"))strFile=strBasePath+strFile;
@@ -117,6 +156,7 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 		for(int i=1;i<=2;i++){ //1st is try
 			try{
 				an = new AudioNode(GlobalAppRefI.i().getAssetManager(), strFile,	DataType.Buffer);
+				an.setUserData(EUserData.FileName.toString(), strFile);
 				
 				tmAudio.put(strAudioId,an);
 				
@@ -135,23 +175,57 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 		
 		return an;
 	}
-
+	
+	public String getFileNameFrom(AudioNode an){
+		return an.getUserData(EUserData.FileName.toString());
+	}
+	
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 	}
 	
+	public final StringCmdField scfSetSound = new StringCmdField(this);
+	public final StringCmdField scfListSounds = new StringCmdField(this);
+	public final StringCmdField scfPlaySoundFile = new StringCmdField(this);
+	public final StringCmdField scfRefreshSounds = new StringCmdField(this);
+	
 	@Override
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 		boolean bCommandWorked = false;
 		
-		if(cd.checkCmdValidity(this,"refreshSounds",null,"mainly to let developer dinamically update sound files")){
+		if(cd.checkCmdValidity(this,scfRefreshSounds,"mainly to let developer dinamically update sound files")){
 			/**
 			 * TODO this is not working because of the jme assets cache right?
 			 */
-			tmAudio.clear();
+			cd.dumpWarnEntry("TODO: not working yet...");
+			
+			tmAudio.clear(); //useless without cleaning jme sound cache
 			
 			bCommandWorked=true;
+		}else
+		if(cd.checkCmdValidity(this,scfListSounds,"")){
+			for(String strKey:tmAudio.keySet().toArray(new String[]{})){
+				cd.dumpSubEntry(strKey+":\n\t"+getFileNameFrom(tmAudio.get(strKey)));
+			}
+			
+			bCommandWorked=true;
+		}else
+		if(cd.checkCmdValidity(this,scfSetSound,"<strAudioId> <strFile>")){
+			String strAudioId = cd.getCurrentCommandLine().paramString(1);
+			String strFile 		= cd.getCurrentCommandLine().paramString(2);
+			if(strAudioId!=null && strFile!=null){
+				setAudio(strAudioId, strFile);
+				bCommandWorked=true;
+			}
+		}else
+		if(cd.checkCmdValidity(this,scfPlaySoundFile,"<strSoundFile>")){
+			String strSoundFile = cd.getCurrentCommandLine().paramString(1);
+			if(strSoundFile!=null){
+				setAudio("temp", strSoundFile);
+				play("temp");
+				bCommandWorked=true;
+			}
 		}else
 		{
 			return ECmdReturnStatus.NotFound;
@@ -160,9 +234,16 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 		return cd.cmdFoundReturnStatus(bCommandWorked);
 	}
 
-	public void configure() {
+	public void configure(Class<?>... aclassUserActionStack) {
+		this.aclassUserActionStackList.addAll(Arrays.asList(aclassUserActionStack));
+		
 		// this will register the bool togglers commands too. 
 		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
+		
+		for(EAudio ea:EAudio.values()){
+			setAudio(ea.toString(), ea.getFile());
+		}
+
 	}
 	
 }

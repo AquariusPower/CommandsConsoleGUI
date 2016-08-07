@@ -178,7 +178,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 	Command<Button> cmdbtnHoverOver = new Command<Button>(){
 		@Override
 		public void execute(Button source) {
-			AudioUII.i().playAudio(EAudio.HoverOverActivators);
+			AudioUII.i().playOnUserAction(EAudio.HoverOverActivators);
 		}
 	};
 	public void addDefaultCommands(Button btn){

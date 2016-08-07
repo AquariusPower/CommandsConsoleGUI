@@ -29,7 +29,6 @@ package com.github.commandsconsolegui.jmegui.console;
 
 import java.util.concurrent.Callable;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.extras.SingleAppInstanceI;
@@ -37,17 +36,20 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
-import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGUII;
 import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CommandsBackgroundStateI;
 import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
+import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
+import com.github.commandsconsolegui.jmegui.lemur.MouseCursorListenerAbs;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppState;
+import com.simsilica.lemur.event.KeyInterceptState;
+import com.simsilica.lemur.event.MouseEventControl;
 
 
 /**
@@ -91,7 +93,11 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 		
 		UngrabMouseStateI.i().configure(new UngrabMouseStateI.CfgParm(null,null));
 		
-		AudioUII.i().configure();
+		AudioUII.i().configure(
+			DialogMouseCursorListenerI.class,
+			MouseCursorListenerAbs.class, 
+			MouseEventControl.class,
+			KeyInterceptState.class);
 		
 		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
 		

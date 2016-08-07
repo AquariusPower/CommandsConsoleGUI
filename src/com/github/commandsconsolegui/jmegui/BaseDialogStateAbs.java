@@ -225,7 +225,7 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 	@Override
 	protected boolean updateOrUndo(float tpf) {
 		DialogListEntryData<T> dle = getSelectedEntryData();
-		if(dle!=dleLastSelected)AudioUII.i().playAudio(AudioUII.EAudio.EntrySelect);
+		if(dle!=dleLastSelected)AudioUII.i().play(AudioUII.EAudio.EntrySelect);
 //		if(dle!=null)
 		dleLastSelected = dle;
 		
@@ -384,7 +384,7 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 			adataChosenEntriesList.clear();
 			if(dataSelected!=null){
 				adataChosenEntriesList.add(dataSelected); //TODO could be many, use a checkbox for multi-selection
-				AudioUII.i().playAudio(AudioUII.EAudio.SubmitCfgChoice);
+				AudioUII.i().play(AudioUII.EAudio.SubmitChosen);
 				
 //			if(getParentDialog()!=null)getParentDialog().setModalChosenData(dataSelected);
 //				lChoiceMadeAtMilis=System.currentTimeMillis();
@@ -411,7 +411,7 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 	 * @param dataSelected
 	 */
 	protected void actionCustomAtEntry(DialogListEntryData<T> dataSelected){
-		AudioUII.i().playAudio(AudioUII.EAudio.SubmitSelection);
+		AudioUII.i().playOnUserAction(AudioUII.EAudio.SubmitSelection);
 	}
 
 	protected void updateAllParts(){
