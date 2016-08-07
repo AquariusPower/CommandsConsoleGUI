@@ -67,7 +67,8 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 	protected ArrayList<Class<?>>	aclassUserActionStackList = new ArrayList<Class<?>>(); 
 	
 	public enum EUserData{
-		FileName,
+		strFileName,
+		bMute,
 		;
 	}
 	
@@ -129,6 +130,8 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 		}
 		
 		if(an!=null){
+			if(isMute(an))return false;
+			
 			an.setVolume(fdvVolumeGain.f());
 			an.playInstance();
 			return true;
@@ -139,6 +142,10 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 		return false;
 	}
 	
+	private boolean isMute(AudioNode an) {
+		return (Boolean)an.getUserData(EUserData.bMute.toString());
+	}
+
 	public AudioNode setAudio(String strAudioId, String strFile){
 		if(strAudioId.isEmpty()){
 			throw new PrerequisitesNotMetException("invalid id", strAudioId);
@@ -156,7 +163,8 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 		for(int i=1;i<=2;i++){ //1st is try
 			try{
 				an = new AudioNode(GlobalAppRefI.i().getAssetManager(), strFile,	DataType.Buffer);
-				an.setUserData(EUserData.FileName.toString(), strFile);
+				an.setUserData(EUserData.strFileName.toString(), strFile);
+				an.setUserData(EUserData.bMute.toString(), false);
 				
 				tmAudio.put(strAudioId,an);
 				
@@ -177,7 +185,19 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 	}
 	
 	public String getFileNameFrom(AudioNode an){
-		return an.getUserData(EUserData.FileName.toString());
+		return an.getUserData(EUserData.strFileName.toString());
+	}
+	
+	public boolean muteAudioToggle(String strAudioId) {
+		AudioNode an = tmAudio.get(strAudioId);
+		if(an==null)return false;
+		
+		Boolean bMute = an.getUserData(EUserData.bMute.toString());
+		bMute=!bMute;
+		an.setUserData(EUserData.bMute.toString(), bMute);
+		GlobalCommandsDelegatorI.i().dumpInfoEntry("SounteMuted: "+strAudioId+" "+bMute);
+		
+		return true;
 	}
 	
 	@Override
@@ -185,16 +205,17 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 	}
 	
-	public final StringCmdField scfSetSound = new StringCmdField(this);
-	public final StringCmdField scfListSounds = new StringCmdField(this);
-	public final StringCmdField scfPlaySoundFile = new StringCmdField(this);
-	public final StringCmdField scfRefreshSounds = new StringCmdField(this);
+	public final StringCmdField scfSoundSet = new StringCmdField(this);
+	public final StringCmdField scfSoundMuteToggle = new StringCmdField(this);
+	public final StringCmdField scfSoundList = new StringCmdField(this);
+	public final StringCmdField scfSoundPlayFile = new StringCmdField(this);
+	public final StringCmdField scfSoundRefreshCache = new StringCmdField(this);
 	
 	@Override
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 		boolean bCommandWorked = false;
 		
-		if(cd.checkCmdValidity(this,scfRefreshSounds,"mainly to let developer dinamically update sound files")){
+		if(cd.checkCmdValidity(this,scfSoundRefreshCache,"mainly to let developer dinamically update sound files")){
 			/**
 			 * TODO this is not working because of the jme assets cache right?
 			 */
@@ -204,22 +225,29 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 			
 			bCommandWorked=true;
 		}else
-		if(cd.checkCmdValidity(this,scfListSounds,"")){
+		if(cd.checkCmdValidity(this,scfSoundList,"")){
 			for(String strKey:tmAudio.keySet().toArray(new String[]{})){
-				cd.dumpSubEntry(strKey+":\n\t"+getFileNameFrom(tmAudio.get(strKey)));
+				AudioNode an = tmAudio.get(strKey);
+				String strMute=isMute(an)?"(Mute)":"";
+				cd.dumpSubEntry(strKey+strMute+":\n\t"+getFileNameFrom(an));
 			}
 			
 			bCommandWorked=true;
 		}else
-		if(cd.checkCmdValidity(this,scfSetSound,"<strAudioId> <strFile>")){
+		if(cd.checkCmdValidity(this,scfSoundSet,"<strAudioId> <strFile>")){
 			String strAudioId = cd.getCurrentCommandLine().paramString(1);
 			String strFile 		= cd.getCurrentCommandLine().paramString(2);
 			if(strAudioId!=null && strFile!=null){
-				setAudio(strAudioId, strFile);
-				bCommandWorked=true;
+				bCommandWorked=setAudio(strAudioId, strFile)!=null;
 			}
 		}else
-		if(cd.checkCmdValidity(this,scfPlaySoundFile,"<strSoundFile>")){
+		if(cd.checkCmdValidity(this,scfSoundMuteToggle,"<strAudioId>")){
+			String strAudioId = cd.getCurrentCommandLine().paramString(1);
+			if(strAudioId!=null){
+				bCommandWorked=muteAudioToggle(strAudioId);
+			}
+		}else
+		if(cd.checkCmdValidity(this,scfSoundPlayFile,"<strSoundFile>")){
 			String strSoundFile = cd.getCurrentCommandLine().paramString(1);
 			if(strSoundFile!=null){
 				setAudio("temp", strSoundFile);
