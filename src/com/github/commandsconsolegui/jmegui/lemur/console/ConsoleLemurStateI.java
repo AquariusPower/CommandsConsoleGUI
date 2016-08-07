@@ -40,6 +40,7 @@ import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI.CompositeCo
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
+import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI.BindKey;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.font.BitmapCharacter;
@@ -61,6 +62,7 @@ import com.simsilica.lemur.ListBox;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.RangedValueModel;
 import com.simsilica.lemur.TextField;
+import com.simsilica.lemur.Button.ButtonAction;
 import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.component.TextEntryComponent;
@@ -338,6 +340,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 			btn.setTextHAlignment(HAlignment.Center);
 			//BUG buttons do not obbey this: btn.setPreferredSize(new Vector3f(50,1,0));
 			btn.addClickCommands(new ButtonClick());
+			DialogMouseCursorListenerI.i().addDefaultCommands(btn);
 			getContainerStatsAndControls().addChild(btn,0,++iButtonIndex);
 		}
 		

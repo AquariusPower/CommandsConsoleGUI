@@ -232,6 +232,9 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 			btn.setUserData(dled.getClass().getName(), dled);
 			CursorEventControl.addListenersToSpatial(btn, DialogMouseCursorListenerI.i());
 			cntr.addChild(btn,aobjConstraints);
+			
+			DialogMouseCursorListenerI.i().addDefaultCommands(btn);
+			
 			return btn;
 		}
 

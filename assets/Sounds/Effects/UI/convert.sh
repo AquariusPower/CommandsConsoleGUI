@@ -31,10 +31,16 @@ astrFileList=(
 	220197__gameaudio__click-basic.wav
 	220183__gameaudio__click-casual.wav
 	220172__gameaudio__flourish-spacey-2.wav
+	220189__gameaudio__blip-squeak.wav
 )
 
 for strFile in "${astrFileList[@]}";do
-	echo "FILE: $strFile"
-	avconv -i "$strFile" -ac 1 -acodec libvorbis "${strFile%wav}.mono.ogg"&&:
+#	echo "FILE: $strFile"
+	strFileOut="${strFile%.wav}.mono.ogg"
+	if [[ ! -f "$strFileOut" ]];then
+		avconv -i "$strFile" -ac 1 -acodec libvorbis "$strFileOut"&&:
+	else
+		echo "found: $strFileOut"
+	fi
 done
 

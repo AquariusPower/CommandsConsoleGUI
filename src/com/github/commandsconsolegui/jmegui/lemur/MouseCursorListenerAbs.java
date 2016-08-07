@@ -29,13 +29,17 @@ package com.github.commandsconsolegui.jmegui.lemur;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
 import com.github.commandsconsolegui.jmegui.MouseCursorButtonsControl;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
+import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
-import com.github.commandsconsolegui.misc.DebugI;
 import com.jme3.scene.Spatial;
+import com.simsilica.lemur.Button;
+import com.simsilica.lemur.Button.ButtonAction;
+import com.simsilica.lemur.Command;
 import com.simsilica.lemur.event.CursorButtonEvent;
 import com.simsilica.lemur.event.CursorListener;
 import com.simsilica.lemur.event.CursorMotionEvent;
@@ -171,5 +175,14 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 		
 	}
 
-	
+	Command<Button> cmdbtnHoverOver = new Command<Button>(){
+		@Override
+		public void execute(Button source) {
+			AudioUII.i().playAudio(EAudio.HoverOverActivators);
+		}
+	};
+	public void addDefaultCommands(Button btn){
+		btn.addCommands(ButtonAction.HighlightOn, cmdbtnHoverOver);
+	}
+
 }

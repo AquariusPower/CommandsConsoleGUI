@@ -60,9 +60,10 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 	
 	static String strBasePath="Sounds/Effects/UI/";
 	public static enum EAudio{
-		SubmitCfgChoice	(strBasePath+"220172__gameaudio__flourish-spacey-2.mono.ogg"),
-		SubmitSelection	(strBasePath+"220183__gameaudio__click-casual.mono.ogg"),
-		HoverActivator	(strBasePath+"220197__gameaudio__click-basic.mono.ogg" ),
+		SubmitCfgChoice			(strBasePath+"220172__gameaudio__flourish-spacey-2.mono.ogg"),
+		SubmitSelection			(strBasePath+"220183__gameaudio__click-casual.mono.ogg"),
+		EntrySelect					(strBasePath+"220197__gameaudio__click-basic.mono.ogg" ),
+		HoverOverActivators	(strBasePath+"220189__gameaudio__blip-squeak.mono.ogg" ),
 		;
 		
 		private String	strFile;
@@ -140,5 +141,5 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 		// this will register the bool togglers commands too. 
 		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
 	}
-
+	
 }
