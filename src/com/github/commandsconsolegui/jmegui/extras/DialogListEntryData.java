@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
@@ -203,6 +204,10 @@ public class DialogListEntryData<T> implements Savable{
 //		if(!isParent())return false;
 		
 		this.bTreeExpanded = !this.bTreeExpanded;
+		
+		AudioUII.i().playAudio(isTreeExpanded() ?
+				AudioUII.EAudio.ExpandSubTree : AudioUII.EAudio.ShrinkSubTree);
+		
 		return this.bTreeExpanded; 
 	}
 

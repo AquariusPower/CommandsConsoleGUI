@@ -395,9 +395,6 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 			if(dataSelected!=null){
 				if(dataSelected.isParent()){
 					dataSelected.toggleExpanded();
-					AudioUII.i().playAudio(dataSelected.isTreeExpanded() ?
-						AudioUII.EAudio.ExpandSubTree : AudioUII.EAudio.ShrinkSubTree);
-					
 					requestRefreshList();
 				}else{
 					actionCustomAtEntry(dataSelected);
