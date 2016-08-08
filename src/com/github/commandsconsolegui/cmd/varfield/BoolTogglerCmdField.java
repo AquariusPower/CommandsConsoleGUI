@@ -37,6 +37,7 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
+import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -238,10 +239,11 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 			if(isChangedAndRefresh()){
 				if(bDoCallOnChange){
 					if(this.caller==null){
-						throw new PrerequisitesNotMetException("null caller for "+this.getReport());
+						MsgI.i().warn("null caller for "+this.getReport(), this);
+//						throw new PrerequisitesNotMetException("null caller for "+this.getReport());
+					}else{
+						CallQueueI.i().appendCall(this.caller);
 					}
-					
-					CallQueueI.i().appendCall(this.caller);
 				}
 			}
 		}
@@ -282,7 +284,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	
 	public BoolTogglerCmdField setCallOnChange(Callable<Boolean> caller){
 		if(!bDoCallOnChange){
-			// to avoid developer forgotten behavior misconfiguration
+			// to avoid developer forgot already configured to call nothing
 			throw new PrerequisitesNotMetException("was set to call nothing already!",this,getHelp());
 		}
 		
@@ -296,14 +298,14 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	 */
 	public BoolTogglerCmdField setCallNothingOnChange(){
 		if(caller!=null){
-			// to avoid developer forgotten behavior misconfiguration
+			// to avoid developer forgotten previously configured caller
 			throw new PrerequisitesNotMetException("caller already set!",this,getHelp());
 		}
 		
-		if(!bDoCallOnChange){
-			// to avoid double call
-			throw new PrerequisitesNotMetException("will already call nothing!",this,getHelp());
-		}
+//		if(!bDoCallOnChange){
+//			// to avoid double setup
+//			throw new PrerequisitesNotMetException("will already call nothing!",this,getHelp());
+//		}
 		
 		bDoCallOnChange=false;
 		return this;
@@ -312,6 +314,19 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	@Override
 	public String getVariablePrefix() {
 		return "Bool";
+	}
+
+	public boolean isEqualToAndEnabled(BoolTogglerCmdField btg) {
+		if(this==btg){
+			return b();
+		}
+		
+		return false;
+	}
+
+	public BoolTogglerCmdField setHelp(String str) {
+		this.strHelp = str;
+		return this;
 	}
 
 //	public static void removeFromList(BoolTogglerCmdField bt) {

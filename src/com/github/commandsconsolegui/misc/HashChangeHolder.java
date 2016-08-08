@@ -28,15 +28,18 @@
 package com.github.commandsconsolegui.misc;
 
 /**
+ * To easily detect if an object has changed.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class HashVersionHolder {
+public class HashChangeHolder {
 	private Object	objRef;
 	private int	iHash;
+	private long lCount;
+	private long	lLastChangeTime;
 
-	public HashVersionHolder(Object objRef){
+	public HashChangeHolder(Object objRef){
 		this.objRef=objRef;
 	}
 	
@@ -44,8 +47,18 @@ public class HashVersionHolder {
 		int iHashTmp = objRef.hashCode();
 		if(iHashTmp!=iHash){
 			iHash=iHashTmp;
+			lCount++;
+			lLastChangeTime=System.nanoTime();
 			return true;
 		}
 		return false;
+	}
+	
+	public long getChangedCount(){
+		return lCount;
+	}
+	
+	public long getLastChangeTimeNano(){
+		return lLastChangeTime;
 	}
 }

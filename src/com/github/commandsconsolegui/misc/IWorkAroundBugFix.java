@@ -30,20 +30,27 @@ package com.github.commandsconsolegui.misc;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 
 /**
- * To make it easy to track all bug fix implementations.
+ * This interface exist to make it easy to track all bug fix implementations.
+ * All bugfixes must be disablable dynamically, therefore, if some library dependency
+ * is updated, that bug may have been fixed and the bugfix can be disabled.
  * 
  * "Bug fix" is some workaround (be hackish or not) that make things work 
  * as expected when they aren't.
  * 
  * Bug fixes should be a temporary code.
- *
+ * 
+ * Implement bugfixes identifiers as {@link BoolTogglerCmdField}, so they become user console commands.
+ * 
  * @author AquariusPower <https://github.com/AquariusPower>
  * 
  */
 public interface IWorkAroundBugFix {
-	public static interface IEnumStatus{
-		public boolean isEnabled();
-	}
-	public Object bugFix(Object... aobj);
-	public <T> T bugFix(Class<T> cl, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams);
+	/**
+	 * BFR is bugfix return (type)
+	 * @param clReturnType
+	 * @param btgBugFixId
+	 * @param aobjCustomParams
+	 * @return
+	 */
+	public <BFR> BFR bugFix(Class<BFR> clReturnType, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams);
 }

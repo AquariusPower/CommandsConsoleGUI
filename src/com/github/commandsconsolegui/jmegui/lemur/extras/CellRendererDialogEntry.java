@@ -39,6 +39,8 @@ import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
+import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -167,7 +169,8 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 				 * Will be linked to the 1st instance of this class, 
 				 * no problem as it will be a global.
 				 */
-				Cell.btgBugFixGapForListBoxSelectorArea = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
+				Cell.btgBugFixGapForListBoxSelectorArea = 
+					new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 			}
 			
 			this.setName(strPrefix+"MainContainer");
@@ -283,14 +286,16 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 			return spt==btnText;
 		}
 
-		@Override
-		public Object bugFix(Object... aobj) {
-			return null;
-		}
+//		@Override
+//		public Object bugFix(Object... aobj) {
+//			return null;
+//		}
 		
+		@SuppressWarnings("unchecked")
 		@Override
-		public <T> T bugFix(Class<T> cl, BoolTogglerCmdField btgBugFixId,	Object... aobjCustomParams) {
+		public <BFR> BFR bugFix(Class<BFR> clReturnType, BoolTogglerCmdField btgBugFixId,	Object... aobjCustomParams) {
 			if(btgBugFixId==btgBugFixGapForListBoxSelectorArea){
+//				MiscI.i().assertSameClass(Container.class,clReturnType);
 				Container cntr=null;
 				if(btgBugFixGapForListBoxSelectorArea.b()){
 					/**
@@ -304,7 +309,7 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 				}else{
 					cntr = this;
 				}
-				return (T) cntr;
+				return (BFR)cntr;
 			}
 			
 			return null;

@@ -1086,9 +1086,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	}
 
 	@Override
-	public <T> T bugFix(Class<T> cl, BoolTogglerCmdField btgBugFixId,
-			Object... aobjCustomParams) {
-		// TODO Auto-generated method stub
+	public <BFR> BFR bugFix(Class<BFR> clReturnType, BoolTogglerCmdField btgBugFixId,	Object... aobjCustomParams) {
 		return null;
 	}
 

@@ -45,6 +45,7 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.DumpEntryData;
 import com.github.commandsconsolegui.cmd.EDataBaseOperations;
 import com.github.commandsconsolegui.cmd.IConsoleUI;
+import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
@@ -1998,71 +1999,132 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 		}
 	}
 	
-	enum EBugFix{
-		StatsLabelTextSize,
-	}
+	BoolTogglerCmdField btgBugFixStatsLabelTextSize = 
+		new BoolTogglerCmdField(this,false,null,"FIXED: By fixating the size of the label, this crash preventer is not that necesary anymore.");
 	@Override
-	public Object bugFix(Object... aobj) {
-		switch((EBugFix)aobj[0]){
-			case StatsLabelTextSize:{
-				/**
-				 * BugFix: because the related crash should/could be prevented/preventable.
-				 * 
-				 * Buttons get smashed, shrinking to less than 0, they seem to not accept preferred size constraint.
-				 * 
-				 * By fixating the size of the label, this crash preventer is not that necesary anymore.
-				 */
-				boolean bEnableThisCrashPreventer=false;if(!bEnableThisCrashPreventer)return null;
+	public <BFR> BFR bugFix(Class<BFR> clReturnType, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams) {
+		if(btgBugFixStatsLabelTextSize.isEqualToAndEnabled(btgBugFixId)){
+			/**
+			 * BugFix: because the related crash should/could be prevented/preventable.
+			 * TODO this bugfix is slow right?
+			 * 
+			 * Buttons get smashed, shrinking to less than 0, they seem to not accept preferred size constraint.
+			 */
+			
+			boolean bFailed=false;
+			while(true){
+				String str=getStatsText();
+				if(str.isEmpty())break;
 				
-				boolean bFailed=false;
-				while(true){
-					String str=getStatsText();
-					if(str.isEmpty())break;
-					
-					boolean bCheckAlways=true; //safer
-					if(!bCheckAlways){
-						if(iStatsTextSafeLength!=null){
-							if(str.length()>iStatsTextSafeLength){
-								str=str.substring(0,iStatsTextSafeLength);
-								setStatsText(str);
-							}
-							break;
+				boolean bCheckAlways=true; //safer
+				if(!bCheckAlways){
+					if(iStatsTextSafeLength!=null){
+						if(str.length()>iStatsTextSafeLength){
+							str=str.substring(0,iStatsTextSafeLength);
+							setStatsText(str);
 						}
+						break;
 					}
-					
-					boolean bRetry=false;
-					try{
-						/**
-						 * this is when crashes outside of here
-						 */
-						getContainerMain().updateLogicalState(0.05f);
-						
-						if(bFailed){ //had failed, so look for a safe length
-							if(iStatsTextSafeLength==null || !iStatsTextSafeLength.equals(str.length())){
-								iStatsTextSafeLength=str.length();
-								cd().dumpDebugEntry("StatsTextSafeLength="+str.length());
-							}
-						}
-					}catch(Exception ex){
-						if(bExceptionOnce){
-							cd().dumpExceptionEntry(ex);
-							bExceptionOnce=false;
-						}
-						
-						str=str.substring(0,str.length()-1);
-						setStatsText(str);
-						
-						bRetry = true;
-						bFailed = true;
-					}
-					
-					if(!bRetry)break;
 				}
-			}break;
+				
+				boolean bRetry=false;
+				try{
+					/**
+					 * this is when crashes outside of here
+					 */
+					getContainerMain().updateLogicalState(0.05f);
+					
+					if(bFailed){ //had failed, so look for a safe length
+						if(iStatsTextSafeLength==null || !iStatsTextSafeLength.equals(str.length())){
+							iStatsTextSafeLength=str.length();
+							cd().dumpDebugEntry("StatsTextSafeLength="+str.length());
+						}
+					}
+				}catch(Exception ex){
+					if(bExceptionOnce){
+						cd().dumpExceptionEntry(ex);
+						bExceptionOnce=false;
+					}
+					
+					str=str.substring(0,str.length()-1);
+					setStatsText(str);
+					
+					bRetry = true;
+					bFailed = true;
+				}
+				
+				if(!bRetry)break;
+			}
 		}
 		
 		return null;
 	}
+	
+//	enum EBugFix{
+//		StatsLabelTextSize,
+//	}
+//	@Override
+//	public Object bugFix(Object... aobj) {
+//		switch((EBugFix)aobj[0]){
+//			case StatsLabelTextSize:{
+//				/**
+//				 * BugFix: because the related crash should/could be prevented/preventable.
+//				 * 
+//				 * Buttons get smashed, shrinking to less than 0, they seem to not accept preferred size constraint.
+//				 * 
+//				 * By fixating the size of the label, this crash preventer is not that necesary anymore.
+//				 */
+//				boolean bEnableThisCrashPreventer=false;if(!bEnableThisCrashPreventer)return null;
+//				
+//				boolean bFailed=false;
+//				while(true){
+//					String str=getStatsText();
+//					if(str.isEmpty())break;
+//					
+//					boolean bCheckAlways=true; //safer
+//					if(!bCheckAlways){
+//						if(iStatsTextSafeLength!=null){
+//							if(str.length()>iStatsTextSafeLength){
+//								str=str.substring(0,iStatsTextSafeLength);
+//								setStatsText(str);
+//							}
+//							break;
+//						}
+//					}
+//					
+//					boolean bRetry=false;
+//					try{
+//						/**
+//						 * this is when crashes outside of here
+//						 */
+//						getContainerMain().updateLogicalState(0.05f);
+//						
+//						if(bFailed){ //had failed, so look for a safe length
+//							if(iStatsTextSafeLength==null || !iStatsTextSafeLength.equals(str.length())){
+//								iStatsTextSafeLength=str.length();
+//								cd().dumpDebugEntry("StatsTextSafeLength="+str.length());
+//							}
+//						}
+//					}catch(Exception ex){
+//						if(bExceptionOnce){
+//							cd().dumpExceptionEntry(ex);
+//							bExceptionOnce=false;
+//						}
+//						
+//						str=str.substring(0,str.length()-1);
+//						setStatsText(str);
+//						
+//						bRetry = true;
+//						bFailed = true;
+//					}
+//					
+//					if(!bRetry)break;
+//				}
+//			}break;
+//		}
+//		
+//		return null;
+//	}
 	
 	protected void updateStats(){
 		if(!tdStatsRefresh.isReady(true))return;
@@ -2073,7 +2135,8 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 		
 		setStatsText(str);
 		
-		bugFix(EBugFix.StatsLabelTextSize);
+		bugFix(null,btgBugFixStatsLabelTextSize);
+//		bugFix(EBugFix.StatsLabelTextSize);
 	}	
 	
 	protected void updateAutoCompleteHint() {

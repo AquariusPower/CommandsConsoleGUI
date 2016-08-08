@@ -464,4 +464,9 @@ public class MiscI {
 		}
 	};
 	
+	public void assertSameClass(Class<?> cl, Class<?> clOther){
+		if(!cl.isAssignableFrom(clOther)){
+			throw new PrerequisitesNotMetException("invalid class", cl, clOther);
+		}
+	}
 }

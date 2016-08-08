@@ -71,6 +71,7 @@ DOING:
 	... SeparateGUI class from Lemur, so other GUI can use the same abstract class to implement a console GUI.
 
 TODO.FastToImplement:
+	+ basic dialogs. reflexfill owner instead of cmdlistener. 
 	+ Auto complete with aliases if line begins with alias token.
 	+ /bind [--list]|[<key> <cmd>]; simplify key to accept lowercase and be as shortest as possible
 	+ /while stores subsequent commands on array for repeating til WhileEnd. Nestable too.

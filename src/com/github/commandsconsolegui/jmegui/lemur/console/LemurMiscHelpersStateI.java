@@ -86,9 +86,9 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 
 //	private CommandsDelegatorI	cd;
 
-	private boolean	bFixInvisibleTextInputCursor;
+//	private boolean	bFixInvisibleTextInputCursor=false;
 
-	private boolean	bBlinkFadeInAndOut =true;
+	private boolean	bBlinkFadeInAndOut=true;
 
 	private enum EKey{
 		CursorHotLink,
@@ -197,7 +197,8 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 				if(geomCursor.getCullHint().compareTo(CullHint.Always)!=0){
 					geomCursor.setCullHint(CullHint.Always);
 				}else{
-					bugFix(EBugFix.InvisibleCursor,tf);
+					bugFix(null,btgBugFixInvisibleCursor,tf);
+//					bugFix(EBugFix.InvisibleCursor,tf);
 //					fixInvisibleCursor(geomCursor);
 					geomCursor.setCullHint(CullHint.Inherit);
 				}
@@ -229,66 +230,9 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	
 	@Override
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator	cc) {
-		boolean bCmdEndedGracefully = false;
-		
-		if(cc.checkCmdValidity(this,CMD_FIX_INVISIBLE_TEXT_CURSOR ,"in case text cursor is invisible")){
-			cc.dumpInfoEntry("requesting: "+CMD_FIX_INVISIBLE_TEXT_CURSOR);
-			bFixInvisibleTextInputCursor=true;
-			bCmdEndedGracefully = true;
-		}else
-		{
-			return ECmdReturnStatus.NotFound;
-		}
-		
-		return cc.cmdFoundReturnStatus(bCmdEndedGracefully);
+		return ECmdReturnStatus.NotFound;
 	}
 
-//	@Override
-//	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
-//		return cd().getReflexFillCfg(rfcv);
-//	}
-	
-//	private String strCaratNewPosition = "CaratNewPosition";
-//	/**
-//	 * Carat new position will be stored at {@link TextField#}
-//	 * 
-//	 * @param tf
-//	 * @param strCurrent
-//	 * @param strPasted
-//	 * @return
-//	 */
-//	public String prepareStringToPasteAtCaratPosition(TextField tf, String strCurrent, String strPasted) {
-//		int iCarat = tf.getDocumentModel().getCarat();
-//		String strBefore = strCurrent.substring(0,iCarat);
-//		String strAfter = strCurrent.substring(iCarat);
-//		
-//		strCurrent = strBefore + strPasted;
-//		tf.setUserData(strCaratNewPosition, strCurrent.length());
-//		strCurrent += strAfter;
-//		
-//		return strCurrent;
-//	}
-//	
-//	public void pasteAtCaratPosition(TextField tf, String strCurrent, String strPasted) {
-//		tf.setText(prepareStringToPasteAtCaratPosition(tf, strCurrent, strPasted));
-//		positionCaratProperly(tf);//, (int) tf.getUserData(strCaratNewPosition));
-//	}
-//	
-//	/**
-//	 * 
-//	 * @param tf must have had the new carat set by {@link #prepareStringToPasteAtCaratPosition(TextField, String, String)} 
-//	 * @param tec 
-//	 */
-//	public void positionCaratProperly(TextField tf) {
-//		Object objUD = tf.getUserData(strCaratNewPosition);
-//		if(objUD==null){
-//			cd().dumpExceptionEntry(new NullPointerException("missing carat new position user data"));
-//		}else{
-//			int iMoveCaratTo = (int)objUD;
-//			setCaratPosition(tf, iMoveCaratTo);
-//		}
-//	}
-	
 	/**
 	 * To show the cursor at the new carat position, 
 	 * this required protected method: {@link TextEntryComponent#resetCursorPosition}
@@ -306,7 +250,8 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 			dm.right();
 		}
 		
-		bugFix(EBugFix.UpdateTextFieldTextAndCaratVisibility,tf);
+		bugFix(null,btgBugFixUpdateTextFieldTextAndCaratVisibility,tf);
+//		bugFix(EBugFix.UpdateTextFieldTextAndCaratVisibility,tf);
 //		resetCursorPosition(tf);
 	}
 	
@@ -353,83 +298,160 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 //		bInitialized=true;
 //	}
 	
-	enum EBugFix{
-		InvisibleCursor,
-		UpdateTextFieldTextAndCaratVisibility,
-	}
+//	enum EBugFix{
+//		InvisibleCursor,
+//		UpdateTextFieldTextAndCaratVisibility,
+//	}
+	
+	BoolTogglerCmdField btgBugFixInvisibleCursor = 
+		new BoolTogglerCmdField(this,true).setHelp("in case text cursor is invisible").setCallNothingOnChange();
+	BoolTogglerCmdField btgBugFixUpdateTextFieldTextAndCaratVisibility = 
+		new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 	@Override
-	public Object bugFix(Object... aobj) {
+	public <T> T bugFix(Class<T> clReturnType, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams){
 		boolean bFixed = false;
-		EBugFix e = (EBugFix)aobj[0];
-		switch(e){
-			case InvisibleCursor:{
+		
+		if(btgBugFixUpdateTextFieldTextAndCaratVisibility.isEqualToAndEnabled(btgBugFixId)){
+			/**
+			 * This updates the displayed text cursor position.
+			 * 
+			 * This below is actually a trick, 
+			 * because this flow will finally call the required method.
+			 * {@link TextEntryComponent#resetCursorPosition}
+			 *  
+			 * @param tf
+			 */
+			if(aobjCustomParams[0] instanceof TextField){
+				TextField tf = (TextField)aobjCustomParams[0];
+				tf.setFontSize(tf.getFontSize());
+				bFixed=true;
+			}				
+		}else
+		if(btgBugFixInvisibleCursor.isEqualToAndEnabled(btgBugFixId)){
+			/**
+			 * To the point, but unnecessary.
+			 * see {@link TextEntryComponent#resetCursorColor()}
+			 */
+			if(aobjCustomParams[0] instanceof Geometry){
+				Geometry geomCursor = (Geometry)aobjCustomParams[0];
+//				if(!bFixInvisibleTextInputCursor)return null;
+				
+//			getBitmapTextFrom(tf).setAlpha(1f); //this is a fix to let text cursor be visible.
+				geomCursor.getMaterial().setColor("Color",ColorRGBA.White.clone());
+				bFixed=true;
+			}else
+			if(aobjCustomParams[0] instanceof TextField){
+				TextField tf = (TextField)aobjCustomParams[0];
+//				if(!bFixInvisibleTextInputCursor)return null;
+				
+				String strInvisibleCursorFixed="InvisibleCursorFixed";
+				if(tf.getUserData(strInvisibleCursorFixed)!=null)return null;
+				
+				BitmapText bmt = getBitmapTextFrom(tf);
+				
 				/**
-				 * To the point, but unnecessary.
-				 * see {@link TextEntryComponent#resetCursorColor()}
-				 */
-				if(aobj[1] instanceof Geometry){
-					Geometry geomCursor = (Geometry) aobj[1];
-					if(!bFixInvisibleTextInputCursor)return null;
-//				getBitmapTextFrom(tf).setAlpha(1f); //this is a fix to let text cursor be visible.
-					geomCursor.getMaterial().setColor("Color",ColorRGBA.White.clone());
-					bFixed=true;
-				}else
-				if(aobj[1] instanceof TextField){
-					TextField tf = (TextField) aobj[1];
-					
-					if(!bFixInvisibleTextInputCursor)return null;
-					
-					String strInvisibleCursorFixed="InvisibleCursorFixed";
-					if(tf.getUserData(strInvisibleCursorFixed)!=null)return null;
-					
-					BitmapText bmt = getBitmapTextFrom(tf);
-					
-					/**
-					 * The BitmapText base alpha is set to an invalid value -1.
-					 * That value seems to be used as a marker/indicator of "invalidity?".
-					 * But the problem is, it is used as a normal value and never verified/validadted 
-					 * towards its invalidity of -1.
-					 * Wouldnt have been better if it was used 'null' as indicator of invalidity?
-					 * 
-					 * This flow will fix that base alpha to fully visible.
-					 * -> BitmapText.letters.setBaseAlpha(alpha);
-					 */
-					bmt.setAlpha(1f); // alpha need to be fixed, it was -1; -1 is an invalid value used as a merker/indicator, woulndt be better it be a null marker?
-					
-					/**
-					 * This flow will apply the base alpha of BitmapText to the text cursor.
-					 * -> TextField.text.setColor(color)->resetCursorColor()
-					 */
-					tf.setColor(tf.getColor());
-					
-					tf.setUserData(strInvisibleCursorFixed,true);
-					bFixed=true;
-				}				
-			}break;
-			case UpdateTextFieldTextAndCaratVisibility:{
-				/**
-				 * This updates the displayed text cursor position.
+				 * The BitmapText base alpha is set to an invalid value -1.
+				 * That value seems to be used as a marker/indicator of "invalidity?".
+				 * But the problem is, it is used as a normal value and never verified/validadted 
+				 * towards its invalidity of -1.
+				 * Wouldnt have been better if it was used 'null' as indicator of invalidity?
 				 * 
-				 * This below is actually a trick, 
-				 * because this flow will finally call the required method.
-				 * {@link TextEntryComponent#resetCursorPosition}
-				 *  
-				 * @param tf
+				 * This flow will fix that base alpha to fully visible.
+				 * -> BitmapText.letters.setBaseAlpha(alpha);
 				 */
-				if(aobj[1] instanceof TextField){
-					TextField tf = (TextField) aobj[1];
-					tf.setFontSize(tf.getFontSize());
-					bFixed=true;
-				}				
-			}break;
+				bmt.setAlpha(1f); // alpha need to be fixed, it was -1; -1 is an invalid value used as a merker/indicator, woulndt be better it be a null marker?
+				
+				/**
+				 * This flow will apply the base alpha of BitmapText to the text cursor.
+				 * -> TextField.text.setColor(color)->resetCursorColor()
+				 */
+				tf.setColor(tf.getColor());
+				
+				tf.setUserData(strInvisibleCursorFixed,true);
+				bFixed=true;
+			}				
 		}
 		
 		if(!bFixed){
-			throw new PrerequisitesNotMetException("cant bugfix this way...",aobj);
+			throw new PrerequisitesNotMetException("cant bugfix this way...",aobjCustomParams);
 		}
 		
 		return null;
 	}
+	
+//	@Override
+//	public Object bugFix(Object... aobj) {
+//		boolean bFixed = false;
+//		EBugFix e = (EBugFix)aobj[0];
+//		switch(e){
+//			case InvisibleCursor:{
+//				/**
+//				 * To the point, but unnecessary.
+//				 * see {@link TextEntryComponent#resetCursorColor()}
+//				 */
+//				if(aobj[1] instanceof Geometry){
+//					Geometry geomCursor = (Geometry) aobj[1];
+//					if(!bFixInvisibleTextInputCursor)return null;
+////				getBitmapTextFrom(tf).setAlpha(1f); //this is a fix to let text cursor be visible.
+//					geomCursor.getMaterial().setColor("Color",ColorRGBA.White.clone());
+//					bFixed=true;
+//				}else
+//				if(aobj[1] instanceof TextField){
+//					TextField tf = (TextField) aobj[1];
+//					
+//					if(!bFixInvisibleTextInputCursor)return null;
+//					
+//					String strInvisibleCursorFixed="InvisibleCursorFixed";
+//					if(tf.getUserData(strInvisibleCursorFixed)!=null)return null;
+//					
+//					BitmapText bmt = getBitmapTextFrom(tf);
+//					
+//					/**
+//					 * The BitmapText base alpha is set to an invalid value -1.
+//					 * That value seems to be used as a marker/indicator of "invalidity?".
+//					 * But the problem is, it is used as a normal value and never verified/validadted 
+//					 * towards its invalidity of -1.
+//					 * Wouldnt have been better if it was used 'null' as indicator of invalidity?
+//					 * 
+//					 * This flow will fix that base alpha to fully visible.
+//					 * -> BitmapText.letters.setBaseAlpha(alpha);
+//					 */
+//					bmt.setAlpha(1f); // alpha need to be fixed, it was -1; -1 is an invalid value used as a merker/indicator, woulndt be better it be a null marker?
+//					
+//					/**
+//					 * This flow will apply the base alpha of BitmapText to the text cursor.
+//					 * -> TextField.text.setColor(color)->resetCursorColor()
+//					 */
+//					tf.setColor(tf.getColor());
+//					
+//					tf.setUserData(strInvisibleCursorFixed,true);
+//					bFixed=true;
+//				}				
+//			}break;
+//			case UpdateTextFieldTextAndCaratVisibility:{
+//				/**
+//				 * This updates the displayed text cursor position.
+//				 * 
+//				 * This below is actually a trick, 
+//				 * because this flow will finally call the required method.
+//				 * {@link TextEntryComponent#resetCursorPosition}
+//				 *  
+//				 * @param tf
+//				 */
+//				if(aobj[1] instanceof TextField){
+//					TextField tf = (TextField) aobj[1];
+//					tf.setFontSize(tf.getFontSize());
+//					bFixed=true;
+//				}				
+//			}break;
+//		}
+//		
+//		if(!bFixed){
+//			throw new PrerequisitesNotMetException("cant bugfix this way...",aobj);
+//		}
+//		
+//		return null;
+//	}
 
 	@Override
 	protected boolean initOrUndo() {
@@ -472,7 +494,8 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	public void insertTextAtCaratPosition(TextField tf, String str) {
 		DocumentModel dm = tf.getDocumentModel();
 		for(int i=0;i<str.length();i++)dm.insert(str.charAt(i));
-		LemurMiscHelpersStateI.i().bugFix(EBugFix.UpdateTextFieldTextAndCaratVisibility, tf);
+		bugFix(null,btgBugFixUpdateTextFieldTextAndCaratVisibility,tf);
+//		bugFix(EBugFix.UpdateTextFieldTextAndCaratVisibility, tf);
 	}
 
 	/**
@@ -533,12 +556,6 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		public String getHelp() {
 			return strModifiers+strName+": "+strHelp;
 		}
-	}
-	@Override
-	public <T> T bugFix(Class<T> cl, BoolTogglerCmdField btgBugFixId,
-			Object... aobjCustomParams) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 	
 }
