@@ -39,5 +39,9 @@ package com.github.commandsconsolegui.misc;
  * 
  */
 public interface IWorkAroundBugFix {
+	public static interface IEnumStatus{
+		public boolean isEnabled();
+	}
 	public Object bugFix(Object... aobj);
+	public <T> T bugFix(Class<T> cl, IEnumStatus e, Object... aobj);
 }

@@ -249,7 +249,8 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 //		attrs.set("color", new ColorRGBA(0,1,0.5f,1));
 //		clBg = new ColorRGBA(0,0,0.125f,1);
 		attrs.set("color", ColorRGBA.Cyan.clone());
-		clBg = new ColorRGBA(0,0.25f,0,1);
+//		clBg = new ColorRGBA(0,0.25f,0,1);
+		clBg = new ColorRGBA(0,0.25f,0,0.75f);
 		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
 		attrs = styles.getSelector(TextField.ELEMENT_ID, STYLE_CONSOLE);
@@ -264,6 +265,10 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		clBg = ColorRGBA.Yellow.clone();clBg.a=0.25f;
 		attrs.set(ListBox.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
+//		attrs = styles.getSelector(ListBox.ELEMENT_ID, ListBox.ITEMS_ID, STYLE_CONSOLE);
+//		clBg = new ColorRGBA(0,0,0,0);
+//		attrs.set(ListBox.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
+
 //			attrs.set("background", new QuadBackgroundComponent(new ColorRGBA(0,0,0.25f,1)));
 //
 //			attrs = styles.getSelector("slider", "button", STYLE_CONSOLE);
@@ -1079,4 +1084,10 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		super.actionCustomAtEntry(dataSelected);
 	}
 
+	@Override
+	public <T> T bugFix(Class<T> cl, IEnumStatus e, Object... aobj) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 }

@@ -35,11 +35,13 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
+import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.font.LineWrapMode;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
@@ -51,6 +53,8 @@ import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.BorderLayout.Position;
 import com.simsilica.lemur.component.SpringGridLayout;
+import com.simsilica.lemur.core.GuiComponent;
+import com.simsilica.lemur.core.GuiControl;
 import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.list.CellRenderer;
 
@@ -63,10 +67,6 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 	protected StringVarField svfTreeDepthToken = new StringVarField(this, " ", null);
 	protected BoolTogglerCmdField	btgShowTreeUId=new BoolTogglerCmdField(this,false).setCallNothingOnChange();
 	
-	public enum ECell{
-		CellClassRef
-	}
-
 	private String	strStyle;
 	private LemurDialogGUIStateAbs<T>	diagParent;
 //	private boolean	bOptionChoiceMode;
@@ -77,7 +77,13 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 //		this.bOptionChoiceMode=bOptionChoiceMode;
 	}
 	
-	public static class Cell<T extends Command<Button>> extends Container{
+	public static class Cell<T extends Command<Button>> extends Container implements IWorkAroundBugFix{
+		public static enum EUserData{
+			colorFgBkp,
+			cellClassRef,
+			;
+		}
+		
 		private Button	btnText;
 		private Button	btnTree;
 		
@@ -86,8 +92,9 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 		private DialogListEntryData<T>	dled;
 		private CellRendererDialogEntry<T>	assignedCellRenderer;
 		private String	strPrefix = "Cell";
-		private String	strColorFgBkpKey = "ColorFgBkp";
+//		private String	strColorFgBkpKey = "ColorFgBkp";
 		private Container	cntrCustomButtons;
+		private Container	cntrBase;
 		
 		public DialogListEntryData<T> getDialogListEntryData(){
 			return dled;
@@ -127,9 +134,23 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 			btnTree.setText(str); //it seems to auto trim the string...
 			btnTree.setInsets(new Insets3f(0, 0, 0, 10));
 			
-			btnTree.setColor((ColorRGBA) btnTree.getUserData(strColorFgBkpKey));
+			btnTree.setColor((ColorRGBA) btnTree.getUserData(EUserData.colorFgBkp.toString()));
 			if(!assignedCellRenderer.diagParent.isOptionSelectionMode()){
 				if(!dled.isParent())btnTree.setColor(btnTree.getShadowColor());
+			}
+		}
+		
+		enum EBugFix implements IEnumStatus{
+			gap(true),
+			;
+			
+			private boolean b;
+			
+			EBugFix(boolean b){this.b=b;}
+			
+			@Override
+			public boolean isEnabled() {
+				return b;
 			}
 		}
 		
@@ -142,15 +163,18 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 			this.assignedCellRenderer=parentCellRenderer;
 			this.dled=dledToSet;
 			
-			btnTree = createButton("Tree", "?", this, Position.West);
+//			cntrBase = (Container)bugFix(0);
+			cntrBase = bugFix(Container.class, EBugFix.gap);
+			
+			btnTree = createButton("Tree", "?", cntrBase, Position.West);
 			btnTree.addCommands(ButtonAction.Click, ctt);
 			btnTree.setUserData(Cell.class.getName(), this);
-			btnTree.setUserData(strColorFgBkpKey , btnTree.getColor());
+			btnTree.setUserData(EUserData.colorFgBkp.toString(), btnTree.getColor());
 			
-			btnText = createButton("Text", this.dled.getText(), this, Position.Center);
+			btnText = createButton("Text", this.dled.getText(), cntrBase, Position.Center);
 			
-			cntrCustomButtons = new Container(new SpringGridLayout(),assignedCellRenderer.strStyle);
-			addChild(cntrCustomButtons,Position.East);
+			cntrCustomButtons = new Container(new SpringGridLayout(), assignedCellRenderer.strStyle);
+			cntrBase.addChild(cntrCustomButtons,Position.East);
 			
 			update(this.dled);
 		}
@@ -229,7 +253,7 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 			Button btn = new Button(strLabel,assignedCellRenderer.strStyle);
 			MiscJmeI.i().retrieveBitmapTextFor(btn).setLineWrapMode(LineWrapMode.NoWrap);
 			btn.setName(strPrefix+"Button"+strId);
-			btn.setUserData(ECell.CellClassRef.toString(),this);
+			btn.setUserData(EUserData.cellClassRef.toString(),this);
 			btn.setUserData(dled.getClass().getName(), dled);
 			CursorEventControl.addListenersToSpatial(btn, DialogMouseCursorListenerI.i());
 			cntr.addChild(btn,aobjConstraints);
@@ -245,6 +269,55 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 		
 		public boolean isTextButton(Spatial spt){
 			return spt==btnText;
+		}
+
+		@Override
+		public Object bugFix(Object... aobj) {
+//			switch((int)aobj[0]){
+//				case 0:
+//					boolean bUseGap=true;
+//					Container cntr=null;
+//					if(bUseGap){
+//						/**
+//						 * this requires that all childs (in this case buttons) have their style background
+//						 * color transparent (like alpha 0.5f) or the listbox selector will not be visible below them...
+//						 */
+//						// same layout as the cell container
+//						cntr = new Container(new BorderLayout(), assignedCellRenderer.strStyle);
+//						cntr.setName("bugfixGap"); //when mouse is over a cell, if the ListBox->selectorArea has the same world Z value of the button, it may be ordered before the button on the raycast collision results at PickEventSession.setCurrentHitTarget(ViewPort, Spatial, Vector2f, CollisionResult) line: 262	-> PickEventSession.cursorMoved(int, int) line: 482 
+//						addChild(cntr, Position.Center);
+//					}else{
+//						cntr = this;
+//					}
+//					return cntr;
+//				case 1:
+//					break;
+//			}
+//			
+			return null;
+		}
+
+		@Override
+		public <T> T bugFix(Class<T> cl, IEnumStatus e, Object... aobj) {
+			switch((EBugFix)e){
+				case gap:
+					Container cntr=null;
+					if(e.isEnabled()){
+						/**
+						 * this requires that all childs (in this case buttons) have their style background
+						 * color transparent (like alpha 0.5f) or the listbox selector will not be visible below them...
+						 */
+						// same layout as the cell container
+						cntr = new Container(new BorderLayout(), assignedCellRenderer.strStyle);
+						cntr.setName("bugfixGap"); //when mouse is over a cell, if the ListBox->selectorArea has the same world Z value of the button, it may be ordered before the button on the raycast collision results at PickEventSession.setCurrentHitTarget(ViewPort, Spatial, Vector2f, CollisionResult) line: 262	-> PickEventSession.cursorMoved(int, int) line: 482 
+						addChild(cntr, Position.Center);
+					}else{
+						cntr = this;
+					}
+					return (T) cntr;
+			}
+			
+			return null;
 		}
 		
 //		public boolean isSelectButton(Spatial spt){
@@ -269,4 +342,5 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 	}
+
 }

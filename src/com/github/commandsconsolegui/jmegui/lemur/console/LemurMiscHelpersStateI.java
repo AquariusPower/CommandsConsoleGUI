@@ -535,4 +535,10 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		}
 	}
 	
+	@Override
+	public <T> T bugFix(Class<T> cl, IEnumStatus e, Object... aobj) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 }

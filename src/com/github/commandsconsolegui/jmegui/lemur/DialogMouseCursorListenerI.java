@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
@@ -39,9 +38,8 @@ import com.github.commandsconsolegui.jmegui.MultiClickCondStateI;
 import com.github.commandsconsolegui.jmegui.MultiClickCondStateI.ECallMode;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell;
-import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.ECell;
+import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell.EUserData;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
-import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.event.CursorButtonEvent;
@@ -69,7 +67,7 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 		switch(e){
 			case Action1Click:
 //				if(iClickCount==1){
-					final Cell cell = (Cell<?>)capture.getUserData(ECell.CellClassRef.toString());
+					final Cell cell = (Cell<?>)capture.getUserData(EUserData.cellClassRef.toString());
 					if(cell!=null){
 //						if(cell.isCfgButton(capture)){
 //							diag.openCfgDataDialog(cell.getData());
