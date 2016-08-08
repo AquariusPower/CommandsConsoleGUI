@@ -79,11 +79,11 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 //	private StringVarField svfOptionSelectedDialog2 = new StringVarField(this,"");
 	
 	// generic dialog
-	private DialogTestState<T>	diagCfg;
+	private DialogTestState<T>	diagChoice;
 
 	private DialogTestState<T>	diagList;
 
-	private DialogTestState<T>	diagConfirm;
+	private DialogTestState<T>	diagQuestion;
 
 //	private String	strOptionSelected;
 	
@@ -136,16 +136,16 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		
 		//////////////////////// config this test
 		// test dialogs
-		diagCfg = new DialogTestState<T>(DialogTestState.EDiag.Cfg).configure(
-			new DialogTestState.CfgParm(true, 0.6f, 0.5f, null, null));//, null));
+		diagChoice = new DialogTestState<T>(DialogTestState.EDiag.Choice).configure(
+			new DialogTestState.CfgParm(true, 0.6f, 0.5f, null, null));
 		
-		diagConfirm = new DialogTestState<T>(DialogTestState.EDiag.Confirm).configure(
-			new DialogTestState.CfgParm(true, 500f, 300f, null, null));//, diag));
+		diagQuestion = new DialogTestState<T>(DialogTestState.EDiag.Question).configure(
+			new DialogTestState.CfgParm(true, 500f, 300f, null, null));
 		
-		diagList = new DialogTestState<T>(DialogTestState.EDiag.List).configure(
-			new DialogTestState.CfgParm(false, null, null, null, null))//, null))
-			.addModalDialog(diagCfg)
-			.addModalDialog(diagConfirm);
+		diagList = new DialogTestState<T>(DialogTestState.EDiag.BrowseManagementList).configure(
+			new DialogTestState.CfgParm(false, null, null, null, null))
+			.addModalDialog(diagChoice)
+			.addModalDialog(diagQuestion);
 		
 	}
 	

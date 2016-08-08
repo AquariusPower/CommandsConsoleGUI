@@ -534,9 +534,9 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 			return strModifiers+strName+": "+strHelp;
 		}
 	}
-	
 	@Override
-	public <T> T bugFix(Class<T> cl, IEnumStatus e, Object... aobj) {
+	public <T> T bugFix(Class<T> cl, BoolTogglerCmdField btgBugFixId,
+			Object... aobjCustomParams) {
 		// TODO Auto-generated method stub
 		return null;
 	}

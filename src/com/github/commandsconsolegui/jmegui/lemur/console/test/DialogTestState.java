@@ -34,6 +34,7 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
+import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
@@ -50,9 +51,9 @@ public class DialogTestState<T extends Command<Button>> extends LemurDialogGUISt
 	StringCmdField scfAddEntry = new StringCmdField(this,null,"[strEntryText]");
 	
 	public static enum EDiag{
-		Cfg,
-		List,
-		Confirm,
+		BrowseManagementList,
+		Question, //just yes/no
+		Choice, //like a question with many "yes" possibilities, and ESC for no.
 		;
 	}
 	EDiag ediag = null;
@@ -113,13 +114,25 @@ public class DialogTestState<T extends Command<Button>> extends LemurDialogGUISt
 		boolean bChangesMade = false;
 		for(DialogListEntryData<T> dataAtModal:diagModal.getDataSelectionListCopy()){
 			switch(ediag){
-				case List:
+				case BrowseManagementList:
 					if(cmdAtParent.equals(cmdDel)){
-						if(dataAtModal.equals(diagModal.dataYes)){
-							for(DialogListEntryData<T> dataToApplyResults:adataToApplyResultsList){
-								removeEntry(dataToApplyResults);
-								bChangesMade=true;
-							}
+						switch(diagModal.ediag){
+							case Question:
+								if(dataAtModal.equals(diagModal.dataYes)){
+									for(DialogListEntryData<T> dataToApplyResults:adataToApplyResultsList){
+										removeEntry(dataToApplyResults);
+										bChangesMade=true;
+									}
+									
+									/**
+									 * There is already a sound for entries removal
+									if(bChangesMade)AudioUII.i().play(EAudio.ReturnChosen);
+									 */
+								}else
+								if(dataAtModal.equals(diagModal.dataNo)){
+									AudioUII.i().play(EAudio.ReturnNothing);
+								}
+								break;
 						}
 					}else
 					if(cmdAtParent.equals(cmdCfg)){
@@ -127,6 +140,8 @@ public class DialogTestState<T extends Command<Button>> extends LemurDialogGUISt
 							dataToCfg.updateTextTo(dataAtModal.getText());
 							bChangesMade=true;
 						}
+						
+						if(bChangesMade)AudioUII.i().play(EAudio.ReturnChosen);
 					}
 					break;
 			}
@@ -172,7 +187,8 @@ public class DialogTestState<T extends Command<Button>> extends LemurDialogGUISt
 			
 			if(dled.isParent()){
 //				CustomDialogGUIState.this.setDataToApplyModalChoice(data);
-				DialogTestState.this.openModalDialog(EDiag.Confirm.toString(), dled, (T)this);
+				DialogTestState.this.openModalDialog(EDiag.Question.toString(), dled, (T)this);
+				AudioUII.i().play(EAudio.Question);
 			}else{
 				DialogTestState.this.removeEntry(dled);
 			}
@@ -236,14 +252,14 @@ public class DialogTestState<T extends Command<Button>> extends LemurDialogGUISt
 	@Override
 	protected boolean initOrUndo() {
 		switch(ediag){
-			case Cfg:
+			case Choice:
 				for(int i=0;i<10;i++)addEntryQuick(null); //some test data
 				break;
-			case Confirm:
+			case Question:
 				dataYes = addEntryQuick("[ yes    ]");
 				dataNo  = addEntryQuick("[     no ]");
 				break;
-			case List:
+			case BrowseManagementList:
 				addEntryQuick(null);
 				addEntryQuick(null);
 				
@@ -326,6 +342,6 @@ public class DialogTestState<T extends Command<Button>> extends LemurDialogGUISt
 	@Override
 	protected void actionCustomAtEntry(DialogListEntryData<T> dataSelected) {
 		super.actionCustomAtEntry(dataSelected);
-		openModalDialog(EDiag.Cfg.toString(), dataSelected, (T)cmdCfg);
+		openModalDialog(EDiag.Choice.toString(), dataSelected, (T)cmdCfg);
 	}
 }

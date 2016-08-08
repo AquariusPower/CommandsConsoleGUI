@@ -74,12 +74,17 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 	
 	static String strBasePath="Sounds/Effects/UI/13940__gameaudio__game-audio-ui-sfx/";
 	public static enum EAudio{
-		SubmitChosen			(strBasePath+"220172__gameaudio__flourish-spacey-2.mono.ogg"),
 		SubmitSelection			(strBasePath+"220183__gameaudio__click-casual.mono.ogg"),
-		EntrySelect					(strBasePath+"220197__gameaudio__click-basic.mono.ogg" ),
+		ReturnChosen				(strBasePath+"220172__gameaudio__flourish-spacey-2.mono.ogg"),
+		ReturnNothing				(strBasePath+"220210__gameaudio__bonk-click-w-deny-feel.mono.ogg"),
+		Question						(strBasePath+"220187__gameaudio__loose-deny-casual-1.mono.ogg"),
+		
 		HoverOverActivators	(strBasePath+"220189__gameaudio__blip-squeak.cut.mono.ogg" ), 
-		RemoveListEntry			(strBasePath+"220177__gameaudio__quick-ui-or-event-deep.mono.ogg"),
+		EntrySelect					(strBasePath+"220197__gameaudio__click-basic.mono.ogg" ),
+		
+		RemoveEntry					(strBasePath+"220177__gameaudio__quick-ui-or-event-deep.mono.ogg"),
 		RemoveSubTreeEntry	(strBasePath+"220205__gameaudio__teleport-darker.mono.ogg"),
+		
 		ExpandSubTree				(strBasePath+"220195__gameaudio__click-wooden-1.mono.ogg"), 
 		ShrinkSubTree				(strBasePath+"220194__gameaudio__click-heavy.mono.ogg"), 
 		;
@@ -269,7 +274,6 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 	public void configure(Class<?>... aclassUserActionStack) {
 		this.aclassUserActionStackList.addAll(Arrays.asList(aclassUserActionStack));
 		
-		// this will register the bool togglers commands too. 
 		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
 		
 		for(EAudio ea:EAudio.values()){

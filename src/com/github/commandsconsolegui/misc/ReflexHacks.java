@@ -178,19 +178,9 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 		return cc.getReflexFillCfg(rfcv);
 	}
 	
-	/**
-	 * For now, this is just a dummy method to allow this class {@link BoolToggler#} 
-	 * fields to be indicated as owned by this class. 
-	 * TODO confirm this...
-	 */
 	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 		return ECmdReturnStatus.NotFound;
-//		/**
-//		 * remove this below if something else is actually implemented here...
-//		 */
-//		throw new NullPointerException("Do not call! Dummy method, just to allow the "
-//				+BoolToggler.class.getName()+" be indicated as owned by this class "
-//				+this.getClass().getName());
 	}
+	
 }

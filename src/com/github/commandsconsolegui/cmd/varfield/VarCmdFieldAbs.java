@@ -33,6 +33,7 @@ import com.github.commandsconsolegui.cmd.CommandData;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData.IVarIdValueOwner;
+import com.github.commandsconsolegui.misc.HashVersionHolder;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -56,9 +57,12 @@ public abstract class VarCmdFieldAbs implements IReflexFillCfgVariant, IVarIdVal
 	protected CommandData	cmdd;
 	
 	private static ArrayList<VarCmdFieldAbs> avcfList = new ArrayList<VarCmdFieldAbs>();
+	public static final HashVersionHolder hvhVarList = new HashVersionHolder(avcfList);
+	
 	public static ArrayList<VarCmdFieldAbs> getListFullCopy(){
 		return new ArrayList<VarCmdFieldAbs>(VarCmdFieldAbs.avcfList);
 	}
+	
 	public static <T extends VarCmdFieldAbs> ArrayList<T> getListCopy(Class<T> clFilter){
 		ArrayList<T> a = new ArrayList<T>();
 		for(VarCmdFieldAbs vcf:VarCmdFieldAbs.avcfList){
@@ -164,4 +168,5 @@ public abstract class VarCmdFieldAbs implements IReflexFillCfgVariant, IVarIdVal
 	public String getHelp(){
 		return strHelp;
 	}
+
 }

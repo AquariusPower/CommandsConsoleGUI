@@ -480,6 +480,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		return btgReferenceMatched!=null;
 	}
 	
+	/**
+	 * placeholder pseudo dummy class to help pipe all commands in a single place
+	 */
 	private class PseudoSelfListener implements IConsoleCommandListener{
 		@Override
 		public ECmdReturnStatus execConsoleCommand(CommandsDelegator ccRequester) {
@@ -602,6 +605,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	private CommandData	cmddLastAdded;
 
 
+//	private int	iBoolTogglersListHashCode;
+
+
 //	private ECmdReturnStatus	ecrsCurrentCommandReturnStatus;
 	
 	protected void assertConfigured(){
@@ -660,8 +666,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				//this will let it fill the commands list for this listener
 				bFillCommandList=true;
 				icc.execConsoleCommand(CommandsDelegator.this); 
-				checkCmdValidityBoolTogglers(); //update cmd list with new booltoggler commands
-				setupVars(false); //update var list with all kinds of vars (booltogglers too)
+//				checkCmdValidityBoolTogglers(); //update cmd list with new booltoggler commands
+//				setupVars(false); //update var list with all kinds of vars (booltogglers too)
 				bFillCommandList=false;
 				return true;
 			}
@@ -826,9 +832,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		if(checkCmdValidity(icclPseudo,CMD_HELP,"[strFilter...] show (filtered) available commands")){
 			String strFilter=null;
 			int iParamIndex=1;
+			boolean bFiltered=false;
 			while((strFilter=ccl.paramString(iParamIndex++))!=null){
 				cmdShowHelp(strFilter);
+				bFiltered=true;
 			}
+			
+			if(!bFiltered)cmdShowHelp(null);
+			
 			/**
 			 * ALWAYS return TRUE here, to avoid infinite loop when improving some failed command help info!
 			 */
@@ -1011,7 +1022,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		if(checkCmdValidity(icclPseudo,CMD_STATS_FIELD_TOGGLE,"[bEnable] toggle simple stats field visibility")){
 			bCmdWorked=icui().statsFieldToggle();
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_STATS_SHOW_ALL,"sho)w all console stats")){
+		if(checkCmdValidity(icclPseudo,CMD_STATS_SHOW_ALL,"show all console stats")){
 			dumpAllStats();
 			bCmdWorked=true;
 		}else
@@ -1526,7 +1537,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	protected void addCmdToValidList(IConsoleCommandListener iccl, String strUniqueCmdIdNew, String strSimpleCmdIdNew, boolean bSkipSortCheck){
 //		String strConflict=null;
 		
-		if(iccl==null)throw new PrerequisitesNotMetException("listener reference cannot be null");
+		if(iccl==null){
+			throw new PrerequisitesNotMetException("listener reference cannot be null");
+		}
 			
 //		if(!astrCmdWithCmtValidList.contains(strNew)){
 		if(!strUniqueCmdIdNew.startsWith(TOKEN_CMD_NOT_WORKING_YET)){
@@ -1555,9 +1568,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 					throw new PrerequisitesNotMetException("conflicting commands id "
 						+"'"+cmdd.getUniqueCmdId()+"'"
 						+" for "
-						+"'"+getListenerId(cmdd.getOwner())+"'"
+						+"'"+getListenerId(cmdd.getOwner())+"("+cmdd.getOwner()+")'"
 						+" vs "
-						+"'"+getListenerId(cmddNew.getOwner())+"'"
+						+"'"+getListenerId(cmddNew.getOwner())+"("+cmddNew.getOwner()+")'"
 					);
 				}
 			}
@@ -2686,7 +2699,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		if(!icui().isInitializationCompleted())return;
 		
 		updateNewDay();
-//		updateToggles();
+		updateCheckNewVarCmdAndToggleFields();
 		updateExecPreQueuedCmdsBlockDispatcher(); //before exec queue 
 		updateExecConsoleCmdQueue(); // after pre queue
 		updateDumpQueueEntry();
@@ -2701,14 +2714,22 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			DebugI.i().disableKey(EDbgKey.NewDayInfo);
 		}
 	}
-
-//	protected void updateToggles() {
-//		if(btgEngineStatsView.isChangedAndRefresh())icui().updateEngineStats();
-//		if(btgEngineStatsFps.isChangedAndRefresh())icui().updateEngineStats();
-////		if(btgFpsLimit.checkChangedAndUpdate())fpslState.setEnabled(btgFpsLimit.b());
-//		if(btgConsoleCpuRest.isChangedAndRefresh())tdLetCpuRest.setActive(btgConsoleCpuRest.b());
-////		if(btgPreQueue.checkChangedAndUpdate())bUsePreQueue=btgPreQueue.b();
-//	}
+	
+	/**
+	 * if there are new commands, booltogglers, variables available, prepare them.
+	 */
+	protected void updateCheckNewVarCmdAndToggleFields() {
+//		int iBoolTogglersListHashCodeTmp = VarCmdFieldAbs.getListHash();
+//		if(iBoolTogglersListHashCodeTmp!=iBoolTogglersListHashCode){
+		if(VarCmdFieldAbs.hvhVarList.isChangedAndUpdateHash()){
+			bFillCommandList=true;
+			checkCmdValidityBoolTogglers(); //update cmd list with new booltoggler commands
+			setupVars(false); //update var list with all kinds of vars (booltogglers too)
+			bFillCommandList=false;
+			
+//			iBoolTogglersListHashCode=iBoolTogglersListHashCodeTmp;
+		}
+	}
 
 	protected void addCmdListOneByOneToQueue(ArrayList<String> astrCmdList, boolean bPrepend, boolean bShowExecIndex){
 		ArrayList<String> astrCmdListCopy = new ArrayList<String>(astrCmdList);

@@ -308,7 +308,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 		bDoCallOnChange=false;
 		return this;
 	}
-
+	
 	@Override
 	public String getVariablePrefix() {
 		return "Bool";

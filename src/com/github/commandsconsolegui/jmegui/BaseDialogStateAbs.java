@@ -384,7 +384,7 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 			adataChosenEntriesList.clear();
 			if(dataSelected!=null){
 				adataChosenEntriesList.add(dataSelected); //TODO could be many, use a checkbox for multi-selection
-				AudioUII.i().play(AudioUII.EAudio.SubmitChosen);
+//				AudioUII.i().play(AudioUII.EAudio.ReturnChosen);
 				
 //			if(getParentDialog()!=null)getParentDialog().setModalChosenData(dataSelected);
 //				lChoiceMadeAtMilis=System.currentTimeMillis();

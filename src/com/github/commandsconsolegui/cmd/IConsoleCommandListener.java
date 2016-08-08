@@ -47,5 +47,5 @@ public interface IConsoleCommandListener{
 	 *   
 	 *  2) normally when executing a console command.
 	 */
-	public abstract ECmdReturnStatus execConsoleCommand(CommandsDelegator ccRequester);
+	public abstract ECmdReturnStatus execConsoleCommand(CommandsDelegator cd);
 }

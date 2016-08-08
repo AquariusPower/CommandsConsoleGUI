@@ -807,7 +807,7 @@ public abstract class LemurDialogGUIStateAbs<T extends Command<Button>> extends 
 		if(adleCompleteEntriesList.remove(dled)){
 			if(dledParent==null){ //play sound only for the initial entry
 				AudioUII.i().play(bIsParent?
-					EAudio.RemoveSubTreeEntry : EAudio.RemoveListEntry);
+					EAudio.RemoveSubTreeEntry : EAudio.RemoveEntry);
 			}
 		}else{
 			throw new PrerequisitesNotMetException("missing data at list", dled);

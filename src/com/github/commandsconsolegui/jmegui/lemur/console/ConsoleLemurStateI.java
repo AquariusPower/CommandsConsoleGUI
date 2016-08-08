@@ -31,6 +31,7 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
@@ -1085,9 +1086,11 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	}
 
 	@Override
-	public <T> T bugFix(Class<T> cl, IEnumStatus e, Object... aobj) {
+	public <T> T bugFix(Class<T> cl, BoolTogglerCmdField btgBugFixId,
+			Object... aobjCustomParams) {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 	
 }

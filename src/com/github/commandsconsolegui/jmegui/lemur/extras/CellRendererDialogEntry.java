@@ -29,6 +29,9 @@ package com.github.commandsconsolegui.jmegui.lemur.extras;
 
 import java.util.Map.Entry;
 
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
@@ -41,8 +44,6 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.font.LineWrapMode;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
-import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Button.ButtonAction;
@@ -53,8 +54,6 @@ import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.BorderLayout.Position;
 import com.simsilica.lemur.component.SpringGridLayout;
-import com.simsilica.lemur.core.GuiComponent;
-import com.simsilica.lemur.core.GuiControl;
 import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.list.CellRenderer;
 
@@ -63,38 +62,53 @@ import com.simsilica.lemur.list.CellRenderer;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class CellRendererDialogEntry<T extends Command<Button>> implements CellRenderer<DialogListEntryData<T>>, IReflexFillCfg {
-	protected StringVarField svfTreeDepthToken = new StringVarField(this, " ", null);
-	protected BoolTogglerCmdField	btgShowTreeUId=new BoolTogglerCmdField(this,false).setCallNothingOnChange();
+public class CellRendererDialogEntry<T extends Command<Button>> implements CellRenderer<DialogListEntryData<T>>, IReflexFillCfg, IConsoleCommandListener {
+	protected static StringVarField svfTreeDepthToken;
+	protected static BoolTogglerCmdField	btgShowTreeUId;
 	
-	private String	strStyle;
-	private LemurDialogGUIStateAbs<T>	diagParent;
+	protected String	strStyle;
+	protected LemurDialogGUIStateAbs<T>	diagParent;
 //	private boolean	bOptionChoiceMode;
 	
 	public CellRendererDialogEntry(String strStyle, LemurDialogGUIStateAbs<T> diag){//, boolean bOptionChoiceMode) {
 		this.strStyle=strStyle;
 		this.diagParent=diag;
 //		this.bOptionChoiceMode=bOptionChoiceMode;
+		
+		/**
+		 * all other can come here too, even ones related to each instance,
+		 * just put them outside the static ones block.
+		 */
+		if(CellRendererDialogEntry.svfTreeDepthToken==null){
+			/**
+			 * Will be linked to the 1st instance of this class, 
+			 * no problem as it will be a global.
+			 */
+			CellRendererDialogEntry.svfTreeDepthToken = new StringVarField(this, " ", null);
+			CellRendererDialogEntry.btgShowTreeUId = new BoolTogglerCmdField(this,false).setCallNothingOnChange();
+		}
 	}
 	
-	public static class Cell<T extends Command<Button>> extends Container implements IWorkAroundBugFix{
+	public static class Cell<T extends Command<Button>> extends Container implements IWorkAroundBugFix, IReflexFillCfg, IConsoleCommandListener{
 		public static enum EUserData{
 			colorFgBkp,
 			cellClassRef,
 			;
 		}
 		
-		private Button	btnText;
-		private Button	btnTree;
+		protected static BoolTogglerCmdField btgBugFixGapForListBoxSelectorArea;
+		
+		protected Button	btnText;
+		protected Button	btnTree;
 		
 //		private Button	btnCfg;
 //		private Button btnSelect;
-		private DialogListEntryData<T>	dled;
-		private CellRendererDialogEntry<T>	assignedCellRenderer;
-		private String	strPrefix = "Cell";
+		protected DialogListEntryData<T>	dled;
+		protected CellRendererDialogEntry<T>	assignedCellRenderer;
+		protected String	strPrefix = "Cell";
 //		private String	strColorFgBkpKey = "ColorFgBkp";
-		private Container	cntrCustomButtons;
-		private Container	cntrBase;
+		protected Container	cntrCustomButtons;
+		protected Container	cntrBase;
 		
 		public DialogListEntryData<T> getDialogListEntryData(){
 			return dled;
@@ -140,23 +154,21 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 			}
 		}
 		
-		enum EBugFix implements IEnumStatus{
-			gap(true),
-			;
-			
-			private boolean b;
-			
-			EBugFix(boolean b){this.b=b;}
-			
-			@Override
-			public boolean isEnabled() {
-				return b;
-			}
-		}
-		
 		@SuppressWarnings("unchecked")
 		public Cell(CellRendererDialogEntry<T> parentCellRenderer, DialogListEntryData<T> dledToSet){
 			super(new BorderLayout(), parentCellRenderer.strStyle);
+			
+			/**
+			 * all other can come here too, even ones related to each instance,
+			 * just put them outside the static ones block.
+			 */
+			if(Cell.btgBugFixGapForListBoxSelectorArea==null){
+				/**
+				 * Will be linked to the 1st instance of this class, 
+				 * no problem as it will be a global.
+				 */
+				Cell.btgBugFixGapForListBoxSelectorArea = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
+			}
 			
 			this.setName(strPrefix+"MainContainer");
 			
@@ -164,7 +176,7 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 			this.dled=dledToSet;
 			
 //			cntrBase = (Container)bugFix(0);
-			cntrBase = bugFix(Container.class, EBugFix.gap);
+			cntrBase = bugFix(Container.class, btgBugFixGapForListBoxSelectorArea);
 			
 			btnTree = createButton("Tree", "?", cntrBase, Position.West);
 			btnTree.addCommands(ButtonAction.Click, ctt);
@@ -273,51 +285,39 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 
 		@Override
 		public Object bugFix(Object... aobj) {
-//			switch((int)aobj[0]){
-//				case 0:
-//					boolean bUseGap=true;
-//					Container cntr=null;
-//					if(bUseGap){
-//						/**
-//						 * this requires that all childs (in this case buttons) have their style background
-//						 * color transparent (like alpha 0.5f) or the listbox selector will not be visible below them...
-//						 */
-//						// same layout as the cell container
-//						cntr = new Container(new BorderLayout(), assignedCellRenderer.strStyle);
-//						cntr.setName("bugfixGap"); //when mouse is over a cell, if the ListBox->selectorArea has the same world Z value of the button, it may be ordered before the button on the raycast collision results at PickEventSession.setCurrentHitTarget(ViewPort, Spatial, Vector2f, CollisionResult) line: 262	-> PickEventSession.cursorMoved(int, int) line: 482 
-//						addChild(cntr, Position.Center);
-//					}else{
-//						cntr = this;
-//					}
-//					return cntr;
-//				case 1:
-//					break;
-//			}
-//			
+			return null;
+		}
+		
+		@Override
+		public <T> T bugFix(Class<T> cl, BoolTogglerCmdField btgBugFixId,	Object... aobjCustomParams) {
+			if(btgBugFixId==btgBugFixGapForListBoxSelectorArea){
+				Container cntr=null;
+				if(btgBugFixGapForListBoxSelectorArea.b()){
+					/**
+					 * this requires that all childs (in this case buttons) have their style background
+					 * color transparent (like alpha 0.5f) or the listbox selector will not be visible below them...
+					 */
+					// same layout as the cell container
+					cntr = new Container(new BorderLayout(), assignedCellRenderer.strStyle);
+					cntr.setName("bugfixGap"); //when mouse is over a cell, if the ListBox->selectorArea has the same world Z value of the button, it may be ordered before the button on the raycast collision results at PickEventSession.setCurrentHitTarget(ViewPort, Spatial, Vector2f, CollisionResult) line: 262	-> PickEventSession.cursorMoved(int, int) line: 482 
+					addChild(cntr, Position.Center);
+				}else{
+					cntr = this;
+				}
+				return (T) cntr;
+			}
+			
 			return null;
 		}
 
 		@Override
-		public <T> T bugFix(Class<T> cl, IEnumStatus e, Object... aobj) {
-			switch((EBugFix)e){
-				case gap:
-					Container cntr=null;
-					if(e.isEnabled()){
-						/**
-						 * this requires that all childs (in this case buttons) have their style background
-						 * color transparent (like alpha 0.5f) or the listbox selector will not be visible below them...
-						 */
-						// same layout as the cell container
-						cntr = new Container(new BorderLayout(), assignedCellRenderer.strStyle);
-						cntr.setName("bugfixGap"); //when mouse is over a cell, if the ListBox->selectorArea has the same world Z value of the button, it may be ordered before the button on the raycast collision results at PickEventSession.setCurrentHitTarget(ViewPort, Spatial, Vector2f, CollisionResult) line: 262	-> PickEventSession.cursorMoved(int, int) line: 482 
-						addChild(cntr, Position.Center);
-					}else{
-						cntr = this;
-					}
-					return (T) cntr;
-			}
-			
-			return null;
+		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+			return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
+		}
+
+		@Override
+		public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
+			return ECmdReturnStatus.NotFound;
 		}
 		
 //		public boolean isSelectButton(Spatial spt){
@@ -341,6 +341,11 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
+	}
+
+	@Override
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
+		return ECmdReturnStatus.NotFound;
 	}
 
 }

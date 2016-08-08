@@ -27,23 +27,25 @@
 
 package com.github.commandsconsolegui.misc;
 
-import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
-
 /**
- * To make it easy to track all bug fix implementations.
  * 
- * "Bug fix" is some workaround (be hackish or not) that make things work 
- * as expected when they aren't.
- * 
- * Bug fixes should be a temporary code.
- *
  * @author AquariusPower <https://github.com/AquariusPower>
- * 
+ *
  */
-public interface IWorkAroundBugFix {
-	public static interface IEnumStatus{
-		public boolean isEnabled();
+public class HashVersionHolder {
+	private Object	objRef;
+	private int	iHash;
+
+	public HashVersionHolder(Object objRef){
+		this.objRef=objRef;
 	}
-	public Object bugFix(Object... aobj);
-	public <T> T bugFix(Class<T> cl, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams);
+	
+	public boolean isChangedAndUpdateHash(){
+		int iHashTmp = objRef.hashCode();
+		if(iHashTmp!=iHash){
+			iHash=iHashTmp;
+			return true;
+		}
+		return false;
+	}
 }
