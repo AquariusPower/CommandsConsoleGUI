@@ -96,7 +96,11 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 	public boolean isUserActionStack(){
 		for(StackTraceElement ste:Thread.currentThread().getStackTrace()){
 			for(Class<?> cl:aclassUserActionStackList){
-				if(ste.getClassName().startsWith(cl.getName())){
+				if(
+						ste.getClassName().equals(cl.getName())
+						||
+						ste.getClassName().startsWith(cl.getName()+"$")
+				){
 					return true;
 				}
 			}
