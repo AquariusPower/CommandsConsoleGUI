@@ -578,21 +578,23 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	}
 
 	public void checkElementsRecursive(Spatial spt, Float fNewZSize) {
+		float zL=spt.getLocalTranslation().z;
+		float zW=spt.getWorldTranslation().z;
+		Float z=null;
+		Float zP=null;
+		
 		if(spt instanceof Panel){
 			Panel panel = (Panel)spt;
 			
-			float zL=panel.getLocalTranslation().z;
-			float zW=panel.getWorldTranslation().z;
-			
 			Vector3f v3f = panel.getSize();
-			float z=v3f.z;
+			z=v3f.z;
 			if(fNewZSize!=null){
 				v3f.z=fNewZSize;
 				panel.setSize(v3f);
 			}
 			
 			Vector3f v3fP = panel.getPreferredSize();
-			float zP=v3fP.z;
+			zP=v3fP.z;
 			if(v3fP!=null){
 				if(fNewZSize!=null){
 					v3fP.z=fNewZSize;
@@ -600,21 +602,22 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 				}
 			}
 			
-			String strIndent="";
-			Spatial sptTmp=spt;
-			while(sptTmp.getParent()!=null){
-				strIndent+=" ";
-				sptTmp=sptTmp.getParent();
-			}
-			
-			GlobalCommandsDelegatorI.i().dumpSubEntry(strIndent
-				+"z="+MiscI.i().fmtFloat(z)+";"
-				+"zP="+MiscI.i().fmtFloat(zP)+";"
+		}
+		
+		String strIndent="";
+		Spatial sptTmp=spt;
+		while(sptTmp.getParent()!=null){
+			strIndent+=" ";
+			sptTmp=sptTmp.getParent();
+		}
+		
+		GlobalCommandsDelegatorI.i().dumpSubEntry(strIndent
+				+"z="+(z==null?z:MiscI.i().fmtFloat(z))+";"
+				+"zP="+(zP==null?zP:MiscI.i().fmtFloat(zP))+";"
 				+"zL="+MiscI.i().fmtFloat(zL)+";"
 				+"zW="+MiscI.i().fmtFloat(zW)+";"
-				+""+panel.getClass().getSimpleName()+"(name)="+panel.getName()+";"
+				+""+spt.getClass().getSimpleName()+"(name)="+spt.getName()+";"
 			);
-		}
 		
 		if(spt instanceof Node){
 			Node node = (Node)spt;
