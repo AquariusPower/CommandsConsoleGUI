@@ -200,10 +200,10 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 //		return cc.cmdFoundReturnStatus(bCommandWorked);
 //	}
 @Override
-public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
+public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 	boolean bCommandWorked = false;
 	
-	if(cc.checkCmdValidity(this,scfRestart,null)){
+	if(cd.checkCmdValidity(this,scfRestart,null)){
 //		Boolean bEnabledForce = cc.paramBoolean(1);
 //		
 //		if(bEnabledForce!=null){
@@ -219,7 +219,7 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
 		return ECmdReturnStatus.NotFound; //end of inheritance seek
 	}
 	
-	return cc.cmdFoundReturnStatus(bCommandWorked);
+	return cd.cmdFoundReturnStatus(bCommandWorked);
 }
 	
 	@Override

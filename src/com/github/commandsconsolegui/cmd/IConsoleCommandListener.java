@@ -46,6 +46,9 @@ public interface IConsoleCommandListener{
 	 *   Use {@link CommandsDelegator#isFillingCommandList()} to know if this flow is being run.
 	 *   
 	 *  2) normally when executing a console command.
+	 * 
+	 * @param cd this is mainly to provide an easy access to the global
+	 * @return
 	 */
 	public abstract ECmdReturnStatus execConsoleCommand(CommandsDelegator cd);
 }

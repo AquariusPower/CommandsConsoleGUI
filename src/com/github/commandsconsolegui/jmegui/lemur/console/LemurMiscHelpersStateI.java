@@ -29,9 +29,12 @@ package com.github.commandsconsolegui.jmegui.lemur.console;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
@@ -43,12 +46,15 @@ import com.jme3.input.dummy.DummyKeyInput;
 import com.jme3.material.MatParam;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.DocumentModel;
 import com.simsilica.lemur.ListBox;
+import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.component.TextEntryComponent;
 import com.simsilica.lemur.event.KeyAction;
@@ -61,7 +67,7 @@ import com.simsilica.lemur.focus.FocusManagerState;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IWorkAroundBugFix {
+public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IWorkAroundBugFix, IConsoleCommandListener {
 	private static LemurMiscHelpersStateI instance = new LemurMiscHelpersStateI(); 
 	public static LemurMiscHelpersStateI i(){return instance;}
 	
@@ -549,6 +555,72 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		
 		public String getHelp() {
 			return strModifiers+strName+": "+strHelp;
+		}
+	}
+	
+	StringCmdField scfCheckLemur = new StringCmdField(this);
+	@Override
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
+		boolean bCommandWorked = false;
+		
+		if(cc.checkCmdValidity(this,scfCheckLemur,"[fNewZSize] go thru all lemur elemets active on the GUI node to check if they are all properly configured")){
+			Float fNewZSize = cc.getCurrentCommandLine().paramFloat(1);
+			
+			checkElementsRecursive(GlobalGUINodeI.i(), fNewZSize);
+			
+			bCommandWorked = true;
+		}else
+		{
+			return super.execConsoleCommand(cc);
+		}
+		
+		return cc.cmdFoundReturnStatus(bCommandWorked);
+	}
+
+	public void checkElementsRecursive(Spatial spt, Float fNewZSize) {
+		if(spt instanceof Panel){
+			Panel panel = (Panel)spt;
+			
+			float zL=panel.getLocalTranslation().z;
+			float zW=panel.getWorldTranslation().z;
+			
+			Vector3f v3f = panel.getSize();
+			float z=v3f.z;
+			if(fNewZSize!=null){
+				v3f.z=fNewZSize;
+				panel.setSize(v3f);
+			}
+			
+			Vector3f v3fP = panel.getPreferredSize();
+			float zP=v3fP.z;
+			if(v3fP!=null){
+				if(fNewZSize!=null){
+					v3fP.z=fNewZSize;
+					panel.setPreferredSize(v3fP);
+				}
+			}
+			
+			String strIndent="";
+			Spatial sptTmp=spt;
+			while(sptTmp.getParent()!=null){
+				strIndent+=" ";
+				sptTmp=sptTmp.getParent();
+			}
+			
+			GlobalCommandsDelegatorI.i().dumpSubEntry(strIndent
+				+"z="+MiscI.i().fmtFloat(z)+";"
+				+"zP="+MiscI.i().fmtFloat(zP)+";"
+				+"zL="+MiscI.i().fmtFloat(zL)+";"
+				+"zW="+MiscI.i().fmtFloat(zW)+";"
+				+""+panel.getClass().getSimpleName()+"(name)="+panel.getName()+";"
+			);
+		}
+		
+		if(spt instanceof Node){
+			Node node = (Node)spt;
+			for(Spatial sptChild:node.getChildren()){
+				checkElementsRecursive(sptChild,fNewZSize);
+			}
 		}
 	}
 	
