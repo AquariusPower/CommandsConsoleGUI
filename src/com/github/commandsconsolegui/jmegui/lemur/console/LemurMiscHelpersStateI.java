@@ -563,7 +563,13 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
 		boolean bCommandWorked = false;
 		
-		if(cc.checkCmdValidity(this,scfCheckLemur,"[fNewZSize] go thru all lemur elemets active on the GUI node to check if they are all properly configured")){
+		if(
+			cc.checkCmdValidity(this,scfCheckLemur,
+				"[fNewZSize] go thru all lemur elemets active on the GUI node to check if they are "
+				+"all properly configured."
+//				+"The option will only modify Z thickness if it is 0.0f."
+			)
+		){
 			Float fNewZSize = cc.getCurrentCommandLine().paramFloat(1);
 			
 			checkElementsRecursive(GlobalGUINodeI.i(), fNewZSize);
@@ -588,7 +594,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 			
 			Vector3f v3f = panel.getSize();
 			z=v3f.z;
-			if(fNewZSize!=null){
+			if(fNewZSize!=null){// && v3f.z==0.0f){
 				v3f.z=fNewZSize;
 				panel.setSize(v3f);
 			}
@@ -596,7 +602,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 			Vector3f v3fP = panel.getPreferredSize();
 			zP=v3fP.z;
 			if(v3fP!=null){
-				if(fNewZSize!=null){
+				if(fNewZSize!=null){// && v3fP.z==0.0f){
 					v3fP.z=fNewZSize;
 					panel.setPreferredSize(v3fP);
 				}
