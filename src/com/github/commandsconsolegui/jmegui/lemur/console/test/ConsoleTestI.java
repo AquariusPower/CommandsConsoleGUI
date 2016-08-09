@@ -36,6 +36,9 @@ import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGUII;
 import com.github.commandsconsolegui.jmegui.console.SimpleConsoleAppAbs;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceDialogState;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.ListDialogState;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.QuestionDialogState;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -79,11 +82,11 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 //	private StringVarField svfOptionSelectedDialog2 = new StringVarField(this,"");
 	
 	// generic dialog
-	private DialogTestState<T>	diagChoice;
+	private ChoiceDialogState<T>	diagChoice;
 
-	private DialogTestState<T>	diagList;
+	private ListDialogState<T>	diagList;
 
-	private DialogTestState<T>	diagQuestion;
+	private QuestionDialogState<T>	diagQuestion;
 
 //	private String	strOptionSelected;
 	
@@ -136,17 +139,22 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		
 		//////////////////////// config this test
 		// test dialogs
-		diagChoice = new DialogTestState<T>(DialogTestState.EDiag.Choice).configure(
-			new DialogTestState.CfgParm(true, 0.6f, 0.5f, null, null));
+//		diagChoice = new BasicDialogStateAbs<T>(BasicDialogStateAbs.EDiag.Choice).configure(
+//			new BasicDialogStateAbs.CfgParm(true, 0.6f, 0.5f, null, null));
+		diagChoice = new ChoiceDialogState<T>().configure(new ChoiceDialogState.CfgParm(
+			0.6f, 0.5f, null, null).doPrepareTestData());
 		
-		diagQuestion = new DialogTestState<T>(DialogTestState.EDiag.Question).configure(
-			new DialogTestState.CfgParm(true, 500f, 300f, null, null));
+//		diagQuestion = new BasicDialogStateAbs<T>(BasicDialogStateAbs.EDiag.Question).configure(
+//			new BasicDialogStateAbs.CfgParm(true, 500f, 300f, null, null));
+		diagQuestion = new QuestionDialogState<T>().configure(new QuestionDialogState.CfgParm(
+			500f, 300f, null, null).doPrepareTestData());
 		
-		diagList = new DialogTestState<T>(DialogTestState.EDiag.BrowseManagementList).configure(
-			new DialogTestState.CfgParm(false, null, null, null, null))
-			.addModalDialog(diagChoice)
-			.addModalDialog(diagQuestion);
-		
+//		diagList = new BasicDialogStateAbs<T>(BasicDialogStateAbs.EDiag.BrowseManagementList).configure(
+//			new BasicDialogStateAbs.CfgParm(false, null, null, null, null))
+//			.addModalDialog(diagChoice)
+//			.addModalDialog(diagQuestion);
+		diagList = new ListDialogState<T>().configure(new ListDialogState.CfgParm<T>(
+			null, null, null, null, diagChoice, diagQuestion).doPrepareTestData());
 	}
 	
 	/**

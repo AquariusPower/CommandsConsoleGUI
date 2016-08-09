@@ -64,7 +64,7 @@ import com.simsilica.lemur.list.CellRenderer;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class CellRendererDialogEntry<T extends Command<Button>> implements CellRenderer<DialogListEntryData<T>>, IReflexFillCfg, IConsoleCommandListener {
+public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryData<T>>, IReflexFillCfg, IConsoleCommandListener {
 	protected static StringVarField svfTreeDepthToken;
 	protected static BoolTogglerCmdField	btgShowTreeUId;
 	
@@ -91,7 +91,7 @@ public class CellRendererDialogEntry<T extends Command<Button>> implements CellR
 		}
 	}
 	
-	public static class Cell<T extends Command<Button>> extends Container implements IWorkAroundBugFix, IReflexFillCfg, IConsoleCommandListener{
+	public static class Cell<T> extends Container implements IWorkAroundBugFix, IReflexFillCfg, IConsoleCommandListener{
 		public static enum EUserData{
 			colorFgBkp,
 			cellClassRef,

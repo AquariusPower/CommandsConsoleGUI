@@ -44,6 +44,7 @@ import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI.BindKey;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.BasicDialogStateAbs.CfgParm;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -75,7 +76,7 @@ import com.simsilica.lemur.list.SelectionModel;
 * @author AquariusPower <https://github.com/AquariusPower>
 *
 */
-public abstract class LemurDialogGUIStateAbs<T extends Command<Button>> extends BaseDialogStateAbs<T> {
+public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 	protected Label	lblTitle;
 	protected Label	lblTextInfo;
 	protected ListBox<DialogListEntryData<T>>	lstbxEntriesToSelect;
@@ -118,12 +119,12 @@ public abstract class LemurDialogGUIStateAbs<T extends Command<Button>> extends 
 		 * @param fInfoHeightPercentOfDialog (if null will use default) the percentual height to show informational text, the list and input field will properly use the remaining space
 		 * @param iEntryHeightPixels
 		 */
-		public CfgParm(boolean	bOptionSelectionMode,String strUIId,
+		public CfgParm(String strUIId,
 				Node nodeGUI, Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow, Float fInfoHeightPercentOfDialog,
 				Integer iEntryHeightPixels)//, BaseDialogStateAbs<T> modalParent)
 		{
-			super(bOptionSelectionMode,strUIId, nodeGUI);//, modalParent);
+			super(strUIId, nodeGUI);//, modalParent);
 			
 			this.fDialogHeightPercentOfAppWindow = fDialogHeightPercentOfAppWindow;
 			this.fDialogWidthPercentOfAppWindow = fDialogWidthPercentOfAppWindow;
@@ -131,9 +132,10 @@ public abstract class LemurDialogGUIStateAbs<T extends Command<Button>> extends 
 			this.iEntryHeightPixels = iEntryHeightPixels;
 		}
 	}
+	private CfgParm	cfg;
 	@Override
 	public LemurDialogGUIStateAbs<T> configure(ICfgParm icfg) {
-		CfgParm cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
+		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
 		
 //		DialogMouseCursorListenerI.i().configure(null);
 		
@@ -183,8 +185,6 @@ public abstract class LemurDialogGUIStateAbs<T extends Command<Button>> extends 
 	 */
 	@Override
 	protected boolean initGUI(){
-		CfgParm cfg = (CfgParm)getCfg();
-		
 		String strStyle = ConsoleLemurStateI.i().STYLE_CONSOLE; //TODO make it custom
 		
 		Vector3f v3fApplicationWindowSize = new Vector3f(

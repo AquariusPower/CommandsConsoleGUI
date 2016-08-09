@@ -38,11 +38,13 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.jmegui.ConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.BasicDialogStateAbs.CfgParm;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
+import com.jme3.app.Application;
 
 /**
  * basic state console commands control
@@ -88,21 +90,28 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 //		throw new NullPointerException("deprecated!!!");
 //	}
 	
-	public static class CfgParm implements ICfgParm{
-//		protected boolean bIgnorePrefixAndSuffix;
-		protected String	strId;
-		public String getId(){return strId;}
-		public CfgParm(String strCmdBaseId) {
-			super();
-			this.strId = strCmdBaseId;
-//			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
+//	public static class CfgParm implements ICfgParm{
+////		protected boolean bIgnorePrefixAndSuffix;
+//		protected String	strId;
+//		public String getId(){return strId;}
+//		public CfgParm(String strCmdBaseId) {
+//			super();
+//			this.strId = strCmdBaseId;
+////			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
+//		}
+//	}
+	public static class CfgParm extends ConditionalStateAbs.CfgParm{
+		public CfgParm(String strId) {
+			super(GlobalAppRefI.i(), strId);
 		}
 	}
+	private CfgParm	cfg;
 	@Override
 	public CmdConditionalStateAbs configure(ICfgParm icfg) {
-		CfgParm cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
+		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
 		
-		super.configure(new ConditionalStateAbs.CfgParm(GlobalAppRefI.i(), cfg.strId));
+//		super.configure(new ConditionalStateAbs.CfgParm(GlobalAppRefI.i(), cfg.strId));
+		super.configure(cfg);
 		
 //		cd=GlobalCommandsDelegatorI.i();
 		

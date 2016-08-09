@@ -38,6 +38,7 @@ import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.BasicDialogStateAbs.CfgParm;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.MsgI;
 //import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
@@ -82,7 +83,7 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 //	private T	cmdAtParent;
 	protected DiagModalInfo<T> dmi = null;
 	
-	protected boolean bOptionChoiceSelectionMode = false;
+	private boolean bOptionChoiceSelectionMode = false;
 //	protected Long	lChoiceMadeAtMilis = null;
 	protected ArrayList<DialogListEntryData<T>> adataChosenEntriesList = new ArrayList<DialogListEntryData<T>>();
 	
@@ -138,31 +139,24 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 	
 	public static class CfgParm extends CmdConditionalStateAbs.CfgParm{
 		protected boolean	bOptionSelectionMode;
-//		protected String strUIId;
-//		protected boolean bIgnorePrefixAndSuffix;
 		protected Node nodeGUI;
-//		protected BaseDialogStateAbs<T> diagParent;
 		protected boolean bInitiallyEnabled = false; //the console needs this "true"
-		public CfgParm(boolean bOptionSelectionMode, String strUIId, Node nodeGUI){//, BaseDialogStateAbs<T> diagParent) {
+		public CfgParm(String strUIId, Node nodeGUI){//, BaseDialogStateAbs<T> diagParent) {
 			super(strUIId);
-//			this.strUIId = strUIId;
-//			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
 			this.nodeGUI = nodeGUI;
-			this.bOptionSelectionMode=bOptionSelectionMode;
-//			this.diagParent=diagParent;
 		}
 		public void setUIId(String strUIId){
 			if(this.strId!=null)throw new PrerequisitesNotMetException("UI Id already set",this.strId,strUIId);
 			super.strId=strUIId;
-//			super.strId=this.strUIId;
 		}
 	}
+	private CfgParm	cfg;
 	@Override
 	public BaseDialogStateAbs<T> configure(ICfgParm icfg) {
-		CfgParm cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
+		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
 //	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
 		
-		this.bOptionChoiceSelectionMode=cfg.bOptionSelectionMode;
+//		this.bOptionChoiceSelectionMode=cfg.bOptionSelectionMode;
 		
 //		bEnabled=cfg.bInitiallyEnabled;
 //		if(!cfg.bInitiallyEnabled)requestDisable();
@@ -326,7 +320,7 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 	public abstract void clearSelection();
 	
 	public boolean isOptionSelectionMode(){
-		return bOptionChoiceSelectionMode;
+		return isOptionChoiceSelectionMode();
 	}
 	
 	/**
@@ -348,7 +342,7 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 	protected String getTextInfo(){
 		String str="Info: Type a list filter at input text area and hit Enter.\n";
 		
-		if(bOptionChoiceSelectionMode){
+		if(isOptionChoiceSelectionMode()){
 			str+="Option Mode: when hitting Enter, if an entry is selected, it's value will be chosen.\n";
 			
 			if(getParentDialog()!=null){
@@ -380,7 +374,7 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 		
 		DialogListEntryData<T> dataSelected = getSelectedEntryData(); //this value is in this console variable now
 		
-		if(bOptionChoiceSelectionMode){
+		if(isOptionChoiceSelectionMode()){
 			adataChosenEntriesList.clear();
 			if(dataSelected!=null){
 				adataChosenEntriesList.add(dataSelected); //TODO could be many, use a checkbox for multi-selection
@@ -474,5 +468,13 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 	public void resetChoice() {
 //		lChoiceMadeAtMilis=null;
 		adataChosenEntriesList.clear();
+	}
+
+	public boolean isOptionChoiceSelectionMode() {
+		return bOptionChoiceSelectionMode;
+	}
+
+	public void setOptionChoiceSelectionMode(boolean bOptionChoiceSelectionMode) {
+		this.bOptionChoiceSelectionMode = bOptionChoiceSelectionMode;
 	}
 }

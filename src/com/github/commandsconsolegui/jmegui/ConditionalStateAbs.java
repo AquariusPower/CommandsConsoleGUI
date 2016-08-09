@@ -31,6 +31,7 @@ package com.github.commandsconsolegui.jmegui;
 import java.io.IOException;
 
 import com.github.commandsconsolegui.globals.GlobalHolderAbs.IGlobalOpt;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.BasicDialogStateAbs.CfgParm;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.app.Application;
@@ -117,8 +118,6 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 	/** set to true to allow instant configuration but wait before properly initializing*/
 	protected boolean bHoldProperInitialization = false;
 	
-	private Application app;
-	
 	private boolean	bLastUpdateSuccessful;
 	private boolean	bHoldUpdates;
 	
@@ -154,11 +153,13 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 			this.app = app;
 			this.strId = strId;
 		}
+		public String getId(){
+			return strId;
+		}
 	}
+	private CfgParm	cfg;
 	private ICfgParm icfgOfInstance;
-
 	private boolean	bRestartRequested;
-
 	/**
 	 * Configure simple references assignments and variable values.<br>
 	 * Must be used before initialization.<br>
@@ -169,7 +170,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 	 * @param cp
 	 */
 	public ConditionalStateAbs configure(ICfgParm icfg){
-		CfgParm cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
+		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
 		
 		if(isDiscarded())throw new PrerequisitesNotMetException("cannot re-use after discarded");
 		
@@ -178,7 +179,6 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 		
 		// internal configurations
 		if(cfg.app==null)throw new PrerequisitesNotMetException("app is null");
-		this.app=cfg.app;
 		
 		// the Unique State Id
 		if(cfg.strId==null){
@@ -253,7 +253,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 		return app();
 	}
 	public Application app(){
-		return app;
+		return cfg.app;
 	}
 	
 	protected void assertIsConfigured() {

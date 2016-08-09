@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.jmegui.lemur.console.test;
+package com.github.commandsconsolegui.jmegui.lemur.dialog;
 
 import java.util.ArrayList;
 
@@ -47,44 +47,42 @@ import com.simsilica.lemur.GuiGlobals;
 /**
  * @author AquariusPower <https://github.com/AquariusPower>
  */
-public class DialogTestState<T extends Command<Button>> extends LemurDialogGUIStateAbs<T>{
+public abstract class BasicDialogStateAbs<T> extends LemurDialogGUIStateAbs<T>{
 	StringCmdField scfAddEntry = new StringCmdField(this,null,"[strEntryText]");
+	private CfgParm	cfg;
 	
-	public static enum EDiag{
-		BrowseManagementList,
-		Question, //just yes/no
-		Choice, //like a question with many "yes" possibilities, and ESC for no.
-		;
-	}
-	EDiag ediag = null;
-	
-	public DialogTestState(EDiag ediag) {
-		this.ediag=ediag;
+	public BasicDialogStateAbs() {
 		super.bPrefixCmdWithIdToo = true;
 	}
 	
 	public static class CfgParm extends LemurDialogGUIStateAbs.CfgParm{
-		public CfgParm(boolean	bOptionSelectionMode,
+		boolean bPrepareTestData;
+		public CfgParm doPrepareTestData(){
+			bPrepareTestData=true;
+			return this;
+		}
+		public CfgParm(
 				Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow, Float fInfoHeightPercentOfDialog,
 				Integer iEntryHeightPixels){//, BaseDialogStateAbs<T> modalParent) {
-			super(bOptionSelectionMode, null, null,
+			super(null, null,
 					fDialogWidthPercentOfAppWindow, fDialogHeightPercentOfAppWindow,
 					fInfoHeightPercentOfDialog, iEntryHeightPixels);//, modalParent);
 		}
 	}
 	@Override
-	public DialogTestState<T> configure(ICfgParm icfg) {
-		CfgParm cfg = (CfgParm)icfg; //this also validates if icfg is the CfgParam of this class
-		cfg.setUIId(ediag.toString());
+	public BasicDialogStateAbs<T> configure(ICfgParm icfg) {
+		cfg = (CfgParm)icfg; //this also validates if icfg is the CfgParam of this class
 		
 		super.configure(cfg); //params are identical
 		
 		/**
-		 * this is just an example as state changes can be delayed
+		 * this is actually not really necessary here, 
+		 * but is an example as state changes can be delayed,
+		 * to save CPU or any other reason.
 		 */
-		super.setRetryDelay(500);
-		super.rInit.setRetryDelay(1000); //after the generic one
+		super.setRetryDelay(100); //sets for all kinds
+		super.rInit.setRetryDelay(1000); //must be after the generic one above.
 		
 		return storeCfgAndReturnSelf(icfg);
 	}
@@ -105,54 +103,7 @@ public class DialogTestState<T extends Command<Button>> extends LemurDialogGUISt
 		return super.updateOrUndo(tpf);
 	}
 	
-	@Override
-	public void applyResultsFromModalDialog() {
-		DialogTestState<T> diagModal = getDiagModalCurrent().getDiagModal();
-		T cmdAtParent = getDiagModalCurrent().getCmdAtParent();
-		ArrayList<DialogListEntryData<T>> adataToApplyResultsList = getDiagModalCurrent().getDataReferenceAtParentListCopy();
-		
-		boolean bChangesMade = false;
-		for(DialogListEntryData<T> dataAtModal:diagModal.getDataSelectionListCopy()){
-			switch(ediag){
-				case BrowseManagementList:
-					if(cmdAtParent.equals(cmdDel)){
-						switch(diagModal.ediag){
-							case Question:
-								if(dataAtModal.equals(diagModal.dataYes)){
-									for(DialogListEntryData<T> dataToApplyResults:adataToApplyResultsList){
-										removeEntry(dataToApplyResults);
-										bChangesMade=true;
-									}
-									
-									/**
-									 * There is already a sound for entries removal
-									if(bChangesMade)AudioUII.i().play(EAudio.ReturnChosen);
-									 */
-								}else
-								if(dataAtModal.equals(diagModal.dataNo)){
-									AudioUII.i().play(EAudio.ReturnNothing);
-								}
-								break;
-						}
-					}else
-					if(cmdAtParent.equals(cmdCfg)){
-						for(DialogListEntryData<T> dataToCfg:adataToApplyResultsList){
-							dataToCfg.updateTextTo(dataAtModal.getText());
-							bChangesMade=true;
-						}
-						
-						if(bChangesMade)AudioUII.i().play(EAudio.ReturnChosen);
-					}
-					break;
-			}
-		}
-	
-		if(bChangesMade){
-			requestRefreshList();
-		}
-		
-		super.applyResultsFromModalDialog();
-	}
+	public abstract boolean prepareTestData();
 	
 	@SuppressWarnings("unchecked")
 	public DialogListEntryData<T> getDataFrom(Spatial spt){
@@ -162,50 +113,25 @@ public class DialogTestState<T extends Command<Button>> extends LemurDialogGUISt
 		return (DialogListEntryData<T>) data;
 	}
 	
-	public class CommandCfg implements Command<Button>{
-		@SuppressWarnings("unchecked")
-		@Override
-		public void execute(Button btn) {
-//			DialogTestState.this.openModalDialog(EDiag.Cfg.toString(), getDataFrom(btn), (T)this);
-			actionCustomAtEntry(getDataFrom(btn));
-//			DialogTestState.this.actionSubmit();
-		}
-	}
-	CommandCfg cmdCfg = new CommandCfg();
-	
 //	enum EAudio{
 //		RemoveListEntry,
 //		RemoveSubTreeEntry,
 //		;
 //	}
 	
-	public class CommandDel implements Command<Button>{
-		@SuppressWarnings("unchecked")
-		@Override
-		public void execute(Button btn) {
-			DialogListEntryData<T> dled = getDataFrom(btn);
-			
-			if(dled.isParent()){
-//				CustomDialogGUIState.this.setDataToApplyModalChoice(data);
-				DialogTestState.this.openModalDialog(EDiag.Question.toString(), dled, (T)this);
-				AudioUII.i().play(EAudio.Question);
-			}else{
-				DialogTestState.this.removeEntry(dled);
-			}
-		}
-	}
-	CommandDel cmdDel = new CommandDel();
-	
 	public class CommandSel implements Command<Button>{
 		@Override
 		public void execute(Button btn) {
-			DialogTestState.this.selectAndChoseOption(getDataFrom(btn));
+			BasicDialogStateAbs.this.selectAndChoseOption(getDataFrom(btn));
 		}
 	}
 	CommandSel cmdSel = new CommandSel();
-	private DialogListEntryData<T>	dataYes;
-	private DialogListEntryData<T>	dataNo;
 	
+	/**
+	 * TODO addTextEntry()
+	 * @param strText
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public DialogListEntryData<T> addEntryQuick(String strText){
 		DialogListEntryData<T> dle = new DialogListEntryData<T>();
@@ -218,14 +144,8 @@ public class DialogTestState<T extends Command<Button>> extends LemurDialogGUISt
 //		dle.setText(strText, cmdCfg);
 		dle.setText(strText, null);
 		
-		if(bOptionChoiceSelectionMode){
+		if(isOptionChoiceSelectionMode()){
 			dle.addCustomButtonAction("<-",(T)cmdSel);
-		}else{
-			/**
-			 * this order matters
-			 */
-			dle.addCustomButtonAction("Cfg",(T)cmdCfg);
-			dle.addCustomButtonAction("X",(T)cmdDel);
 		}
 		
 		super.addEntry(dle);
@@ -247,43 +167,6 @@ public class DialogTestState<T extends Command<Button>> extends LemurDialogGUISt
 		if(GuiGlobals.getInstance()==null)return false;
 		
 		return super.initCheckPrerequisites();
-	}
-	
-	@Override
-	protected boolean initOrUndo() {
-		switch(ediag){
-			case Choice:
-				for(int i=0;i<10;i++)addEntryQuick(null); //some test data
-				break;
-			case Question:
-				dataYes = addEntryQuick("[ yes    ]");
-				dataNo  = addEntryQuick("[     no ]");
-				break;
-			case BrowseManagementList:
-				addEntryQuick(null);
-				addEntryQuick(null);
-				
-				DialogListEntryData<T> dleS1 = addEntryQuick("section 1");
-				addEntryQuick(null).setParent(dleS1);
-				addEntryQuick(null).setParent(dleS1);
-				addEntryQuick(null).setParent(dleS1);
-				
-				DialogListEntryData<T> dleS2 = addEntryQuick("section 2");
-				addEntryQuick(null).setParent(dleS2);
-				addEntryQuick(null).setParent(dleS2);
-				DialogListEntryData<T> dleS21 = addEntryQuick("section 2.1").setParent(dleS2);
-				addEntryQuick(null).setParent(dleS21);
-				addEntryQuick(null).setParent(dleS21);
-				addEntryQuick(null).setParent(dleS21);
-				
-				addEntryQuick("S2 child").setParent(dleS2); //ok, will be placed properly
-				
-				addEntryQuick("S1 child").setParent(dleS1); //out of order for test
-				addEntryQuick("S21 child").setParent(dleS21); //out of order for test
-				break;
-		}
-		
-		return super.initOrUndo();
 	}
 	
 	@Override
@@ -340,8 +223,13 @@ public class DialogTestState<T extends Command<Button>> extends LemurDialogGUISt
 	}
 
 	@Override
-	protected void actionCustomAtEntry(DialogListEntryData<T> dataSelected) {
-		super.actionCustomAtEntry(dataSelected);
-		openModalDialog(EDiag.Choice.toString(), dataSelected, (T)cmdCfg);
+	protected boolean initOrUndo() {
+		if(!super.initOrUndo())return false;
+		
+		if(cfg.bPrepareTestData){
+			if(!prepareTestData())return false;
+		}
+		
+		return true;
 	}
 }

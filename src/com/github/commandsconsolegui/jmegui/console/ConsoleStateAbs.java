@@ -400,7 +400,7 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 	public static class CfgParm extends BaseDialogStateAbs.CfgParm{
 		protected int iToggleConsoleKey;
 		public CfgParm(String strUIId, Node nodeGUI, int iToggleConsoleKey) {
-			super(false, strUIId, nodeGUI);//, null);
+			super(strUIId, nodeGUI);//, null);
 			this.iToggleConsoleKey = iToggleConsoleKey;
 		}
 	}	
