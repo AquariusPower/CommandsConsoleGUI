@@ -64,7 +64,7 @@ import com.simsilica.lemur.list.CellRenderer;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryData<T>>, IReflexFillCfg, IConsoleCommandListener {
+public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryData<T>>, IReflexFillCfg {
 	protected static StringVarField svfTreeDepthToken;
 	protected static BoolTogglerCmdField	btgShowTreeUId;
 	
@@ -91,7 +91,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		}
 	}
 	
-	public static class Cell<T> extends Container implements IWorkAroundBugFix, IReflexFillCfg, IConsoleCommandListener{
+	public static class Cell<T> extends Container implements IWorkAroundBugFix, IReflexFillCfg {
 		public static enum EUserData{
 			colorFgBkp,
 			cellClassRef,
@@ -320,16 +320,6 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 		}
 
-		@Override
-		public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
-			return ECmdReturnStatus.NotFound;
-		}
-		
-//		public boolean isSelectButton(Spatial spt){
-//			return spt==btnSelect;
-//		}
-		
-		
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -346,11 +336,6 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
-	}
-
-	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
-		return ECmdReturnStatus.NotFound;
 	}
 
 }

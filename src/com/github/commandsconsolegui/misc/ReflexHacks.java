@@ -60,7 +60,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
  * @author AquariusPower <https://github.com/AquariusPower>
  * 
  */
-public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
+public class ReflexHacks implements IReflexFillCfg {
 	private static ReflexHacks instance = new ReflexHacks();
 	public static ReflexHacks i(){return instance;}
 	
@@ -176,11 +176,6 @@ public class ReflexHacks implements IReflexFillCfg, IConsoleCommandListener{
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		return cc.getReflexFillCfg(rfcv);
-	}
-	
-	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
-		return ECmdReturnStatus.NotFound;
 	}
 	
 }

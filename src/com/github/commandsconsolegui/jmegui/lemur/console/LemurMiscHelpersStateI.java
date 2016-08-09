@@ -227,12 +227,6 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		tf.setUserData(EKey.CursorLargeMode.toString(), b?true:null);
 	}
 	
-	
-	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegator	cc) {
-		return ECmdReturnStatus.NotFound;
-	}
-
 	/**
 	 * To show the cursor at the new carat position, 
 	 * this required protected method: {@link TextEntryComponent#resetCursorPosition}

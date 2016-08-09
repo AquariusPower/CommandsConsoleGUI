@@ -31,6 +31,7 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 
 /**
  * 
@@ -51,7 +52,7 @@ public class CommandData implements Comparable<CommandData>{
 	private String strUniqueCmdId;
 	
 	private String strComment;
-	private IConsoleCommandListener icclOwner;
+	private IReflexFillCfg irfcOwner;
 	private StackTraceElement[] asteCodeTrackUniqueId;
 
 	private ArrayList<CommandData>	acmddCoreIdConflicts = new ArrayList<CommandData>();
@@ -66,19 +67,19 @@ public class CommandData implements Comparable<CommandData>{
 	public String getComment() {
 		return strComment;
 	}
-	public IConsoleCommandListener getOwner() {
-		return icclOwner;
+	public IReflexFillCfg getOwner() {
+		return irfcOwner;
 	}
 	
-	public CommandData(IConsoleCommandListener icclOwner, String strBaseCmd, String strSimpleCmdId, String strComment) {
+	public CommandData(IReflexFillCfg irfcOwner, String strBaseCmd, String strSimpleCmdId, String strComment) {
 		super();
-		this.icclOwner = icclOwner;
+		this.irfcOwner = irfcOwner;
 		this.strUniqueCmdId = strBaseCmd;
 		this.strSimpleCmdId=strSimpleCmdId;
 		this.strComment = strComment;
 		this.asteCodeTrackUniqueId = Thread.currentThread().getStackTrace();
 		
-		if(this.icclOwner==null)throw new PrerequisitesNotMetException("listener cannot be null");
+		if(this.irfcOwner==null)throw new PrerequisitesNotMetException("listener cannot be null");
 	}
 	
 	public String asHelp() {

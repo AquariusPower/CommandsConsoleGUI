@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
@@ -472,7 +471,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		for(BoolTogglerCmdField btg : VarCmdFieldAbs.getListCopy(BoolTogglerCmdField.class)){
 			String strSimpleCmdId = btg.getSimpleCmdId();
 			if(!strSimpleCmdId.endsWith("Toggle"))strSimpleCmdId+="Toggle";
-			if(checkCmdValidity(btg.getOwnerAsCmdListener(), btg.getUniqueCmdId(), strSimpleCmdId, "[bEnable] "+btg.getHelp(), true)){
+			if(checkCmdValidity(btg.getOwner(), btg.getUniqueCmdId(), strSimpleCmdId, "[bEnable] "+btg.getHelp(), true)){
 				btgReferenceMatched = btg;
 				break;
 			}
@@ -483,21 +482,25 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	/**
 	 * placeholder pseudo dummy class to help pipe all commands in a single place
 	 */
-	private class PseudoSelfListener implements IConsoleCommandListener{
+	private class PseudoSelfListener implements IReflexFillCfg,IConsoleCommandListener{
 		@Override
 		public ECmdReturnStatus execConsoleCommand(CommandsDelegator ccRequester) {
+			throw new NullPointerException("This method shall never be called!");
+		}
+		@Override
+		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 			throw new NullPointerException("This method shall never be called!");
 		}
 	}
 	protected PseudoSelfListener icclPseudo = new PseudoSelfListener();
 	
-	public String getListenerId(IConsoleCommandListener iccl){
-		if(iccl.equals(icclPseudo)){
+	public String getListenerId(IReflexFillCfg irfc){
+		if(irfc.equals(icclPseudo)){
 			return "ROOT";
 		}
 		
 		String strClassTree="";
-		Class<?> cl = iccl.getClass();
+		Class<?> cl = irfc.getClass();
 		while(!cl.toString().equals(Object.class.toString())){
 			if(!strClassTree.isEmpty())strClassTree+=",";
 			strClassTree+=cl.getSimpleName();
@@ -509,14 +512,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		return strClassTree;
 	}
 	
-	public IConsoleCommandListener getPseudoListener(){
+	public PseudoSelfListener getPseudoListener(){
 		return icclPseudo;
 	}
 	
-	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strUniqueCmdId){
-		return checkCmdValidity(iccl, strUniqueCmdId, null, null);
+	public boolean checkCmdValidity(IReflexFillCfg irfc, String strUniqueCmdId){
+		return checkCmdValidity(irfc, strUniqueCmdId, null, null);
 	}
-	public boolean checkCmdValidity(IConsoleCommandListener iccl, StringCmdField scf, String strComment){
+	public boolean checkCmdValidity(IReflexFillCfg irfc, StringCmdField scf, String strComment){
 		if(strComment==null){
 			strComment = scf.getHelp();
 		}else{
@@ -524,21 +527,21 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				strComment+="\n"+scf.getHelp();
 			}
 		}
-		return checkCmdValidity(iccl, scf.toString(), scf.getSimpleCmdId(), strComment);
+		return checkCmdValidity(irfc, scf.toString(), scf.getSimpleCmdId(), strComment);
 	}
-	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strUniqueCmdId, String strSimpleCmdId, String strComment){
-		return checkCmdValidity(iccl, strUniqueCmdId, strSimpleCmdId, strComment, false);
+	public boolean checkCmdValidity(IReflexFillCfg irfc, String strUniqueCmdId, String strSimpleCmdId, String strComment){
+		return checkCmdValidity(irfc, strUniqueCmdId, strSimpleCmdId, strComment, false);
 	}
 	/**
 	 * 
-	 * @param iccl
+	 * @param irfcOwner
 	 * @param strUniqueCmdId
 	 * @param strSimpleCmdId (can be null)
 	 * @param strComment (can be null)
 	 * @param bSkipSortCheck
 	 * @return
 	 */
-	public boolean checkCmdValidity(IConsoleCommandListener iccl, String strUniqueCmdId, String strSimpleCmdId, String strComment, boolean bSkipSortCheck){
+	public boolean checkCmdValidity(IReflexFillCfg irfcOwner, String strUniqueCmdId, String strSimpleCmdId, String strComment, boolean bSkipSortCheck){
 //		if(strCmdLinePrepared==null){
 		if(bFillCommandList){
 			if(strComment!=null){
@@ -546,7 +549,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			}
 			
 			if(strSimpleCmdId==null)strSimpleCmdId=strUniqueCmdId;
-			addCmdToValidList(iccl,strUniqueCmdId,strSimpleCmdId,bSkipSortCheck);
+			addCmdToValidList(irfcOwner,strUniqueCmdId,strSimpleCmdId,bSkipSortCheck);
 			
 			return false;
 		}
@@ -1534,10 +1537,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		return astr;
 	}
 	
-	protected void addCmdToValidList(IConsoleCommandListener iccl, String strUniqueCmdIdNew, String strSimpleCmdIdNew, boolean bSkipSortCheck){
+	protected void addCmdToValidList(IReflexFillCfg irfcOwner, String strUniqueCmdIdNew, String strSimpleCmdIdNew, boolean bSkipSortCheck){
 //		String strConflict=null;
 		
-		if(iccl==null){
+		if(irfcOwner==null){
 			throw new PrerequisitesNotMetException("listener reference cannot be null");
 		}
 			
@@ -1551,7 +1554,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				strComment=strUniqueCmdIdNew.substring(strBaseCmdNew.length()).trim();
 			}
 			
-			CommandData cmddNew = new CommandData(iccl, strBaseCmdNew, strSimpleCmdIdNew, strComment);
+			CommandData cmddNew = new CommandData(irfcOwner, strBaseCmdNew, strSimpleCmdIdNew, strComment);
 			
 			/**
 			 * conflict check, will discard in case it is identical origin

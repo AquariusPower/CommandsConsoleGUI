@@ -32,13 +32,17 @@ import java.lang.management.ManagementFactory;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class DebugI implements IConsoleCommandListener{
+public class DebugI implements IReflexFillCfg, IConsoleCommandListener{
 //	private ConsoleCommands	cc;
 	
 	/**
@@ -137,5 +141,10 @@ public class DebugI implements IConsoleCommandListener{
 			i2=iPutABreakPointHere;
 			iPutABreakPointHere=i2;
 		}
+	}
+
+	@Override
+	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 	}
 }

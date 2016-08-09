@@ -65,13 +65,13 @@ DONE:
 	= toggle run console commands in background (with console closed)
 	= commands setup value can be retrieved like: ${&consoleHeight}
 	= transform TimedDelay main value into varible like BoolTogglers!
+	+ navigate thru words with ctrl+left/right
 
 DOING:
 	... SeparateGUI class from Commands Management, independent from Lemur and JME, so can be used even on a text console or 2D application etc.
 	... SeparateGUI class from Lemur, so other GUI can use the same abstract class to implement a console GUI.
 
 TODO.FastToImplement:
-	+ reflexfill owner instead of cmdlistener. 
 	+ Auto complete with aliases if line begins with alias token.
 	+ /bind [--list]|[<key> <cmd>]; simplify key to accept lowercase and be as shortest as possible
 	+ /while stores subsequent commands on array for repeating til WhileEnd. Nestable too.
@@ -83,7 +83,6 @@ TODO.FastToImplement:
 	
 TODO.TimeConsuming:
 	.Good
-	+ navigate thru words with ctrl+left/right
 	+ BitmapFontBkgColor.shiftRightLeftSelect.inputField
 	+ ListboxEntry(btn)FontColorWarnExceptionSelectHK
 	+ Separate scripting commands in another class, so they can be fully disabled by not instancing it.
