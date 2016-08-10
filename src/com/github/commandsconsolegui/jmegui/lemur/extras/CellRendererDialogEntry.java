@@ -28,6 +28,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.github.commandsconsolegui.jmegui.lemur.extras;
 
 import java.util.Map.Entry;
+import java.util.Vector;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
@@ -38,6 +39,7 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
+import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -46,6 +48,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.font.LineWrapMode;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Button.ButtonAction;
@@ -98,7 +101,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			;
 		}
 		
-		protected static BoolTogglerCmdField btgBugFixGapForListBoxSelectorArea;
+		protected static BoolTogglerCmdField btgNOTWORKINGBugFixGapForListBoxSelectorArea;
 		
 		protected Button	btnText;
 		protected Button	btnTree;
@@ -164,13 +167,13 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			 * all other can come here too, even ones related to each instance,
 			 * just put them outside the static ones block.
 			 */
-			if(Cell.btgBugFixGapForListBoxSelectorArea==null){
+			if(Cell.btgNOTWORKINGBugFixGapForListBoxSelectorArea==null){
 				/**
 				 * Will be linked to the 1st instance of this class, 
 				 * no problem as it will be a global.
 				 */
-				Cell.btgBugFixGapForListBoxSelectorArea = 
-					new BoolTogglerCmdField(this,true).setCallNothingOnChange();
+				Cell.btgNOTWORKINGBugFixGapForListBoxSelectorArea = 
+					new BoolTogglerCmdField(this,false).setCallNothingOnChange();
 			}
 			
 			this.setName(strPrefix+"MainContainer");
@@ -179,7 +182,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			this.dled=dledToSet;
 			
 //			cntrBase = (Container)bugFix(0);
-			cntrBase = bugFix(Container.class, btgBugFixGapForListBoxSelectorArea);
+			cntrBase = bugFix(Container.class, btgNOTWORKINGBugFixGapForListBoxSelectorArea);
 			
 			btnTree = createButton("Tree", "?", cntrBase, Position.West);
 			btnTree.addCommands(ButtonAction.Click, ctt);
@@ -294,17 +297,20 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		@SuppressWarnings("unchecked")
 		@Override
 		public <BFR> BFR bugFix(Class<BFR> clReturnType, BoolTogglerCmdField btgBugFixId,	Object... aobjCustomParams) {
-			if(btgBugFixId==btgBugFixGapForListBoxSelectorArea){
+			if(btgBugFixId==btgNOTWORKINGBugFixGapForListBoxSelectorArea){
 //				MiscI.i().assertSameClass(Container.class,clReturnType);
 				Container cntr=null;
-				if(btgBugFixGapForListBoxSelectorArea.b()){
+				if(btgNOTWORKINGBugFixGapForListBoxSelectorArea.b()){ //TODO the fix is not working anymore
 					/**
 					 * this requires that all childs (in this case buttons) have their style background
 					 * color transparent (like alpha 0.5f) or the listbox selector will not be visible below them...
 					 */
 					// same layout as the cell container
 					cntr = new Container(new BorderLayout(), assignedCellRenderer.strStyle);
-					cntr.setName("bugfixGap"); //when mouse is over a cell, if the ListBox->selectorArea has the same world Z value of the button, it may be ordered before the button on the raycast collision results at PickEventSession.setCurrentHitTarget(ViewPort, Spatial, Vector2f, CollisionResult) line: 262	-> PickEventSession.cursorMoved(int, int) line: 482 
+//					Vector3f v3fSize = new Vector3f(this.getPreferredSize());
+//					v3fSize.z=LemurMiscHelpersStateI.fPreferredThickness*2f;
+//					LemurMiscHelpersStateI.i().setGrantedSize(cntr, v3fSize, true);
+					cntr.setName(btgNOTWORKINGBugFixGapForListBoxSelectorArea.getSimpleCmdId()); //when mouse is over a cell, if the ListBox->selectorArea has the same world Z value of the button, it may be ordered before the button on the raycast collision results at PickEventSession.setCurrentHitTarget(ViewPort, Spatial, Vector2f, CollisionResult) line: 262	-> PickEventSession.cursorMoved(int, int) line: 482 
 					addChild(cntr, Position.Center);
 				}else{
 					cntr = this;

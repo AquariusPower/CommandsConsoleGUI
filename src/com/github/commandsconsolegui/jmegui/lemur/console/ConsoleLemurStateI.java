@@ -36,7 +36,9 @@ import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGUII;
+import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
+import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI.CompositeControl;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
@@ -303,14 +305,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		
 		// main container
 		setContainerMain(new Container(new BorderLayout(), strStyle));
-//		LemurFocusHelperI.i().addFocusChangeListener(ctnrConsole);
-//		int iMargin=2;
-//		v3fConsoleSize = new Vector3f(
-//			v3fApplicationWindowSize.x -(iMargin*2),
-//			(v3fApplicationWindowSize.y * fConsoleHeightPerc) -iMargin,
-//			0); //TODO why Z shouldnt be 0? changed to 0.1 and 1, but made no difference.
-		getContainerConsole().setPreferredSize(v3fConsoleSize); //setSize() does not work well..
-//		getContainerConsole().setSize(v3fConsoleSize);
+		LemurMiscHelpersStateI.i().setGrantedSize(getContainerConsole(), v3fConsoleSize, true);
 
 		/**
 		 * TOP ELEMENT =================================================================
@@ -322,7 +317,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		// console stats
 		lblStats = new Label("Console stats.",strStyle);
 		lblStats.setColor(new ColorRGBA(1,1,0.5f,1));
-		lblStats.setPreferredSize(new Vector3f(v3fConsoleSize.x*0.75f,1,0));
+		LemurMiscHelpersStateI.i().setGrantedSize(lblStats, v3fConsoleSize.x*0.75f, 1f, false); //TODO y=1f so it will expand?
 		fStatsHeight = MiscJmeI.i().retrieveBitmapTextFor(lblStats).getLineHeight();
 		getContainerStatsAndControls().addChild(lblStats,0,0);
 		
@@ -343,7 +338,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		
 		for(Button btn:abu){
 			btn.setTextHAlignment(HAlignment.Center);
-			//BUG buttons do not obbey this: btn.setPreferredSize(new Vector3f(50,1,0));
+			//TODO why buttons do not obbey this preferred size 50,1,0?
 			btn.addClickCommands(new ButtonClick());
 			DialogMouseCursorListenerI.i().addDefaultCommands(btn);
 			getContainerStatsAndControls().addChild(btn,0,++iButtonIndex);
@@ -517,7 +512,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 
 	@Override
 	public ConsoleLemurStateI setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines) {
-		getHintBox().setPreferredSize(v3fBoxSizeXY);
+		LemurMiscHelpersStateI.i().setGrantedSize(getHintBox(), v3fBoxSizeXY, false);
 		getHintBox().setVisibleItems(iVisibleLines);
 		return this;
 	}
@@ -939,7 +934,11 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 			}else
 			if(source.equals(btnPaste)){
 				editPasteFromClipBoard();
+			}else{
+				return; //to not make sound mainly 
 			}
+			
+			AudioUII.i().play(EAudio.ReturnChosen);
 		}
 	}
 	
@@ -950,7 +949,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	
 	@Override
 	public void setContainerConsolePreferredSize(Vector3f v3f) {
-		getContainerConsole().setPreferredSize(v3f);
+		LemurMiscHelpersStateI.i().setGrantedSize(getContainerConsole(), v3f, true);
 	}
 	@Override
 	public void addRemoveContainerConsoleChild(boolean bAdd, Node pnlChild){

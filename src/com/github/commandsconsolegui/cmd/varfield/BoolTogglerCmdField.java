@@ -27,14 +27,12 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import java.util.ArrayList;
-import java.util.concurrent.Callable;
-
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.CallQueueI;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MsgI;
@@ -64,7 +62,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 
 	protected String	strReflexFillCfgCodePrefixVariant;
 	protected boolean bDoCallOnChange = true;
-	protected Callable<Boolean>	caller;
+	protected CallableX	caller;
 	protected boolean	bConstructed;
 	
 	public static void configure(IHandleExceptions ihe){
@@ -242,7 +240,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 						MsgI.i().warn("null caller for "+this.getReport(), this);
 //						throw new PrerequisitesNotMetException("null caller for "+this.getReport());
 					}else{
-						CallQueueI.i().appendCall(this.caller);
+						CallQueueI.i().addCall(this.caller);
 					}
 				}
 			}
@@ -282,7 +280,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 //		return null;
 //	}
 	
-	public BoolTogglerCmdField setCallOnChange(Callable<Boolean> caller){
+	public BoolTogglerCmdField setCallOnChange(CallableX caller){
 		if(!bDoCallOnChange){
 			// to avoid developer forgot already configured to call nothing
 			throw new PrerequisitesNotMetException("was set to call nothing already!",this,getHelp());

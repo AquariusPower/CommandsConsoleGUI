@@ -27,6 +27,9 @@
 
 package com.github.commandsconsolegui.jmegui.lemur.console;
 
+import java.util.ArrayList;
+import java.util.concurrent.Callable;
+
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
@@ -37,6 +40,8 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
+import com.github.commandsconsolegui.misc.CallQueueI;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -68,8 +73,12 @@ import com.simsilica.lemur.focus.FocusManagerState;
  *
  */
 public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IWorkAroundBugFix, IConsoleCommandListener {
-	private static LemurMiscHelpersStateI instance = new LemurMiscHelpersStateI(); 
+	private static LemurMiscHelpersStateI instance = new LemurMiscHelpersStateI();
 	public static LemurMiscHelpersStateI i(){return instance;}
+	
+	public final BoolTogglerCmdField	btgBugFixListBoxSelectorArea = 
+		new BoolTogglerCmdField(this,true,"listbox.selectorArea is above listbox entry button and below button's text, so mouse cursor over event only happens when over button text but not over button area without text...")
+			.setCallNothingOnChange();
 	
 	public final BoolTogglerCmdField	btgTextCursorPulseFadeBlinkMode = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 	public final BoolTogglerCmdField	btgTextCursorLarge = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
@@ -309,8 +318,56 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 	@Override
 	public <T> T bugFix(Class<T> clReturnType, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams){
+		if(!btgBugFixId.b())return null;
+		
 		boolean bFixed = false;
 		
+		if(btgBugFixListBoxSelectorArea.isEqualToAndEnabled(btgBugFixId)){
+			ListBox<?> lstbx = (ListBox<?>)aobjCustomParams[0];
+			
+			Node nodeSelectorArea = (Node)lstbx.getChild("selectorArea");
+//			nodeSelectorArea.getLocalTranslation().z-=1f;
+//			nodeSelectorArea.getLocalTranslation().z=0f;
+			for(Spatial spt:nodeSelectorArea.getChildren()){
+				if(spt instanceof Panel){
+					final Panel pnlSelectorArea = (Panel)spt;
+					
+					Geometry geomSelectorArea = (Geometry)pnlSelectorArea.getChild(0);
+//					geomSelectorArea.getLocalRotation().lookAt(new Vector3f(0f,10f,0.1f), Vector3f.UNIT_Y);
+					geomSelectorArea.setLocalScale(1f, 0.1f, 1f); //this makes the selectorArea looks like an underline! quite cool!
+					
+//					CallableX caller = new CallableX() {
+//						@Override
+//						public Boolean call() throws Exception {
+//							Vector3f v3fP = pnlSelectorArea.getPreferredSize();
+//							
+//							float fZMin=0.1f;
+//							
+//							// this check will succeed if the fix below it remains applied.
+//							if(Float.compare(v3fP.z,fZMin)==0){
+//								return true;
+//							}
+//							
+//							v3fP.z=fZMin; //minimal, just to not squash it.
+//							if(pnlSelectorArea.getName()==null){
+//								pnlSelectorArea.setName("Bogus:"+btgBugFixListBoxSelectorArea.getSimpleCmdId());
+//							}
+//							pnlSelectorArea.setSize(v3fP);
+//							pnlSelectorArea.setPreferredSize(v3fP);
+//							pnlSelectorArea.getLocalTranslation().z=0f;
+//							
+//							return false; //next retry will check
+//						}
+//					};
+//					
+//					CallQueueI.i().addCall(caller);
+					
+					break;
+				}
+			}
+			
+			bFixed=true;
+		}else
 		if(btgBugFixUpdateTextFieldTextAndCaratVisibility.isEqualToAndEnabled(btgBugFixId)){
 			/**
 			 * This updates the displayed text cursor position.
@@ -564,15 +621,26 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		boolean bCommandWorked = false;
 		
 		if(
-			cc.checkCmdValidity(this,scfCheckLemur,
-				"[fNewZSize] go thru all lemur elemets active on the GUI node to check if they are "
-				+"all properly configured."
+			cc.checkCmdValidity(this,scfCheckLemur, 
+				"[strName] if name is provided, check only the spatials matching it"
+//				"[fNewZSize] go thru all lemur elemets active on the GUI node to check if they are "
+//				+"all properly configured."
 //				+"The option will only modify Z thickness if it is 0.0f."
 			)
 		){
-			Float fNewZSize = cc.getCurrentCommandLine().paramFloat(1);
+//			Float fNewZSize = cc.getCurrentCommandLine().paramFloat(1);
+			String strName = cc.getCurrentCommandLine().paramString(1);
 			
-			checkElementsRecursive(GlobalGUINodeI.i(), fNewZSize);
+			Spatial spt = GlobalGUINodeI.i();
+			
+			if(strName!=null){
+				spt=GlobalGUINodeI.i().getChild(strName);
+				if(spt==null)cc.dumpWarnEntry("spatial not found with name: "+strName);
+			}
+			
+			if(spt!=null){
+				checkElementsRecursive(spt, null);//fNewZSize);
+			}
 			
 			bCommandWorked = true;
 		}else
@@ -589,22 +657,38 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		Float z=null;
 		Float zP=null;
 		
-		if(spt instanceof Panel){
-			Panel panel = (Panel)spt;
+		Panel panel = (spt instanceof Panel) ? (Panel)spt : null;
+		
+		if(panel!=null){
+			Vector3f v3fSize = panel.getSize();
+			Vector3f v3fPrefSize = panel.getPreferredSize();
 			
-			Vector3f v3f = panel.getSize();
-			z=v3f.z;
-			if(fNewZSize!=null){// && v3f.z==0.0f){
-				v3f.z=fNewZSize;
-				panel.setSize(v3f);
+			if(Float.compare(v3fSize.z,0.0f)==0 && Float.compare(v3fPrefSize.z,0.0f)==0){
+				GlobalCommandsDelegatorI.i().dumpProblemEntry(
+//					new InvalidAttributesException(
+					"lemur element "+panel.getClass().getSimpleName()+"(name)="+panel.getName()
+						+" thickness is squashed (z=0.0)",
+					panel.getClass().getName(),
+					panel,
+					"style:"+panel.getStyle(),
+					"size:"+panel.getSize(),
+					"prefSize:"+panel.getPreferredSize(),
+					panel.getElementId(),
+					panel.getName(),
+					panel.getParent());
 			}
 			
-			Vector3f v3fP = panel.getPreferredSize();
-			zP=v3fP.z;
-			if(v3fP!=null){
-				if(fNewZSize!=null){// && v3fP.z==0.0f){
-					v3fP.z=fNewZSize;
-					panel.setPreferredSize(v3fP);
+			z=v3fSize.z;
+			if(fNewZSize!=null && Float.compare(v3fSize.z,0.0f)==0 ){
+				v3fSize.z=fNewZSize;
+				panel.setSize(v3fSize);
+			}
+			
+			zP=v3fPrefSize.z;
+			if(v3fPrefSize!=null){
+				if(fNewZSize!=null && Float.compare(v3fPrefSize.z,0.0f)==0 ){
+					v3fPrefSize.z=fNewZSize;
+					setGrantedSize(panel,v3fPrefSize,false);
 				}
 			}
 			
@@ -622,7 +706,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 				+"zP="+(zP==null?zP:MiscI.i().fmtFloat(zP))+";"
 				+"zL="+MiscI.i().fmtFloat(zL)+";"
 				+"zW="+MiscI.i().fmtFloat(zW)+";"
-				+""+spt.getClass().getSimpleName()+"(name)="+spt.getName()+";"
+				+elementInfo(spt,false)+";"
 			);
 		
 		if(spt instanceof Node){
@@ -633,4 +717,104 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		}
 	}
 	
+	public String elementInfo(Spatial spt, boolean bShowParentTreeOnNullName){
+		if(spt.getName()==null && bShowParentTreeOnNullName){
+			ArrayList<Spatial> aspt = MiscJmeI.i().getParentListFrom(spt,true);
+			String str="";
+			for(Spatial sptParent:aspt){
+				if(!str.isEmpty())str+=" <- ";
+				str+=sptParent.getClass().getSimpleName()+"(name)='"+sptParent.getName()+"'";
+			}
+			
+			return str;
+		}
+		
+		return spt.getClass().getSimpleName()+"(name)='"+spt.getName()+"'";
+	}
+	
+//	public static final float fPreferredThickness = 5f; //thickness z=5f to distinguish what was set by this library
+	public static final float fPreferredThickness = 1f; //thickness z=1f to match lemur one and do not mess with its calculations, TODO try to collect it from lemur...
+	Vector3f v3fMinSize=new Vector3f(10f,10f,fPreferredThickness); 
+	
+	/**
+	 * see {@link #setGrantedSize(Panel, Vector3f, boolean)}
+	 * 
+	 * @param pnl
+	 * @param fX
+	 * @param fY
+	 * @param bEnsureSizeNow
+	 * @return
+	 */
+	public Vector3f setGrantedSize(Panel pnl, float fX, float fY, boolean bEnsureSizeNow){
+		return setGrantedSize(pnl, new Vector3f(fX,fY,-1), bEnsureSizeNow); //z=-1 will be fixed
+	}
+	/**
+	 * Sets size properly, acurately, precisely,
+	 * without pitfalls.
+	 * Make it sure the thickness is correct (not 0.0f).
+	 * 
+	 * @param pnl
+	 * @param v3fSize
+	 * @param bEnsureSizeNow this means that the Preferred size will be used now!
+	 * @return
+	 */
+	public Vector3f setGrantedSize(final Panel pnl, final Vector3f v3fSize, final boolean bEnsureSizeNow){
+		if(v3fSize.x<v3fMinSize.x)v3fSize.x=v3fMinSize.x;
+		if(v3fSize.y<v3fMinSize.y)v3fSize.y=v3fMinSize.y;
+		if(v3fSize.z<v3fMinSize.z)v3fSize.z=v3fMinSize.z;
+		
+		Vector3f v3fP = pnl.getPreferredSize();
+		if(v3fSize.x<v3fP.x)v3fSize.x=v3fP.x;
+		if(v3fSize.y<v3fP.y)v3fSize.y=v3fP.y;
+		v3fSize.z=v3fP.z;
+		//if(v3fSize.z<v3fP.z)v3fSize.z=v3fP.z;
+		
+		pnl.setPreferredSize(v3fSize); 
+		
+//		pnl.setSize(v3fSize); //pnl.getPreferredSize(); pnl.getSize();
+//		
+//		// check on the next frame, so lemur had time to make its calculations.
+//		CallableX caller = new CallableX() {
+//			@Override
+//			public Boolean call() throws Exception {
+//				boolean bUsePreferred = bEnsureSizeNow;
+//				
+//				if(!bUsePreferred && pnl.getSize().distance(v3fSize)>0.01f){
+//					GlobalCommandsDelegatorI.i().dumpDevWarnEntry(
+//						"setSize() failed, using setPreferredSize() for "+elementInfo(pnl,true), 
+//						pnl,
+//						pnl.getClass().getName(),
+//						pnl.getName(),
+//						"size="+pnl.getSize(),
+//						"requestedSize="+v3fSize);
+//					
+//					bUsePreferred=true;
+//				}
+//				
+//				if(bUsePreferred){
+//					//TODO double/tripple try setSize() before preferred?
+//					pnl.setPreferredSize(v3fSize); 
+//					//TODO check after preferred?
+//					
+//					return true; //cuz could also return false here for some reason
+//				}
+//				
+//				return true;
+//			}
+//		};
+//		CallQueueI.i().addCall(caller.setAsPrepend(),bEnsureSizeNow);
+		
+//		if(bForcedSizeNow){
+//			try {
+//				caller.call();
+//			} catch (Exception e) {
+//				
+//				e.printStackTrace();
+//			}
+//		}else{
+//			CallQueueI.i().addCall(caller);
+//		}
+		
+		return v3fSize;
+	}
 }

@@ -52,6 +52,7 @@ import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleUII;
 import com.github.commandsconsolegui.misc.CallQueueI;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDbgKey;
@@ -231,7 +232,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	protected boolean	bAddEmptyLineAfterCommand = true;
 //	protected IConsoleUI	icui;
 	protected boolean bStartupCmdQueueDone = false; 
-	protected CharSequence	strReplaceTAB = "  ";
+//	protected CharSequence	strReplaceTAB = "  ";
 	protected int	iCopyFrom = -1;
 	protected int	iCopyTo = -1;
 	protected int	iCmdHistoryCurrentIndex = 0;
@@ -315,7 +316,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				rfcfg.setSuffix("Toggle");
 			}
 			
-			rfcfg.setAsCommandToo(true);
+			if(rfcfg!=null)rfcfg.setAsCommandToo(true);
 		}else
 		if(rfcv.getClass().isAssignableFrom(StringCmdField.class)){
 			if(strFinalCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
@@ -329,7 +330,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				rfcfg = new ReflexFillCfg(rfcv);
 			}
 			
-			rfcfg.setAsCommandToo(true);
+			if(rfcfg!=null)rfcfg.setAsCommandToo(true);
 		}
 //		else
 //		if(rfcv.getClass().isAssignableFrom(TimedDelayVarField.class)){
@@ -347,6 +348,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //				rfcfg.setPrefixInstancedClass(rfcv.getOwner().getClass().getSimpleName());
 				rfcfg.setFirstLetterUpperCase(true);
 			}
+		}else{
+			dumpDevWarnEntry("unable to create a cfg for variant: "+rfcv);
 		}
 		
 		return rfcfg;
@@ -661,7 +664,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		/**
 		 * postponed to let configurations run smoothly
 		 */
-		CallQueueI.i().appendCall(new Callable<Boolean>() {
+		CallQueueI.i().addCall(new CallableX() {
 			@Override
 			public Boolean call() throws Exception {
 				if(!CommandsDelegator.this.bInitialized)return false; //wait its initialization
@@ -896,20 +899,25 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			
 			Integer iStackLimit = ccl.paramInt(2,true);
 			
+			ArrayList<ImportantMsgData> aimsg = new ArrayList<ImportantMsgData>(aimBufferList);
+			
+			Collections.sort(aimsg, ImportantMsgData.cmpFirstOcurrenceCreationTime());
+			
 //			for(ImportantMsg imsg:astrImportantMsgBufferList){
-			for(int i=0;i<aimBufferList.size();i++){
+			for(int i=0;i<aimsg.size();i++){
 				if(iIndex!=null && iIndex.intValue()!=i)continue;
 				
-				ImportantMsgData imsg = aimBufferList.get(i);
+				ImportantMsgData imsg = aimsg.get(i);
 				if(iIndex==null && !containsFilterString(imsg.strMsg,strFilter))continue;
 				
 //				dumpSubEntry(""+i+": "+imsg.strMsg);
-				dumpSubEntry(""+i+": "+imsg.getDumpEntryData().getLineFinal(false));
 				if(iIndex!=null && (imsg.ex!=null||imsg.aste!=null)){
-					dumpExceptionEntry(imsg,iStackLimit==null?0:iStackLimit);
+					dumpExceptionEntry(imsg, iStackLimit==null?0:iStackLimit);
+				}else{
+					dumpSubEntry(""+i+": "+imsg.getDumpEntryData().getLineFinal(false));
 				}
 			}
-			dumpSubEntry("Total: "+aimBufferList.size());
+			dumpSubEntry("Total: "+aimsg.size());
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(icclPseudo,scfQuit,"the application")){
@@ -1114,7 +1122,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			if(astr.length>=3){
 				alias.strAliasId=astr[1];
 				if(hasVar(alias.strAliasId)){
-					dumpErrorEntry("Alias identifier '"+alias.strAliasId+"' conflicts with existing variable!");
+					dumpUserErrorEntry("Alias identifier '"+alias.strAliasId+"' conflicts with existing variable!");
 					return ECmdReturnStatus.FoundAndFailedGracefully;
 				}
 				
@@ -1179,6 +1187,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		if(de.isImportant()){
 //			addImportantMsgToBuffer(de.getType(),de.getKey(),de.getException());
+			/**
+			 * if this stack is already from an important message, it will 
+			 * just refresh that message on the list. 
+			 */
 			addImportantMsgToBuffer(de);
 		}
 		
@@ -1194,17 +1206,21 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			return;
 		}
 		
-		if(!de.bDumpToConsole)return;
+		dumpEntryToConsole(de);
+	}
+	
+	protected void dumpEntryToConsole(DumpEntryData de){
+		if(!de.isDumpToConsole())return;
 		
 		ArrayList<String> astrDumpLineList = new ArrayList<String>();
 //		if(de.getLineOriginal().isEmpty()){
-		if(de.getLineFinal(false).isEmpty()){
+		if(de.getLineFinal().isEmpty()){
 			astrDumpLineList.add("");
 		}else{
-			de.setLineBaking(de.getLineFinal(false).replace("\t", strReplaceTAB));
+			de.setLineBaking(de.getLineFinal().replace("\t", MiscI.i().getTabAsSpaces()));
 			de.setLineBaking(de.getLineBaking().replace("\r", "")); //removes carriage return
 			
-			if(de.bApplyNewLineRequests){
+			if(de.isApplyNewLineRequests()){
 				de.setLineBaking(de.getLineBaking().replace("\\n","\n")); //converts newline request into newline char
 			}else{
 				de.setLineBaking(de.getLineBaking().replace("\n","\\n")); //disables any newline char without losing it
@@ -1277,7 +1293,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				}
 			}
 			
-			applyDumpEntryOrPutToSlowQueue(de.bUseSlowQueue, strPart);
+			applyDumpEntryOrPutToSlowQueue(de.isUseSlowQueue(), strPart);
 		}
 		
 	}
@@ -1337,32 +1353,56 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //	private void addImportantMsgToBuffer(String strMsgType,String strMsgKey,StackTraceElement[] aste){
 //		addImportantMsgToBuffer(strMsgType, new ImportantMsg(strMsgKey,null,aste));
 //	}
-	private void addImportantMsgToBuffer(String strMsgType,ImportantMsgData imsg){
-		String str="["+strMsgType+"] "+imsg.strMsg;
-		for(ImportantMsgData aimOther:aimBufferList){
-			if(imsg.identicalTo(aimOther)){
-				/**
-				 * so, being re-added it will be refreshed and remain longer on the list
-				 */
-				aimBufferList.remove(aimOther);
+	public final IntLongVarField ilvImportantMessagesBufferMaxSize = new IntLongVarField(this, 1000, "");
+	private void addImportantMsgToBuffer(String strMsgType,ImportantMsgData imsgNew){
+		String str="["+strMsgType+"] "+imsgNew.strMsg;
+		for(ImportantMsgData imsg:aimBufferList.toArray(new ImportantMsgData[0])){
+			if(imsgNew.identicalTo(imsg)){
+				imsgNew.applyFirstOcurrenceCreationTimeFrom(imsg);
+				aimBufferList.remove(imsg);
 				break;
 			}
 		}
-//		if(aimBufferList.contains(imsg)){ //that object overriden hashcode/equals is used at contains() 
-//			/**
-//			 * so, being re-added it will be refreshed and remain longer on the list
-//			 */
-//			aimBufferList.remove(imsg);
-//		}
 		
-		aimBufferList.add(imsg);
+		aimBufferList.add(imsgNew.updateBufferedTime());
 		
-		if(aimBufferList.size()>1000)aimBufferList.remove(0);
+		Collections.sort(aimBufferList, ImportantMsgData.cmpBufferedTime());
+		while(aimBufferList.size()>ilvImportantMessagesBufferMaxSize.intValue()){
+			aimBufferList.remove(0);
+		}
 	}
 	
-	public void dumpErrorEntry(String strMessageKey, Object... aobj){
-		String strType = "ERROR";
-		Exception ex = new Exception("(This is just a "+strType+" stacktrace) "+strMessageKey);
+	/**
+	 * A problem is something that may make other parts of the application malfunction.
+	 * It will not break the application, but will make it misbehave.
+	 * It can but shouldnt be ignored.
+	 * 
+	 * @param strMessageKey
+	 * @param aobj
+	 */
+	public void dumpProblemEntry(String strMessageKey, Object... aobj){
+		String strType = "PROBLEM";
+		Exception ex = new Exception("(This is a "+strType+" stacktrace) "+strMessageKey);
+		ex.setStackTrace(Thread.currentThread().getStackTrace());
+		dumpEntry(new DumpEntryData()
+			.setImportant(strType,strMessageKey,ex)
+			.setPrintStream(System.err)
+			.setDumpToConsole(btgShowWarn.get())
+			.setDumpObjects(aobj)
+			.setKey(strErrorEntryPrefix+strMessageKey)
+		);
+	}
+	
+	/**
+	 * User error is something the user did and can be fixed by him/her without having
+	 * to modify this code.
+	 * 
+	 * @param strMessageKey
+	 * @param aobj
+	 */
+	public void dumpUserErrorEntry(String strMessageKey, Object... aobj){
+		String strType = "USER_ERROR";
+		Exception ex = new Exception("(This is a "+strType+" stacktrace) "+strMessageKey);
 		ex.setStackTrace(Thread.currentThread().getStackTrace());
 //		addImportantMsgToBuffer(strType,str,ex);
 		dumpEntry(new DumpEntryData()
@@ -1390,8 +1430,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			.setApplyNewLineRequests(false)
 			.setDumpToConsole(btgShowDeveloperWarn.get())
 			.setUseSlowQueue(false)
-			.setKey(strDevWarnEntryPrefix+strMessageKey)
 			.setDumpObjects(aobj)
+			.setKey(strDevWarnEntryPrefix+strMessageKey)
 		);
 	}
 	
@@ -1413,11 +1453,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //			Misc.i().getSimpleTime(btgShowMiliseconds.get())+strDevInfoEntryPrefix+str);
 	}
 	
-	protected void dumpExceptionEntry(ImportantMsgData imsg, Integer iShowStackElementsCount, Object... aobj) {
+	protected void dumpExceptionEntry(ImportantMsgData imsg, Integer iShowStackElementsCount) {
 		/**
-		 * it is coming from the message buffer, so will not readd it...
+		 * it is coming from the message buffer, so will not read it...
 		 */
-		dumpExceptionEntry(imsg.ex, imsg.aste, iShowStackElementsCount, false, aobj);
+		dumpExceptionEntry(imsg.ex, imsg.aste, iShowStackElementsCount, false, imsg.getDumpEntryData().getCustomObjects());
 	}
 	public void dumpExceptionEntry(Exception ex, Object... aobj){
 		dumpExceptionEntry(ex, null, null, true, aobj);
@@ -1446,18 +1486,18 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			psInfo = psStack = System.out;
 		}
 		
-//		dumpEntry(false, btgShowException.get(), false, 
-//			strTime+strExceptionEntryPrefix+ex.toString());
 		dumpEntry(new DumpEntryData()
 			.setImportant("Exception",ex.toString(),ex)
 			.setPrintStream(psInfo) //this is good to show the time at terminal
 			.setApplyNewLineRequests(false)
 			.setDumpToConsole(btgShowException.get())
 			.setDumpObjects(aobj)
+			.setShowDumpObjects(iShowStackElementsCount!=null)
 			.setUseSlowQueue(false)
-//			.setKey(strTime+strExceptionEntryPrefix+ex.toString()));
-			.setKey(strExceptionEntryPrefix+ex.toString()));
-		
+			.setApplyNewLineRequests(true)
+			.setKey(strExceptionEntryPrefix+ex.toString())
+		);
+			
 		if(iShowStackElementsCount!=null){
 			if(asteStackOverride==null)asteStackOverride=ex.getStackTrace();
 			
@@ -1469,6 +1509,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 					.setApplyNewLineRequests(true)
 					.setDumpToConsole(true)
 					.setUseSlowQueue(false)
+					.setShowTime(false)
 					.setKey(strSubEntryPrefix+ste.toString()));
 			}
 		}
@@ -2487,7 +2528,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 */
 	public boolean varSet(VarIdValueOwnerData vivo, boolean bSave) {
 		if(getAlias(vivo.strId)!=null){
-			dumpErrorEntry("Variable identifier '"+vivo.strId+"' conflicts with existing alias!");
+			dumpUserErrorEntry("Variable identifier '"+vivo.strId+"' conflicts with existing alias!");
 			return false;
 		}
 		
@@ -2893,7 +2934,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	protected void showHelpForFailedCommand(String strFullCmdLine){
-		if(validateCommand(strFullCmdLine,true)){
+//		if(validateCommand(strFullCmdLine,true)){
+		if(validateCommand(strFullCmdLine,false)){
 //			addToExecConsoleCommandQueue(CMD_HELP+" "+extractCommandPart(strFullCmdLine,0));
 			cmdShowHelp(extractCommandPart(strFullCmdLine,0));
 		}else{
@@ -3148,7 +3190,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		DebugI.i().configure(this);
 		MiscI.i().configure(this);
-		ReflexHacks.i().configure(this, this);
+//		ReflexHacks.i().configure(this, this);
+		ReflexHacks.i().configure(this);
 //		SingleInstanceState.i().initialize(sapp, this);
 		
 //		CommandsBackgroundState.i().configure(sapp, icui, this);
@@ -3161,7 +3204,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		/**
 		 * postponed to let configuration run smoothly
 		 */
-		CallQueueI.i().appendCall(new Callable<Boolean>() {
+		CallQueueI.i().addCall(new CallableX() {
 			@Override
 			public Boolean call() throws Exception {
 				return initialize();
@@ -3177,7 +3220,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		tdDumpQueuedSlowEntry.updateTime();
 		
-		Callable<Boolean> call = new Callable<Boolean>() {
+		CallableX call = new CallableX() {
 			@Override
 			public Boolean call() throws Exception {
 				icui().updateEngineStats();
@@ -3187,7 +3230,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		btgEngineStatsView.setCallOnChange(call);
 		btgEngineStatsFps.setCallOnChange(call);
 		
-		btgConsoleCpuRest.setCallOnChange(new Callable<Boolean>() {
+		btgConsoleCpuRest.setCallOnChange(new CallableX() {
 			@Override
 			public Boolean call() throws Exception {
 				tdLetCpuRest.setActive(btgConsoleCpuRest.b());

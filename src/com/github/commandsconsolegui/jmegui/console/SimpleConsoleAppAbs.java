@@ -27,8 +27,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.github.commandsconsolegui.jmegui.console;
 
-import java.util.concurrent.Callable;
-
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.extras.SingleAppInstanceI;
@@ -43,6 +41,7 @@ import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.MouseCursorListenerAbs;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -83,7 +82,7 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 		CommandsBackgroundStateI.i().configure(new CommandsBackgroundStateI.CfgParm());
 		
 		FpsLimiterStateI.i().configure(new FpsLimiterStateI.CfgParm());
-		btgFpsLimit.setCallOnChange(new Callable<Boolean>() {
+		btgFpsLimit.setCallOnChange(new CallableX() {
 			@Override
 			public Boolean call() throws Exception {
 				FpsLimiterStateI.i().setEnabledRequest(btgFpsLimit.b());

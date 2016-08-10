@@ -29,7 +29,6 @@ package com.github.commandsconsolegui.jmegui.lemur.extras;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.Callable;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
@@ -44,8 +43,9 @@ import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI.BindKey;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.BasicDialogStateAbs.CfgParm;
 import com.github.commandsconsolegui.misc.CallQueueI;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.input.KeyInput;
@@ -53,8 +53,6 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.simsilica.lemur.Button;
-import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.ListBox;
@@ -200,7 +198,7 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 		Vector3f v3fDiagWindowSize = new Vector3f(v3fApplicationWindowSize);
 		v3fDiagWindowSize.y = sizePercOrPixels(v3fDiagWindowSize.y,cfg.fDialogHeightPercentOfAppWindow);
 		v3fDiagWindowSize.x = sizePercOrPixels(v3fDiagWindowSize.x,cfg.fDialogWidthPercentOfAppWindow);
-		getContainerMain().setPreferredSize(v3fDiagWindowSize);
+		LemurMiscHelpersStateI.i().setGrantedSize(getContainerMain(), v3fDiagWindowSize, false);
 		
 		///////////////////////// NORTH (title + info/help)
 		cntrNorth = new Container(new BorderLayout(), strStyle);
@@ -211,7 +209,7 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 		 */
 		float fInfoHeightPixels = sizePercOrPixels(v3fDiagWindowSize.y, cfg.fInfoHeightPercentOfDialog);
 		v3fNorthSize.y = fInfoHeightPixels;
-		getNorthContainer().setPreferredSize(v3fNorthSize);
+		LemurMiscHelpersStateI.i().setGrantedSize(getNorthContainer(), v3fNorthSize, false);
 		
 		//title 
 		lblTitle = new Label(strTitle,strStyle);
@@ -246,6 +244,8 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 		
 //		vlstrEntriesList.add("(Empty list)");
 		lstbxEntriesToSelect.setModel((VersionedList<DialogListEntryData<T>>)vlVisibleEntriesList);
+		
+//		LemurMiscHelpersStateI.i().bugFix(null, LemurMiscHelpersStateI.i().btgBugFixListBoxSelectorArea, lstbxEntriesToSelect);
 		
 		/**
 		 * TODO entry height should be automatic... may be each entry could have its own height.
@@ -722,6 +722,8 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 			+"puid="+(dledParent==null?"(ROOT)":dledParent.getUId())+", "
 			+"'"+dled.getText()+"'"
 		);
+		
+		LemurMiscHelpersStateI.i().bugFix(null, LemurMiscHelpersStateI.i().btgBugFixListBoxSelectorArea, lstbxEntriesToSelect);
 	}
 	public void selectEntry(DialogListEntryData<T> dledSelectRequested) {
 //		this.dataSelectRequested = data;
@@ -843,7 +845,7 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 		/**
 		 * need to wait it actually get selected
 		 */
-		CallQueueI.i().appendCall(new Callable<Boolean>() {
+		CallQueueI.i().addCall(new CallableX() {
 			@Override
 			public Boolean call() throws Exception {
 				DialogListEntryData<T> dledParent = dledParentTmp;

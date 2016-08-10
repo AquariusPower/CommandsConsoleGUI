@@ -32,6 +32,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.BufferUnderflowException;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
@@ -77,6 +79,24 @@ public class MiscJmeI {
 			sptParentest=sptParentest.getParent();
 		}
 		return (Node)sptParentest; //parent is always Node
+	}
+	
+	/**
+	 * first is the parentest
+	 * 
+	 * @param spt
+	 * @param bIncludeSelf
+	 * @return
+	 */
+	public ArrayList<Spatial> getParentListFrom(Spatial spt, boolean bIncludeSelf){
+		ArrayList<Spatial> aspt = new ArrayList<Spatial>();
+		Spatial sptParent = spt;
+		if(bIncludeSelf)aspt.add(spt);
+		while( (sptParent = sptParent.getParent()) != null ){
+			aspt.add(sptParent);
+		}
+		Collections.reverse(aspt);
+		return aspt;
 	}
 	
 	public void saveImageToFile(com.jme3.texture.Image img, String strFileNameWithoutExt) {

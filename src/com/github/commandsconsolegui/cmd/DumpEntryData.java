@@ -44,19 +44,20 @@ public class DumpEntryData{
 	 * as many usages of DumpEntry may depend on it.
 	 * Maybe extend this class to have other defaults.
 	 */
-	boolean bApplyNewLineRequests = false; //this is a special behavior, disabled by default
-	boolean bDumpToConsole = true;
-	boolean bUseSlowQueue = false;
-//	String strLineOriginal = null;
-	String strLineBaking = null;
-	PrintStream	ps = System.out;
-	Object[]	aobj;
-	String	strType;
-	String	strKey = null;
-	Exception	ex;
-	boolean	bImportant;
-	long	lMilis;
-	boolean	bShowTime = true;
+	private boolean bApplyNewLineRequests = false; //this is a special behavior, disabled by default
+	private boolean bDumpToConsole = true;
+	private boolean bUseSlowQueue = false;
+//private String strLineOriginal = null;
+	private String strLineBaking = null;
+	private PrintStream	ps = System.out;
+	private Object[]	aobjCustom;
+	private String	strType;
+	private String	strKey = null;
+	private Exception	ex;
+	private boolean	bImportant;
+	private long	lMilis;
+	private boolean	bShowTime = true;
+	private boolean	bShowDumpObjects;
 	
 	public DumpEntryData() {
 		lMilis = System.currentTimeMillis();
@@ -76,7 +77,7 @@ public class DumpEntryData{
 		this.bDumpToConsole = bDump;
 		return this;
 	}
-	public boolean isUseQueue() {
+	public boolean isUseSlowQueue() {
 		return bUseSlowQueue;
 	}
 	public DumpEntryData setUseSlowQueue(boolean bUseQueue) {
@@ -87,6 +88,9 @@ public class DumpEntryData{
 //		return strLineOriginal;
 //	}
 	
+	public String getLineFinal() {
+		return getLineFinal(bShowDumpObjects);
+	}
 	public String getLineFinal(boolean bShowObjects) {
 		String str = "";
 		
@@ -96,13 +100,16 @@ public class DumpEntryData{
 		
 		str+=strKey;
 		
-		if(aobj!=null && bShowObjects){
-			for(int i=0;i<aobj.length;i++){
-				Object obj = aobj[i];
-				if(str.equals(strKey)){
-					str+="\n";
-				}
-				str+="\t["+i+"]("+obj.getClass().getName()+":"+obj.toString()+")\n";
+		if(aobjCustom!=null && bShowObjects){
+			for(int i=0;i<aobjCustom.length;i++){
+				Object obj = aobjCustom[i];
+//				if(str.equals(strKey)){
+//				if(i<(aobjCustom.length-1)){
+//					str+="\n";
+//				}
+				
+//				str+="\t["+i+"]("+obj.getClass().getName()+":"+(obj==null?obj:obj.toString())+")\n";
+				str+="\n\t["+i+"]("+(obj==null?null:obj.getClass().getName()+":"+obj.toString())+")";
 			}
 		}
 		
@@ -134,11 +141,11 @@ public class DumpEntryData{
 		return this;
 	}
 	public void sendToPrintStream(){
-		String strOutput=("[CCUI]"+getLineFinal(true).replace("\t","  ")); //remove tabs for better compatibility
+		String strOutput=("[CCUI]"+getLineFinal(true).replace("\t",MiscI.i().getTabAsSpaces())); //remove tabs for better compatibility (mainly with eclipse IDE source link)
 		if(this.ps!=null)this.ps.println(strOutput);
 	}
 	public DumpEntryData setDumpObjects(Object[] aobj) {
-		this.aobj=aobj;
+		this.aobjCustom=aobj;
 		return this;
 	}
 	public DumpEntryData setImportant(String strType, String strKey, Exception ex) {
@@ -169,6 +176,22 @@ public class DumpEntryData{
 	public boolean isShowTime(){
 		return bShowTime;
 	}
+
+	public Object[] getCustomObjects() {
+		return aobjCustom;
+	}
+
+	public boolean isDumpToConsole() {
+		return bDumpToConsole;
+	}
+
+	public DumpEntryData setShowDumpObjects(boolean b) {
+		this.bShowDumpObjects=b;
+		return this;
+	}
 	
+	public boolean isShowDumpObjects(){
+		return bShowDumpObjects;
+	}
 }
 

@@ -27,24 +27,19 @@
 
 package com.github.commandsconsolegui.jmegui.cmd;
 
-import java.util.concurrent.Callable;
-
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
-import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.jmegui.ConditionalStateAbs;
-import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.BasicDialogStateAbs.CfgParm;
-import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.jme3.app.Application;
 
 /**
  * basic state console commands control
@@ -124,7 +119,7 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 		
 		cd().addConsoleCommandListener(this);
 		
-		btgState.setCallOnChange(new Callable<Boolean>() {
+		btgState.setCallOnChange(new CallableX() {
 			@Override
 			public Boolean call() throws Exception {
 				setEnabledRequest(btgState.b());

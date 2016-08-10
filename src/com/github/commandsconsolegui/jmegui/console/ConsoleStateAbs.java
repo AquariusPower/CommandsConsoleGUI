@@ -54,6 +54,7 @@ import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI.CompositeControl;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
+import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 //import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersState;
 import com.github.commandsconsolegui.misc.AutoCompleteI;
@@ -556,14 +557,16 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 		v3fApplicationWindowSize = new Vector3f(
 				app().getContext().getSettings().getWidth(),
 				app().getContext().getSettings().getHeight(),
-				0);
+				LemurMiscHelpersStateI.fPreferredThickness);
 		
 		iMargin=2;
 		v3fConsoleSize = new Vector3f(
 			v3fApplicationWindowSize.x -(iMargin*2),
 			(v3fApplicationWindowSize.y * fConsoleHeightPerc) -iMargin,
-			0); //TODO why Z shouldnt be 0? changed to 0.1 and 1, but made no difference.
+			LemurMiscHelpersStateI.fPreferredThickness);
 	}
+	
+//	protected float fPreferredThickness=10.0f;
 	
 	protected void initializeOnlyTheUIallSteps(){
 		prepareStyle();
@@ -2221,9 +2224,6 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 			float fMinimumHeightGUESSED = fEntryHeightGUESSED*iMinLinesGUESSED;
 			if(fHintHeight<fMinimumHeightGUESSED)fHintHeight=fMinimumHeightGUESSED;
 			setHintBoxSize(new Vector3f(widthForListbox(),fHintHeight,0), iVisibleItems);
-//			lstbxAutoCompleteHint.setPreferredSize(new Vector3f(
-//				);
-//			lstbxAutoCompleteHint.setVisibleItems(iVisibleItems);//astr.size());
 			
 			lineWrapDisableForChildrenOf(lstbxAutoCompleteHint);
 			

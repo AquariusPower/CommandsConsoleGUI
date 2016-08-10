@@ -28,17 +28,20 @@
 package com.github.commandsconsolegui.cmd;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ImportantMsgData{
+public class ImportantMsgData {
 	String strMsg;
 	Exception ex;
 	StackTraceElement[] aste;
 	DumpEntryData de;
+	Long lBufferedTimeNano;
+	Long lFirstOcurrenceCreationTimeNano;
 	
 //	/**
 //	 * for warnings
@@ -78,35 +81,9 @@ public class ImportantMsgData{
 //	}
 		this.ex=de.getException();
 		this.aste=de.getException().getStackTrace();
+		
+		lFirstOcurrenceCreationTimeNano=System.nanoTime();
 	}
-	
-//	@Override
-//	public int hashCode() {
-//		final int prime = 31;
-//		int result = 1;
-//		result = prime * result + Arrays.hashCode(aste);
-//		result = prime * result + ((strMsg == null) ? 0 : strMsg.hashCode());
-//		return result;
-//	}
-//	
-//	@Override
-//	public boolean equals(Object obj) {
-//		if (this == obj)
-//			return true;
-//		if (obj == null)
-//			return false;
-//		if (getClass() != obj.getClass())
-//			return false;
-//		ImportantMsgData other = (ImportantMsgData) obj;
-//		if (!Arrays.equals(aste, other.aste))
-//			return false;
-//		if (strMsg == null) {
-//			if (other.strMsg != null)
-//				return false;
-//		} else if (!strMsg.equals(other.strMsg))
-//			return false;
-//		return true;
-//	}
 	
 	public boolean identicalTo(ImportantMsgData imdOther){
 		if (!strMsg.equals(imdOther.strMsg))return false; //equals() is faster, and such messages will not have case difference...
@@ -117,5 +94,36 @@ public class ImportantMsgData{
 	
 	public DumpEntryData getDumpEntryData(){
 		return de;
+	}
+	
+	public ImportantMsgData updateBufferedTime(){
+		lBufferedTimeNano = System.nanoTime();
+		return this;
+	}
+	
+	public long getBufferedTime() {
+		return lBufferedTimeNano;
+	}
+	
+	public static Comparator<? super ImportantMsgData> cmpFirstOcurrenceCreationTime() {
+		return new Comparator<ImportantMsgData>() {
+			@Override
+			public int compare(ImportantMsgData o1, ImportantMsgData o2) {
+				return o1.lFirstOcurrenceCreationTimeNano.compareTo(o2.lFirstOcurrenceCreationTimeNano);
+			}
+		};
+	}
+
+	public static Comparator<? super ImportantMsgData> cmpBufferedTime() {
+		return new Comparator<ImportantMsgData>() {
+			@Override
+			public int compare(ImportantMsgData o1, ImportantMsgData o2) {
+				return o1.lBufferedTimeNano.compareTo(o2.lBufferedTimeNano);
+			}
+		};
+	}
+
+	public void applyFirstOcurrenceCreationTimeFrom(ImportantMsgData imsg) {
+		this.lFirstOcurrenceCreationTimeNano=imsg.lFirstOcurrenceCreationTimeNano;
 	}
 }

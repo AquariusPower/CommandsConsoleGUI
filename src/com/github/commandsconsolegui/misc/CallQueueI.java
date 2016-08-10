@@ -40,43 +40,81 @@ public class CallQueueI {
 	private static CallQueueI instance = new CallQueueI();
 	public static CallQueueI i(){return instance;}
 	
-	ArrayList<Callable<Boolean>> aCallList = new ArrayList<Callable<Boolean>>();
+	public static abstract class CallableX implements Callable<Boolean>{
+		boolean bPrepend;
+		public CallableX setAsPrepend(){
+			bPrepend=true;
+			return this;
+		}
+	}
+	
+	ArrayList<CallableX> aCallList = new ArrayList<CallableX>();
 	
 	public int update(float fTPF){
 		int i=0;
 		
-		for(Callable<Boolean> caller:new ArrayList<Callable<Boolean>>(aCallList)){
-			try {
-				if(caller.call().booleanValue()){
-					aCallList.remove(caller);
-					i++;
-				}else{
-					appendCall(caller); //will retry
-				}
-			} catch (Exception e) {
-				NullPointerException npe = new NullPointerException("callable exception");
-				npe.initCause(e);
-				throw npe;
-			}
+		for(CallableX caller:new ArrayList<CallableX>(aCallList)){
+			if(runCallerCode(caller))i++;
 		}
 		
 		return i;
 	}
+	
+	private boolean runCallerCode(CallableX caller) {
+		try {
+			if(caller.call().booleanValue()){
+				aCallList.remove(caller);
+				return true;
+			}else{
+				addCall(caller, false); //will retry
+			}
+		} catch (Exception e) {
+			NullPointerException npe = new NullPointerException("callable exception");
+			npe.initCause(e);
+			throw npe;
+		}
+		
+		return false;
+	}
 
-	public synchronized void appendCall(Callable<Boolean> caller) {
-		addCall(caller, false);
+//	/**
+//	 * see {@link #addCall(Callable, boolean)}
+//	 * 
+//	 * @param caller
+//	 */
+//	public synchronized void appendCall(CallableX caller) {
+//		addCall(caller, false);
+//	}
+	
+	/**
+	 * see {@link #addCall(Callable, boolean)}
+	 * 
+	 * @param caller
+	 */
+	public synchronized void addCall(CallableX caller) {
+		addCall(caller,false);
 	}
 	
-	public synchronized void addCall(Callable<Boolean> caller, boolean bPrepend) {
+	/**
+	 * if the caller returns false, it will be retried on the queue.
+	 * 
+	 * @param caller
+	 * @param bPrepend
+	 */
+	public synchronized void addCall(CallableX caller, boolean bTryToRunNow) {
 		if(caller==null)throw new PrerequisitesNotMetException("null caller");
 		
 //	if(aCallList.contains(caller))
-		aCallList.remove(caller);
+		aCallList.remove(caller); //prevent duplicity
 		
-		if(bPrepend){
-			aCallList.add(0,caller);
+		if(bTryToRunNow){
+			runCallerCode(caller);
 		}else{
-			aCallList.add(caller);
+			if(caller.bPrepend){
+				aCallList.add(0,caller);
+			}else{
+				aCallList.add(caller);
+			}
 		}
 	}
 }

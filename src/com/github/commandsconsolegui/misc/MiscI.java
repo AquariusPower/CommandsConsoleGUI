@@ -469,4 +469,8 @@ public class MiscI {
 			throw new PrerequisitesNotMetException("invalid class", cl, clOther);
 		}
 	}
+
+	public String getTabAsSpaces() {
+		return "  ";
+	}
 }

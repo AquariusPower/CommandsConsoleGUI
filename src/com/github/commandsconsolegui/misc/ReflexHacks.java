@@ -35,6 +35,7 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -64,7 +65,7 @@ public class ReflexHacks implements IReflexFillCfg {
 	private static ReflexHacks instance = new ReflexHacks();
 	public static ReflexHacks i(){return instance;}
 	
-	private CommandsDelegator cc;
+//	private CommandsDelegator cc;
 	public final BoolTogglerCmdField	btgAllowHacks = new BoolTogglerCmdField(this,false,null,
 		"Hacks allows for otherwise impossible features, but they may break if targeted classes are updated.").setCallNothingOnChange();
 
@@ -160,12 +161,13 @@ public class ReflexHacks implements IReflexFillCfg {
 	}
 	
 //	public void configure(SimpleApplication sapp, CommandsDelegatorI cc, IHandleExceptions ihe){
-	public void configure(CommandsDelegator cc, IHandleExceptions ihe){
+//	public void configure(CommandsDelegator cc, IHandleExceptions ihe){
+	public void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 //		this.sapp = sapp;
 		
-		if(cc==null)throw  new NullPointerException("invalid instance for "+CommandsDelegator.class.getName());
-		this.cc=cc;
+//		if(cc==null)throw  new NullPointerException("invalid instance for "+CommandsDelegator.class.getName());
+//		this.cc=cc;
 		
 		if(ihe==null)throw  new NullPointerException("invalid instance for "+IHandleExceptions.class.getName());
 		this.ihe=ihe;
@@ -175,7 +177,7 @@ public class ReflexHacks implements IReflexFillCfg {
 	
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
-		return cc.getReflexFillCfg(rfcv);
+		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 	}
 	
 }
