@@ -33,7 +33,9 @@ import java.util.HashMap;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.jmegui.AudioUII;
+import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
@@ -92,7 +94,9 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 //	protected DialogListEntryData<T>	dataSelectRequested;
 	protected Label	lblSelectedEntryStatus;
 	protected ArrayList<BindKey>	abkList = new ArrayList<BindKey>();
-	private KeyActionListener	actSimpleActions;
+	protected KeyActionListener	actSimpleActions;
+	protected TimedDelayVarField tdListboxSelectorAreaBlinkFade = new TimedDelayVarField(1f,"");
+	
 	
 	@Override
 	public Container getContainerMain(){
@@ -494,6 +498,8 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 			applyListKeyFilter();
 			updateList();
 		}
+		
+		LemurMiscHelpersStateI.i().updateBlinkListBoxSelector(lstbxEntriesToSelect);
 		
 		return true;
 	}

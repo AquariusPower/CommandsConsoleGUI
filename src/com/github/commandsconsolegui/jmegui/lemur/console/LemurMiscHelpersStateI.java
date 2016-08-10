@@ -28,7 +28,6 @@
 package com.github.commandsconsolegui.jmegui.lemur.console;
 
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
@@ -39,9 +38,8 @@ import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
+import com.github.commandsconsolegui.jmegui.SavableHolder;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
-import com.github.commandsconsolegui.misc.CallQueueI;
-import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -55,7 +53,6 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.jme3.scene.Spatial.CullHint;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.DocumentModel;
 import com.simsilica.lemur.ListBox;
@@ -77,7 +74,9 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	public static LemurMiscHelpersStateI i(){return instance;}
 	
 	public final BoolTogglerCmdField	btgBugFixListBoxSelectorArea = 
-		new BoolTogglerCmdField(this,true,"listbox.selectorArea is above listbox entry button and below button's text, so mouse cursor over event only happens when over button text but not over button area without text...")
+		new BoolTogglerCmdField(this,true,"listbox.selectorArea is above listbox entry button and"
+			+" below button's text, so mouse cursor over event only happens when over button text "
+			+" but not over button area without text...")
 			.setCallNothingOnChange();
 	
 	public final BoolTogglerCmdField	btgTextCursorPulseFadeBlinkMode = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
@@ -103,14 +102,15 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 
 //	private boolean	bFixInvisibleTextInputCursor=false;
 
-	private boolean	bBlinkFadeInAndOut=true;
+//	private boolean	bBlinkFadeInAndOut=true;
 
-	private enum EKey{
-		CursorHotLink,
-		ExclusiveCursorMaterial,
-		CursorMaterialBkp,
-		ExclusiveCursorColor,
-		CursorLargeMode,
+	private enum EUserData{ //TODO EUserData
+		geomCursorHotLink,
+		bCursorLargeMode,
+		matExclusiveCursor,
+		colorExclusiveCursor,
+		tdColorFade,
+		geomListboxSelector,
 		;
 	}
 
@@ -142,12 +142,16 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		return null;
 	}
 	
+	/**
+	 * There can only have one single input target at a time.
+	 * @param tf
+	 */
 	public void setTextFieldInputToBlinkCursor(TextField tf){
 		this.tfToBlinkCursor = tf;
 	}
 	
-	private void checkAndPrepareExclusiveCursorMaterialFor(TextField tf, Geometry geomCursor){
-		Material matCursorOnly = tf.getUserData(EKey.ExclusiveCursorMaterial.toString());
+	private ColorRGBA retrieveExclusiveColorForBlinking(Spatial sptUserDataHolder, Geometry geomCursor){
+		Material matCursorOnly = sptUserDataHolder.getUserData(EUserData.matExclusiveCursor.toString());
 //		matCursorOnly=null;
 		/**
 		 * check if cursor material was updated outside here
@@ -158,7 +162,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 			 * As the material may affect also the text, and a fading text is horrible
 			 * using a cloned material to substitute it.
 			 */
-			tf.setUserData(EKey.CursorMaterialBkp.toString(), geomCursor.getMaterial());
+			sptUserDataHolder.setUserData(MiscJmeI.EUserData.matCursorBkp.toString(), geomCursor.getMaterial());
 			matCursorOnly = geomCursor.getMaterial().clone();
 			MatParam param = matCursorOnly.getParam("Color");
 			ColorRGBA colorClone = ((ColorRGBA)param.getValue()).clone();
@@ -167,70 +171,117 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 			
 			geomCursor.setMaterial(matCursorOnly);
 //		fixInvisibleCursor(geomCursor);
-			tf.setUserData(EKey.ExclusiveCursorMaterial.toString(), matCursorOnly);
-			tf.setUserData(EKey.ExclusiveCursorColor.toString(), colorClone);
+			sptUserDataHolder.setUserData(EUserData.matExclusiveCursor.toString(), matCursorOnly);
+			sptUserDataHolder.setUserData(EUserData.colorExclusiveCursor.toString(), colorClone);
 		}
+		
+		return (ColorRGBA)sptUserDataHolder.getUserData(EUserData.colorExclusiveCursor.toString());
 	}
 	
-	private void updateBlinkInputFieldTextCursor(TextField tf) {
+//	@Deprecated
+//	protected void _updateBlinkInputFieldTextCursor(TextField tf) {
+//		if(!bBlinkingTextCursor)return;
+//		if(!tf.equals(LemurFocusHelperStateI.i().getFocused()))return;
+//		
+////		tdTextCursorBlink.updateTime();
+//		
+//		Geometry geomCursor = tf.getUserData(EUserData.CursorHotLink.toString());
+//		if(geomCursor==null){
+//			geomCursor = getTextCursorFrom(tf);
+//			tf.setUserData(EUserData.CursorHotLink.toString(), geomCursor);
+//		}
+//		
+////		BitmapText bmt = getBitmapTextFrom(tf);
+////		((BitmapTextPage)bmt.getChild("BitmapFont")).
+//		
+//		long lDelay = tdTextCursorBlink.getCurrentDelayNano();
+//		
+//		if(btgTextCursorPulseFadeBlinkMode.b()){
+//			checkAndPrepareExclusiveCursorMaterialFor(tf,geomCursor);
+//			
+//			ColorRGBA color = tf.getUserData(EUserData.ExclusiveCursorColor.toString());
+//			color.a = tdTextCursorBlink.getCurrentDelayPercentualDynamic();
+//			if(bBlinkFadeInAndOut){
+//				if(color.a>0.5f)color.a=1f-color.a; //to allow it fade in and out
+//				color.a*=2f;
+////				if(color.a<0.75f)color.a=0.75f;
+//			}
+//			if(color.a<0)color.a=0;
+//			if(color.a>1)color.a=1;
+//		}else{
+//			Material matBkp = tf.getUserData(MiscJmeI.EUserData.CursorMaterialBkp.toString());
+//			if(matBkp!=null){
+//				geomCursor.setMaterial(matBkp);
+//				tf.setUserData(MiscJmeI.EUserData.CursorMaterialBkp.toString(),null); //clear
+//			}
+//			
+//			if(lDelay > tdTextCursorBlink.getDelayLimitNano()){
+//				if(geomCursor.getCullHint().compareTo(CullHint.Always)!=0){
+//					geomCursor.setCullHint(CullHint.Always);
+//				}else{
+//					bugFix(null,btgBugFixInvisibleCursor,tf);
+////					bugFix(EBugFix.InvisibleCursor,tf);
+////					fixInvisibleCursor(geomCursor);
+//					geomCursor.setCullHint(CullHint.Inherit);
+//				}
+//				
+//				tdTextCursorBlink.updateTime();
+//			}
+//		}
+//			
+//	}
+	
+	protected void updateBlinkInputFieldTextCursor(TextField tf) {
 		if(!bBlinkingTextCursor)return;
 		if(!tf.equals(LemurFocusHelperStateI.i().getFocused()))return;
 		
-//		tdTextCursorBlink.updateTime();
-		
-		Geometry geomCursor = tf.getUserData(EKey.CursorHotLink.toString());
+		Geometry geomCursor = tf.getUserData(EUserData.geomCursorHotLink.toString());
 		if(geomCursor==null){
 			geomCursor = getTextCursorFrom(tf);
-			tf.setUserData(EKey.CursorHotLink.toString(), geomCursor);
+			tf.setUserData(EUserData.geomCursorHotLink.toString(), geomCursor);
 		}
-		
-//		BitmapText bmt = getBitmapTextFrom(tf);
-//		((BitmapTextPage)bmt.getChild("BitmapFont")).
-		
-		long lDelay = tdTextCursorBlink.getCurrentDelayNano();
 		
 		if(btgTextCursorPulseFadeBlinkMode.b()){
-			checkAndPrepareExclusiveCursorMaterialFor(tf,geomCursor);
-			
-			ColorRGBA color = tf.getUserData(EKey.ExclusiveCursorColor.toString());
-			color.a = tdTextCursorBlink.getCurrentDelayPercentualDynamic();
-			if(bBlinkFadeInAndOut){
-				if(color.a>0.5f)color.a=1f-color.a; //to allow it fade in and out
-				color.a*=2f;
-//				if(color.a<0.75f)color.a=0.75f;
-			}
-			if(color.a<0)color.a=0;
-			if(color.a>1)color.a=1;
+			ColorRGBA color = retrieveExclusiveColorForBlinking(tf,geomCursor);
+		//(ColorRGBA)tf.getUserData(EUserData.colorExclusiveCursor.toString()),
+			MiscJmeI.i().updateColorFading(tdTextCursorBlink, color, true);
 		}else{
-			Material matBkp = tf.getUserData(EKey.CursorMaterialBkp.toString());
-			if(matBkp!=null){
-				geomCursor.setMaterial(matBkp);
-				tf.setUserData(EKey.CursorMaterialBkp.toString(),null); //clear
-			}
-			
-			if(lDelay > tdTextCursorBlink.getDelayLimitNano()){
-				if(geomCursor.getCullHint().compareTo(CullHint.Always)!=0){
-					geomCursor.setCullHint(CullHint.Always);
-				}else{
-					bugFix(null,btgBugFixInvisibleCursor,tf);
-//					bugFix(EBugFix.InvisibleCursor,tf);
-//					fixInvisibleCursor(geomCursor);
-					geomCursor.setCullHint(CullHint.Inherit);
-				}
-				
-				tdTextCursorBlink.updateTime();
+			if(MiscJmeI.i().updateBlink(tdTextCursorBlink, tf, geomCursor)){
+				bugFix(null,btgBugFixInvisibleCursor,tf);
 			}
 		}
-			
 	}
+	
+	public void updateBlinkListBoxSelector(ListBox<?> lstbx) {
+		SavableHolder sh = (SavableHolder)lstbx.getUserData(EUserData.tdColorFade.toString());
+		TimedDelayVarField td = null;
+		if(sh==null){
+			sh = new SavableHolder(new TimedDelayVarField(2f,"").setActive(true));
+			lstbx.setUserData(EUserData.tdColorFade.toString(), sh);
+		}
+		td = (TimedDelayVarField)sh.getRef();
+		
+		Geometry geomSelector = getSelectorGeometryFromListbox(lstbx);
+		if(geomSelector==null)return;
+		
+//		Geometry geomSelector = (Geometry)lstbx.getUserData(EUserData.geomListboxSelector.toString());
+//		if(geomSelector==null){
+//			geomSelector=getSelectorGeometryFromListbox(lstbx);
+//			lstbx.setUserData(EUserData.geomListboxSelector.toString(), geomSelector);
+//		}
+		ColorRGBA color = retrieveExclusiveColorForBlinking(lstbx,geomSelector);
+//		ColorRGBA color = (ColorRGBA)lstbx.getUserData(EUserData.colorExclusiveCursor.toString());
+		
+		MiscJmeI.i().updateColorFading(td, color, true);
+	}	
 	
 	private void updateLargeTextCursorMode(TextField tf){
 		if(btgTextCursorLarge.b()){
-			if(tf.getUserData(EKey.CursorLargeMode.toString())==null){
+			if(tf.getUserData(EUserData.bCursorLargeMode.toString())==null){
 				enableLargeCursor(tf,true);
 			}
 		}else{
-			if(tf.getUserData(EKey.CursorLargeMode.toString())!=null){
+			if(tf.getUserData(EUserData.bCursorLargeMode.toString())!=null){
 				enableLargeCursor(tf,false);
 			}
 		}
@@ -239,7 +290,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	private void enableLargeCursor(TextField tf, boolean b){
 		Geometry geomCursor = getTextCursorFrom(tf);
 		geomCursor.setLocalScale(b?3f:1f/3f,1f,1f);
-		tf.setUserData(EKey.CursorLargeMode.toString(), b?true:null);
+		tf.setUserData(EUserData.bCursorLargeMode.toString(), b?true:null);
 	}
 	
 	/**
@@ -312,6 +363,39 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 //		UpdateTextFieldTextAndCaratVisibility,
 //	}
 	
+	/**
+	 * the geom may not have been created yet by lemur.
+	 * 
+	 * @param lstbx
+	 * @return can be null for awhile...
+	 */
+	public Geometry getSelectorGeometryFromListbox(ListBox<?> lstbx){
+		Geometry geomSelector = (Geometry)lstbx.getUserData(EUserData.geomListboxSelector.toString());
+		
+		/**
+		 * this is guess work...
+		 * the geometry could have a name... :)
+		 */
+		if(geomSelector==null){
+			Node nodeSelectorArea = (Node)lstbx.getChild("selectorArea");
+			labelFound:for(Spatial sptPanel:nodeSelectorArea.getChildren()){
+				if(sptPanel instanceof Panel){
+					Panel pnlSelectorArea = (Panel)sptPanel;
+					for(Spatial sptGeom:pnlSelectorArea.getChildren()){
+						if(sptGeom instanceof Geometry){
+							geomSelector=(Geometry)sptGeom;
+							break labelFound;
+						}
+					}
+				}
+			}
+			
+			lstbx.setUserData(EUserData.geomListboxSelector.toString(), geomSelector);
+		}
+		
+		return geomSelector;
+	}
+	
 	BoolTogglerCmdField btgBugFixInvisibleCursor = 
 		new BoolTogglerCmdField(this,true).setHelp("in case text cursor is invisible").setCallNothingOnChange();
 	BoolTogglerCmdField btgBugFixUpdateTextFieldTextAndCaratVisibility = 
@@ -325,46 +409,51 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		if(btgBugFixListBoxSelectorArea.isEqualToAndEnabled(btgBugFixId)){
 			ListBox<?> lstbx = (ListBox<?>)aobjCustomParams[0];
 			
-			Node nodeSelectorArea = (Node)lstbx.getChild("selectorArea");
-//			nodeSelectorArea.getLocalTranslation().z-=1f;
-//			nodeSelectorArea.getLocalTranslation().z=0f;
-			for(Spatial spt:nodeSelectorArea.getChildren()){
-				if(spt instanceof Panel){
-					final Panel pnlSelectorArea = (Panel)spt;
-					
-					Geometry geomSelectorArea = (Geometry)pnlSelectorArea.getChild(0);
-//					geomSelectorArea.getLocalRotation().lookAt(new Vector3f(0f,10f,0.1f), Vector3f.UNIT_Y);
-					geomSelectorArea.setLocalScale(1f, 0.1f, 1f); //this makes the selectorArea looks like an underline! quite cool!
-					
-//					CallableX caller = new CallableX() {
-//						@Override
-//						public Boolean call() throws Exception {
-//							Vector3f v3fP = pnlSelectorArea.getPreferredSize();
-//							
-//							float fZMin=0.1f;
-//							
-//							// this check will succeed if the fix below it remains applied.
-//							if(Float.compare(v3fP.z,fZMin)==0){
-//								return true;
-//							}
-//							
-//							v3fP.z=fZMin; //minimal, just to not squash it.
-//							if(pnlSelectorArea.getName()==null){
-//								pnlSelectorArea.setName("Bogus:"+btgBugFixListBoxSelectorArea.getSimpleCmdId());
-//							}
-//							pnlSelectorArea.setSize(v3fP);
-//							pnlSelectorArea.setPreferredSize(v3fP);
-//							pnlSelectorArea.getLocalTranslation().z=0f;
-//							
-//							return false; //next retry will check
-//						}
-//					};
-//					
-//					CallQueueI.i().addCall(caller);
-					
-					break;
-				}
+			Geometry geomSelectorArea = getSelectorGeometryFromListbox(lstbx);
+			if(geomSelectorArea!=null){ 
+				geomSelectorArea.setLocalScale(1f, 0.1f, 1f); //this makes the selectorArea looks like an underline! quite cool!
 			}
+			
+//			Node nodeSelectorArea = (Node)lstbx.getChild("selectorArea");
+////			nodeSelectorArea.getLocalTranslation().z-=1f;
+////			nodeSelectorArea.getLocalTranslation().z=0f;
+//			for(Spatial spt:nodeSelectorArea.getChildren()){
+//				if(spt instanceof Panel){
+//					final Panel pnlSelectorArea = (Panel)spt;
+//					
+//					Geometry geomSelectorArea = (Geometry)pnlSelectorArea.getChild(0);
+////					geomSelectorArea.getLocalRotation().lookAt(new Vector3f(0f,10f,0.1f), Vector3f.UNIT_Y);
+//					geomSelectorArea.setLocalScale(1f, 0.1f, 1f); //this makes the selectorArea looks like an underline! quite cool!
+//					
+////					CallableX caller = new CallableX() {
+////						@Override
+////						public Boolean call() throws Exception {
+////							Vector3f v3fP = pnlSelectorArea.getPreferredSize();
+////							
+////							float fZMin=0.1f;
+////							
+////							// this check will succeed if the fix below it remains applied.
+////							if(Float.compare(v3fP.z,fZMin)==0){
+////								return true;
+////							}
+////							
+////							v3fP.z=fZMin; //minimal, just to not squash it.
+////							if(pnlSelectorArea.getName()==null){
+////								pnlSelectorArea.setName("Bogus:"+btgBugFixListBoxSelectorArea.getSimpleCmdId());
+////							}
+////							pnlSelectorArea.setSize(v3fP);
+////							pnlSelectorArea.setPreferredSize(v3fP);
+////							pnlSelectorArea.getLocalTranslation().z=0f;
+////							
+////							return false; //next retry will check
+////						}
+////					};
+////					
+////					CallQueueI.i().addCall(caller);
+//					
+//					break;
+//				}
+//			}
 			
 			bFixed=true;
 		}else

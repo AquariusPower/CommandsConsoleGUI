@@ -34,10 +34,10 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
-import truetypefontlite.TrueTypeBitmapGlyph;
-import truetypefontlite.TrueTypeFont;
-import truetypefontlite.TrueTypeKey;
-import truetypefontlite.TrueTypeLoader;
+import truetypefont.TrueTypeBitmapGlyph;
+import truetypefont.TrueTypeFont;
+import truetypefont.TrueTypeKey;
+import truetypefont.TrueTypeLoader;
 
 import com.github.commandsconsolegui.cmd.CommandData;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
@@ -53,9 +53,9 @@ import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI.CompositeControl;
+import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
-import com.github.commandsconsolegui.jmegui.MiscJmeI;
 //import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersState;
 import com.github.commandsconsolegui.misc.AutoCompleteI;
 import com.github.commandsconsolegui.misc.AutoCompleteI.AutoCompleteResult;

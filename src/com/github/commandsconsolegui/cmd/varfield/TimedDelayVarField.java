@@ -27,16 +27,12 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import java.util.ArrayList;
-
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
-import com.github.commandsconsolegui.cmd.VarIdValueOwnerData.IVarIdValueOwner;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 
 /**
  * Use this class to avoid running code on every loop.
@@ -189,13 +185,16 @@ public class TimedDelayVarField extends VarCmdFieldAbs{
 	/**
 	 * can be called many subsequent times without updating the reference time
 	 * @param b
+	 * @return 
 	 */
-	public void setActive(boolean b){
+	public TimedDelayVarField setActive(boolean b){
 		if(b){
 			if(!isActive())updateTime();
 		}else{
 			reset();
 		}
+		
+		return this;
 	}
 	
 	/**

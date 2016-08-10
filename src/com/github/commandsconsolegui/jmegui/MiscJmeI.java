@@ -35,18 +35,20 @@ import java.nio.BufferUnderflowException;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.jme3.font.BitmapText;
-import com.jme3.input.MouseInput;
+import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.Spatial.CullHint;
 import com.jme3.system.JmeSystem;
 import com.simsilica.lemur.event.AbstractCursorEvent;
-import com.simsilica.lemur.event.CursorButtonEvent;
-import com.simsilica.lemur.event.CursorMotionEvent;
 
 /**
  * @author AquariusPower <https://github.com/AquariusPower>
@@ -135,9 +137,54 @@ public class MiscJmeI {
 	public Vector3f eventToV3f(AbstractCursorEvent event){
 		return new Vector3f(event.getX(),event.getY(),0);
 	}
+
+	public void updateColorFading(TimedDelayVarField td, ColorRGBA color, boolean bFadeInAndOut){
+		color.a = td.getCurrentDelayPercentualDynamic();
+		if(bFadeInAndOut){
+			if(color.a>0.5f)color.a=1f-color.a; //to allow it fade in and out
+			color.a *= 2f;
+//				if(color.a<0.75f)color.a=0.75f;
+		}
+		if(color.a<0)color.a=0;
+		if(color.a>1)color.a=1;
+	}
 	
 //	
 //	public boolean isMouseCursorButton(EMouseCursorButton emcb, int iIndex){
 //		return emcb.getIndex()==iIndex;
 //	}
+	
+	public static enum EUserData{
+		matCursorBkp,
+		;
+	}
+	
+	public boolean updateBlink(TimedDelayVarField td, Spatial sptUserDataHolder, Geometry geom) {
+		long lDelay = td.getCurrentDelayNano();
+		
+		Material matBkp = (Material)sptUserDataHolder.getUserData(EUserData.matCursorBkp.toString());
+		
+		boolean bVisible=false;
+		
+		if(matBkp!=null){
+			geom.setMaterial(matBkp);
+			sptUserDataHolder.setUserData(EUserData.matCursorBkp.toString(),null); //clear TODO why???
+		}
+		
+		if(lDelay > td.getDelayLimitNano()){
+			if(geom.getCullHint().compareTo(CullHint.Always)!=0){
+				geom.setCullHint(CullHint.Always);
+			}else{
+//				bugFix(null,btgBugFixInvisibleCursor,tf);
+//					bugFix(EBugFix.InvisibleCursor,tf);
+//					fixInvisibleCursor(geomCursor);
+				geom.setCullHint(CullHint.Inherit);
+				bVisible=true;
+			}
+			
+			td.updateTime();
+		}
+		
+		return bVisible;
+	}
 }
