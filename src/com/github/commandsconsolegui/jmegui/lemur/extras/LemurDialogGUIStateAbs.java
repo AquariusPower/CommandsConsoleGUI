@@ -729,7 +729,8 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 			+"'"+dled.getText()+"'"
 		);
 		
-		LemurMiscHelpersStateI.i().bugFix(null, LemurMiscHelpersStateI.i().btgBugFixListBoxSelectorArea, lstbxEntriesToSelect);
+//		LemurMiscHelpersStateI.i().bugFix(null, LemurMiscHelpersStateI.i().btgBugFixListBoxSelectorArea, lstbxEntriesToSelect);
+		LemurMiscHelpersStateI.i().listboxSelectorAsUnderline(lstbxEntriesToSelect);
 	}
 	public void selectEntry(DialogListEntryData<T> dledSelectRequested) {
 //		this.dataSelectRequested = data;

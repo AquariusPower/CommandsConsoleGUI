@@ -73,11 +73,13 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	private static LemurMiscHelpersStateI instance = new LemurMiscHelpersStateI();
 	public static LemurMiscHelpersStateI i(){return instance;}
 	
-	public final BoolTogglerCmdField	btgBugFixListBoxSelectorArea = 
-		new BoolTogglerCmdField(this,true,"listbox.selectorArea is above listbox entry button and"
+	public final BoolTogglerCmdField	btgListBoxSelectorAsUnderline = 
+		new BoolTogglerCmdField(this,true,
+			" BUGFIX: this also work as a workaround/bugfix: "
+			+" listbox.selectorArea is above listbox entry button and"
 			+" below button's text, so mouse cursor over event only happens when over button text "
-			+" but not over button area without text...")
-			.setCallNothingOnChange();
+			+" but not over button area without text..."
+		).setCallNothingOnChange();
 	
 	public final BoolTogglerCmdField	btgTextCursorPulseFadeBlinkMode = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 	public final BoolTogglerCmdField	btgTextCursorLarge = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
@@ -396,6 +398,15 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		return geomSelector;
 	}
 	
+	public void listboxSelectorAsUnderline(ListBox<?> lstbx){
+		if(!btgListBoxSelectorAsUnderline.b())return;
+		
+		Geometry geomSelectorArea = getSelectorGeometryFromListbox(lstbx);
+		if(geomSelectorArea!=null){
+			geomSelectorArea.getLocalScale().y=0.1f;
+		}
+	}
+	
 	BoolTogglerCmdField btgBugFixInvisibleCursor = 
 		new BoolTogglerCmdField(this,true).setHelp("in case text cursor is invisible").setCallNothingOnChange();
 	BoolTogglerCmdField btgBugFixUpdateTextFieldTextAndCaratVisibility = 
@@ -406,57 +417,16 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		
 		boolean bFixed = false;
 		
-		if(btgBugFixListBoxSelectorArea.isEqualToAndEnabled(btgBugFixId)){
-			ListBox<?> lstbx = (ListBox<?>)aobjCustomParams[0];
-			
-			Geometry geomSelectorArea = getSelectorGeometryFromListbox(lstbx);
-			if(geomSelectorArea!=null){ 
-				geomSelectorArea.setLocalScale(1f, 0.1f, 1f); //this makes the selectorArea looks like an underline! quite cool!
-			}
-			
-//			Node nodeSelectorArea = (Node)lstbx.getChild("selectorArea");
-////			nodeSelectorArea.getLocalTranslation().z-=1f;
-////			nodeSelectorArea.getLocalTranslation().z=0f;
-//			for(Spatial spt:nodeSelectorArea.getChildren()){
-//				if(spt instanceof Panel){
-//					final Panel pnlSelectorArea = (Panel)spt;
-//					
-//					Geometry geomSelectorArea = (Geometry)pnlSelectorArea.getChild(0);
-////					geomSelectorArea.getLocalRotation().lookAt(new Vector3f(0f,10f,0.1f), Vector3f.UNIT_Y);
-//					geomSelectorArea.setLocalScale(1f, 0.1f, 1f); //this makes the selectorArea looks like an underline! quite cool!
-//					
-////					CallableX caller = new CallableX() {
-////						@Override
-////						public Boolean call() throws Exception {
-////							Vector3f v3fP = pnlSelectorArea.getPreferredSize();
-////							
-////							float fZMin=0.1f;
-////							
-////							// this check will succeed if the fix below it remains applied.
-////							if(Float.compare(v3fP.z,fZMin)==0){
-////								return true;
-////							}
-////							
-////							v3fP.z=fZMin; //minimal, just to not squash it.
-////							if(pnlSelectorArea.getName()==null){
-////								pnlSelectorArea.setName("Bogus:"+btgBugFixListBoxSelectorArea.getSimpleCmdId());
-////							}
-////							pnlSelectorArea.setSize(v3fP);
-////							pnlSelectorArea.setPreferredSize(v3fP);
-////							pnlSelectorArea.getLocalTranslation().z=0f;
-////							
-////							return false; //next retry will check
-////						}
-////					};
-////					
-////					CallQueueI.i().addCall(caller);
-//					
-//					break;
-//				}
+//		if(btgBugFixListBoxSelectorArea.isEqualToAndEnabled(btgBugFixId)){
+//			ListBox<?> lstbx = (ListBox<?>)aobjCustomParams[0];
+//			
+//			Geometry geomSelectorArea = getSelectorGeometryFromListbox(lstbx);
+//			if(geomSelectorArea!=null){ 
+//				geomSelectorArea.setLocalScale(1f, 0.1f, 1f); //this makes the selectorArea looks like an underline! quite cool!
 //			}
-			
-			bFixed=true;
-		}else
+//			
+//			bFixed=true;
+//		}else
 		if(btgBugFixUpdateTextFieldTextAndCaratVisibility.isEqualToAndEnabled(btgBugFixId)){
 			/**
 			 * This updates the displayed text cursor position.
