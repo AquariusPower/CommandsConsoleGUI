@@ -67,6 +67,7 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 	protected ArrayList<Class<?>>	aclassUserActionStackList = new ArrayList<Class<?>>(); 
 	
 	public enum EUserData{
+		strAudioId,
 		strFileName,
 		bMute,
 		;
@@ -87,6 +88,9 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 		
 		ExpandSubTree				(strBasePath+"220195__gameaudio__click-wooden-1.mono.ogg"), 
 		ShrinkSubTree				(strBasePath+"220194__gameaudio__click-heavy.mono.ogg"), 
+		
+		OpenConsole					(strBasePath+"220202__gameaudio__teleport-casual.mono.ogg"),
+		CloseConsole				(strBasePath+"220203__gameaudio__casual-death-loose.mono.ogg"),
 		;
 		
 		private String	strFile;
@@ -169,25 +173,38 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 			GlobalRootNodeI.i().detachChild(an);
 		}
 		
-		for(int i=1;i<=2;i++){ //1st is try
+		labelRetry:for(int i=1;i<=2;i++){ //1st is try
 			try{
 				an = new AudioNode(GlobalAppRefI.i().getAssetManager(), strFile,	DataType.Buffer);
+				an.setUserData(EUserData.strAudioId.toString(), strAudioId);
 				an.setUserData(EUserData.strFileName.toString(), strFile);
 				an.setUserData(EUserData.bMute.toString(), false);
 				
-				tmAudio.put(strAudioId,an);
+				for(AudioNode anChkDupSndSrc:tmAudio.values()){
+					if(anChkDupSndSrc.getUserData(EUserData.strFileName.toString()).equals(strFile)){
+						GlobalCommandsDelegatorI.i().dumpDevWarnEntry(
+							"same sound file ["+strFile+"] being used with more than one event: "
+								+strAudioId+", "
+								+anChkDupSndSrc.getUserData(EUserData.strAudioId.toString())
+						);
+					}
+				}
+				
+				tmAudio.put(strAudioId, an);
 				
 				GlobalRootNodeI.i().attachChild(an);
 			}catch(AssetNotFoundException ex){
 				switch(i){
 					case 1:
 						GlobalAppRefI.i().getAssetManager().registerLocator("./assets/", FileLocator.class);
-						break;
+						continue labelRetry;
 					case 2:
 						GlobalCommandsDelegatorI.i().dumpExceptionEntry(ex, strAudioId, strFile);
-						break;
+						break labelRetry;
 				}
 			}
+			
+			break;
 		}
 		
 		return an;

@@ -236,7 +236,6 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	protected int	iCopyFrom = -1;
 	protected int	iCopyTo = -1;
 	protected int	iCmdHistoryCurrentIndex = 0;
-	public static final String	strValidCmdCharsRegex = "a-zA-Z0-9_"; // better not allow "-" as has other uses like negate number and commands functionalities
 //	protected String	strStatsLast = "";
 	protected boolean	bLastAliasCreatedSuccessfuly;
 	protected float	fTPF;
@@ -349,9 +348,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				rfcfg.setFirstLetterUpperCase(true);
 			}
 		}else{
+			/**
+			 *  put nothing here, the null cfg will be taken care properly.
+			 *  see {@link ReflexFillI#createIdentifierWithFieldName(IReflexFillCfg, IReflexFillCfgVariant, boolean)}
 			dumpDevWarnEntry("unable to create a cfg for variant: "+rfcv);
+			 */
 		}
-		
+	
 		return rfcfg;
 	}
 	
@@ -1177,12 +1180,20 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 
 	/**
+	 * dumps can happen before this class initialization, 
+	 * they will be stored to be shown later. 
+	 * 
 	 * provides line-wrap
 	 * 
 	 * @param bDumpToConsole if false, will only log to file
 	 * @param strLineOriginal
 	 */
 	protected void dumpEntry(DumpEntryData de){
+		if(!icui().isInitializationCompleted()){
+			adeDumpEntryFastQueue.add(de);
+			return;
+		}
+		
 		dumpSave(de);
 		
 		if(de.isImportant()){
@@ -1201,10 +1212,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			de.sendToPrintStream(); 
 		}
 		
-		if(!icui().isInitializationCompleted()){
-			adeDumpEntryFastQueue.add(de);
-			return;
-		}
+//		if(!icui().isInitializationCompleted()){
+//			adeDumpEntryFastQueue.add(de);
+//			return;
+//		}
 		
 		dumpEntryToConsole(de);
 	}
@@ -1322,10 +1333,20 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}
 	}
 	
+	/**
+	 * see {@link #dumpEntry(DumpEntryData)}
+	 * @param strMessageKey
+	 * @param aobj
+	 */
 	public void dumpInfoEntry(String strMessageKey, Object... aobj){
 		dumpEntry(false, btgShowInfo.get(), false, true, strInfoEntryPrefix+strMessageKey, aobj);
 	}
 	
+	/**
+	 * see {@link #dumpEntry(DumpEntryData)}
+	 * @param strMessageKey
+	 * @param aobj
+	 */
 	public void dumpWarnEntry(String strMessageKey, Object... aobj){
 		String strType = "Warn";
 		
@@ -1376,6 +1397,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * A problem is something that may make other parts of the application malfunction.
 	 * It will not break the application, but will make it misbehave.
 	 * It can but shouldnt be ignored.
+	 * see {@link #dumpEntry(DumpEntryData)}
 	 * 
 	 * @param strMessageKey
 	 * @param aobj
@@ -1396,6 +1418,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	/**
 	 * User error is something the user did and can be fixed by him/her without having
 	 * to modify this code.
+	 * see {@link #dumpEntry(DumpEntryData)}
 	 * 
 	 * @param strMessageKey
 	 * @param aobj
@@ -1417,6 +1440,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	
 	/**
 	 * warnings that should not bother end users...
+	 * see {@link #dumpEntry(DumpEntryData)}
 	 * @param strMessageKey
 	 */
 	public void dumpDevWarnEntry(String strMessageKey, Object... aobj){
@@ -1435,6 +1459,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		);
 	}
 	
+	/**
+	 * see {@link #dumpEntry(DumpEntryData)}
+	 * @param strMessageKey
+	 * @param aobj
+	 */
 	public void dumpDebugEntry(String strMessageKey, Object... aobj){
 		dumpEntry(new DumpEntryData()
 			.setDumpToConsole(btgShowDebugEntries.get())
@@ -1443,6 +1472,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		);
 	}
 	
+	/**
+	 * see {@link #dumpEntry(DumpEntryData)}
+	 * @param strMessageKey
+	 * @param aobj
+	 */
 	public void dumpDevInfoEntry(String strMessageKey, Object... aobj){
 		dumpEntry(new DumpEntryData()
 			.setDumpToConsole(btgShowDeveloperInfo.get())
@@ -1453,16 +1487,27 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //			Misc.i().getSimpleTime(btgShowMiliseconds.get())+strDevInfoEntryPrefix+str);
 	}
 	
+	/**
+	 * see {@link #dumpEntry(DumpEntryData)}
+	 * @param imsg
+	 * @param iShowStackElementsCount
+	 */
 	protected void dumpExceptionEntry(ImportantMsgData imsg, Integer iShowStackElementsCount) {
 		/**
 		 * it is coming from the message buffer, so will not read it...
 		 */
 		dumpExceptionEntry(imsg.ex, imsg.aste, iShowStackElementsCount, false, imsg.getDumpEntryData().getCustomObjects());
 	}
+	/**
+	 * see {@link #dumpEntry(DumpEntryData)}
+	 * @param ex
+	 * @param aobj
+	 */
 	public void dumpExceptionEntry(Exception ex, Object... aobj){
 		dumpExceptionEntry(ex, null, null, true, aobj);
 	}
 	/**
+	 * see {@link #dumpEntry(DumpEntryData)}
 	 * 
 	 * @param ex
 	 * @param asteStackOverride if null will use the exception one
@@ -1517,6 +1562,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	
 	/**
 	 * a simple, usually indented, output
+	 * see {@link #dumpEntry(DumpEntryData)}
 	 * @param strMessageKey
 	 */
 	public void dumpSubEntry(String strMessageKey){
@@ -2948,7 +2994,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	
 	protected void dumpSave(DumpEntryData de) {
 //		if(de.isSavedToLogFile())return;
-		MiscI.i().fileAppendLine(flLastDump,de.getLineFinal(true));
+		MiscI.i().fileAppendLine(flLastDump, de.getLineFinal(true));
 	}
 	/**
 	 * These variables can be loaded from the setup file!
@@ -3052,10 +3098,6 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}
 		
 		return null;
-	}
-	public boolean isValidIdentifierCmdVarAliasFuncString(String strCmdPart) {
-		if(strCmdPart==null)return false;
-		return strCmdPart.matches("["+strValidCmdCharsRegex+"]*");
 	}
 	
 	public boolean isCommandString(String str) {

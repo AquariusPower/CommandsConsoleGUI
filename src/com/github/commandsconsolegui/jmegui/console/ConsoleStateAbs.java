@@ -176,7 +176,7 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 	protected AbstractList<String> vlstrAutoCompleteHint;
 	protected Node lstbxAutoCompleteHint;
 	protected int	iShowRows = 1;
-	protected Integer	iToggleConsoleKey = null;
+//	protected Integer	iToggleConsoleKey = null;
 	protected Integer	iVisibleRowsAdjustRequest = 0; //0 means dynamic
 //	protected int	iCmdHistoryCurrentIndex = 0;
 //	protected String	strInfoEntryPrefix			=". ";
@@ -405,9 +405,10 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 			this.iToggleConsoleKey = iToggleConsoleKey;
 		}
 	}	
+	private CfgParm cfg;
 	@Override
 	public ConsoleStateAbs<T> configure(ICfgParm icfg) {
-		CfgParm cfg = (CfgParm)icfg;
+		cfg = (CfgParm)icfg;
 		
 		/**
 		 * The console is a special dialog.
@@ -417,7 +418,7 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 		
 		super.configure(cfg);
 		
-		this.iToggleConsoleKey=cfg.iToggleConsoleKey;
+//		this.iToggleConsoleKey=cfg.iToggleConsoleKey;
 		
 		return storeCfgAndReturnSelf(icfg);
 	}
@@ -810,7 +811,7 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 //		if(iToggleConsoleKey!=null){
 			if(!app().getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_TOGGLE.toString())){
 				app().getInputManager().addMapping(INPUT_MAPPING_CONSOLE_TOGGLE.toString(), 
-					new KeyTrigger(iToggleConsoleKey));
+					new KeyTrigger(cfg.iToggleConsoleKey));
 					
 				alConsoleToggle = new ActionListener() {
 					@Override
@@ -1502,7 +1503,7 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 				 * complete for variables ids when retrieving variable value 
 				 */
 				String strRegexVarOpen=Pattern.quote(""+cd().getVariableExpandPrefix()+"{");
-				String strRegex=".*"+strRegexVarOpen+"["+cd().strValidCmdCharsRegex+cd().RESTRICTED_TOKEN+"]*$";
+				String strRegex=".*"+strRegexVarOpen+"["+MiscI.strValidCmdCharsRegex+cd().RESTRICTED_TOKEN+"]*$";
 				if(strCompletedCmd.matches(strRegex)){
 					strCmd=strCompletedCmd.trim().substring(1); //removes command prefix
 					astrOptList=cd().getVariablesIdentifiers(true);
@@ -1570,7 +1571,7 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 		strCmdPart=strCmdPart.replaceFirst("^"+cd().getCommandPrefix(), "");
 		
 		// do not allow invalid chars
-		if(!cd().isValidIdentifierCmdVarAliasFuncString(strCmdPart)){
+		if(!MiscI.i().isValidIdentifierCmdVarAliasFuncString(strCmdPart)){
 			return strCmdPartOriginal;
 		}
 		

@@ -52,7 +52,16 @@ public class PrerequisitesNotMetException extends NullPointerException {
 			if(strRet.equals(str)){
 				strRet+=":\n";
 			}
-			strRet+="  [obj="+i+"]"+obj.getClass().getName()+", value:"+obj+"\n";
+			
+			strRet+="  [obj="+i+"]";
+			
+			if(obj==null){
+				strRet+=""+null;
+			}else{
+				strRet+=obj.getClass().getName()+", "+"value:"+obj;
+			}
+			
+			strRet+="\n";
 		}
 		return strRet;
 	}

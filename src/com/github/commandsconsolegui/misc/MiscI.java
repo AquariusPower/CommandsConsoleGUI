@@ -473,4 +473,10 @@ public class MiscI {
 	public String getTabAsSpaces() {
 		return "  ";
 	}
+
+	public static final String	strValidCmdCharsRegex = "a-zA-Z0-9_"; // better not allow "-" as has other uses like negate number and commands functionalities
+	public boolean isValidIdentifierCmdVarAliasFuncString(String strCmdPart) {
+		if(strCmdPart==null)return false;
+		return strCmdPart.matches("["+strValidCmdCharsRegex+"]*");
+	}
 }

@@ -393,6 +393,8 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		LemurFocusHelperStateI.i().requestFocus(getIntputField());
 //	commonOnEnableDisable();
 		
+		AudioUII.i().play(EAudio.OpenConsole);
+		
 		return true;
 	}
 	
@@ -403,6 +405,8 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		closeHint();
 		LemurFocusHelperStateI.i().removeFocusableFromList(getIntputField());
 //		commonOnEnableDisable();
+		
+		AudioUII.i().play(EAudio.CloseConsole);
 		
 		return true;
 	};

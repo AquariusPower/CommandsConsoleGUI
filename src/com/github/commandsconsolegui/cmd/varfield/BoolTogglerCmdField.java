@@ -35,6 +35,7 @@ import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
+import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -109,6 +110,10 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 		this.strReflexFillCfgCodePrefixVariant=strReflexFillCfgCodePrefixVariant;
 		if(this.strReflexFillCfgCodePrefixVariant==null){
 			this.strReflexFillCfgCodePrefixVariant=BoolTogglerCmdField.strTogglerCodePrefix;
+		}else{
+			if(!MiscI.i().isValidIdentifierCmdVarAliasFuncString(this.strReflexFillCfgCodePrefixVariant)){
+				throw new PrerequisitesNotMetException("invalid code prefix", this.strReflexFillCfgCodePrefixVariant);
+			}
 		}
 		
 		this.rfcfgOwner=rfcfgOwnerUseThis;

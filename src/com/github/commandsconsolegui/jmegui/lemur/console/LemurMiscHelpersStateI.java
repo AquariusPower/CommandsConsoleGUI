@@ -74,7 +74,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	public static LemurMiscHelpersStateI i(){return instance;}
 	
 	public final BoolTogglerCmdField	btgListBoxSelectorAsUnderline = 
-		new BoolTogglerCmdField(this,true,
+		new BoolTogglerCmdField(this,true,null,
 			" BUGFIX: this also work as a workaround/bugfix: "
 			+" listbox.selectorArea is above listbox entry button and"
 			+" below button's text, so mouse cursor over event only happens when over button text "

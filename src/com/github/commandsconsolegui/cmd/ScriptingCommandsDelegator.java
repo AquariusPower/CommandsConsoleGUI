@@ -140,7 +140,7 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 	public boolean cmdFunctionBegin() {
 		String strFunctionId = ccl.paramString(1);
 		
-		if(!isValidIdentifierCmdVarAliasFuncString(strFunctionId))return false;
+		if(!MiscI.i().isValidIdentifierCmdVarAliasFuncString(strFunctionId))return false;
 		
 		tmFunctions.put(strFunctionId, new ArrayList<String>());
 		dumpInfoEntry("Function creation begins for: "+strFunctionId);
