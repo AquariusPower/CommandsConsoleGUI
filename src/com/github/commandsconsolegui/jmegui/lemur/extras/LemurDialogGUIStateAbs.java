@@ -499,7 +499,7 @@ public abstract class LemurDialogGUIStateAbs<T> extends BaseDialogStateAbs<T> {
 			updateList();
 		}
 		
-		LemurMiscHelpersStateI.i().updateBlinkListBoxSelector(lstbxEntriesToSelect);
+		LemurMiscHelpersStateI.i().updateBlinkListBoxSelector(lstbxEntriesToSelect);//,true);
 		
 		return true;
 	}

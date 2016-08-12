@@ -109,9 +109,11 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	private enum EUserData{ //TODO EUserData
 		geomCursorHotLink,
 		bCursorLargeMode,
-		matExclusiveCursor,
-		colorExclusiveCursor,
-		tdColorFade,
+		
+		matForBlinking,
+		colorForBlinking,
+		
+//		tdListboxSelectorColorFade,
 		geomListboxSelector,
 		;
 	}
@@ -153,7 +155,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	}
 	
 	private ColorRGBA retrieveExclusiveColorForBlinking(Spatial sptUserDataHolder, Geometry geomCursor){
-		Material matCursorOnly = sptUserDataHolder.getUserData(EUserData.matExclusiveCursor.toString());
+		Material matCursorOnly = sptUserDataHolder.getUserData(EUserData.matForBlinking.toString());
 //		matCursorOnly=null;
 		/**
 		 * check if cursor material was updated outside here
@@ -173,11 +175,11 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 			
 			geomCursor.setMaterial(matCursorOnly);
 //		fixInvisibleCursor(geomCursor);
-			sptUserDataHolder.setUserData(EUserData.matExclusiveCursor.toString(), matCursorOnly);
-			sptUserDataHolder.setUserData(EUserData.colorExclusiveCursor.toString(), colorClone);
+			sptUserDataHolder.setUserData(EUserData.matForBlinking.toString(), matCursorOnly);
+			sptUserDataHolder.setUserData(EUserData.colorForBlinking.toString(), colorClone);
 		}
 		
-		return (ColorRGBA)sptUserDataHolder.getUserData(EUserData.colorExclusiveCursor.toString());
+		return (ColorRGBA)sptUserDataHolder.getUserData(EUserData.colorForBlinking.toString());
 	}
 	
 //	@Deprecated
@@ -254,16 +256,20 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		}
 	}
 	
-	public void updateBlinkListBoxSelector(ListBox<?> lstbx) {
-		SavableHolder sh = (SavableHolder)lstbx.getUserData(EUserData.tdColorFade.toString());
+	public TimedDelayVarField retrieveTimedDelayFrom(Spatial sptHolder, String strUserDataKey){
+		SavableHolder sh = (SavableHolder)sptHolder.getUserData(strUserDataKey);
 		TimedDelayVarField td = null;
 		if(sh==null){
 			sh = new SavableHolder(new TimedDelayVarField(2f,"").setActive(true));
-			lstbx.setUserData(EUserData.tdColorFade.toString(), sh);
+			sptHolder.setUserData(strUserDataKey, sh);
 		}
 		td = (TimedDelayVarField)sh.getRef();
 		
-		Geometry geomSelector = getSelectorGeometryFromListbox(lstbx);
+		return td;
+	}
+	
+	public void updateBlinkListBoxSelector(ListBox<?> lstbx){//, boolean bShrinkExpandToo) {
+		Geometry geomSelector = retrieveSelectorGeometryFromListbox(lstbx);
 		if(geomSelector==null)return;
 		
 //		Geometry geomSelector = (Geometry)lstbx.getUserData(EUserData.geomListboxSelector.toString());
@@ -274,7 +280,16 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		ColorRGBA color = retrieveExclusiveColorForBlinking(lstbx,geomSelector);
 //		ColorRGBA color = (ColorRGBA)lstbx.getUserData(EUserData.colorExclusiveCursor.toString());
 		
-		MiscJmeI.i().updateColorFading(td, color, true);
+		TimedDelayVarField td = retrieveTimedDelayFrom(lstbx, "tdListboxSelectorColorFade");
+		MiscJmeI.i().updateColorFading(
+			td, 
+			color, 
+			true);
+		
+//		if(bShrinkExpandToo){
+//			geomSelector.getLocalScale().x = 0.5f + (td.getCurrentDelayPercentualDynamic() - 0.5f);
+////			geomSelector.update
+//		}
 	}	
 	
 	private void updateLargeTextCursorMode(TextField tf){
@@ -371,7 +386,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	 * @param lstbx
 	 * @return can be null for awhile...
 	 */
-	public Geometry getSelectorGeometryFromListbox(ListBox<?> lstbx){
+	public Geometry retrieveSelectorGeometryFromListbox(ListBox<?> lstbx){
 		Geometry geomSelector = (Geometry)lstbx.getUserData(EUserData.geomListboxSelector.toString());
 		
 		/**
@@ -401,7 +416,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	public void listboxSelectorAsUnderline(ListBox<?> lstbx){
 		if(!btgListBoxSelectorAsUnderline.b())return;
 		
-		Geometry geomSelectorArea = getSelectorGeometryFromListbox(lstbx);
+		Geometry geomSelectorArea = retrieveSelectorGeometryFromListbox(lstbx);
 		if(geomSelectorArea!=null){
 			geomSelectorArea.getLocalScale().y=0.1f;
 		}

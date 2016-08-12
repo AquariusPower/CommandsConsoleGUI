@@ -175,8 +175,12 @@ public class MiscJmeI {
 //			color.a *= 2f;
 ////				if(color.a<0.75f)color.a=0.75f;
 //		}
-		if(color.a<0)color.a=0;
-		if(color.a>1)color.a=1;
+		if(color.a<0){
+			color.a=0;
+		}
+		if(color.a>1){
+			color.a=1;
+		}
 	}
 	
 //	
