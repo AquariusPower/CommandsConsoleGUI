@@ -188,14 +188,14 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 			AudioUII.i().playOnUserAction(EAudio.HoverOverActivators);
 			
 			Cell<?> cell = (Cell<?>)source.getUserData(EUserData.cellClassRef.toString());
-			cell.setOverrideBackgroundColor(ColorRGBA.Yellow);			
+			cell.setOverrideBackgroundColorNegatingCurrent();			
 		}
 	};
 	Command<Button> cmdbtnHoverOut = new Command<Button>(){
 		@Override
 		public void execute(Button source) {
 			Cell<?> cell = (Cell<?>)source.getUserData(EUserData.cellClassRef.toString());
-			cell.setOverrideBackgroundColor(null);			
+			cell.resetOverrideBackgroundColor();			
 		}
 	};
 	public void addDefaultCommands(Button btn){

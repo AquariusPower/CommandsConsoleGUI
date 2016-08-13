@@ -126,6 +126,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	}
 	
 	public Geometry getTextCursorFrom(TextField tf){
+		//TODO is there some way to get the cursor geometry in a lemur way?
 		return (Geometry) getBitmapTextFrom(tf).getChild("cursor");
 //				
 //		Geometry geomCursor = null;

@@ -48,6 +48,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.font.LineWrapMode;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
@@ -327,27 +328,58 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 		}
 		
+		public void setOverrideBackgroundColorNegatingCurrent() {
+			setOverrideBackgroundColor(ColorRGBA.randomColor(),true); //dummy color...
+		}
+		public void resetOverrideBackgroundColor(){
+			setOverrideBackgroundColor(null,false);
+		}
+		public void setOverrideBackgroundColor(ColorRGBA colorApply) {
+			setOverrideBackgroundColor(colorApply,false);
+		}
 		/**
 		 * 
-		 * @param color if null, will reset (restore current normal bkg color)
+		 * @param colorApply if null, will reset (restore current normal bkg color)
+		 * @param bNegateCurrentColor overrides color param (least if it is null)
 		 */
-		public void setOverrideBackgroundColor(ColorRGBA color) {
+		protected void setOverrideBackgroundColor(ColorRGBA colorApply,boolean bNegateCurrentColor) {
 			QuadBackgroundComponent qbc = (QuadBackgroundComponent)
 					getBackground().getGuiControl().getComponent("background");
 			
-			if(color!=null){
-				if(!qbc.getColor().equals(color)){
-					setUserData("BkgColorBkp", qbc.getColor());
+			ColorRGBA colorBkp=getUserData("BkgColorBkp");
+			if(colorBkp==null){
+				colorBkp = qbc.getColor();
+				setUserData("BkgColorBkp", colorBkp);
+			}
+			
+			if(colorApply!=null){
+				if(bNegateCurrentColor){
+					colorApply = new ColorRGBA(
+							FastMath.abs(1f-colorBkp.r),
+							FastMath.abs(1f-colorBkp.g),
+							FastMath.abs(1f-colorBkp.b),
+							colorBkp.a
+						);
 				}
 				
-				qbc.setColor(ColorRGBA.Yellow);
-			}else{
-				ColorRGBA colorBkp = getUserData("BkgColorBkp");
-				if(colorBkp!=null){
-					qbc.setColor(colorBkp);
-					setUserData("BkgColorBkp", null);
-				}
+				qbc.setColor(colorApply);
+			}else{ //restore
+				qbc.setColor(colorBkp);
+				setUserData("BkgColorBkp", null); //clear to not leave useless value there
 			}
+			
+//			if(colorApply!=null){
+//				if(!qbc.getColor().equals(colorApply)){
+//					
+//				}
+//				
+//				qbc.setColor(colorApply);
+//			}else{
+//				if(colorBkp!=null){
+//					qbc.setColor(colorBkp);
+//					setUserData("BkgColorBkp", null); //clear to not leave useless value there
+//				}
+//			}
 			
 		}
 
