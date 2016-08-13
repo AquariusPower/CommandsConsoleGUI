@@ -36,13 +36,20 @@ import com.github.commandsconsolegui.jmegui.MouseCursorButtonsControl;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
+import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
+import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell;
+import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell.EUserData;
+import com.jme3.math.ColorRGBA;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Button.ButtonAction;
 import com.simsilica.lemur.Command;
+import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.event.CursorButtonEvent;
 import com.simsilica.lemur.event.CursorListener;
 import com.simsilica.lemur.event.CursorMotionEvent;
+import com.simsilica.lemur.list.CellRenderer;
 
 /**
  * Click detection is based in time delay on this class.
@@ -179,10 +186,21 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 		@Override
 		public void execute(Button source) {
 			AudioUII.i().playOnUserAction(EAudio.HoverOverActivators);
+			
+			Cell<?> cell = (Cell<?>)source.getUserData(EUserData.cellClassRef.toString());
+			cell.setOverrideBackgroundColor(ColorRGBA.Yellow);			
+		}
+	};
+	Command<Button> cmdbtnHoverOut = new Command<Button>(){
+		@Override
+		public void execute(Button source) {
+			Cell<?> cell = (Cell<?>)source.getUserData(EUserData.cellClassRef.toString());
+			cell.setOverrideBackgroundColor(null);			
 		}
 	};
 	public void addDefaultCommands(Button btn){
 		btn.addCommands(ButtonAction.HighlightOn, cmdbtnHoverOver);
+		btn.addCommands(ButtonAction.HighlightOff, cmdbtnHoverOut);
 	}
 
 }

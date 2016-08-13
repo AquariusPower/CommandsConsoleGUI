@@ -3414,6 +3414,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			if(strCmd.equalsIgnoreCase(ccl.getOriginalLine())){
 //			if(RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE.equals(ccl.strCmdLineOriginal)){
 				bStartupCmdQueueDone=true;
+//				bFullyInitialized=true;
 				return ECmdReturnStatus.FoundAndWorked;
 			}
 		}

@@ -57,6 +57,7 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Insets3f;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.component.BorderLayout;
+import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.component.BorderLayout.Position;
 import com.simsilica.lemur.component.SpringGridLayout;
 import com.simsilica.lemur.event.CursorEventControl;
@@ -324,6 +325,30 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		@Override
 		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 			return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
+		}
+		
+		/**
+		 * 
+		 * @param color if null, will reset (restore current normal bkg color)
+		 */
+		public void setOverrideBackgroundColor(ColorRGBA color) {
+			QuadBackgroundComponent qbc = (QuadBackgroundComponent)
+					getBackground().getGuiControl().getComponent("background");
+			
+			if(color!=null){
+				if(!qbc.getColor().equals(color)){
+					setUserData("BkgColorBkp", qbc.getColor());
+				}
+				
+				qbc.setColor(ColorRGBA.Yellow);
+			}else{
+				ColorRGBA colorBkp = getUserData("BkgColorBkp");
+				if(colorBkp!=null){
+					qbc.setColor(colorBkp);
+					setUserData("BkgColorBkp", null);
+				}
+			}
+			
 		}
 
 	}

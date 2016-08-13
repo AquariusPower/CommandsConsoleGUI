@@ -34,10 +34,13 @@ import java.io.OutputStream;
 import java.nio.BufferUnderflowException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
+import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
@@ -220,5 +223,55 @@ public class MiscJmeI {
 		}
 		
 		return bVisible;
+	}
+	
+	Comparator<Spatial> cmpNodesLast = new Comparator<Spatial>() {
+		@Override
+		public int compare(Spatial o1, Spatial o2) {
+			if(o1 instanceof Node && o2 instanceof Spatial)return 1;
+			return 0;
+		}
+	};
+	
+	public ArrayList<Spatial> getAllChildrenFrom(Node node, String strChildName) {
+		return getAllChildrenFrom(node, strChildName, false);
+	}
+	/**
+	 * 
+	 * @param node
+	 * @param strChildName
+	 * @param bIgnoreCase
+	 * @param asptList
+	 * @return
+	 */
+	public ArrayList<Spatial> getAllChildrenFrom(Node node, String strChildName, boolean bIgnoreCase) {
+		ArrayList<Spatial> asptList = new ArrayList<Spatial>();
+		
+		// add direct children
+		for(Spatial sptChild:node.getChildren()){
+			if(sptChild.getName()==null)continue;
+			
+			Spatial sptMatch = null;
+			if(bIgnoreCase){
+				if(sptChild.getName().equalsIgnoreCase(strChildName)){
+					sptMatch=(sptChild);
+				}
+			}else{
+				if(sptChild.getName().equals(strChildName)){
+					sptMatch=(sptChild);
+				}
+			}
+			
+			if(sptMatch!=null)asptList.add(sptMatch);
+		}
+		
+		// deep search (even on node children matching name)
+		for(Spatial sptChild:node.getChildren()){
+			if(sptChild instanceof Node){
+				asptList.addAll(getAllChildrenFrom((Node)sptChild, strChildName));
+			}
+		}
+		
+		return asptList;
 	}
 }

@@ -299,6 +299,8 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 	protected Integer	iStatsTextSafeLength = null;
 	protected boolean	bExceptionOnce = true;
 	protected boolean	bKeepInitiallyInvisibleUntilFirstClosed = false;
+	protected boolean	bFullyInitialized = false;
+	
 //	protected FocusManagerState	focusState;
 //	protected Spatial	sptPreviousFocus;
 //	protected boolean	bRestorePreviousFocus;
@@ -1822,7 +1824,8 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 		
 		if(cd.checkCmdValidity(this,CMD_CLOSE_CONSOLE,"like the bound key to do it")){
 			setEnabledRequest(false);
-			bKeepInitiallyInvisibleUntilFirstClosed =false;
+//			bKeepInitiallyInvisibleUntilFirstClosed=false; //"first close" is the hint
+//			bFullyInitialized=true; //it will only be completely initialized after the 1st close...
 			bCommandWorked=true;
 		}else
 		if(cd.checkCmdValidity(this,CMD_CONSOLE_HEIGHT,"[fPercent] of the application window")){
@@ -2596,12 +2599,24 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 		this.vlstrDumpEntriesSlowedQueue = vlstrDumpEntriesSlowedQueue;
 	}
 	
+	public boolean isFullyInitialized(){
+		return bFullyInitialized;
+	}
+	
 	public void setHintBox(Node listBox) {
 		this.lstbxAutoCompleteHint=listBox;
 	}
 	
 	public Node getHintBox() {
 		return lstbxAutoCompleteHint;
+	}
+	
+	@Override
+	protected boolean disableOrUndo() {
+		bKeepInitiallyInvisibleUntilFirstClosed=false; //"first close" is the hint
+		bFullyInitialized=true; //it will only be completely initialized after the 1st close...
+		
+		return super.disableOrUndo();
 	}
 	
 	public void setStatsAndControls(Node container) {
@@ -2641,5 +2656,7 @@ public abstract class ConsoleStateAbs<T> extends BaseDialogStateAbs<T> implement
 		// TODO Auto-generated method stub
 		
 	}
+	
+	
 }
 

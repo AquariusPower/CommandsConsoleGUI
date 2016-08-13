@@ -393,20 +393,24 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		LemurFocusHelperStateI.i().requestFocus(getIntputField());
 //	commonOnEnableDisable();
 		
-		AudioUII.i().play(EAudio.OpenConsole);
+		if(isFullyInitialized()){
+			AudioUII.i().play(EAudio.OpenConsole);
+		}
 		
 		return true;
 	}
 	
 	@Override
 	protected boolean disableOrUndo() {
+		if(isFullyInitialized()){ //super sets this..
+			AudioUII.i().play(EAudio.CloseConsole);
+		}
+		
 		if(!super.disableOrUndo())return false;
 		
 		closeHint();
 		LemurFocusHelperStateI.i().removeFocusableFromList(getIntputField());
 //		commonOnEnableDisable();
-		
-		AudioUII.i().play(EAudio.CloseConsole);
 		
 		return true;
 	};

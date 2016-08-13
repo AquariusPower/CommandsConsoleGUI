@@ -40,6 +40,7 @@ import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.SavableHolder;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
+import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -890,5 +891,17 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 //		}
 		
 		return v3fSize;
+	}
+
+	public Cell<?> getCellFor(Spatial source) {
+		Cell<?> cell=null;
+		for(Spatial sptParent:MiscJmeI.i().getParentListFrom(source, false)){
+			if(sptParent instanceof Cell<?>){
+				cell = (Cell<?>)sptParent;
+				break;
+			}
+		}
+		
+		return cell;
 	}
 }
