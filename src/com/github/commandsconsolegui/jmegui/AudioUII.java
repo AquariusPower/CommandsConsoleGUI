@@ -64,7 +64,7 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 	public final BoolTogglerCmdField btgMute = new BoolTogglerCmdField(this,false).setCallNothingOnChange();
 	public final FloatDoubleVarField fdvVolumeGain = new FloatDoubleVarField(this,1.0,"").setMin(0.0).setMax(1.0);
 
-	protected ArrayList<Class<?>>	aclassUserActionStackList = new ArrayList<Class<?>>(); 
+	private ArrayList<Class<?>>	aclassUserActionStackList = new ArrayList<Class<?>>(); 
 	
 	public enum EUserData{
 		strAudioId,

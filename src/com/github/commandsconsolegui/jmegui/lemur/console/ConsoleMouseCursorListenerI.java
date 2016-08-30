@@ -48,10 +48,10 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 	private static ConsoleMouseCursorListenerI instance = new ConsoleMouseCursorListenerI();
 	public static ConsoleMouseCursorListenerI i(){return instance;}
 	
-	protected ConsoleStateAbs<?> csa;
-	protected CommandsDelegator	cd;
-//	protected ConsoleStateAbs<?>	cgui;
-	protected boolean	bConfigured;
+//	private ConsoleStateAbs<?> csa;
+	private CommandsDelegator	cd;
+//	private ConsoleStateAbs<?>	cgui;
+	private boolean	bConfigured;
 	
 	public void configure(){
 		this.cd=GlobalCommandsDelegatorI.i();
@@ -64,7 +64,7 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 		bConfigured=true;
 	}
 
-	protected String debugPart(Panel pnl){
+	private String debugPart(Panel pnl){
 		return pnl.getName()+","
 			+pnl.getElementId()+","
 			+pnl.getClass().getSimpleName()
@@ -84,7 +84,7 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 		cd.dumpDebugEntry("FOCUS@"+strTgt+strCap+strB+strM);
 	}
 	
-	protected void cursorMoveEvent(CursorMotionEvent event, Spatial target,	Spatial capture) {
+	private void cursorMoveEvent(CursorMotionEvent event, Spatial target,	Spatial capture) {
 		if(!GlobalConsoleGUII.i().isScrollRequestTarget(target)){ //detect changed
 			debugReport(event, null, target, capture);
 		}
@@ -105,7 +105,7 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 	}
 	
 //	@Override
-//	protected boolean click(EMouseCursorButton button, Spatial target,	Spatial capture) {
+//	private boolean click(EMouseCursorButton button, Spatial target,	Spatial capture) {
 //		debugReport(null, button.getLastButtonEvent(), target, capture);
 //		
 //		if(!button.isPressed()){ //on release

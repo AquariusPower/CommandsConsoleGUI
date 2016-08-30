@@ -81,7 +81,7 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 //		return mcab;
 //	}
 	
-//	protected long lClickDelayMilis;
+//	private long lClickDelayMilis;
 	
 	/**
 	 * Calling this method will also promptly instantiate this class and

@@ -47,12 +47,12 @@ import com.simsilica.lemur.GuiGlobals;
 /**
  * @author AquariusPower <https://github.com/AquariusPower>
  */
-public abstract class BasicDialogStateAbs<T> extends LemurDialogGUIStateAbs<T>{
+public abstract class BasicDialogStateAbs<T,R extends BasicDialogStateAbs<T,R>> extends LemurDialogGUIStateAbs<T,R>{
 	StringCmdField scfAddEntry = new StringCmdField(this,null,"[strEntryText]");
 	private CfgParm	cfg;
 	
 	public BasicDialogStateAbs() {
-		super.bPrefixCmdWithIdToo = true;
+		setPrefixCmdWithIdToo(true);
 	}
 	
 	public static class CfgParm extends LemurDialogGUIStateAbs.CfgParm{
@@ -71,7 +71,7 @@ public abstract class BasicDialogStateAbs<T> extends LemurDialogGUIStateAbs<T>{
 		}
 	}
 	@Override
-	public BasicDialogStateAbs<T> configure(ICfgParm icfg) {
+	public R configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg; //this also validates if icfg is the CfgParam of this class
 		
 		super.configure(cfg); //params are identical
@@ -82,7 +82,7 @@ public abstract class BasicDialogStateAbs<T> extends LemurDialogGUIStateAbs<T>{
 		 * to save CPU or any other reason.
 		 */
 		super.setRetryDelay(100); //sets for all kinds
-		super.rInit.setRetryDelay(1000); //must be after the generic one above.
+		super.setRetryDelay(EDelayMode.Init,1000); //must be after the generic one above.
 		
 		return storeCfgAndReturnSelf(icfg);
 	}
@@ -158,7 +158,7 @@ public abstract class BasicDialogStateAbs<T> extends LemurDialogGUIStateAbs<T>{
 	}
 
 //	@Override
-//	protected String getSelectedEntryKey() {
+//	private String getSelectedEntryKey() {
 //		return hmKeyValueTmp.get(formatEntryKey(getSelectedEntryValue()));
 //	}
 	
@@ -178,7 +178,7 @@ public abstract class BasicDialogStateAbs<T> extends LemurDialogGUIStateAbs<T>{
 			String strParentUId = cd.getCurrentCommandLine().paramString(2);
 			
 			DialogListEntryData<T> dleParent = null;
-			for(DialogListEntryData<T> dle:super.getListCopy()){
+			for(DialogListEntryData<T> dle:getCompleteEntriesListCopy()){
 				if(dle.getUId().equalsIgnoreCase(strParentUId)){
 					dleParent=dle;
 					break;

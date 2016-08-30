@@ -31,6 +31,7 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.misc.CheckInitAndCleanupI.ICheckInitAndCleanupI;
+import com.github.commandsconsolegui.misc.CompositeControlAbs;
 
 /**
  * 
@@ -51,11 +52,11 @@ public interface IConsoleUI extends ICheckInitAndCleanupI{
 
 //	public abstract Integer getConsoleMaxWidthInCharsForLineWrap();
 
-	public abstract AbstractList<String> getDumpEntriesSlowedQueue();
+	public abstract AbstractList<String> getDumpEntriesSlowedQueue(CompositeControlAbs<?> ccTrustedManipulator);
+	
+	public abstract AbstractList<String> getDumpEntries(CompositeControlAbs<?> ccTrustedManipulator);
 
-	public abstract AbstractList<String> getDumpEntries();
-
-	public abstract AbstractList<String> getAutoCompleteHintList();
+//	public abstract AbstractList<String> getAutoCompleteHintList();
 
 	public abstract String getInputText();
 

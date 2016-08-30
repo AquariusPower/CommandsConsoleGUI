@@ -63,7 +63,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 	/**
 	 * This Id is only required if there is more than one state of the same class.
 	 */
-	protected String strCaseInsensitiveId = null;
+	private String strCaseInsensitiveId = null;
 	
 //	public static interface IConditionalStateAbsForConsoleUI{
 //		public abstract void requestRestart();
@@ -78,11 +78,11 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 	private Long lTimeReferenceMilis = null;
 	
 //	/** true to delay initialization*/
-//	protected boolean bPreInitHold=false;
+//	private boolean bPreInitHold=false;
 //	private boolean	bPreInitialized;
 	
 	// TRY INIT 
-	protected class Retry{
+	private class Retry{
 		long lStartMilis=0;
 		
 		/** 0 means retry at every update*/
@@ -92,6 +92,10 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 			this.lDelayMilis=lMilis;
 		}
 		
+		/**
+		 * TODO rename to isReadyToRetry()
+		 * @return
+		 */
 		boolean canRetryNow(){
 			return getUpdatedTime() > (lStartMilis+lDelayMilis);
 		}
@@ -101,22 +105,22 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 		}
 		
 	}
-	protected Retry rInit = new Retry();
-	protected Retry rEnable = new Retry();
-	protected Retry rDisable = new Retry();
-	protected Retry rDiscard = new Retry();
+	private Retry rInit = new Retry();
+	private Retry rEnable = new Retry();
+	private Retry rDisable = new Retry();
+	private Retry rDiscard = new Retry();
 	
 	// PROPERLY INIT
 	private boolean	bProperlyInitialized;
 	
 	/** it must be initially disabled, the request will properly enable it*/
-	protected boolean	bEnabled = false;
+	private boolean	bEnabled = false;
 	
 	private boolean	bEnabledRequested = true; //initially all will be wanted as enabled by default
 	private boolean	bDisabledRequested;
 	
 	/** set to true to allow instant configuration but wait before properly initializing*/
-	protected boolean bHoldProperInitialization = false;
+	private boolean bHoldProperInitialization = false;
 	
 	private boolean	bLastUpdateSuccessful;
 	private boolean	bHoldUpdates;
@@ -146,8 +150,8 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 	 * see {@link ICfgParm}
 	 */
 	public static class CfgParm implements ICfgParm{
-		protected Application app;
-		protected String strId;
+		private Application app;
+		private String strId;
 		public CfgParm(Application app, String strId) {
 			super();
 			this.app = app;
@@ -155,6 +159,9 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 		}
 		public String getId(){
 			return strId;
+		}
+		public void setId(String strId){
+			this.strId=strId;
 		}
 	}
 	private CfgParm	cfg;
@@ -174,7 +181,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 		
 		if(isDiscarded())throw new PrerequisitesNotMetException("cannot re-use after discarded");
 		
-//	protected void configure(Application app){
+//	private void configure(Application app){
 		if(this.bConfigured)throw new PrerequisitesNotMetException("already configured");
 		
 		// internal configurations
@@ -222,11 +229,11 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 		return (T)this;
 	}
 	
-	protected ICfgParm getCfg(){
+	private ICfgParm getCfg(){
 		return icfgOfInstance;
 	}
 	
-	protected void msgDbg(String str, boolean bSuccess) {
+	private void msgDbg(String str, boolean bSuccess) {
 		MsgI.i().dbg(str, bSuccess, this);
 	}
 
@@ -256,7 +263,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 		return cfg.app;
 	}
 	
-	protected void assertIsConfigured() {
+	private void assertIsConfigured() {
 		if(!isConfigured())throw new PrerequisitesNotMetException("not configured yet!");
 	}
 	
@@ -584,16 +591,45 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 	}
 	
 	/**
-	 * each state can have its delay value set individually also.
+	 * see {@link #setRetryDelay(EDelayMode, long)}
 	 * @param lMilis
 	 */
 	public void setRetryDelay(long lMilis){
-		rInit.setRetryDelay(lMilis);
-		rEnable.setRetryDelay(lMilis);
-		rDisable.setRetryDelay(lMilis);
-		rDiscard.setRetryDelay(lMilis);
+		setRetryDelay(null, lMilis);
 	}
-
+	/**
+	 * each state can have its delay value set individually also.
+	 * @param lMilis
+	 */
+	public void setRetryDelay(EDelayMode e, long lMilis){
+		EDelayMode[] ae = {e};
+		if(e==null)ae=EDelayMode.values();
+		
+		for(EDelayMode eDoIt:ae){
+			switch(eDoIt){
+				case Init:
+					rInit.setRetryDelay(lMilis);
+					break;
+				case Enable:
+					rEnable.setRetryDelay(lMilis);
+					break;
+				case Disable:
+					rDisable.setRetryDelay(lMilis);
+					break;
+				case Discard:
+					rDiscard.setRetryDelay(lMilis);
+					break;
+			}
+		}
+	}
+	
+	public static enum EDelayMode{
+		Init,
+		Enable,
+		Disable,
+		Discard
+	}
+	
   @Override
 	public void write(JmeExporter ex) throws IOException{
   	

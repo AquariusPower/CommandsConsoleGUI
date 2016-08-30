@@ -70,14 +70,14 @@ import com.simsilica.lemur.list.CellRenderer;
  *
  */
 public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryData<T>>, IReflexFillCfg {
-	protected static StringVarField svfTreeDepthToken;
-	protected static BoolTogglerCmdField	btgShowTreeUId;
+	private static StringVarField svfTreeDepthToken;
+	private static BoolTogglerCmdField	btgShowTreeUId;
 	
-	protected String	strStyle;
-	protected LemurDialogGUIStateAbs<T>	diagParent;
+	private String	strStyle;
+	private LemurDialogGUIStateAbs<T,?>	diagParent;
 //	private boolean	bOptionChoiceMode;
 	
-	public CellRendererDialogEntry(String strStyle, LemurDialogGUIStateAbs<T> diag){//, boolean bOptionChoiceMode) {
+	public CellRendererDialogEntry(String strStyle, LemurDialogGUIStateAbs<T,?> diag){//, boolean bOptionChoiceMode) {
 		this.strStyle=strStyle;
 		this.diagParent=diag;
 //		this.bOptionChoiceMode=bOptionChoiceMode;
@@ -103,25 +103,25 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			;
 		}
 		
-		protected static BoolTogglerCmdField btgNOTWORKINGBugFixGapForListBoxSelectorArea;
+		private static BoolTogglerCmdField btgNOTWORKINGBugFixGapForListBoxSelectorArea;
 		
-		protected Button	btnText;
-		protected Button	btnTree;
+		private Button	btnText;
+		private Button	btnTree;
 		
 //		private Button	btnCfg;
 //		private Button btnSelect;
-		protected DialogListEntryData<T>	dled;
-		protected CellRendererDialogEntry<T>	assignedCellRenderer;
-		protected String	strPrefix = "Cell";
+		private DialogListEntryData<T>	dled;
+		private CellRendererDialogEntry<T>	assignedCellRenderer;
+		private String	strPrefix = "Cell";
 //		private String	strColorFgBkpKey = "ColorFgBkp";
-		protected Container	cntrCustomButtons;
-		protected Container	cntrBase;
+		private Container	cntrCustomButtons;
+		private Container	cntrBase;
 		
 		public DialogListEntryData<T> getDialogListEntryData(){
 			return dled;
 		}
 		
-		protected void updateTreeButton(){
+		private void updateTreeButton(){
 			String strDepth = "";
 			
 			String strTreeAction = dled.isParent() ? 
@@ -268,7 +268,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		 * @param p
 		 * @return
 		 */
-		protected Button createButton(String strId, String strLabel, Container cntr, Object... aobjConstraints){
+		private Button createButton(String strId, String strLabel, Container cntr, Object... aobjConstraints){
 			if(strId==null)strId=strLabel;
 			Button btn = new Button(strLabel,assignedCellRenderer.strStyle);
 			MiscJmeI.i().retrieveBitmapTextFor(btn).setLineWrapMode(LineWrapMode.NoWrap);
@@ -342,7 +342,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		 * @param colorApply if null, will reset (restore current normal bkg color)
 		 * @param bNegateCurrentColor overrides color param (least if it is null)
 		 */
-		protected void setOverrideBackgroundColor(ColorRGBA colorApply,boolean bNegateCurrentColor) {
+		private void setOverrideBackgroundColor(ColorRGBA colorApply,boolean bNegateCurrentColor) {
 			QuadBackgroundComponent qbc = (QuadBackgroundComponent)
 					getBackground().getGuiControl().getComponent("background");
 			

@@ -27,11 +27,10 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
-import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 
 /**
@@ -40,14 +39,14 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  *
  * @author AquariusPower <https://github.com/AquariusPower>
  */
-public class FloatDoubleVarField extends VarCmdFieldAbs{
-	protected static boolean	bConfigured;
-	protected static IHandleExceptions	ihe = HandleExceptionsRaw.i();
-	protected static String	strCodePrefixVariant = "fdv";
-//	protected static ArrayList<FloatDoubleVarField> afdvList = new ArrayList<FloatDoubleVarField>();
-	protected Double dValue;
-	protected Double dMin;
-	protected Double dMax;
+public class FloatDoubleVarField extends VarCmdFieldAbs<FloatDoubleVarField>{
+	private static boolean	bConfigured;
+	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
+	private static String	strCodePrefixVariant = "fdv";
+//	private static ArrayList<FloatDoubleVarField> afdvList = new ArrayList<FloatDoubleVarField>();
+	private Double dValue;
+	private Double dMin;
+	private Double dMax;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
@@ -67,15 +66,17 @@ public class FloatDoubleVarField extends VarCmdFieldAbs{
 	 */
 	public FloatDoubleVarField(IReflexFillCfg rfcfgOwnerUseThis, Double dInitialValue, String strHelp) {
 //		if(rfcfgOwnerUseThis!=null)afdvList.add(this); //only fields allowed
-		super(rfcfgOwnerUseThis!=null); //only fields allowed
-		this.rfcfgOwner=rfcfgOwnerUseThis;
+//		super(rfcfgOwnerUseThis!=null); //only fields allowed
+		super(rfcfgOwnerUseThis); //only fields allowed
+//		setOwner(rfcfgOwnerUseThis);
 		this.dValue=dInitialValue;
-		this.strHelp=strHelp;
-		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
+		setHelp(strHelp);
+//		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
 	}
 	
 	@Override
-	public void setObjectValue(Object objValue) {
+//	public FloatDoubleVarField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
+	public FloatDoubleVarField setObjectValue(Object objValue) {
 		if(objValue instanceof Double){
 			dValue = ((Double)objValue);
 		}else
@@ -89,7 +90,10 @@ public class FloatDoubleVarField extends VarCmdFieldAbs{
 		if(dMin!=null && dValue<dMin)dValue=dMin;
 		if(dMax!=null && dValue>dMax)dValue=dMax;
 		
-		if(vivo!=null)vivo.setObjectValue(objValue);
+//		super.setObjectValue(ccCD,objValue);
+		super.setObjectValue(objValue);
+		
+		return this;
 	}
 
 	@Override
@@ -97,11 +101,6 @@ public class FloatDoubleVarField extends VarCmdFieldAbs{
 		return FloatDoubleVarField.strCodePrefixVariant ;
 	}
 
-	@Override
-	public IReflexFillCfg getOwner() {
-		return rfcfgOwner;
-	}
-	
 	public Float getFloat(){
 		if(dValue==null)return null;
 		return dValue.floatValue();
@@ -124,15 +123,15 @@ public class FloatDoubleVarField extends VarCmdFieldAbs{
 //		return new ArrayList<FloatDoubleVarField>(afdvList);
 //	}
 	
-	@Override
-	public String getVarId() {
-//		if(strVarId==null)strVarId=ReflexFillI.i().getVarId(rfcfgOwner, strCodePrefixVariant, this, -1);
-		if(strVarId==null){
-			super.setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner, this, true));
-		}
-		
-		return strVarId;
-	}
+//	@Override
+//	public String getVarId() {
+////		if(strVarId==null)strVarId=ReflexFillI.i().getVarId(rfcfgOwner, strCodePrefixVariant, this, -1);
+//		if(strVarId==null){
+//			super.setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(getOwner(), this, true));
+//		}
+//		
+//		return strVarId;
+//	}
 
 	@Override
 	public String getReport() {
@@ -144,10 +143,10 @@ public class FloatDoubleVarField extends VarCmdFieldAbs{
 		return getDouble();
 	}
 
-	@Override
-	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
-		this.vivo=vivo;
-	}
+//	@Override
+//	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
+//		this.vivo=vivo;
+//	}
 	
 	@Override
 	public String toString() {
@@ -155,10 +154,10 @@ public class FloatDoubleVarField extends VarCmdFieldAbs{
 		return MiscI.i().fmtFloat(dValue,3);
 	}
 
-	@Override
-	public String getHelp() {
-		return strHelp==null?"":strHelp;
-	}
+//	@Override
+//	public String getHelp() {
+//		return strHelp==null?"":strHelp;
+//	}
 
 	@Override
 	public String getVariablePrefix() {
@@ -174,5 +173,9 @@ public class FloatDoubleVarField extends VarCmdFieldAbs{
 		this.dMax=dMax;
 		return this;
 	}
-
+	
+	@Override
+	protected FloatDoubleVarField getThis() {
+		return this;
+	}
 }

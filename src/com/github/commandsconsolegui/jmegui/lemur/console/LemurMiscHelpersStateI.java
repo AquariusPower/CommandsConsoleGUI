@@ -93,7 +93,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 //		this.sapp = sapp;
 //	}
 	
-	protected TimedDelayVarField tdTextCursorBlink = new TimedDelayVarField(this,1f,"blink delay");
+	private TimedDelayVarField tdTextCursorBlink = new TimedDelayVarField(this,1f,"blink delay");
 	private boolean	bBlinkingTextCursor = true;
 	private FocusManagerState	focusState;
 	private TextField	tfToBlinkCursor;
@@ -122,7 +122,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 //	private int	iMoveCaratTo;
 	
 	public LemurMiscHelpersStateI() {
-		super.bPrefixCmdWithIdToo = true;
+		setPrefixCmdWithIdToo(true);
 	}
 	
 	public Geometry getTextCursorFrom(TextField tf){
@@ -185,7 +185,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	}
 	
 //	@Deprecated
-//	protected void _updateBlinkInputFieldTextCursor(TextField tf) {
+//	private void _updateBlinkInputFieldTextCursor(TextField tf) {
 //		if(!bBlinkingTextCursor)return;
 //		if(!tf.equals(LemurFocusHelperStateI.i().getFocused()))return;
 //		
@@ -237,7 +237,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 //			
 //	}
 	
-	protected void updateBlinkInputFieldTextCursor(TextField tf) {
+	private void updateBlinkInputFieldTextCursor(TextField tf) {
 		if(!bBlinkingTextCursor)return;
 		if(!tf.equals(LemurFocusHelperStateI.i().getFocused()))return;
 		
@@ -314,7 +314,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	
 	/**
 	 * To show the cursor at the new carat position, 
-	 * this required protected method: {@link TextEntryComponent#resetCursorPosition}
+	 * this required private method: {@link TextEntryComponent#resetCursorPosition}
 	 * must be reached in some way...
 	 * 
 	 * @param tf

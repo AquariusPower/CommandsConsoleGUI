@@ -38,6 +38,7 @@ public class HashChangeHolder {
 	private int	iHash;
 	private long lCount;
 	private long	lLastChangeTime;
+	private StackTraceElement[] ste;
 
 	public HashChangeHolder(Object objRef){
 		this.objRef=objRef;
@@ -48,6 +49,7 @@ public class HashChangeHolder {
 		if(iHashTmp!=iHash){
 			iHash=iHashTmp;
 			lCount++;
+			ste=Thread.currentThread().getStackTrace();
 			lLastChangeTime=System.nanoTime();
 			return true;
 		}

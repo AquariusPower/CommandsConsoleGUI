@@ -27,15 +27,10 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import java.util.ArrayList;
-
-import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
-import com.github.commandsconsolegui.cmd.VarIdValueOwnerData.IVarIdValueOwner;
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
-import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 
 /**
  * This class is intended to be used only as class field variables.
@@ -44,7 +39,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class StringVarField extends VarCmdFieldAbs{
+public class StringVarField extends VarCmdFieldAbs<StringVarField>{
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	private static String	strCodePrefixVariant = "svf";
@@ -67,15 +62,17 @@ public class StringVarField extends VarCmdFieldAbs{
 	 */
 	public StringVarField(IReflexFillCfg rfcfgOwnerUseThis, String strInitialValue,String strHelp) {
 //		if(rfcfgOwnerUseThis!=null)ailvList.add(this); //only fields allowed
-		super(rfcfgOwnerUseThis!=null); //only fields allowed
-		this.rfcfgOwner=rfcfgOwnerUseThis;
+//		super(rfcfgOwnerUseThis!=null); //only fields allowed
+		super(rfcfgOwnerUseThis);
+//		this.setOwner(rfcfgOwnerUseThis);
 		this.strValue=strInitialValue;
-		this.strHelp=strHelp;
-		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
+		this.setHelp(strHelp);
+//		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
 	}
 	
 	@Override
-	public void setObjectValue(Object objValue) {
+//	public StringVarField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
+	public StringVarField setObjectValue(Object objValue) {
 		if(objValue instanceof StringVarField){
 			strValue = ((StringVarField)objValue).strValue;
 		}else
@@ -83,7 +80,10 @@ public class StringVarField extends VarCmdFieldAbs{
 			strValue = ""+objValue;
 		}
 		
-		if(vivo!=null)vivo.setObjectValue(objValue);
+//		super.setObjectValue(ccCD,objValue);
+		super.setObjectValue(objValue);
+		
+		return this;
 	}
 
 	@Override
@@ -91,23 +91,18 @@ public class StringVarField extends VarCmdFieldAbs{
 		return StringVarField.strCodePrefixVariant ;
 	}
 
-	@Override
-	public IReflexFillCfg getOwner() {
-		return rfcfgOwner;
-	}
-
 //	public static ArrayList<StringVarField> getListCopy(){
 //		return new ArrayList<StringVarField>(ailvList);
 //	}
 	
-	@Override
-	public String getVarId() {
-		if(strVarId==null){
-			super.setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner, this, true));
-		}
-		
-		return strVarId;
-	}
+//	@Override
+//	public String getVarId() {
+//		if(strVarId==null){
+//			super.setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(getOwner(), this, true));
+//		}
+//		
+//		return strVarId;
+//	}
 
 	@Override
 	public String getReport() {
@@ -119,10 +114,10 @@ public class StringVarField extends VarCmdFieldAbs{
 		return strValue;
 	}
 
-	@Override
-	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
-		this.vivo=vivo;
-	}
+//	@Override
+//	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
+//		this.vivo=vivo;
+//	}
 	
 	@Override
 	public String toString() {
@@ -134,14 +129,18 @@ public class StringVarField extends VarCmdFieldAbs{
 		return strValue;
 	}
 
-	@Override
-	public String getHelp() {
-		return strHelp==null?"":strHelp;
-	}
+//	@Override
+//	public String getHelp() {
+//		return strHelp==null?"":strHelp;
+//	}
 
 	@Override
 	public String getVariablePrefix() {
 		return "String";
 	}
 
+	@Override
+	protected StringVarField getThis() {
+		return this;
+	}
 }

@@ -62,9 +62,14 @@ public class GlobalsI <G extends GlobalsI<G>> {
 			throw new NullPointerException("use specific methods for primitives: "+objGloballyAccessible);
 		}
 		
-		if(getSingleInstance(objGloballyAccessible.getClass())!=null){
-			throw new NullPointerException("single instance already set for: "+objGloballyAccessible.getClass().getName());
-		}
+		PrerequisitesNotMetException.assertNotAlreadySet(
+			"SingleInstance", 
+			getSingleInstance(objGloballyAccessible.getClass()), 
+			objGloballyAccessible, 
+			objGloballyAccessible.getClass().getName());
+//		if(getSingleInstance(objGloballyAccessible.getClass())!=null){
+//			throw new NullPointerException("single instance already set for: "+objGloballyAccessible.getClass().getName());
+//		}
 		
 		hmSingleInstanceGlobalList.put(objGloballyAccessible.getClass(),objGloballyAccessible);
 	}
@@ -101,12 +106,14 @@ public class GlobalsI <G extends GlobalsI<G>> {
 			throw new NullPointerException("use specific methods for non-primitives: "+objVal);
 		}
 		
+		ValueAccess va = new ValueAccess(objVal,objRestrictAccess);
 		if(hmPrimitiveGlobalList.containsKey(objKey)){
 //		if(getPrimitiveValue(objKey, objVal.getClass())!=null){
-			throw new NullPointerException("primitive already set for key: "+objKey);
+//			throw new NullPointerException("primitive already set for key: "+objKey);
+			PrerequisitesNotMetException.assertNotAlreadySet("primitive", hmPrimitiveGlobalList.get(objKey), va, objKey);
 		}
 		
-		hmPrimitiveGlobalList.put(objKey,new ValueAccess(objVal,objRestrictAccess));
+		hmPrimitiveGlobalList.put(objKey,va);
 	}
 	
 	public void updatePrimitiveValue(Object objKey, Object objVal, Object objRestrictAccess){

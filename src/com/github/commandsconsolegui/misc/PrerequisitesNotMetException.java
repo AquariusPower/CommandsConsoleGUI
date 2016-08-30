@@ -27,6 +27,9 @@
 
 package com.github.commandsconsolegui.misc;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 /**
  * Things that should be been coded in a certain way but were overlooked.
  * 
@@ -68,5 +71,14 @@ public class PrerequisitesNotMetException extends NullPointerException {
 	
 	public static boolean isExitRequested(){
 		return bRequestExit;
+	}
+	
+	public static void assertNotAlreadySet(String strDescWhat, Object objCurrent, Object objNew, Object... aobjMoreObjectsForDebugInfo){
+		ArrayList<Object> aobjAll = new ArrayList<Object>();
+		aobjAll.add(objCurrent);
+		aobjAll.add(objNew);
+		aobjAll.addAll(Arrays.asList(aobjMoreObjectsForDebugInfo));
+		
+		if(objCurrent!=null)throw new PrerequisitesNotMetException(strDescWhat+": already set", aobjAll.toArray());
 	}
 }

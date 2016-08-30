@@ -27,15 +27,10 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import java.util.ArrayList;
-
-import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
-import com.github.commandsconsolegui.cmd.VarIdValueOwnerData.IVarIdValueOwner;
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
-import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 
 /**
  * This class is intended to be used only as class field variables.
@@ -46,13 +41,13 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class IntLongVarField extends VarCmdFieldAbs{
-	protected static boolean	bConfigured;
-	protected static IHandleExceptions	ihe = HandleExceptionsRaw.i();
-	protected static String	strCodePrefixVariant = "ilv";
-//	protected static ArrayList<IntLongVarField> ailvList = new ArrayList<IntLongVarField>();
+public class IntLongVarField extends VarCmdFieldAbs<IntLongVarField>{
+	private static boolean	bConfigured;
+	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
+	private static String	strCodePrefixVariant = "ilv";
+//	private static ArrayList<IntLongVarField> ailvList = new ArrayList<IntLongVarField>();
 	
-	protected Long lValue;
+	private Long lValue;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
@@ -72,15 +67,17 @@ public class IntLongVarField extends VarCmdFieldAbs{
 	 */
 	public IntLongVarField(IReflexFillCfg rfcfgOwnerUseThis, Long lInitialValue, String strHelp) {
 //		if(rfcfgOwnerUseThis!=null)ailvList.add(this); //only fields allowed
-		super(rfcfgOwnerUseThis!=null); //only fields allowed
-		this.rfcfgOwner=rfcfgOwnerUseThis;
+//		super(rfcfgOwnerUseThis!=null); //only fields allowed
+		super(rfcfgOwnerUseThis);
+//		this.setOwner(rfcfgOwnerUseThis);
 		this.lValue=lInitialValue;
-		this.strHelp=strHelp;
-		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
+		setHelp(strHelp);
+//		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
 	}
 	
 	@Override
-	public void setObjectValue(Object objValue) {
+//	public IntLongVarField setObjectValue(CommandsDelegator.CompositeControl cc, Object objValue) {
+	public IntLongVarField setObjectValue(Object objValue) {
 		if(objValue instanceof Long){
 			lValue = ((Long)objValue);
 		}else
@@ -91,22 +88,20 @@ public class IntLongVarField extends VarCmdFieldAbs{
 			lValue = ((Integer)objValue).longValue();
 		}
 		
-		if(vivo!=null)vivo.setObjectValue(objValue);
+//		super.setObjectValue(cc,objValue);
+		super.setObjectValue(objValue);
+		
+		return this;
 	}
 	
-	@Override
-	public String getHelp(){
-		return strHelp==null?"":strHelp;
-	}
+//	@Override
+//	public String getHelp(){
+//		return strHelp==null?"":strHelp;
+//	}
 	
 	@Override
 	public String getCodePrefixVariant() {
 		return IntLongVarField.strCodePrefixVariant ;
-	}
-
-	@Override
-	public IReflexFillCfg getOwner() {
-		return rfcfgOwner;
 	}
 
 	public Integer getInt() {
@@ -128,15 +123,15 @@ public class IntLongVarField extends VarCmdFieldAbs{
 //		return new ArrayList<IntLongVarField>(ailvList);
 //	}
 	
-	@Override
-	public String getVarId() {
-//		if(strVarId==null)strVarId=ReflexFillI.i().getVarId(rfcfgOwner, strCodePrefixVariant, this, -1);
-		if(strVarId==null){
-			super.setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner, this, true));
-		}
-		
-		return strVarId;
-	}
+//	@Override
+//	public String getVarId() {
+////		if(strVarId==null)strVarId=ReflexFillI.i().getVarId(rfcfgOwner, strCodePrefixVariant, this, -1);
+//		if(strVarId==null){
+//			super.setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(getOwner(), this, true));
+//		}
+//		
+//		return strVarId;
+//	}
 
 	@Override
 	public String getReport() {
@@ -148,10 +143,10 @@ public class IntLongVarField extends VarCmdFieldAbs{
 		return getLong();
 	}
 
-	@Override
-	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
-		this.vivo=vivo;
-	}
+//	@Override
+//	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
+//		this.vivo=vivo;
+//	}
 	
 	@Override
 	public String toString() {
@@ -164,4 +159,8 @@ public class IntLongVarField extends VarCmdFieldAbs{
 		return "Int";
 	}
 	
+	@Override
+	protected IntLongVarField getThis() {
+		return this;
+	}
 }

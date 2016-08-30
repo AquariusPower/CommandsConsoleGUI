@@ -59,7 +59,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 	private static ConsoleTestI instance = new ConsoleTestI();
 	public static ConsoleTestI i(){return instance;}
 	
-	protected boolean bHideSettings=true; 
+	private boolean bHideSettings=true; 
 	
 	//private final String strFinalFieldCodePrefix="CMD_";
 	private final String strFieldCodePrefix="sf";
@@ -172,7 +172,8 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 			AppSettings as = new AppSettings(true);
 			as.setResizable(true);
 			as.setWidth(1024);
-			as.setHeight(768);
+			as.setHeight(700); //768
+//			as.setFullscreen(false);
 			//as.setFrameRate(30); //TODO are we unable to change this on-the-fly after starting the application?
 			ConsoleTestI.i().setSettings(as);
 			ConsoleTestI.i().setShowSettings(false);

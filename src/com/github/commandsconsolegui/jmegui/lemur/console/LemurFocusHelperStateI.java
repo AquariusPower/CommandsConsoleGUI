@@ -66,7 +66,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	
 	ArrayList<FocusTarget> aftZOrderList = new ArrayList<FocusTarget>();
 	ArrayList<Spatial> asptFocusRequestList = new ArrayList<Spatial>();
-	protected FocusManagerState focusState;
+	private FocusManagerState focusState;
 //	private SimpleApplication	sapp;
 //	private CommandsDelegatorI	cc;
 	FloatDoubleVarField fdvDialogBazeZ = new FloatDoubleVarField(this, 20f, "the starting point at Z axis to place dialogs");
@@ -80,7 +80,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 //	}
 	
 	public LemurFocusHelperStateI() {
-		super.bPrefixCmdWithIdToo = true;
+		setPrefixCmdWithIdToo(true);
 	}
 	
 	public static class CfgParm implements ICfgParm{

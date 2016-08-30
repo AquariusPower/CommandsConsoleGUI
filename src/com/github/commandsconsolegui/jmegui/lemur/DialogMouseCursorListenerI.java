@@ -62,7 +62,7 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 		
 		// missing ones are ignored so each element can consume it properly
 		boolean bConsumed = false;
-		final LemurDialogGUIStateAbs<?> diag = LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
+		final LemurDialogGUIStateAbs<?,?> diag = LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
 		EMouseCursorButton e = buttonData.getActivatorType();
 		switch(e){
 			case Action1Click:

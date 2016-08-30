@@ -52,10 +52,10 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 	
 	StringCmdField scfRestart = new StringCmdField(this,null);
 //	private StringCmdField cmdState = null;
-	protected BoolTogglerCmdField btgState = new BoolTogglerCmdField(this, true, null, "toggles the state (enabled/disabled)");
+	protected final BoolTogglerCmdField btgState = new BoolTogglerCmdField(this, true, null, "toggles the state (enabled/disabled)");
 //	private String	strCmdIdentifier;
-	protected String strCmdPrefix="toggle";
-	protected String strCmdSuffix="State";
+	private String strCmdPrefix="toggle";
+	private String strCmdSuffix="State";
 	
 	public CmdConditionalStateAbs() {
 		// TODO Auto-generated constructor stub
@@ -81,13 +81,13 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 	
 //	@Deprecated
 //	@Override
-//	protected void configure(Application app) {
+//	private void configure(Application app) {
 //		throw new NullPointerException("deprecated!!!");
 //	}
 	
 //	public static class CfgParm implements ICfgParm{
-////		protected boolean bIgnorePrefixAndSuffix;
-//		protected String	strId;
+////		private boolean bIgnorePrefixAndSuffix;
+//		private String	strId;
 //		public String getId(){return strId;}
 //		public CfgParm(String strCmdBaseId) {
 //			super();
@@ -237,7 +237,7 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 		return true;
 	}
 	
-	protected boolean bPrefixCmdWithIdToo=false;
+	private boolean bPrefixCmdWithIdToo=false;
 	
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
@@ -257,6 +257,30 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 		}
 		
 		return rfcfg;
+	}
+
+	public String getCmdPrefix() {
+		return strCmdPrefix;
+	}
+
+	protected void setCmdPrefix(String strCmdPrefix) {
+		this.strCmdPrefix = strCmdPrefix;
+	}
+
+	public String getCmdSuffix() {
+		return strCmdSuffix;
+	}
+
+	protected void setCmdSuffix(String strCmdSuffix) {
+		this.strCmdSuffix = strCmdSuffix;
+	}
+
+	public boolean isPrefixCmdWithIdToo() {
+		return bPrefixCmdWithIdToo;
+	}
+	
+	protected void setPrefixCmdWithIdToo(boolean bPrefixCmdWithIdToo) {
+		this.bPrefixCmdWithIdToo = bPrefixCmdWithIdToo;
 	}
 
 }

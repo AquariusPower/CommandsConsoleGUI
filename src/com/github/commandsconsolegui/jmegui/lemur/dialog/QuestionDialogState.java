@@ -36,7 +36,7 @@ import com.simsilica.lemur.Command;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class QuestionDialogState<T extends Command<Button>> extends BasicDialogStateAbs<T> {
+public class QuestionDialogState<T extends Command<Button>> extends BasicDialogStateAbs<T,QuestionDialogState<T>> {
 	private DialogListEntryData<T>	dledYes;
 	private DialogListEntryData<T>	dledNo;
 	
@@ -81,4 +81,10 @@ public class QuestionDialogState<T extends Command<Button>> extends BasicDialogS
 	public boolean prepareTestData() {
 		return true;
 	}
+
+	@Override
+	protected QuestionDialogState<T> getThis() {
+		return this;
+	}
 }
+

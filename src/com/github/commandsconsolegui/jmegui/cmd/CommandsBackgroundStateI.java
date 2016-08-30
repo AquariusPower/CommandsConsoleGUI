@@ -43,13 +43,13 @@ public class CommandsBackgroundStateI extends CmdConditionalStateAbs {
 	private static CommandsBackgroundStateI instance = new CommandsBackgroundStateI();
 	public static CommandsBackgroundStateI i(){return instance;}
 	
-	protected BoolTogglerCmdField	btgExecCommandsInBackground=new BoolTogglerCmdField(this, true, null,
+	private BoolTogglerCmdField	btgExecCommandsInBackground=new BoolTogglerCmdField(this, true, null,
 		"Will continue running console commands even if console is closed.").setCallNothingOnChange();
 	
 //	private IConsoleUI	icui;
 	
 	public CommandsBackgroundStateI() {
-		super.bPrefixCmdWithIdToo = true;
+		setPrefixCmdWithIdToo(true);
 	}
 	
 	public static class CfgParm implements ICfgParm{

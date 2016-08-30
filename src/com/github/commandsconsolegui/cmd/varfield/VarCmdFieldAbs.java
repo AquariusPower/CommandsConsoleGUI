@@ -31,9 +31,10 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandData;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.CompositeControl;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
-import com.github.commandsconsolegui.cmd.VarIdValueOwnerData.IVarIdValueOwner;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -45,16 +46,20 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
  * @author AquariusPower <https://github.com/AquariusPower>
  * 
  */
-public abstract class VarCmdFieldAbs implements IReflexFillCfgVariant, IVarIdValueOwner{
-	protected boolean bReflexingIdentifier = true;
-	protected String strVarId = null;
-	protected String strUniqueCmdId = null;
-	protected String strSimpleCmdId = null;
-	protected String strDebugErrorHelper = "ERROR: "+this.getClass().getName()+" not yet properly initialized!!!";
-	protected IReflexFillCfg	rfcfgOwner;
-	protected VarIdValueOwnerData	vivo;
-	protected String strHelp="";
-	protected CommandData	cmdd;
+public abstract class VarCmdFieldAbs <S extends VarCmdFieldAbs<S>> implements IReflexFillCfgVariant{//, IVarIdValueOwner{
+//	private boolean bReflexingIdentifier = true;
+	private String strVarId = null;
+	private String strUniqueCmdId = null;
+	private String strSimpleCmdId = null;
+	
+	/** keep unused, just used in debug as a hint */
+	@SuppressWarnings("unused")
+	private String strDebugErrorHelper = "ERROR: "+this.getClass().getName()+" not yet properly initialized!!!";
+	
+	private IReflexFillCfg	rfcfgOwner;
+	private VarIdValueOwnerData	vivo;
+	private String strHelp=null;
+	private CommandData	cmdd;
 	
 	private static ArrayList<VarCmdFieldAbs> avcfList = new ArrayList<VarCmdFieldAbs>();
 	public static final HashChangeHolder hvhVarList = new HashChangeHolder(avcfList);
@@ -65,7 +70,7 @@ public abstract class VarCmdFieldAbs implements IReflexFillCfgVariant, IVarIdVal
 	
 	public static <T extends VarCmdFieldAbs> ArrayList<T> getListCopy(Class<T> clFilter){
 		ArrayList<T> a = new ArrayList<T>();
-		for(VarCmdFieldAbs vcf:VarCmdFieldAbs.avcfList){
+		for(VarCmdFieldAbs<?> vcf:VarCmdFieldAbs.avcfList){
 			if(clFilter.isInstance(vcf)){
 				a.add((T)vcf);
 			}
@@ -74,9 +79,13 @@ public abstract class VarCmdFieldAbs implements IReflexFillCfgVariant, IVarIdVal
 		return a;
 	}
 	
-	public VarCmdFieldAbs(boolean bAddToList){
-		if(bAddToList)VarCmdFieldAbs.avcfList.add(this);
+	public VarCmdFieldAbs(IReflexFillCfg rfcfgOwner){
+		if(rfcfgOwner!=null)VarCmdFieldAbs.avcfList.add(this);
+		this.rfcfgOwner=rfcfgOwner;
 	}
+//	public VarCmdFieldAbs(boolean bAddToList){
+//		if(bAddToList)VarCmdFieldAbs.avcfList.add(this);
+//	}
 	
 	public void discardSelf(CommandsDelegator.CompositeControl ccSelf) {
 		VarCmdFieldAbs.avcfList.remove(this);
@@ -86,24 +95,63 @@ public abstract class VarCmdFieldAbs implements IReflexFillCfgVariant, IVarIdVal
 		return this.cmdd;
 	}
 	
-	public void setCmdData(CommandData cmdd){
+	public S setCmdData(CommandData cmdd){
 		this.cmdd=cmdd;
+		return getThis();
 	}
 	
-	public void setVarData(VarIdValueOwnerData	vivo){
-		this.vivo=vivo;
+	/**
+	 * 
+	 * @param ccCD
+	 * @param vivo if the object already set is different from it, will throw exception
+	 * @return
+	 */
+	public S setConsoleVarLink(CommandsDelegator.CompositeControl ccCD, VarIdValueOwnerData vivo) {
+		ccCD.assertSelfNotNull();
+		
+		if(vivo==null){
+			throw new PrerequisitesNotMetException("VarLink is null", this);
+		}
+		
+//		if(this.vivo!=null)throw new PrerequisitesNotMetException("already set", this, this.vivo, vivo);
+		if(this.vivo != vivo){
+			// so, np if was null...
+			PrerequisitesNotMetException.assertNotAlreadySet("VarLink", this.vivo, vivo, this);
+		}
+		
+		this.vivo = vivo;
+		
+		return getThis();
 	}
-	public VarIdValueOwnerData getVarData(){
+	
+	public VarIdValueOwnerData getVarData(CommandsDelegator.CompositeControl ccCD){
+		ccCD.assertSelfNotNull();
 		return this.vivo;
 	}
 	
-	@Override
-	public boolean isReflexing() {
-		return bReflexingIdentifier;
+	public String getVarId() {
+		if(strVarId==null){
+			setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(getOwner(), this, true));
+		}
+		
+		return strVarId;
 	}
 	
-	@SuppressWarnings("unchecked")
-	protected <T extends VarCmdFieldAbs> T setUniqueCmdId(IdTmp id){
+	/**
+	 * TODO is this as useless as it appears to be?
+	 */
+	@Override
+	public boolean isReflexing() {
+//		return bReflexingIdentifier;
+		return rfcfgOwner!=null;
+	}
+	
+//	protected S setReflexing(boolean b){
+//		this.bReflexingIdentifier=b;
+//		return getThis();
+//	}
+	
+	protected S setUniqueCmdId(IdTmp id){
 		String strExceptionId = null;
 		
 		/**
@@ -123,15 +171,16 @@ public abstract class VarCmdFieldAbs implements IReflexFillCfgVariant, IVarIdVal
 			}
 		}
 		
-		if(strExceptionId!=null){
-			throw new NullPointerException("asked for '"+id.strUniqueCmdId+"' but was already set to: "+strExceptionId);
-		}
+		PrerequisitesNotMetException.assertNotAlreadySet("UniqueCmdId", strExceptionId, id.strUniqueCmdId);
+//		if(strExceptionId!=null){
+////			throw new NullPointerException("asked for '"+id.strUniqueCmdId+"' but was already set to: "+strExceptionId);
+//		}
 		
 		strSimpleCmdId = id.strSimpleCmdId;
 		
 		strDebugErrorHelper=null; //clear error helper
 		
-		return (T)this;
+		return getThis();
 	}
 	
 	/**
@@ -141,32 +190,92 @@ public abstract class VarCmdFieldAbs implements IReflexFillCfgVariant, IVarIdVal
 	 * @param bIsVariable
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
-	protected <T extends VarCmdFieldAbs> T setCustomUniqueCmdId(String strUniqueCmdId, boolean bIsVariable){
+	protected S setCustomUniqueCmdId(String strUniqueCmdId, boolean bIsVariable){
 		setUniqueCmdId(new IdTmp(bIsVariable,strUniqueCmdId,strUniqueCmdId));
-		return (T)this;
+		return getThis();
 	}
 
-	@Override
 	public String getSimpleCmdId() {
 		chkAndInit();
 		return strSimpleCmdId;
 	}
 	
-	protected void chkAndInit(){
+	private void chkAndInit(){
 		if(strUniqueCmdId==null){
 			setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this,false));
 		}
 	}
 	
+	@Override
+	public IReflexFillCfg getOwner() {
+		return rfcfgOwner;
+	}
+
+//	private S setOwner(IReflexFillCfg rfcfgOwner) {
+//		this.rfcfgOwner = rfcfgOwner;
+//		return getThis();
+//	}
+
 	public String getUniqueCmdId(){
 		chkAndInit();
 		return strUniqueCmdId;
 	}
-	
-	@Override
-	public String getHelp(){
-		return strHelp;
+
+	protected S setUniqueCmdId(String strUniqueCmdId) {
+		this.strUniqueCmdId = strUniqueCmdId;
+		return getThis();
 	}
 
+	public String getHelp(){
+		return strHelp==null?"":strHelp;
+	}
+	
+	/**
+	 * public but can be set only once.
+	 * @param strHelp
+	 * @return
+	 */
+	public S setHelp(String strHelp) {
+		PrerequisitesNotMetException.assertNotAlreadySet("help", this.strHelp, strHelp);
+		
+		if(strHelp!=null && !strHelp.isEmpty()){
+			this.strHelp = strHelp;
+		}
+		
+		return getThis();
+	}
+	
+	public abstract String getReport(); //this is safe to be public because it is just a report string
+	public abstract Object getValueRaw(); //this is safe to be public because it is a base access to the concrete class simple value ex.: will return a primitive Long on the concrete class
+	
+	/**
+	 * implement only at concrete class (not the midlevel abstract ones)
+	 * @return
+	 */
+	protected abstract S getThis();
+	
+	/**
+	 * DEV: do not expose this one, let only subclasses use it, to avoid messing the field.
+	 * @return
+	 */
+	protected VarIdValueOwnerData getConsoleVarLink() {
+		return vivo;
+	}
+	
+	/**
+	 * TODO rename to setObjectRawValue() to indicate it is the unmodified/original value. Confirm all its uses (the object get too), as fixed (modified to be correct) values shall not actually reach here.
+	 * @param objValue
+	 * @return
+	 */
+	public S setObjectValue(Object objValue) {
+//		public S setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
+//		ccCD.assertSelfNotNull();
+		
+		if(vivo==null)throw new PrerequisitesNotMetException("var link not set", this, objValue);
+		
+		vivo.setObjectValue(objValue);
+		
+		return getThis();
+	}
+	
 }

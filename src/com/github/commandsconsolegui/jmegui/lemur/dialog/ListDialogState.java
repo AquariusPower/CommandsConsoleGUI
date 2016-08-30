@@ -31,6 +31,7 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
+import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.simsilica.lemur.Button;
@@ -41,17 +42,17 @@ import com.simsilica.lemur.Command;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ListDialogState<T extends Command<Button>> extends BasicDialogStateAbs<T> {
+public class ListDialogState<T extends Command<Button>> extends BasicDialogStateAbs<T,ListDialogState<T>> {
 	public static class CfgParm<T extends Command<Button>> extends BasicDialogStateAbs.CfgParm{
-		private LemurDialogGUIStateAbs<T>	diagChoice;
-		private LemurDialogGUIStateAbs<T>	diagQuestion;
+		private LemurDialogGUIStateAbs<T,?>	diagChoice;
+		private LemurDialogGUIStateAbs<T,?>	diagQuestion;
 
 		public CfgParm(
 				Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow,
 				Float fInfoHeightPercentOfDialog, Integer iEntryHeightPixels,
-				LemurDialogGUIStateAbs<T> diagChoice,
-				LemurDialogGUIStateAbs<T> diagQuestion) {
+				LemurDialogGUIStateAbs<T,?> diagChoice,
+				LemurDialogGUIStateAbs<T,?> diagQuestion) {
 			super(fDialogWidthPercentOfAppWindow,
 					fDialogHeightPercentOfAppWindow, fInfoHeightPercentOfDialog,
 					iEntryHeightPixels);
@@ -101,7 +102,7 @@ public class ListDialogState<T extends Command<Button>> extends BasicDialogState
 
 	@Override
 	public void applyResultsFromModalDialog() {
-		BasicDialogStateAbs<T> diagModal = getDiagModalCurrent().getDiagModal();
+		BaseDialogStateAbs<T,?> diagModal = getDiagModalCurrent().getDiagModal();
 		T cmdAtParent = getDiagModalCurrent().getCmdAtParent();
 		ArrayList<DialogListEntryData<T>> adataToApplyResultsList = getDiagModalCurrent().getDataReferenceAtParentListCopy();
 		
@@ -190,4 +191,9 @@ public class ListDialogState<T extends Command<Button>> extends BasicDialogState
 		}
 	}
 	CommandCfg cmdCfg = new CommandCfg();
+	
+	@Override
+	protected ListDialogState<T> getThis() {
+		return this;
+	}
 }

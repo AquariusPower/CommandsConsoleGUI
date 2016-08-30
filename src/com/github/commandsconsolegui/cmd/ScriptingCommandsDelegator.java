@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.TreeMap;
 
+import com.github.commandsconsolegui.cmd.CommandsDelegator.EStats;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.google.common.collect.Lists;
@@ -62,6 +63,10 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 	public String	strPrepareFunctionBlockForId;
 	public boolean	bFuncCmdLineRunning;
 	public boolean	bFuncCmdLineSkipTilEnd;
+	
+	private Boolean	bIfConditionIsValid;
+	private Boolean	bIfConditionExecCommands;
+	private ArrayList<ConditionalNestedData> aIfConditionNestedList = new ArrayList<ConditionalNestedData>();
 	
 	public TreeMap<String,ArrayList<String>> tmFunctions = 
 		new TreeMap<String, ArrayList<String>>(String.CASE_INSENSITIVE_ORDER);
@@ -187,16 +192,16 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 		if(ecrs.compareTo(ECmdReturnStatus.NotFound)!=0)return ecrs;
 		
 		if(!bCommandWorked){
-			if(checkCmdValidity(icclPseudo,CMD_FUNCTION,"<id> begins a function block")){
+			if(checkCmdValidity(getPseudoListener(),CMD_FUNCTION,"<id> begins a function block")){
 				bCommandWorked=cmdFunctionBegin();
 			}else
-			if(checkCmdValidity(icclPseudo,CMD_FUNCTION_CALL,"<id> [parameters...] retrieve parameters values with ex.: ${id_1} ${id_2} ...")){
+			if(checkCmdValidity(getPseudoListener(),CMD_FUNCTION_CALL,"<id> [parameters...] retrieve parameters values with ex.: ${id_1} ${id_2} ...")){
 				bCommandWorked=cmdFunctionCall();
 			}else
-			if(checkCmdValidity(icclPseudo,CMD_FUNCTION_END,"ends a function block")){
+			if(checkCmdValidity(getPseudoListener(),CMD_FUNCTION_END,"ends a function block")){
 				bCommandWorked=cmdFunctionEnd();
 			}else
-			if(checkCmdValidity(icclPseudo,scfFunctionList,"[filter]")){
+			if(checkCmdValidity(getPseudoListener(),scfFunctionList,"[filter]")){
 				String strFilter = ccl.paramString(1);
 				ArrayList<String> astr = Lists.newArrayList(tmFunctions.keySet().iterator());
 				for(String str:astr){
@@ -205,14 +210,14 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 				}
 				bCommandWorked=true;
 			}else
-			if(checkCmdValidity(icclPseudo,scfFunctionShow,"<functionId>")){
+			if(checkCmdValidity(getPseudoListener(),scfFunctionShow,"<functionId>")){
 				String strFuncId = ccl.paramString(1);
 				if(strFuncId!=null){
 					ArrayList<String> astr = tmFunctions.get(strFuncId);
 					if(astr!=null){
 						dumpSubEntry(getCommandPrefixStr()+CMD_FUNCTION+" "+strFuncId+getCommandDelimiter());
 						for(String str:astr){
-							str=strSubEntryPrefix+strSubEntryPrefix+str+getCommandDelimiter();
+							str=getSubEntryPrefix()+getSubEntryPrefix()+str+getCommandDelimiter();
 //								dumpSubEntry("\t"+str+getCommandDelimiter());
 							dumpEntry(false, true, false, false, str);
 						}
@@ -221,16 +226,16 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 					}
 				}
 			}else
-			if(checkCmdValidity(icclPseudo,CMD_ELSE,"conditinal block")){
+			if(checkCmdValidity(getPseudoListener(),CMD_ELSE,"conditinal block")){
 				bCommandWorked=cmdElse();
 			}else
-			if(checkCmdValidity(icclPseudo,CMD_ELSE_IF,"<[!]<true|false>> conditional block")){
+			if(checkCmdValidity(getPseudoListener(),CMD_ELSE_IF,"<[!]<true|false>> conditional block")){
 				bCommandWorked=cmdElseIf();
 			}else
-			if(checkCmdValidity(icclPseudo,CMD_IF,"<[!]<true|false>> [cmd|alias] if cmd|alias is not present, this will be a multiline block start!")){
+			if(checkCmdValidity(getPseudoListener(),CMD_IF,"<[!]<true|false>> [cmd|alias] if cmd|alias is not present, this will be a multiline block start!")){
 				bCommandWorked=cmdIf();
 			}else
-			if(checkCmdValidity(icclPseudo,CMD_IF_END,"ends conditional block")){
+			if(checkCmdValidity(getPseudoListener(),CMD_IF_END,"ends conditional block")){
 				bCommandWorked=cmdIfEnd();
 			}else
 			{
@@ -319,6 +324,12 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 		if(EStats.FunctionCreation.b() && strPrepareFunctionBlockForId!=null){
 			strStatsLast+=
 					"F="+strPrepareFunctionBlockForId
+						+";";
+		}
+		
+		if(EStats.IfConditionalBlock.b() && aIfConditionNestedList.size()>0){
+			strStatsLast+=
+					"If"+aIfConditionNestedList.size()
 						+";";
 		}
 		

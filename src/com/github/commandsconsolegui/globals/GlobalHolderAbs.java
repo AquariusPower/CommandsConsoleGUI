@@ -50,7 +50,7 @@ public abstract class GlobalHolderAbs<T> { //not abstract methods yet tho...
 	
 	T obj;
 	
-	protected void setAssertingNotAlreadySet(T objNew){
+	private void setAssertingNotAlreadySet(T objNew){
 		validate();
 		this.obj = CheckInitAndCleanupI.i().assertGlobalIsNull(this.obj, objNew);
 	}

@@ -82,7 +82,7 @@ public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleComma
 		}
 		
 		if(EStats.TimePerFrame.b()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(fTPF)+";";
+			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
 		}
 		
 		return strStatsLast; 

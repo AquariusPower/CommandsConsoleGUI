@@ -52,19 +52,19 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class BoolTogglerCmdField extends VarCmdFieldAbs{
+public class BoolTogglerCmdField extends VarCmdFieldAbs<BoolTogglerCmdField>{
 	public static final String strTogglerCodePrefix="btg";
-//	protected static ArrayList<BoolTogglerCmdField> abtgList = new ArrayList<BoolTogglerCmdField>();
+//	private static ArrayList<BoolTogglerCmdField> abtgList = new ArrayList<BoolTogglerCmdField>();
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	
-	protected boolean bPrevious;
-	protected boolean bCurrent;
+	private boolean bPrevious;
+	private boolean bCurrent;
 
-	protected String	strReflexFillCfgCodePrefixVariant;
-	protected boolean bDoCallOnChange = true;
-	protected CallableX	caller;
-	protected boolean	bConstructed;
+	private String	strReflexFillCfgCodePrefixVariant;
+	private boolean bDoCallOnChange = true;
+	private CallableX	caller;
+	private boolean	bConstructed;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
@@ -79,10 +79,10 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 ////		return new ArrayList<BoolTogglerCmdField>(abtgList);
 //	}
 	
-	private BoolTogglerCmdField(){
-		super(true);
-//		abtgList.add(this);
-	}
+//	private BoolTogglerCmdField(){
+//		super(true);
+////		abtgList.add(this);
+//	}
 	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitValue){
 		this( rfcfgOwnerUseThis,  bInitValue, BoolTogglerCmdField.strTogglerCodePrefix, "");
 	}
@@ -103,7 +103,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	 * @param strHelp
 	 */
 	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitialValue, String strReflexFillCfgCodePrefixVariant, String strHelp){
-		this();
+		super(rfcfgOwnerUseThis);
 		
 //		ReflexFill.assertAndGetField(rfcfgOwnerUseThis, this);
 		
@@ -116,8 +116,8 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 			}
 		}
 		
-		this.rfcfgOwner=rfcfgOwnerUseThis;
-		this.strHelp=strHelp;
+//		setOwner(rfcfgOwnerUseThis);
+		setHelp(strHelp);
 		set(bInitialValue);
 		
 		this.bConstructed=true;
@@ -136,11 +136,12 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 		/**
 		 * must be an exception as it can have already been read/collected with automatic value.
 		 */
-		if(super.strUniqueCmdId!=null){
-			throw new NullPointerException("asked for '"+strCmd+"' but was already set to: "+this.strUniqueCmdId);
-		}
+		PrerequisitesNotMetException.assertNotAlreadySet("CustomCmdId", getUniqueCmdId(), strCmd);
+//		if(getUniqueCmdId()!=null){
+////			throw new NullPointerException("asked for '"+strCmd+"' but was already set to: "+getUniqueCmdId());
+//		}
 		
-		super.setUniqueCmdId(new IdTmp(false, strCmd, strCmd));
+		setUniqueCmdId(new IdTmp(false, strCmd, strCmd));
 	}
 	
 //	public String getCmdId(){
@@ -157,10 +158,10 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 //		return super.getCoreId();
 //	}
 	
-	@Override
-	public String getHelp(){
-		return strHelp==null?"":strHelp;
-	}
+//	@Override
+//	public String getHelp(){
+//		return strHelp==null?"":strHelp;
+//	}
 	
 	/** same as {@link #b()}*/
 	public boolean get(){return bCurrent;}
@@ -177,7 +178,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	 * 
 	 * @return true once if value changed, and update the reference to wait for next change
 	 */
-	protected boolean isChangedAndRefresh(){
+	private boolean isChangedAndRefresh(){
 //		DebugI.i().conditionalBreakpoint(strCommand.equals("cmd_TestDialog_CmdConditionalStateAbs_State_Toggle"));
 		if(bCurrent && bPrevious)return false;
 		if(!bCurrent && !bPrevious)return false;
@@ -209,23 +210,18 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	public String getCmdIdAsCommand(boolean bForceState) {
 		return getUniqueCmdId()+" "+bForceState;
 	}
-
-	@Override
-	public IReflexFillCfg getOwner() {
-		return rfcfgOwner;
-	}
-
-	public IConsoleCommandListener getOwnerAsCmdListener() {
-		if(rfcfgOwner instanceof CommandsDelegator){
-			return GlobalCommandsDelegatorI.i().getPseudoListener();
-		}
-		
-		if(rfcfgOwner instanceof IConsoleCommandListener){
-			return (IConsoleCommandListener)rfcfgOwner;
-		}
-		
-		return null;
-	}
+	
+//	public IConsoleCommandListener getOwnerAsCmdListener() {
+//		if(getOwner() instanceof CommandsDelegator){
+//			return GlobalCommandsDelegatorI.i().getPseudoListener();
+//		}
+//		
+//		if(getOwner() instanceof IConsoleCommandListener){
+//			return (IConsoleCommandListener)getOwner();
+//		}
+//		
+//		return null;
+//	}
 
 	@Override
 	public String getReport() {
@@ -253,28 +249,31 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	}
 	
 	@Override
-	public void setObjectValue(Object objValue) {
+//	public BoolTogglerCmdField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
+	public BoolTogglerCmdField setObjectValue(Object objValue) {
 		this.set((Boolean)objValue);
-		if(vivo!=null)vivo.setObjectValue(objValue);
+//		super.setObjectValue(ccCD,objValue);
+		super.setObjectValue(objValue);
+		return this;
 	}
 
-	@Override
-	public String getVarId() {
-		if(strVarId==null){
-			super.setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner, this, true));
-		}
-		return strVarId;
-	}
+//	@Override
+//	public String getVarId() {
+//		if(strVarId==null){
+//			super.setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(getOwner(), this, true));
+//		}
+//		return strVarId;
+//	}
 
 	@Override
 	public Object getValueRaw() {
 		return this.bCurrent;
 	}
 
-	@Override
-	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
-		this.vivo=vivo;
-	}
+//	@Override
+//	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
+//		this.vivo=vivo;
+//	}
 	
 //	public static String getPrefix() {
 //		return rfcfgOwner.;
@@ -300,10 +299,11 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 	 * @return 
 	 */
 	public BoolTogglerCmdField setCallNothingOnChange(){
-		if(caller!=null){
-			// to avoid developer forgotten previously configured caller
-			throw new PrerequisitesNotMetException("caller already set!",this,getHelp());
-		}
+		// to avoid developer forgotten previously configured caller
+		PrerequisitesNotMetException.assertNotAlreadySet("caller", caller, null, this, getHelp());
+//		if(caller!=null){
+////			throw new PrerequisitesNotMetException("caller already set!",this,getHelp());
+//		}
 		
 //		if(!bDoCallOnChange){
 //			// to avoid double setup
@@ -327,12 +327,17 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs{
 		return false;
 	}
 
-	public BoolTogglerCmdField setHelp(String str) {
-		this.strHelp = str;
-		return this;
-	}
+//	@Override
+//	public BoolTogglerCmdField setHelp(String str) {
+//		this.strHelp = str;
+//		return this;
+//	}
 
 //	public static void removeFromList(BoolTogglerCmdField bt) {
 //		abtgList.remove(bt);
 //	}
+	@Override
+	protected BoolTogglerCmdField getThis() {
+		return this;
+	}
 }

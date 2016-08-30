@@ -28,6 +28,7 @@
 package com.github.commandsconsolegui.cmd;
 
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 
 /**
  * 
@@ -35,23 +36,24 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  *
  */
 public class VarIdValueOwnerData {
-	public static interface IVarIdValueOwner{
-		public abstract void setObjectValue(Object objValue);
-		public abstract String getReport();
-		public abstract String getVarId();
-		public abstract Object getValueRaw();
-		public abstract void setConsoleVarLink(VarIdValueOwnerData vivo);
-		public abstract String getHelp();
-		public abstract String getSimpleCmdId();
-	}
+//	public static interface IVarIdValueOwner{
+//		public abstract void setObjectValue(Object objValue);
+//		public abstract String getReport();
+//		public abstract String getVarId();
+//		public abstract Object getValueRaw();
+//		public abstract void setConsoleVarLink(VarIdValueOwnerData vivo);
+//		public abstract String getHelp();
+//		public abstract String getSimpleCmdId();
+//	}
 	
-	protected String strId;
-	protected Object objValue;
-	protected IVarIdValueOwner owner;
-	protected IReflexFillCfg rfcfgClassHoldingTheOwner;
-	protected String	strHelp;
+	private String strId;
+	private Object objValue;
+//	private IVarIdValueOwner owner;
+	private VarCmdFieldAbs<?> owner;
+	private IReflexFillCfg rfcfgClassHoldingTheOwner;
+	private String	strHelp;
 	
-	public VarIdValueOwnerData(String strId, Object objValue,	IVarIdValueOwner vivoOwner, IReflexFillCfg rfcfgClassHoldingTheOwner, String strHelp) {
+	public VarIdValueOwnerData(String strId, Object objValue,	VarCmdFieldAbs<?> vivoOwner, IReflexFillCfg rfcfgClassHoldingTheOwner, String strHelp) {
 		super();
 		this.strId = strId;
 		this.objValue = objValue;
@@ -64,8 +66,24 @@ public class VarIdValueOwnerData {
 		this.objValue=objValue;
 	}
 	
+	public Object getObjectValue(){
+		return this.objValue;
+	}
+	
 	public String getHelp(){
 		return strHelp==null?"":strHelp;
+	}
+
+	public String getId() {
+		return strId;
+	}
+
+	public VarCmdFieldAbs<?> getOwner() {
+		return owner;
+	}
+
+	public IReflexFillCfg getRfcfgClassHoldingTheOwner() {
+		return rfcfgClassHoldingTheOwner;
 	}
 	
 }

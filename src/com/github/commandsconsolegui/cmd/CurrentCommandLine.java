@@ -29,12 +29,20 @@ package com.github.commandsconsolegui.cmd;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.cmd.CommandsDelegator.CompositeControl;
+import com.github.commandsconsolegui.misc.CompositeControlAbs;
+
 /**
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
 public class CurrentCommandLine {
+	public static final class CompositeControl extends CompositeControlAbs<CurrentCommandLine>{
+		private CompositeControl(CurrentCommandLine casm){super(casm);};
+	};
+	private CompositeControl ccSelf = new CompositeControl(this);
+	
 	String	strCmdLineOriginal;
 	
 	ArrayList<String>	astrCmdAndParams = new ArrayList<String>();
@@ -102,7 +110,7 @@ public class CurrentCommandLine {
 	public String paramString(int iIndex){
 		if(iIndex<astrCmdAndParams.size()){
 			String str=astrCmdAndParams.get(iIndex);
-			str = cd.applyVariablesValues(str);
+			str = cd.applyVariablesValues(ccSelf,str);
 			return str;
 		}
 		return null;
@@ -120,7 +128,7 @@ public class CurrentCommandLine {
 		}
 		
 		if(str!=null){
-			str = cd.applyVariablesValues(str);
+			str = cd.applyVariablesValues(ccSelf,str);
 		}
 		
 		return str;
@@ -179,7 +187,7 @@ public class CurrentCommandLine {
 		return true; // if reach here, will not be toggle, will be a set override
 	}
 
-	protected boolean isCommentedLine(){
+	public boolean isCommentedLine(){
 		if(strCmdLinePrepared==null)return false;
 		return strCmdLinePrepared.trim().startsWith(""+cd.getCommentPrefix());
 	}

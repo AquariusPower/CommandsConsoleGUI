@@ -52,7 +52,7 @@ import com.jme3.export.Savable;
  * @param <T> is the action class for buttons
  */
 public class DialogListEntryData<T> implements Savable{
-	protected static String strLastUniqueId = "0";
+	private static String strLastUniqueId = "0";
 	
 	private String	strUniqueId;
 	

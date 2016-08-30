@@ -35,6 +35,7 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
+import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
@@ -48,6 +49,7 @@ import com.jme3.audio.AudioData.DataType;
 import com.jme3.audio.AudioNode;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.simsilica.lemur.Container;
 
 /**
  * This class would be useful to a non Lemur dialog too.
@@ -58,46 +60,51 @@ import com.jme3.scene.Spatial;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs implements IReflexFillCfg{
-	protected Spatial	sptContainerMain;
-	protected Spatial	sptIntputField;
-	protected String	strTitle;
+public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> extends CmdConditionalStateAbs implements IReflexFillCfg{
+	private Spatial	sptContainerMain;
+	private Spatial	sptIntputField;
+	private String	strTitle;
 	
-	protected BaseDialogStateAbs<T> diagParent;
-	protected ArrayList<BaseDialogStateAbs<T>> aModalChildList = new ArrayList<BaseDialogStateAbs<T>>();
-//	protected DialogListEntryData<T>	dataToCfgReference;
-//	protected DialogListEntryData<T> dataFromModal;
+	private BaseDialogStateAbs<T,?> diagParent;
+	private ArrayList<BaseDialogStateAbs<T,?>> aModalChildList = new ArrayList<BaseDialogStateAbs<T,?>>();
+//	private DialogListEntryData<T>	dataToCfgReference;
+//	private DialogListEntryData<T> dataFromModal;
 	private boolean	bRequestedActionSubmit;
 //	private Object[]	aobjModalAnswer;
-	protected Node cntrNorth;
-	protected Node cntrSouth;
-	protected String	strLastFilter = "";
-//	protected ArrayList<DialogListEntry> aEntryList = new ArrayList<DialogListEntry>();
-//	protected String	strLastSelectedKey;
-	protected ArrayList<DialogListEntryData<T>>	adleCompleteEntriesList = new ArrayList<DialogListEntryData<T>>();
-	protected ArrayList<DialogListEntryData<T>>	adleTmp;
-	protected DialogListEntryData<T>	dleLastSelected;
+	private Node cntrNorth;
+	private Node cntrSouth;
+	private String	strLastFilter = "";
+//	private ArrayList<DialogListEntry> aEntryList = new ArrayList<DialogListEntry>();
+//	private String	strLastSelectedKey;
+	private ArrayList<DialogListEntryData<T>>	adleCompleteEntriesList = new ArrayList<DialogListEntryData<T>>();
+	private ArrayList<DialogListEntryData<T>>	adleTmp;
+	private DialogListEntryData<T>	dleLastSelected;
 //	private V	valueOptionSelected;
-	protected boolean	bRequestedRefreshList;
+	private boolean	bRequestedRefreshList;
 //	private DialogListEntryData<T>	dataReferenceAtParent;
 //	private T	cmdAtParent;
-	protected DiagModalInfo<T> dmi = null;
+	private DiagModalInfo<T> dmi = null;
 	
 	private boolean bOptionChoiceSelectionMode = false;
-//	protected Long	lChoiceMadeAtMilis = null;
-	protected ArrayList<DialogListEntryData<T>> adataChosenEntriesList = new ArrayList<DialogListEntryData<T>>();
+//	private Long	lChoiceMadeAtMilis = null;
+	private ArrayList<DialogListEntryData<T>> adataChosenEntriesList = new ArrayList<DialogListEntryData<T>>();
 	
-	public DiagModalInfo<T> getDiagModalInfo(){
+	public DiagModalInfo<T> getDiagModalCurrent(){
 		return dmi;
+	}
+	
+	public R setDiagModalInfo(DiagModalInfo<T> dmi){
+		this.dmi=dmi;
+		return getThis();
 	}
 	
 	public Spatial getContainerMain(){
 		return sptContainerMain;
 	}
 	
-	protected BaseDialogStateAbs<T> setContainerMain(Spatial spt){
+	protected R setContainerMain(Spatial spt){
 		this.sptContainerMain=spt;
-		return this;
+		return getThis();
 	}
 	
 //	public static class CfgParm extends BaseDialogStateAbs.CfgParm{
@@ -114,14 +121,14 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 //	}
 	
 //	public static class CfgParmOld<T> implements ICfgParm{
-//		protected boolean	bOptionSelectionMode;
-//		protected String strUIId;
-//		protected boolean bIgnorePrefixAndSuffix;
-//		protected Node nodeGUI;
-////		protected boolean bInitiallyEnabled;
-//		protected BaseDialogStateAbs<T> diagParent;
-////		protected Long lMouseCursorClickDelayMilis;
-//		public CfgParm(boolean bOptionSelectionMode, String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI, BaseDialogStateAbs<T> diagParent){//, Long lMouseCursorClickDelayMilis) {
+//		private boolean	bOptionSelectionMode;
+//		private String strUIId;
+//		private boolean bIgnorePrefixAndSuffix;
+//		private Node nodeGUI;
+////		private boolean bInitiallyEnabled;
+//		private R diagParent;
+////		private Long lMouseCursorClickDelayMilis;
+//		public CfgParm(boolean bOptionSelectionMode, String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI, R diagParent){//, Long lMouseCursorClickDelayMilis) {
 //			super();
 //			this.strUIId = strUIId;
 //			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
@@ -138,23 +145,30 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 //	}
 	
 	public static class CfgParm extends CmdConditionalStateAbs.CfgParm{
-		protected boolean	bOptionSelectionMode;
-		protected Node nodeGUI;
-		protected boolean bInitiallyEnabled = false; //the console needs this "true"
-		public CfgParm(String strUIId, Node nodeGUI){//, BaseDialogStateAbs<T> diagParent) {
+		private boolean	bOptionSelectionMode;
+		private Node nodeGUI;
+		private boolean bInitiallyEnabled = false; //the console needs this "true"
+		public CfgParm(String strUIId, Node nodeGUI){//, R diagParent) {
 			super(strUIId);
 			this.nodeGUI = nodeGUI;
 		}
 		public void setUIId(String strUIId){
-			if(this.strId!=null)throw new PrerequisitesNotMetException("UI Id already set",this.strId,strUIId);
-			super.strId=strUIId;
+//			if(getId()!=null)throw new PrerequisitesNotMetException("UI Id already set",getId(),strUIId);
+			PrerequisitesNotMetException.assertNotAlreadySet("UI id", getId(), strUIId, this);
+			setId(strUIId);
+		}
+		public boolean isInitiallyEnabled() {
+			return bInitiallyEnabled;
+		}
+		public void setInitiallyEnabled(boolean bInitiallyEnabled) {
+			this.bInitiallyEnabled = bInitiallyEnabled;
 		}
 	}
 	private CfgParm	cfg;
 	@Override
-	public BaseDialogStateAbs<T> configure(ICfgParm icfg) {
+	public R configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
-//	protected void configure(String strUIId,boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
+//	private void configure(String strUIId,boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
 		
 //		this.bOptionChoiceSelectionMode=cfg.bOptionSelectionMode;
 		
@@ -166,7 +180,7 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 		 * Dialogs must be initially disabled because they are enabled 
 		 * on user demand. 
 		 */
-		if(!cfg.bInitiallyEnabled){
+		if(!cfg.isInitiallyEnabled()){
 			initiallyDisabled();
 			btgState.set(false,false);
 		}
@@ -174,13 +188,13 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 //		MouseCursor.i().configure(cfg.lMouseCursorClickDelayMilis);
 		
 		if(cfg.nodeGUI==null)cfg.nodeGUI=GlobalGUINodeI.i();
-		super.setNodeGUI(cfg.nodeGUI);//getNodeGUI()
+		setNodeGUI(cfg.nodeGUI);//getNodeGUI()
 		
 //		this.diagParent=cfg.diagParent;
 //		updateModalParent();
 		
-		strCmdPrefix = "toggleUI";
-		strCmdSuffix = "";
+		setCmdPrefix("toggleUI");
+		setCmdSuffix("");
 		
 //		ConditionalStateManagerI.i().
 		if(cfg.getId()==null || cfg.getId().isEmpty())throw new PrerequisitesNotMetException("invalid UI identifier");
@@ -269,51 +283,63 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 	 * vanishing with (grabbing) the mouse cursor.
 	 * @param b
 	 */
-	public void setMouseCursorKeepUngrabbed(boolean b) {
+	public R setMouseCursorKeepUngrabbed(boolean b) {
 		UngrabMouseStateI.i().setKeepUngrabbedRequester(this,b);
+		return getThis();
 	}
 	
-	public void setTitle(String str){
+	public R setTitle(String str){
 		this.strTitle = str;
+		return getThis();
 	}
 	
 //	@Override
 //	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 //		return cd().getReflexFillCfg(rfcv);
 //	}
-
+	
+	/**
+	 * TODO rename getInputField()
+	 * @return
+	 */
 	public Spatial getIntputField() {
 		return sptIntputField;
 	}
 	
-	protected BaseDialogStateAbs<T> setIntputField(Spatial sptIntputField) {
-		this.sptIntputField = sptIntputField;
-		return this;
-	}
-
-	public BaseDialogStateAbs<T> getParentDialog(){
-		return this.diagParent;
+	public float getInputFieldHeight(){
+		return MiscJmeI.i().retrieveBitmapTextFor((Node)getIntputField()).getLineHeight();
 	}
 	
-	public void setDiagParent(BaseDialogStateAbs<T> diagParent) {
-		if(this.diagParent!=null)throw new PrerequisitesNotMetException("modal parente already set",this.diagParent,diagParent);
-		this.diagParent=diagParent;
+	protected R setIntputField(Spatial sptIntputField) {
+		this.sptIntputField = sptIntputField;
+		return getThis();
+	}
+
+	public R getParentDialog(){
+		return (R)this.diagParent;
+	}
+	
+	public R setDiagParent(BaseDialogStateAbs<T,?> diagParent) {
+//		if(this.diagParent!=null)throw new PrerequisitesNotMetException("modal parent already set",this.diagParent,diagParent);
+		PrerequisitesNotMetException.assertNotAlreadySet("modal parent", this.diagParent, diagParent, this);
+		this.diagParent = diagParent;
+		return getThis();
 	}
 	
 //	public abstract void setAnswerFromModalChild(Object... aobj);
 	
-	public ArrayList<BaseDialogStateAbs<T>> getModalChildListCopy() {
-		return new ArrayList<BaseDialogStateAbs<T>>(aModalChildList);
+	public ArrayList<BaseDialogStateAbs<T,?>> getModalChildListCopy() {
+		return new ArrayList<BaseDialogStateAbs<T,?>>(aModalChildList);
 	}
-	protected void updateModalChild(boolean bAdd, BaseDialogStateAbs<T> modal) {
+	protected void updateModalChild(boolean bAdd, BaseDialogStateAbs<T,?> baseDialogStateAbs) {
 //		if(this.modalParent==null)return;
 			
 		if(bAdd){
-			if(!aModalChildList.contains(modal)){
-				aModalChildList.add(modal);
+			if(!aModalChildList.contains(baseDialogStateAbs)){
+				aModalChildList.add(baseDialogStateAbs);
 			}
 		}else{
-			aModalChildList.remove(modal);
+			aModalChildList.remove(baseDialogStateAbs);
 		}
 	}
 
@@ -328,12 +354,9 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 	 * default is to fill with the last filter
 	 */
 	protected abstract void updateInputField();
-	
-	public abstract DialogListEntryData<T> getSelectedEntryData();
-	
 	protected abstract void updateList();
-	
 	protected abstract void updateTextInfo();
+	public abstract DialogListEntryData<T> getSelectedEntryData();
 	
 	public void requestRefreshList(){
 		bRequestedRefreshList=true;
@@ -346,8 +369,8 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 			str+="Option Mode: when hitting Enter, if an entry is selected, it's value will be chosen.\n";
 			
 			if(getParentDialog()!=null){
-				if(getParentDialog().getDiagModalInfo()!=null){
-					for(DialogListEntryData<T> data:getParentDialog().getDiagModalInfo().getDataReferenceAtParentListCopy()){
+				if(getParentDialog().getDiagModalCurrent()!=null){
+					for(DialogListEntryData<T> data:getParentDialog().getDiagModalCurrent().getDataReferenceAtParentListCopy()){
 						str+="ParentCfgData: "+data.getText()+"\n";
 					}
 				}
@@ -395,6 +418,7 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 				}
 			}
 		}
+		
 	}
 	
 	
@@ -408,12 +432,13 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 		AudioUII.i().playOnUserAction(AudioUII.EAudio.SubmitSelection);
 	}
 
-	protected void updateAllParts(){
+	private void updateAllParts(){
 		updateTextInfo();
 		
 		updateList();
 		
 		updateInputField();
+		
 	}
 	
 	public ArrayList<DialogListEntryData<T>> getDataSelectionListCopy() {
@@ -421,13 +446,13 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 	}
 	
 	protected class DiagModalInfo<T>{
-		protected BaseDialogStateAbs<T>	diagChildModal;
+		private R	diagChildModal;
 		
-		protected T	actionAtParent;
-		protected ArrayList<DialogListEntryData<T>>	adledToPerformResultOfActionAtParentList;
+		private T	actionAtParent;
+		private ArrayList<DialogListEntryData<T>>	adledToPerformResultOfActionAtParentList;
 		
 		public DiagModalInfo(
-			BaseDialogStateAbs<T> diagModalCurrent,
+			R diagModalCurrent,
 			T cmdAtParent,
 			DialogListEntryData<T>... adledReferenceAtParent 
 		) {
@@ -439,10 +464,10 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 		}
 		
 		@SuppressWarnings("unchecked")
-		public <S extends BaseDialogStateAbs<T>> S getDiagModal() {
-			return (S)diagChildModal;
+		public R getDiagModal() {
+			return diagChildModal;
 		}
-//		public void setDiagModal(BaseDialogStateAbs<T> diagModal) {
+//		public void setDiagModal(R diagModal) {
 //			this.diagChildModal = diagModal;
 //		}
 		public ArrayList<DialogListEntryData<T>> getDataReferenceAtParentListCopy() {
@@ -465,16 +490,155 @@ public abstract class BaseDialogStateAbs<T> extends CmdConditionalStateAbs imple
 		return adataChosenEntriesList.size()>0;
 	}
 
-	public void resetChoice() {
+	public R resetChoice() {
 //		lChoiceMadeAtMilis=null;
 		adataChosenEntriesList.clear();
+		return getThis();
 	}
 
 	public boolean isOptionChoiceSelectionMode() {
 		return bOptionChoiceSelectionMode;
 	}
 
-	public void setOptionChoiceSelectionMode(boolean bOptionChoiceSelectionMode) {
+	public R setOptionChoiceSelectionMode(boolean bOptionChoiceSelectionMode) {
 		this.bOptionChoiceSelectionMode = bOptionChoiceSelectionMode;
+		return getThis();
 	}
+
+	protected void clearList() {
+		adleCompleteEntriesList.clear();
+	}
+
+	protected ArrayList<DialogListEntryData<T>> getCompleteEntriesListCopy() {
+		return new ArrayList<DialogListEntryData<T>>(adleCompleteEntriesList);
+	}
+
+	protected DialogListEntryData<T> getAbove(DialogListEntryData<T> dled){
+		int iDataAboveIndex = adleCompleteEntriesList.indexOf(dled)-1;
+		if(iDataAboveIndex>=0){
+			return adleCompleteEntriesList.get(iDataAboveIndex);
+		}
+		return null;
+	}
+
+	/**
+	 * for proper sorting
+	 * @param dled
+	 */
+	protected void recursiveAddEntries(DialogListEntryData<T> dled){
+		adleTmp.remove(dled);
+		adleCompleteEntriesList.add(dled);
+		if(dled.isParent()){
+			for(DialogListEntryData<T> dledChild:dled.getChildrenCopy()){
+				if(!dledChild.getParent().equals(dled)){
+					throw new PrerequisitesNotMetException("invalid parent", dled, dledChild);
+				}
+				recursiveAddEntries(dledChild);
+			}
+		}
+	}
+
+	protected void sortEntries(){
+		adleTmp = new ArrayList<DialogListEntryData<T>>(adleCompleteEntriesList);
+		adleCompleteEntriesList.clear();
+		
+		for(DialogListEntryData<T> dled:new ArrayList<DialogListEntryData<T>>(adleTmp)){
+			if(dled.getParent()==null){ //root ones
+				recursiveAddEntries(dled);
+			}
+		}
+	}
+	
+	protected void addEntry(DialogListEntryData<T> dled) {
+		if(dled==null)throw new PrerequisitesNotMetException("cant be null!");
+		adleCompleteEntriesList.add(dled);
+	}
+
+	public void removeEntry(DialogListEntryData<T> dled){
+		removeEntry(dled, null);
+	}
+	private void removeEntry(DialogListEntryData<T> dled, DialogListEntryData<T> dledParent){
+//		int iDataAboveIndex = -1;
+		DialogListEntryData<T> dledAboveTmp = null;
+		if(getSelectedEntryData().equals(dled)){
+//			iDataAboveIndex = adleCompleteEntriesList.indexOf(data)-1;
+//			if(iDataAboveIndex>=0)dataAboveTmp = adleCompleteEntriesList.get(iDataAboveIndex);
+			dledAboveTmp = getAbove(dled);
+		}
+		DialogListEntryData<T> dledParentTmp = dled.getParent();
+		
+		ArrayList<DialogListEntryData<T>> dledChildren = dled.getChildrenCopy();
+		boolean bIsParent=false;
+		if(dledChildren.size()>0)bIsParent=true;
+		for(DialogListEntryData<T> dledChild:dledChildren){
+			removeEntry(dledChild,dled); //recursive
+		}
+		
+		if(adleCompleteEntriesList.remove(dled)){
+			if(dledParent==null){ //play sound only for the initial entry
+				AudioUII.i().play(bIsParent?
+					EAudio.RemoveSubTreeEntry : EAudio.RemoveEntry);
+			}
+		}else{
+			throw new PrerequisitesNotMetException("missing data at list", dled);
+		}
+		
+		dled.setParent(null);
+		
+		if(dledAboveTmp!=null){
+			updateSelected(dledAboveTmp,dledParentTmp);
+		}
+		
+		requestRefreshList();
+		
+	}
+	
+	protected abstract void updateSelected(DialogListEntryData<T> dledPreviouslySelected);
+	protected abstract void updateSelected(final DialogListEntryData<T> dledAbove, final DialogListEntryData<T> dledParentTmp);
+
+	protected Container getNorthContainer() {
+		return (Container)cntrNorth;
+	}
+	
+	protected Container getSouthContainer() {
+		return (Container)cntrSouth;
+	}
+
+	protected R setCntrNorth(Node cntrNorth) {
+		this.cntrNorth = cntrNorth;
+		return getThis();
+	}
+
+	protected R setCntrSouth(Node cntrSouth) {
+		this.cntrSouth = cntrSouth;
+		return getThis();
+	}
+	
+	protected DialogListEntryData<T> getLastSelected(){
+		return dleLastSelected;
+	}
+
+	public String getLastFilter() { //no problem be public
+		return strLastFilter;
+	}
+
+	protected R setLastFilter(String inputText) {
+		this.strLastFilter=inputText;
+		return getThis();
+	}
+	
+	/**
+	 * implement this only on concrete classes
+	 * @return
+	 */
+	protected abstract R getThis();
+
+	public String getTitle() {
+		return strTitle;
+	}
+
+//	public void setTitle(String strTitle) {
+//		this.strTitle = strTitle;
+//	}
+	
 }

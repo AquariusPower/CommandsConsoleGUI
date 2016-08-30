@@ -45,6 +45,7 @@ import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI.BindKey;
+import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.font.BitmapCharacter;
 import com.jme3.font.BitmapCharacterSet;
@@ -84,21 +85,26 @@ import com.simsilica.lemur.style.Styles;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateAbs<T>{
-	protected static ConsoleLemurStateI instance=null;//new ConsoleLemurStateI();
+public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateAbs<T,ConsoleLemurStateI<T>>{
+	private static ConsoleLemurStateI instance=null;//new ConsoleLemurStateI();
 	public static ConsoleLemurStateI i(){
-		if(instance==null)instance=new ConsoleLemurStateI<Command<Button>>();
+		if(instance==null)instance=new ConsoleLemurStateI();
 		return instance;
 	}
 	
+	public static final class CompositeControl extends CompositeControlAbs<ConsoleLemurStateI>{
+		private CompositeControl(ConsoleLemurStateI casm){super(casm);};
+	}
+	private CompositeControl ccSelf = new CompositeControl(this);
+	
 	StringVarField svfBackgroundHexaColorRGBA = new StringVarField(this,"","XXXXXXXX ex.: 'FF12BC4A' Red Green Blue Alpha");
-//	protected ConsoleMouseCursorListenerI consoleCursorListener;
-	protected Button	btnCopy;
-	protected Button	btnPaste;
-	protected Button	btnClipboardShow;
-	protected Button	btnCut;
-	protected Label	lblStats;
-	protected ArrayList<BindKey>	abkList = new ArrayList<BindKey>();
+//	private ConsoleMouseCursorListenerI consoleCursorListener;
+	private Button	btnCopy;
+	private Button	btnPaste;
+	private Button	btnClipboardShow;
+	private Button	btnCut;
+	private Label	lblStats;
+	private ArrayList<BindKey>	abkList = new ArrayList<BindKey>();
 	
 	public final StringCmdField CMD_SHOW_BINDS = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
 	
@@ -108,8 +114,8 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	
 	public ConsoleLemurStateI(){
 		setDumpEntriesSlowedQueue(new VersionedList<String>());
-		vlstrDumpEntries = new VersionedList<String>();
-		super.bPrefixCmdWithIdToo = true;
+		setDumpEntries(new VersionedList<String>());
+		setPrefixCmdWithIdToo(true);
 	}
 	
 //	@Override
@@ -158,7 +164,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 			super(
 				strUIId==null ? strUIId=ConsoleLemurStateI.class.getSimpleName() : strUIId, 
 				nodeGUI, iToggleConsoleKey);
-			super.bInitiallyEnabled=true; // the console must be initially enabled to startup properly
+			super.setInitiallyEnabled(true); // the console must be initially enabled to startup properly
 		}
 	}
 	@Override
@@ -243,7 +249,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 //		clBg = ColorRGBA.Blue.clone();clBg.b=0.25f;clBg.a=0.75f;
 		clBg = colorConsoleStyleBackground;
 		attrs.set("background", new QuadBackgroundComponent(clBg));
-		attrs.set("font", font);
+		attrs.set("font", getFont());
 		
 //			attrs = styles.getSelector("grid", STYLE_CONSOLE);
 //			attrs.set("background", new QuadBackgroundComponent(new ColorRGBA(0,1,0,1)));
@@ -298,42 +304,41 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 //		consoleCursorListener.configure();
 		
 		// auto complete hint
-		super.vlstrAutoCompleteHint = new VersionedList<String>();
-		super.setHintBox(new ListBox<String>(new VersionedList<String>(),strStyle));
+		setHintList(new VersionedList<String>());
+		super.setHintBox(new ListBox<String>(new VersionedList<String>(),getStyle()));
 		getHintBox().setModel(getHintList());
 		CursorEventControl.addListenersToSpatial(getHintBox(), ConsoleMouseCursorListenerI.i());
 		
 		// main container
-		setContainerMain(new Container(new BorderLayout(), strStyle));
-		LemurMiscHelpersStateI.i().setGrantedSize(getContainerConsole(), v3fConsoleSize, true);
-
+		setContainerMain(new Container(new BorderLayout(), getStyle()));
+		LemurMiscHelpersStateI.i().setGrantedSize(getContainerConsole(), getConsoleSizeCopy(), true);
+		
 		/**
 		 * TOP ELEMENT =================================================================
 		 */
-		super.setStatsAndControls(new Container(strStyle));
+		super.setStatsAndControls(new Container(getStyle()));
 //		getContainerStatsAndControls().setName("ConsoleStats");
 		getContainerConsole().addChild(getContainerStatsAndControls(), BorderLayout.Position.North);
 		
 		// console stats
-		lblStats = new Label("Console stats.",strStyle);
+		lblStats = new Label("Console stats.",getStyle());
 		lblStats.setColor(new ColorRGBA(1,1,0.5f,1));
-		LemurMiscHelpersStateI.i().setGrantedSize(lblStats, v3fConsoleSize.x*0.75f, 1f, false); //TODO y=1f so it will expand?
-		fStatsHeight = MiscJmeI.i().retrieveBitmapTextFor(lblStats).getLineHeight();
+		LemurMiscHelpersStateI.i().setGrantedSize(lblStats, getConsoleSizeCopy().x*0.75f, 1f, false); //TODO y=1f so it will expand?
 		getContainerStatsAndControls().addChild(lblStats,0,0);
 		
 		// buttons
 		ArrayList<Button> abu = new ArrayList<Button>();
 		int iButtonIndex=0;
-		btnClipboardShow = new Button("ShwClpbrd",strStyle);
+		btnClipboardShow = new Button("ShwClpbrd",getStyle());
 		abu.add(btnClipboardShow);
 		
-		btnCopy = new Button("Copy",strStyle);
+		btnCopy = new Button("Copy",getStyle());
 		abu.add(btnCopy);
 		
-		btnPaste = new Button("Paste",strStyle);
+		btnPaste = new Button("Paste",getStyle());
 		abu.add(btnPaste);
 		
-		btnCut = new Button("Cut",strStyle);
+		btnCut = new Button("Cut",getStyle());
 		abu.add(btnCut);
 		
 		for(Button btn:abu){
@@ -348,9 +353,9 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		/**
 		 * CENTER ELEMENT (dump entries area) ===========================================
 		 */
-		lstbxDumpArea = new ListBox<String>(new VersionedList<String>(),strStyle);
+		setLstbxDumpArea(new ListBox<String>(new VersionedList<String>(),getStyle()));
     CursorEventControl.addListenersToSpatial(getDumpArea(), ConsoleMouseCursorListenerI.i());
-		Vector3f v3fLstbxSize = v3fConsoleSize.clone();
+		Vector3f v3fLstbxSize = getConsoleSizeCopy();
 //		v3fLstbxSize.x/=2;
 //		v3fLstbxSize.y/=2;
 		getDumpArea().setSize(v3fLstbxSize); // no need to update fLstbxHeight, will be automatic
@@ -360,30 +365,31 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		 * The existance of at least one entry is very important to help on initialization.
 		 * Actually to determine the listbox entry height.
 		 */
-		if(vlstrDumpEntries.isEmpty())vlstrDumpEntries.add(""+cd().getCommentPrefix()+" Initializing console.");
+		if(getDumpEntries().isEmpty())getDumpEntries().add(""+cd().getCommentPrefix()+" Initializing console.");
 		
-		getDumpArea().setModel((VersionedList<String>)vlstrDumpEntries);
-		getDumpArea().setVisibleItems(iShowRows);
-//		lstbx.getGridPanel().setVisibleSize(iShowRows,1);
+		getDumpArea().setModel((VersionedList<String>)getDumpEntries());
+		getDumpArea().setVisibleItems(getShowRowsAmount());
+//		lstbx.getGridPanel().setVisibleSize(getShowRowsAmount(),1);
 		getContainerConsole().addChild(getDumpArea(), BorderLayout.Position.Center);
 		
-		super.sliderDumpArea = getDumpArea().getSlider();
+		setSliderDumpArea(getDumpArea().getSlider());
 		
 		/**
 		 * BOTTOM ELEMENT =================================================================
 		 */
 		// input
-		super.setIntputField(new TextField(""+cd().getCommandPrefix(),strStyle));
+		super.setIntputField(new TextField(""+cd().getCommandPrefix(),getStyle()));
     CursorEventControl.addListenersToSpatial(getInputField(), ConsoleMouseCursorListenerI.i());
 		LemurFocusHelperStateI.i().addFocusChangeListener(getInputField());
-		fInputHeight = MiscJmeI.i().retrieveBitmapTextFor(getInputField()).getLineHeight();
+//		fInputHeight = MiscJmeI.i().retrieveBitmapTextFor(getInputField()).getLineHeight();
 		getContainerConsole().addChild( getInputField(), BorderLayout.Position.South );
 		
 		super.initializeOnlyTheUI();
 	}
 	
+	@Override
 	public VersionedList<String> getHintList(){
-		return (VersionedList<String>)vlstrAutoCompleteHint;
+		return (VersionedList<String>)super.getHintList();
 	}
 	
 	@Override
@@ -425,7 +431,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 //		commonOnEnableDisable();
 //	}
 	
-//	protected void commonOnEnableDisable(){
+//	private void commonOnEnableDisable(){
 //		updateOverrideInputFocus();
 ////		if(LemurFocusHelperStateI.i().isFocusRequesterListEmpty()){
 ////			GuiGlobals.getInstance().setCursorEventsEnabled(this.bEnabled);
@@ -481,8 +487,9 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		return (ListBox<String>)super.getHintBox();
 	}
 	
+	@SuppressWarnings("unchecked")
 	public ListBox<String> getDumpArea() {
-		return (ListBox<String>)super.lstbxDumpArea;
+		return (ListBox<String>)super.getLstbxDumpArea();
 	}
 	
 	public TextField getInputField(){
@@ -525,7 +532,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		return this;
 	}
 	
-	protected void setInputFieldTextEntryComponent(TextEntryComponent source){
+	private void setInputFieldTextEntryComponent(TextEntryComponent source){
 		if(this.tecInputField!=null){
 			if(!this.tecInputField.equals(source)){
 				throw new NullPointerException("input field changed? support is required for this...");
@@ -561,7 +568,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 						setEnabledRequest(false);
 						break;
 					case KeyInput.KEY_V: 
-						if(bKeyShiftIsPressed){
+						if(isKeyShiftIsPressed()){
 							if(bControl)cd().showClipboard();
 						}else{
 							if(bControl)editPasteFromClipBoard();
@@ -632,16 +639,16 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 				double dAdd = 0;
 				switch(key.getKeyCode()){
 					case KeyInput.KEY_PGUP:
-						dAdd = -iShowRows;
+						dAdd = -getShowRowsAmount();
 						break;
 					case KeyInput.KEY_PGDN:
-						dAdd = +iShowRows;
+						dAdd = +getShowRowsAmount();
 						break;
 					case KeyInput.KEY_HOME:
 						if(bControl)dAdd = -dCurrent;
 						break;
 					case KeyInput.KEY_END:
-						if(bControl)dAdd = vlstrDumpEntries.size();
+						if(bControl)dAdd = getDumpEntries().size();
 						break;
 				}
 				scrollDumpArea(dCurrent + dAdd);
@@ -656,10 +663,10 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		return true;
 	}
 	
-	protected BindKey bindKey(String strActionPerformedHelp, int iKeyCode, int... aiKeyModifiers){
+	private BindKey bindKey(String strActionPerformedHelp, int iKeyCode, int... aiKeyModifiers){
 		return bindKey(actSimpleActions,strActionPerformedHelp, iKeyCode, aiKeyModifiers);
 	}
-	protected BindKey bindKey(KeyActionListener act, String strActionPerformedHelp, int iKeyCode, int... aiKeyModifiers){
+	private BindKey bindKey(KeyActionListener act, String strActionPerformedHelp, int iKeyCode, int... aiKeyModifiers){
 		BindKey bk = LemurMiscHelpersStateI.i().bindKey(getInputField(), act,
 			strActionPerformedHelp, iKeyCode, aiKeyModifiers);
 		abkList.add(bk);
@@ -688,15 +695,15 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	
 	@Override
 	protected void updateVisibleRowsAmount(){
-		if(fLstbxHeight != getDumpArea().getSize().y){
-			iVisibleRowsAdjustRequest = 0; //dynamic
+		if(getLstbxHeight() != getDumpArea().getSize().y){
+			setVisibleRowsAdjustRequest(0); //dynamic
 		}
 		
-		if(iVisibleRowsAdjustRequest==null)return;
+		if(getVisibleRowsAdjustRequest()==null)return;
 		
-		Integer iForceAmount = iVisibleRowsAdjustRequest;
+		Integer iForceAmount = getVisibleRowsAdjustRequest();
 		if(iForceAmount>0){
-			iShowRows=iForceAmount;
+			super.setShowRowsAmount(iForceAmount);
 //			lstbx.setVisibleItems(iShowRows);
 //			lstbx.getGridPanel().setVisibleSize(iShowRows,1);
 		}else{
@@ -712,27 +719,27 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 //			if(btnFixVisibleRowsHelper==null)return;
 //			
 //			fLstbxEntryHeight = retrieveBitmapTextFor(btnFixVisibleRowsHelper).getLineHeight();
-			fLstbxEntryHeight = LemurMiscHelpersStateI.i().guessEntryHeight(getDumpArea());
-			if(fLstbxEntryHeight==null)return;
+			setLstbxEntryHeight(LemurMiscHelpersStateI.i().guessEntryHeight(getDumpArea()));
+			if(getLstbxEntryHeight()==null)return;
 			
-			fLstbxHeight = getDumpArea().getSize().y;
+			setLstbxHeight(getDumpArea().getSize().y);
 			
-			float fHeightAvailable = fLstbxHeight;
+			float fHeightAvailable = getLstbxHeight();
 //				float fHeightAvailable = fLstbxHeight -fInputHeight;
 //				if(getContainerConsole().hasChild(lblStats)){
 //					fHeightAvailable-=fStatsHeight;
 //				}
-			iShowRows = (int) (fHeightAvailable / fLstbxEntryHeight);
+			super.setShowRowsAmount((int) (fHeightAvailable / getLstbxEntryHeight()));
 		}
 		
-		getDumpArea().setVisibleItems(iShowRows);
+		getDumpArea().setVisibleItems(super.getShowRowsAmount());
 		
-		cd().varSet(cd().CMD_FIX_VISIBLE_ROWS_AMOUNT, ""+iShowRows, true);
+		cd().varSet(cd().CMD_FIX_VISIBLE_ROWS_AMOUNT, ""+getShowRowsAmount(), true);
 		
-	//	lstbx.getGridPanel().setVisibleSize(iShowRows,1);
-		cd().dumpInfoEntry("fLstbxEntryHeight="+MiscI.i().fmtFloat(fLstbxEntryHeight)+", "+"iShowRows="+iShowRows);
+	//	lstbx.getGridPanel().setVisibleSize(getShowRowsAmount(),1);
+		cd().dumpInfoEntry("fLstbxEntryHeight="+MiscI.i().fmtFloat(getLstbxEntryHeight())+", "+"iShowRows="+getShowRowsAmount());
 		
-		iVisibleRowsAdjustRequest=null;
+		setVisibleRowsAdjustRequest(null);
 		
 		cmdLineWrapDisableDumpArea();
 	}
@@ -766,7 +773,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	}
 	
 //	@Override
-//	protected void editPasteFromClipBoard() {
+//	private void editPasteFromClipBoard() {
 //		super.editPasteFromClipBoard();
 //		LemurMiscHelpersStateI.i().positionCaratProperly(getInputField());
 //	}
@@ -881,7 +888,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	}
 	
 //	@Override
-//	protected String prepareToPaste(String strPasted, String strCurrent) {
+//	private String prepareToPaste(String strPasted, String strCurrent) {
 //		if(!isInputTextFieldEmpty()){
 //			strCurrent = LemurMiscHelpersStateI.i().prepareStringToPasteAtCaratPosition(
 //				getInputField(), strCurrent, strPasted);
@@ -894,7 +901,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	@Override
 	protected void updateDumpAreaSelectedIndex(){
 		Integer i = getDumpArea().getSelectionModel().getSelection();
-		iSelectionIndex = i==null ? -1 : i;
+		setDumpAreaSelectedIndex(i==null ? -1 : i);
 	}
 	@Override
 	public void clearDumpAreaSelection() {
@@ -928,7 +935,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		return (Container)super.getStatsAndControls();
 	}
 	
-	protected class ButtonClick implements Command<Button>{
+	private class ButtonClick implements Command<Button>{
 		@Override
 		public void execute(Button source) {
 			if(source.equals(btnClipboardShow)){
@@ -971,7 +978,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	}
 	
 //	@Override
-//	protected Vector3f getStatsAndControlsSize() {
+//	private Vector3f getStatsAndControlsSize() {
 //		return getContainerStatsAndControls().getSize();
 //	}
 	
@@ -986,16 +993,16 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	 * keep this method as reference! 
 	 */
 	@Deprecated
-	protected void tweakDefaultFontToBecomeFixedSize(){
-		fntMakeFixedWidth = app().getAssetManager().loadFont("Interface/Fonts/Default.fnt");
-		BitmapCharacterSet cs = fntMakeFixedWidth.getCharSet();
+	private void tweakDefaultFontToBecomeFixedSize(){
+		setFntMakeFixedWidth(app().getAssetManager().loadFont("Interface/Fonts/Default.fnt"));
+		BitmapCharacterSet cs = getFntMakeFixedWidth().getCharSet();
 		for(int i=0;i<256;i++){ //is there more than 256?
 			BitmapCharacter bc = cs.getCharacter(i);
 			if(bc!=null){
 				bc.setXAdvance(15); 
 			}
 		}
-		GuiGlobals.getInstance().getStyles().setDefault(fntMakeFixedWidth);
+		GuiGlobals.getInstance().getStyles().setDefault(getFntMakeFixedWidth());
 	}
 	
 	@Override
@@ -1020,7 +1027,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	}
 	
 	@Override
-	public boolean prepareAndCheckIfReadyToDiscard(CompositeControl cc) {
+	public boolean prepareAndCheckIfReadyToDiscard(ConditionalStateManagerI.CompositeControl cc) {
 		getContainerConsole().clearChildren();
 		return super.prepareAndCheckIfReadyToDiscard(cc);
 	}
@@ -1097,5 +1104,26 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		return null;
 	}
 
-	
+	@Override
+	protected void updateSelected(DialogListEntryData<T> dledPreviouslySelected) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void updateSelected(DialogListEntryData<T> dledAbove,
+			DialogListEntryData<T> dledParentTmp) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected ConsoleLemurStateI<T> getThis() {
+		return this;
+	}
+
+	@Override
+	protected Float getStatsHeight() {
+		return MiscJmeI.i().retrieveBitmapTextFor(lblStats).getLineHeight();
+	}
 }

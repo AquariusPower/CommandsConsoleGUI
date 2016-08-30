@@ -29,7 +29,9 @@ package com.github.commandsconsolegui.cmd.varfield;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
@@ -41,15 +43,15 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class StringCmdField extends VarCmdFieldAbs{
+public class StringCmdField extends VarCmdFieldAbs<StringCmdField>{
 //	String str = "ERROR: NOT SET"; // hashcode depends on it not being null
-//	protected String strCmdId = null;
-//	protected int	iReflexFillCfgVariant;
-	protected String	strReflexFillCfgCodePrefixVariant;
+//	private String strCmdId = null;
+//	private int	iReflexFillCfgVariant;
+	private String	strReflexFillCfgCodePrefixVariant;
 //	private String	strHelpComment;
-	protected static boolean bIgnoreCaseOnComparison = true;
+	private static boolean bIgnoreCaseOnComparison = true;
 	public static final String strCodePrefix="scf"; //ex.: scfTestCommand
-//	protected static ArrayList<StringCmdField> ascfList = new ArrayList<StringCmdField>();
+//	private static ArrayList<StringCmdField> ascfList = new ArrayList<StringCmdField>();
 	
 //	public static ArrayList<StringCmdField> getListCopy(){
 //		return new ArrayList<StringCmdField>(ascfList);
@@ -68,18 +70,19 @@ public class StringCmdField extends VarCmdFieldAbs{
 //		this(rfcfgOwner,0);
 //	}
 	
-	/**
-	 * 
-	 * @param strCmdId overrides auto-identifier thru reflection
-	 * @param strHelpComment
-	 */
-	public StringCmdField(String strCmdId, String strHelpComment){
-		super(true);
-		super.setUniqueCmdId(new IdTmp(false, strCmdId, strCmdId));
-		this.strHelp = strHelpComment;
-		this.bReflexingIdentifier = false;
-//		StringCmdField.ascfList.add(this);
-	}
+//	/**
+//	 * 
+//	 * @param strCmdId overrides auto-identifier thru reflection
+//	 * @param strHelpComment
+//	 */
+//	public StringCmdField(String strCmdId, String strHelpComment){
+////		super(true);
+//		super(null);
+//		super.setUniqueCmdId(new IdTmp(false, strCmdId, strCmdId));
+//		setHelp(strHelpComment);
+////		this.bReflexingIdentifier = false;
+////		StringCmdField.ascfList.add(this);
+//	}
 	
 	/**
 	 * The value cannot be prepared at the constructor, 
@@ -87,7 +90,9 @@ public class StringCmdField extends VarCmdFieldAbs{
 	 * a valid field (will still be null).
 	 */
 	public StringCmdField(IReflexFillCfg rfcfgOwner, String strReflexFillCfgCodePrefixVariant, String strHelpComment){ // int iReflexFillCfgVariant){
-		this((String)null,strHelpComment);
+//		this((String)null,strHelpComment);
+		super(rfcfgOwner);
+		setHelp(strHelpComment);
 		
 //		this.iReflexFillCfgVariant=iReflexFillCfgVariant;
 		this.strReflexFillCfgCodePrefixVariant = strReflexFillCfgCodePrefixVariant;
@@ -97,9 +102,9 @@ public class StringCmdField extends VarCmdFieldAbs{
 		
 //		ReflexFill.assertAndGetField(rfcfgOwner, this);
 		
-		this.rfcfgOwner=rfcfgOwner;
+//		setOwner(rfcfgOwner);
 		
-		if(this.rfcfgOwner==null){
+		if(getOwner()==null){
 			throw new NullPointerException("cant be null for: "+IReflexFillCfg.class.getName());
 		}
 	}
@@ -115,21 +120,21 @@ public class StringCmdField extends VarCmdFieldAbs{
 	 */
 	@Override
 	public String toString() {
-		if(strUniqueCmdId==null)initialize();
-		return this.strUniqueCmdId;
+		if(getUniqueCmdId()==null)initialize();
+		return getUniqueCmdId();
 	}
 	
 //	public String getHelpComment(){
 //		return strHelp;
 //	}
 	
-	protected void initialize(){
+	private void initialize(){
 		/**
 		 * This basically prevents recursive infinite loop,
 		 * if this is called at reflex fill method.
 		 */
 //		super.strCmdId=errorMessage();
-		super.setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(this.rfcfgOwner, this, false));
+		super.setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(getOwner(), this, false));
 //		throw new NullPointerException("not initialized properly: "+this);
 	}
 //	
@@ -140,19 +145,19 @@ public class StringCmdField extends VarCmdFieldAbs{
 	@Override
 	public boolean equals(Object obj) {
 //		if(strCmdId==null)throw new NullPointerException(errorMessage());
-		if(strUniqueCmdId==null)initialize();
+		if(getUniqueCmdId()==null)initialize();
 		if(bIgnoreCaseOnComparison){
-			return this.strUniqueCmdId.equalsIgnoreCase(""+obj);
+			return getUniqueCmdId().equalsIgnoreCase(""+obj);
 		}else{
-			return this.strUniqueCmdId.equals(""+obj);
+			return getUniqueCmdId().equals(""+obj);
 		}
 	}
 	
 	@Override
 	public int hashCode() {
 //		if(strCmdId==null)throw new NullPointerException(errorMessage());
-		if(strUniqueCmdId==null)initialize();
-		return strUniqueCmdId.hashCode();
+		if(getUniqueCmdId()==null)initialize();
+		return getUniqueCmdId().hashCode();
 	}
 	
 //	@Override
@@ -166,14 +171,9 @@ public class StringCmdField extends VarCmdFieldAbs{
 	}
 
 	@Override
-	public IReflexFillCfg getOwner() {
-		return rfcfgOwner;
-	}
-
-	@Override
-	public void setObjectValue(Object objValue) {
-		// TODO Auto-generated method stub
-		
+//	public StringCmdField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
+	public StringCmdField setObjectValue(Object objValue) {
+		throw new PrerequisitesNotMetException("TODO should this method do nothing here?", this, objValue); //TODO
 	}
 
 	@Override
@@ -184,8 +184,11 @@ public class StringCmdField extends VarCmdFieldAbs{
 
 	@Override
 	public String getVarId() {
-		// TODO Auto-generated method stub
-		return null;
+		/**
+		 * no var to console commands yet.
+		 * TODO console commands could have a var representing their return value?
+		 */
+		return null; 
 	}
 
 	@Override
@@ -195,20 +198,23 @@ public class StringCmdField extends VarCmdFieldAbs{
 	}
 
 	@Override
-	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
-		// TODO Auto-generated method stub
-		
+	public StringCmdField setConsoleVarLink(CommandsDelegator.CompositeControl ccCD, VarIdValueOwnerData vivo) {
+//	public StringCmdField setConsoleVarLink(VarIdValueOwnerData vivo) {
+		throw new PrerequisitesNotMetException("TODO should this method do nothing here?", this, vivo); //TODO
 	}
 
 	@Override
 	public String getHelp() {
-		// TODO Auto-generated method stub
-		return null;
+		return null; //TODO mmm... check its uses, and let it use super getHelp()
 	}
 
 	@Override
 	public String getVariablePrefix() {
 		return "StringCmd";
 	}
-
+	
+	@Override
+	protected StringCmdField getThis() {
+		return this;
+	}
 }

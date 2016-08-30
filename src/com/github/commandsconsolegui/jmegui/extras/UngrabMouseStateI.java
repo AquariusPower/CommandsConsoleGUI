@@ -84,7 +84,7 @@ public class UngrabMouseStateI extends ConditionalStateAbs {
 	}
 //	@Deprecated
 //	@Override
-//	protected void configure(Application app) {
+//	private void configure(Application app) {
 //		throw new NullPointerException("deprecated!!!");
 //	}
 	

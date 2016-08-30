@@ -36,7 +36,7 @@ import com.simsilica.lemur.Command;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ChoiceDialogState<T extends Command<Button>> extends BasicDialogStateAbs<T> {
+public class ChoiceDialogState<T extends Command<Button>> extends BasicDialogStateAbs<T,ChoiceDialogState<T>> {
 	public static class CfgParm extends BasicDialogStateAbs.CfgParm{
 		public CfgParm(
 				Float fDialogWidthPercentOfAppWindow,
@@ -67,5 +67,10 @@ public class ChoiceDialogState<T extends Command<Button>> extends BasicDialogSta
 	public boolean prepareTestData(){
 		for(int i=0;i<10;i++)addEntryQuick(null); //some test data
 		return true;
+	}
+
+	@Override
+	protected ChoiceDialogState<T> getThis() {
+		return this;
 	}
 }

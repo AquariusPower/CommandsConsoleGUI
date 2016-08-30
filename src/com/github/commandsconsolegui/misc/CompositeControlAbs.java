@@ -52,5 +52,5 @@ public class CompositeControlAbs<T>{
 	/**
 	 * quite fun this one...
 	 */
-	public void assertSelfNotNull(){/*yes, to nothing here...*/}
+	public void assertSelfNotNull(){/*yes, there is no point putting anything here...*/}
 }

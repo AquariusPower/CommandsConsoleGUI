@@ -27,6 +27,7 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
+import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
@@ -45,19 +46,19 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  *
  */
 
-public class TimedDelayVarField extends VarCmdFieldAbs{
-	protected static IHandleExceptions ihe = HandleExceptionsRaw.i();
-//	protected static ArrayList<TimedDelayVarField> atdList = new ArrayList<TimedDelayVarField>();
+public class TimedDelayVarField extends VarCmdFieldAbs<TimedDelayVarField>{
+	private static IHandleExceptions ihe = HandleExceptionsRaw.i();
+//	private static ArrayList<TimedDelayVarField> atdList = new ArrayList<TimedDelayVarField>();
 	
-	protected static Long lCurrentTimeNano;
-	protected static boolean	bConfigured;
+	private static Long lCurrentTimeNano;
+	private static boolean	bConfigured;
 	
 	public static final long lNanoOneSecond = 1000000000L; // 1s in nano time
 	public static final float fNanoToSeconds = 1f/lNanoOneSecond; //multiply nano by it to get in seconds
 	
-	protected Long	lLastUpdateReferenceTimeNano;
-	protected float	fDelayLimitSeconds;
-	protected long	lDelayLimitNano;
+	private Long	lLastUpdateReferenceTimeNano;
+	private float	fDelayLimitSeconds;
+	private long	lDelayLimitNano;
 
 	public static final String	strCodePrefixVariant = "td";
 	
@@ -90,7 +91,7 @@ public class TimedDelayVarField extends VarCmdFieldAbs{
 	 */
 	public TimedDelayVarField(float fDelay, String strHelp) {
 		this(null,fDelay,strHelp);
-		this.bReflexingIdentifier=false;
+//		this.bReflexingIdentifier=false;
 	}
 	/**
 	 * This constructor is for field variables.
@@ -101,10 +102,11 @@ public class TimedDelayVarField extends VarCmdFieldAbs{
 	 */
 	public TimedDelayVarField(IReflexFillCfg rfcfgOwnerUseThis, float fDelay, String strHelp) {
 //		if(rfcfgOwnerUseThis!=null)atdList.add(this); //only fields allowed
-		super(rfcfgOwnerUseThis!=null); //only fields allowed
-		this.rfcfgOwner=rfcfgOwnerUseThis;
+//		super(rfcfgOwnerUseThis!=null); //only fields allowed
+		super(rfcfgOwnerUseThis); //only fields allowed
+//		this.setOwner(rfcfgOwnerUseThis);
 		setDelayLimitSeconds(fDelay);
-		this.strHelp=strHelp;
+		setHelp(strHelp);
 	}
 	
 	private void setDelayLimitSeconds(float fDelaySeconds){
@@ -306,14 +308,14 @@ public class TimedDelayVarField extends VarCmdFieldAbs{
 //		return new ArrayList<TimedDelayVarField>(atdList);
 //	}
 
-	@Override
-	public String getVarId() {
-		if(strVarId==null){
-			super.setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner, this, true));
-		}
-		
-		return strVarId;
-	}
+//	@Override
+//	public String getVarId() {
+//		if(strVarId==null){
+//			super.setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(getOwner(), this, true));
+//		}
+//		
+//		return strVarId;
+//	}
 
 	@Override
 	public String getCodePrefixVariant() {
@@ -321,19 +323,18 @@ public class TimedDelayVarField extends VarCmdFieldAbs{
 	}
 
 	@Override
-	public IReflexFillCfg getOwner() {
-		return rfcfgOwner;
-	}
-
-	@Override
-	public void setObjectValue(Object objValue) {
+	public TimedDelayVarField setObjectValue(Object objValue) {
+//	public TimedDelayVarField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
 		if(objValue instanceof Double){
 			setDelayLimitSeconds( ((Double)objValue).floatValue() );
 		}else{
 			setDelayLimitSeconds((Float)objValue);
 		}
 		
-		if(vivo!=null)vivo.setObjectValue(objValue);
+		super.setObjectValue(objValue);
+//		super.setObjectValue(ccCD, objValue);
+		
+		return this;
 	}
 
 	@Override
@@ -346,10 +347,10 @@ public class TimedDelayVarField extends VarCmdFieldAbs{
 		return getDelayLimitSeconds();
 	}
 
-	@Override
-	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
-		this.vivo=vivo;
-	}
+//	@Override
+//	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
+//		this.vivo=vivo;
+//	}
 	
 	@Override
 	public String toString() {
@@ -359,13 +360,16 @@ public class TimedDelayVarField extends VarCmdFieldAbs{
 
 	@Override
 	public String getHelp() {
-		// TODO Auto-generated method stub
-		return null;
+		return null; //TODO check its uses and let it use super.getHelp()
 	}
 
 	@Override
 	public String getVariablePrefix() {
 		return "TimedDelay";
 	}
-
+	
+	@Override
+	protected TimedDelayVarField getThis() {
+		return this;
+	}
 }

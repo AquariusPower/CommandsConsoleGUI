@@ -58,10 +58,10 @@ import com.simsilica.lemur.event.MouseEventControl;
 */
 public abstract class SimpleConsoleAppAbs extends SimpleApplication implements IConsoleCommandListener, IReflexFillCfg {
 	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
-	protected boolean bHideSettings=true;
+	private boolean bHideSettings=true;
 	private boolean	bStopping; 
 	
-//	protected CommandsDelegator	cd;
+//	private CommandsDelegator	cd;
 	
 	public SimpleConsoleAppAbs() {
 		super();

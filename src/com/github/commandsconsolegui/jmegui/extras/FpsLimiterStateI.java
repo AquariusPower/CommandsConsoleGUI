@@ -56,7 +56,7 @@ public class FpsLimiterStateI extends CmdConditionalStateAbs{
 	private int	iMaxFPS;
 	
 	public FpsLimiterStateI() {
-		super.bPrefixCmdWithIdToo=true;
+		setPrefixCmdWithIdToo(true);
 	}
 	
 	public static class CfgParm implements ICfgParm{} //look at super class
