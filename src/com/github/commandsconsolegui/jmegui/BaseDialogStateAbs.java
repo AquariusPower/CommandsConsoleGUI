@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.jmegui;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
@@ -40,6 +41,7 @@ import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI
 //import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Container;
@@ -83,6 +85,8 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	private boolean bOptionChoiceSelectionMode = false;
 //	private Long	lChoiceMadeAtMilis = null;
 	private ArrayList<DialogListEntryData<T>> adataChosenEntriesList = new ArrayList<DialogListEntryData<T>>();
+	
+	BoolTogglerCmdField btgGrowEffect = new BoolTogglerCmdField(this, false); //TODO WIP
 	
 	public DiagModalInfo<T> getDiagModalCurrent(){
 		return dmi;
@@ -246,6 +250,14 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 			bRequestedActionSubmit=false;
 		}
 		
+//		if(btgGrowEffect.b()){
+			Vector3f v3fScale = sptContainerMain.getLocalScale();
+			if(v3fScale.x<1f)v3fScale.x+=0.01f;
+			if(v3fScale.x>1f)v3fScale.x=1f;
+			if(v3fScale.y<1f)v3fScale.y+=0.01f;
+			if(v3fScale.y>1f)v3fScale.y=1f;
+//		}
+		
 		return super.updateOrUndo(tpf);
 	}
 	
@@ -258,6 +270,12 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		setMouseCursorKeepUngrabbed(true);
 		if(diagParent!=null)diagParent.updateModalChild(true,this);
 //		updateModalParent(true);
+		
+		if(btgGrowEffect.b()){
+			Vector3f v3fScale = sptContainerMain.getLocalScale();
+			v3fScale.x=0.01f;
+			v3fScale.y=0.01f;
+		}
 		
 		return super.enableOrUndo();
 	}
