@@ -106,8 +106,8 @@ public abstract class VarCmdFieldAbs <S extends VarCmdFieldAbs<S>> implements IR
 	 * @param vivo if the object already set is different from it, will throw exception
 	 * @return
 	 */
-	public S setConsoleVarLink(CommandsDelegator.CompositeControl ccCD, VarIdValueOwnerData vivo) {
-		ccCD.assertSelfNotNull();
+	public S setConsoleVarLink(CommandsDelegator.CompositeControl cc, VarIdValueOwnerData vivo) {
+		cc.assertSelfNotNull();
 		
 		if(vivo==null){
 			throw new PrerequisitesNotMetException("VarLink is null", this);
@@ -121,12 +121,30 @@ public abstract class VarCmdFieldAbs <S extends VarCmdFieldAbs<S>> implements IR
 		
 		this.vivo = vivo;
 		
+		/**
+		 * vivo will already come with an updated value, because this method is called
+		 * in a "set value" flow.
+		 */
+		boolean bUpdateWithInitialValue=false; //do not enable... kept as reference...
+		if(bUpdateWithInitialValue){
+//			if(this.vivo.getObjectValue()==null){ //nah... value can be set to null...
+			setObjectRawValue(getValueRaw()); //update it's value with old/previous value? nah...
+//			}
+		}
+		
 		return getThis();
 	}
 	
-	public VarIdValueOwnerData getVarData(CommandsDelegator.CompositeControl ccCD){
-		ccCD.assertSelfNotNull();
+	public VarIdValueOwnerData getConsoleVarLink(CommandsDelegator.CompositeControl cc){
+		cc.assertSelfNotNull();
 		return this.vivo;
+	}
+	/**
+	 * DEV: do not expose this one, let only subclasses use it, to avoid messing the field.
+	 * @return
+	 */
+	protected VarIdValueOwnerData getConsoleVarLink() {
+		return vivo;
 	}
 	
 	public String getVarId() {
@@ -255,19 +273,12 @@ public abstract class VarCmdFieldAbs <S extends VarCmdFieldAbs<S>> implements IR
 	protected abstract S getThis();
 	
 	/**
-	 * DEV: do not expose this one, let only subclasses use it, to avoid messing the field.
-	 * @return
-	 */
-	protected VarIdValueOwnerData getConsoleVarLink() {
-		return vivo;
-	}
-	
-	/**
-	 * TODO rename to setObjectRawValue() to indicate it is the unmodified/original value. Confirm all its uses (the object get too), as fixed (modified to be correct) values shall not actually reach here.
+	 * It is the unmodified/original value. 
+	 * TODO Confirm all its uses (the object get too), as fixed (modified to be correct) values shall not actually reach here.
 	 * @param objValue
 	 * @return
 	 */
-	public S setObjectValue(Object objValue) {
+	protected S setObjectRawValue(Object objValue) {
 //		public S setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
 //		ccCD.assertSelfNotNull();
 		

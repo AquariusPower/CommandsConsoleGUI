@@ -74,9 +74,15 @@ public class FloatDoubleVarField extends VarCmdFieldAbs<FloatDoubleVarField>{
 //		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
 	}
 	
+	public FloatDoubleVarField setValue(Double d){
+		this.dValue=d;
+		if(super.getConsoleVarLink()!=null)setObjectRawValue(this.dValue);
+		return this;
+	}
+	
 	@Override
 //	public FloatDoubleVarField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
-	public FloatDoubleVarField setObjectValue(Object objValue) {
+	public FloatDoubleVarField setObjectRawValue(Object objValue) {
 		if(objValue instanceof Double){
 			dValue = ((Double)objValue);
 		}else
@@ -91,7 +97,7 @@ public class FloatDoubleVarField extends VarCmdFieldAbs<FloatDoubleVarField>{
 		if(dMax!=null && dValue>dMax)dValue=dMax;
 		
 //		super.setObjectValue(ccCD,objValue);
-		super.setObjectValue(objValue);
+		super.setObjectRawValue(objValue);
 		
 		return this;
 	}

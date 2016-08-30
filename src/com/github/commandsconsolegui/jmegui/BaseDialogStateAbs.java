@@ -29,24 +29,17 @@ package com.github.commandsconsolegui.jmegui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.TreeMap;
 
-import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
+import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
-import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.BasicDialogStateAbs.CfgParm;
-import com.github.commandsconsolegui.misc.CallQueueI;
-import com.github.commandsconsolegui.misc.MsgI;
+import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 //import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
-import com.jme3.audio.AudioData.DataType;
-import com.jme3.audio.AudioNode;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Container;
@@ -64,6 +57,8 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	private Spatial	sptContainerMain;
 	private Spatial	sptIntputField;
 	private String	strTitle;
+//	private String strStyle;
+	private StringVarField svfStyle = new StringVarField(this, (String)null, null);
 	
 	private BaseDialogStateAbs<T,?> diagParent;
 	private ArrayList<BaseDialogStateAbs<T,?>> aModalChildList = new ArrayList<BaseDialogStateAbs<T,?>>();
@@ -182,7 +177,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		 */
 		if(!cfg.isInitiallyEnabled()){
 			initiallyDisabled();
-			btgState.set(false,false);
+			btgState.setValue(false);//,false);
 		}
 		
 //		MouseCursor.i().configure(cfg.lMouseCursorClickDelayMilis);
@@ -300,14 +295,19 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	
 	/**
 	 * TODO rename getInputField()
+	 * @param ccSelf 
 	 * @return
 	 */
-	public Spatial getIntputField() {
+	public Spatial getInputField(LemurFocusHelperStateI.CompositeControl ccSelf) {
+		ccSelf.assertSelfNotNull();
+		return sptIntputField;
+	}
+	protected Spatial getInputField() {
 		return sptIntputField;
 	}
 	
 	public float getInputFieldHeight(){
-		return MiscJmeI.i().retrieveBitmapTextFor((Node)getIntputField()).getLineHeight();
+		return MiscJmeI.i().retrieveBitmapTextFor((Node)sptIntputField).getLineHeight();
 	}
 	
 	protected R setIntputField(Spatial sptIntputField) {
@@ -635,6 +635,16 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 
 	public String getTitle() {
 		return strTitle;
+	}
+
+	public String getStyle() {
+		return svfStyle.getStringValue();
+	}
+
+	protected void setStyle(String strStyle) {
+//		this.strStyle = strStyle;
+//		svfStyle.setObjectRawValue(strStyle);
+		svfStyle.setValue(strStyle);
 	}
 
 //	public void setTitle(String strTitle) {

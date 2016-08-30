@@ -230,7 +230,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		if(svfBackgroundHexaColorRGBA.getStringValue().isEmpty()){
 			String strHexa = Integer.toHexString(colorConsoleStyleBackground.asIntRGBA());
 			strHexa = String.format("%8s", strHexa).replace(" ", "0").toUpperCase();
-			svfBackgroundHexaColorRGBA.setObjectValue(strHexa);
+			svfBackgroundHexaColorRGBA.setObjectRawValue(strHexa);
 		}else{
 			try{
 				int i = Integer.parseInt(svfBackgroundHexaColorRGBA.getStringValue(),16);//hexa string
@@ -396,7 +396,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	protected boolean enableOrUndo() {
 		if(!super.enableOrUndo())return false;
 		
-		LemurFocusHelperStateI.i().requestFocus(getIntputField());
+		LemurFocusHelperStateI.i().requestFocus(getInputField());
 //	commonOnEnableDisable();
 		
 		if(isFullyInitialized()){
@@ -415,7 +415,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		if(!super.disableOrUndo())return false;
 		
 		closeHint();
-		LemurFocusHelperStateI.i().removeFocusableFromList(getIntputField());
+		LemurFocusHelperStateI.i().removeFocusableFromList(getInputField());
 //		commonOnEnableDisable();
 		
 		return true;
@@ -492,8 +492,9 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		return (ListBox<String>)super.getLstbxDumpArea();
 	}
 	
-	public TextField getInputField(){
-		return (TextField)super.getIntputField();
+	@Override
+	protected TextField getInputField(){
+		return (TextField)super.getInputField();
 	}
 	
 	@Override
@@ -1057,8 +1058,8 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 
 	@Override
 	protected void updateOverrideInputFocus() {
-		if(!getIntputField().equals(LemurFocusHelperStateI.i().getFocused())){
-			LemurFocusHelperStateI.i().requestFocus(getIntputField(),true);
+		if(!getInputField().equals(LemurFocusHelperStateI.i().getFocused())){
+			LemurFocusHelperStateI.i().requestFocus(getInputField(),true);
 		}
 	}
 	

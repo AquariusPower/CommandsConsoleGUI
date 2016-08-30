@@ -230,7 +230,7 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 	protected boolean disableOrUndo() {
 		if(!super.disableOrUndo())return false;
 		
-		btgState.set(false,false);
+		btgState.setValue(false);//,false);
 		
 		cd().dumpInfoEntry(getCmd()+" disabled");
 		

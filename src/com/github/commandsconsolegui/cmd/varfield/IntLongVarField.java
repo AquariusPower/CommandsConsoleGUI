@@ -75,9 +75,15 @@ public class IntLongVarField extends VarCmdFieldAbs<IntLongVarField>{
 //		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
 	}
 	
+	public IntLongVarField setValue(Long l){
+		this.lValue=l;
+		if(super.getConsoleVarLink()!=null)setObjectRawValue(this.lValue);
+		return this;
+	}
+	
 	@Override
 //	public IntLongVarField setObjectValue(CommandsDelegator.CompositeControl cc, Object objValue) {
-	public IntLongVarField setObjectValue(Object objValue) {
+	public IntLongVarField setObjectRawValue(Object objValue) {
 		if(objValue instanceof Long){
 			lValue = ((Long)objValue);
 		}else
@@ -89,7 +95,7 @@ public class IntLongVarField extends VarCmdFieldAbs<IntLongVarField>{
 		}
 		
 //		super.setObjectValue(cc,objValue);
-		super.setObjectValue(objValue);
+		super.setObjectRawValue(objValue);
 		
 		return this;
 	}

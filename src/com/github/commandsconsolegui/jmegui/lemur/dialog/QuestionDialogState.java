@@ -69,6 +69,15 @@ public class QuestionDialogState<T extends Command<Button>> extends BasicDialogS
 		return super.initOrUndo();
 	}
 	
+	@Override
+	protected boolean initGUI() {
+		getCellRenderer().setCellHeightMult(2f);
+		
+		if(!super.initGUI())return false;
+		
+		return true;
+	}
+	
 	public boolean isYes(DialogListEntryData<T> dled){
 		return dled==dledYes;
 	}
@@ -86,5 +95,19 @@ public class QuestionDialogState<T extends Command<Button>> extends BasicDialogS
 	protected QuestionDialogState<T> getThis() {
 		return this;
 	}
+	
+	@Override
+	protected boolean enableOrUndo() {
+		if(!super.enableOrUndo())return false;
+		
+		selectEntry(dledNo);
+		
+		return true;
+	}
+	
+//	@Override
+//	protected Integer getEntryHeightPixels() {
+//		return super.getEntryHeightPixels()*2;
+//	}
 }
 

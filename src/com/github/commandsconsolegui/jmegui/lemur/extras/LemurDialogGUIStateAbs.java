@@ -33,11 +33,10 @@ import java.util.HashMap;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
-import com.github.commandsconsolegui.jmegui.AudioUII;
-import com.github.commandsconsolegui.jmegui.MiscJmeI;
-import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
+import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
@@ -47,14 +46,15 @@ import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI.BindKey;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
-import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.input.KeyInput;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.ListBox;
@@ -82,7 +82,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	private ListBox<DialogListEntryData<T>>	lstbxEntriesToSelect;
 	private VersionedList<DialogListEntryData<T>>	vlVisibleEntriesList = new VersionedList<DialogListEntryData<T>>();
 	private int	iVisibleRows;
-	private Integer	iEntryHeightPixels; //TODO this is init is failing why? = 20; 
+//	private Integer	iEntryHeightPixels; //TODO this is init is failing why? = 20; 
 	private Vector3f	v3fEntryListSize;
 	private Container	cntrEntryCfg;
 	private SelectionModel	selectionModel;
@@ -96,7 +96,9 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	private ArrayList<BindKey>	abkList = new ArrayList<BindKey>();
 	private KeyActionListener	actSimpleActions;
 	private TimedDelayVarField tdListboxSelectorAreaBlinkFade = new TimedDelayVarField(1f,"");
-	
+	private CellRendererDialogEntry<T>	cr;
+//	private StringVarField svfStyle = new StringVarField(this, null, null);
+//	private String strStyle;
 	
 	@Override
 	public Container getContainerMain(){
@@ -107,7 +109,10 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		private Float fDialogHeightPercentOfAppWindow;
 		private Float fDialogWidthPercentOfAppWindow;
 		private Float fInfoHeightPercentOfDialog;
+		
+		/** TODO entry height should be automatic... may be each entry could have its own height. */
 		private Integer iEntryHeightPixels;
+		
 //		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI) {
 //			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI);
 //		}
@@ -187,14 +192,16 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	 */
 	@Override
 	protected boolean initGUI(){
-		String strStyle = ConsoleLemurStateI.i().STYLE_CONSOLE; //TODO make it custom
+		if(getStyle()==null){
+			setStyle(ConsoleLemurStateI.i().STYLE_CONSOLE);
+		}
 		
 		Vector3f v3fApplicationWindowSize = new Vector3f(
 			app().getContext().getSettings().getWidth(),
 			app().getContext().getSettings().getHeight(),
 			0);
 			
-		setContainerMain(new Container(new BorderLayout(), strStyle));
+		setContainerMain(new Container(new BorderLayout(), getStyle()));
 		getContainerMain().setName(getId()+"_Dialog");
 		LemurFocusHelperStateI.i().prepareDialogToBeFocused(this);
 		CursorEventControl.addListenersToSpatial(getContainerMain(), DialogMouseCursorListenerI.i());
@@ -205,7 +212,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		LemurMiscHelpersStateI.i().setGrantedSize(getContainerMain(), v3fDiagWindowSize, false);
 		
 		///////////////////////// NORTH (title + info/help)
-		setCntrNorth(new Container(new BorderLayout(), strStyle));
+		setCntrNorth(new Container(new BorderLayout(), getStyle()));
 		getNorthContainer().setName(getId()+"_NorthContainer");
 		Vector3f v3fNorthSize = v3fDiagWindowSize.clone();
 		/**
@@ -216,7 +223,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		LemurMiscHelpersStateI.i().setGrantedSize(getNorthContainer(), v3fNorthSize, false);
 		
 		//title 
-		lblTitle = new Label(getTitle(),strStyle);
+		lblTitle = new Label(getTitle(),getStyle());
 		lblTitle.setName(getId()+"_Title");
 		ColorRGBA cLightGreen = new ColorRGBA(0.35f,1f,0.35f,1f);
 		lblTitle.setColor(cLightGreen); //TODO make it custom
@@ -224,7 +231,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		CursorEventControl.addListenersToSpatial(lblTitle, DialogMouseCursorListenerI.i());
 		
 		// simple info
-		lblTextInfo = new Label("",strStyle);
+		lblTextInfo = new Label("",getStyle());
 		lblTextInfo.setName(getId()+"_TxtInfo");
 		getNorthContainer().addChild(lblTextInfo, BorderLayout.Position.Center);
 		
@@ -238,8 +245,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		v3fEntryListSize.y -= fInfoHeightPixels;
 		lstbxEntriesToSelect = new ListBox<DialogListEntryData<T>>(
 			new VersionedList<DialogListEntryData<T>>(), 
-			new CellRendererDialogEntry<T>(strStyle,this),// bOptionSelectionMode), 
-			strStyle);
+			getCellRenderer(), 
+			getStyle());
 		selectionModel = lstbxEntriesToSelect.getSelectionModel();
 		lstbxEntriesToSelect.setName(getId()+"_EntriesList");
 		lstbxEntriesToSelect.setSize(v3fEntryListSize); //not preferred, so the input field can fit properly
@@ -251,26 +258,26 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		
 //		LemurMiscHelpersStateI.i().bugFix(null, LemurMiscHelpersStateI.i().btgBugFixListBoxSelectorArea, lstbxEntriesToSelect);
 		
-		/**
-		 * TODO entry height should be automatic... may be each entry could have its own height.
-		 */
-		iEntryHeightPixels = cfg.iEntryHeightPixels;
+//		/**
+//		 * TODO entry height should be automatic... may be each entry could have its own height.
+//		 */
+//		iEntryHeightPixels = cfg.iEntryHeightPixels;
 		
 		//////////////////////////////// SOUTH (typing/config)
-		setCntrSouth(new Container(new BorderLayout(), strStyle));
+		setCntrSouth(new Container(new BorderLayout(), getStyle()));
 		getSouthContainer().setName(getId()+"_SouthContainer");
 		
 //		// configure an entry from the list
-//		cntrEntryCfg = new Container(new BorderLayout(), strStyle);
+//		cntrEntryCfg = new Container(new BorderLayout(), getStyle());
 //		cntrEntryCfg.setName(getId()+"_EntryConfig");
 //		getSouthContainer().addChild(cntrEntryCfg, Bor)
 		
 		// status line, about the currently selected entry on the list
-		lblSelectedEntryStatus = new Label("Selected Entry Status",strStyle);
+		lblSelectedEntryStatus = new Label("Selected Entry Status",getStyle());
 		getSouthContainer().addChild(lblSelectedEntryStatus, BorderLayout.Position.North);
 		
 		// mainly used as a list filter
-		setIntputField(new TextField("",strStyle));
+		setIntputField(new TextField("",getStyle()));
 		getInputField().setName(getId()+"_InputField");
 		LemurFocusHelperStateI.i().addFocusChangeListener(getInputField());
 		getSouthContainer().addChild(getInputField(),BorderLayout.Position.South);
@@ -287,6 +294,11 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		getNodeGUI().attachChild(getContainerMain());
 		
 		return true;
+	}
+	
+	protected CellRendererDialogEntry<T> getCellRenderer(){
+		if(cr==null)cr = new CellRendererDialogEntry<T>(getStyle(),this);// bOptionSelectionMode),
+		return cr;
 	}
 	
 //	@Override
@@ -323,8 +335,9 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		getInputField().setText(getLastFilter());
 	}
 	
-	private TextField getInputField(){
-		return (TextField)getIntputField();
+	@Override
+	protected TextField getInputField(){
+		return (TextField)super.getInputField();
 	}
 	
 	@Override
@@ -335,8 +348,20 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	}
 	
 	private void updateEntryHeight(){
-		//TODO use font height? or button height?
-		iEntryHeightPixels = 20; //blind placeholder
+//		if(cfg.iEntryHeightPixels==null){
+			cfg.iEntryHeightPixels = getEntryHeightPixels();
+//		}
+	}
+	
+	protected Integer getEntryHeightPixels(){
+		if(vlVisibleEntriesList.size()==0)return null;
+		
+		// query an actual entry from the list
+		Panel pnl = lstbxEntriesToSelect.getGridPanel().getModel().getCell(0, 0, null);
+		float fHeight = pnl.getPreferredSize().getY();
+		// a simple value would be: MiscJmeI.i().retrieveBitmapTextFor(new Button("W")).getLineHeight()
+		
+		return (int)FastMath.ceil(fHeight);
 	}
 	
 	/**
@@ -379,13 +404,22 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		
 		updateSelected(dledLastSelectedBkp);
 		
-		// update visible rows
+		/**
+		 * update visible rows
+		 * 
+		 * if there are too many rows, they will be shrinked...
+		 * so this grants they have a good height.
+		 * 
+		 * TODO sum each individual top entries height? considering they could have diff heights of course
+		 */
 		updateEntryHeight();
-		iVisibleRows = (int) (v3fEntryListSize.y/iEntryHeightPixels);
-		lstbxEntriesToSelect.setVisibleItems(iVisibleRows);
-		if(vlVisibleEntriesList.size()>0){
-			if(getSelectedEntryData()==null){
-				selectRelativeEntry(0);
+		if(cfg.iEntryHeightPixels!=null){
+			iVisibleRows = (int) (v3fEntryListSize.y/cfg.iEntryHeightPixels);
+			lstbxEntriesToSelect.setVisibleItems(iVisibleRows);
+			if(vlVisibleEntriesList.size()>0){
+				if(getSelectedEntryData()==null){
+					selectRelativeEntry(0);
+				}
 			}
 		}
 	}

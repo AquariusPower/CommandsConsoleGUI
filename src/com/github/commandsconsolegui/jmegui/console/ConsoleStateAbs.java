@@ -591,7 +591,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 //		CursorEventControl.addListenersToSpatial(lstbxAutoCompleteHint, consoleCursorListener);
 		lstbxAutoCompleteHint.setName("ConsoleHints");
 		lstbxDumpArea.setName("ConsoleDumpArea");
-		getIntputField().setName("ConsoleInput");
+		getInputField().setName("ConsoleInput");
 		getContainerMain().setName("ConsoleContainer");
 		ctnrStatsAndControls.setName("ConsoleStats");
 		
@@ -897,8 +897,8 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 							scrollDumpArea(dScrollCurrentFlindex + dScrollBy);
 						}
 	      	}else
-	      	if(sptScrollTarget.equals(getIntputField())){
-	      		navigateCmdHistOrHintBox(getIntputField(), bUp?ENav.Up:ENav.Down);
+	      	if(sptScrollTarget.equals(getInputField())){
+	      		navigateCmdHistOrHintBox(getInputField(), bUp?ENav.Up:ENav.Down);
 	      	}else
 	      	if(sptScrollTarget.equals(lstbxAutoCompleteHint)){
 	      		navigateCmdHistOrHintBox(lstbxAutoCompleteHint, bUp?ENav.Up:ENav.Down);
@@ -970,10 +970,10 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	protected abstract void updateOverrideInputFocus();
 //	{
 //		if(isEnabled()){
-//			LemurFocusHelperStateI.i().requestFocus(getIntputField());
-//			setFocus(getIntputField());
+//			LemurFocusHelperStateI.i().requestFocus(getInputField());
+//			setFocus(getInputField());
 //		}else{
-//			removeFocus(getIntputField());
+//			removeFocus(getInputField());
 //		}
 //	}
 	
@@ -1852,8 +1852,8 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		}else
 		if(cd.checkCmdValidity(this,CMD_DEFAULT,"will revert to default values/config/setup (use if something goes wrong)")){
 			//TODO apply all basic settings here, like font size etc
-			svfUserFontOption.setObjectValue(strDefaultFont);
-			ilvFontSize.setObjectValue(iDefaultFontSize);
+			svfUserFontOption.setObjectRawValue(strDefaultFont);
+			ilvFontSize.setObjectRawValue(iDefaultFontSize);
 			bCommandWorked=cmdStyleApply(STYLE_CONSOLE);
 		}else
 		if(cd.checkCmdValidity(this,CMD_FONT_LIST,"[strFilter] use 'all' as filter to show all, otherwise only monospaced will be the default filter")){
@@ -1892,7 +1892,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 			+"Stats Container Height = "+MiscI.i().fmtFloat(getSizeOf(ctnrStatsAndControls).y)+"\n"
 			
 			+"Input Field Height = "+MiscI.i().fmtFloat(getInputFieldHeight())+"\n"
-			+"Input Field Final Height = "+MiscI.i().fmtFloat(getSizeOf(getIntputField()).y)+"\n"
+			+"Input Field Final Height = "+MiscI.i().fmtFloat(getSizeOf(getInputField()).y)+"\n"
 			
 			+"Slider Value = "+MiscI.i().fmtFloat(getScrollDumpAreaFlindex())+"\n"
 			
@@ -1962,7 +1962,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		if(cd().getCmdHistoryCurrentIndex()<0)cd().setCmdHistoryCurrentIndex(0); //cant underflow
 		if(cd().getCmdHistoryCurrentIndex()>cd().getCmdHistorySize())cd().resetCmdHistoryCursor(); //iCmdHistoryCurrentIndex=getCmdHistorySize(); //can overflow by 1
 		
-		if(!objSource.equals(getIntputField()) && !objSource.equals(lstbxAutoCompleteHint)){
+		if(!objSource.equals(getInputField()) && !objSource.equals(lstbxAutoCompleteHint)){
 			objSource=null;
 		}
 		
@@ -1971,7 +1971,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 			case Up:
 				if(objSource==null || objSource==lstbxAutoCompleteHint)bOk=navigateHint(-1);
 				
-				if((objSource==null && !bOk) || (objSource!=null && objSource.equals(getIntputField()))){
+				if((objSource==null && !bOk) || (objSource!=null && objSource.equals(getInputField()))){
 					cd().addCmdHistoryCurrentIndex(-1);
 					/**
 					 * to not lose last possibly typed (but not issued) cmd
@@ -1986,7 +1986,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 			case Down:
 				if(objSource==null || objSource==lstbxAutoCompleteHint)bOk=navigateHint(+1);
 				
-				if((objSource==null && !bOk) || objSource==getIntputField()){
+				if((objSource==null && !bOk) || objSource==getInputField()){
 					cd().addCmdHistoryCurrentIndex(1);
 					if(cd().getCmdHistoryCurrentIndex()>=cd().getCmdHistorySize()){
 						if(strNotSubmitedCmd!=null){
@@ -2202,8 +2202,8 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 			}
 			
 			//lstbxAutoCompleteHint.setLocalTranslation(new Vector3f(0, -fInputHeight, 0));
-			Vector3f v3f = getIntputField().getWorldTranslation().clone();
-			v3f.y -= getSizeOf(getIntputField()).y;
+			Vector3f v3f = getInputField().getWorldTranslation().clone();
+			v3f.y -= getSizeOf(getInputField()).y;
 			lstbxAutoCompleteHint.setLocalTranslation(v3f);
 			
 			float fEntryHeightGUESSED = getInputFieldHeight(); //TODO should be the listbox entry height
@@ -2580,7 +2580,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 //			strFontName="Console";
 //			font = app().getAssetManager().loadFont("Interface/Fonts/"+strFontName+".fnt");
 //		svUserFontOption.setObjectValue(strFontName);
-			svfUserFontOption.setObjectValue(strConsoleDefaultFontName );
+			svfUserFontOption.setObjectRawValue(strConsoleDefaultFontName );
 		}
 	//	BitmapFont font = app().getAssetManager().loadFont("Interface/Fonts/Console512x.fnt");
 		

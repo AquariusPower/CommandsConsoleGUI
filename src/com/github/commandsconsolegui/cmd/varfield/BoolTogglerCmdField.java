@@ -118,7 +118,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<BoolTogglerCmdField>{
 		
 //		setOwner(rfcfgOwnerUseThis);
 		setHelp(strHelp);
-		set(bInitialValue);
+		setValue(bInitialValue);
 		
 		this.bConstructed=true;
 	}
@@ -228,11 +228,29 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<BoolTogglerCmdField>{
 		return getUniqueCmdId()+" = "+bCurrent;
 	}
 
-	public void set(boolean b){
-		set(b,true);
-	}
-	public void set(boolean b, boolean bUseCallQueue){
+//	public void set(boolean b){
+////		set(b,true);
+////	}
+////	public void set(boolean b, boolean bUseCallQueue){
+//		setValue(b);
+//		
+//		if(bConstructed){
+//			if(isChangedAndRefresh()){
+//				if(bDoCallOnChange){
+//					if(this.caller==null){
+//						MsgI.i().warn("null caller for "+this.getReport(), this);
+////						throw new PrerequisitesNotMetException("null caller for "+this.getReport());
+//					}else{
+//						CallQueueI.i().addCall(this.caller);
+//					}
+//				}
+//			}
+//		}
+//	}
+	
+	public BoolTogglerCmdField setValue(Boolean b){
 		this.bCurrent=b;
+		if(super.getConsoleVarLink()!=null)super.setObjectRawValue(this.bCurrent);
 		
 		if(bConstructed){
 			if(isChangedAndRefresh()){
@@ -246,16 +264,18 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<BoolTogglerCmdField>{
 				}
 			}
 		}
-	}
-	
-	@Override
-//	public BoolTogglerCmdField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
-	public BoolTogglerCmdField setObjectValue(Object objValue) {
-		this.set((Boolean)objValue);
-//		super.setObjectValue(ccCD,objValue);
-		super.setObjectValue(objValue);
+		
 		return this;
 	}
+	
+//	@Override
+////	public BoolTogglerCmdField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
+//	public BoolTogglerCmdField setObjectRawValue(Object objValue) {
+//		this.set((Boolean)objValue);
+////		super.setObjectValue(ccCD,objValue);
+//		super.setObjectRawValue(objValue);
+//		return this;
+//	}
 
 //	@Override
 //	public String getVarId() {
@@ -339,5 +359,14 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<BoolTogglerCmdField>{
 	@Override
 	protected BoolTogglerCmdField getThis() {
 		return this;
+	}
+	
+	/**
+	 * 
+	 * @return current status
+	 */
+	public boolean toggle(){
+		setValue(!getBoolean());
+		return getBoolean();
 	}
 }

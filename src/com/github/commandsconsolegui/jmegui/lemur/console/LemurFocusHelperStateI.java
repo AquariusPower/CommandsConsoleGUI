@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.CompositeControl;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
@@ -41,6 +42,7 @@ import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButt
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.MouseCursorListenerAbs;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
+import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
@@ -61,6 +63,10 @@ import com.simsilica.lemur.focus.FocusTarget;
  * 
  */
 public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements FocusChangeListener {
+	public static final class CompositeControl extends CompositeControlAbs<LemurFocusHelperStateI>{
+		private CompositeControl(LemurFocusHelperStateI casm){super(casm);}; }
+	private CompositeControl ccSelf = new CompositeControl(this);
+	
 	private static LemurFocusHelperStateI	instance=new LemurFocusHelperStateI();
 	public static LemurFocusHelperStateI i(){return instance;}
 	
@@ -100,7 +106,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	public LemurFocusHelperStateI configure(ICfgParm icfg) {
 //	public void configure(Float fBaseZ){
 		CfgParm cfg = (CfgParm)icfg;
-		if(cfg.fBaseZ!=null)this.fdvDialogBazeZ.setObjectValue(cfg.fBaseZ);
+		if(cfg.fBaseZ!=null)this.fdvDialogBazeZ.setObjectRawValue(cfg.fBaseZ);
 //		super.configure(new CmdConditionalStateAbs.CfgParm(LemurFocusHelperStateI.class.getSimpleName()));
 		super.configure(new CmdConditionalStateAbs.CfgParm(null));
 //		configure();
@@ -214,7 +220,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	
 	public boolean lowerDialogFocusPriority(Spatial sptAny){
 		LemurDialogGUIStateAbs diag = retrieveDialogFromSpatial(sptAny);
-		Spatial sptFocusable = diag.getIntputField();
+		Spatial sptFocusable = diag.getInputField(ccSelf);
 		
 		if(asptFocusRequestList.contains(sptFocusable)){
 			asptFocusRequestList.remove(sptFocusable);
@@ -238,7 +244,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 			break;
 		}
 		
-		requestFocus(diagFocus.getIntputField(),true);
+		requestFocus(diagFocus.getInputField(ccSelf),true);
 	}
 	
 	public void requestFocus(Spatial spt) {

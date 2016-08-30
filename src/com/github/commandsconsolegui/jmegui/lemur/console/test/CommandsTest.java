@@ -72,7 +72,7 @@ public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleComma
 	public String prepareStatsFieldText() {
 		String strStatsLast = super.prepareStatsFieldText();
 		
-		if(EStats.MouseCursorPosition.b()){
+		if(EStats.MouseCursorPosition.isShow()){
 			strStatsLast+=
 				"xy"
 					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
@@ -81,7 +81,7 @@ public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleComma
 					+";";
 		}
 		
-		if(EStats.TimePerFrame.b()){
+		if(EStats.TimePerFrame.isShow()){
 			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
 		}
 		

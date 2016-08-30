@@ -61,6 +61,7 @@ import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.component.BorderLayout.Position;
 import com.simsilica.lemur.component.SpringGridLayout;
+import com.simsilica.lemur.core.GuiComponent;
 import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.list.CellRenderer;
 
@@ -72,7 +73,9 @@ import com.simsilica.lemur.list.CellRenderer;
 public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryData<T>>, IReflexFillCfg {
 	private static StringVarField svfTreeDepthToken;
 	private static BoolTogglerCmdField	btgShowTreeUId;
+	private static BoolTogglerCmdField	btgHoverHighlight;
 	
+	private float fCellHeightMult = 1f;
 	private String	strStyle;
 	private LemurDialogGUIStateAbs<T,?>	diagParent;
 //	private boolean	bOptionChoiceMode;
@@ -93,6 +96,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			 */
 			CellRendererDialogEntry.svfTreeDepthToken = new StringVarField(this, " ", null);
 			CellRendererDialogEntry.btgShowTreeUId = new BoolTogglerCmdField(this,false).setCallNothingOnChange();
+			CellRendererDialogEntry.btgHoverHighlight = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 		}
 	}
 	
@@ -196,7 +200,16 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			cntrCustomButtons = new Container(new SpringGridLayout(), assignedCellRenderer.strStyle);
 			cntrBase.addChild(cntrCustomButtons,Position.East);
 			
+			applyEntryHeight();
+			
 			update(this.dled);
+		}
+		
+		private void applyEntryHeight(){
+			LemurMiscHelpersStateI.i().setGrantedSize(this, 
+					-1f, 
+					getPreferredSize().getY() * assignedCellRenderer.getCellHeightMult(),
+					true);
 		}
 		
 		static class CommandTreeToggle implements Command<Button>{
@@ -343,8 +356,16 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		 * @param bNegateCurrentColor overrides color param (least if it is null)
 		 */
 		private void setOverrideBackgroundColor(ColorRGBA colorApply,boolean bNegateCurrentColor) {
+			if(!btgHoverHighlight.b())return;
+			
+			GuiComponent gcBkg = getBackground();
+			if(gcBkg==null){
+				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("background is null", this);
+				return;
+			}
+			
 			QuadBackgroundComponent qbc = (QuadBackgroundComponent)
-					getBackground().getGuiControl().getComponent("background");
+					gcBkg.getGuiControl().getComponent("background");
 			
 			ColorRGBA colorBkp=getUserData("BkgColorBkp");
 			if(colorBkp==null){
@@ -399,6 +420,14 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
+	}
+
+	public float getCellHeightMult() {
+		return fCellHeightMult;
+	}
+
+	public void setCellHeightMult(float fCellHeightMult) {
+		this.fCellHeightMult = fCellHeightMult;
 	}
 
 }

@@ -322,16 +322,20 @@ public class TimedDelayVarField extends VarCmdFieldAbs<TimedDelayVarField>{
 		return strCodePrefixVariant;
 	}
 
+	public TimedDelayVarField setObjectRawValue(CommandsDelegator.CompositeControl cc, Object objValue) {
+		cc.assertSelfNotNull();
+		setObjectRawValue(objValue);
+		return this;
+	}
 	@Override
-	public TimedDelayVarField setObjectValue(Object objValue) {
-//	public TimedDelayVarField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
+	protected TimedDelayVarField setObjectRawValue(Object objValue) {
 		if(objValue instanceof Double){
 			setDelayLimitSeconds( ((Double)objValue).floatValue() );
 		}else{
 			setDelayLimitSeconds((Float)objValue);
 		}
 		
-		super.setObjectValue(objValue);
+		super.setObjectRawValue(objValue);
 //		super.setObjectValue(ccCD, objValue);
 		
 		return this;

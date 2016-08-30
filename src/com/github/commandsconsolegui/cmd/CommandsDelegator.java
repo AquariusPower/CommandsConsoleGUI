@@ -705,16 +705,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	/**
-	 * This is the delegator, should not be necessary to be overriden,
-	 * just use the cmd listener interface.
+	 * This is the actual commands delegator root/core/main method.
 	 * 
-	 * TODO set to final prot or private? make scripting commands class a simple listener...
-	 * 
-	 * TODO rename to execCmdFromConsoleRequestRoot()
+	 * Scripting commands sub-class must override {@link #stillExecutingCommand()} that
+	 * ends calling this method at a point.
 	 * 
 	 * @return
 	 */
-	protected ECmdReturnStatus executePreparedCommandRoot(){
+	protected ECmdReturnStatus execCmdFromConsoleRequestRoot(){
 		if(RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(ccl.strCmdLinePrepared)){
 			return ECmdReturnStatus.Skip;
 		}
@@ -879,7 +877,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			Integer i = ccl.paramInt(1);
 			if(i!=null && i>=0){ // a value was supplied
 //				ilvConsoleMaxWidthInCharsForLineWrap.setObjectValue(ccSelf,i);
-				ilvConsoleMaxWidthInCharsForLineWrap.setObjectValue(i);
+				ilvConsoleMaxWidthInCharsForLineWrap.setObjectRawValue(i);
 //				if(i==-1){
 //					/**
 //					 * prefered using null instead of -1 that is for the user type a valid integer
@@ -1037,11 +1035,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				}
 				
 				if(e!=null){
-					e.b = ( bValue!=null ? bValue : !e.b() );
+					e.bShow = ( bValue!=null ? bValue : !e.isShow() );
 				}
 			}else{
 				for(EStats e:EStats.values()){
-					dumpSubEntry(e.toString()+" "+e.b);
+					dumpSubEntry(e.toString()+" "+e.isShow());
 				}
 			}
 		}else
@@ -1270,7 +1268,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			}
 			
 //			ilvCurrentFixedLineWrapAtColumn.setObjectValue(ccSelf,iWrapAt);
-			ilvCurrentFixedLineWrapAtColumn.setObjectValue(iWrapAt);
+			ilvCurrentFixedLineWrapAtColumn.setObjectRawValue(iWrapAt);
 			
 			//TODO use \n to create a new line properly
 			if(iWrapAt>0){ //fixed chars wrap
@@ -2083,7 +2081,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	private boolean toggle(BoolTogglerCmdField btg){
 		if(ccl.paramBooleanCheckForToggle(1)){
 			Boolean bEnable = ccl.paramBoolean(1);
-			btg.set(bEnable==null ? !btg.get() : bEnable); //overrider
+//			btg.toggle();
+			btg.setValue(bEnable==null ? !btg.get() : bEnable); //overrider
 			varSet(btg,true);
 			dumpInfoEntry("Toggle, setting "+ccl.paramString(0)+" to "+btg.get());
 			return true;
@@ -2505,7 +2504,27 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		VarIdValueOwnerData vivo = getVar(RESTRICTED_TOKEN+owner.getVarId());
 		if(vivo==null)return false;
 //		owner.setObjectValue(ccSelf,vivo.getObjectValue());
-		owner.setObjectValue(vivo.getObjectValue());
+		
+		if(owner instanceof TimedDelayVarField){
+			((TimedDelayVarField)owner).setObjectRawValue(ccSelf,vivo.getObjectValue());
+		}else
+		if(owner instanceof StringVarField){
+			((StringVarField)owner).setObjectRawValue(vivo.getObjectValue());
+		}else
+		if(owner instanceof IntLongVarField){
+			((IntLongVarField)owner).setObjectRawValue(vivo.getObjectValue());
+		}else
+		if(owner instanceof FloatDoubleVarField){
+			((FloatDoubleVarField)owner).setObjectRawValue(vivo.getObjectValue());
+		}else
+		if(owner instanceof BoolTogglerCmdField){
+//			((BoolTogglerCmdField)owner).setObjectRawValue(vivo.getObjectValue());
+			((BoolTogglerCmdField)owner).setValue((Boolean)vivo.getObjectValue());
+		}else
+		{
+			throw new UnsupportedOperationException("missing support for class "+owner.getClass().getName());
+		}
+		
 		dumpSubEntry(owner.getReport());
 		return true;
 	}
@@ -2722,7 +2741,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	
 	protected ECmdReturnStatus stillExecutingCommand(){
 //		ECmdReturnStatus e = 
-		return executePreparedCommandRoot();
+		return execCmdFromConsoleRequestRoot();
 //		if(e.compareTo(ECmdReturnStatus.NotFound)==0)return false;
 //		return true;
 	}
@@ -3186,11 +3205,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		TimePerFrame,
 		;
 		
-		private boolean b;
-		public boolean b(){return b;}; //TODO rename to isShow()
+		private boolean bShow;
+		public boolean isShow(){return bShow;};
 		
 		EStats(){}
-		EStats(boolean b){this.b=b;}
+		EStats(boolean b){this.bShow=b;}
 	}
 	
 	/**
@@ -3200,7 +3219,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public String prepareStatsFieldText(){
 		String strStatsLast = "";
 		
-		if(EStats.CopyFromTo.b){
+		if(EStats.CopyFromTo.isShow()){
 			strStatsLast+=
 					// user important
 					"Cp"+iCopyFrom
@@ -3208,7 +3227,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 						+";";
 		}
 						
-		if(EStats.CommandsHistory.b){
+		if(EStats.CommandsHistory.isShow()){
 			strStatsLast+=
 					"Hs"+iCmdHistoryCurrentIndex+"/"+(astrCmdHistory.size()-1)
 						+";";
@@ -3234,7 +3253,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 					 */
 						
 					// less important (mainly for debug)
-		if(EStats.ConsoleSliderControl.b){
+		if(EStats.ConsoleSliderControl.isShow()){
 			strStatsLast+=icui().getDumpAreaSliderStatInfo();
 		}
 					
@@ -3357,7 +3376,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		// init valid cmd list
 		bFillCommandList=true;
-		executePreparedCommandRoot();
+		execCmdFromConsoleRequestRoot();
 		bFillCommandList=false;
 //		executeCommand(null); //to populate the array with available commands
 		

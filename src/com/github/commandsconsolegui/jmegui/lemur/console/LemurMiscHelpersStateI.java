@@ -830,7 +830,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	 * Make it sure the thickness is correct (not 0.0f).
 	 * 
 	 * @param pnl
-	 * @param v3fSize
+	 * @param v3fSize x,y,z use -1 to let it be automatic = preferred
 	 * @param bEnsureSizeNow this means that the Preferred size will be used now!
 	 * @return
 	 */
@@ -842,14 +842,14 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		Vector3f v3fP = pnl.getPreferredSize();
 		if(v3fSize.x<v3fP.x)v3fSize.x=v3fP.x;
 		if(v3fSize.y<v3fP.y)v3fSize.y=v3fP.y;
-		v3fSize.z=v3fP.z;
+		v3fSize.z=v3fP.z; // do not mess with Z !!!
 		//if(v3fSize.z<v3fP.z)v3fSize.z=v3fP.z;
 		
 		pnl.setPreferredSize(v3fSize); 
 		
 //		pnl.setSize(v3fSize); //pnl.getPreferredSize(); pnl.getSize();
 //		
-//		// check on the next frame, so lemur had time to make its calculations.
+//		// check on the next frame, so lemur possibly had time to make its calculations. TODO how to be sure lemur did it?
 //		CallableX caller = new CallableX() {
 //			@Override
 //			public Boolean call() throws Exception {

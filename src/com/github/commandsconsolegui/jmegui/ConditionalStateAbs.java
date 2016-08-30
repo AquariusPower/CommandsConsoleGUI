@@ -93,10 +93,9 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 		}
 		
 		/**
-		 * TODO rename to isReadyToRetry()
 		 * @return
 		 */
-		boolean canRetryNow(){
+		boolean isReadyToRetry(){
 			return getUpdatedTime() > (lStartMilis+lDelayMilis);
 		}
 
@@ -332,7 +331,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 	private boolean doItInitializeProperly(float tpf){
 		if(bHoldProperInitialization)return false;
 		
-		if(!rInit.canRetryNow())return false;
+		if(!rInit.isReadyToRetry())return false;
 		
 		if(!initCheckPrerequisites() || !initOrUndo()){
 			rInit.resetStartTime();
@@ -375,7 +374,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 	private boolean doItUpdateOrEnableOrDisableProperly(float tpf) {
 		if(bEnabledRequested && !bEnabled){
 			if(bHoldEnable)return false;
-			if(!rEnable.canRetryNow())return false;
+			if(!rEnable.isReadyToRetry())return false;
 			
 			bEnableSuccessful=enableOrUndo();
 			msgDbg("enabled",bEnableSuccessful);
@@ -389,7 +388,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 		}else
 		if(bDisabledRequested && bEnabled){
 			if(bHoldDisable)return false;
-			if(!rDisable.canRetryNow())return false;
+			if(!rDisable.isReadyToRetry())return false;
 			
 			bDisableSuccessful=disableOrUndo();
 			msgDbg("disabled",bDisableSuccessful);
@@ -482,7 +481,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 		if(bEnabled){
 			boolean bRetry=false;
 			
-			if(!rDiscard.canRetryNow()){
+			if(!rDiscard.isReadyToRetry()){
 //			if(getUpdatedTime() < (lCleanupRequestMilis+lCleanupRetryDelayMilis)){
 				bRetry=true;
 			}else{

@@ -27,7 +27,6 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -70,9 +69,15 @@ public class StringVarField extends VarCmdFieldAbs<StringVarField>{
 //		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
 	}
 	
+	public StringVarField setValue(String str){
+		this.strValue=str;
+		if(super.getConsoleVarLink()!=null)setObjectRawValue(this.strValue);
+		return this;
+	}
+	
 	@Override
 //	public StringVarField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
-	public StringVarField setObjectValue(Object objValue) {
+	public StringVarField setObjectRawValue(Object objValue) {
 		if(objValue instanceof StringVarField){
 			strValue = ((StringVarField)objValue).strValue;
 		}else
@@ -81,7 +86,7 @@ public class StringVarField extends VarCmdFieldAbs<StringVarField>{
 		}
 		
 //		super.setObjectValue(ccCD,objValue);
-		super.setObjectValue(objValue);
+		super.setObjectRawValue(objValue);
 		
 		return this;
 	}

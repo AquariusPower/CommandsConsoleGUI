@@ -185,10 +185,10 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 	
 	
 	@Override
-	public ECmdReturnStatus executePreparedCommandRoot(){
+	public ECmdReturnStatus execCmdFromConsoleRequestRoot(){
 		boolean bCommandWorked = false;
 		
-		ECmdReturnStatus ecrs = super.executePreparedCommandRoot();
+		ECmdReturnStatus ecrs = super.execCmdFromConsoleRequestRoot();
 		if(ecrs.compareTo(ECmdReturnStatus.NotFound)!=0)return ecrs;
 		
 		if(!bCommandWorked){
@@ -321,13 +321,13 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 	public String prepareStatsFieldText() {
 		String strStatsLast = super.prepareStatsFieldText();
 		
-		if(EStats.FunctionCreation.b() && strPrepareFunctionBlockForId!=null){
+		if(EStats.FunctionCreation.isShow() && strPrepareFunctionBlockForId!=null){
 			strStatsLast+=
 					"F="+strPrepareFunctionBlockForId
 						+";";
 		}
 		
-		if(EStats.IfConditionalBlock.b() && aIfConditionNestedList.size()>0){
+		if(EStats.IfConditionalBlock.isShow() && aIfConditionNestedList.size()>0){
 			strStatsLast+=
 					"If"+aIfConditionNestedList.size()
 						+";";

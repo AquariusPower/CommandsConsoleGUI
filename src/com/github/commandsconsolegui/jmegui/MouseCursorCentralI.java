@@ -90,7 +90,7 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 	 * @param lClickDelayMilis will use default if null
 	 */
 	public void configure(Long lClickDelayMilis) {
-		if(lClickDelayMilis!=null)ilvClickMaxDelayMilis.setObjectValue(lClickDelayMilis);
+		if(lClickDelayMilis!=null)ilvClickMaxDelayMilis.setObjectRawValue(lClickDelayMilis);
 		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
 		
 		if(!MultiClickCondStateI.i().isConfigured()){
