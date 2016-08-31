@@ -31,7 +31,7 @@ package com.github.commandsconsolegui.jmegui;
 import java.io.IOException;
 
 import com.github.commandsconsolegui.globals.GlobalHolderAbs.IGlobalOpt;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.BasicDialogStateAbs.CfgParm;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBasicDialogStateAbs.CfgParm;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.app.Application;

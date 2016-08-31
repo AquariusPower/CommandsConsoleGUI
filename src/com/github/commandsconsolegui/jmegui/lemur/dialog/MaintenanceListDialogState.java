@@ -38,12 +38,13 @@ import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 
 /**
+ * This is like the inventory list.
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class ListDialogState<T extends Command<Button>> extends BasicDialogStateAbs<T,ListDialogState<T>> {
-	public static class CfgParm<T extends Command<Button>> extends BasicDialogStateAbs.CfgParm{
+public class MaintenanceListDialogState<T extends Command<Button>> extends LemurBasicDialogStateAbs<T,MaintenanceListDialogState<T>> {
+	public static class CfgParm<T extends Command<Button>> extends LemurBasicDialogStateAbs.CfgParm{
 		private LemurDialogGUIStateAbs<T,?>	diagChoice;
 		private LemurDialogGUIStateAbs<T,?>	diagQuestion;
 
@@ -58,12 +59,12 @@ public class ListDialogState<T extends Command<Button>> extends BasicDialogState
 					iEntryHeightPixels);
 			this.diagChoice=diagChoice;
 			this.diagQuestion=diagQuestion;
-			super.setUIId(ListDialogState.class.getSimpleName());
+			super.setUIId(MaintenanceListDialogState.class.getSimpleName());
 		}
 	}
 	private CfgParm<T>	cfg;
 	@Override
-	public ListDialogState<T> configure(ICfgParm icfg) {
+	public MaintenanceListDialogState<T> configure(ICfgParm icfg) {
 		cfg = (CfgParm<T>)icfg;
 		
 		addModalDialog(cfg.diagChoice);
@@ -161,10 +162,10 @@ public class ListDialogState<T extends Command<Button>> extends BasicDialogState
 			
 			if(dled.isParent()){
 //				CustomDialogGUIState.this.setDataToApplyModalChoice(data);
-				ListDialogState.this.openModalDialog(cfg.diagQuestion.getId(), dled, (T)this);
+				MaintenanceListDialogState.this.openModalDialog(cfg.diagQuestion.getId(), dled, (T)this);
 				AudioUII.i().play(EAudio.Question);
 			}else{
-				ListDialogState.this.removeEntry(dled);
+				MaintenanceListDialogState.this.removeEntry(dled);
 			}
 		}
 	}
@@ -193,7 +194,7 @@ public class ListDialogState<T extends Command<Button>> extends BasicDialogState
 	CommandCfg cmdCfg = new CommandCfg();
 	
 	@Override
-	protected ListDialogState<T> getThis() {
+	protected MaintenanceListDialogState<T> getThis() {
 		return this;
 	}
 }

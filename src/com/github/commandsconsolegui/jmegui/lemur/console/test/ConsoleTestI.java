@@ -37,7 +37,7 @@ import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGUII;
 import com.github.commandsconsolegui.jmegui.console.SimpleConsoleAppAbs;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceDialogState;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.ListDialogState;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.MaintenanceListDialogState;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.QuestionDialogState;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.MsgI;
@@ -84,7 +84,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 	// generic dialog
 	private ChoiceDialogState<T>	diagChoice;
 
-	private ListDialogState<T>	diagList;
+	private MaintenanceListDialogState<T>	diagList;
 
 	private QuestionDialogState<T>	diagQuestion;
 
@@ -153,7 +153,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 //			new BasicDialogStateAbs.CfgParm(false, null, null, null, null))
 //			.addModalDialog(diagChoice)
 //			.addModalDialog(diagQuestion);
-		diagList = new ListDialogState<T>().configure(new ListDialogState.CfgParm<T>(
+		diagList = new MaintenanceListDialogState<T>().configure(new MaintenanceListDialogState.CfgParm<T>(
 			null, null, null, null, diagChoice, diagQuestion).doPrepareTestData());
 	}
 	

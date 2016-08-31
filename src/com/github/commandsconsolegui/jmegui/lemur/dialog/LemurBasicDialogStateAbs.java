@@ -43,11 +43,11 @@ import com.simsilica.lemur.GuiGlobals;
 /**
  * @author AquariusPower <https://github.com/AquariusPower>
  */
-public abstract class BasicDialogStateAbs<T,R extends BasicDialogStateAbs<T,R>> extends LemurDialogGUIStateAbs<T,R>{
+public abstract class LemurBasicDialogStateAbs<T,R extends LemurBasicDialogStateAbs<T,R>> extends LemurDialogGUIStateAbs<T,R>{
 	StringCmdField scfAddEntry = new StringCmdField(this,null,"[strEntryText]");
 	private CfgParm	cfg;
 	
-	public BasicDialogStateAbs() {
+	public LemurBasicDialogStateAbs() {
 		setPrefixCmdWithIdToo(true);
 	}
 	
@@ -118,7 +118,7 @@ public abstract class BasicDialogStateAbs<T,R extends BasicDialogStateAbs<T,R>> 
 	public class CommandSel implements Command<Button>{
 		@Override
 		public void execute(Button btn) {
-			BasicDialogStateAbs.this.selectAndChoseOption(getDataFrom(btn));
+			LemurBasicDialogStateAbs.this.selectAndChoseOption(getDataFrom(btn));
 		}
 	}
 	CommandSel cmdSel = new CommandSel();

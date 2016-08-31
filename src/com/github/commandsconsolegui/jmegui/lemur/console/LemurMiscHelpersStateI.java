@@ -905,4 +905,18 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		
 		return cell;
 	}
+
+	public LemurMiscHelpersStateI setLocationXY(Spatial spt, Vector3f v3f) {
+		spt.setLocalTranslation(v3f.x, v3f.y, spt.getLocalTranslation().z); // to not mess with Z order
+		return this;
+	}
+
+	public LemurMiscHelpersStateI setScaleXY(Spatial spt, Float fScaleX, Float fScaleY) {
+		Vector3f v3fCurrentScale = spt.getLocalScale();
+		spt.setLocalScale(
+			fScaleX==null?v3fCurrentScale.x:fScaleX,
+			fScaleY==null?v3fCurrentScale.y:fScaleY,
+			v3fCurrentScale.z); // to not mess with Z order
+		return this;
+	}
 }

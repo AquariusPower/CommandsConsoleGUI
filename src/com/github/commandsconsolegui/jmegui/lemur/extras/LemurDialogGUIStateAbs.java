@@ -56,6 +56,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
+import com.simsilica.lemur.GridPanel;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.ListBox;
 import com.simsilica.lemur.Panel;
@@ -66,6 +67,7 @@ import com.simsilica.lemur.core.VersionedList;
 import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.event.KeyAction;
 import com.simsilica.lemur.event.KeyActionListener;
+import com.simsilica.lemur.grid.GridModel;
 import com.simsilica.lemur.list.SelectionModel;
 
 /**
@@ -99,6 +101,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	private CellRendererDialogEntry<T>	cr;
 //	private StringVarField svfStyle = new StringVarField(this, null, null);
 //	private String strStyle;
+	private BoolTogglerCmdField btgEffectListEntries = new BoolTogglerCmdField(this, true);
+	private TimedDelayVarField tdEffectListEachEntry = new TimedDelayVarField(this, 0.05f, "");
 	
 	@Override
 	public Container getContainerMain(){
@@ -140,6 +144,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		}
 	}
 	private CfgParm	cfg;
+	private boolean	bEffectListAllEntriesCompleted;
+	private float	fMinScale = 0.01f;
 	@Override
 	public R configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
@@ -312,6 +318,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		
 		LemurFocusHelperStateI.i().requestFocus(getInputField());
 		
+		prepareEffectListEntries();
+		
 		return true;
 	}
 	
@@ -356,7 +364,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	protected Integer getEntryHeightPixels(){
 		if(vlVisibleEntriesList.size()==0)return null;
 		
-		// query an actual entry from the list
+		// query for an entry from the list (this will actually create a new cell)
 		Panel pnl = lstbxEntriesToSelect.getGridPanel().getModel().getCell(0, 0, null);
 		float fHeight = pnl.getPreferredSize().getY();
 		// a simple value would be: MiscJmeI.i().retrieveBitmapTextFor(new Button("W")).getLineHeight()
@@ -490,6 +498,22 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 			setLastFilter(getInputText());
 			applyListKeyFilter();
 			updateList();
+		}
+		
+		if(!isTryingToDisable()){
+			if(isEffectsDone()){ // play list effect after main one completes
+				if(btgEffectListEntries.b()){
+					if(!tdEffectListEachEntry.isActive()){
+						if(!bEffectListAllEntriesCompleted){
+							tdEffectListEachEntry.setActive(true);
+						}
+					}
+				}
+		
+				if(tdEffectListEachEntry.isActive()){ //dont use btgEffectListEntries.b() as it may be disabled during the grow effect
+					updateEffectListEntries(!isTryingToDisable(),null);
+				}
+			}
 		}
 		
 		LemurMiscHelpersStateI.i().updateBlinkListBoxSelector(lstbxEntriesToSelect);//,true);
@@ -852,5 +876,77 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //	public ArrayList<DialogListEntryData<T>> getListCopy() {
 //		return new ArrayList<DialogListEntryData<T>>(adleCompleteEntriesList);
 //	}
+	
+	protected boolean updateEffectListEntries(boolean bGrow, Float fForceScale) {
+		GridPanel gp = lstbxEntriesToSelect.getGridPanel();
+		
+		boolean bForceScale = fForceScale!=null;
+		
+		float fScale = 1f;
+		if(!bForceScale){
+			float fPerc = tdEffectListEachEntry.getCurrentDelayPercentual(false);
+			if(Float.compare(fPerc,1f)>=0){
+				fPerc=1f;
+//				bEffectListEntriesCompleted=true;
+//				tdEffectListEachEntry.setActive(false);
+				tdEffectListEachEntry.updateTime(); //prepare for next entry
+			}
+			fScale = fPerc;
+		}else{
+			fScale = fForceScale;
+		}
+		
+		if(!bGrow)fScale=1f-fScale;
+		
+		int iTotal = gp.getVisibleColumns() * gp.getVisibleRows();
+		int iCount = 0;
+		int iMaxConcurrent = 3;
+		int iCountConcurrent = 0;
+		for(int iC=0;iC<gp.getVisibleColumns();iC++){
+			for(int iR=0;iR<gp.getVisibleRows();iR++){
+				Panel pnl = gp.getCell(iR, iC);
+				iCount++;
+				
+				if(pnl!=null){
+					if(bForceScale){
+						LemurMiscHelpersStateI.i().setScaleXY(pnl, fScale, 1f);
+					}else{
+						if(Float.compare(pnl.getLocalScale().x,1f)==0){
+							continue;
+						}
+						
+						LemurMiscHelpersStateI.i().setScaleXY(pnl, fScale, 1f);
+						iCountConcurrent++;
+						
+						fScale-=0.33f;
+						if(fScale<0f)fScale=fMinScale;
+						
+						if(iCountConcurrent==iMaxConcurrent)break; //to update one entry step per frame
+					}
+				}
+			}			
+		}
+		
+		if(!bForceScale){
+			if(iCount==iTotal && Float.compare(fScale,1f)==0){ //the last entry scale must be 1f
+				bEffectListAllEntriesCompleted=true;
+				tdEffectListEachEntry.setActive(false);
+			}
+		}
+		
+		return bEffectListAllEntriesCompleted;
+	}
+
+	private void prepareEffectListEntries() {
+		bEffectListAllEntriesCompleted=false;
+		
+		GridPanel gp = lstbxEntriesToSelect.getGridPanel();
+		for(int iC=0;iC<gp.getVisibleColumns();iC++){
+			for(int iR=0;iR<gp.getVisibleRows();iR++){
+				Panel pnl = gp.getCell(iR, iC);
+				LemurMiscHelpersStateI.i().setScaleXY(pnl, fMinScale, 1f);
+			}
+		}
+	}
 	
 }

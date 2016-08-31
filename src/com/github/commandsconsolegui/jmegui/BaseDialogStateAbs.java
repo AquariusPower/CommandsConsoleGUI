@@ -39,6 +39,7 @@ import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
+import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
 //import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -290,23 +291,27 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		// LOCATION
 		if(btgEffectLocation.b()){
 			Vector3f v3f = new Vector3f(v3fMainLocationBkp);
-			float fPerc = tdEffect.getCurrentDelayPercentual(false);
+			float fPerc = getEffectPerc();
 			float fHalfWidth = (v3fMainSize.x/2f);
 			float fHalfHeight = (v3fMainSize.y/2f);
 			if(!bGrow)fPerc = 1.0f - fPerc;
 			v3f.x = v3f.x + fHalfWidth - (fHalfWidth*fPerc);
 			v3f.y = v3f.y - fHalfHeight + (fHalfHeight*fPerc);
-			sptContainerMain.setLocalTranslation(v3f);
+			LemurMiscHelpersStateI.i().setLocationXY(sptContainerMain,v3f);
 		}
 		
 		if(bCompleted){
 			tdEffect.setActive(false);
 			
-			sptContainerMain.setLocalTranslation(v3fMainLocationBkp);
+			LemurMiscHelpersStateI.i().setLocationXY(sptContainerMain,v3fMainLocationBkp);
 			v3fMainLocationBkp=null;
 		}
 		
 		return bCompleted;
+	}
+	
+	protected float getEffectPerc(){
+		return tdEffect.getCurrentDelayPercentual(false);
 	}
 	
 	@Override
@@ -328,6 +333,10 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		}
 		
 		return super.enableAttempt();
+	}
+	
+	public boolean isEffectsDone(){
+		return !tdEffect.isActive();
 	}
 	
 	public abstract Vector3f getMainSize();

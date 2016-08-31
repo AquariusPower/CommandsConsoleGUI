@@ -1799,6 +1799,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			 * SET user or restricted variable
 			 */
 			if(isRestrictedAndDoesNotExist(strVarId))return false;
+			dumpSubEntry("# Previous value: \""+varGetValueString(strVarId)+"\"");
+//			varReport(strVarId); //to show previous value
 			bCmdWorkDone=varSet(strVarId,strValue,true);
 		}
 		
@@ -2661,7 +2663,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @return "null" if not set
 	 */
 	private String varGetValueString(String strVarId){
-		Object obj = selectVarSource(strVarId).get(strVarId);
+//		Object obj = selectVarSource(strVarId).get(strVarId);
+		Object obj = selectVarSource(strVarId).get(strVarId).getObjectValue();
 		if(obj==null)return "null";
 		return ""+obj;
 	}
