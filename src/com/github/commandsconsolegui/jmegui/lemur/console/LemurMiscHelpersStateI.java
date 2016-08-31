@@ -587,13 +587,13 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 //	}
 
 	@Override
-	protected boolean initOrUndo() {
+	protected boolean initAttempt() {
 		tdTextCursorBlink.updateTime();
-		return super.initOrUndo();
+		return super.initAttempt();
 	}
 
 	@Override
-	protected boolean updateOrUndo(float tpf) {
+	protected boolean updateAttempt(float tpf) {
 //		LemurFocusHelperStateI.i().update(tpf);
 		
 		if(tfToBlinkCursor!=null){
@@ -601,7 +601,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 			updateLargeTextCursorMode(tfToBlinkCursor);
 		}
 		
-		return super.updateOrUndo(tpf);
+		return super.updateAttempt(tpf);
 	}
 	
 	/**

@@ -34,6 +34,7 @@ import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButt
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
@@ -88,14 +89,14 @@ public abstract class BasicDialogStateAbs<T,R extends BasicDialogStateAbs<T,R>> 
 	};
 	
 	@Override
-	protected boolean updateOrUndo(float tpf) {
+	protected boolean updateAttempt(float tpf) {
 		if(getDiagModalCurrent()!=null){
 			if(getDiagModalCurrent().getDiagModal().isChoiceMade()){
 				applyResultsFromModalDialog();
 			}
 		}
 		
-		return super.updateOrUndo(tpf);
+		return super.updateAttempt(tpf);
 	}
 	
 	public abstract boolean prepareTestData();
@@ -218,13 +219,18 @@ public abstract class BasicDialogStateAbs<T,R extends BasicDialogStateAbs<T,R>> 
 	}
 
 	@Override
-	protected boolean initOrUndo() {
-		if(!super.initOrUndo())return false;
+	protected boolean initAttempt() {
+		if(!super.initAttempt())return false;
 		
 		if(cfg.bPrepareTestData){
 			if(!prepareTestData())return false;
 		}
 		
 		return true;
+	}
+	
+	@Override
+	public Vector3f getMainSize() {
+		return getContainerMain().getPreferredSize();
 	}
 }

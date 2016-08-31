@@ -327,17 +327,21 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 		
 		return true;
 	}
-	protected boolean initOrUndo(){return true;}
-	protected boolean updateOrUndo(float tpf){return true;}
-	protected boolean enableOrUndo(){return true;}
-	protected boolean disableOrUndo(){return true;}
+	/** a failed attempt may be undone or it can just be gradually stepping towards success */
+	protected boolean initAttempt(){return true;}
+	/** a failed attempt may be undone or it can just be gradually stepping towards success */
+	protected boolean updateAttempt(float tpf){return true;}
+	/** a failed attempt may be undone or it can just be gradually stepping towards success */
+	protected boolean enableAttempt(){return true;}
+	/** a failed attempt may be undone or it can just be gradually stepping towards success */
+	protected boolean disableAttempt(){return true;}
 	
 	private boolean doItInitializeProperly(float tpf){
 		if(bHoldProperInitialization)return false;
 		
 		if(!rInit.isReadyToRetry())return false;
 		
-		if(!initCheckPrerequisites() || !initOrUndo()){
+		if(!initCheckPrerequisites() || !initAttempt()){
 			rInit.resetStartTime();
 			msgDbg("init",false);
 			return false;
@@ -355,7 +359,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 	 * - enable/disable properly
 	 * - update properly
 	 * 
-	 * Use {@link #updateOrUndo(float)}<br>
+	 * Use {@link #updateAttempt(float)}<br>
 	 */
 	public boolean doItAllProperly(ConditionalStateManagerI.CompositeControl cc, float tpf) {
 		cc.assertSelfNotNull();
@@ -382,7 +386,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 			if(bHoldEnable)return false;
 			if(!rEnable.isReadyToRetry())return false;
 			
-			bEnableSuccessful=enableOrUndo();
+			bEnableSuccessful=enableAttempt();
 			msgDbg("enabled",bEnableSuccessful);
 			bEnabled=bEnableSuccessful;
 			
@@ -398,7 +402,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 			if(bHoldDisable)return false;
 			if(!rDisable.isReadyToRetry())return false;
 			
-			bDisableSuccessful=disableOrUndo();
+			bDisableSuccessful=disableAttempt();
 			msgDbg("disabled",bDisableSuccessful);
 			bEnabled=!bDisableSuccessful;
 			
@@ -412,7 +416,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 		if(bEnabled){
 			if(bHoldUpdates)return false;
 			
-			bLastUpdateSuccessful = updateOrUndo(tpf);
+			bLastUpdateSuccessful = updateAttempt(tpf);
 			if(!bLastUpdateSuccessful){
 				msgDbg("update",false); //only on fail!!!
 				return false;
@@ -493,7 +497,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 //			if(getUpdatedTime() < (lCleanupRequestMilis+lCleanupRetryDelayMilis)){
 				bRetry=true;
 			}else{
-				bRetry = !disableOrUndo();
+				bRetry = !disableAttempt();
 				if(bRetry){ //failed, retry
 					rDiscard.resetStartTime();
 //					lCleanupRequestMilis=getUpdatedTime();

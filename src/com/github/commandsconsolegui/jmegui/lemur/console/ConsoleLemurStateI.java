@@ -37,9 +37,8 @@ import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGUII;
 import com.github.commandsconsolegui.jmegui.AudioUII;
-import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
-import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI.CompositeControl;
+import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
@@ -130,7 +129,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 //	}
 
 	@Override
-	protected boolean initOrUndo() {
+	protected boolean initAttempt() {
 		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
 		
 		addStyle(BaseStyles.GLASS);
@@ -138,7 +137,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		
 //		initializationCompleted();
 		
-		return super.initOrUndo();
+		return super.initAttempt();
 	}
 	
 //	public static class CfgParm implements ICfgParm{
@@ -393,8 +392,8 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	}
 	
 	@Override
-	protected boolean enableOrUndo() {
-		if(!super.enableOrUndo())return false;
+	protected boolean enableAttempt() {
+		if(!super.enableAttempt())return false;
 		
 		LemurFocusHelperStateI.i().requestFocus(getInputField());
 //	commonOnEnableDisable();
@@ -407,12 +406,12 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	}
 	
 	@Override
-	protected boolean disableOrUndo() {
+	protected boolean disableAttempt() {
+		if(!super.disableAttempt())return false;
+		
 		if(isFullyInitialized()){ //super sets this..
 			AudioUII.i().play(EAudio.CloseConsole);
 		}
-		
-		if(!super.disableOrUndo())return false;
 		
 		closeHint();
 		LemurFocusHelperStateI.i().removeFocusableFromList(getInputField());
@@ -1126,5 +1125,15 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	@Override
 	protected Float getStatsHeight() {
 		return MiscJmeI.i().retrieveBitmapTextFor(lblStats).getLineHeight();
+	}
+	
+	@Override
+	public Container getContainerMain(){
+		return (Container)super.getContainerMain();
+	}
+	
+	@Override
+	public Vector3f getMainSize() {
+		return getContainerMain().getPreferredSize();
 	}
 }

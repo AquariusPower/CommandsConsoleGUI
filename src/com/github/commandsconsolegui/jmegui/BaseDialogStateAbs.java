@@ -87,9 +87,10 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 //	private Long	lChoiceMadeAtMilis = null;
 	private ArrayList<DialogListEntryData<T>> adataChosenEntriesList = new ArrayList<DialogListEntryData<T>>();
 	
-	private BoolTogglerCmdField btgGrowEffect = new BoolTogglerCmdField(this, true);
-	private TimedDelayVarField tdGrowEffect = new TimedDelayVarField(this, 0.15f, "");
-	private float	fMinGrowScale=0.01f;
+	private BoolTogglerCmdField btgEffectLocation = new BoolTogglerCmdField(this, true);
+	private BoolTogglerCmdField btgEffect = new BoolTogglerCmdField(this, true);
+	private TimedDelayVarField tdEffect = new TimedDelayVarField(this, 0.15f, "");
+	private float	fMinEffectScale=0.01f;
 	
 	public DiagModalInfo<T> getDiagModalCurrent(){
 		return dmi;
@@ -167,6 +168,8 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		}
 	}
 	private CfgParm	cfg;
+	private Vector3f	v3fMainLocationBkp;
+	private Vector3f	v3fMainSize;
 	@Override
 	public R configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
@@ -215,10 +218,10 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	 * This will setup and instantiate everything to make it actually be able to work.
 	 */
 	@Override
-	protected boolean initOrUndo() {
+	protected boolean initAttempt() {
 		if(!initGUI())return false;
 		if(!initKeyMappings())return false;
-		return super.initOrUndo();
+		return super.initAttempt();
 	}
 	
 	protected abstract boolean initGUI();
@@ -233,7 +236,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	 * this will react to changes on the list
 	 */
 	@Override
-	protected boolean updateOrUndo(float tpf) {
+	protected boolean updateAttempt(float tpf) {
 		DialogListEntryData<T> dle = getSelectedEntryData();
 		if(dle!=dleLastSelected)AudioUII.i().play(AudioUII.EAudio.EntrySelect);
 //		if(dle!=null)
@@ -253,29 +256,30 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 			bRequestedActionSubmit=false;
 		}
 		
-		if(tdGrowEffect.isActive()){ //dont use btgGrowEffect.b() as it may be disabled during the grow effect
+		if(tdEffect.isActive()){ //dont use btgGrowEffect.b() as it may be disabled during the grow effect
 			updateEffect(!isTryingToDisable());
 		}
 		
-		return super.updateOrUndo(tpf);
+		return super.updateAttempt(tpf);
 	}
 	
 	protected boolean updateEffect(boolean bGrow){
 		boolean bCompleted=false;
 		
+		// SCALE
 		Vector3f v3fScaleCopy = sptContainerMain.getLocalScale().clone();
-		float fValAdd = tdGrowEffect.getCurrentDelayCalc(1f-fMinGrowScale,false);
+		float fValAdd = tdEffect.getCurrentDelayCalc(1f-fMinEffectScale,false);
 		float fVal=0f;
 		if(bGrow){
-			fVal = fMinGrowScale+fValAdd;
+			fVal = fMinEffectScale+fValAdd;
 			if(Float.compare(fVal,1f)>=0){
 				fVal=1f;
 				bCompleted=true;
 			}
 		}else{ //shrink
 			fVal = 1f - fValAdd;
-			if(Float.compare(fVal,fMinGrowScale)<=0){
-				fVal=fMinGrowScale;
+			if(Float.compare(fVal,fMinEffectScale)<=0){
+				fVal=fMinEffectScale;
 				bCompleted=true;
 			}
 		}
@@ -283,15 +287,30 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		
 		sptContainerMain.setLocalScale(v3fScaleCopy);
 		
+		// LOCATION
+		if(btgEffectLocation.b()){
+			Vector3f v3f = new Vector3f(v3fMainLocationBkp);
+			float fPerc = tdEffect.getCurrentDelayPercentual(false);
+			float fHalfWidth = (v3fMainSize.x/2f);
+			float fHalfHeight = (v3fMainSize.y/2f);
+			if(!bGrow)fPerc = 1.0f - fPerc;
+			v3f.x = v3f.x + fHalfWidth - (fHalfWidth*fPerc);
+			v3f.y = v3f.y - fHalfHeight + (fHalfHeight*fPerc);
+			sptContainerMain.setLocalTranslation(v3f);
+		}
+		
 		if(bCompleted){
-			tdGrowEffect.setActive(false);
+			tdEffect.setActive(false);
+			
+			sptContainerMain.setLocalTranslation(v3fMainLocationBkp);
+			v3fMainLocationBkp=null;
 		}
 		
 		return bCompleted;
 	}
 	
 	@Override
-	protected boolean enableOrUndo() {
+	protected boolean enableAttempt() {
 		updateAllParts();
 		
 		getNodeGUI().attachChild(sptContainerMain);
@@ -300,27 +319,32 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		if(diagParent!=null)diagParent.updateModalChild(true,this);
 //		updateModalParent(true);
 		
-		if(btgGrowEffect.b()){
+		if(btgEffect.b()){
 			Vector3f v3fScale = sptContainerMain.getLocalScale();
-			v3fScale.x=v3fScale.y=fMinGrowScale;
-			tdGrowEffect.setActive(true);
+			v3fScale.x=v3fScale.y=fMinEffectScale;
+			tdEffect.setActive(true);
+			v3fMainLocationBkp = sptContainerMain.getLocalTranslation().clone();
+			v3fMainSize = getMainSize();
 		}
 		
-		return super.enableOrUndo();
+		return super.enableAttempt();
 	}
 	
+	public abstract Vector3f getMainSize();
+	
 	@Override
-	protected boolean disableOrUndo() {
-		if(btgGrowEffect.b()){
+	protected boolean disableAttempt() {
+		if(btgEffect.b()){
 			Vector3f v3fScale = sptContainerMain.getLocalScale();
 			
 			if(Float.compare(v3fScale.x,1f)==0){
-				tdGrowEffect.setActive(true);
+				tdEffect.setActive(true);
+				v3fMainLocationBkp = sptContainerMain.getLocalTranslation().clone();
 				return false;
 			}else{
-				if(Float.compare(v3fScale.x,fMinGrowScale)>0){
+				if(Float.compare(v3fScale.x,fMinEffectScale)>0){
 					return false;
-				}				
+				}
 			}
 		}
 		
@@ -330,7 +354,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		if(diagParent!=null)diagParent.updateModalChild(false,this);
 //		updateModalParent(false);
 		
-		return super.disableOrUndo();
+		return super.disableAttempt();
 	}
 	
 	/**

@@ -501,12 +501,12 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 //	}
 	
 	@Override
-	protected boolean enableOrUndo() {
+	protected boolean enableAttempt() {
 		if(!bInitializeOnlyTheUI){
 			initializeOnlyTheUIallSteps();
 		}
 		
-		return super.enableOrUndo();
+		return super.enableAttempt();
 	}
 	
 //	@Override
@@ -935,8 +935,8 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 //	}
 	
 	@Override
-	protected boolean updateOrUndo(float tpf) {
-		if(!super.updateOrUndo(tpf))return false;
+	protected boolean updateAttempt(float tpf) {
+		if(!super.updateAttempt(tpf))return false;
 		
 		if(bKeepInitiallyInvisibleUntilFirstClosed){
 			setInitializationVisibility(false);
@@ -2604,11 +2604,11 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	}
 	
 	@Override
-	protected boolean disableOrUndo() {
+	protected boolean disableAttempt() {
 		bKeepInitiallyInvisibleUntilFirstClosed=false; //"first close" is the hint
 		bFullyInitialized=true; //it will only be completely initialized after the 1st close...
 		
-		return super.disableOrUndo();
+		return super.disableAttempt();
 	}
 	
 	public void setStatsAndControls(Node container) {

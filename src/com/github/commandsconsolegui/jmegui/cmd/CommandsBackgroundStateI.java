@@ -72,7 +72,7 @@ public class CommandsBackgroundStateI extends CmdConditionalStateAbs {
 	}
 	
 	@Override
-	protected boolean updateOrUndo(float tpf) {
+	protected boolean updateAttempt(float tpf) {
 		if(!btgExecCommandsInBackground.b())return true; //this is an OK state, no failure!
 		
 		if(GlobalConsoleGUII.i().isEnabled())return true; //will be foreground execution, this is an OK state, no failure!
@@ -83,7 +83,7 @@ public class CommandsBackgroundStateI extends CmdConditionalStateAbs {
 		 */
 		cd().update(tpf);
 		
-		return super.updateOrUndo(tpf);
+		return super.updateAttempt(tpf);
 	}
 	
 	@Override

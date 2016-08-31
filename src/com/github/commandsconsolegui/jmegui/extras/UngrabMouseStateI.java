@@ -106,7 +106,7 @@ public class UngrabMouseStateI extends ConditionalStateAbs {
 	}
 	
 	@Override
-	protected boolean initOrUndo() {
+	protected boolean initAttempt() {
 		r = new Runnable() {
 			@Override
 			public void run() {
@@ -129,7 +129,7 @@ public class UngrabMouseStateI extends ConditionalStateAbs {
 		t.start();
 		
 //		initializationCompleted();
-		return super.initOrUndo();
+		return super.initAttempt();
 	}
 	
 //	@Override
@@ -176,15 +176,15 @@ public class UngrabMouseStateI extends ConditionalStateAbs {
 	}
 	
 	@Override
-	protected boolean enableOrUndo() {
+	protected boolean enableAttempt() {
 		updateTimeAtMainThread();
-		return super.enableOrUndo();
+		return super.enableAttempt();
 	}
 
 	@Override
-	protected boolean updateOrUndo(float tpf) {
+	protected boolean updateAttempt(float tpf) {
 		updateTimeAtMainThread();
-		return super.updateOrUndo(tpf);
+		return super.updateAttempt(tpf);
 	}
 
 }

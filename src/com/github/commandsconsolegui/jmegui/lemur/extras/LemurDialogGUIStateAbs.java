@@ -307,8 +307,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //	}
 	
 	@Override
-	protected boolean enableOrUndo() {
-		if(!super.enableOrUndo())return false;
+	protected boolean enableAttempt() {
+		if(!super.enableAttempt())return false;
 		
 		LemurFocusHelperStateI.i().requestFocus(getInputField());
 		
@@ -316,8 +316,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	}
 	
 	@Override
-	protected boolean disableOrUndo() {
-		if(!super.disableOrUndo())return false;
+	protected boolean disableAttempt() {
+		if(!super.disableAttempt())return false;
 		
 //		if(getInputField().equals(LemurFocusHelperStateI.i().getFocused())){
 			LemurFocusHelperStateI.i().removeFocusableFromList(getInputField());
@@ -479,8 +479,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	}
 	
 	@Override
-	protected boolean updateOrUndo(float tpf) {
-		if(!super.updateOrUndo(tpf))return false;
+	protected boolean updateAttempt(float tpf) {
+		if(!super.updateAttempt(tpf))return false;
 		
 		if(bRefreshScroll)autoScroll();
 		

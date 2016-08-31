@@ -99,7 +99,7 @@ public class FpsLimiterStateI extends CmdConditionalStateAbs{
 	 * @param bFpsLimiter
 	 */
 	@Override
-	protected boolean updateOrUndo(float tpf) {
+	protected boolean updateAttempt(float tpf) {
 		try {
 			/**
 			 * //MUST BE BEFORE THE SLEEP!!!!!!

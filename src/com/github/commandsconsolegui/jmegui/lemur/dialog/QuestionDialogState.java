@@ -60,13 +60,13 @@ public class QuestionDialogState<T extends Command<Button>> extends BasicDialogS
 	}
 	
 	@Override
-	protected boolean initOrUndo() {
+	protected boolean initAttempt() {
 		super.setOptionChoiceSelectionMode(true);
 		
 		dledYes = addEntryQuick("[ yes    ]");
 		dledNo  = addEntryQuick("[     no ]");
 		
-		return super.initOrUndo();
+		return super.initAttempt();
 	}
 	
 	@Override
@@ -97,8 +97,8 @@ public class QuestionDialogState<T extends Command<Button>> extends BasicDialogS
 	}
 	
 	@Override
-	protected boolean enableOrUndo() {
-		if(!super.enableOrUndo())return false;
+	protected boolean enableAttempt() {
+		if(!super.enableAttempt())return false;
 		
 		selectEntry(dledNo);
 		

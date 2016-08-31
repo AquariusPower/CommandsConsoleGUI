@@ -57,10 +57,10 @@ public class ChoiceDialogState<T extends Command<Button>> extends BasicDialogSta
 	}
 	
 	@Override
-	protected boolean initOrUndo() {
+	protected boolean initAttempt() {
 		super.setOptionChoiceSelectionMode(true);
 		
-		return super.initOrUndo();
+		return super.initAttempt();
 	}
 	
 	@Override

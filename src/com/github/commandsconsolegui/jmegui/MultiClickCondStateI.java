@@ -78,8 +78,8 @@ public class MultiClickCondStateI extends ConditionalStateAbs {
 	}
 	
 	@Override
-	protected boolean updateOrUndo(float tpf) {
-		if(!super.updateOrUndo(tpf))return false;
+	protected boolean updateAttempt(float tpf) {
+		if(!super.updateAttempt(tpf))return false;
 		
 		for(Object objActivator:hmActivatorCmd.keySet().toArray()){
 			MultiClick mc = hmActivatorCmd.get(objActivator);

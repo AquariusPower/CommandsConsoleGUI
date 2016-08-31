@@ -218,8 +218,8 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 }
 	
 	@Override
-	protected boolean enableOrUndo() {
-		if(!super.enableOrUndo())return false;
+	protected boolean enableAttempt() {
+		if(!super.enableAttempt())return false;
 		
 		cd().dumpInfoEntry(getCmd()+" enabled");
 		
@@ -227,8 +227,8 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 	}
 	
 	@Override
-	protected boolean disableOrUndo() {
-		if(!super.disableOrUndo())return false;
+	protected boolean disableAttempt() {
+		if(!super.disableAttempt())return false;
 		
 		btgState.setValue(false);//,false);
 		
