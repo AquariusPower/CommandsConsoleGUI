@@ -27,10 +27,6 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegator;
-import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
-import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
-import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
@@ -38,7 +34,6 @@ import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
 
@@ -118,7 +113,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<BoolTogglerCmdField>{
 		
 //		setOwner(rfcfgOwnerUseThis);
 		setHelp(strHelp);
-		setValue(bInitialValue);
+		setObjectRawValue(bInitialValue);
 		
 		this.bConstructed=true;
 	}
@@ -248,9 +243,15 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<BoolTogglerCmdField>{
 //		}
 //	}
 	
-	public BoolTogglerCmdField setValue(Boolean b){
-		this.bCurrent=b;
-		if(super.getConsoleVarLink()!=null)super.setObjectRawValue(this.bCurrent);
+	@Override
+	public BoolTogglerCmdField setObjectRawValue(Object objValue) {
+		if(objValue instanceof BoolTogglerCmdField){
+			this.bCurrent = ((BoolTogglerCmdField)objValue).b();
+		}else{
+			this.bCurrent = (Boolean)objValue;
+		}
+//		if(bConstructed)
+		super.setObjectRawValue(this.bCurrent);
 		
 		if(bConstructed){
 			if(isChangedAndRefresh()){
@@ -264,9 +265,28 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<BoolTogglerCmdField>{
 				}
 			}
 		}
-		
 		return this;
 	}
+//	public BoolTogglerCmdField setValue(Boolean b){
+//		this.bCurrent=b;
+////		if(super.getConsoleVarLink()!=null)
+//		super.setObjectRawValue(this.bCurrent);
+//		
+//		if(bConstructed){
+//			if(isChangedAndRefresh()){
+//				if(bDoCallOnChange){
+//					if(this.caller==null){
+//						MsgI.i().warn("null caller for "+this.getReport(), this);
+////						throw new PrerequisitesNotMetException("null caller for "+this.getReport());
+//					}else{
+//						CallQueueI.i().addCall(this.caller);
+//					}
+//				}
+//			}
+//		}
+//		
+//		return this;
+//	}
 	
 //	@Override
 ////	public BoolTogglerCmdField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
@@ -366,7 +386,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<BoolTogglerCmdField>{
 	 * @return current status
 	 */
 	public boolean toggle(){
-		setValue(!getBoolean());
+		setObjectRawValue(!getBoolean());
 		return getBoolean();
 	}
 }

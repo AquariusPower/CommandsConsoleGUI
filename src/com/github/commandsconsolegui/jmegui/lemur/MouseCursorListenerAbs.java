@@ -36,7 +36,7 @@ import com.github.commandsconsolegui.jmegui.MouseCursorButtonsControl;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
-import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
+import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell.EUserData;
 import com.jme3.math.ColorRGBA;

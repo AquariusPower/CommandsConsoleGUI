@@ -2084,7 +2084,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		if(ccl.paramBooleanCheckForToggle(1)){
 			Boolean bEnable = ccl.paramBoolean(1);
 //			btg.toggle();
-			btg.setValue(bEnable==null ? !btg.get() : bEnable); //overrider
+			btg.setObjectRawValue(bEnable==null ? !btg.get() : bEnable); //overrider
 			varSet(btg,true);
 			dumpInfoEntry("Toggle, setting "+ccl.paramString(0)+" to "+btg.get());
 			return true;
@@ -2507,25 +2507,27 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		if(vivo==null)return false;
 //		owner.setObjectValue(ccSelf,vivo.getObjectValue());
 		
-		if(owner instanceof TimedDelayVarField){
-			((TimedDelayVarField)owner).setObjectRawValue(ccSelf,vivo.getObjectValue());
-		}else
-		if(owner instanceof StringVarField){
-			((StringVarField)owner).setObjectRawValue(vivo.getObjectValue());
-		}else
-		if(owner instanceof IntLongVarField){
-			((IntLongVarField)owner).setObjectRawValue(vivo.getObjectValue());
-		}else
-		if(owner instanceof FloatDoubleVarField){
-			((FloatDoubleVarField)owner).setObjectRawValue(vivo.getObjectValue());
-		}else
-		if(owner instanceof BoolTogglerCmdField){
-//			((BoolTogglerCmdField)owner).setObjectRawValue(vivo.getObjectValue());
-			((BoolTogglerCmdField)owner).setValue((Boolean)vivo.getObjectValue());
-		}else
-		{
-			throw new UnsupportedOperationException("missing support for class "+owner.getClass().getName());
-		}
+		owner.setObjectRawValue(vivo.getObjectValue());
+//		if(owner instanceof TimedDelayVarField){
+////			((TimedDelayVarField)owner).setObjectRawValue(ccSelf,vivo.getObjectValue());
+//			((TimedDelayVarField)owner).setObjectRawValue(vivo.getObjectValue());
+//		}else
+//		if(owner instanceof StringVarField){
+//			((StringVarField)owner).setObjectRawValue(vivo.getObjectValue());
+//		}else
+//		if(owner instanceof IntLongVarField){
+//			((IntLongVarField)owner).setObjectRawValue(vivo.getObjectValue());
+//		}else
+//		if(owner instanceof FloatDoubleVarField){
+//			((FloatDoubleVarField)owner).setObjectRawValue(vivo.getObjectValue());
+//		}else
+//		if(owner instanceof BoolTogglerCmdField){
+////			((BoolTogglerCmdField)owner).setObjectRawValue(vivo.getObjectValue());
+//			((BoolTogglerCmdField)owner).setValue((Boolean)vivo.getObjectValue());
+//		}else
+//		{
+//			throw new UnsupportedOperationException("missing support for class "+owner.getClass().getName());
+//		}
 		
 		dumpSubEntry(owner.getReport());
 		return true;

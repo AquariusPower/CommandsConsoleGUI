@@ -55,7 +55,7 @@ import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
-import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
+import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
 //import com.github.commandsconsolegui.console.gui.lemur.LemurMiscHelpersState;
 import com.github.commandsconsolegui.misc.AutoCompleteI;
 import com.github.commandsconsolegui.misc.AutoCompleteI.AutoCompleteResult;
@@ -565,13 +565,13 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		v3fApplicationWindowSize = new Vector3f(
 				app().getContext().getSettings().getWidth(),
 				app().getContext().getSettings().getHeight(),
-				LemurMiscHelpersStateI.fPreferredThickness);
+				MiscLemurHelpersStateI.fPreferredThickness);
 		
 		iMargin=2;
 		v3fConsoleSize = new Vector3f(
 			v3fApplicationWindowSize.x -(iMargin*2),
 			(v3fApplicationWindowSize.y * fConsoleHeightPerc) -iMargin,
-			LemurMiscHelpersStateI.fPreferredThickness);
+			MiscLemurHelpersStateI.fPreferredThickness);
 	}
 	
 //	private float fPreferredThickness=10.0f;

@@ -35,13 +35,13 @@ import java.nio.BufferUnderflowException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
+import java.util.concurrent.Callable;
 
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
-import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -290,5 +290,51 @@ public class MiscJmeI {
 		}
 		
 		return asptList;
+	}
+
+	public TimedDelayVarField retrieveUserDataTimedDelay(Spatial sptHolder, String strKey, final float fDelay){
+		TimedDelayVarField td = retrieveUserData(TimedDelayVarField.class, sptHolder, strKey, new Callable<TimedDelayVarField>() {
+			@Override
+			public TimedDelayVarField call() throws Exception {
+				return new TimedDelayVarField(fDelay,"").setActive(true);
+			}
+		});
+		
+		if(Float.compare(td.getDelayLimitSeconds(), fDelay)!=0){
+			td.setObjectRawValue(fDelay);
+		}
+		
+		return td;
+	}
+//	public TimedDelayVarField retrieveTimedDelayFrom(Spatial sptHolder, String strUserDataKey){
+//		@SuppressWarnings("unchecked")
+//		SavableHolder<TimedDelayVarField> sh = (SavableHolder<TimedDelayVarField>)sptHolder.getUserData(strUserDataKey);
+//		
+//		TimedDelayVarField td = null;
+//		if(sh==null){
+//			sh = new SavableHolder<TimedDelayVarField>(new TimedDelayVarField(2f,"").setActive(true));
+//			sptHolder.setUserData(strUserDataKey, sh);
+//		}
+//		td = sh.getRef();
+//		
+//		return td;
+//	}
+	
+	public <R> R retrieveUserData(Class<R> clReturn, Spatial sptHolder, String strKey, Callable<R> callCreateInstance){
+		@SuppressWarnings("unchecked")
+		SavableHolder<R> sh = (SavableHolder<R>)sptHolder.getUserData(strKey);
+		
+		R objUser = null;
+		if(sh==null){
+			try {
+				sh = new SavableHolder<R>(callCreateInstance.call());
+			} catch (Exception e) {
+				throw new PrerequisitesNotMetException("object instance creation failed", clReturn, sptHolder, strKey);
+			}
+			sptHolder.setUserData(strKey, sh);
+		}
+		objUser = sh.getRef();
+		
+		return (R)objUser;
 	}
 }

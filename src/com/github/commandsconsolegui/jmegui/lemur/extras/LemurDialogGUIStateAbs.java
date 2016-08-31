@@ -29,10 +29,12 @@ package com.github.commandsconsolegui.jmegui.lemur.extras;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.Callable;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
@@ -42,8 +44,8 @@ import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
-import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
-import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI.BindKey;
+import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
+import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI.BindKey;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -102,7 +104,9 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //	private StringVarField svfStyle = new StringVarField(this, null, null);
 //	private String strStyle;
 	private BoolTogglerCmdField btgEffectListEntries = new BoolTogglerCmdField(this, true);
-	private TimedDelayVarField tdEffectListEachEntry = new TimedDelayVarField(this, 0.05f, "");
+//	private TimedDelayVarField tdEffectListEachEntry = new TimedDelayVarField(this, 0.05f, "");
+//	private float fEffectListEntryDelay=0.05f;
+	private FloatDoubleVarField fdvEffectListEntryDelay = new FloatDoubleVarField(this, 0.05f, "");
 	
 	@Override
 	public Container getContainerMain(){
@@ -215,7 +219,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		Vector3f v3fDiagWindowSize = new Vector3f(v3fApplicationWindowSize);
 		v3fDiagWindowSize.y = sizePercOrPixels(v3fDiagWindowSize.y,cfg.fDialogHeightPercentOfAppWindow);
 		v3fDiagWindowSize.x = sizePercOrPixels(v3fDiagWindowSize.x,cfg.fDialogWidthPercentOfAppWindow);
-		LemurMiscHelpersStateI.i().setGrantedSize(getContainerMain(), v3fDiagWindowSize, false);
+		MiscLemurHelpersStateI.i().setGrantedSize(getContainerMain(), v3fDiagWindowSize, false);
 		
 		///////////////////////// NORTH (title + info/help)
 		setCntrNorth(new Container(new BorderLayout(), getStyle()));
@@ -226,7 +230,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		 */
 		float fInfoHeightPixels = sizePercOrPixels(v3fDiagWindowSize.y, cfg.fInfoHeightPercentOfDialog);
 		v3fNorthSize.y = fInfoHeightPixels;
-		LemurMiscHelpersStateI.i().setGrantedSize(getNorthContainer(), v3fNorthSize, false);
+		MiscLemurHelpersStateI.i().setGrantedSize(getNorthContainer(), v3fNorthSize, false);
 		
 		//title 
 		lblTitle = new Label(getTitle(),getStyle());
@@ -500,23 +504,24 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 			updateList();
 		}
 		
-		if(!isTryingToDisable()){
+		if(isTryingToEnable()){
 			if(isEffectsDone()){ // play list effect after main one completes
-				if(btgEffectListEntries.b()){
-					if(!tdEffectListEachEntry.isActive()){
-						if(!bEffectListAllEntriesCompleted){
-							tdEffectListEachEntry.setActive(true);
-						}
-					}
-				}
+//				if(btgEffectListEntries.b()){
+//					if(!tdEffectListEachEntry.isActive()){
+//						if(!bEffectListAllEntriesCompleted){
+//							tdEffectListEachEntry.setActive(true);
+//						}
+//					}
+//				}
 		
-				if(tdEffectListEachEntry.isActive()){ //dont use btgEffectListEntries.b() as it may be disabled during the grow effect
-					updateEffectListEntries(!isTryingToDisable(),null);
+//				if(tdEffectListEachEntry.isActive()){ //dont use btgEffectListEntries.b() as it may be disabled during the grow effect
+				if(!bEffectListAllEntriesCompleted){
+					updateEffectListEntries(isTryingToEnable());
 				}
 			}
 		}
 		
-		LemurMiscHelpersStateI.i().updateBlinkListBoxSelector(lstbxEntriesToSelect);//,true);
+		MiscLemurHelpersStateI.i().updateBlinkListBoxSelector(lstbxEntriesToSelect);//,true);
 		
 		return true;
 	}
@@ -613,7 +618,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 						break;
 					case KeyInput.KEY_V: 
 						if(bControl){
-							LemurMiscHelpersStateI.i().insertTextAtCaratPosition(getInputField(),
+							MiscLemurHelpersStateI.i().insertTextAtCaratPosition(getInputField(),
 								MiscI.i().retrieveClipboardString(true));
 //							getInputField().setText(getInputField().getText()
 //								+MiscI.i().retrieveClipboardString(true));
@@ -642,7 +647,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	}
 	
 	private BindKey bindKey(String strActionPerformedHelp, int iKeyCode, int... aiKeyModifiers){
-		BindKey bk = LemurMiscHelpersStateI.i().bindKey(getInputField(), actSimpleActions,
+		BindKey bk = MiscLemurHelpersStateI.i().bindKey(getInputField(), actSimpleActions,
 			strActionPerformedHelp, iKeyCode, aiKeyModifiers);
 		abkList.add(bk);
 		return bk;
@@ -748,7 +753,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		);
 		
 //		LemurMiscHelpersStateI.i().bugFix(null, LemurMiscHelpersStateI.i().btgBugFixListBoxSelectorArea, lstbxEntriesToSelect);
-		LemurMiscHelpersStateI.i().listboxSelectorAsUnderline(lstbxEntriesToSelect);
+		MiscLemurHelpersStateI.i().listboxSelectorAsUnderline(lstbxEntriesToSelect);
 	}
 	public void selectEntry(DialogListEntryData<T> dledSelectRequested) {
 //		this.dataSelectRequested = data;
@@ -877,66 +882,6 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		return new ArrayList<DialogListEntryData<T>>(adleCompleteEntriesList);
 //	}
 	
-	protected boolean updateEffectListEntries(boolean bGrow, Float fForceScale) {
-		GridPanel gp = lstbxEntriesToSelect.getGridPanel();
-		
-		boolean bForceScale = fForceScale!=null;
-		
-		float fScale = 1f;
-		if(!bForceScale){
-			float fPerc = tdEffectListEachEntry.getCurrentDelayPercentual(false);
-			if(Float.compare(fPerc,1f)>=0){
-				fPerc=1f;
-//				bEffectListEntriesCompleted=true;
-//				tdEffectListEachEntry.setActive(false);
-				tdEffectListEachEntry.updateTime(); //prepare for next entry
-			}
-			fScale = fPerc;
-		}else{
-			fScale = fForceScale;
-		}
-		
-		if(!bGrow)fScale=1f-fScale;
-		
-		int iTotal = gp.getVisibleColumns() * gp.getVisibleRows();
-		int iCount = 0;
-		int iMaxConcurrent = 3;
-		int iCountConcurrent = 0;
-		for(int iC=0;iC<gp.getVisibleColumns();iC++){
-			for(int iR=0;iR<gp.getVisibleRows();iR++){
-				Panel pnl = gp.getCell(iR, iC);
-				iCount++;
-				
-				if(pnl!=null){
-					if(bForceScale){
-						LemurMiscHelpersStateI.i().setScaleXY(pnl, fScale, 1f);
-					}else{
-						if(Float.compare(pnl.getLocalScale().x,1f)==0){
-							continue;
-						}
-						
-						LemurMiscHelpersStateI.i().setScaleXY(pnl, fScale, 1f);
-						iCountConcurrent++;
-						
-						fScale-=0.33f;
-						if(fScale<0f)fScale=fMinScale;
-						
-						if(iCountConcurrent==iMaxConcurrent)break; //to update one entry step per frame
-					}
-				}
-			}			
-		}
-		
-		if(!bForceScale){
-			if(iCount==iTotal && Float.compare(fScale,1f)==0){ //the last entry scale must be 1f
-				bEffectListAllEntriesCompleted=true;
-				tdEffectListEachEntry.setActive(false);
-			}
-		}
-		
-		return bEffectListAllEntriesCompleted;
-	}
-
 	private void prepareEffectListEntries() {
 		bEffectListAllEntriesCompleted=false;
 		
@@ -944,9 +889,70 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		for(int iC=0;iC<gp.getVisibleColumns();iC++){
 			for(int iR=0;iR<gp.getVisibleRows();iR++){
 				Panel pnl = gp.getCell(iR, iC);
-				LemurMiscHelpersStateI.i().setScaleXY(pnl, fMinScale, 1f);
+				if(pnl!=null)MiscLemurHelpersStateI.i().setScaleXY(pnl, fMinScale, 1f);
 			}
 		}
+	}
+	protected boolean updateEffectListEntries(boolean bGrow) {
+		GridPanel gp = lstbxEntriesToSelect.getGridPanel();
+		
+		int iTotal = gp.getVisibleColumns() * gp.getVisibleRows();
+		int iCount = 0;
+		
+//		int iMaxConcurrent = 3;
+//		int iCountConcurrent = 0;
+		
+		float fLastCalculatedEntryScale = 0f;
+		for(int iC=0;iC<gp.getVisibleColumns();iC++){
+			for(int iR=0;iR<gp.getVisibleRows();iR++){
+				Panel pnl = gp.getCell(iR, iC);
+				iCount++;
+				
+				if(pnl!=null){
+					if(Float.compare(pnl.getLocalScale().x,1f)==0){
+						continue;
+					}
+					
+					fLastCalculatedEntryScale=updateEffectOnEntry(pnl,bGrow);
+					if(fLastCalculatedEntryScale<0.33f){
+						break;
+					}
+//					iCountConcurrent++;
+					
+//					fScale-=0.33f;
+//					if(fScale<0f)fScale=fMinScale;
+					
+//					if(iCountConcurrent==iMaxConcurrent)break; //to update one entry step per frame
+				}
+			}
+		}
+		
+		if(iCount==iTotal && Float.compare(fLastCalculatedEntryScale,1f)==0){ //the last entry scale must be 1f
+			bEffectListAllEntriesCompleted=true;
+//			tdEffectListEachEntry.setActive(false);
+		}
+		
+		return bEffectListAllEntriesCompleted;
+	}
+	
+	private float updateEffectOnEntry(Spatial spt, boolean bGrow) {
+//		MiscJmeI.i().user
+//		TimedDelayVarField td = (TimedDelayVarField)spt.getUserData("TimedDelayEffect");
+		TimedDelayVarField td = MiscJmeI.i().retrieveUserDataTimedDelay(
+			spt, "tdListEntryEffect", fdvEffectListEntryDelay.f());
+		
+		float fScale = 1f;
+		float fPerc = td.getCurrentDelayPercentual(false);
+		if(Float.compare(fPerc,1f)==0){
+			td.updateTime(); //prepare for next entry
+		}
+		fScale = fPerc;
+		
+		if(!bGrow)fScale=1f-fScale; //shrink
+		
+		MiscLemurHelpersStateI.i().setScaleXY(spt, fScale, 1f);
+		
+		return fScale;
 	}
 	
 }

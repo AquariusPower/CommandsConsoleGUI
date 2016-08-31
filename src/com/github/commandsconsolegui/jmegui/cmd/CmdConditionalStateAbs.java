@@ -230,7 +230,7 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 	protected boolean disableAttempt() {
 		if(!super.disableAttempt())return false;
 		
-		btgState.setValue(false);//,false);
+		btgState.setObjectRawValue(false);//,false);
 		
 		cd().dumpInfoEntry(getCmd()+" disabled");
 		

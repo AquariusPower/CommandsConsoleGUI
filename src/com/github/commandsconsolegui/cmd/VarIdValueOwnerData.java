@@ -52,6 +52,7 @@ public class VarIdValueOwnerData {
 	private VarCmdFieldAbs<?> owner;
 	private IReflexFillCfg rfcfgClassHoldingTheOwner;
 	private String	strHelp;
+	private StackTraceElement[] asteLastSetOriginDebug;
 	
 	public VarIdValueOwnerData(String strId, Object objValue,	VarCmdFieldAbs<?> vivoOwner, IReflexFillCfg rfcfgClassHoldingTheOwner, String strHelp) {
 		super();
@@ -64,6 +65,7 @@ public class VarIdValueOwnerData {
 
 	public void setObjectValue(Object objValue) {
 		this.objValue=objValue;
+		this.asteLastSetOriginDebug=Thread.currentThread().getStackTrace();
 	}
 	
 	public Object getObjectValue(){

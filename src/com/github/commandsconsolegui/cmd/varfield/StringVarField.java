@@ -69,11 +69,11 @@ public class StringVarField extends VarCmdFieldAbs<StringVarField>{
 //		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
 	}
 	
-	public StringVarField setValue(String str){
-		this.strValue=str;
-		if(super.getConsoleVarLink()!=null)setObjectRawValue(this.strValue);
-		return this;
-	}
+//	public StringVarField setValue(String str){
+//		this.strValue=str;
+//		if(super.getConsoleVarLink()!=null)setObjectRawValue(this.strValue);
+//		return this;
+//	}
 	
 	@Override
 //	public StringVarField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
@@ -82,7 +82,7 @@ public class StringVarField extends VarCmdFieldAbs<StringVarField>{
 			strValue = ((StringVarField)objValue).strValue;
 		}else
 		{
-			strValue = ""+objValue;
+			strValue = ""+objValue; //TODO too much permissive?
 		}
 		
 //		super.setObjectValue(ccCD,objValue);

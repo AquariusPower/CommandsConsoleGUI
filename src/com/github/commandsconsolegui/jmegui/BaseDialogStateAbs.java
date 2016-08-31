@@ -39,7 +39,7 @@ import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
-import com.github.commandsconsolegui.jmegui.lemur.console.LemurMiscHelpersStateI;
+import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
 //import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -188,7 +188,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		 */
 		if(!cfg.isInitiallyEnabled()){
 			initiallyDisabled();
-			btgState.setValue(false);//,false);
+			btgState.setObjectRawValue(false);//,false);
 		}
 		
 //		MouseCursor.i().configure(cfg.lMouseCursorClickDelayMilis);
@@ -297,13 +297,13 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 			if(!bGrow)fPerc = 1.0f - fPerc;
 			v3f.x = v3f.x + fHalfWidth - (fHalfWidth*fPerc);
 			v3f.y = v3f.y - fHalfHeight + (fHalfHeight*fPerc);
-			LemurMiscHelpersStateI.i().setLocationXY(sptContainerMain,v3f);
+			MiscLemurHelpersStateI.i().setLocationXY(sptContainerMain,v3f);
 		}
 		
 		if(bCompleted){
 			tdEffect.setActive(false);
 			
-			LemurMiscHelpersStateI.i().setLocationXY(sptContainerMain,v3fMainLocationBkp);
+			MiscLemurHelpersStateI.i().setLocationXY(sptContainerMain,v3fMainLocationBkp);
 			v3fMainLocationBkp=null;
 		}
 		
@@ -737,7 +737,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	protected void setStyle(String strStyle) {
 //		this.strStyle = strStyle;
 //		svfStyle.setObjectRawValue(strStyle);
-		svfStyle.setValue(strStyle);
+		svfStyle.setObjectRawValue(strStyle);
 	}
 
 //	public void setTitle(String strTitle) {

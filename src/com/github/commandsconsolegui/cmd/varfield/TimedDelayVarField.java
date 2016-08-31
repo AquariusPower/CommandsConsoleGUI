@@ -296,7 +296,10 @@ public class TimedDelayVarField extends VarCmdFieldAbs<TimedDelayVarField>{
 	 */
 	public float getCurrentDelayPercentual(boolean bIfReadyWillAlsoUpdate) {
 		long lCurrentDelayNano = getCurrentDelayNano();
+		
 		long lDiff = getDelayLimitNano()-lCurrentDelayNano;
+		if(lDiff<0)lDiff=0; //if it took too much time, this constraint will fix the negative value
+		
 		double dPerc = 1.0 - ((double)lDiff)/((double)getDelayLimitNano());
 		
 		if(isReady(bIfReadyWillAlsoUpdate)){
@@ -386,25 +389,32 @@ public class TimedDelayVarField extends VarCmdFieldAbs<TimedDelayVarField>{
 		return strCodePrefixVariant;
 	}
 
-	public TimedDelayVarField setObjectRawValue(CommandsDelegator.CompositeControl cc, Object objValue) {
-		cc.assertSelfNotNull();
-		setObjectRawValue(objValue);
-		return this;
-	}
+//	public TimedDelayVarField setObjectRawValue(CommandsDelegator.CompositeControl cc, Object objValue) {
+//		cc.assertSelfNotNull();
+//		setObjectRawValue(objValue);
+//		return this;
+//	}
 	@Override
-	protected TimedDelayVarField setObjectRawValue(Object objValue) {
+	public TimedDelayVarField setObjectRawValue(Object objValue) {
 		if(objValue instanceof Double){
 			setDelayLimitSeconds( ((Double)objValue).floatValue() );
 		}else{
 			setDelayLimitSeconds((Float)objValue);
 		}
 		
-		super.setObjectRawValue(objValue);
+//		if(super.getConsoleVarLink()!=null)
+			super.setObjectRawValue(objValue);
 //		super.setObjectValue(ccCD, objValue);
 		
 		return this;
 	}
-
+	
+//	public TimedDelayVarField setValue(float fDelay){
+//		setDelayLimitSeconds(fDelay);
+//		if(super.getConsoleVarLink()!=null)setObjectRawValue(this.fDelayLimitSeconds);
+//		return this;
+//	}
+//	
 	@Override
 	public String getReport() {
 		return getVarId()+" = "+getDelayLimitSeconds();
@@ -439,5 +449,11 @@ public class TimedDelayVarField extends VarCmdFieldAbs<TimedDelayVarField>{
 	@Override
 	protected TimedDelayVarField getThis() {
 		return this;
+	}
+
+	@Override
+	public boolean isReflexing() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

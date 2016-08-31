@@ -173,7 +173,7 @@ public class StringCmdField extends VarCmdFieldAbs<StringCmdField>{
 	@Override
 //	public StringCmdField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
 	public StringCmdField setObjectRawValue(Object objValue) {
-		throw new PrerequisitesNotMetException("TODO should this method do nothing here?", this, objValue); //TODO
+		throw new PrerequisitesNotMetException("TODO should this method do nothing here? should it be only set thru reflex?", this, objValue); //TODO
 	}
 
 	@Override

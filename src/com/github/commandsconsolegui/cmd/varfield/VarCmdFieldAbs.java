@@ -60,6 +60,8 @@ public abstract class VarCmdFieldAbs <S extends VarCmdFieldAbs<S>> implements IR
 	private VarIdValueOwnerData	vivo;
 	private String strHelp=null;
 	private CommandData	cmdd;
+	private Object	objRawValueLazy;
+	private boolean	bLazyValueWasSet;
 	
 	private static ArrayList<VarCmdFieldAbs> avcfList = new ArrayList<VarCmdFieldAbs>();
 	public static final HashChangeHolder hvhVarList = new HashChangeHolder(avcfList);
@@ -80,8 +82,8 @@ public abstract class VarCmdFieldAbs <S extends VarCmdFieldAbs<S>> implements IR
 	}
 	
 	public VarCmdFieldAbs(IReflexFillCfg rfcfgOwner){
-		if(rfcfgOwner!=null)VarCmdFieldAbs.avcfList.add(this);
 		this.rfcfgOwner=rfcfgOwner;
+		if(isField())VarCmdFieldAbs.avcfList.add(this);
 	}
 //	public VarCmdFieldAbs(boolean bAddToList){
 //		if(bAddToList)VarCmdFieldAbs.avcfList.add(this);
@@ -107,7 +109,7 @@ public abstract class VarCmdFieldAbs <S extends VarCmdFieldAbs<S>> implements IR
 	
 	/**
 	 * 
-	 * @param ccCD
+	 * @param cc
 	 * @param vivo if the object already set is different from it, will throw exception
 	 * @return
 	 */
@@ -130,10 +132,18 @@ public abstract class VarCmdFieldAbs <S extends VarCmdFieldAbs<S>> implements IR
 		 * vivo will already come with an updated value, because this method is called
 		 * in a "set value" flow.
 		 */
-		boolean bUpdateWithInitialValue=false; //do not enable... kept as reference...
-		if(bUpdateWithInitialValue){
+//		boolean bUpdateWithInitialValue=false; //do not enable... kept as reference...
+//		if(bUpdateWithInitialValue){
+		if(isRawValueLazySet()){
 //			if(this.vivo.getObjectValue()==null){ //nah... value can be set to null...
-			setObjectRawValue(getValueRaw()); //update it's value with old/previous value? nah...
+//			setObjectRawValue(getValueRaw()); //update it's value with old/previous value? nah...
+			setObjectRawValue(getRawValueLazy());
+			
+			/**
+			 * lazy value is not required anymore, so clean it up
+			 */
+			bLazyValueWasSet=false;
+			objRawValueLazy=null;
 //			}
 		}
 		
@@ -160,14 +170,6 @@ public abstract class VarCmdFieldAbs <S extends VarCmdFieldAbs<S>> implements IR
 		return strVarId;
 	}
 	
-	/**
-	 * TODO is this as useless as it appears to be?
-	 */
-	@Override
-	public boolean isReflexing() {
-//		return bReflexingIdentifier;
-		return rfcfgOwner!=null;
-	}
 	
 //	protected S setReflexing(boolean b){
 //		this.bReflexingIdentifier=b;
@@ -278,20 +280,49 @@ public abstract class VarCmdFieldAbs <S extends VarCmdFieldAbs<S>> implements IR
 	protected abstract S getThis();
 	
 	/**
-	 * It is the unmodified/original value. 
-	 * TODO Confirm all its uses (the object get too), as fixed (modified to be correct) values shall not actually reach here.
+	 * It is the unmodified/original value.
+	 * If var link is not set, the raw value will be lazily stored.
+	 *  
 	 * @param objValue
 	 * @return
 	 */
-	protected S setObjectRawValue(Object objValue) {
+	public S setObjectRawValue(Object objValue) {
 //		public S setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
 //		ccCD.assertSelfNotNull();
 		
-		if(vivo==null)throw new PrerequisitesNotMetException("var link not set", this, objValue);
-		
-		vivo.setObjectValue(objValue);
+//	if(isField()){
+//	if(vivo==null){
+//		throw new PrerequisitesNotMetException("var link not set for field", this, objValue);
+//	}else{
+//		vivo.setObjectValue(objValue);
+//	}
+		if(vivo!=null){
+			vivo.setObjectValue(objValue);
+		}else{
+			bLazyValueWasSet=true; //as such value can be actually null
+			this.objRawValueLazy = objValue;
+		}
 		
 		return getThis();
+	}
+	
+	protected boolean isRawValueLazySet(){
+		return bLazyValueWasSet;
+	}
+	
+	protected Object getRawValueLazy(){
+		return objRawValueLazy;
+	}
+	
+	/**
+	 * used at {@link ReflexFillI#assertAndGetField()}
+	 */
+	@Override
+	public boolean isReflexing() { // will only reflex for field name!
+		return isField();
+	}
+	public boolean isField(){ // will be a field if it has an owner. Must have var link!
+		return rfcfgOwner!=null;
 	}
 	
 }

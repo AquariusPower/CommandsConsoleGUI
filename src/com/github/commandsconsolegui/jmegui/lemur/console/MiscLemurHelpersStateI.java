@@ -70,9 +70,9 @@ import com.simsilica.lemur.focus.FocusManagerState;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IWorkAroundBugFix, IConsoleCommandListener {
-	private static LemurMiscHelpersStateI instance = new LemurMiscHelpersStateI();
-	public static LemurMiscHelpersStateI i(){return instance;}
+public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IWorkAroundBugFix, IConsoleCommandListener {
+	private static MiscLemurHelpersStateI instance = new MiscLemurHelpersStateI();
+	public static MiscLemurHelpersStateI i(){return instance;}
 	
 	public final BoolTogglerCmdField	btgListBoxSelectorAsUnderline = 
 		new BoolTogglerCmdField(this,true,null,
@@ -121,7 +121,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 
 //	private int	iMoveCaratTo;
 	
-	public LemurMiscHelpersStateI() {
+	public MiscLemurHelpersStateI() {
 		setPrefixCmdWithIdToo(true);
 	}
 	
@@ -258,18 +258,6 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		}
 	}
 	
-	public TimedDelayVarField retrieveTimedDelayFrom(Spatial sptHolder, String strUserDataKey){
-		SavableHolder sh = (SavableHolder)sptHolder.getUserData(strUserDataKey);
-		TimedDelayVarField td = null;
-		if(sh==null){
-			sh = new SavableHolder(new TimedDelayVarField(2f,"").setActive(true));
-			sptHolder.setUserData(strUserDataKey, sh);
-		}
-		td = (TimedDelayVarField)sh.getRef();
-		
-		return td;
-	}
-	
 	public void updateBlinkListBoxSelector(ListBox<?> lstbx){//, boolean bShrinkExpandToo) {
 		Geometry geomSelector = retrieveSelectorGeometryFromListbox(lstbx);
 		if(geomSelector==null)return;
@@ -282,7 +270,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		ColorRGBA color = retrieveExclusiveColorForBlinking(lstbx,geomSelector);
 //		ColorRGBA color = (ColorRGBA)lstbx.getUserData(EUserData.colorExclusiveCursor.toString());
 		
-		TimedDelayVarField td = retrieveTimedDelayFrom(lstbx, "tdListboxSelectorColorFade");
+		TimedDelayVarField td = MiscJmeI.i().retrieveUserDataTimedDelay(lstbx, "tdListboxSelectorColorFade", 2f);
 		MiscJmeI.i().updateColorFading(
 			td, 
 			color, 
@@ -609,7 +597,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 	 */
 	public static class CfgParm implements ICfgParm{}
 	@Override
-	public LemurMiscHelpersStateI configure(ICfgParm icfg) {
+	public MiscLemurHelpersStateI configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
 		
 //		super.icfgOfInstance=icfg;
@@ -906,12 +894,12 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 		return cell;
 	}
 
-	public LemurMiscHelpersStateI setLocationXY(Spatial spt, Vector3f v3f) {
+	public MiscLemurHelpersStateI setLocationXY(Spatial spt, Vector3f v3f) {
 		spt.setLocalTranslation(v3f.x, v3f.y, spt.getLocalTranslation().z); // to not mess with Z order
 		return this;
 	}
 
-	public LemurMiscHelpersStateI setScaleXY(Spatial spt, Float fScaleX, Float fScaleY) {
+	public MiscLemurHelpersStateI setScaleXY(Spatial spt, Float fScaleX, Float fScaleY) {
 		Vector3f v3fCurrentScale = spt.getLocalScale();
 		spt.setLocalScale(
 			fScaleX==null?v3fCurrentScale.x:fScaleX,
