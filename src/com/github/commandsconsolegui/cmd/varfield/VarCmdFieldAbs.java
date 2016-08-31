@@ -87,6 +87,11 @@ public abstract class VarCmdFieldAbs <S extends VarCmdFieldAbs<S>> implements IR
 //		if(bAddToList)VarCmdFieldAbs.avcfList.add(this);
 //	}
 	
+	/**
+	 * When discarding a class object that has fields of this class,
+	 * the global fields list {@link #avcfList} must also be updated/synchronized.
+	 * @param ccSelf
+	 */
 	public void discardSelf(CommandsDelegator.CompositeControl ccSelf) {
 		VarCmdFieldAbs.avcfList.remove(this);
 	}

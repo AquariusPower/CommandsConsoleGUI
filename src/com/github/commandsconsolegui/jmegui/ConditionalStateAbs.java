@@ -166,6 +166,10 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 	private CfgParm	cfg;
 	private ICfgParm icfgOfInstance;
 	private boolean	bRestartRequested;
+
+	private boolean	bTryingToEnable;
+
+	private boolean	bTryingToDisable;
 	/**
 	 * Configure simple references assignments and variable values.<br>
 	 * Must be used before initialization.<br>
@@ -373,6 +377,8 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 	
 	private boolean doItUpdateOrEnableOrDisableProperly(float tpf) {
 		if(bEnabledRequested && !bEnabled){
+			bTryingToEnable=true;
+			bTryingToDisable=false;
 			if(bHoldEnable)return false;
 			if(!rEnable.isReadyToRetry())return false;
 			
@@ -387,6 +393,8 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 			}
 		}else
 		if(bDisabledRequested && bEnabled){
+			bTryingToDisable=true;
+			bTryingToEnable=false;
 			if(bHoldDisable)return false;
 			if(!rDisable.isReadyToRetry())return false;
 			
@@ -637,6 +645,14 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 	public void read(JmeImporter im) throws IOException{
   	
   }
+
+	public boolean isTryingToEnable() {
+		return bTryingToEnable;
+	}
+
+	public boolean isTryingToDisable() {
+		return bTryingToDisable;
+	}
 
 //	public boolean applyBoolTogglerChange(BoolTogglerCmdField btgSource) {
 //		return false;

@@ -82,7 +82,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 			+" but not over button area without text..."
 		).setCallNothingOnChange();
 	
-	public final BoolTogglerCmdField	btgTextCursorPulseFadeBlinkMode = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
+	public final BoolTogglerCmdField	btgTextCursorOscilateFadeBlinkMode = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 	public final BoolTogglerCmdField	btgTextCursorLarge = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 	
 	public final StringCmdField CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringCmdField(this, CommandsDelegator.strFinalCmdCodePrefix);
@@ -247,7 +247,7 @@ public class LemurMiscHelpersStateI extends CmdConditionalStateAbs implements IW
 			tf.setUserData(EUserData.geomCursorHotLink.toString(), geomCursor);
 		}
 		
-		if(btgTextCursorPulseFadeBlinkMode.b()){
+		if(btgTextCursorOscilateFadeBlinkMode.b()){
 			ColorRGBA color = retrieveExclusiveColorForBlinking(tf,geomCursor);
 		//(ColorRGBA)tf.getUserData(EUserData.colorExclusiveCursor.toString()),
 			MiscJmeI.i().updateColorFading(tdTextCursorBlink, color, true);

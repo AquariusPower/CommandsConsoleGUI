@@ -145,46 +145,63 @@ public class MiscJmeI {
 		float fMinAlpha=0.25f;
 		float fDeltaWorkAlpha = 1.0f - fMinAlpha;
 		
-		float fPerc = td.getCurrentDelayPercentualDynamic();
+		td.setOscilateMode(bFadeInAndOut);
 		
-		if(bFadeInAndOut){
-			if(fPerc<0.5f){
-				fPerc*=2f;
-				color.a = fMinAlpha + (fDeltaWorkAlpha*fPerc);
-			}else{
-				fPerc = (1.0f - fPerc)*2f; // 0.5 to 1.0, will become 1.0 to 0.0
-				color.a = fMinAlpha + (fDeltaWorkAlpha*fPerc);
-			}
-		}else{
-			color.a = fMinAlpha + (fDeltaWorkAlpha*fPerc);
-		}
+		color.a = fMinAlpha + td.getCurrentDelayCalcDynamic(fDeltaWorkAlpha);
 		
+//		if(color.a<0)color.a=0;
+		if(color.a>1f){
+			color.a=1f;
+		}else
 		if(color.a < fMinAlpha){
 			color.a=fMinAlpha;
 		}
-		
-//		if(bFadeInAndOut){
-//			color.a=fPerc;
-//			if(fPerc>0.5f){
-//				color.a=1f-fPerc; //to allow it fade in and out
-//			}
-//			color.a *= 2f;
-////				if(color.a<0.75f)color.a=0.75f;
-//		}
-		
-//		color.a = td.getCurrentDelayPercentualDynamic();
-//		if(bFadeInAndOut){
-//			if(color.a>0.5f)color.a=1f-color.a; //to allow it fade in and out
-//			color.a *= 2f;
-////				if(color.a<0.75f)color.a=0.75f;
-//		}
-		if(color.a<0){
-			color.a=0;
-		}
-		if(color.a>1){
-			color.a=1;
-		}
 	}
+	
+//	public void updateColorFading(TimedDelayVarField td, ColorRGBA color, boolean bFadeInAndOut){
+//		float fMinAlpha=0.25f;
+//		float fDeltaWorkAlpha = 1.0f - fMinAlpha;
+//		
+//		float fPerc = td.getCurrentDelayPercentualDynamic();
+//		
+//		if(bFadeInAndOut){
+//			if(fPerc<0.5f){
+//				fPerc*=2f;
+//				color.a = fMinAlpha + (fDeltaWorkAlpha*fPerc);
+//			}else{
+//				fPerc = (1.0f - fPerc)*2f; // 0.5 to 1.0, will become 1.0 to 0.0
+//				color.a = fMinAlpha + (fDeltaWorkAlpha*fPerc);
+//			}
+//		}else{
+//			color.a = fMinAlpha + (fDeltaWorkAlpha*fPerc);
+//		}
+//		
+//		if(color.a < fMinAlpha){
+//			color.a=fMinAlpha;
+//		}
+//		
+////		if(bFadeInAndOut){
+////			color.a=fPerc;
+////			if(fPerc>0.5f){
+////				color.a=1f-fPerc; //to allow it fade in and out
+////			}
+////			color.a *= 2f;
+//////				if(color.a<0.75f)color.a=0.75f;
+////		}
+//		
+////		color.a = td.getCurrentDelayPercentualDynamic();
+////		if(bFadeInAndOut){
+////			if(color.a>0.5f)color.a=1f-color.a; //to allow it fade in and out
+////			color.a *= 2f;
+//////				if(color.a<0.75f)color.a=0.75f;
+////		}
+//		if(color.a<0){
+//			color.a=0;
+//		}
+//		if(color.a>1){
+//			color.a=1;
+//		}
+//	}
 	
 //	
 //	public boolean isMouseCursorButton(EMouseCursorButton emcb, int iIndex){

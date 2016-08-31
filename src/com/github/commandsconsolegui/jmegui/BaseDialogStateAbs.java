@@ -32,6 +32,7 @@ import java.util.Arrays;
 
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
+import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
@@ -86,7 +87,9 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 //	private Long	lChoiceMadeAtMilis = null;
 	private ArrayList<DialogListEntryData<T>> adataChosenEntriesList = new ArrayList<DialogListEntryData<T>>();
 	
-	BoolTogglerCmdField btgGrowEffect = new BoolTogglerCmdField(this, false); //TODO WIP
+	private BoolTogglerCmdField btgGrowEffect = new BoolTogglerCmdField(this, true);
+	private TimedDelayVarField tdGrowEffect = new TimedDelayVarField(this, 0.15f, "");
+	private float	fMinGrowScale=0.01f;
 	
 	public DiagModalInfo<T> getDiagModalCurrent(){
 		return dmi;
@@ -250,15 +253,41 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 			bRequestedActionSubmit=false;
 		}
 		
-//		if(btgGrowEffect.b()){
-			Vector3f v3fScale = sptContainerMain.getLocalScale();
-			if(v3fScale.x<1f)v3fScale.x+=0.01f;
-			if(v3fScale.x>1f)v3fScale.x=1f;
-			if(v3fScale.y<1f)v3fScale.y+=0.01f;
-			if(v3fScale.y>1f)v3fScale.y=1f;
-//		}
+		if(tdGrowEffect.isActive()){ //dont use btgGrowEffect.b() as it may be disabled during the grow effect
+			updateEffect(!isTryingToDisable());
+		}
 		
 		return super.updateOrUndo(tpf);
+	}
+	
+	protected boolean updateEffect(boolean bGrow){
+		boolean bCompleted=false;
+		
+		Vector3f v3fScaleCopy = sptContainerMain.getLocalScale().clone();
+		float fValAdd = tdGrowEffect.getCurrentDelayCalc(1f-fMinGrowScale,false);
+		float fVal=0f;
+		if(bGrow){
+			fVal = fMinGrowScale+fValAdd;
+			if(Float.compare(fVal,1f)>=0){
+				fVal=1f;
+				bCompleted=true;
+			}
+		}else{ //shrink
+			fVal = 1f - fValAdd;
+			if(Float.compare(fVal,fMinGrowScale)<=0){
+				fVal=fMinGrowScale;
+				bCompleted=true;
+			}
+		}
+		v3fScaleCopy.x = v3fScaleCopy.y = fVal;
+		
+		sptContainerMain.setLocalScale(v3fScaleCopy);
+		
+		if(bCompleted){
+			tdGrowEffect.setActive(false);
+		}
+		
+		return bCompleted;
 	}
 	
 	@Override
@@ -273,8 +302,8 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		
 		if(btgGrowEffect.b()){
 			Vector3f v3fScale = sptContainerMain.getLocalScale();
-			v3fScale.x=0.01f;
-			v3fScale.y=0.01f;
+			v3fScale.x=v3fScale.y=fMinGrowScale;
+			tdGrowEffect.setActive(true);
 		}
 		
 		return super.enableOrUndo();
@@ -282,6 +311,19 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	
 	@Override
 	protected boolean disableOrUndo() {
+		if(btgGrowEffect.b()){
+			Vector3f v3fScale = sptContainerMain.getLocalScale();
+			
+			if(Float.compare(v3fScale.x,1f)==0){
+				tdGrowEffect.setActive(true);
+				return false;
+			}else{
+				if(Float.compare(v3fScale.x,fMinGrowScale)>0){
+					return false;
+				}				
+			}
+		}
+		
 		sptContainerMain.removeFromParent();
 		
 		setMouseCursorKeepUngrabbed(false);

@@ -60,6 +60,8 @@ public class TimedDelayVarField extends VarCmdFieldAbs<TimedDelayVarField>{
 	private float	fDelayLimitSeconds;
 	private long	lDelayLimitNano;
 
+	private boolean	bOscilate;
+
 	public static final String	strCodePrefixVariant = "td";
 	
 	public static void configure(IHandleExceptions ihe){
@@ -109,10 +111,11 @@ public class TimedDelayVarField extends VarCmdFieldAbs<TimedDelayVarField>{
 		setHelp(strHelp);
 	}
 	
-	private void setDelayLimitSeconds(float fDelaySeconds){
+	private TimedDelayVarField setDelayLimitSeconds(float fDelaySeconds){
 		this.fDelayLimitSeconds = fDelaySeconds;
 		this.lDelayLimitNano = (long) (this.fDelayLimitSeconds * lNanoOneSecond);;
-//		if(isActive())updateTime(); //this is required for consistency at get percentual 
+//		if(isActive())updateTime(); //this is required for consistency at get percentual
+		return this;
 	}
 	
 	public long getCurrentDelayNano() {
@@ -123,7 +126,7 @@ public class TimedDelayVarField extends VarCmdFieldAbs<TimedDelayVarField>{
 	 * 
 	 * @param bOverlapLimit if false, update is required to get a value withing the limit. If true,
 	 * will use {@link #lLastUpdateReferenceTimeNano} to precisely determine the delay based on 
-	 * the remainder of a the division by {@link #lDelayLimitNano} 
+	 * the remainder of a the division by {@link #getDelayLimitNano()} 
 	 * @param bOverlapModeAlsoUpdateReferenceTime
 	 * @return
 	 */
@@ -138,7 +141,7 @@ public class TimedDelayVarField extends VarCmdFieldAbs<TimedDelayVarField>{
 			
 			long lTotalDelayNano = lCurrentTimeNano - lLastUpdateReferenceTimeNano;
 			
-			lCurrentDelay = lTotalDelayNano%lDelayLimitNano;
+			lCurrentDelay = lTotalDelayNano%getDelayLimitNano();
 			
 //			while(lTimeNanoCopy<lCurrentTimeNano){
 //				lTimeNanoCopy+=lDelayLimitNano;
@@ -165,17 +168,25 @@ public class TimedDelayVarField extends VarCmdFieldAbs<TimedDelayVarField>{
 		return isReady(false);
 	}
 	public boolean isReady(boolean bIfReadyWillAlsoUpdate) {
-		boolean bReady = getCurrentDelayNano() >= lDelayLimitNano;
+		boolean bReady = getCurrentDelayNano() >= getDelayLimitNano();
 		if(bIfReadyWillAlsoUpdate){
 			if(bReady)updateTime();
 		}
 		return bReady;
 	}
 	public long getDelayLimitNano(){
-		return lDelayLimitNano;
+		if(bOscilate){
+			return lDelayLimitNano*2;
+		}else{
+			return lDelayLimitNano;
+		}
 	}
 	public float getDelayLimitSeconds(){
-		return fDelayLimitSeconds;
+		if(bOscilate){
+			return fDelayLimitSeconds*2f;
+		}else{
+			return fDelayLimitSeconds;
+		}
 	}
 	public void reset() {
 		lLastUpdateReferenceTimeNano=null;
@@ -199,8 +210,51 @@ public class TimedDelayVarField extends VarCmdFieldAbs<TimedDelayVarField>{
 		return this;
 	}
 	
+	public TimedDelayVarField setOscilateMode(boolean b){
+		this.bOscilate=b;
+		return this;
+	}
+	
+	public float getCurrentDelayCalc(float fMaxValue,boolean bIfReadyWillAlsoUpdate) {
+		return getCurrentDelayCalc(fMaxValue,bOscilate,false,bIfReadyWillAlsoUpdate);
+	}
+	public float getCurrentDelayCalcDynamic(float fMaxValue) {
+		return getCurrentDelayCalc(fMaxValue,bOscilate,true,null);
+	}
 	/**
-	 * Will overlap {@link #lDelayLimitNano} not requiring {@link #updateTime()} 
+	 * 
+	 * @param fMaxValue
+	 * @param bOscilate
+	 * @param bDynamic
+	 * @param bIfReadyWillAlsoUpdate
+	 * @return
+	 */
+	private float getCurrentDelayCalc(float fMaxValue, boolean bOscilate, boolean bDynamic, Boolean bIfReadyWillAlsoUpdate) {
+		float fHalf=(fMaxValue/2f);
+		
+		Float fPerc = null;
+		if(bDynamic){
+			fPerc = getCurrentDelayPercentualDynamic();
+		}else{
+			fPerc = getCurrentDelayPercentual(bIfReadyWillAlsoUpdate);
+		}
+		float fCurrent = (fPerc * fMaxValue);
+		
+		if(!bOscilate)return fCurrent;
+		
+		float fOscilatedCurrent=0f;
+		
+		//ex.: max is 10
+		if(fCurrent<fHalf){
+			fOscilatedCurrent=fCurrent*2f; //ex.: from 0 to 10: 1 -> 2; 4 -> 8;
+		}else{
+			fOscilatedCurrent=fMaxValue-((fCurrent-fHalf)*2f); //ex.: from 10 to 0: 6 -> 8; 9 -> 2;
+		}
+		
+		return fOscilatedCurrent;
+	}	
+	/**
+	 * Will overlap {@link #getDelayLimitNano()} not requiring {@link #updateTime()} 
 	 * to return precise values.
 	 * 
 	 * @return
@@ -232,39 +286,49 @@ public class TimedDelayVarField extends VarCmdFieldAbs<TimedDelayVarField>{
 //			updateTime();
 //		}
 		
-		double dPerc = 1.0 - ((double)lCurrentDelay)/((double)lDelayLimitNano);
+		double dPerc = 1.0 - ((double)lCurrentDelay)/((double)getDelayLimitNano());
 		
 		return (float)dPerc;
 	}
 	
 	/**
-	 * Will not overlap {@link #lDelayLimitNano}, so {@link #updateTime()} is required.
-	 * 
-	 * @return if null, indicates that an update is required.
+	 * Will not overlap {@link #getDelayLimitNano()}, so {@link #updateTime()} is required.
 	 */
-	public Float getCurrentDelayPercentual(boolean bIfReadyWillAlsoUpdate) {
-		if(bIfReadyWillAlsoUpdate)isReady(true); //just to auto update.
+	public float getCurrentDelayPercentual(boolean bIfReadyWillAlsoUpdate) {
+		long lCurrentDelayNano = getCurrentDelayNano();
+		long lDiff = getDelayLimitNano()-lCurrentDelayNano;
+		double dPerc = 1.0 - ((double)lDiff)/((double)getDelayLimitNano());
 		
-		long lCurrentDelay = getCurrentDelayNano();
-		long lDiff = lDelayLimitNano-lCurrentDelay;
-		if(lDiff<0){
-			if(bIfReadyWillAlsoUpdate){
-				return 0f;
-			}else{
-				return null;
-			}
+		if(isReady(bIfReadyWillAlsoUpdate)){
+			return 1f; //if from getting the current to now it gets ready, will return 100%
+		}else{
+			return (float)dPerc;
 		}
-		double dPerc = 1.0 - ((double)lDiff)/((double)lDelayLimitNano);
-		
-		return (float)dPerc;
-//		
-//		float f = 1.0f - ((lNanoDelayLimit-getCurrentDelayNano())*fNanoToSeconds);
-//		if(f<0f){
-//			ihe.handleExceptionThreaded(new NullPointerException("negative value: "+f));
-//			f=0f;
-//		}
-//		return f;
 	}
+//	 * @return if null, indicates that an update is required.
+//	public Float getCurrentDelayPercentual(boolean bIfReadyWillAlsoUpdate) {
+//		if(bIfReadyWillAlsoUpdate)isReady(true); //just to auto update.
+//		
+//		long lCurrentDelayNano = getCurrentDelayNano();
+//		long lDiff = getDelayLimitNano()-lCurrentDelayNano;
+//		if(lDiff<0){
+//			if(bIfReadyWillAlsoUpdate){
+//				return 0f;
+//			}else{
+//				return null;
+//			}
+//		}
+//		double dPerc = 1.0 - ((double)lDiff)/((double)getDelayLimitNano());
+//		
+//		return (float)dPerc;
+////		
+////		float f = 1.0f - ((lNanoDelayLimit-getCurrentDelayNano())*fNanoToSeconds);
+////		if(f<0f){
+////			ihe.handleExceptionThreaded(new NullPointerException("negative value: "+f));
+////			f=0f;
+////		}
+////		return f;
+//	}
 	
 //	public float getCurrentDelayPercentualWithinBounds() {
 //		float f = getCurrentDelayPercentual();
