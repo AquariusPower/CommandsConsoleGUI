@@ -964,7 +964,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	
 	private float updateEffectOnEntry(Spatial spt, boolean bGrow) {
 		if(Float.compare(spt.getLocalScale().x,fMinScale)==0){
-			AudioUII.i().play(EAudio.EntryGrowEffect);
+			AudioUII.i().play(EAudio.DisplayEntryEffect);
 		}
 		
 //		MiscJmeI.i().user

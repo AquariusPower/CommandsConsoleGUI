@@ -239,7 +239,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	@Override
 	protected boolean updateAttempt(float tpf) {
 		DialogListEntryData<T> dle = getSelectedEntryData();
-		if(dle!=dleLastSelected)AudioUII.i().play(AudioUII.EAudio.EntrySelect);
+		if(dle!=dleLastSelected)AudioUII.i().play(AudioUII.EAudio.SelectEntry);
 //		if(dle!=null)
 		dleLastSelected = dle;
 		

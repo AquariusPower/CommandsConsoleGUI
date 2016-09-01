@@ -83,8 +83,8 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 		
 		HoverOverActivators	(strBasePath+"220189__gameaudio__blip-squeak.cut.mono.ogg" ),
 		
-		EntrySelect					(strBasePath+"220197__gameaudio__click-basic.mono.ogg" ),
-		EntryGrowEffect			(strBasePath+"220168__gameaudio__button-spacey-confirm.mono.ogg"),
+		SelectEntry					(strBasePath+"220197__gameaudio__click-basic.mono.ogg" ),
+		DisplayEntryEffect	(strBasePath+"220168__gameaudio__button-spacey-confirm.mono.ogg"),
 		
 		RemoveEntry					(strBasePath+"220177__gameaudio__quick-ui-or-event-deep.mono.ogg"),
 		RemoveSubTreeEntry	(strBasePath+"220205__gameaudio__teleport-darker.mono.ogg"),
