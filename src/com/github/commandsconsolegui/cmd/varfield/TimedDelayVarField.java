@@ -27,12 +27,9 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegator;
-import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
-import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 
 /**
@@ -46,7 +43,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  *
  */
 
-public class TimedDelayVarField extends VarCmdFieldAbs<TimedDelayVarField>{
+public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 	private static IHandleExceptions ihe = HandleExceptionsRaw.i();
 //	private static ArrayList<TimedDelayVarField> atdList = new ArrayList<TimedDelayVarField>();
 	
@@ -57,7 +54,7 @@ public class TimedDelayVarField extends VarCmdFieldAbs<TimedDelayVarField>{
 	public static final float fNanoToSeconds = 1f/lNanoOneSecond; //multiply nano by it to get in seconds
 	
 	private Long	lLastUpdateReferenceTimeNano;
-	private float	fDelayLimitSeconds;
+//	private float	fDelayLimitSeconds;
 	private long	lDelayLimitNano;
 
 	private boolean	bOscilate;
@@ -112,8 +109,9 @@ public class TimedDelayVarField extends VarCmdFieldAbs<TimedDelayVarField>{
 	}
 	
 	private TimedDelayVarField setDelayLimitSeconds(float fDelaySeconds){
-		this.fDelayLimitSeconds = fDelaySeconds;
-		this.lDelayLimitNano = (long) (this.fDelayLimitSeconds * lNanoOneSecond);;
+//		this.fDelayLimitSeconds = fDelaySeconds;
+//		this.lDelayLimitNano = (long) (this.fDelayLimitSeconds * lNanoOneSecond);;
+		this.lDelayLimitNano = (long) (fDelaySeconds * lNanoOneSecond);;
 //		if(isActive())updateTime(); //this is required for consistency at get percentual
 		return this;
 	}
@@ -183,9 +181,11 @@ public class TimedDelayVarField extends VarCmdFieldAbs<TimedDelayVarField>{
 	}
 	public float getDelayLimitSeconds(){
 		if(bOscilate){
-			return fDelayLimitSeconds*2f;
+//			return fDelayLimitSeconds*2f;
+			return lDelayLimitNano*fNanoToSeconds*2f;
 		}else{
-			return fDelayLimitSeconds;
+			return lDelayLimitNano*fNanoToSeconds;
+//			return fDelayLimitSeconds;
 		}
 	}
 	public void reset() {

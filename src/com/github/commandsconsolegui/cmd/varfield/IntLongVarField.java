@@ -27,7 +27,6 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -41,7 +40,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class IntLongVarField extends VarCmdFieldAbs<IntLongVarField>{
+public class IntLongVarField extends VarCmdFieldAbs<Long,IntLongVarField>{
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	private static String	strCodePrefixVariant = "ilv";

@@ -49,12 +49,12 @@ public class VarIdValueOwnerData {
 	private String strId;
 	private Object objValue;
 //	private IVarIdValueOwner owner;
-	private VarCmdFieldAbs<?> owner;
+	private VarCmdFieldAbs owner;
 	private IReflexFillCfg rfcfgClassHoldingTheOwner;
 	private String	strHelp;
 	private StackTraceElement[] asteLastSetOriginDebug;
 	
-	public VarIdValueOwnerData(String strId, Object objValue,	VarCmdFieldAbs<?> vivoOwner, IReflexFillCfg rfcfgClassHoldingTheOwner, String strHelp) {
+	public VarIdValueOwnerData(String strId, Object objValue,	VarCmdFieldAbs vivoOwner, IReflexFillCfg rfcfgClassHoldingTheOwner, String strHelp) {
 		super();
 		this.strId = strId;
 		this.objValue = objValue;
@@ -80,7 +80,7 @@ public class VarIdValueOwnerData {
 		return strId;
 	}
 
-	public VarCmdFieldAbs<?> getOwner() {
+	public VarCmdFieldAbs getOwner() {
 		return owner;
 	}
 

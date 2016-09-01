@@ -37,8 +37,10 @@ import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
+import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
@@ -106,7 +108,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	private BoolTogglerCmdField btgEffectListEntries = new BoolTogglerCmdField(this, true);
 //	private TimedDelayVarField tdEffectListEachEntry = new TimedDelayVarField(this, 0.05f, "");
 //	private float fEffectListEntryDelay=0.05f;
-	private FloatDoubleVarField fdvEffectListEntryDelay = new FloatDoubleVarField(this, 0.05f, "");
+	private FloatDoubleVarField fdvEffectListEntryDelay = new FloatDoubleVarField(this, 0.15f, "");
 	
 	@Override
 	public Container getContainerMain(){
@@ -148,8 +150,9 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		}
 	}
 	private CfgParm	cfg;
-	private boolean	bEffectListAllEntriesCompleted;
+	private boolean	bRunningEffectAtAllListEntries;
 	private float	fMinScale = 0.01f;
+	private boolean	bPreparedForListEntriesEffects;
 	@Override
 	public R configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
@@ -322,7 +325,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		
 		LemurFocusHelperStateI.i().requestFocus(getInputField());
 		
-		prepareEffectListEntries();
+		bPreparedForListEntriesEffects=false;
+//		prepareEffectListEntries(false);
 		
 		return true;
 	}
@@ -334,6 +338,11 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		if(getInputField().equals(LemurFocusHelperStateI.i().getFocused())){
 			LemurFocusHelperStateI.i().removeFocusableFromList(getInputField());
 //		}
+			
+			// this is to prepare for the next enable
+//			prepareEffectListEntries(false);
+			
+//		bPreparedForListEntriesEffects=false;
 		
 		return true;
 	}
@@ -504,22 +513,23 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 			updateList();
 		}
 		
-		if(isTryingToEnable()){
-			if(isEffectsDone()){ // play list effect after main one completes
-//				if(btgEffectListEntries.b()){
-//					if(!tdEffectListEachEntry.isActive()){
-//						if(!bEffectListAllEntriesCompleted){
-//							tdEffectListEachEntry.setActive(true);
-//						}
-//					}
+		updateEffectListEntries(isTryingToEnable());
+//		if(isTryingToEnable()){
+//			if(isEffectsDone()){ // play list effect after main one completes
+////				if(btgEffectListEntries.b()){
+////					if(!tdEffectListEachEntry.isActive()){
+////						if(!bEffectListAllEntriesCompleted){
+////							tdEffectListEachEntry.setActive(true);
+////						}
+////					}
+////				}
+//		
+////				if(tdEffectListEachEntry.isActive()){ //dont use btgEffectListEntries.b() as it may be disabled during the grow effect
+//				if(bRunningEffectAtAllListEntries){
+//					updateEffectListEntries(isTryingToEnable());
 //				}
-		
-//				if(tdEffectListEachEntry.isActive()){ //dont use btgEffectListEntries.b() as it may be disabled during the grow effect
-				if(!bEffectListAllEntriesCompleted){
-					updateEffectListEntries(isTryingToEnable());
-				}
-			}
-		}
+//			}
+//		}
 		
 		MiscLemurHelpersStateI.i().updateBlinkListBoxSelector(lstbxEntriesToSelect);//,true);
 		
@@ -882,8 +892,13 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		return new ArrayList<DialogListEntryData<T>>(adleCompleteEntriesList);
 //	}
 	
-	private void prepareEffectListEntries() {
-		bEffectListAllEntriesCompleted=false;
+	/**
+	 * Lemur must have a chance to configure everything before we play with it.
+	 * So this must happen at update and not at enable.
+	 */
+	private void prepareEffectListEntries(boolean bEnabling) {
+//	private void prepareEffectListEntries(boolean bApplyNow) {
+//		bRunningEffectAtAllListEntries=true;
 		
 		GridPanel gp = lstbxEntriesToSelect.getGridPanel();
 		for(int iC=0;iC<gp.getVisibleColumns();iC++){
@@ -892,8 +907,20 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 				if(pnl!=null)MiscLemurHelpersStateI.i().setScaleXY(pnl, fMinScale, 1f);
 			}
 		}
+		
+		if(bEnabling){
+			bPreparedForListEntriesEffects=true;
+			bRunningEffectAtAllListEntries=true;
+		}
 	}
-	protected boolean updateEffectListEntries(boolean bGrow) {
+	protected void updateEffectListEntries(boolean bGrow) {
+		if(!btgEffectListEntries.b())return;
+		if(!isTryingToEnable())return; // only actually interesting during enable
+		if(!bPreparedForListEntriesEffects)prepareEffectListEntries(true);
+		if(!isDialogEffectsDone())return; // play list effect after main one completes
+//		if(!bPreparedForListEntriesEffects)prepareEffectListEntries(true);
+		if(!bRunningEffectAtAllListEntries)return;
+		
 		GridPanel gp = lstbxEntriesToSelect.getGridPanel();
 		
 		int iTotal = gp.getVisibleColumns() * gp.getVisibleRows();
@@ -928,14 +955,18 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		}
 		
 		if(iCount==iTotal && Float.compare(fLastCalculatedEntryScale,1f)==0){ //the last entry scale must be 1f
-			bEffectListAllEntriesCompleted=true;
+			bRunningEffectAtAllListEntries=false; // ended
 //			tdEffectListEachEntry.setActive(false);
 		}
 		
-		return bEffectListAllEntriesCompleted;
+//		return bRunningEffectAtAllListEntries;
 	}
 	
 	private float updateEffectOnEntry(Spatial spt, boolean bGrow) {
+		if(Float.compare(spt.getLocalScale().x,fMinScale)==0){
+			AudioUII.i().play(EAudio.EntryGrowEffect);
+		}
+		
 //		MiscJmeI.i().user
 //		TimedDelayVarField td = (TimedDelayVarField)spt.getUserData("TimedDelayEffect");
 		TimedDelayVarField td = MiscJmeI.i().retrieveUserDataTimedDelay(

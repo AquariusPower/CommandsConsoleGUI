@@ -90,7 +90,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	
 	private BoolTogglerCmdField btgEffectLocation = new BoolTogglerCmdField(this, true);
 	private BoolTogglerCmdField btgEffect = new BoolTogglerCmdField(this, true);
-	private TimedDelayVarField tdEffect = new TimedDelayVarField(this, 0.15f, "");
+	private TimedDelayVarField tdDialogEffect = new TimedDelayVarField(this, 0.15f, "");
 	private float	fMinEffectScale=0.01f;
 	
 	public DiagModalInfo<T> getDiagModalCurrent(){
@@ -257,7 +257,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 			bRequestedActionSubmit=false;
 		}
 		
-		if(tdEffect.isActive()){ //dont use btgGrowEffect.b() as it may be disabled during the grow effect
+		if(tdDialogEffect.isActive()){ //dont use btgGrowEffect.b() as it may be disabled during the grow effect
 			updateEffect(!isTryingToDisable());
 		}
 		
@@ -269,7 +269,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		
 		// SCALE
 		Vector3f v3fScaleCopy = sptContainerMain.getLocalScale().clone();
-		float fValAdd = tdEffect.getCurrentDelayCalc(1f-fMinEffectScale,false);
+		float fValAdd = tdDialogEffect.getCurrentDelayCalc(1f-fMinEffectScale,false);
 		float fVal=0f;
 		if(bGrow){
 			fVal = fMinEffectScale+fValAdd;
@@ -301,7 +301,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		}
 		
 		if(bCompleted){
-			tdEffect.setActive(false);
+			tdDialogEffect.setActive(false);
 			
 			MiscLemurHelpersStateI.i().setLocationXY(sptContainerMain,v3fMainLocationBkp);
 			v3fMainLocationBkp=null;
@@ -311,7 +311,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	}
 	
 	protected float getEffectPerc(){
-		return tdEffect.getCurrentDelayPercentual(false);
+		return tdDialogEffect.getCurrentDelayPercentual(false);
 	}
 	
 	@Override
@@ -327,7 +327,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		if(btgEffect.b()){
 			Vector3f v3fScale = sptContainerMain.getLocalScale();
 			v3fScale.x=v3fScale.y=fMinEffectScale;
-			tdEffect.setActive(true);
+			tdDialogEffect.setActive(true);
 			v3fMainLocationBkp = sptContainerMain.getLocalTranslation().clone();
 			v3fMainSize = getMainSize();
 		}
@@ -335,8 +335,8 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return super.enableAttempt();
 	}
 	
-	public boolean isEffectsDone(){
-		return !tdEffect.isActive();
+	public boolean isDialogEffectsDone(){
+		return !tdDialogEffect.isActive();
 	}
 	
 	public abstract Vector3f getMainSize();
@@ -344,20 +344,24 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	@Override
 	protected boolean disableAttempt() {
 		if(btgEffect.b()){
-			Vector3f v3fScale = sptContainerMain.getLocalScale();
+			Vector3f v3fScaleCopy = sptContainerMain.getLocalScale().clone();
 			
-			if(Float.compare(v3fScale.x,1f)==0){
-				tdEffect.setActive(true);
+			if(Float.compare(v3fScaleCopy.x,1f)==0){
+				tdDialogEffect.setActive(true);
 				v3fMainLocationBkp = sptContainerMain.getLocalTranslation().clone();
 				return false;
 			}else{
-				if(Float.compare(v3fScale.x,fMinEffectScale)>0){
+				if(Float.compare(v3fScaleCopy.x,fMinEffectScale)>0){
 					return false;
 				}
 			}
 		}
 		
 		sptContainerMain.removeFromParent();
+		
+		if(btgEffect.b()){ //reset scale to normal
+			sptContainerMain.setLocalScale(1f);
+		}
 		
 		setMouseCursorKeepUngrabbed(false);
 		if(diagParent!=null)diagParent.updateModalChild(false,this);

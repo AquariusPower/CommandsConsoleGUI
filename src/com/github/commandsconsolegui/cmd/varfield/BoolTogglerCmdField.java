@@ -47,7 +47,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class BoolTogglerCmdField extends VarCmdFieldAbs<BoolTogglerCmdField>{
+public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdField>{
 	public static final String strTogglerCodePrefix="btg";
 //	private static ArrayList<BoolTogglerCmdField> abtgList = new ArrayList<BoolTogglerCmdField>();
 	private static boolean	bConfigured;

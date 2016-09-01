@@ -1660,7 +1660,8 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	 */
 	private void modifyConsoleHeight(Float fNewHeightPercent) {
 		Vector3f v3fNew = getContainerConsolePreferredSize(); //getSize() does not work well..
-		if(!v3fNew.equals(v3fConsoleSize)){
+//		if(!v3fNew.equals(v3fConsoleSize)){
+		if(Float.compare(v3fNew.x,v3fConsoleSize.x)!=0 && Float.compare(v3fNew.y,v3fConsoleSize.y)!=0){ // Z doesnt matter, is to be controlled by ex.: lemur gui
 			cd().dumpDevWarnEntry("sizes should be equal: "+v3fNew+v3fConsoleSize);
 		}
 		

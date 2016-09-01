@@ -69,23 +69,23 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		/**
 		 * these shall not be copied/cloned
 		 */
-		IReflexFillCfgVariant rfcv;
+		private IReflexFillCfgVariant rfcv;
 		private boolean bUsePrefixDeclaringClass=true;
-		String	strPrefixDeclaringClass="";
+		private String	strPrefixDeclaringClass="";
 		boolean bUsePrefixInstancedClass=true;
-		String	strPrefixInstancedClass="";
+		private String	strPrefixInstancedClass="";
 		
 		/**
 		 * to validate and also be removed from the identifier string
 		 * these can be copied/cloned
 		 */
-		String	strCodingStyleFieldNamePrefix=null;
-		String	strPrefixCmd="cmd";
-		String	strPrefixVar="var";
-		String	strPrefixCustomId="";
-		String	strSuffix="";
-		boolean bFirstLetterUpperCase = false;
-		boolean	bIsCommandToo = false;
+		private String	strCodingStyleFieldNamePrefix=null;
+		private String	strPrefixCmd="cmd";
+		private String	strPrefixVar="var";
+		private String	strPrefixCustomId="";
+		private String	strSuffix="";
+		private boolean bFirstLetterUpperCase = false;
+		private boolean	bIsCommandToo = false;
 		
 		public String getCodingStyleFieldNamePrefix() {
 			return strCodingStyleFieldNamePrefix;

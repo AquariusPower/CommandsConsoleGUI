@@ -2502,7 +2502,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //		return true;
 //	}
 	
-	private boolean varRestoreTo(VarCmdFieldAbs<?> owner){
+	private boolean varRestoreTo(VarCmdFieldAbs owner){
 		VarIdValueOwnerData vivo = getVar(RESTRICTED_TOKEN+owner.getVarId());
 		if(vivo==null)return false;
 //		owner.setObjectValue(ccSelf,vivo.getObjectValue());
@@ -2577,7 +2577,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //			bSave);
 //	}
 	
-	public boolean varSet(VarCmdFieldAbs<?> owner, boolean bSave) {
+	public boolean varSet(VarCmdFieldAbs owner, boolean bSave) {
 		IReflexFillCfg rfcfg=null;
 		if(owner instanceof IReflexFillCfgVariant){
 			/**
@@ -2609,7 +2609,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		if(bOk){
 			VarIdValueOwnerData vivo = getVar(strVarId);
-			if(vivo.getOwner() instanceof VarCmdFieldAbs<?>){
+			if(vivo.getOwner() instanceof VarCmdFieldAbs){
 				varRestoreTo(vivo.getOwner());
 			}else
 			if(vivo.getOwner()!=null){

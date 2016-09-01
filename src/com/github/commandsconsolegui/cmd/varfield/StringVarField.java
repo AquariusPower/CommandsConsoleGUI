@@ -38,7 +38,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class StringVarField extends VarCmdFieldAbs<StringVarField>{
+public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	private static String	strCodePrefixVariant = "svf";

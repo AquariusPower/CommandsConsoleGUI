@@ -62,7 +62,7 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 	TreeMap<String,AudioNode> tmAudio = new TreeMap<String,AudioNode>();
 
 	public final BoolTogglerCmdField btgMute = new BoolTogglerCmdField(this,false).setCallNothingOnChange();
-	public final FloatDoubleVarField fdvVolumeGain = new FloatDoubleVarField(this,1.0,"").setMin(0.0).setMax(1.0);
+	public final FloatDoubleVarField fdvMasterVolumeGain = new FloatDoubleVarField(this,1.0,"").setMin(0.0).setMax(1.0);
 
 	private ArrayList<Class<?>>	aclassUserActionStackList = new ArrayList<Class<?>>(); 
 	
@@ -76,12 +76,15 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 	static String strBasePath="Sounds/Effects/UI/13940__gameaudio__game-audio-ui-sfx/";
 	public static enum EAudio{
 		SubmitSelection			(strBasePath+"220183__gameaudio__click-casual.mono.ogg"),
-		ReturnChosen				(strBasePath+"220172__gameaudio__flourish-spacey-2.mono.ogg"),
+		ReturnChosen				(strBasePath+"220200__gameaudio__basic-click-wooden.mono.ogg"),
+//		ReturnChosen				(strBasePath+"220172__gameaudio__flourish-spacey-2.mono.ogg"),
 		ReturnNothing				(strBasePath+"220210__gameaudio__bonk-click-w-deny-feel.mono.ogg"),
 		Question						(strBasePath+"220187__gameaudio__loose-deny-casual-1.mono.ogg"),
 		
-		HoverOverActivators	(strBasePath+"220189__gameaudio__blip-squeak.cut.mono.ogg" ), 
+		HoverOverActivators	(strBasePath+"220189__gameaudio__blip-squeak.cut.mono.ogg" ),
+		
 		EntrySelect					(strBasePath+"220197__gameaudio__click-basic.mono.ogg" ),
+		EntryGrowEffect			(strBasePath+"220168__gameaudio__button-spacey-confirm.mono.ogg"),
 		
 		RemoveEntry					(strBasePath+"220177__gameaudio__quick-ui-or-event-deep.mono.ogg"),
 		RemoveSubTreeEntry	(strBasePath+"220205__gameaudio__teleport-darker.mono.ogg"),
@@ -93,13 +96,41 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 		CloseConsole				(strBasePath+"220203__gameaudio__casual-death-loose.mono.ogg"),
 		;
 		
-		private String	strFile;
-
+		CfgAudio cfga;
+		
 		EAudio(String strFile){
-			this.strFile=strFile;
+			cfga = new CfgAudio(this.toString());
+			cfga.setFile(strFile);
 		}
 		
-		public String getFile(){return strFile;} 
+		/**
+		 * cfg() not getCfg() in a sense that the cfg can be directly modified, is not a safe copy.
+		 * @return
+		 */
+		public CfgAudio cfg(){
+			return cfga;
+		}
+		
+	}
+	
+	public static class CfgAudio implements IReflexFillCfg{
+		private String	strUId;
+		private String	strFile;
+		private FloatDoubleVarField fdvVolumeGain = new FloatDoubleVarField(this,1.0,"").setMin(0.0).setMax(1.0);
+		
+		public CfgAudio(String strUId) {
+			this.strUId=strUId;
+		}
+		public String getFile(){return strFile;}
+		public void setFile(String strFile){this.strFile=strFile;}
+		
+		@Override
+		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+			ReflexFillCfg rfcfg = GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
+			if(rfcfg==null)rfcfg=new ReflexFillCfg(rfcv);
+			rfcfg.setPrefixCustomId(strUId);
+			return rfcfg;
+		} 
 	}
 	
 	public boolean isUserActionStack(){
@@ -136,16 +167,18 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 		
 		AudioNode an = tmAudio.get(strAudioId);
 		
+		CfgAudio cfg = EAudio.valueOf(strAudioId).cfg();
+		
 		if(an==null){
 			try{
-				an = setAudio(strAudioId, EAudio.valueOf(strAudioId).getFile());
+				an = setAudio(strAudioId, cfg.getFile());
 			}catch(IllegalArgumentException e){}
 		}
 		
 		if(an!=null){
 			if(isMute(an))return false;
 			
-			an.setVolume(fdvVolumeGain.f());
+			an.setVolume(cfg.fdvVolumeGain.f() * fdvMasterVolumeGain.f());
 			an.playInstance();
 			return true;
 		}else{
@@ -294,7 +327,7 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
 		
 		for(EAudio ea:EAudio.values()){
-			setAudio(ea.toString(), ea.getFile());
+			setAudio(ea.toString(), ea.cfg().getFile());
 		}
 
 	}

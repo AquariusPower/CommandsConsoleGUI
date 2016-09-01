@@ -27,7 +27,6 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -39,7 +38,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  *
  * @author AquariusPower <https://github.com/AquariusPower>
  */
-public class FloatDoubleVarField extends VarCmdFieldAbs<FloatDoubleVarField>{
+public class FloatDoubleVarField extends VarCmdFieldAbs<Double,FloatDoubleVarField>{
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	private static String	strCodePrefixVariant = "fdv";

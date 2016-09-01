@@ -46,7 +46,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
  * @author AquariusPower <https://github.com/AquariusPower>
  * 
  */
-public abstract class VarCmdFieldAbs <S extends VarCmdFieldAbs<S>> implements IReflexFillCfgVariant{//, IVarIdValueOwner{
+public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implements IReflexFillCfgVariant{//, IVarIdValueOwner{
 //	private boolean bReflexingIdentifier = true;
 	private String strVarId = null;
 	private String strUniqueCmdId = null;
@@ -60,7 +60,7 @@ public abstract class VarCmdFieldAbs <S extends VarCmdFieldAbs<S>> implements IR
 	private VarIdValueOwnerData	vivo;
 	private String strHelp=null;
 	private CommandData	cmdd;
-	private Object	objRawValueLazy;
+	private O	objRawValueLazy;
 	private boolean	bLazyValueWasSet;
 	
 	private static ArrayList<VarCmdFieldAbs> avcfList = new ArrayList<VarCmdFieldAbs>();
@@ -72,7 +72,7 @@ public abstract class VarCmdFieldAbs <S extends VarCmdFieldAbs<S>> implements IR
 	
 	public static <T extends VarCmdFieldAbs> ArrayList<T> getListCopy(Class<T> clFilter){
 		ArrayList<T> a = new ArrayList<T>();
-		for(VarCmdFieldAbs<?> vcf:VarCmdFieldAbs.avcfList){
+		for(VarCmdFieldAbs vcf:VarCmdFieldAbs.avcfList){
 			if(clFilter.isInstance(vcf)){
 				a.add((T)vcf);
 			}
@@ -286,7 +286,7 @@ public abstract class VarCmdFieldAbs <S extends VarCmdFieldAbs<S>> implements IR
 	 * @param objValue
 	 * @return
 	 */
-	public S setObjectRawValue(Object objValue) {
+	public S setObjectRawValue(Object objValue) { // do not use O at param here, ex.: bool toggler can be used on overriden
 //		public S setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
 //		ccCD.assertSelfNotNull();
 		
@@ -300,7 +300,7 @@ public abstract class VarCmdFieldAbs <S extends VarCmdFieldAbs<S>> implements IR
 			vivo.setObjectValue(objValue);
 		}else{
 			bLazyValueWasSet=true; //as such value can be actually null
-			this.objRawValueLazy = objValue;
+			this.objRawValueLazy = (O)objValue;
 		}
 		
 		return getThis();

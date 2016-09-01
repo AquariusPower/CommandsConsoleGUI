@@ -43,7 +43,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class StringCmdField extends VarCmdFieldAbs<StringCmdField>{
+public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 //	String str = "ERROR: NOT SET"; // hashcode depends on it not being null
 //	private String strCmdId = null;
 //	private int	iReflexFillCfgVariant;

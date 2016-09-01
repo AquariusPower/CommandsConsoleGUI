@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.jmegui.lemur;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
@@ -188,14 +189,22 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 			AudioUII.i().playOnUserAction(EAudio.HoverOverActivators);
 			
 			Cell<?> cell = (Cell<?>)source.getUserData(EUserData.cellClassRef.toString());
-			cell.setOverrideBackgroundColorNegatingCurrent();			
+			if(cell==null){
+				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("activator has no cell?", source, Cell.class.getName());
+			}else{
+				cell.setOverrideBackgroundColorNegatingCurrent();
+			}
 		}
 	};
 	Command<Button> cmdbtnHoverOut = new Command<Button>(){
 		@Override
 		public void execute(Button source) {
 			Cell<?> cell = (Cell<?>)source.getUserData(EUserData.cellClassRef.toString());
-			cell.resetOverrideBackgroundColor();			
+			if(cell==null){
+				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("activator has no cell?", source, Cell.class.getName());
+			}else{
+				cell.resetOverrideBackgroundColor();
+			}
 		}
 	};
 	public void addDefaultCommands(Button btn){
