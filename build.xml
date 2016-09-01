@@ -1,9 +1,32 @@
 <?xml version="1.0" ?>
 <!-- Configuration of the Ant build system to generate a Jar file --> 
-<project name="CommandsConsoleGUI" default="ConsoleCommandsUI">
-  <target name="ConsoleCommandsUI" description="Create Jar file">
-  	<!--     <jar jarfile="ConsoleCommandsUI.jar" basedir="./bin/" includes="**/*.class" /> -->
-    <jar jarfile="ConsoleCommandsUI.jar" basedir="./bin/" />
-    <jar jarfile="ConsoleCommandsUI-sources.jar" basedir="./src/" includes="**/*.java" />
-  </target>
+<project name="CommandsConsoleGUI" default="CreateAllJars">
+	<tstamp>
+		<format property="DATE_TIME_NOW" pattern="yyyyMMddHHmmss"  locale="en,UK" />
+	</tstamp>
+	
+	<property name="projname" value="CommandsConsoleUI"/>
+	<property name="version" value="1.4.${DATE_TIME_NOW}.beta"/>
+		
+	<target name="CreateAllJars" description="Create all Jar files">
+		<jar jarfile="${projname}-${version}.jar" >
+			<fileset dir="./" includes="LICENSE" />
+			<!-- <fileset dir="./bin/" includes="**/*.class" /> -->
+			<fileset dir="./bin/" />
+		</jar>
+		
+		<jar jarfile="${projname}-${version}-sources.jar" >
+			<fileset dir="./" includes="LICENSE" />
+			<fileset dir="./" includes="README.md" />
+			<fileset dir="./doc/" includes="**/*" />
+			<fileset dir="./src/" includes="**/*.java" />
+		</jar>
+		
+		<jar jarfile="${projname}-${version}-assets.jar" >
+			<!-- each asset file or path must contain it's license --> 
+			<fileset dir="./assets/" />
+		</jar>
+		
+	</target>
+	
 </project>
