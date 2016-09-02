@@ -236,11 +236,16 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		MiscLemurHelpersStateI.i().setGrantedSize(getNorthContainer(), v3fNorthSize, false);
 		
 		//title 
+//		Container cntrTitleBox = new Container(new BorderLayout(), getStyle());
+//		cntrTitleBox.setName(getId()+"_TitleBox");
+//		cntrTitleBox.addChild(lblTitle, BorderLayout.Position.Center);
+		
 		lblTitle = new Label(getTitle(),getStyle());
 		lblTitle.setName(getId()+"_Title");
 		ColorRGBA cLightGreen = new ColorRGBA(0.35f,1f,0.35f,1f);
 		lblTitle.setColor(cLightGreen); //TODO make it custom
 		getNorthContainer().addChild(lblTitle, BorderLayout.Position.North);
+		
 //		CursorEventControl.addListenersToSpatial(lblTitle, DialogMouseCursorListenerI.i());
 		
 		// simple info
@@ -964,7 +969,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	
 	private float updateEffectOnEntry(Spatial spt, boolean bGrow) {
 		if(Float.compare(spt.getLocalScale().x,fMinScale)==0){
-			AudioUII.i().play(EAudio.EntryGrowEffect);
+			AudioUII.i().play(EAudio.DisplayEntryEffect);
 		}
 		
 //		MiscJmeI.i().user

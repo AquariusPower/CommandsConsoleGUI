@@ -30,6 +30,10 @@ package com.github.commandsconsolegui.misc;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+
+import org.lwjgl.opengl.XRandR;
+import org.lwjgl.opengl.XRandR.Screen;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
@@ -61,7 +65,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
  * @author AquariusPower <https://github.com/AquariusPower>
  * 
  */
-public class ReflexHacks implements IReflexFillCfg {
+public class ReflexHacks implements IConsoleCommandListener, IReflexFillCfg {
 	private static ReflexHacks instance = new ReflexHacks();
 	public static ReflexHacks i(){return instance;}
 	
@@ -76,30 +80,87 @@ public class ReflexHacks implements IReflexFillCfg {
 //	}
 	private boolean	bConfigured;
 	
+//	public Object getFieldValueHK(Object objFrom, String strFieldName){
+//		if(!btgAllowHacks.b())return null;
+//		
+//		return getFieldValueHK(objFrom.getClass(), objFrom, strFieldName);
+//	}
+	
+//	/**
+//	 * We shouldnt access private fields/methods as things may break.
+//	 * Any code depending on this must ALWAYS be optional!
+//	 * 
+//	 * @param clazzOfObjectFrom what superclass of the object from is to be used?
+//	 * @param objFieldOwner
+//	 * @param strFieldName will break if changed..
+//	 * @return field value
+//	 */
+//	public Object getFieldValueHK(Object objFieldOwner, String strFieldName){
+//		if(clazz==null)clazz=objFieldOwner.getClass();
+//		return fieldWorkHK(objFieldOwner.getClass(), objFieldOwner, strFieldName, false, null);
+//////	private Object getFieldValueHK(Class<?> clazzOfObjectFrom, Object objFrom, String strFieldName){
+////		if(!btgAllowHacks.b())return null;
+////		
+////		Class<?> clazzOfObjectFrom = objFieldOwner.getClass();
+////		Object objFieldValue = null;
+////		try{
+////			Field field = clazzOfObjectFrom.getDeclaredField(strFieldName);
+////			field.setAccessible(true);
+////			objFieldValue = field.get(objFieldOwner);
+////			field.setAccessible(false);
+////		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+////			ihe.handleExceptionThreaded(e);
+////		}
+////		
+////		return objFieldValue;
+//	}
+	
+//	/**
+//	 * 
+//	 * @param clazz if null, will use owner.class()
+//	 * @param objFieldOwner if null, clazz must be set (will be refering to a static field then)
+//	 * @param strFieldName
+//	 * @param objSetNewValue
+//	 * @return
+//	 */
+//	public Object setFieldValueHK(Class<?> clazz, Object objFieldOwner, String strFieldName, Object objSetNewValue){
+//		if(clazz==null)clazz=objFieldOwner.getClass();
+//		return fieldWorkHK(clazz, objFieldOwner, strFieldName, true, objSetNewValue);
+//	}
+	
 	/**
-	 * We shouldnt access private fields/methods as things may break.
-	 * Any code depending on this must ALWAYS be optional!
 	 * 
-	 * @param clazzOfObjectFrom what superclass of the object from is to be used?
-	 * @param objFrom
-	 * @param strFieldName will break if changed..
-	 * @return field value
+	 * @param clazzOfObjectFrom what superclass of the object from is to be used? if null, will use owner.class()
+	 * @param objFieldOwner if null, clazz must be set (will be refering to a static field then)
+	 * @param strFieldName this method will break if it gets changed by lib developers...
+	 * @param bSetValue
+	 * @param objSetNewValue
+	 * @return
 	 */
-	public Object reflexFieldHK(Class<?> clazzOfObjectFrom, Object objFrom, String strFieldName){
+	public Object getOrSetFieldValueHK(Class<?> clazzOfObjectFrom, Object objFieldOwner, String strFieldName, boolean bSetValue, Object objSetNewValue){
 		if(!btgAllowHacks.b())return null;
+		
+		if(clazzOfObjectFrom==null)clazzOfObjectFrom=objFieldOwner.getClass();
 		
 		Object objFieldValue = null;
 		try{
 			Field field = clazzOfObjectFrom.getDeclaredField(strFieldName);
-			field.setAccessible(true);
-			objFieldValue = field.get(objFrom);
-			field.setAccessible(false);
+			
+			boolean b = field.isAccessible();
+			if(!b)field.setAccessible(true);
+			
+			objFieldValue = field.get(objFieldOwner);
+			
+			if(bSetValue)field.set(objFieldOwner, objSetNewValue);
+			
+			if(!b)field.setAccessible(false);
 		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
 			ihe.handleExceptionThreaded(e);
 		}
 		
 		return objFieldValue;
 	}
+	
 //	/**
 //	 * 
 //	 * @param clazzOfObjectFrom what superclass of the object from is to be used?
@@ -129,12 +190,6 @@ public class ReflexHacks implements IReflexFillCfg {
 //		
 //		return objFieldData;
 //	}
-	
-	public Object getFieldValueHK(Object objFrom, String strFieldName){
-		if(!btgAllowHacks.b())return null;
-		
-		return reflexFieldHK(objFrom.getClass(), objFrom, strFieldName);
-	}
 	
 	/**
 	 * We shouldnt access private fields/methods as things may break.
@@ -172,12 +227,34 @@ public class ReflexHacks implements IReflexFillCfg {
 		if(ihe==null)throw  new NullPointerException("invalid instance for "+IHandleExceptions.class.getName());
 		this.ihe=ihe;
 		
+		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
+		
 		bConfigured=true;
 	}
 	
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
+	}
+
+	@Override
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
+		boolean bCommandWorked = false;
+		
+		if(cd.checkCmdValidity(this,"linuxXrandRScreenRestoreWhileWindowedBugFix", "fixXRandR", "in linux XRandR, even if application is windowed, on exiting it may try to restore the resolution but may do it wrongly")){
+			// fix as upon restoring may ignore X configuration viewportin/viewportout
+			Object o = ReflexHacks.i().getOrSetFieldValueHK(XRandR.class, null, "savedConfiguration", true, null);
+			String str = "XRandR fix, saved value that was erased: "
+				+Arrays.toString((Screen[])o);
+			cd.dumpDevInfoEntry(str, o);
+			
+			bCommandWorked = true;
+		}else
+		{
+			return ECmdReturnStatus.NotFound;
+		}
+		
+		return cd.cmdFoundReturnStatus(bCommandWorked);
 	}
 	
 }

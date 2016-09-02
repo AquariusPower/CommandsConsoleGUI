@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.jmegui.lemur.console.test;
 
+import org.lwjgl.opengl.XRandR;
+
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
@@ -45,6 +47,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexHacks;
 import com.jme3.input.KeyInput;
 import com.jme3.system.AppSettings;
 import com.simsilica.lemur.Button;
@@ -236,5 +239,9 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		return rfcfg;
 	}
 	
-	
+//	@Override
+//	public void stop() {
+//		getCamera().setViewPort(0f, 1f, 0f, 1f);
+//		super.stop();
+//	}
 }	

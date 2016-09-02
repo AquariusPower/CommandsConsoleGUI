@@ -335,7 +335,7 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 //	}
 	@Deprecated
 	public void resetCursorPositionHK(TextField tf){
-		TextEntryComponent tec = ((TextEntryComponent)ReflexHacks.i().getFieldValueHK(tf, "text"));
+		TextEntryComponent tec = ((TextEntryComponent)ReflexHacks.i().getOrSetFieldValueHK(null, tf, "text", false, null));
 		ReflexHacks.i().callMethodHK(tec,"resetCursorPosition");
 	}
 
