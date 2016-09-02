@@ -27,27 +27,22 @@
 
 package com.github.commandsconsolegui.jmegui.lemur.console.test;
 
-import org.lwjgl.opengl.XRandR;
-
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.extras.SingleAppInstanceI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
-import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGUII;
 import com.github.commandsconsolegui.jmegui.console.SimpleConsoleAppAbs;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceDialogState;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.MaintenanceListDialogState;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.QuestionDialogState;
-import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexHacks;
 import com.jme3.input.KeyInput;
 import com.jme3.system.AppSettings;
 import com.simsilica.lemur.Button;
@@ -60,6 +55,8 @@ import com.simsilica.lemur.Command;
  */
 public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs implements IReflexFillCfg{
 	private static ConsoleTestI instance = new ConsoleTestI();
+
+	private static AppSettings	as;
 	public static ConsoleTestI i(){return instance;}
 	
 	private boolean bHideSettings=true; 
@@ -172,7 +169,8 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		GlobalAppRefI.iGlobal().set(ConsoleTestI.i());
 		
 		if(ConsoleTestI.i().bHideSettings){
-			AppSettings as = new AppSettings(true);
+			as = new AppSettings(true);
+			as.setTitle(ConsoleTestI.class.getSimpleName());
 			as.setResizable(true);
 			as.setWidth(1024);
 			as.setHeight(700); //768
@@ -200,6 +198,11 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		}else
 		if(cd.checkCmdValidity(this,"testDialog")){
 			diagList.requestEnable();
+			bCommandWorked = true;
+		}else
+		if(cd.checkCmdValidity(this,"activateSelfWindow")){
+			cd.addCmdToQueue(cd.scfCmdOS.getUniqueCmdId()+" linux "
+				+"xdotool windowactivate $(xdotool search --name \"^"+as.getTitle()+"$\")");
 			bCommandWorked = true;
 		}else
 //		if(cc.checkCmdValidity(this,"conflictTest123","")){

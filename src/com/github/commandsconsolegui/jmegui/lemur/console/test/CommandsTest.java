@@ -47,6 +47,8 @@ public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleComma
 		 *  This allows test3 at endUserCustomMethod() to work.
 		 */
 		ReflexFillI.i().setUseDefaultCfgIfMissing(true);
+		
+		setAllowUserCmdOS(true);
 	}
 	
 //	@Override

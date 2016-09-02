@@ -30,7 +30,9 @@ package com.github.commandsconsolegui.cmd;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
+import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -63,6 +65,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexHacks;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
@@ -95,6 +98,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	
 	// not protected... development token... 
 	public final String	TOKEN_CMD_NOT_WORKING_YET = "[NOTWORKINGYET]";
+	
+	private boolean bAllowUserCmdOS = false;
 	
 	CurrentCommandLine ccl = new CurrentCommandLine(this);
 	
@@ -181,6 +186,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public final StringCmdField	CMD_SHOW_SETUP = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField scfClearDumpArea = new StringCmdField(this);
 	public final StringCmdField scfAlias = new StringCmdField(this);
+	public final StringCmdField scfCmdOS = new StringCmdField(this);
 	public final StringCmdField scfFileShowData = new StringCmdField(this);
 	public final StringCmdField scfExit = new StringCmdField(this);
 	public final StringCmdField scfExecBatchCmdsFromFile = new StringCmdField(this);
@@ -568,9 +574,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			return false;
 		}
 		
-		if(RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(ccl.strCmdLinePrepared))return false;
+		if(RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(ccl.getCmdLinePrepared()))return false;
 		if(ccl.isCommentedLine())return false;
-		if(ccl.strCmdLinePrepared.trim().isEmpty())return false;
+		if(ccl.getCmdLinePrepared().trim().isEmpty())return false;
 		
 //		String strCheck = strPreparedCmdLine;
 //		strCheck = strCheck.trim().split(" ")[0];
@@ -705,6 +711,50 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	/**
+	 * extend this class to access it directly
+	 * @param ccl
+	 * @return
+	 */
+	protected boolean cmdOS(CurrentCommandLine ccl){
+		boolean bOk=true;
+		
+		String strOSName=System.getProperty("os.name").split(" ")[0];
+		if(!ccl.paramString(1).equalsIgnoreCase(strOSName)){
+			/**
+			 * skip message would be just annoying...
+			 */
+			return true; //just skip
+		}
+		
+		ArrayList<String> astrOSCmd = new ArrayList<String>();
+		if(strOSName.equalsIgnoreCase("linux")){
+			astrOSCmd.add("bash");
+			astrOSCmd.add("-c");
+		}
+		astrOSCmd.add(String.join(" ",ccl.getPreparedCmdAndParamsListCopy(2)));
+		
+		try {
+			dumpSubEntry("Running OS command: "+astrOSCmd);
+			
+//			Process p = Runtime.getRuntime().exec(astrOSCmd.toArray(new String[0]));
+//			InputStream isErr = p.getErrorStream();
+			
+			ProcessBuilder pb = new ProcessBuilder(astrOSCmd);
+			pb.redirectOutput(Redirect.INHERIT);
+			pb.redirectError(Redirect.INHERIT);
+			Process p = pb.start();
+			int iExit = p.waitFor();
+			
+			dumpSubEntry("OS command exit value: "+iExit);
+			bOk = iExit==0;
+		} catch (IOException|InterruptedException e) {
+			dumpExceptionEntry(e, astrOSCmd);
+		}
+		
+		return bOk;
+	}
+	
+	/**
 	 * This is the actual commands delegator root/core/main method.
 	 * 
 	 * Scripting commands sub-class must override {@link #stillExecutingCommand()} that
@@ -713,7 +763,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @return
 	 */
 	protected ECmdReturnStatus execCmdFromConsoleRequestRoot(){
-		if(RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(ccl.strCmdLinePrepared)){
+		if(RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(ccl.getCmdLinePrepared())){
 			return ECmdReturnStatus.Skip;
 		}
 		
@@ -778,6 +828,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				dumpSubEntry(data.asHelp());
 				
 				bCmdWorked=true;
+			}
+		}else
+		if(checkCmdValidity(getPseudoListener(),scfCmdOS,"<strOSName> <astrOSCommandAndParams> runs an OS command. Will only be executed if in the correponding OS, otherwise will be skipped, so use with the other OS alternatives nearby.")){
+			if(bAllowUserCmdOS){
+				bCmdWorked=cmdOS(getCurrentCommandLine());
+			}else{
+				dumpUserErrorEntry("OS cmd not allowed to users.");
+				bCmdWorked=false;
 			}
 		}else
 		if(checkCmdValidity(icclPseudo,scfEditShowClipboad,"--noNL")){
@@ -1121,9 +1179,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	private ECmdReturnStatus cmdRawLineCheckAlias(){
 		bLastAliasCreatedSuccessfuly=false;
 		
-		if(ccl.strCmdLineOriginal==null)return ECmdReturnStatus.NotFound;
+		if(ccl.getOriginalLine()==null)return ECmdReturnStatus.NotFound;
 		
-		String strCmdLine = ccl.strCmdLineOriginal.trim();
+		String strCmdLine = ccl.getOriginalLine().trim();
 		String strExecAliasPrefix = ""+getCommandPrefix()+getAliasPrefix();
 		if(strCmdLine.startsWith(getCommandPrefix()+"alias ")){
 			/**
@@ -2093,7 +2151,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	private void prepareCmdAndParams(){
-		String strCleaningCmdLine = ccl.strCmdLineOriginal; //dont touch the original...
+		String strCleaningCmdLine = ccl.getOriginalLine(); //dont touch the original...
 		
 		if(strCleaningCmdLine!=null){
 			strCleaningCmdLine = strCleaningCmdLine.trim();
@@ -2162,7 +2220,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			
 			addCmdListOneByOneToQueue(astrMulti,true,true);
 			
-			ccl.strCmdLinePrepared = RESTRICTED_CMD_SKIP_CURRENT_COMMAND.toString();
+			ccl.setCmdLinePrepared(RESTRICTED_CMD_SKIP_CURRENT_COMMAND.toString());
 //			return RESTRICTED_CMD_SKIP_CURRENT_COMMAND.toString();
 		}
 		
@@ -2182,7 +2240,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @param strFullCmdLine
 	 * @return
 	 */
-	public ArrayList<String> convertToCmdParamsList(String strFullCmdLine){
+	public ArrayList<String> convertToCmdAndParamsList(String strFullCmdLine){
 		return convertToCmdParamsList(strFullCmdLine, null, null);
 	}
 	public ArrayList<String> convertToCmdParamsList(String strFullCmdLine, Integer iBeginIndexInclusive){
@@ -3149,7 +3207,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //		if(astr.length>iPart){
 //			return astr[iPart];
 //		}
-		ArrayList<String> astr = convertToCmdParamsList(strCmdFull);
+		ArrayList<String> astr = convertToCmdAndParamsList(strCmdFull);
 		if(iPart>=0 && astr.size()>iPart){
 			String strCmdPart = astr.get(iPart);
 			if(strCmdPart.endsWith(getCommandDelimiterStr())){
@@ -3888,6 +3946,16 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 
 	protected void setSubEntryPrefix(String strSubEntryPrefix) {
 		this.strSubEntryPrefix = strSubEntryPrefix;
+	}
+
+
+	public boolean isAllowUserCmdOS() {
+		return bAllowUserCmdOS;
+	}
+
+
+	protected void setAllowUserCmdOS(boolean bAllowUserCmdOS) {
+		this.bAllowUserCmdOS = bAllowUserCmdOS;
 	}
 
 }

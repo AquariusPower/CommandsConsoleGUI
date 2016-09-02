@@ -39,6 +39,7 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -236,17 +237,25 @@ public class ReflexHacks implements IConsoleCommandListener, IReflexFillCfg {
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 	}
-
+	
+	String strHacksWarning="WARNING: Hacks may break when libraries get updated.";
+	StringCmdField scfHkFixXRandR = new StringCmdField(this);
 	@Override
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 		boolean bCommandWorked = false;
 		
-		if(cd.checkCmdValidity(this,"linuxXrandRScreenRestoreWhileWindowedBugFix", "fixXRandR", "in linux XRandR, even if application is windowed, on exiting it may try to restore the resolution but may do it wrongly")){
+//		if(cd.checkCmdValidity(this,"linuxXrandRScreenRestoreWhileWindowedBugFix", "fixXRandR", "in linux XRandR, even if application is windowed, on exiting it may try to restore the resolution but may do it wrongly, without considering the viewport")){
+		if(
+				cd.checkCmdValidity(this, scfHkFixXRandR, 
+					"In linux XRandR, even if application is windowed, on exiting it may try to "
+					+"restore the resolution but may do it wrongly, without considering the viewport."
+					+strHacksWarning
+				)
+		){
 			// fix as upon restoring may ignore X configuration viewportin/viewportout
 			Object o = ReflexHacks.i().getOrSetFieldValueHK(XRandR.class, null, "savedConfiguration", true, null);
-			String str = "XRandR fix, saved value that was erased: "
-				+Arrays.toString((Screen[])o);
-			cd.dumpDevInfoEntry(str, o);
+			String str = scfHkFixXRandR.getUniqueCmdId()+", erased value: "+Arrays.toString((Screen[])o);
+			cd.dumpInfoEntry(str, o);
 			
 			bCommandWorked = true;
 		}else

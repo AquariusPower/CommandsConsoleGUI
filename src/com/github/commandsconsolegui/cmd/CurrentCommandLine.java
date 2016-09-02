@@ -43,12 +43,12 @@ public class CurrentCommandLine {
 	};
 	private CompositeControl ccSelf = new CompositeControl(this);
 	
-	String	strCmdLineOriginal;
+	private String	strCmdLineOriginal;
 	
-	ArrayList<String>	astrCmdAndParams = new ArrayList<String>();
-	String strCmdLinePrepared = null;
+	private ArrayList<String>	astrCmdAndParams = new ArrayList<String>();
+	private String strCmdLinePrepared = null;
 	
-	String strMainCommand = null;
+	private String strMainCommand = null;
 
 	private CommandsDelegator	cd;
 	
@@ -60,14 +60,20 @@ public class CurrentCommandLine {
 		return strCmdLineOriginal;
 	}
 	
-	public ArrayList<String> getPreparedCmdParamsListCopy(){
+	public ArrayList<String> getPreparedCmdAndParamsListCopy(){
 		return new ArrayList<String>(astrCmdAndParams);
+	}
+	public ArrayList<String> getPreparedCmdAndParamsListCopy(int iFromIndexIncl){
+		return getPreparedCmdAndParamsListCopy(iFromIndexIncl, astrCmdAndParams.size());
+	}
+	public ArrayList<String> getPreparedCmdAndParamsListCopy(int iFromIndexIncl, int iToIndexExcl){
+		return new ArrayList<String>(astrCmdAndParams.subList(iFromIndexIncl, iToIndexExcl));
 	}
 	
 	public void updateFrom(String strFullCmdLine) {
 		clear();
-		astrCmdAndParams.addAll(cd.convertToCmdParamsList(strFullCmdLine));
-		strCmdLinePrepared = String.join(" ", astrCmdAndParams);
+		astrCmdAndParams.addAll(cd.convertToCmdAndParamsList(strFullCmdLine));
+		setCmdLinePrepared(String.join(" ", astrCmdAndParams));
 	}
 	
 	public void setOriginalLine(String strFullCmdLineOriginal) {
@@ -75,7 +81,7 @@ public class CurrentCommandLine {
 	}
 
 	public void clear(){
-		strCmdLinePrepared = null;
+		setCmdLinePrepared(null);
 		astrCmdAndParams.clear();
 	}
 
@@ -188,7 +194,15 @@ public class CurrentCommandLine {
 	}
 
 	public boolean isCommentedLine(){
-		if(strCmdLinePrepared==null)return false;
-		return strCmdLinePrepared.trim().startsWith(""+cd.getCommentPrefix());
+		if(getCmdLinePrepared()==null)return false;
+		return getCmdLinePrepared().trim().startsWith(""+cd.getCommentPrefix());
+	}
+
+	public String getCmdLinePrepared() {
+		return strCmdLinePrepared;
+	}
+
+	public void setCmdLinePrepared(String strCmdLinePrepared) {
+		this.strCmdLinePrepared = strCmdLinePrepared;
 	}
 }

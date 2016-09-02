@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.TreeMap;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegator.EStats;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.google.common.collect.Lists;
@@ -52,6 +51,7 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 	public final StringCmdField CMD_FUNCTION_END = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField scfFunctionList = new StringCmdField(this);
 	public final StringCmdField scfFunctionShow = new StringCmdField(this);
+	
 	/**
 	 * conditional user coding
 	 */
@@ -75,12 +75,12 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 //		super(icg);
 //	}
 	public boolean checkFuncExecEnd() {
-		if(ccl.strCmdLineOriginal==null)return false;
-		return ccl.strCmdLineOriginal.startsWith(RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS.toString());
+		if(ccl.getOriginalLine()==null)return false;
+		return ccl.getOriginalLine().startsWith(RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS.toString());
 	}
 	public boolean checkFuncExecStart() {
-		if(ccl.strCmdLineOriginal==null)return false;
-		return ccl.strCmdLineOriginal.startsWith(RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS.toString());
+		if(ccl.getOriginalLine()==null)return false;
+		return ccl.getOriginalLine().startsWith(RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS.toString());
 	}
 	public boolean cmdFunctionCall() {
 		String strFunctionId = ccl.paramString(1);
@@ -183,7 +183,6 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 		return true;
 	}
 	
-	
 	@Override
 	public ECmdReturnStatus execCmdFromConsoleRequestRoot(){
 		boolean bCommandWorked = false;
@@ -266,8 +265,8 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 				bCmdFoundAndWorked=true;
 			}else
 			if(strPrepareFunctionBlockForId!=null){
-				if(bCmdFoundAndWorked==null)bCmdFoundAndWorked = functionEndCheck(ccl.strCmdLineOriginal); //before feed
-				if(bCmdFoundAndWorked==null)bCmdFoundAndWorked = functionFeed(ccl.strCmdLineOriginal);
+				if(bCmdFoundAndWorked==null)bCmdFoundAndWorked = functionEndCheck(ccl.getOriginalLine()); //before feed
+				if(bCmdFoundAndWorked==null)bCmdFoundAndWorked = functionFeed(ccl.getOriginalLine());
 			}else
 			if(bIfConditionExecCommands!=null && !bIfConditionExecCommands){
 				/**
@@ -285,7 +284,7 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 					/**
 					 * The if condition resulted in false, therefore commands must be skipped.
 					 */
-					dumpInfoEntry("ConditionalSkip: "+ccl.strCmdLinePrepared);
+					dumpInfoEntry("ConditionalSkip: "+ccl.getCmdLinePrepared());
 					if(bCmdFoundAndWorked==null)bCmdFoundAndWorked = true;
 				}
 			}
@@ -293,7 +292,7 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 		
 		if(bCmdFoundAndWorked==null){
 			if(bFuncCmdLineRunning && bFuncCmdLineSkipTilEnd){
-				dumpWarnEntry("SkippingRemainingFunctionCmds: "+ccl.strCmdLinePrepared);
+				dumpWarnEntry("SkippingRemainingFunctionCmds: "+ccl.getCmdLinePrepared());
 				bCmdFoundAndWorked = true; //this just means that the skip worked
 			}
 		}
