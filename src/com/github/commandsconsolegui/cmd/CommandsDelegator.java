@@ -718,8 +718,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	protected boolean cmdOS(CurrentCommandLine ccl){
 		boolean bOk=true;
 		
-		String strOSName=System.getProperty("os.name").split(" ")[0];
-		if(!ccl.paramString(1).equalsIgnoreCase(strOSName)){
+		String strOSName=System.getProperty("os.name");
+		if(!strOSName.toLowerCase().startsWith(ccl.paramString(1).toLowerCase())){
 			/**
 			 * skip message would be just annoying...
 			 */

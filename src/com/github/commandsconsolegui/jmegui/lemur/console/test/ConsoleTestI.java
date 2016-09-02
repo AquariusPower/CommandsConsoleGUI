@@ -166,6 +166,8 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 	}
 	
 	public static void main( String... args ) {
+		System.getProperties().list(System.out);
+		
 		GlobalAppRefI.iGlobal().set(ConsoleTestI.i());
 		
 		if(ConsoleTestI.i().bHideSettings){
