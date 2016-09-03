@@ -479,4 +479,35 @@ public class MiscI {
 		if(strCmdPart==null)return false;
 		return strCmdPart.matches("["+strValidCmdCharsRegex+"]*");
 	}
+	
+	public String getClassTreeReportFor(Object obj,boolean bSimpleName){
+		ArrayList<Class<?>> ac = getClassTreeFor(obj);
+		String strClassTree="";
+		for(Class<?> cl:ac){
+			if(!strClassTree.isEmpty())strClassTree+="/";
+			strClassTree+= bSimpleName ? cl.getSimpleName() : cl.getName();
+		}
+		return strClassTree;
+	}
+	public ArrayList<Class<?>> getClassTreeFor(Object obj){
+		ArrayList<Class<?>> ac = new ArrayList<Class<?>>();
+		
+		Class<?> cl = obj.getClass();
+		while(!cl.toString().equals(Object.class.toString())){
+			ac.add(cl);
+			cl=cl.getSuperclass();
+		}
+		
+		return ac;
+	}
+	
+	public String getClassName(Object obj, boolean bSimple){
+		String str =  bSimple ? obj.getClass().getSimpleName() : obj.getClass().getName();
+		if(str.isEmpty()){
+			throw new PrerequisitesNotMetException(
+				"empty class name, do not use anonymous inner class if you want to use their name...",
+				obj, getClassTreeReportFor(obj,true), bSimple);
+		}
+		return str;
+	}
 }

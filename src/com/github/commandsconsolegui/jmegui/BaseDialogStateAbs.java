@@ -40,6 +40,7 @@ import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
+import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 //import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -208,8 +209,9 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 //		ConditionalStateManagerI.i().
 		if(cfg.getId()==null || cfg.getId().isEmpty()){
 //			throw new PrerequisitesNotMetException("invalid UI identifier");
-			MsgI.i().warn("automatic UI id for", this);
-			cfg.setId(this.getClass().getSimpleName());
+			String str=MiscI.i().getClassName(this,true);
+			cfg.setId(str);
+			MsgI.i().warn("using automatic UI id for", this);
 		}
 //		this.strCaseInsensitiveId=cfg.strUIId;
 		

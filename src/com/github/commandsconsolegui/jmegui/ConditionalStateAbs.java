@@ -150,6 +150,10 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 			return strId;
 		}
 		public void setId(String strId){
+			if(strId==null || strId.isEmpty()){
+				throw new PrerequisitesNotMetException("invalid id", strId);
+			}
+			
 			this.strId=strId;
 		}
 	}

@@ -523,17 +523,18 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			return "ROOT";
 		}
 		
-		String strClassTree="";
-		Class<?> cl = irfc.getClass();
-		while(!cl.toString().equals(Object.class.toString())){
-			if(!strClassTree.isEmpty())strClassTree+=",";
-			strClassTree+=cl.getSimpleName();
-			cl=cl.getSuperclass();
-		}
-		
-//		return iccl.getClass().getSimpleName();
-//		ReflexFillI.i().assertAndGetField(iccl., objFieldValue)
-		return strClassTree;
+//		String strClassTree="";
+//		Class<?> cl = irfc.getClass();
+//		while(!cl.toString().equals(Object.class.toString())){
+//			if(!strClassTree.isEmpty())strClassTree+=",";
+//			strClassTree+=cl.getSimpleName();
+//			cl=cl.getSuperclass();
+//		}
+//		
+////		return iccl.getClass().getSimpleName();
+////		ReflexFillI.i().assertAndGetField(iccl., objFieldValue)
+//		return strClassTree;
+		return MiscI.i().getClassTreeReportFor(irfc, true);
 	}
 	
 	public boolean checkCmdValidity(IReflexFillCfg irfc, String strUniqueCmdId){
