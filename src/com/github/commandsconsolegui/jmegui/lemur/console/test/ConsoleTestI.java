@@ -61,8 +61,6 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 	private static AppSettings	as;
 	public static ConsoleTestI i(){return instance;}
 	
-	private boolean bHideSettings=true; 
-	
 	//private final String strFinalFieldCodePrefix="CMD_";
 	private final String strFieldCodePrefix="sf";
 	private final String strFieldCodePrefixLess = "VariantAsPrefixLess";
@@ -187,7 +185,8 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		
 		GlobalAppRefI.iGlobal().set(ConsoleTestI.i());
 		
-		if(ConsoleTestI.i().bHideSettings){
+		boolean bHideJMESettingsDialog=true; 
+		if(bHideJMESettingsDialog){
 			as = new AppSettings(true);
 			as.setTitle(ConsoleTestI.class.getSimpleName());
 			as.setResizable(true);

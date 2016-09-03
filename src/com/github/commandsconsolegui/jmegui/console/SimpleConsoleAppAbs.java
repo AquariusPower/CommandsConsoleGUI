@@ -58,9 +58,8 @@ import com.simsilica.lemur.event.MouseEventControl;
 *
 */
 public abstract class SimpleConsoleAppAbs extends SimpleApplication implements IConsoleCommandListener, IReflexFillCfg, IConfigure<SimpleConsoleAppAbs> {
-	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
-	private boolean bHideSettings=true;
-	private boolean	bStopping;
+//	private boolean bHideSettings=true;
+//	private boolean	bStopping;
 	private boolean	bConfigured; 
 	
 //	private CommandsDelegator	cd;
@@ -85,6 +84,8 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
   public SimpleConsoleAppAbs configure(ICfgParm icfg) {
   	cfg = (CfgParm)icfg;
   	
+		MiscJmeI.i().configure(GlobalCommandsDelegatorI.i());
+  	
 		GlobalGUINodeI.iGlobal().set(getGuiNode());
 		GlobalRootNodeI.iGlobal().set(getRootNode());
 		
@@ -92,13 +93,6 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 		CommandsBackgroundStateI.i().configure(new CommandsBackgroundStateI.CfgParm());
 		
 		FpsLimiterStateI.i().configure(new FpsLimiterStateI.CfgParm());
-		btgFpsLimit.setCallOnChange(new CallableX() {
-			@Override
-			public Boolean call() throws Exception {
-				FpsLimiterStateI.i().setEnabledRequest(btgFpsLimit.b());
-				return true;
-			}
-		});
 		
 		UngrabMouseStateI.i().configure(new UngrabMouseStateI.CfgParm(null,null));
 		
@@ -117,9 +111,6 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
   
 	@Override
 	public void simpleInitApp() {
-		MiscJmeI.i().configure(GlobalCommandsDelegatorI.i());
-		
-		
 //	SingleInstanceState.i().configureBeforeInitializing(this,true);
 		SingleAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);
 	}
