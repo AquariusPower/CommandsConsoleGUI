@@ -103,7 +103,16 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
   @Override
   public ConsoleTestI configure(ICfgParm icfg) {
   	cfg = (CfgParm)icfg;
+  	
+		/**
+		 * Globals setup are actually very simple, and must come 1st!
+		 * Such classes shall have parameter-less default constructors.
+		 */
+		GlobalCommandsDelegatorI.iGlobal().set(new CommandsTest());
+//		GlobalConsoleGuiI.iGlobal().set(ConsoleLemurStateI.i());
+  	
 		super.configure(icfg);
+		
 		return this;
   }
 	
@@ -126,13 +135,6 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 	@Override
 	public void simpleInitApp() {
 		MsgI.bDebug=true;
-		
-		/**
-		 * Globals setup are actually very simple, and must come 1st!
-		 * Such classes shall have parameter-less default constructors.
-		 */
-		GlobalCommandsDelegatorI.iGlobal().set(new CommandsTest());
-//		GlobalConsoleGuiI.iGlobal().set(ConsoleLemurStateI.i());
 		
 		/**
 		 * Configs:
@@ -199,6 +201,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		
 		SingleAppInstanceI.i().configureOptionalAtMainMethod();
 		
+		ConsoleTestI.i().configure(new ConsoleTestI.CfgParm());
 		ConsoleTestI.i().start();
 	}
 

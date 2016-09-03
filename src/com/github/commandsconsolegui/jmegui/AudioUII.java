@@ -45,6 +45,7 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
+import com.jme3.app.Application;
 import com.jme3.asset.AssetNotFoundException;
 import com.jme3.asset.plugins.FileLocator;
 import com.jme3.audio.AudioData.DataType;
@@ -55,7 +56,7 @@ import com.jme3.audio.AudioNode;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
+public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, IConsoleCommandListener {
 	private static AudioUII instance = new AudioUII();
 	public static AudioUII i(){return instance;}
 	
@@ -320,16 +321,36 @@ public class AudioUII implements IReflexFillCfg, IConsoleCommandListener {
 		
 		return cd.cmdFoundReturnStatus(bCommandWorked);
 	}
-
-	public void configure(Class<?>... aclassUserActionStack) {
-		this.aclassUserActionStackList.addAll(Arrays.asList(aclassUserActionStack));
+	
+	public static class CfgParm extends ConditionalStateAbs.CfgParm{
+		Class<?>[] aclassUserActionStack;
+		public CfgParm(Class<?>... aclassUserActionStack) {
+			super(GlobalAppRefI.i(), null);
+			this.aclassUserActionStack=aclassUserActionStack;
+		}
+	}
+	private CfgParm cfg = null;
+	@Override
+	public ConditionalStateAbs configure(ICfgParm icfg) {
+		cfg = (CfgParm)icfg;
+		
+		super.configure(icfg);
+		
+		this.aclassUserActionStackList.addAll(Arrays.asList(cfg.aclassUserActionStack));
 		
 		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
+		
+		return this;
+	}
+	
+	@Override
+	protected boolean initAttempt() {
+		if(!super.initAttempt())return false;
 		
 		for(EAudio ea:EAudio.values()){
 			setAudio(ea.toString(), ea.cfg().getFile());
 		}
-
+		
+		return true;
 	}
-	
 }

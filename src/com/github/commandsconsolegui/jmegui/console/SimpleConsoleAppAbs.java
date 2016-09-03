@@ -60,7 +60,8 @@ import com.simsilica.lemur.event.MouseEventControl;
 public abstract class SimpleConsoleAppAbs extends SimpleApplication implements IConsoleCommandListener, IReflexFillCfg, IConfigure<SimpleConsoleAppAbs> {
 	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
 	private boolean bHideSettings=true;
-	private boolean	bStopping; 
+	private boolean	bStopping;
+	private boolean	bConfigured; 
 	
 //	private CommandsDelegator	cd;
 	
@@ -74,7 +75,7 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 	
   @Override
   public boolean isConfigured() {
-  	return false;
+  	return bConfigured;
   }
   
   public static class CfgParm implements ICfgParm {
@@ -84,18 +85,10 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
   public SimpleConsoleAppAbs configure(ICfgParm icfg) {
   	cfg = (CfgParm)icfg;
   	
-  	
-  	return this;
-  }
-  
-	@Override
-	public void simpleInitApp() {
-		MiscJmeI.i().configure(GlobalCommandsDelegatorI.i());
-		
 		GlobalGUINodeI.iGlobal().set(getGuiNode());
 		GlobalRootNodeI.iGlobal().set(getRootNode());
 		
-//		CommandsBackgroundStateI.i().configure(new CommandsBackgroundStateI.CfgParm(GlobalConsoleGuiI.i()));
+	//	CommandsBackgroundStateI.i().configure(new CommandsBackgroundStateI.CfgParm(GlobalConsoleGuiI.i()));
 		CommandsBackgroundStateI.i().configure(new CommandsBackgroundStateI.CfgParm());
 		
 		FpsLimiterStateI.i().configure(new FpsLimiterStateI.CfgParm());
@@ -109,13 +102,23 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 		
 		UngrabMouseStateI.i().configure(new UngrabMouseStateI.CfgParm(null,null));
 		
-		AudioUII.i().configure(
+		AudioUII.i().configure(new AudioUII.CfgParm(
 			DialogMouseCursorListenerI.class,
 			MouseCursorListenerAbs.class, 
 			MouseEventControl.class,
-			KeyInterceptState.class);
+			KeyInterceptState.class));
 		
 		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
+	
+		bConfigured = true;
+		
+  	return this;
+  }
+  
+	@Override
+	public void simpleInitApp() {
+		MiscJmeI.i().configure(GlobalCommandsDelegatorI.i());
+		
 		
 //	SingleInstanceState.i().configureBeforeInitializing(this,true);
 		SingleAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);

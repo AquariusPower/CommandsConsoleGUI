@@ -32,6 +32,7 @@ import java.io.IOException;
 
 import com.github.commandsconsolegui.globals.GlobalHolderAbs.IGlobalOpt;
 import com.github.commandsconsolegui.misc.IConfigure;
+import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.app.Application;
@@ -189,7 +190,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		// the Unique State Id
 		if(cfg.strId==null){
 //			throw new PrerequisitesNotMetException("id cant be null");
-			cfg.strId = this.getClass().getSimpleName();
+			cfg.strId = MiscI.i().getClassName(this,true);
 		}
 		
 		@SuppressWarnings("unchecked") //so obvious...
@@ -201,7 +202,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		if(!ConditionalStateManagerI.i().attach(this)){
 //		if(!app.getStateManager().attach(this)){
 			throw new PrerequisitesNotMetException("state already attached: "
-				+this.getClass().getName()+"; "+this);
+				+this.getClass()+"; "+this);
 		}
 //		preInitRequest();
 		
