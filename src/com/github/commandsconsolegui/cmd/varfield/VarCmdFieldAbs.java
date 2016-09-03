@@ -31,7 +31,6 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandData;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
-import com.github.commandsconsolegui.cmd.CommandsDelegator.CompositeControl;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -162,12 +161,27 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		return vivo;
 	}
 	
+	/**
+	 * see {@link #getUniqueVarId(boolean)}
+	 * @return
+	 */
 	public String getUniqueVarId() {
+		return getUniqueVarId(false);
+	}
+	/**
+	 * @return type_concreteClass[_declaringClass][_prefix]_id[_suffix]
+	 */
+	public String getUniqueVarId(boolean bRemoveType) {
 		if(strUniqueVarId==null){
 			setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(getOwner(), this, true));
 		}
 		
-		return strUniqueVarId;
+		if(bRemoveType){
+//			return strUniqueVarId.replaceAll("^[[:alnum:]]*_", "");
+			return strUniqueVarId.replaceAll("^[a-zA-Z0-9]*_", "");
+		}else{
+			return strUniqueVarId;
+		}
 	}
 	
 	

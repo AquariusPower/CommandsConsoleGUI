@@ -44,10 +44,10 @@ public class QuestionDialogState<T extends Command<Button>> extends LemurBasicDi
 		public CfgParm(
 				Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow,
-				Float fInfoHeightPercentOfDialog, Integer iEntryHeightPixels) {
+				Float fInfoHeightPercentOfDialog, Float fEntryHeightMultiplier) {
 			super(fDialogWidthPercentOfAppWindow,
 					fDialogHeightPercentOfAppWindow, fInfoHeightPercentOfDialog,
-					iEntryHeightPixels);
+					fEntryHeightMultiplier);
 //			super.setUIId(QuestionDialogStateAbs.class.getSimpleName());
 		}
 	}

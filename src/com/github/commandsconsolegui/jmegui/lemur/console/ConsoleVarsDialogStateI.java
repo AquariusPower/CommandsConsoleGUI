@@ -58,10 +58,10 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	public static class CfgParm<T> extends MaintenanceListDialogState.CfgParm{
 		public CfgParm(Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow,
-				Float fInfoHeightPercentOfDialog, Integer iEntryHeightPixels,
+				Float fInfoHeightPercentOfDialog, Float fEntryHeightMultiplier,
 				LemurDialogGUIStateAbs diagChoice, LemurDialogGUIStateAbs diagQuestion) {
 			super(fDialogWidthPercentOfAppWindow, fDialogHeightPercentOfAppWindow,
-					fInfoHeightPercentOfDialog, iEntryHeightPixels, diagChoice, diagQuestion);
+					fInfoHeightPercentOfDialog, fEntryHeightMultiplier, diagChoice, diagQuestion);
 		}
 	}
 	private CfgParm<T>	cfg;
@@ -115,17 +115,13 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		}
 	}
 	
-	private void updateDled(){
-		
-	}
-	
 	private void updateDledList() {
 		ArrayList<VarCmdFieldAbs> avcf = VarCmdFieldAbs.getListFullCopy();
 		
 		ArrayList<DialogListEntryData<T>> adled = getCompleteEntriesListCopy();
 		
 		for(VarCmdFieldAbs vcf:avcf){
-			String strId = vcf.getUniqueVarId();
+			String strId = vcf.getUniqueVarId(true);
 			if(strId==null)continue;
 			
 			DialogListEntryData<T> dledWork = null;

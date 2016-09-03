@@ -189,12 +189,16 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 	}
 
 	@Override
-	public String getUniqueVarId() {
+	public String getUniqueVarId(boolean bRemoveType) {
 		/**
 		 * no var to console commands yet.
 		 * TODO console commands could have a var representing their return value?
 		 */
-		return null; 
+		return null;
+	}
+	@Override
+	public String getUniqueVarId() {
+		return getUniqueVarId(false); 
 	}
 	@Override
 	public StringCmdField setConsoleVarLink(CommandsDelegator.CompositeControl ccCD, VarIdValueOwnerData vivo) {

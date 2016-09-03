@@ -172,11 +172,12 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	
 	public static class CfgParm extends CmdConditionalStateAbs.CfgParm{
 		private boolean	bOptionSelectionMode;
-		private Node nodeGUI;
+//		private Node nodeGUI;
 		private boolean bInitiallyEnabled = false; //the console needs this "true"
-		public CfgParm(String strUIId, Node nodeGUI){//, R diagParent) {
+//		public CfgParm(String strUIId, Node nodeGUI){//, R diagParent) {
+		public CfgParm(String strUIId){//, R diagParent) {
 			super(strUIId);
-			this.nodeGUI = nodeGUI;
+//			this.nodeGUI = nodeGUI;
 		}
 		public void setUIId(String strUIId){
 //			if(getId()!=null)throw new PrerequisitesNotMetException("UI Id already set",getId(),strUIId);
@@ -215,8 +216,8 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		
 //		MouseCursor.i().configure(cfg.lMouseCursorClickDelayMilis);
 		
-		if(cfg.nodeGUI==null)cfg.nodeGUI=GlobalGUINodeI.i();
-		setNodeGUI(cfg.nodeGUI);//getNodeGUI()
+//		if(cfg.nodeGUI==null)cfg.nodeGUI=GlobalGUINodeI.i();
+//		setNodeGUI(cfg.nodeGUI);//getNodeGUI()
 		
 //		this.diagParent=cfg.diagParent;
 //		updateModalParent();

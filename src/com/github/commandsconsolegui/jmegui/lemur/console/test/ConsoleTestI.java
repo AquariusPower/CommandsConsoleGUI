@@ -63,7 +63,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 	
 	//private final String strFinalFieldCodePrefix="CMD_";
 	private final String strFieldCodePrefix="sf";
-	private final String strFieldCodePrefixLess = "VariantAsPrefixLess";
+	private final String strFieldCodePrefixLess = "";
 	
 //	public final StringCmdField CMD_END_DEVELOPER_COMMAND_TEST = new StringCmdField(
 //		this,CustomCommands.strFinalCmdCodePrefix);
@@ -76,7 +76,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 	 */
 	private StringCmdField sfTestCommandAutoFillVariant1 = new StringCmdField(this,strFieldCodePrefix);
 	private StringCmdField testCommandAutoFillPrefixLessVariant2 = new StringCmdField(this,strFieldCodePrefixLess);
-	private StringCmdField testCommandAutoFillPrefixLessVariantDefaulted3 = new StringCmdField(this,null);
+	private StringCmdField scfCommandAutoFillPrefixLessVariantDefaulted3 = new StringCmdField(this,null);
 	private StringCmdField CMD_TRADITIONAL_PRETTYFIED_0 = new StringCmdField(this,CommandsTest.strFinalCmdCodePrefix);
 	
 //	private StringVarField svfOptionSelectedDialog2 = new StringVarField(this,"");
@@ -93,6 +93,20 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 	public ConsoleTestI() {
 		super();
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
+	}
+	
+	
+	public boolean customCommand(Integer i){
+		CommandsDelegator cd = GlobalCommandsDelegatorI.i();
+		cd.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
+		
+		cd.dumpSubEntry("CommandTest0: "+CMD_TRADITIONAL_PRETTYFIED_0);
+		cd.dumpSubEntry("CommandTest1: "+sfTestCommandAutoFillVariant1);
+		cd.dumpSubEntry("CommandTest2: "+testCommandAutoFillPrefixLessVariant2);
+		if(ReflexFillI.i().isbUseDefaultCfgIfMissing()){
+			cd.dumpSubEntry("CommandTest3: "+scfCommandAutoFillPrefixLessVariantDefaulted3);
+		}
+		return true;
 	}
 	
   public static class CfgParm extends SimpleConsoleAppAbs.CfgParm {
@@ -114,19 +128,6 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		return this;
   }
 	
-	public boolean endDevCustomMethod(Integer i){
-		CommandsDelegator cd = GlobalCommandsDelegatorI.i();
-		cd.dumpSubEntry("Shhh.. "+i+" end user(s) working!");
-		
-		cd.dumpSubEntry("CommandTest0: "+CMD_TRADITIONAL_PRETTYFIED_0);
-		cd.dumpSubEntry("CommandTest1: "+sfTestCommandAutoFillVariant1);
-		cd.dumpSubEntry("CommandTest2: "+testCommandAutoFillPrefixLessVariant2);
-		if(ReflexFillI.i().isbUseDefaultCfgIfMissing()){
-			cd.dumpSubEntry("CommandTest3: "+testCommandAutoFillPrefixLessVariantDefaulted3);
-		}
-		return true;
-	}
-	
 	/**
 	 * 
 	 */
@@ -134,17 +135,6 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 	public void simpleInitApp() {
 		MsgI.bDebug=true;
 		
-		/**
-		 * Configs:
-		 * 
-		 * Shall be simple enough to not require any exact order.
-		 * 
-		 * Anything more complex can be postponed (from withing the config itself)
-		 * with {@link CallQueueI#appendCall(java.util.concurrent.Callable)}.
-		 */
-		GlobalCommandsDelegatorI.i().configure();//ConsoleLemurStateI.i());
-		ConsoleLemurStateI.i().configure(new ConsoleLemurStateI.CfgParm(
-			null, KeyInput.KEY_F10, getGuiNode()));
 		
 		//////////////////////// super init depends on globals
 		super.simpleInitApp(); // basic initializations
@@ -209,7 +199,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		boolean bCommandWorked = false;
 		
 		if(cd.checkCmdValidity(this,scfEndDeveloperCommandTest,"[iHowMany] users working?")){
-			bCommandWorked = endDevCustomMethod(cd.getCurrentCommandLine().paramInt(1));
+			bCommandWorked = customCommand(cd.getCurrentCommandLine().paramInt(1));
 		}else
 		if(cd.checkCmdValidity(this,scfHelp,"specific custom help")){
 			cd.dumpSubEntry("custom help");
@@ -244,6 +234,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 				rfcfg.setSuffix("Nicesuffix");
 				rfcfg.setFirstLetterUpperCase(true);
 			}else
+//			if(rfcv.getCodePrefixVariant().isEmpty()){
 			if(strFieldCodePrefixLess.equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg(rfcv);
 				rfcfg.setCodingStyleFieldNamePrefix(null);

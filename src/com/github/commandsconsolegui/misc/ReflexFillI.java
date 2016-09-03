@@ -363,36 +363,21 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		}
 		
 		String strCommandCore = strFieldName;
-		if(strCodeTypePrefix==null || strFieldName.startsWith(strCodeTypePrefix)){
-			if(strCodeTypePrefix!=null){
+		if(strCodeTypePrefix!=null){
+			if(strCommandCore.startsWith(strCodeTypePrefix)){
 				//remove prefix
 				strCommandCore=strCommandCore.substring(strCodeTypePrefix.length());
-			}
-			
-			if(bMakePretty){
-				strCommandCore=MiscI.i().makePretty(strCommandCore, rfcfg.bFirstLetterUpperCase);
-//				/**
-//				 * upper case with underscores
-//				 */
-//				String strCmdNew = null;
-//				for(String strWord : strCommand.split("_")){
-//					if(strCmdNew==null){
-//						if(rfcfg.bFirstLetterUpperCase){
-//							strCmdNew=firstLetter(strWord.toLowerCase(),true);
-//						}else{
-//							strCmdNew=strWord.toLowerCase();
-//						}
-//					}else{
-//						strCmdNew+=firstLetter(strWord.toLowerCase(),true);
-//					}
-//				}
-//				strCommand=strCmdNew;
 			}else{
-				/**
-				 * Already nice to read field name.
-				 */
-				strCommandCore=MiscI.i().firstLetter(strCommandCore,rfcfg.bFirstLetterUpperCase);
+				throw new PrerequisitesNotMetException("code prefix was set but field doesnt begin with it: "
+					+strCodeTypePrefix+", "+strFieldName, strCommandCore);
 			}
+		}
+		
+		if(bMakePretty){
+			strCommandCore=MiscI.i().makePretty(strCommandCore, rfcfg.bFirstLetterUpperCase);
+		}else{
+			/** Already nice to read field name. */
+			strCommandCore=MiscI.i().firstLetter(strCommandCore,rfcfg.bFirstLetterUpperCase);
 		}
 		
 		IdTmp id = new IdTmp();

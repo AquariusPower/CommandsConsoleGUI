@@ -660,7 +660,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	/**
 	 * Any class can attach it's command interpreter.
 	 * 
-	 * It will promptly call the listener in a safe way, 
+	 * It will call the listener in a safe way, 
 	 * to let it fill the recognized commands list with it's own commands. 
 	 * 
 	 * @param icc
@@ -684,8 +684,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		 */
 		CallQueueI.i().addCall(new CallableX() {
 			@Override
-			public Boolean call() throws Exception {
-				if(!CommandsDelegator.this.bInitialized)return false; //wait its initialization
+			public Boolean call() {
+				if(!CommandsDelegator.this.isInitialized())return false; //wait its initialization
 				
 				//this will let it fill the commands list for this listener
 				bFillCommandList=true;
@@ -3371,7 +3371,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		 */
 		CallQueueI.i().addCall(new CallableX() {
 			@Override
-			public Boolean call() throws Exception {
+			public Boolean call() {
 				return initialize();
 			}
 		});
@@ -3387,7 +3387,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		CallableX call = new CallableX() {
 			@Override
-			public Boolean call() throws Exception {
+			public Boolean call() {
 				icui().updateEngineStats();
 				return true;
 			}
@@ -3397,7 +3397,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		btgConsoleCpuRest.setCallOnChange(new CallableX() {
 			@Override
-			public Boolean call() throws Exception {
+			public Boolean call() {
 				tdLetCpuRest.setActive(btgConsoleCpuRest.b());
 				return true;
 			}

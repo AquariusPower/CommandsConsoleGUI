@@ -141,14 +141,6 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 			
 			lCurrentDelay = lTotalDelayNano%getDelayLimitNano();
 			
-//			while(lTimeNanoCopy<lCurrentTimeNano){
-//				lTimeNanoCopy+=lDelayLimitNano;
-//			}
-//			
-//			long lOverlappedDiff = lTimeNanoCopy - lCurrentTimeNano;
-//			
-//			lCurrentDelay = lDelayLimitNano - lOverlappedDiff;
-			
 			if(bOverlapModeAlsoUpdateReferenceTime){
 				lLastUpdateReferenceTimeNano = lCurrentTimeNano;
 			}
@@ -262,30 +254,6 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 	public float getCurrentDelayPercentualDynamic() {
 		long lCurrentDelay = getCurrentDelayNano(true,false);
 		
-//		long lTimeNanoCopy = lLastUpdateReferenceTimeNano;
-//		long lCurrentTimeNano = getCurrentTimeNano();
-//		
-//		long lDiff = lCurrentTimeNano-lTimeNanoCopy;
-//		
-//		long lRemainder = lDiff%lDelayLimitNano;
-//		
-//		
-//		while(lTimeNanoCopy<lCurrentTimeNano){
-//			lTimeNanoCopy+=lDelayLimitNano;
-//		}
-//		
-//		long lCurrentDelay = lDelayLimitNano - (lTimeNanoCopy - lCurrentTimeNano);
-//		
-//		
-//		
-//		
-//		long lCurrentDelay = getCurrentDelayNano();
-//		long lDiff = lDelayLimitNano-lCurrentDelay;
-//		
-//		while(lDiff<0){
-//			updateTime();
-//		}
-		
 		double dPerc = 1.0 - ((double)lCurrentDelay)/((double)getDelayLimitNano());
 		
 		return (float)dPerc;
@@ -308,81 +276,6 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 			return (float)dPerc;
 		}
 	}
-//	 * @return if null, indicates that an update is required.
-//	public Float getCurrentDelayPercentual(boolean bIfReadyWillAlsoUpdate) {
-//		if(bIfReadyWillAlsoUpdate)isReady(true); //just to auto update.
-//		
-//		long lCurrentDelayNano = getCurrentDelayNano();
-//		long lDiff = getDelayLimitNano()-lCurrentDelayNano;
-//		if(lDiff<0){
-//			if(bIfReadyWillAlsoUpdate){
-//				return 0f;
-//			}else{
-//				return null;
-//			}
-//		}
-//		double dPerc = 1.0 - ((double)lDiff)/((double)getDelayLimitNano());
-//		
-//		return (float)dPerc;
-////		
-////		float f = 1.0f - ((lNanoDelayLimit-getCurrentDelayNano())*fNanoToSeconds);
-////		if(f<0f){
-////			ihe.handleExceptionThreaded(new NullPointerException("negative value: "+f));
-////			f=0f;
-////		}
-////		return f;
-//	}
-	
-//	public float getCurrentDelayPercentualWithinBounds() {
-//		float f = getCurrentDelayPercentual();
-//		if(f>1f)return 1f;
-//		return f;
-//	}
-	
-//	/**
-//	 * Will use the delay value to sleep the thread.
-//	 * 
-//	 * FPS Limiter:
-//	 * 	The TimePerFrame (tpf) is measured from after the sleepCode to just before the sleepCode,
-//	 * 	therefore, this is the tpf based on CPU usage/encumberance.
-//	 * 
-//	 * 	For the limiter to work properly, this method MUST be called at every frame update,
-//	 * 	and only from a single place!
-//	 * 
-//	 * @param bFpsLimiter
-//	 */
-//	public void updateSleepThread(boolean bFpsLimiter){
-//		try {
-//			if(bFpsLimiter){
-//				lNanoFrameDelay = System.nanoTime() - lNanoTimePrevious; //MUST BE BEFORE THE SLEEP!!!!!!
-//				lNanoThreadSleep = lNanoDelayLimit -lNanoFrameDelay;
-//				if(lNanoThreadSleep<0L)lNanoThreadSleep=0L;
-//			}else{
-//				lNanoThreadSleep = lNanoDelayLimit;
-//			}
-//			
-//			if(lNanoThreadSleep>0L)Thread.sleep(lNanoDelayLimit/1000000L); //milis
-//			
-//			if(bFpsLimiter){
-//				lNanoTimePrevious = System.nanoTime(); //MUST BE AFTER THE SLEEP!!!!!!!
-//			}
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-//	}
-	
-//	public static ArrayList<TimedDelayVarField> getListCopy(){
-//		return new ArrayList<TimedDelayVarField>(atdList);
-//	}
-
-//	@Override
-//	public String getVarId() {
-//		if(strVarId==null){
-//			super.setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(getOwner(), this, true));
-//		}
-//		
-//		return strVarId;
-//	}
 
 	@Override
 	public String getCodePrefixVariant() {

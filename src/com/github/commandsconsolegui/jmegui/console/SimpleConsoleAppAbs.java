@@ -41,6 +41,7 @@ import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.MouseCursorListenerAbs;
+import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.IConfigure;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -48,6 +49,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppState;
+import com.jme3.input.KeyInput;
 import com.simsilica.lemur.event.KeyInterceptState;
 import com.simsilica.lemur.event.MouseEventControl;
 
@@ -84,10 +86,23 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
   public SimpleConsoleAppAbs configure(ICfgParm icfg) {
   	cfg = (CfgParm)icfg;
   	
-		MiscJmeI.i().configure(GlobalCommandsDelegatorI.i());
-  	
+  	// globals must be set as soon as possible
 		GlobalGUINodeI.iGlobal().set(getGuiNode());
 		GlobalRootNodeI.iGlobal().set(getRootNode());
+		
+		/**
+		 * Configs:
+		 * 
+		 * Shall be simple enough to not require any exact order.
+		 * 
+		 * Anything more complex can be postponed (from withing the config itself)
+		 * with {@link CallQueueI#appendCall(java.util.concurrent.Callable)}.
+		 */
+		GlobalCommandsDelegatorI.i().configure();//ConsoleLemurStateI.i());
+		ConsoleLemurStateI.i().configure(new ConsoleLemurStateI.CfgParm(
+			null, KeyInput.KEY_F10));
+  	
+		MiscJmeI.i().configure(GlobalCommandsDelegatorI.i());
 		
 	//	CommandsBackgroundStateI.i().configure(new CommandsBackgroundStateI.CfgParm(GlobalConsoleGuiI.i()));
 		CommandsBackgroundStateI.i().configure(new CommandsBackgroundStateI.CfgParm());

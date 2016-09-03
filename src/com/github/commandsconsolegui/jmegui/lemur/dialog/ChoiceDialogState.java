@@ -41,10 +41,10 @@ public class ChoiceDialogState<T extends Command<Button>> extends LemurBasicDial
 		public CfgParm(
 				Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow,
-				Float fInfoHeightPercentOfDialog, Integer iEntryHeightPixels) {
+				Float fInfoHeightPercentOfDialog, Float fEntryHeightMultiplier) {
 			super(fDialogWidthPercentOfAppWindow,
 					fDialogHeightPercentOfAppWindow, fInfoHeightPercentOfDialog,
-					iEntryHeightPixels);
+					fEntryHeightMultiplier);
 //			super.setUIId(ChoiceDialogStateAbs.class.getSimpleName());
 		}
 	}

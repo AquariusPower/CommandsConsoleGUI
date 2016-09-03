@@ -130,6 +130,8 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 
 	@Override
 	protected boolean initAttempt() {
+		GuiGlobals.initialize(GlobalAppRefI.i());
+		
 		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
 		
 		addStyle(BaseStyles.GLASS);
@@ -157,12 +159,11 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	public static class CfgParm extends ConsoleStateAbs.CfgParm{
 		public CfgParm(
 			String strUIId, 
-			int iToggleConsoleKey,
-			Node nodeGUI
+			int iToggleConsoleKey
 		) {
 			super(
 				strUIId==null ? strUIId=ConsoleLemurStateI.class.getSimpleName() : strUIId, 
-				nodeGUI, iToggleConsoleKey);
+				iToggleConsoleKey);
 			super.setInitiallyEnabled(true); // the console must be initially enabled to startup properly
 		}
 	}
@@ -176,7 +177,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		
 		super.configure(cfg);
 		
-		GuiGlobals.initialize(GlobalAppRefI.i());
+//		GuiGlobals.initialize(GlobalAppRefI.i());
 		
 		// misc cfg
 		if(!MiscLemurHelpersStateI.i().isConfigured()){ //in case of restarting the console
@@ -201,7 +202,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		
 		if(!ConsoleVarsDialogStateI.i().isConfigured()){
 			ConsoleVarsDialogStateI.i().configure(new ConsoleVarsDialogStateI.CfgParm(
-				0.9f, 0.9f, 0.1f, null, null, null));
+				0.9f, 0.9f, 0.1f, 2.0f, null, null));
 		}
 		
 		return storeCfgAndReturnSelf(icfg);

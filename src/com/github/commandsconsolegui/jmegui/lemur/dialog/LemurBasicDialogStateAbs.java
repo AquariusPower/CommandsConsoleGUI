@@ -60,10 +60,10 @@ public abstract class LemurBasicDialogStateAbs<T,R extends LemurBasicDialogState
 		public CfgParm(
 				Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow, Float fInfoHeightPercentOfDialog,
-				Integer iEntryHeightPixels){//, BaseDialogStateAbs<T> modalParent) {
-			super(null, null,
+				Float fEntryHeightMultiplier){//, BaseDialogStateAbs<T> modalParent) {
+			super(null,
 					fDialogWidthPercentOfAppWindow, fDialogHeightPercentOfAppWindow,
-					fInfoHeightPercentOfDialog, iEntryHeightPixels);//, modalParent);
+					fInfoHeightPercentOfDialog, fEntryHeightMultiplier);//, modalParent);
 		}
 	}
 	@Override

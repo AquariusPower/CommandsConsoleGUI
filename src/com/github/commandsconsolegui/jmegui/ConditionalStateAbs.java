@@ -31,6 +31,7 @@ package com.github.commandsconsolegui.jmegui;
 import java.io.IOException;
 
 import com.github.commandsconsolegui.globals.GlobalHolderAbs.IGlobalOpt;
+import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.misc.IConfigure;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
@@ -72,7 +73,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 	
 //	public static interface ICfgParm{}
 	
-	private Node nodeGUI;
+//	private Node nodeGUI;
 	
 	// CONFIGURE 
 	private boolean bConfigured;
@@ -533,13 +534,14 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 	}
 	
 	public Node getNodeGUI() {
-		return nodeGUI;
+//		return nodeGUI;
+		return GlobalGUINodeI.i();
 	}
 
-	protected void setNodeGUI(Node nodeGUI) {
-		if(nodeGUI==null)throw new PrerequisitesNotMetException("null node gui");
-		this.nodeGUI = nodeGUI;
-	}
+//	protected void setNodeGUI(Node nodeGUI) {
+//		if(nodeGUI==null)throw new PrerequisitesNotMetException("null node gui");
+//		this.nodeGUI = nodeGUI;
+//	}
 	
 	public void setAppStateManagingThis(ConditionalStateManagerI.CompositeControl cc,ConditionalStateManagerI asmParent) {
 		cc.assertSelfNotNull();

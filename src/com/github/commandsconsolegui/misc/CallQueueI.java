@@ -40,7 +40,16 @@ public class CallQueueI {
 	private static CallQueueI instance = new CallQueueI();
 	public static CallQueueI i(){return instance;}
 	
-	public static abstract class CallableX implements Callable<Boolean>{
+	public static interface CallableWeak<V> extends Callable<V>{
+		/**
+		 * without exception thrown, the debug will stop in the exact place where the exception
+		 * happens inside a call (finally!!)
+		 */
+    @Override
+		V call();
+	}
+	
+	public static abstract class CallableX implements CallableWeak<Boolean>{
 		boolean bPrepend;
 		public CallableX setAsPrepend(){
 			bPrepend=true;
@@ -61,18 +70,18 @@ public class CallQueueI {
 	}
 	
 	private boolean runCallerCode(CallableX caller) {
-		try {
+//		try {
 			if(caller.call().booleanValue()){
 				aCallList.remove(caller);
 				return true;
 			}else{
 				addCall(caller, false); //will retry
 			}
-		} catch (Exception e) {
-			NullPointerException npe = new NullPointerException("callable exception");
-			npe.initCause(e);
-			throw npe;
-		}
+//		} catch (Exception e) {
+//			NullPointerException npe = new NullPointerException("callable exception");
+//			npe.initCause(e);
+//			throw npe;
+//		}
 		
 		return false;
 	}

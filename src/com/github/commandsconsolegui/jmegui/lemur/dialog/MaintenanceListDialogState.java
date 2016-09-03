@@ -52,12 +52,12 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 		public CfgParm(
 				Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow,
-				Float fInfoHeightPercentOfDialog, Integer iEntryHeightPixels,
+				Float fInfoHeightPercentOfDialog, Float fEntryHeightMultiplier,
 				LemurDialogGUIStateAbs<T,?> diagChoice,
 				LemurDialogGUIStateAbs<T,?> diagQuestion) {
 			super(fDialogWidthPercentOfAppWindow,
 					fDialogHeightPercentOfAppWindow, fInfoHeightPercentOfDialog,
-					iEntryHeightPixels);
+					fEntryHeightMultiplier);
 			this.diagChoice=diagChoice;
 			this.diagQuestion=diagQuestion;
 //			super.setUIId(MaintenanceListDialogStateAbs.class.getSimpleName());

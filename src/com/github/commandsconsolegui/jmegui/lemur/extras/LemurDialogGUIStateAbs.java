@@ -29,18 +29,16 @@ package com.github.commandsconsolegui.jmegui.lemur.extras;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.Callable;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
-import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.jmegui.AudioUII;
+import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
-import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
@@ -56,9 +54,7 @@ import com.jme3.input.KeyInput;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GridPanel;
 import com.simsilica.lemur.Label;
@@ -71,7 +67,6 @@ import com.simsilica.lemur.core.VersionedList;
 import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.event.KeyAction;
 import com.simsilica.lemur.event.KeyActionListener;
-import com.simsilica.lemur.grid.GridModel;
 import com.simsilica.lemur.list.SelectionModel;
 
 /**
@@ -115,13 +110,15 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		return (Container)super.getContainerMain();
 	}
 	
+	private FloatDoubleVarField fdvEntryHeightMultiplier = new FloatDoubleVarField(this,1f,"");
+	
 	public static class CfgParm extends BaseDialogStateAbs.CfgParm{
 		private Float fDialogHeightPercentOfAppWindow;
 		private Float fDialogWidthPercentOfAppWindow;
 		private Float fInfoHeightPercentOfDialog;
 		
-		/** TODO entry height should be automatic... may be each entry could have its own height. */
-		private Integer iEntryHeightPixels;
+//		private Integer iEntryHeightPixels;
+		private Float fEntryHeightMultiplier = 1.0f;
 		
 //		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI) {
 //			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI);
@@ -130,33 +127,34 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		 * 
 		 * @param strUIId
 		 * @param bIgnorePrefixAndSuffix
-		 * @param nodeGUI
 		 * @param fDialogHeightPercentOfAppWindow (if null will use default) the percentual height to cover the application screen/window
 		 * @param fDialogWidthPercentOfAppWindow (if null will use default) the percentual width to cover the application screen/window
 		 * @param fInfoHeightPercentOfDialog (if null will use default) the percentual height to show informational text, the list and input field will properly use the remaining space
-		 * @param iEntryHeightPixels
+		 * @param iFinalEntryHeightPixels
 		 */
 		public CfgParm(String strUIId,
-				Node nodeGUI, Float fDialogWidthPercentOfAppWindow,
+				Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow, Float fInfoHeightPercentOfDialog,
-				Integer iEntryHeightPixels)//, BaseDialogStateAbs<T> modalParent)
+				Float fEntryHeightMultiplier)//, BaseDialogStateAbs<T> modalParent)
 		{
-			super(strUIId, nodeGUI);//, modalParent);
+			super(strUIId);//, nodeGUI);//, modalParent);
 			
 			this.fDialogHeightPercentOfAppWindow = fDialogHeightPercentOfAppWindow;
 			this.fDialogWidthPercentOfAppWindow = fDialogWidthPercentOfAppWindow;
 			this.fInfoHeightPercentOfDialog = fInfoHeightPercentOfDialog;
-			this.iEntryHeightPixels = iEntryHeightPixels;
+			if(fEntryHeightMultiplier!=null)this.fEntryHeightMultiplier = fEntryHeightMultiplier;
 		}
 	}
 	private CfgParm	cfg;
 	private boolean	bRunningEffectAtAllListEntries;
 	private float	fMinScale = 0.01f;
 	private boolean	bPreparedForListEntriesEffects;
+	private Integer	iFinalEntryHeightPixels;
 	@Override
 	public R configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
 		
+		fdvEntryHeightMultiplier.setObjectRawValue(cfg.fEntryHeightMultiplier);
 //		DialogMouseCursorListenerI.i().configure(null);
 		
 		if(cfg.fDialogHeightPercentOfAppWindow==null){
@@ -375,14 +373,17 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	
 	private void updateEntryHeight(){
 //		if(cfg.iEntryHeightPixels==null){
-			cfg.iEntryHeightPixels = getEntryHeightPixels();
+			this.iFinalEntryHeightPixels = (int)FastMath.ceil(getEntryHeightPixels() 
+//				* cfg.fEntryHeightMultiplier);
+				* fdvEntryHeightMultiplier.f());
 //		}
 	}
 	
 	protected Integer getEntryHeightPixels(){
-		if(vlVisibleEntriesList.size()==0)return null;
+		// query for an entry from the list
+		//if(vlVisibleEntriesList.size()==0)return null;
 		
-		// query for an entry from the list (this will actually create a new cell)
+		// create a new cell
 		Panel pnl = lstbxEntriesToSelect.getGridPanel().getModel().getCell(0, 0, null);
 		float fHeight = pnl.getPreferredSize().getY();
 		// a simple value would be: MiscJmeI.i().retrieveBitmapTextFor(new Button("W")).getLineHeight()
@@ -439,15 +440,15 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		 * TODO sum each individual top entries height? considering they could have diff heights of course
 		 */
 		updateEntryHeight();
-		if(cfg.iEntryHeightPixels!=null){
-			iVisibleRows = (int) (v3fEntryListSize.y/cfg.iEntryHeightPixels);
+//		if(cfg.iEntryHeightPixels!=null){
+			iVisibleRows = (int) (v3fEntryListSize.y/iFinalEntryHeightPixels);
 			lstbxEntriesToSelect.setVisibleItems(iVisibleRows);
 			if(vlVisibleEntriesList.size()>0){
 				if(getSelectedEntryData()==null){
 					selectRelativeEntry(0);
 				}
 			}
-		}
+//		}
 	}
 	
 //	/**
@@ -848,7 +849,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		 */
 		CallQueueI.i().addCall(new CallableX() {
 			@Override
-			public Boolean call() throws Exception {
+			public Boolean call() {
 				DialogListEntryData<T> dledParent = dledParentTmp;
 				
 				if(vlVisibleEntriesList.contains(dledAbove)){

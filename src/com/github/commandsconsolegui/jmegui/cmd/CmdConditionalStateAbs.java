@@ -121,7 +121,7 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 		
 		btgState.setCallOnChange(new CallableX() {
 			@Override
-			public Boolean call() throws Exception {
+			public Boolean call() {
 				setEnabledRequest(btgState.b());
 				return true;
 			}
