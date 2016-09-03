@@ -29,6 +29,8 @@ package com.github.commandsconsolegui.jmegui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
@@ -96,6 +98,22 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	private BoolTogglerCmdField btgEffect = new BoolTogglerCmdField(this, true);
 	private TimedDelayVarField tdDialogEffect = new TimedDelayVarField(this, 0.15f, "");
 	private float	fMinEffectScale=0.01f;
+	
+	private Comparator<DialogListEntryData<T>> cmpTextAtoZ = new Comparator<DialogListEntryData<T>>() {
+		@Override
+		public int compare(DialogListEntryData<T> o1, DialogListEntryData<T> o2) {
+			return o1.getText().compareTo(o2.getText());
+		}
+	};
+	private Comparator<DialogListEntryData<T>> cmpTextZtoA = new Comparator<DialogListEntryData<T>>() {
+		@Override
+		public int compare(DialogListEntryData<T> o1, DialogListEntryData<T> o2) {
+			return o2.getText().compareTo(o1.getText());
+		}
+	};
+	private Comparator<DialogListEntryData<T>> getComparatorText(boolean bAtoZ){
+		return bAtoZ ? cmpTextAtoZ : cmpTextZtoA;
+	}
 	
 	public DiagModalInfo<T> getDiagModalCurrent(){
 		return dmi;
@@ -631,7 +649,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	 * for proper sorting
 	 * @param dled
 	 */
-	protected void recursiveAddEntries(DialogListEntryData<T> dled){
+	protected void recursiveAddNestedEntries(DialogListEntryData<T> dled){
 		adleTmp.remove(dled);
 		adleCompleteEntriesList.add(dled);
 		if(dled.isParent()){
@@ -639,18 +657,27 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 				if(!dledChild.getParent().equals(dled)){
 					throw new PrerequisitesNotMetException("invalid parent", dled, dledChild);
 				}
-				recursiveAddEntries(dledChild);
+				recursiveAddNestedEntries(dledChild);
 			}
 		}
 	}
-
-	protected void sortEntries(){
+	
+	BoolTogglerCmdField btgSortListEntries = new BoolTogglerCmdField(this, true);
+	BoolTogglerCmdField btgSortListEntriesAtoZ = new BoolTogglerCmdField(this, true);
+	
+	protected void prepareTree(){
 		adleTmp = new ArrayList<DialogListEntryData<T>>(adleCompleteEntriesList);
+		
+		if(btgSortListEntries.b()){
+			Collections.sort(adleTmp, getComparatorText(btgSortListEntriesAtoZ.b()));
+		}
+		
 		adleCompleteEntriesList.clear();
 		
+		// work on root ones
 		for(DialogListEntryData<T> dled:new ArrayList<DialogListEntryData<T>>(adleTmp)){
-			if(dled.getParent()==null){ //root ones
-				recursiveAddEntries(dled);
+			if(dled.getParent()==null){ 
+				recursiveAddNestedEntries(dled);
 			}
 		}
 	}

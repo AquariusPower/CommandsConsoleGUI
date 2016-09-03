@@ -2562,7 +2562,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //	}
 	
 	private boolean varRestoreTo(VarCmdFieldAbs owner){
-		VarIdValueOwnerData vivo = getVar(RESTRICTED_TOKEN+owner.getVarId());
+		VarIdValueOwnerData vivo = getVar(RESTRICTED_TOKEN+owner.getUniqueVarId());
 		if(vivo==null)return false;
 //		owner.setObjectValue(ccSelf,vivo.getObjectValue());
 		
@@ -2648,7 +2648,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		return varSet(
 			new VarIdValueOwnerData(
-				RESTRICTED_TOKEN+owner.getVarId(),
+				RESTRICTED_TOKEN+owner.getUniqueVarId(),
 				owner.getValueRaw(),
 				owner,
 				rfcfg,
@@ -3154,9 +3154,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			for(VarCmdFieldAbs vcf2:avcf.toArray(new VarCmdFieldAbs[0])){
 				if(vcf==vcf2)continue; //skip self
 				
-				if(vcf.getVarId().equalsIgnoreCase(vcf2.getVarId())){
+				if(vcf.getUniqueVarId().equalsIgnoreCase(vcf2.getUniqueVarId())){
 					throw new PrerequisitesNotMetException("conflicting var id"
-						+"'"+vcf.getVarId()+"'"
+						+"'"+vcf.getUniqueVarId()+"'"
 						+" for "
 						+"'"+(ReflexFillI.i().getDeclaringClass(vcf.getOwner(),vcf)).getName()
 							+"#"+vcf.getOwner().hashCode()+"'"

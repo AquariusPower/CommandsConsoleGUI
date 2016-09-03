@@ -29,13 +29,22 @@ package com.github.commandsconsolegui.jmegui.lemur.console;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
+import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
+import com.github.commandsconsolegui.cmd.varfield.StringVarField;
+import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.jmegui.AudioUII;
+import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBasicDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.MaintenanceListDialogState;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.MaintenanceListDialogState.CfgParm;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
+import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 
@@ -65,13 +74,107 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		return storeCfgAndReturnSelf(icfg);
 	}
 	
-	private void prepareListData() {
+	protected class ChangeValue implements Command<Button>{
+		@Override
+		public void execute(Button source) {
+			ConsoleVarsDialogStateI.this.changeValue(
+				ConsoleVarsDialogStateI.this.getDledFrom(source));
+		}
+	}
+	private ChangeValue cv = new ChangeValue();
+	
+	private void changeValue(DialogListEntryData<T> dled){
+		AudioUII.i().playOnUserAction(EAudio.SelectEntry);
+		
+		VarCmdFieldAbs vcf = (VarCmdFieldAbs)dled.getUserObj();
+		boolean bChanged=false;
+		if(vcf instanceof BoolTogglerCmdField){
+			((BoolTogglerCmdField)vcf).toggle();
+			bChanged=true;
+		}else{
+			GlobalCommandsDelegatorI.i().dumpDevWarnEntry("not yet supported "+vcf.getClass());
+			AudioUII.i().playOnUserAction(EAudio.Failure);				
+		}
+		
+		if(bChanged)requestRefreshList();
+	}
+	
+	@Override
+	protected void updateList() {
+//		clearList(); //TODO could just update each entry value...
+		updateDledList();
+		super.updateList();
+	}
+	
+	@Override
+	protected void actionCustomAtEntry(DialogListEntryData<T> dledSelected) {
+		if(dledSelected.getUserObj() instanceof BoolTogglerCmdField){
+			changeValue(dledSelected);
+		}else{
+			super.actionCustomAtEntry(dledSelected);
+		}
+	}
+	
+	private void updateDled(){
+		
+	}
+	
+	private void updateDledList() {
 		ArrayList<VarCmdFieldAbs> avcf = VarCmdFieldAbs.getListFullCopy();
+		
+		ArrayList<DialogListEntryData<T>> adled = getCompleteEntriesListCopy();
+		
 		for(VarCmdFieldAbs vcf:avcf){
+			String strId = vcf.getUniqueVarId();
+			if(strId==null)continue;
+			
+			DialogListEntryData<T> dledWork = null;
+			for(DialogListEntryData<T> dled:adled){
+				VarCmdFieldAbs vcfEntry = ((VarCmdFieldAbs)dled.getUserObj());
+				if(vcf.getUniqueVarId().equals(vcfEntry.getUniqueVarId())){
+					dledWork = dled;
+				}
+			}
+			
+			boolean bCreatedNow = false;
+			if(dledWork==null){
+//				if(strId!=null){
+					dledWork = new DialogListEntryData<T>();
+					dledWork.setText(strId, vcf);
+					addEntry(dledWork);
+//				}
+			}
+			
 //			if(vcf instanceof StringCmdField)
-			String str = vcf.getVarId();
-			if(str!=null){
-				addEntry(new DialogListEntryData<T>().setText(str, vcf));
+			if(dledWork!=null){
+				String strVal=null;
+				if(vcf instanceof FloatDoubleVarField){
+					strVal = MiscI.i().fmtFloat(((FloatDoubleVarField)vcf).getDouble(),3);
+				}else
+				if(vcf instanceof IntLongVarField){
+					strVal = ""+((IntLongVarField)vcf).getLong();
+				}else
+				if(vcf instanceof BoolTogglerCmdField){
+					strVal = ""+((BoolTogglerCmdField)vcf).getBool();
+				}else
+				if(vcf instanceof StringVarField){
+					strVal = ((StringVarField)vcf).getStringValue();
+					if(strVal==null)strVal="";
+					if(strVal.length()>10)strVal=strVal.substring(0, 10)+"..."; //TODO use 3 dots single character if it exists..
+				}else
+				if(vcf instanceof TimedDelayVarField){
+					strVal = MiscI.i().fmtFloat(((TimedDelayVarField)vcf).getDelayLimitSeconds(),3);
+				}else
+				if(vcf instanceof StringCmdField){
+					// do nothing for now...
+				}else{
+					throw new PrerequisitesNotMetException("still unsupported type", vcf.getClass());
+				}
+				
+				if(!bCreatedNow){
+					dledWork.clearCustomButtonActions();
+				}
+				dledWork.addCustomButtonAction(strVal, (T)cv);
 			}
 			
 		}
@@ -81,7 +184,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	protected boolean initAttempt() {
 		if(!super.initAttempt())return false;
 		
-		prepareListData();
+//		prepareListData();
 		
 		return true;
 	}

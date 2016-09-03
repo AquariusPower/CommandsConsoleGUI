@@ -111,7 +111,7 @@ public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 
 	@Override
 	public String getReport() {
-		return getVarId()+" = "+(strValue==null?"null":"\""+strValue+"\"");
+		return getUniqueVarId()+" = "+(strValue==null?"null":"\""+strValue+"\"");
 	}
 
 	@Override

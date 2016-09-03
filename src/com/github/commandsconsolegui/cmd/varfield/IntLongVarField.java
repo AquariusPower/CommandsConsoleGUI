@@ -140,7 +140,7 @@ public class IntLongVarField extends VarCmdFieldAbs<Long,IntLongVarField>{
 
 	@Override
 	public String getReport() {
-		return getVarId()+" = "+getLong();
+		return getUniqueVarId()+" = "+getLong();
 	}
 
 	@Override

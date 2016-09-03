@@ -102,7 +102,7 @@ public abstract class LemurBasicDialogStateAbs<T,R extends LemurBasicDialogState
 	protected abstract boolean prepareTestData();
 	
 	@SuppressWarnings("unchecked")
-	public DialogListEntryData<T> getDataFrom(Spatial spt){
+	public DialogListEntryData<T> getDledFrom(Spatial spt){
 		String strKey = DialogListEntryData.class.getName();
 		Object data = spt.getUserData(strKey);
 		if(data==null)throw new PrerequisitesNotMetException("missing user object "+strKey);
@@ -115,10 +115,10 @@ public abstract class LemurBasicDialogStateAbs<T,R extends LemurBasicDialogState
 //		;
 //	}
 	
-	public class CommandSel implements Command<Button>{
+	protected class CommandSel implements Command<Button>{
 		@Override
 		public void execute(Button btn) {
-			LemurBasicDialogStateAbs.this.selectAndChoseOption(getDataFrom(btn));
+			LemurBasicDialogStateAbs.this.selectAndChoseOption(getDledFrom(btn));
 		}
 	}
 	CommandSel cmdSel = new CommandSel();

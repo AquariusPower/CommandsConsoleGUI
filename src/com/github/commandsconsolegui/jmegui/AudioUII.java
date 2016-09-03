@@ -77,9 +77,11 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 	static String strBasePath="Sounds/Effects/UI/13940__gameaudio__game-audio-ui-sfx/";
 	public static enum EAudio{
 		SubmitSelection			(strBasePath+"220183__gameaudio__click-casual.mono.ogg"),
+		
 		ReturnChosen				(strBasePath+"220200__gameaudio__basic-click-wooden.mono.ogg"),
 //		ReturnChosen				(strBasePath+"220172__gameaudio__flourish-spacey-2.mono.ogg"),
 		ReturnNothing				(strBasePath+"220210__gameaudio__bonk-click-w-deny-feel.mono.ogg"),
+		
 		Question						(strBasePath+"220187__gameaudio__loose-deny-casual-1.mono.ogg"),
 		
 		HoverOverActivators	(strBasePath+"220189__gameaudio__blip-squeak.cut.mono.ogg" ),
@@ -95,6 +97,8 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 		
 		OpenConsole					(strBasePath+"220202__gameaudio__teleport-casual.mono.ogg"),
 		CloseConsole				(strBasePath+"220203__gameaudio__casual-death-loose.mono.ogg"),
+		
+		Failure							(strBasePath+"220167__gameaudio__button-deny-spacey.mono.ogg"),
 		;
 		
 		CfgAudio cfga;

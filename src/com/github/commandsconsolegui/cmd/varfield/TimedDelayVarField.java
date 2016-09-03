@@ -417,7 +417,7 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 //	
 	@Override
 	public String getReport() {
-		return getVarId()+" = "+getDelayLimitSeconds();
+		return getUniqueVarId()+" = "+getDelayLimitSeconds();
 	}
 
 	@Override

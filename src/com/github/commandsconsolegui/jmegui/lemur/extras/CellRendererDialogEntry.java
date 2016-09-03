@@ -229,7 +229,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public void update(DialogListEntryData<T> dled){
-			DialogListEntryData<T> dataOld = this.dled;
+			DialogListEntryData<T> dledOld = this.dled;
 			this.dled=dled;
 			
 			// tree button
@@ -241,18 +241,18 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			// custom buttons
 			boolean bButtonsChanged = false;
 			
-			if(this.dled.equals(dataOld))bButtonsChanged=true;//1st update is self
+			if(this.dled.equals(dledOld))bButtonsChanged=true;//1st update is self
 			
 			if(!bButtonsChanged){
-				Entry[] entryOldList = dataOld.getCustomButtonsActionsListCopy();
-				Entry[] entryList = this.dled.getCustomButtonsActionsListCopy();
-				if(entryOldList.length==entryList.length){
-					for(int i=0;i<entryList.length;i++){
-						Entry entryOld = entryOldList[i];
-						Entry entry = entryList[i];
+				Entry[] aenActionsListOld = dledOld.getCustomButtonsActionsListCopy();
+				Entry[] aenActionsList = this.dled.getCustomButtonsActionsListCopy();
+				if(aenActionsListOld.length==aenActionsList.length){
+					for(int i=0;i<aenActionsList.length;i++){
+						Entry enOld = aenActionsListOld[i];
+						Entry en = aenActionsList[i];
 						if(
-							!entry.getKey().equals(entryOld.getKey()) ||
-							!entry.getValue().equals(entryOld.getValue())
+							!en.getKey().equals(enOld.getKey()) ||
+							!en.getValue().equals(enOld.getValue())
 						){
 							bButtonsChanged = true;
 							break;

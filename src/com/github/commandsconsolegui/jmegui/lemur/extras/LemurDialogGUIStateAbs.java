@@ -410,7 +410,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		
 		resetList();
 		
-		sortEntries();
+		prepareTree();
 		
 		for(DialogListEntryData<T> dled:getCompleteEntriesListCopy()){
 			if(!getLastFilter().isEmpty()){

@@ -189,7 +189,7 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 	}
 
 	@Override
-	public String getVarId() {
+	public String getUniqueVarId() {
 		/**
 		 * no var to console commands yet.
 		 * TODO console commands could have a var representing their return value?

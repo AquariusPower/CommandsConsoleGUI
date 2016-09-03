@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.jmegui.lemur.dialog;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
@@ -149,21 +150,31 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 	}
 
 	@Override
-	protected void actionCustomAtEntry(DialogListEntryData<T> dataSelected) {
-		super.actionCustomAtEntry(dataSelected);
-		openModalDialog(cfg.diagChoice.getId(), dataSelected, (T)cmdCfg);
+	protected void actionCustomAtEntry(DialogListEntryData<T> dledSelected) {
+		if(cfg.diagChoice!=null){
+			super.actionCustomAtEntry(dledSelected);
+			openModalDialog(cfg.diagChoice.getId(), dledSelected, (T)cmdCfg);
+		}else{
+			AudioUII.i().playOnUserAction(AudioUII.EAudio.Failure);
+			GlobalCommandsDelegatorI.i().dumpDevWarnEntry("no choice dialog configured for "+this, dledSelected);
+		}
 	}
 
 	public class CommandDel implements Command<Button>{
 		@SuppressWarnings("unchecked")
 		@Override
 		public void execute(Button btn) {
-			DialogListEntryData<T> dled = getDataFrom(btn);
+			DialogListEntryData<T> dled = getDledFrom(btn);
 			
 			if(dled.isParent()){
 //				CustomDialogGUIState.this.setDataToApplyModalChoice(data);
-				MaintenanceListDialogState.this.openModalDialog(cfg.diagQuestion.getId(), dled, (T)this);
-				AudioUII.i().play(EAudio.Question);
+				if(cfg.diagQuestion!=null){
+					MaintenanceListDialogState.this.openModalDialog(cfg.diagQuestion.getId(), dled, (T)this);
+					AudioUII.i().play(EAudio.Question);
+				}else{
+					AudioUII.i().playOnUserAction(AudioUII.EAudio.Failure);
+					GlobalCommandsDelegatorI.i().dumpDevWarnEntry("no question dialog configured for "+this, btn, dled);
+				}
 			}else{
 				MaintenanceListDialogState.this.removeEntry(dled);
 			}
@@ -187,7 +198,7 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 		@Override
 		public void execute(Button btn) {
 //			DialogTestState.this.openModalDialog(EDiag.Cfg.toString(), getDataFrom(btn), (T)this);
-			actionCustomAtEntry(getDataFrom(btn));
+			actionCustomAtEntry(getDledFrom(btn));
 //			DialogTestState.this.actionSubmit();
 		}
 	}

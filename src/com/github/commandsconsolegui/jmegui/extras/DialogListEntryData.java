@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.jmegui.extras;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
@@ -72,8 +73,20 @@ public class DialogListEntryData<T> implements Savable{
 		this.strUniqueId = DialogListEntryData.strLastUniqueId = (MiscI.i().getNextUniqueId(strLastUniqueId));
 	}
 	
+//	public DialogListEntryData<T> renameCustomButtonAction(T action, String strLabelTextIdNew){
+//		for(Entry<String, T> en:hmCustomButtonsActions.entrySet()){
+//			if(en.getValue()==)
+//		}
+//		T action = hmCustomButtonsActions.remove(strLabelTextIdOld);
+//		hmCustomButtonsActions.put(strLabelTextIdNew,action);
+//		return this;
+//	}
 	public DialogListEntryData<T> addCustomButtonAction(String strLabelTextId, T action){
 		hmCustomButtonsActions.put(strLabelTextId,action);
+		return this;
+	}
+	public DialogListEntryData<T> clearCustomButtonActions(){
+		hmCustomButtonsActions.clear();
 		return this;
 	}
 	
@@ -221,11 +234,11 @@ public class DialogListEntryData<T> implements Savable{
 	public ArrayList<DialogListEntryData<T>> getChildrenCopy() {
 		return new ArrayList<DialogListEntryData<T>>(aChildList);
 	}
-
+	
 	public String getUId() {
 		return strUniqueId;
 	}
-
+	
 //	public void setUId(String strUId) {
 //		this.strUId = strUId;
 //	}

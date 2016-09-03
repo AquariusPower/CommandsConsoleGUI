@@ -162,7 +162,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		return vivo;
 	}
 	
-	public String getVarId() {
+	public String getUniqueVarId() {
 		if(strUniqueVarId==null){
 			setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(getOwner(), this, true));
 		}

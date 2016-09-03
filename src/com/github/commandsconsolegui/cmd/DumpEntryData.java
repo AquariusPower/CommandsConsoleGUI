@@ -118,6 +118,7 @@ public class DumpEntryData{
 	
 	/**
 	 * The message as key is important to help on avoiding duplicates.
+	 * So try to make them unique when it will be useful.
 	 * @param strLineOriginal
 	 * @return
 	 */

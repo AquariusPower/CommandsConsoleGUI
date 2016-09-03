@@ -140,7 +140,7 @@ public class FloatDoubleVarField extends VarCmdFieldAbs<Double,FloatDoubleVarFie
 
 	@Override
 	public String getReport() {
-		return getVarId()+" = "+MiscI.i().fmtFloat(getDouble(),3);
+		return getUniqueVarId()+" = "+MiscI.i().fmtFloat(getDouble(),3);
 	}
 
 	@Override
