@@ -136,7 +136,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 ////			throw new NullPointerException("asked for '"+strCmd+"' but was already set to: "+getUniqueCmdId());
 //		}
 		
-		setUniqueCmdId(new IdTmp(false, strCmd, strCmd));
+		setUniqueId(new IdTmp(false, strCmd, strCmd));
 	}
 	
 //	public String getCmdId(){

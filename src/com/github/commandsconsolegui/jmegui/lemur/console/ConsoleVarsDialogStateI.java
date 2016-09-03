@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.jmegui.lemur.console;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBasicDialogStateAbs;
@@ -67,9 +68,12 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	private void prepareListData() {
 		ArrayList<VarCmdFieldAbs> avcf = VarCmdFieldAbs.getListFullCopy();
 		for(VarCmdFieldAbs vcf:avcf){
-			DialogListEntryData<T> dled = new DialogListEntryData<T>();
-			dled.setText(vcf.getUniqueCmdId(), vcf);
-			addEntry(dled);
+//			if(vcf instanceof StringCmdField)
+			String str = vcf.getVarId();
+			if(str!=null){
+				addEntry(new DialogListEntryData<T>().setText(str, vcf));
+			}
+			
 		}
 	}
 	

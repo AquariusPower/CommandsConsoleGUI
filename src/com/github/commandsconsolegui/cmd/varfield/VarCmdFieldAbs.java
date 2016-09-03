@@ -48,7 +48,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
  */
 public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implements IReflexFillCfgVariant{//, IVarIdValueOwner{
 //	private boolean bReflexingIdentifier = true;
-	private String strVarId = null;
+	private String strUniqueVarId = null;
 	private String strUniqueCmdId = null;
 	private String strSimpleCmdId = null;
 	
@@ -163,11 +163,11 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	}
 	
 	public String getVarId() {
-		if(strVarId==null){
-			setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(getOwner(), this, true));
+		if(strUniqueVarId==null){
+			setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(getOwner(), this, true));
 		}
 		
-		return strVarId;
+		return strUniqueVarId;
 	}
 	
 	
@@ -176,17 +176,18 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 //		return getThis();
 //	}
 	
-	protected S setUniqueCmdId(IdTmp id){
+	protected S setUniqueId(IdTmp id){
 		String strExceptionId = null;
 		
 		/**
 		 * must be an exception as it can have already been read/collected with automatic value.
+		 * The exception control is strExceptionId.
 		 */
 		if(id.bIsVariable){
-			if(strVarId!=null){
-				strExceptionId=strVarId;
+			if(strUniqueVarId!=null){
+				strExceptionId=strUniqueVarId;
 			}else{
-				strVarId=id.strUniqueCmdId;
+				strUniqueVarId=id.strUniqueCmdId;
 			}
 		}else{
 			if(strUniqueCmdId!=null){
@@ -216,7 +217,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	 * @return
 	 */
 	protected S setCustomUniqueCmdId(String strUniqueCmdId, boolean bIsVariable){
-		setUniqueCmdId(new IdTmp(bIsVariable,strUniqueCmdId,strUniqueCmdId));
+		setUniqueId(new IdTmp(bIsVariable,strUniqueCmdId,strUniqueCmdId));
 		return getThis();
 	}
 
@@ -227,7 +228,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	
 	private void chkAndInit(){
 		if(strUniqueCmdId==null){
-			setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this,false));
+			setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this,false));
 		}
 	}
 	

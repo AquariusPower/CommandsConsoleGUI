@@ -134,7 +134,7 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 		 * if this is called at reflex fill method.
 		 */
 //		super.strCmdId=errorMessage();
-		super.setUniqueCmdId(ReflexFillI.i().createIdentifierWithFieldName(getOwner(), this, false));
+		super.setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(getOwner(), this, false));
 //		throw new NullPointerException("not initialized properly: "+this);
 	}
 //	
@@ -183,6 +183,12 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 	}
 
 	@Override
+	public Object getValueRaw() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public String getVarId() {
 		/**
 		 * no var to console commands yet.
@@ -190,17 +196,10 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 		 */
 		return null; 
 	}
-
-	@Override
-	public Object getValueRaw() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	@Override
 	public StringCmdField setConsoleVarLink(CommandsDelegator.CompositeControl ccCD, VarIdValueOwnerData vivo) {
 //	public StringCmdField setConsoleVarLink(VarIdValueOwnerData vivo) {
-		throw new PrerequisitesNotMetException("TODO should this method do nothing here?", this, vivo); //TODO
+		throw new PrerequisitesNotMetException("TODO: Each command could have a variable storing it's possible return value!", this, vivo); //TODO
 	}
 
 	@Override

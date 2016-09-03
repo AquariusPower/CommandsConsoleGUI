@@ -34,6 +34,7 @@ import java.util.Map.Entry;
 
 import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.export.Savable;
@@ -99,6 +100,7 @@ public class DialogListEntryData<T> implements Savable{
 		return this.objUser;
 	}
 	public DialogListEntryData<T> updateTextTo(String strText) {
+		if(strText==null)throw new PrerequisitesNotMetException("null text", this, strText);
 		this.strText=strText;
 		return this;
 	}
@@ -110,7 +112,8 @@ public class DialogListEntryData<T> implements Savable{
 	 * @return
 	 */
 	public DialogListEntryData<T> setText(String strText, Object objUser) {
-		this.strText = strText;
+		updateTextTo(strText);
+//		this.strText = strText;
 		this.objUser=objUser;
 //		this.objRef=objReference;
 		return this;
