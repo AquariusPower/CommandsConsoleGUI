@@ -40,6 +40,7 @@ import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
+import com.github.commandsconsolegui.misc.MsgI;
 //import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -56,6 +57,8 @@ import com.simsilica.lemur.Container;
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *
+ * @param <T> see {@link DialogListEntryData}
+ * @param <R> is for getThis() concrete auto class type inherited trick
  */
 public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> extends CmdConditionalStateAbs implements IReflexFillCfg{
 	private Spatial	sptContainerMain;
@@ -203,7 +206,11 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		setCmdSuffix("");
 		
 //		ConditionalStateManagerI.i().
-		if(cfg.getId()==null || cfg.getId().isEmpty())throw new PrerequisitesNotMetException("invalid UI identifier");
+		if(cfg.getId()==null || cfg.getId().isEmpty()){
+//			throw new PrerequisitesNotMetException("invalid UI identifier");
+			MsgI.i().warn("automatic UI id for", this);
+			cfg.setId(this.getClass().getSimpleName());
+		}
 //		this.strCaseInsensitiveId=cfg.strUIId;
 		
 //		this.strCmd=strCmdPrefix+strUIId+strCmdSuffix;

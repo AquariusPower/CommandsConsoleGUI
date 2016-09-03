@@ -3146,6 +3146,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	private void setupVarsAllFrom(ArrayList<VarCmdFieldAbs> avcf){
 //		ArrayList<IVarIdValueOwner> a2 = new ArrayList<IVarIdValueOwner>(a);
 		
+		/**
+		 * check for conflicting var ids
+		 */
 		for(VarCmdFieldAbs vcf:avcf.toArray(new VarCmdFieldAbs[0])){
 			for(VarCmdFieldAbs vcf2:avcf.toArray(new VarCmdFieldAbs[0])){
 				if(vcf==vcf2)continue; //skip self
@@ -3377,7 +3380,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	
 	private boolean initialize(){
 		if(!bConfigured)throw new NullPointerException("not configured yet");
-		if(bInitialized)throw new NullPointerException("already initialized");
+		if(bInitialized)throw new NullPointerException("already initialized, remove dup");
 		
 		tdDumpQueuedSlowEntry.updateTime();
 		

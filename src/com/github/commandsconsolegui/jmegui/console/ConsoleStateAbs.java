@@ -95,6 +95,8 @@ import com.jme3.texture.Texture2D;
  * 
  * Project at: https://github.com/AquariusPower/CommandsConsoleGUI
  * 
+ * More info at {@link BaseDialogStateAbs}
+ * 
  * @author AquariusPower <https://github.com/AquariusPower>
  *	
  */

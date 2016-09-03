@@ -25,89 +25,60 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.jmegui.lemur.dialog;
+package com.github.commandsconsolegui.jmegui.lemur.console;
 
+import java.util.ArrayList;
+
+import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBasicDialogStateAbs;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.MaintenanceListDialogState;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.MaintenanceListDialogState.CfgParm;
+import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 
 /**
- * 
  * @author AquariusPower <https://github.com/AquariusPower>
- *
  */
-public class QuestionDialogState<T extends Command<Button>> extends LemurBasicDialogStateAbs<T,QuestionDialogState<T>> {
-	private DialogListEntryData<T>	dledYes;
-	private DialogListEntryData<T>	dledNo;
-	
-	public static class CfgParm extends LemurBasicDialogStateAbs.CfgParm{
-		public CfgParm(
-				Float fDialogWidthPercentOfAppWindow,
+public class ConsoleVarsDialogStateI<T extends Command<Button>> extends MaintenanceListDialogState<T> {
+	private static ConsoleVarsDialogStateI<Command<Button>>	instance=new ConsoleVarsDialogStateI<Command<Button>>();
+	public static ConsoleVarsDialogStateI<Command<Button>> i(){return instance;}
+
+	public static class CfgParm<T> extends MaintenanceListDialogState.CfgParm{
+		public CfgParm(Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow,
-				Float fInfoHeightPercentOfDialog, Integer iEntryHeightPixels) {
-			super(fDialogWidthPercentOfAppWindow,
-					fDialogHeightPercentOfAppWindow, fInfoHeightPercentOfDialog,
-					iEntryHeightPixels);
-//			super.setUIId(QuestionDialogStateAbs.class.getSimpleName());
+				Float fInfoHeightPercentOfDialog, Integer iEntryHeightPixels,
+				LemurDialogGUIStateAbs diagChoice, LemurDialogGUIStateAbs diagQuestion) {
+			super(fDialogWidthPercentOfAppWindow, fDialogHeightPercentOfAppWindow,
+					fInfoHeightPercentOfDialog, iEntryHeightPixels, diagChoice, diagQuestion);
 		}
 	}
-	private CfgParm	cfg;
+	private CfgParm<T>	cfg;
 	@Override
-	public QuestionDialogState<T> configure(ICfgParm icfg) {
-		cfg = (CfgParm)icfg;
+	public ConsoleVarsDialogStateI<T> configure(ICfgParm icfg) {
+		cfg = (CfgParm<T>)icfg;
+		
 		super.configure(cfg);
+		
 		return storeCfgAndReturnSelf(icfg);
+	}
+	
+	private void prepareListData() {
+		ArrayList<VarCmdFieldAbs> avcf = VarCmdFieldAbs.getListFullCopy();
+		for(VarCmdFieldAbs vcf:avcf){
+			DialogListEntryData<T> dled = new DialogListEntryData<T>();
+			dled.setText(vcf.getUniqueCmdId(), vcf);
+			addEntry(dled);
+		}
 	}
 	
 	@Override
 	protected boolean initAttempt() {
-		super.setOptionChoiceSelectionMode(true);
+		if(!super.initAttempt())return false;
 		
-		dledYes = addEntryQuick("[ yes    ]");
-		dledNo  = addEntryQuick("[     no ]");
-		
-		return super.initAttempt();
-	}
-	
-	@Override
-	protected boolean initGUI() {
-		getCellRenderer().setCellHeightMult(2f);
-		
-		if(!super.initGUI())return false;
+		prepareListData();
 		
 		return true;
 	}
-	
-	public boolean isYes(DialogListEntryData<T> dled){
-		return dled==dledYes;
-	}
-	
-	public boolean isNo(DialogListEntryData<T> dled){
-		return dled==dledNo;
-	}
-
-	@Override
-	public boolean prepareTestData() {
-		return true;
-	}
-
-	@Override
-	protected QuestionDialogState<T> getThis() {
-		return this;
-	}
-	
-	@Override
-	protected boolean enableAttempt() {
-		if(!super.enableAttempt())return false;
-		
-		selectEntry(dledNo);
-		
-		return true;
-	}
-	
-//	@Override
-//	protected Integer getEntryHeightPixels() {
-//		return super.getEntryHeightPixels()*2;
-//	}
 }
-

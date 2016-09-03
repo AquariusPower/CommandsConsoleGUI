@@ -28,6 +28,7 @@
 package com.github.commandsconsolegui.globals;
 
 import com.github.commandsconsolegui.misc.CheckInitAndCleanupI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 
 /**
  * Global Reference Holder
@@ -60,7 +61,9 @@ public abstract class GlobalHolderAbs<T> { //not abstract methods yet tho...
 	 * @return
 	 */
 	public T get(){
-		if(!isSet())throw new NullPointerException("global not set yet...");
+		if(!isSet()){
+			throw new PrerequisitesNotMetException("global not set yet...", this);
+		}
 		return obj;
 	}
 	

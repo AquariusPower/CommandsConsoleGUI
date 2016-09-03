@@ -44,7 +44,7 @@ import com.simsilica.lemur.Command;
  *
  */
 public class MaintenanceListDialogState<T extends Command<Button>> extends LemurBasicDialogStateAbs<T,MaintenanceListDialogState<T>> {
-	public static class CfgParm<T extends Command<Button>> extends LemurBasicDialogStateAbs.CfgParm{
+	public static class CfgParm<T> extends LemurBasicDialogStateAbs.CfgParm{
 		private LemurDialogGUIStateAbs<T,?>	diagChoice;
 		private LemurDialogGUIStateAbs<T,?>	diagQuestion;
 
@@ -59,7 +59,7 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 					iEntryHeightPixels);
 			this.diagChoice=diagChoice;
 			this.diagQuestion=diagQuestion;
-			super.setUIId(MaintenanceListDialogState.class.getSimpleName());
+//			super.setUIId(MaintenanceListDialogStateAbs.class.getSimpleName());
 		}
 	}
 	private CfgParm<T>	cfg;
@@ -67,8 +67,8 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 	public MaintenanceListDialogState<T> configure(ICfgParm icfg) {
 		cfg = (CfgParm<T>)icfg;
 		
-		addModalDialog(cfg.diagChoice);
-		addModalDialog(cfg.diagQuestion);
+		if(cfg.diagChoice!=null)addModalDialog(cfg.diagChoice);
+		if(cfg.diagQuestion!=null)addModalDialog(cfg.diagQuestion);
 		
 		super.configure(cfg);
 		
@@ -76,7 +76,7 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 	}
 	
 	@Override
-	public boolean prepareTestData(){
+	protected boolean prepareTestData(){
 		addEntryQuick(null);
 		addEntryQuick(null);
 		

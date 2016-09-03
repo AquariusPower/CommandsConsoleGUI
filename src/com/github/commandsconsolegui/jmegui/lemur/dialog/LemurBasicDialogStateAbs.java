@@ -99,7 +99,7 @@ public abstract class LemurBasicDialogStateAbs<T,R extends LemurBasicDialogState
 		return super.updateAttempt(tpf);
 	}
 	
-	public abstract boolean prepareTestData();
+	protected abstract boolean prepareTestData();
 	
 	@SuppressWarnings("unchecked")
 	public DialogListEntryData<T> getDataFrom(Spatial spt){

@@ -25,52 +25,24 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.jmegui.lemur.dialog;
-
-import com.simsilica.lemur.Button;
-import com.simsilica.lemur.Command;
+package com.github.commandsconsolegui.misc;
 
 /**
- * TODO CfgChoiceDialogState
  * 
  * @author AquariusPower <https://github.com/AquariusPower>
- *
+ * 
  */
-public class ChoiceDialogState<T extends Command<Button>> extends LemurBasicDialogStateAbs<T,ChoiceDialogState<T>> {
-	public static class CfgParm extends LemurBasicDialogStateAbs.CfgParm{
-		public CfgParm(
-				Float fDialogWidthPercentOfAppWindow,
-				Float fDialogHeightPercentOfAppWindow,
-				Float fInfoHeightPercentOfDialog, Integer iEntryHeightPixels) {
-			super(fDialogWidthPercentOfAppWindow,
-					fDialogHeightPercentOfAppWindow, fInfoHeightPercentOfDialog,
-					iEntryHeightPixels);
-//			super.setUIId(ChoiceDialogStateAbs.class.getSimpleName());
-		}
-	}
-	private CfgParm	cfg;
-	@Override
-	public ChoiceDialogState<T> configure(ICfgParm icfg) {
-		cfg = (CfgParm)icfg;
-		super.configure(cfg);
-		return storeCfgAndReturnSelf(icfg);
-	}
+public interface IConfigure<T extends IConfigure<T>> {
+	/**
+	 * Each subclass can have the same name "CfgParm".<br>
+	 * <br>
+	 * Just reference the CfgParm of the superclass directly ex.:<br> 
+	 * 	new ConditionalAppStateAbs.CfgParm()<br>
+	 * <br>
+	 * This is also very important when restarting (configuring a new and fresh robust instance)<br> 
+	 */
+	public static interface ICfgParm{}
 	
-	@Override
-	protected boolean initAttempt() {
-		super.setOptionChoiceSelectionMode(true);
-		
-		return super.initAttempt();
-	}
-	
-	@Override
-	public boolean prepareTestData(){
-		for(int i=0;i<10;i++)addEntryQuick(null); //some test data
-		return true;
-	}
-
-	@Override
-	protected ChoiceDialogState<T> getThis() {
-		return this;
-	}
+	public boolean isConfigured();
+	public T configure(ICfgParm icfg);
 }

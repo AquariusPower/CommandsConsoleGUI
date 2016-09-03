@@ -701,7 +701,6 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		return getInputField().getText();
 	}
 	
-	@SuppressWarnings("unchecked")
 	public R addModalDialog(LemurDialogGUIStateAbs<T,?> diagModal){
 		diagModal.setDiagParent(this);
 		hmModals.put(diagModal.getId(),diagModal);

@@ -42,6 +42,7 @@ import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.MouseCursorListenerAbs;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.IConfigure;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -56,7 +57,7 @@ import com.simsilica.lemur.event.MouseEventControl;
 * @author AquariusPower <https://github.com/AquariusPower>
 *
 */
-public abstract class SimpleConsoleAppAbs extends SimpleApplication implements IConsoleCommandListener, IReflexFillCfg {
+public abstract class SimpleConsoleAppAbs extends SimpleApplication implements IConsoleCommandListener, IReflexFillCfg, IConfigure<SimpleConsoleAppAbs> {
 	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
 	private boolean bHideSettings=true;
 	private boolean	bStopping; 
@@ -71,6 +72,22 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
     super(initialStates);
   }
 	
+  @Override
+  public boolean isConfigured() {
+  	return false;
+  }
+  
+  public static class CfgParm implements ICfgParm {
+  }
+  private CfgParm cfg = null;
+  @Override
+  public SimpleConsoleAppAbs configure(ICfgParm icfg) {
+  	cfg = (CfgParm)icfg;
+  	
+  	
+  	return this;
+  }
+  
 	@Override
 	public void simpleInitApp() {
 		MiscJmeI.i().configure(GlobalCommandsDelegatorI.i());

@@ -199,6 +199,11 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 			ConsoleMouseCursorListenerI.i().configure();
 		}
 		
+//		if(!ConsoleVarsDialogStateI.i().isConfigured()){
+//			ConsoleVarsDialogStateI.i().configure(new ConsoleVarsDialogStateI.CfgParm(
+//				0.9f, 0.9f, 0.1f, null, null, null));
+//		}
+		
 		return storeCfgAndReturnSelf(icfg);
 	}
 	

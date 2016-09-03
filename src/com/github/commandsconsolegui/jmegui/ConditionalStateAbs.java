@@ -31,7 +31,7 @@ package com.github.commandsconsolegui.jmegui;
 import java.io.IOException;
 
 import com.github.commandsconsolegui.globals.GlobalHolderAbs.IGlobalOpt;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBasicDialogStateAbs.CfgParm;
+import com.github.commandsconsolegui.misc.IConfigure;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.app.Application;
@@ -58,7 +58,7 @@ import com.jme3.scene.Node;
  * @author AquariusPower <https://github.com/AquariusPower>
  *
  */
-public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
+public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigure<ConditionalStateAbs>{
 	
 	/**
 	 * This Id is only required if there is more than one state of the same class.
@@ -136,16 +136,6 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 	private boolean	bDiscarded;
 	
 	/**
-	 * Each subclass can have the same name "CfgParm".<br>
-	 * <br>
-	 * Just reference the CfgParm of the superclass directly ex.:<br> 
-	 * 	new ConditionalAppStateAbs.CfgParm()<br>
-	 * <br>
-	 * This is also very important when restarting (configuring a new and fresh robust instance)<br> 
-	 */
-	public static interface ICfgParm{}
-	
-	/**
 	 * see {@link ICfgParm}
 	 */
 	public static class CfgParm implements ICfgParm{
@@ -170,6 +160,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 	private boolean	bTryingToEnable;
 
 	private boolean	bTryingToDisable;
+	
 	/**
 	 * Configure simple references assignments and variable values.<br>
 	 * Must be used before initialization.<br>
@@ -179,6 +170,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 	 * 
 	 * @param cp
 	 */
+	@Override
 	public ConditionalStateAbs configure(ICfgParm icfg){
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
 		
@@ -240,6 +232,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 		MsgI.i().dbg(str, bSuccess, this);
 	}
 
+	@Override
 	public boolean isConfigured(){
 		return bConfigured;
 	}
@@ -597,7 +590,11 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt{
 	}
 
 	public String getId() {
-		if(strCaseInsensitiveId==null)throw new PrerequisitesNotMetException("id cant be null");
+		if(strCaseInsensitiveId==null){
+			throw new PrerequisitesNotMetException("id cant be null", 
+				this.isConfigured()?"configured(ok)":"this object was not configured!!!", 
+				this);
+		}
 		return strCaseInsensitiveId;
 	}
 	

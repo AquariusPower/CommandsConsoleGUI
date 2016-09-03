@@ -34,12 +34,14 @@ import com.github.commandsconsolegui.extras.SingleAppInstanceI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.jmegui.console.SimpleConsoleAppAbs;
+import com.github.commandsconsolegui.jmegui.console.SimpleConsoleAppAbs.CfgParm;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceDialogState;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.MaintenanceListDialogState;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.QuestionDialogState;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.misc.IConfigure.ICfgParm;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -94,6 +96,16 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		super();
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 	}
+	
+  public static class CfgParm extends SimpleConsoleAppAbs.CfgParm {
+  }
+  private CfgParm cfg = null;
+  @Override
+  public ConsoleTestI configure(ICfgParm icfg) {
+  	cfg = (CfgParm)icfg;
+		super.configure(icfg);
+		return this;
+  }
 	
 	public boolean endDevCustomMethod(Integer i){
 		CommandsDelegator cd = GlobalCommandsDelegatorI.i();
@@ -155,6 +167,9 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 //			.addModalDialog(diagQuestion);
 		diagList = new MaintenanceListDialogState<T>().configure(new MaintenanceListDialogState.CfgParm<T>(
 			null, null, null, null, diagChoice, diagQuestion).doPrepareTestData());
+		
+//		//////////////////////// super init depends on globals
+//		super.simpleInitApp(); // basic initializations
 	}
 	
 	/**
