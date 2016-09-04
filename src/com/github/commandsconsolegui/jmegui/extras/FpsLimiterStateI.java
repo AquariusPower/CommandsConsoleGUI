@@ -57,12 +57,17 @@ public class FpsLimiterStateI extends CmdConditionalStateAbs{
 		setPrefixCmdWithIdToo(true);
 	}
 	
-	public static class CfgParm implements ICfgParm{} //look at super class
+	public static class CfgParm extends CmdConditionalStateAbs.CfgParm{
+		public CfgParm() {
+			super(null);
+		}
+		
+	} 
 	@Override
 	public FpsLimiterStateI configure(ICfgParm icfg) {
 		setMaxFps(60);
 //		super.configure(new CmdConditionalStateAbs.CfgParm(FpsLimiterStateI.class.getSimpleName()));
-		super.configure(new CmdConditionalStateAbs.CfgParm(null));
+		super.configure(icfg);
 		return storeCfgAndReturnSelf(icfg);
 	}
 	

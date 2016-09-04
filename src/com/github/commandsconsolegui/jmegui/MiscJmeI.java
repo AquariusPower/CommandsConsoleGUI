@@ -35,11 +35,11 @@ import java.nio.BufferUnderflowException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.concurrent.Callable;
 
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableWeak;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.font.BitmapText;
@@ -293,9 +293,9 @@ public class MiscJmeI {
 	}
 
 	public TimedDelayVarField retrieveUserDataTimedDelay(Spatial sptHolder, String strKey, final float fDelay){
-		TimedDelayVarField td = retrieveUserData(TimedDelayVarField.class, sptHolder, strKey, new Callable<TimedDelayVarField>() {
+		TimedDelayVarField td = retrieveUserData(TimedDelayVarField.class, sptHolder, strKey, new CallableWeak<TimedDelayVarField>() {
 			@Override
-			public TimedDelayVarField call() throws Exception {
+			public TimedDelayVarField call() {
 				return new TimedDelayVarField(fDelay,"").setActive(true);
 			}
 		});
@@ -320,7 +320,7 @@ public class MiscJmeI {
 //		return td;
 //	}
 	
-	public <R> R retrieveUserData(Class<R> clReturn, Spatial sptHolder, String strKey, Callable<R> callCreateInstance){
+	public <R> R retrieveUserData(Class<R> clReturn, Spatial sptHolder, String strKey, CallableWeak<R> callCreateInstance){
 		@SuppressWarnings("unchecked")
 		SavableHolder<R> sh = (SavableHolder<R>)sptHolder.getUserData(strKey);
 		

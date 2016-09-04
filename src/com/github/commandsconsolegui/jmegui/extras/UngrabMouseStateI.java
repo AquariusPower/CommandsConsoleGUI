@@ -54,12 +54,12 @@ public class UngrabMouseStateI extends ConditionalStateAbs {
 	 */
 	private boolean	bKeepUngrabbedOnSlowDown = false;
 	
-	public static class CfgParm implements ICfgParm{
+	public static class CfgParm extends ConditionalStateAbs.CfgParm{
 		Long lSlowMachineDelayToUngrabMilis;
 		Boolean bKeepUngrabbedOnSlowdown;
 		public CfgParm(Long lSlowMachineDelayToUngrabMilis,
 				Boolean bKeepUngrabbedOnSlowdown) {
-			super();
+			super(null);
 			this.lSlowMachineDelayToUngrabMilis = lSlowMachineDelayToUngrabMilis;
 			this.bKeepUngrabbedOnSlowdown = bKeepUngrabbedOnSlowdown;
 		}
@@ -73,8 +73,7 @@ public class UngrabMouseStateI extends ConditionalStateAbs {
 	public UngrabMouseStateI configure(ICfgParm icfg) {
 //	public void configure(Long lSlowMachineDelayToUngrabMilis, Boolean bKeepUngrabbedOnSlowdown) {
 		CfgParm cfg = (CfgParm)icfg;
-		super.configure(new ConditionalStateAbs.CfgParm(
-				GlobalAppRefI.i(),null));
+		super.configure(icfg);
 		
 		if(cfg.lSlowMachineDelayToUngrabMilis!=null)this.lDelayToUngrabMilis=cfg.lSlowMachineDelayToUngrabMilis;
 		if(cfg.bKeepUngrabbedOnSlowdown!=null)this.bKeepUngrabbedOnSlowDown=cfg.bKeepUngrabbedOnSlowdown;

@@ -251,7 +251,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		
 		return rfcfg;
 	}
-	
+
 //	@Override
 //	public void stop() {
 //		getCamera().setViewPort(0f, 1f, 0f, 1f);

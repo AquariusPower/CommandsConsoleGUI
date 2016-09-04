@@ -829,7 +829,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 //							if(!isInitialized()){
 //								initialize();
 //							}
-							toggleRequest();
+							requestToggleEnabled();
 //							setEnabledRequest(!isEnabled());
 							
 							/**
@@ -2332,46 +2332,6 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	public void setScrollRequestTarget(Spatial target) {
 		this.sptScrollTarget = target;
 	}
-	
-//	@Override
-//	public void recreateConsoleGui() {
-//		if(rss.isProcessingRequest()){
-//			cd().dumpWarnEntry("Console recreation request is already being processed...");
-//			return;
-//		}
-//		
-////		Callable<Void> detach = new Callable<Void>() {
-////			@Override
-////			public Void call() throws Exception {
-////				app().getStateManager().detach(ConsoleJmeStateAbs.this);
-////				return null;
-////			}
-////		};
-////		
-////		final boolean bWasEnabled=isEnabled();
-////		Callable<Void> attach = new Callable<Void>() {
-////			@Override
-////			public Void call() throws Exception {
-////				app().getStateManager().attach(ConsoleJmeStateAbs.this);
-////				if(bWasEnabled){
-////					setEnabledRequest(true);
-////				}
-////				return null;
-////			}
-////		};
-//		
-//		Callable<Void> postInitialization = new Callable<Void>() {
-//			@Override
-//			public Void call() throws Exception {
-//				modifyConsoleHeight(fConsoleHeightPerc);
-//				scrollToBottomRequest();
-//				return null;
-//			}
-//		};
-//		
-////		rss.request(detach,attach,postInitialization);
-//		rss.request(postInitialization);
-//	}
 	
 	/**
 	 * TODO WIP, not working yet... may be it is not possible to convert at all yet?

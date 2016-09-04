@@ -43,6 +43,7 @@ public interface IConfigure<T extends IConfigure<T>> {
 	 */
 	public static interface ICfgParm{}
 	
-	public boolean isConfigured();
-	public T configure(ICfgParm icfg);
+	void assertConfigured();
+	boolean isConfigured();
+	T configure(ICfgParm icfg);
 }

@@ -329,7 +329,7 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 	public static class CfgParm extends ConditionalStateAbs.CfgParm{
 		Class<?>[] aclassUserActionStack;
 		public CfgParm(Class<?>... aclassUserActionStack) {
-			super(GlobalAppRefI.i(), null);
+			super(null);
 			this.aclassUserActionStack=aclassUserActionStack;
 		}
 	}

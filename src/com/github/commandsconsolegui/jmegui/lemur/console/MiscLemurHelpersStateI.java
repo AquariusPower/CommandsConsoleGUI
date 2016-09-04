@@ -592,10 +592,11 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 		return super.updateAttempt(tpf);
 	}
 	
-	/**
-	 * Keep this as implementation methodology. Look at super classes also.
-	 */
-	public static class CfgParm implements ICfgParm{}
+	public static class CfgParm extends CmdConditionalStateAbs.CfgParm{
+		public CfgParm() {
+			super(null);
+		}
+	}
 	@Override
 	public MiscLemurHelpersStateI configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
@@ -603,7 +604,7 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 //		super.icfgOfInstance=icfg;
 		
 //		super.configure(new CmdConditionalStateAbs.CfgParm(LemurMiscHelpersStateI.class.getSimpleName()));
-		super.configure(new CmdConditionalStateAbs.CfgParm(null));
+		super.configure(icfg);
 		
 		return storeCfgAndReturnSelf(icfg);
 	}

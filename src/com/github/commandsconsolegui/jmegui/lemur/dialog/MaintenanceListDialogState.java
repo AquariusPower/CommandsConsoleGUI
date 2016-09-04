@@ -58,9 +58,25 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 			super(fDialogWidthPercentOfAppWindow,
 					fDialogHeightPercentOfAppWindow, fInfoHeightPercentOfDialog,
 					fEntryHeightMultiplier);
-			this.diagChoice=diagChoice;
-			this.diagQuestion=diagQuestion;
+			this.setDiagChoice(diagChoice);
+			this.setDiagQuestion(diagQuestion);
 //			super.setUIId(MaintenanceListDialogStateAbs.class.getSimpleName());
+		}
+
+		public LemurDialogGUIStateAbs<T,?> getDiagChoice() {
+			return diagChoice;
+		}
+
+		public void setDiagChoice(LemurDialogGUIStateAbs<T,?> diagChoice) {
+			this.diagChoice = diagChoice;
+		}
+
+		public LemurDialogGUIStateAbs<T,?> getDiagQuestion() {
+			return diagQuestion;
+		}
+
+		public void setDiagQuestion(LemurDialogGUIStateAbs<T,?> diagQuestion) {
+			this.diagQuestion = diagQuestion;
 		}
 	}
 	private CfgParm<T>	cfg;
@@ -68,8 +84,8 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 	public MaintenanceListDialogState<T> configure(ICfgParm icfg) {
 		cfg = (CfgParm<T>)icfg;
 		
-		if(cfg.diagChoice!=null)addModalDialog(cfg.diagChoice);
-		if(cfg.diagQuestion!=null)addModalDialog(cfg.diagQuestion);
+		if(cfg.getDiagChoice()!=null)addModalDialog(cfg.getDiagChoice());
+		if(cfg.getDiagQuestion()!=null)addModalDialog(cfg.getDiagQuestion());
 		
 		super.configure(cfg);
 		
@@ -151,9 +167,9 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 
 	@Override
 	protected void actionCustomAtEntry(DialogListEntryData<T> dledSelected) {
-		if(cfg.diagChoice!=null){
+		if(cfg.getDiagChoice()!=null){
 			super.actionCustomAtEntry(dledSelected);
-			openModalDialog(cfg.diagChoice.getId(), dledSelected, (T)cmdCfg);
+			openModalDialog(cfg.getDiagChoice().getId(), dledSelected, (T)cmdCfg);
 		}else{
 			AudioUII.i().playOnUserAction(AudioUII.EAudio.Failure);
 			GlobalCommandsDelegatorI.i().dumpDevWarnEntry("no choice dialog configured for "+this, dledSelected);
@@ -168,8 +184,8 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 			
 			if(dled.isParent()){
 //				CustomDialogGUIState.this.setDataToApplyModalChoice(data);
-				if(cfg.diagQuestion!=null){
-					MaintenanceListDialogState.this.openModalDialog(cfg.diagQuestion.getId(), dled, (T)this);
+				if(cfg.getDiagQuestion()!=null){
+					MaintenanceListDialogState.this.openModalDialog(cfg.getDiagQuestion().getId(), dled, (T)this);
 					AudioUII.i().play(EAudio.Question);
 				}else{
 					AudioUII.i().playOnUserAction(AudioUII.EAudio.Failure);

@@ -293,7 +293,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		getSouthContainer().addChild(lblSelectedEntryStatus, BorderLayout.Position.North);
 		
 		// mainly used as a list filter
-		setIntputField(new TextField("",getStyle()));
+		setInputField(new TextField("",getStyle()));
 		getInputField().setName(getId()+"_InputField");
 		LemurFocusHelperStateI.i().addFocusChangeListener(getInputField());
 		getSouthContainer().addChild(getInputField(),BorderLayout.Position.South);
@@ -700,6 +700,12 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	@Override
 	public String getInputText() {
 		return getInputField().getText();
+	}
+	
+	@Override
+	protected R setInputText(String str) {
+		getInputField().setText(str);
+		return getThis();
 	}
 	
 	public R addModalDialog(LemurDialogGUIStateAbs<T,?> diagModal){

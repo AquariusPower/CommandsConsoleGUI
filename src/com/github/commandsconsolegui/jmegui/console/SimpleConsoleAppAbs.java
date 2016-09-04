@@ -28,7 +28,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.github.commandsconsolegui.jmegui.console;
 
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
-import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.extras.SingleAppInstanceI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
@@ -42,7 +41,6 @@ import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.MouseCursorListenerAbs;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
-import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.IConfigure;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -96,7 +94,7 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 		 * Shall be simple enough to not require any exact order.
 		 * 
 		 * Anything more complex can be postponed (from withing the config itself)
-		 * with {@link CallQueueI#appendCall(java.util.concurrent.Callable)}.
+		 * with {@link CallQueueI}, or just put these things at initialization method.
 		 */
 		GlobalCommandsDelegatorI.i().configure();//ConsoleLemurStateI.i());
 		ConsoleLemurStateI.i().configure(new ConsoleLemurStateI.CfgParm(
@@ -126,6 +124,7 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
   
 	@Override
 	public void simpleInitApp() {
+		assertConfigured();
 //	SingleInstanceState.i().configureBeforeInitializing(this,true);
 		SingleAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);
 	}
@@ -152,5 +151,9 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
+	}
+
+	@Override
+	public void assertConfigured() {
 	}
 }	

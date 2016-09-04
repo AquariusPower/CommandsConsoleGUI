@@ -28,9 +28,9 @@
 package com.github.commandsconsolegui.jmegui;
 
 import java.util.HashMap;
-import java.util.concurrent.Callable;
 
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableWeak;
 
 /**
  * Dispatches multi-click cmds when they are ready.
@@ -57,7 +57,7 @@ public class MultiClickCondStateI extends ConditionalStateAbs {
 		 *   3rd click will execute callCmd3
 		 * So only 1st click and 3rd multi-click will be recognized.
 		 */
-		Callable<Boolean> callCmd=null;
+		CallableWeak<Boolean> callCmd=null;
 		
 		int	iClickCount=0;
 
@@ -68,7 +68,7 @@ public class MultiClickCondStateI extends ConditionalStateAbs {
 	
 	public static class CfgParm extends ConditionalStateAbs.CfgParm{
 		public CfgParm() {
-			super(GlobalAppRefI.i(), null);
+			super(null);
 		}
 	}
 	
@@ -92,7 +92,7 @@ public class MultiClickCondStateI extends ConditionalStateAbs {
 			
 			boolean bRunNow = false;
 			boolean bRemoveNow = false;
-			Callable<Boolean> callCmd = mc.callCmd;
+			CallableWeak<Boolean> callCmd = mc.callCmd;
 			switch(mc.eCallMode){
 				case OnceAfterDelay:
 					bRemoveNow = bRunNow = bTimedOut;
@@ -167,7 +167,7 @@ public class MultiClickCondStateI extends ConditionalStateAbs {
 	 * @param objActivator
 	 * @return
 	 */
-	public Callable<Boolean> getActivatorCurrentCallCmd(Object objActivator){
+	public CallableWeak<Boolean> getActivatorCurrentCallCmd(Object objActivator){
 		MultiClick mc = hmActivatorCmd.get(objActivator);
 		if(mc==null)return null;
 		return mc.callCmd;
@@ -179,7 +179,7 @@ public class MultiClickCondStateI extends ConditionalStateAbs {
 	 * @param callCmd can be null to disable, return true means success, and will be removed from the list
 	 * @param bCallPromptly
 	 */
-	public void updateActivator(ECallMode e, Object objActivator, Callable<Boolean> callCmd){
+	public void updateActivator(ECallMode e, Object objActivator, CallableWeak<Boolean> callCmd){
 		MultiClick mc = hmActivatorCmd.get(objActivator);
 		if(mc==null){
 			mc = new MultiClick();

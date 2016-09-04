@@ -202,7 +202,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		
 		if(!ConsoleVarsDialogStateI.i().isConfigured()){
 			ConsoleVarsDialogStateI.i().configure(new ConsoleVarsDialogStateI.CfgParm(
-				0.9f, 0.9f, 0.1f, 2.0f, null, null));
+				0.9f, 0.9f, 0.1f, 2.0f));
 		}
 		
 		return storeCfgAndReturnSelf(icfg);
@@ -383,7 +383,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		 * BOTTOM ELEMENT =================================================================
 		 */
 		// input
-		super.setIntputField(new TextField(""+cd().getCommandPrefix(),getStyle()));
+		super.setInputField(new TextField(""+cd().getCommandPrefix(),getStyle()));
     CursorEventControl.addListenersToSpatial(getInputField(), ConsoleMouseCursorListenerI.i());
 		LemurFocusHelperStateI.i().addFocusChangeListener(getInputField());
 //		fInputHeight = MiscJmeI.i().retrieveBitmapTextFor(getInputField()).getLineHeight();
@@ -1141,5 +1141,11 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	@Override
 	public Vector3f getMainSize() {
 		return getContainerMain().getPreferredSize();
+	}
+
+	@Override
+	protected ConsoleLemurStateI<T> setInputText(String str) {
+		getInputField().setText(str);
+		return getThis();
 	}
 }

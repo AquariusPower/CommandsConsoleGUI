@@ -97,7 +97,7 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 //	}
 	public static class CfgParm extends ConditionalStateAbs.CfgParm{
 		public CfgParm(String strId) {
-			super(GlobalAppRefI.i(), strId);
+			super(strId);
 		}
 	}
 	private CfgParm	cfg;

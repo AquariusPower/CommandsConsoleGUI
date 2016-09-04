@@ -40,6 +40,7 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceDialogState;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.MaintenanceListDialogState;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -54,31 +55,51 @@ import com.simsilica.lemur.Command;
 public class ConsoleVarsDialogStateI<T extends Command<Button>> extends MaintenanceListDialogState<T> {
 	private static ConsoleVarsDialogStateI<Command<Button>>	instance=new ConsoleVarsDialogStateI<Command<Button>>();
 	public static ConsoleVarsDialogStateI<Command<Button>> i(){return instance;}
-
-	public static class CfgParm<T> extends MaintenanceListDialogState.CfgParm{
-		public CfgParm(Float fDialogWidthPercentOfAppWindow,
-				Float fDialogHeightPercentOfAppWindow,
-				Float fInfoHeightPercentOfDialog, Float fEntryHeightMultiplier,
-				LemurDialogGUIStateAbs diagChoice, LemurDialogGUIStateAbs diagQuestion) {
-			super(fDialogWidthPercentOfAppWindow, fDialogHeightPercentOfAppWindow,
-					fInfoHeightPercentOfDialog, fEntryHeightMultiplier, diagChoice, diagQuestion);
+	
+	private static class VarChoiceDialogState extends ChoiceDialogState{
+		private static class CfgParm extends ChoiceDialogState.CfgParm{
+			public CfgParm(Float fDialogWidthPercentOfAppWindow,
+					Float fDialogHeightPercentOfAppWindow,
+					Float fInfoHeightPercentOfDialog, Float fEntryHeightMultiplier) {
+				super(fDialogWidthPercentOfAppWindow, fDialogHeightPercentOfAppWindow,
+						fInfoHeightPercentOfDialog, fEntryHeightMultiplier);
+				// TODO Auto-generated constructor stub
+			}
 		}
 	}
-	private CfgParm<T>	cfg;
+	private VarChoiceDialogState chd = new VarChoiceDialogState();
+	
+	public static class CfgParm extends MaintenanceListDialogState.CfgParm{
+		public CfgParm(Float fDialogWidthPercentOfAppWindow,
+				Float fDialogHeightPercentOfAppWindow,
+				Float fInfoHeightPercentOfDialog, Float fEntryHeightMultiplier) {
+			super(fDialogWidthPercentOfAppWindow, fDialogHeightPercentOfAppWindow,
+					fInfoHeightPercentOfDialog, fEntryHeightMultiplier, null, null);
+		}
+	}
+	private CfgParm	cfg;
 	@Override
 	public ConsoleVarsDialogStateI<T> configure(ICfgParm icfg) {
-		cfg = (CfgParm<T>)icfg;
+		cfg = (CfgParm)icfg;
+		
+		chd.configure(new VarChoiceDialogState.CfgParm(0.9f, 0.5f, 0.5f, null));//.setId(strId));
+		chd.setInputToTypeValueMode(true);
+		cfg.setDiagChoice(chd);
+		
+		cfg.setDiagQuestion(null);
 		
 		super.configure(cfg);
 		
-		return storeCfgAndReturnSelf(icfg);
+		return storeCfgAndReturnSelf(cfg);
 	}
 	
 	protected class ChangeValue implements Command<Button>{
 		@Override
 		public void execute(Button source) {
-			ConsoleVarsDialogStateI.this.changeValue(
+			ConsoleVarsDialogStateI.this.actionCustomAtEntry(
 				ConsoleVarsDialogStateI.this.getDledFrom(source));
+//			ConsoleVarsDialogStateI.this.changeValue(
+//				ConsoleVarsDialogStateI.this.getDledFrom(source));
 		}
 	}
 	private ChangeValue cv = new ChangeValue();
@@ -110,7 +131,8 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	protected void actionCustomAtEntry(DialogListEntryData<T> dledSelected) {
 		if(dledSelected.getUserObj() instanceof BoolTogglerCmdField){
 			changeValue(dledSelected);
-		}else{
+		}else
+		{
 			super.actionCustomAtEntry(dledSelected);
 		}
 	}

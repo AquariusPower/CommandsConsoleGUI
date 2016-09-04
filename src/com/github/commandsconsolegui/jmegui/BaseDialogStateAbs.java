@@ -70,6 +70,11 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 //	private String strStyle;
 	private StringVarField svfStyle = new StringVarField(this, (String)null, null);
 	
+	private Vector3f	v3fMainLocationBkp;
+	private Vector3f	v3fMainSize;
+	private String	strTokenTypeValue = "=";
+	
+	private boolean	bTypeValueMode;
 	private BaseDialogStateAbs<T,?> diagParent;
 	private ArrayList<BaseDialogStateAbs<T,?>> aModalChildList = new ArrayList<BaseDialogStateAbs<T,?>>();
 //	private DialogListEntryData<T>	dataToCfgReference;
@@ -192,8 +197,6 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		}
 	}
 	private CfgParm	cfg;
-	private Vector3f	v3fMainLocationBkp;
-	private Vector3f	v3fMainSize;
 	@Override
 	public R configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
@@ -360,6 +363,10 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 			v3fMainSize = getMainSize();
 		}
 		
+		if(getInputText().isEmpty()){
+			if(bTypeValueMode)setInputText(strTokenTypeValue);
+		}
+		
 		return super.enableAttempt();
 	}
 	
@@ -435,11 +442,18 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return MiscJmeI.i().retrieveBitmapTextFor((Node)sptIntputField).getLineHeight();
 	}
 	
-	protected R setIntputField(Spatial sptIntputField) {
+	protected R setInputField(Spatial sptIntputField) {
 		this.sptIntputField = sptIntputField;
 		return getThis();
 	}
-
+	
+	public R setInputToTypeValueMode(boolean bEnable){
+		this.bTypeValueMode=bEnable;
+		return getThis();
+	}
+	
+	protected abstract R setInputText(String str);
+	
 	public R getParentDialog(){
 		return (R)this.diagParent;
 	}
@@ -510,7 +524,16 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	 * override empty to disable filter
 	 */
 	protected void applyListKeyFilter(){
-		this.strLastFilter=getInputText();
+		String str = getInputText();
+		if(
+				getTokenTypeValue()==null
+				||
+				getTokenTypeValue().isEmpty()
+				||
+				!str.startsWith(getTokenTypeValue())
+		){
+			this.strLastFilter=str;
+		}
 	}
 	
 	/**
@@ -779,6 +802,14 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 //		this.strStyle = strStyle;
 //		svfStyle.setObjectRawValue(strStyle);
 		svfStyle.setObjectRawValue(strStyle);
+	}
+
+	public String getTokenTypeValue() {
+		return strTokenTypeValue;
+	}
+
+	protected void setTokenTypeValue(String strTokenTypeValue) {
+		this.strTokenTypeValue = strTokenTypeValue;
 	}
 
 //	public void setTitle(String strTitle) {

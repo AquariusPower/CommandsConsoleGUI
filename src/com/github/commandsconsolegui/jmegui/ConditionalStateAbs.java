@@ -31,6 +31,7 @@ package com.github.commandsconsolegui.jmegui;
 import java.io.IOException;
 
 import com.github.commandsconsolegui.globals.GlobalHolderAbs.IGlobalOpt;
+import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.misc.IConfigure;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -141,22 +142,25 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 	 * see {@link ICfgParm}
 	 */
 	public static class CfgParm implements ICfgParm{
-		private Application app;
+//		private Application app;
 		private String strId;
-		public CfgParm(Application app, String strId) {
+//		public CfgParm(Application app, String strId) {
+		public CfgParm(String strId) {
 			super();
-			this.app = app;
+//			this.app = app;
 			this.strId = strId;
 		}
 		public String getId(){
 			return strId;
 		}
-		public void setId(String strId){
+		public CfgParm setId(String strId){
 			if(strId==null || strId.isEmpty()){
 				throw new PrerequisitesNotMetException("invalid id", strId);
 			}
 			
 			this.strId=strId;
+			
+			return this;
 		}
 	}
 	private CfgParm	cfg;
@@ -186,7 +190,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		if(this.bConfigured)throw new PrerequisitesNotMetException("already configured");
 		
 		// internal configurations
-		if(cfg.app==null)throw new PrerequisitesNotMetException("app is null");
+//		if(cfg.app==null)throw new PrerequisitesNotMetException("app is null");
 		
 		// the Unique State Id
 		if(cfg.strId==null){
@@ -226,6 +230,16 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 	 * @return
 	 */
 	protected <T extends ConditionalStateAbs> T storeCfgAndReturnSelf(ICfgParm icfg){
+		if(this.icfgOfInstance!=null && this.icfgOfInstance!=icfg){
+			throw new PrerequisitesNotMetException(
+				"cfg already set", this, this.icfgOfInstance, icfg);
+		}
+		
+		if(!icfg.getClass().getTypeName().startsWith(this.getClass().getTypeName()+"$")){
+			throw new PrerequisitesNotMetException(
+				"must be the concrete class one", this, icfg);
+		}
+		
 		this.icfgOfInstance=icfg;
 		return (T)this;
 	}
@@ -262,11 +276,8 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		return app();
 	}
 	public Application app(){
-		return cfg.app;
-	}
-	
-	private void assertIsConfigured() {
-		if(!isConfigured())throw new PrerequisitesNotMetException("not configured yet!");
+		return GlobalAppRefI.i();
+//		return cfg.app;
 	}
 	
 	public boolean isInitializedProperly(){
@@ -313,6 +324,10 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		return bDisableSuccessful;
 	}
 	
+	/**
+	 * store the cfg object with {@link ConditionalStateAbs#storeCfgAndReturnSelf()}
+	 * @return
+	 */
 	protected boolean initCheckPrerequisites(){
 		if(icfgOfInstance==null)throw new PrerequisitesNotMetException(
 			"the instantiated class needs to set the configuration params to be used on a restart!");
@@ -320,7 +335,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		if(!icfgOfInstance.getClass().getName().startsWith(this.getClass().getName()+"$")){
 //		if(!icfgOfInstance.getClass().equals(this.getClass())){
 			throw new PrerequisitesNotMetException(
-				"the stored cfg params must be of the instantiated class to be used on restarting it: "
+				"The stored cfg params must be of the instantiated class to be used on restarting it. "
 				+this.getClass().getName());
 		}
 		
@@ -362,7 +377,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 	 */
 	public boolean doItAllProperly(ConditionalStateManagerI.CompositeControl cc, float tpf) {
 		cc.assertSelfNotNull();
-		assertIsConfigured();
+		assertConfigured();
 //		assertIsPreInitialized();
 //		if(bRestartRequested)return false;
 //		if(bDiscardRequested)return false;
@@ -428,7 +443,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		return true;
 	}
 
-	public void toggleRequest(){
+	public void requestToggleEnabled(){
 //		assertIsPreInitialized();
 		setEnabledRequest(!isEnabled());
 	}
@@ -595,8 +610,17 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 	public boolean isRestartRequested() {
 		return bRestartRequested;
 	}
-
+	
+	@Override
+	public void assertConfigured(){
+		if(!isConfigured()){
+			throw new PrerequisitesNotMetException("not configured yet!", this);
+		}
+	}
+	
 	public String getId() {
+		assertConfigured();
+		
 		if(strCaseInsensitiveId==null){
 			throw new PrerequisitesNotMetException("id cant be null", 
 				this.isConfigured()?"configured(ok)":"this object was not configured!!!", 

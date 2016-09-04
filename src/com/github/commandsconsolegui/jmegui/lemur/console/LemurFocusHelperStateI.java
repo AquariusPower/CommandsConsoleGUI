@@ -89,10 +89,10 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 		setPrefixCmdWithIdToo(true);
 	}
 	
-	public static class CfgParm implements ICfgParm{
+	public static class CfgParm extends CmdConditionalStateAbs.CfgParm{
 		Float fBaseZ;
 		public CfgParm(Float fBaseZ) {
-			super();
+			super(null);
 			this.fBaseZ = fBaseZ;
 		}
 	}
@@ -108,7 +108,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 		CfgParm cfg = (CfgParm)icfg;
 		if(cfg.fBaseZ!=null)this.fdvDialogBazeZ.setObjectRawValue(cfg.fBaseZ);
 //		super.configure(new CmdConditionalStateAbs.CfgParm(LemurFocusHelperStateI.class.getSimpleName()));
-		super.configure(new CmdConditionalStateAbs.CfgParm(null));
+		super.configure(icfg);
 //		configure();
 		
 //		MouseCursor.i().configure(null);

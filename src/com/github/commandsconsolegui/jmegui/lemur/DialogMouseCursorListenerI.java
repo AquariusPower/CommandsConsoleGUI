@@ -28,7 +28,6 @@
 package com.github.commandsconsolegui.jmegui.lemur;
 
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
 
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
@@ -40,6 +39,7 @@ import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell.EUserData;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableWeak;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.event.CursorButtonEvent;
@@ -76,8 +76,8 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 						if(cell.isTextButton(capture)){
 							switch(MultiClickCondStateI.i().getActivatorNextUpdateIndex(capture)){
 								case 1:
-									MultiClickCondStateI.i().updateActivator(ECallMode.OncePromptly, capture, new Callable<Boolean>() {
-										@Override public Boolean call() throws Exception {
+									MultiClickCondStateI.i().updateActivator(ECallMode.OncePromptly, capture, new CallableWeak<Boolean>() {
+										@Override public Boolean call() {
 											diag.selectEntry(cell.getDialogListEntryData());
 											return true;
 										}
@@ -85,8 +85,8 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 									bConsumed=true;
 									break;
 								case 2:
-									MultiClickCondStateI.i().updateActivator(ECallMode.OnceAfterDelay, capture, new Callable<Boolean>() {
-										@Override public Boolean call() throws Exception {
+									MultiClickCondStateI.i().updateActivator(ECallMode.OnceAfterDelay, capture, new CallableWeak<Boolean>() {
+										@Override public Boolean call() {
 											if(diag.isOptionSelectionMode()){
 												diag.selectAndChoseOption(cell.getDialogListEntryData());
 											}else{

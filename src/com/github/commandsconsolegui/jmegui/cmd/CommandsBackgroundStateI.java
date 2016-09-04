@@ -27,7 +27,6 @@
 
 package com.github.commandsconsolegui.jmegui.cmd;
 
-import com.github.commandsconsolegui.cmd.IConsoleUI;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGUII;
 
@@ -52,12 +51,10 @@ public class CommandsBackgroundStateI extends CmdConditionalStateAbs {
 		setPrefixCmdWithIdToo(true);
 	}
 	
-	public static class CfgParm implements ICfgParm{
-//		IConsoleUI icui;
-//		public CfgParm(IConsoleUI icui) {
-//			super();
-//			this.icui = icui;
-//		}
+	public static class CfgParm extends CmdConditionalStateAbs.CfgParm{
+		public CfgParm() {
+			super(null);
+		}
 	}
 	@Override
 	public CommandsBackgroundStateI configure(ICfgParm icfg){
@@ -66,7 +63,7 @@ public class CommandsBackgroundStateI extends CmdConditionalStateAbs {
 //		if(cfg.icui==null)throw new NullPointerException("invalid instance for "+IConsoleUI.class.getName());
 //		this.icui = cfg.icui;
 //		super.configure(new CmdConditionalStateAbs.CfgParm(CommandsBackgroundStateI.class.getSimpleName()));
-		super.configure(new CmdConditionalStateAbs.CfgParm(null));
+		super.configure(icfg);
 		
 		return storeCfgAndReturnSelf(icfg);
 	}

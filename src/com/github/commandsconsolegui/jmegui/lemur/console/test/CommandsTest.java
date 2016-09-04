@@ -51,25 +51,6 @@ public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleComma
 		setAllowUserCmdOS(true);
 	}
 	
-//	@Override
-//	public void updateToggles() {
-//		if(btgFpsLimit.isChangedAndRefresh())FpsLimiterStateI.i().setEnabledRequest(btgFpsLimit.b());
-//		super.updateToggles();
-//	}
-	
-//	@Override
-//		public void initialize() {
-//			btgFpsLimit.setCallOnChange(new Callable<Boolean>() {
-//				@Override
-//				public Boolean call() throws Exception {
-//					FpsLimiterStateI.i().setEnabledRequest(btgFpsLimit.b());
-//					return true;
-//				}
-//			});
-//			
-//			super.initialize();
-//		}
-	
 	@Override
 	public String prepareStatsFieldText() {
 		String strStatsLast = super.prepareStatsFieldText();
