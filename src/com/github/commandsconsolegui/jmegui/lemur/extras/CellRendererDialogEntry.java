@@ -125,6 +125,19 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			return dled;
 		}
 		
+		/**
+		 * KEEP here to help on DEBUG!
+		 */
+		@Override
+		public void updateLogicalState(float tpf) {
+			try{
+				super.updateLogicalState(tpf);
+			}catch(IllegalArgumentException ex){
+				//TODO remove this one day, this exception is happening randomly why?
+				GlobalCommandsDelegatorI.i().dumpExceptionEntry(ex, this, this.getName(), this.btnText);
+			}
+		}
+		
 		private void updateTreeButton(){
 			String strDepth = "";
 			
