@@ -27,14 +27,11 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import java.util.ArrayList;
-
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
 
 /**
  * Represents a class field.
@@ -47,10 +44,10 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 //	String str = "ERROR: NOT SET"; // hashcode depends on it not being null
 //	private String strCmdId = null;
 //	private int	iReflexFillCfgVariant;
-	private String	strReflexFillCfgCodePrefixVariant;
+//	private String	strReflexFillCfgCodePrefixVariant;
 //	private String	strHelpComment;
 	private static boolean bIgnoreCaseOnComparison = true;
-	public static final String strCodePrefix="scf"; //ex.: scfTestCommand
+//	public static final String strCodePrefix="scf"; //ex.: scfTestCommand
 //	private static ArrayList<StringCmdField> ascfList = new ArrayList<StringCmdField>();
 	
 //	public static ArrayList<StringCmdField> getListCopy(){
@@ -94,11 +91,12 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 		super(rfcfgOwner);
 		setHelp(strHelpComment);
 		
-//		this.iReflexFillCfgVariant=iReflexFillCfgVariant;
-		this.strReflexFillCfgCodePrefixVariant = strReflexFillCfgCodePrefixVariant;
-		if(this.strReflexFillCfgCodePrefixVariant==null){
-			this.strReflexFillCfgCodePrefixVariant=StringCmdField.strCodePrefix;
-		}
+		setCodePrefixVariant(strReflexFillCfgCodePrefixVariant);
+////		this.iReflexFillCfgVariant=iReflexFillCfgVariant;
+//		this.strReflexFillCfgCodePrefixVariant = strReflexFillCfgCodePrefixVariant;
+//		if(this.strReflexFillCfgCodePrefixVariant==null){
+//			this.strReflexFillCfgCodePrefixVariant=StringCmdField.getCodePrefixDefault();
+//		}
 		
 //		ReflexFill.assertAndGetField(rfcfgOwner, this);
 		
@@ -120,7 +118,7 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 	 */
 	@Override
 	public String toString() {
-		if(getUniqueCmdId()==null)initialize();
+		if(getUniqueCmdId()==null)chkAndInit();//initialize();
 		return getUniqueCmdId();
 	}
 	
@@ -128,15 +126,16 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 //		return strHelp;
 //	}
 	
-	private void initialize(){
-		/**
-		 * This basically prevents recursive infinite loop,
-		 * if this is called at reflex fill method.
-		 */
-//		super.strCmdId=errorMessage();
-		super.setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(getOwner(), this, false));
-//		throw new NullPointerException("not initialized properly: "+this);
-	}
+//	private void initialize(){
+//		/**
+//		 * This basically prevents recursive infinite loop,
+//		 * if this is called at reflex fill method.
+//		 */
+////		super.strCmdId=errorMessage();
+//		super.setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(getOwner(), this, false));
+////		throw new NullPointerException("not initialized properly: "+this);
+//	}
+	
 //	
 //	private String errorMessage(){
 //		return "ERROR: "+StringCmdField.class.getName()+" not yet properly initialized!";
@@ -145,7 +144,7 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 	@Override
 	public boolean equals(Object obj) {
 //		if(strCmdId==null)throw new NullPointerException(errorMessage());
-		if(getUniqueCmdId()==null)initialize();
+		if(getUniqueCmdId()==null)chkAndInit();//initialize();
 		if(bIgnoreCaseOnComparison){
 			return getUniqueCmdId().equalsIgnoreCase(""+obj);
 		}else{
@@ -156,7 +155,7 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 	@Override
 	public int hashCode() {
 //		if(strCmdId==null)throw new NullPointerException(errorMessage());
-		if(getUniqueCmdId()==null)initialize();
+		if(getUniqueCmdId()==null)chkAndInit();//initialize();
 		return getUniqueCmdId().hashCode();
 	}
 	
@@ -165,10 +164,10 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 //		return iReflexFillCfgVariant;
 //	}
 
-	@Override
-	public String getCodePrefixVariant() {
-		return strReflexFillCfgCodePrefixVariant;
-	}
+//	@Override
+//	public String getCodePrefixVariant() {
+//		return strReflexFillCfgCodePrefixVariant;
+//	}
 
 	@Override
 //	public StringCmdField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
@@ -219,5 +218,14 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 	@Override
 	protected StringCmdField getThis() {
 		return this;
+	}
+
+//	public static String getCodePrefixDefault() {
+//		return "scf";
+//	}
+	private static String strCodePrefixDefault="scf";
+	@Override
+	public String getCodePrefixDefault() {
+		return strCodePrefixDefault;
 	}
 }

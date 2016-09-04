@@ -41,7 +41,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
-	private static String	strCodePrefixVariant = "svf";
+//	private static String	strCodePrefixVariant = "svf";
 //	private static ArrayList<StringVarField> ailvList = new ArrayList<StringVarField>();
 	
 	String strValue;
@@ -91,10 +91,10 @@ public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 		return this;
 	}
 
-	@Override
-	public String getCodePrefixVariant() {
-		return StringVarField.strCodePrefixVariant ;
-	}
+//	@Override
+//	public String getCodePrefixVariant() {
+//		return StringVarField.getCodePrefixDefault();
+//	}
 
 //	public static ArrayList<StringVarField> getListCopy(){
 //		return new ArrayList<StringVarField>(ailvList);
@@ -147,5 +147,14 @@ public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 	@Override
 	protected StringVarField getThis() {
 		return this;
+	}
+
+//	public static String getCodePrefixDefault() {
+//		return "svf";
+//	}
+	private static String strCodePrefixDefault="svf";
+	@Override
+	public String getCodePrefixDefault() {
+		return strCodePrefixDefault;
 	}
 }

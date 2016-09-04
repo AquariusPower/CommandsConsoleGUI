@@ -120,11 +120,11 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return bAtoZ ? cmpTextAtoZ : cmpTextZtoA;
 	}
 	
-	public DiagModalInfo<T> getDiagModalCurrent(){
+	public DiagModalInfo<T> getDiagModalInfoCurrent(){
 		return dmi;
 	}
 	
-	public R setDiagModalInfo(DiagModalInfo<T> dmi){
+	public R setDiagModalInfoCurrent(DiagModalInfo<T> dmi){
 		this.dmi=dmi;
 		return getThis();
 	}
@@ -214,7 +214,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		 */
 		if(!cfg.isInitiallyEnabled()){
 			initiallyDisabled();
-			btgState.setObjectRawValue(false);//,false);
+			btgEnabled.setObjectRawValue(false);//,false);
 		}
 		
 //		MouseCursor.i().configure(cfg.lMouseCursorClickDelayMilis);
@@ -225,8 +225,8 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 //		this.diagParent=cfg.diagParent;
 //		updateModalParent();
 		
-		setCmdPrefix("toggleUI");
-		setCmdSuffix("");
+//		setCmdPrefix("toggleUI");
+//		setCmdSuffix("");
 		
 //		ConditionalStateManagerI.i().
 		if(cfg.getId()==null || cfg.getId().isEmpty()){
@@ -502,17 +502,17 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	}
 	
 	protected String getTextInfo(){
-		String str="Info: Type a list filter at input text area and hit Enter.\n";
+		String str="";
+		
+		str+="Help("+BaseDialogStateAbs.class.getSimpleName()+"):\n";
+		str+="\tType a list filter at input text area and hit Enter.\n";
 		
 		if(isOptionChoiceSelectionMode()){
-			str+="Option Mode: when hitting Enter, if an entry is selected, it's value will be chosen.\n";
+			str+="\tOption Mode: when hitting Enter, if an entry is selected, it's value will be chosen.\n";
+			str+="\tBut if the input begins with '"+getTokenTypeValue()+"', when hitting Enter, that specific value will be returned to the parent.\n";
 			
-			if(getParentDialog()!=null){
-				if(getParentDialog().getDiagModalCurrent()!=null){
-					for(DialogListEntryData<T> data:getParentDialog().getDiagModalCurrent().getDataReferenceAtParentListCopy()){
-						str+="ParentCfgData: "+data.getText()+"\n";
-					}
-				}
+			for(DialogListEntryData<T> dled:getParentReferencedDledListCopy()){
+				str+="\tRefAtParent: "+dled.getText()+"\n";
 			}
 			
 		}
@@ -521,19 +521,55 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	}
 	
 	/**
+	 * NO! use {@link #getParentReferencedDledListCopy()} instead
+	 * @return
+	 */
+	@Deprecated
+	protected DialogListEntryData<T> getDledReferenceAtParent(){
+		throw new PrerequisitesNotMetException("NO! see this method documentation...");
+	}
+	/**
+	 * NO! use {@link #getParentReferencedDledListCopy()} instead
+	 */
+	@Deprecated
+	protected void setDledReferenceAtParent(){
+		throw new PrerequisitesNotMetException("NO! see this method documentation...");
+	}
+	
+	protected ArrayList<DialogListEntryData<T>> getParentReferencedDledListCopy() {
+		ArrayList<DialogListEntryData<T>> adled = new ArrayList<DialogListEntryData<T>>();
+		if(getParentDialog()!=null){
+			BaseDialogStateAbs<T, R>.DiagModalInfo<T> dmi = getParentDialog().getDiagModalInfoCurrent();
+			if(dmi!=null){
+				if(dmi.getDiagModal()!=this){
+					throw new PrerequisitesNotMetException("current parent's modal dialog should be 'this'",dmi,dmi.getDiagModal(),this);
+				}
+				
+				for(DialogListEntryData<T> dled:dmi.getParentReferencedDledListCopy()){
+					adled.add(dled);
+				}
+			}
+		}
+		return adled;
+	}
+	
+	/**
 	 * override empty to disable filter
 	 */
 	protected void applyListKeyFilter(){
 		String str = getInputText();
-		if(
-				getTokenTypeValue()==null
-				||
-				getTokenTypeValue().isEmpty()
-				||
-				!str.startsWith(getTokenTypeValue())
-		){
-			this.strLastFilter=str;
+		
+		if(bTypeValueMode){
+			if(
+					getTokenTypeValue()!=null && 
+					!getTokenTypeValue().isEmpty() && 
+					str.startsWith(getTokenTypeValue())
+			){
+				return; //is in type value mode, so skip updating filter
+			}
 		}
+		
+		this.strLastFilter=str;
 	}
 	
 	/**
@@ -618,7 +654,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 //		public void setDiagModal(R diagModal) {
 //			this.diagChildModal = diagModal;
 //		}
-		public ArrayList<DialogListEntryData<T>> getDataReferenceAtParentListCopy() {
+		public ArrayList<DialogListEntryData<T>> getParentReferencedDledListCopy() {
 			return new ArrayList<DialogListEntryData<T>>(adledToPerformResultOfActionAtParentList);
 		}
 //		public void setDataReferenceAtParent(DialogListEntryData<T> dataReferenceAtParent) {
@@ -686,8 +722,8 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		}
 	}
 	
-	BoolTogglerCmdField btgSortListEntries = new BoolTogglerCmdField(this, true);
-	BoolTogglerCmdField btgSortListEntriesAtoZ = new BoolTogglerCmdField(this, true);
+	protected BoolTogglerCmdField btgSortListEntries = new BoolTogglerCmdField(this, true);
+	protected BoolTogglerCmdField btgSortListEntriesAtoZ = new BoolTogglerCmdField(this, true);
 	
 	protected void prepareTree(){
 		adleTmp = new ArrayList<DialogListEntryData<T>>(adleCompleteEntriesList);
@@ -779,10 +815,10 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return strLastFilter;
 	}
 
-	protected R setLastFilter(String inputText) {
-		this.strLastFilter=inputText;
-		return getThis();
-	}
+//	protected R setLastFilter(String str) {
+//		this.strLastFilter=str;
+//		return getThis();
+//	}
 	
 	/**
 	 * implement this only on concrete classes

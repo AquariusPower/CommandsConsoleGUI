@@ -52,10 +52,10 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 	
 	StringCmdField scfRestart = new StringCmdField(this,null);
 //	private StringCmdField cmdState = null;
-	protected final BoolTogglerCmdField btgState = new BoolTogglerCmdField(this, true, null, "toggles the state (enabled/disabled)");
+	protected final BoolTogglerCmdField btgEnabled = new BoolTogglerCmdField(this, true, "toggles the state (enabled/disabled)");
 //	private String	strCmdIdentifier;
-	private String strCmdPrefix="toggle";
-	private String strCmdSuffix="State";
+//	private String strCmdPrefix="toggle";
+//	private String strCmdSuffix="State";
 	
 	public CmdConditionalStateAbs() {
 		// TODO Auto-generated constructor stub
@@ -74,7 +74,7 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 	}
 	
 	public String getCmd(){
-		return btgState.getUniqueCmdId();
+		return btgEnabled.getUniqueCmdId();
 //		return cmdState.toString();
 //		return strCmdIdentifier;
 	}
@@ -119,10 +119,10 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 		
 		cd().addConsoleCommandListener(this);
 		
-		btgState.setCallOnChange(new CallableX() {
+		btgEnabled.setCallOnChange(new CallableX() {
 			@Override
 			public Boolean call() {
-				setEnabledRequest(btgState.b());
+				setEnabledRequest(btgEnabled.b());
 				return true;
 			}
 		});
@@ -230,7 +230,7 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 	protected boolean disableAttempt() {
 		if(!super.disableAttempt())return false;
 		
-		btgState.setObjectRawValue(false);//,false);
+		btgEnabled.setObjectRawValue(false);//,false);
 		
 		cd().dumpInfoEntry(getCmd()+" disabled");
 		
@@ -259,21 +259,21 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 		return rfcfg;
 	}
 
-	public String getCmdPrefix() {
-		return strCmdPrefix;
-	}
+//	public String getCmdPrefix() {
+//		return strCmdPrefix;
+//	}
+//
+//	protected void setCmdPrefix(String strCmdPrefix) {
+//		this.strCmdPrefix = strCmdPrefix;
+//	}
 
-	protected void setCmdPrefix(String strCmdPrefix) {
-		this.strCmdPrefix = strCmdPrefix;
-	}
-
-	public String getCmdSuffix() {
-		return strCmdSuffix;
-	}
-
-	protected void setCmdSuffix(String strCmdSuffix) {
-		this.strCmdSuffix = strCmdSuffix;
-	}
+//	public String getCmdSuffix() {
+//		return strCmdSuffix;
+//	}
+//
+//	protected void setCmdSuffix(String strCmdSuffix) {
+//		this.strCmdSuffix = strCmdSuffix;
+//	}
 
 	public boolean isPrefixCmdWithIdToo() {
 		return bPrefixCmdWithIdToo;

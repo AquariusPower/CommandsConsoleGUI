@@ -130,15 +130,15 @@ public class CommandData implements Comparable<CommandData>{
 		return this.getSimpleCmdId().toLowerCase().compareTo(o.getSimpleCmdId().toLowerCase());
 	}
 
-	public void fixSimpleCmdIdConflict(CommandsDelegator.CompositeControl ccCd, String strNewSimpleCmdId){//, Collection<CommandData> cmdListToClearConflicts) {
-		ccCd.assertSelfNotNull();
+	public void applySimpleCmdIdConflictFixed(CommandsDelegator.CompositeControl cc, String strNewSimpleCmdId){//, Collection<CommandData> cmdListToClearConflicts) {
+		cc.assertSelfNotNull();
 		
 		if(!isSimpleCmdIdConflicting())throw new PrerequisitesNotMetException("can only be directly set if it has conflicts");
 		
 		// clear conflicts
-		for(CommandData dataOther:acmddCoreIdConflicts.toArray(new CommandData[0])){
-			dataOther.acmddCoreIdConflicts.remove(this);
-			this.acmddCoreIdConflicts.remove(dataOther);
+		for(CommandData cmddOther:acmddCoreIdConflicts.toArray(new CommandData[0])){
+			cmddOther.acmddCoreIdConflicts.remove(this);
+			this.acmddCoreIdConflicts.remove(cmddOther);
 		}
 		
 //		for(CommandData dataOther:cmdListToClearConflicts){

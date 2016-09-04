@@ -120,9 +120,9 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 
 	@Override
 	public void applyResultsFromModalDialog() {
-		BaseDialogStateAbs<T,?> diagModal = getDiagModalCurrent().getDiagModal();
-		T cmdAtParent = getDiagModalCurrent().getCmdAtParent();
-		ArrayList<DialogListEntryData<T>> adataToApplyResultsList = getDiagModalCurrent().getDataReferenceAtParentListCopy();
+		BaseDialogStateAbs<T,?> diagModal = getDiagModalInfoCurrent().getDiagModal();
+		T cmdAtParent = getDiagModalInfoCurrent().getCmdAtParent();
+		ArrayList<DialogListEntryData<T>> adataToApplyResultsList = getDiagModalInfoCurrent().getParentReferencedDledListCopy();
 		
 		boolean bChangesMade = false;
 		for(DialogListEntryData<T> dataAtModal:diagModal.getDataSelectionListCopy()){

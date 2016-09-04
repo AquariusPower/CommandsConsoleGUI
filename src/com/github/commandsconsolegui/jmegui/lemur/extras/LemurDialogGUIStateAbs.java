@@ -67,6 +67,7 @@ import com.simsilica.lemur.core.VersionedList;
 import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.event.KeyAction;
 import com.simsilica.lemur.event.KeyActionListener;
+import com.simsilica.lemur.grid.GridModel;
 import com.simsilica.lemur.list.SelectionModel;
 
 /**
@@ -130,7 +131,6 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		 * @param fDialogHeightPercentOfAppWindow (if null will use default) the percentual height to cover the application screen/window
 		 * @param fDialogWidthPercentOfAppWindow (if null will use default) the percentual width to cover the application screen/window
 		 * @param fInfoHeightPercentOfDialog (if null will use default) the percentual height to show informational text, the list and input field will properly use the remaining space
-		 * @param iFinalEntryHeightPixels
 		 */
 		public CfgParm(String strUIId,
 				Float fDialogWidthPercentOfAppWindow,
@@ -371,7 +371,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		return	vlVisibleEntriesList.get(iSel);
 	}
 	
-	private void updateEntryHeight(){
+	private void updateFinalEntryHeightPixels(){
 //		if(cfg.iEntryHeightPixels==null){
 			this.iFinalEntryHeightPixels = (int)FastMath.ceil(getEntryHeightPixels() 
 //				* cfg.fEntryHeightMultiplier);
@@ -379,12 +379,17 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		}
 	}
 	
+	private GridModel<Panel> getListBoxGridPanelModel(){
+		return lstbxEntriesToSelect.getGridPanel().getModel();
+	}
+	
 	protected Integer getEntryHeightPixels(){
 		// query for an entry from the list
 		//if(vlVisibleEntriesList.size()==0)return null;
 		
 		// create a new cell
-		Panel pnl = lstbxEntriesToSelect.getGridPanel().getModel().getCell(0, 0, null);
+		GridModel<Panel> gm = getListBoxGridPanelModel();
+		Panel pnl = gm.getCell(0, 0, null);
 		float fHeight = pnl.getPreferredSize().getY();
 		// a simple value would be: MiscJmeI.i().retrieveBitmapTextFor(new Button("W")).getLineHeight()
 		
@@ -439,16 +444,17 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		 * 
 		 * TODO sum each individual top entries height? considering they could have diff heights of course
 		 */
-		updateEntryHeight();
-//		if(cfg.iEntryHeightPixels!=null){
-			iVisibleRows = (int) (v3fEntryListSize.y/iFinalEntryHeightPixels);
+		if(getListBoxGridPanelModel().getRowCount()>0){
+			updateFinalEntryHeightPixels();
+			
+			iVisibleRows = (int) (v3fEntryListSize.y/getFinalEntryHeightPixels());
 			lstbxEntriesToSelect.setVisibleItems(iVisibleRows);
 			if(vlVisibleEntriesList.size()>0){
 				if(getSelectedEntryData()==null){
 					selectRelativeEntry(0);
 				}
 			}
-//		}
+		}
 	}
 	
 //	/**
@@ -514,7 +520,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		updateSelectEntryRequested();
 		
 		if(!getInputText().equalsIgnoreCase(getLastFilter())){
-			setLastFilter(getInputText());
+//			setLastFilter(getInputText());
 			applyListKeyFilter();
 			updateList();
 		}
@@ -722,7 +728,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	public void openModalDialog(String strDialogId, DialogListEntryData<T> dledToAssignModalTo, T cmd){
 		LemurDialogGUIStateAbs<T,?> diagModalCurrent = hmModals.get(strDialogId);
 		if(diagModalCurrent!=null){
-			setDiagModalInfo(new DiagModalInfo(diagModalCurrent,cmd,dledToAssignModalTo));
+			setDiagModalInfoCurrent(new DiagModalInfo(diagModalCurrent,cmd,dledToAssignModalTo));
 			diagModalCurrent.requestEnable();
 		}else{
 			throw new PrerequisitesNotMetException("no dialog set for id: "+strDialogId);
@@ -730,11 +736,11 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	}
 	
 	public void applyResultsFromModalDialog(){
-		if(getDiagModalCurrent()==null)throw new PrerequisitesNotMetException("no modal active");
+		if(getDiagModalInfoCurrent()==null)throw new PrerequisitesNotMetException("no modal active");
 		
-		getDiagModalCurrent().getDiagModal().resetChoice();
+		getDiagModalInfoCurrent().getDiagModal().resetChoice();
 //		dmi.getDiagModal().adataSelectedEntriesList.clear();
-		setDiagModalInfo(null);
+		setDiagModalInfoCurrent(null);
 	}
 	
 	public boolean isListBoxEntry(Spatial spt){
@@ -995,6 +1001,10 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		MiscLemurHelpersStateI.i().setScaleXY(spt, fScale, 1f);
 		
 		return fScale;
+	}
+
+	public Integer getFinalEntryHeightPixels() {
+		return iFinalEntryHeightPixels;
 	}
 	
 }

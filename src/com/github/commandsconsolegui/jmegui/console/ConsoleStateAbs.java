@@ -319,7 +319,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 //	private boolean	bConfigureSimpleCompleted;
 
 	BoolTogglerCmdField btgBugFixStatsLabelTextSize = 
-		new BoolTogglerCmdField(this,false,null,"FIXED: By fixating the size of the label, this crash preventer is not that necesary anymore.");
+		new BoolTogglerCmdField(this,false,"FIXED: By fixating the size of the label, this crash preventer is not that necesary anymore.");
 	private Object	ccTrustedManipulator;
 //	private boolean	bUsePreQueue = false; 
 	

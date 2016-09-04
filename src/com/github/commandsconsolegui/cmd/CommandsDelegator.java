@@ -111,22 +111,22 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 */
 //	public final BoolToggler	btgAcceptExternalExitRequests = new BoolToggler(this,false,strTogglerCodePrefix, 
 //		"if a ");
-	public final BoolTogglerCmdField	btgDbAutoBkp = new BoolTogglerCmdField(this,false,null, 
+	public final BoolTogglerCmdField	btgDbAutoBkp = new BoolTogglerCmdField(this,false, 
 		"whenever a save happens, if the DB was modified, a backup will be created of the old file").setCallNothingOnChange();
 	public final BoolTogglerCmdField	btgShowWarn = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 	public final BoolTogglerCmdField	btgShowInfo = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 	public final BoolTogglerCmdField	btgShowException = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
-	public final BoolTogglerCmdField	btgDumpToTerminal = new BoolTogglerCmdField(this,true,null,
+	public final BoolTogglerCmdField	btgDumpToTerminal = new BoolTogglerCmdField(this,true,
 		"The system terminal where the application is being run, will also receive "+CommandsDelegator.class.getSimpleName()+" output.").setCallNothingOnChange();
 	public final BoolTogglerCmdField	btgEngineStatsView = new BoolTogglerCmdField(this,false);
 	public final BoolTogglerCmdField	btgEngineStatsFps = new BoolTogglerCmdField(this,false);
 	public final BoolTogglerCmdField	btgShowMiliseconds=new BoolTogglerCmdField(this,false).setCallNothingOnChange();
 	public final BoolTogglerCmdField	btgShowConvertedCommandInfo=new BoolTogglerCmdField(this,false).setCallNothingOnChange();
 //	public final BoolTogglerCmdField	btgStringContainsFuzzyFilter=new BoolTogglerCmdField(this,true);
-	public final BoolTogglerCmdField	btgConsoleCpuRest=new BoolTogglerCmdField(this,false,null,
+	public final BoolTogglerCmdField	btgConsoleCpuRest=new BoolTogglerCmdField(this,false,
 		"Console update steps will be skipped if this is enabled.");
 	public final BoolTogglerCmdField	btgAutoScroll=new BoolTogglerCmdField(this,true).setCallNothingOnChange();
-	public final BoolTogglerCmdField	btgUseFixedLineWrapModeForAllFonts=new BoolTogglerCmdField(this,false,null,
+	public final BoolTogglerCmdField	btgUseFixedLineWrapModeForAllFonts=new BoolTogglerCmdField(this,false,
 		"If enabled, this will use a fixed line wrap column even for non mono spaced fonts, "
 		+"based on the width of the 'W' character. Otherwise it will dynamically guess the best "
 		+"fitting string size.").setCallNothingOnChange();
@@ -319,15 +319,27 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		setCopyRangeIndicator((char)182); //TODO describe what char is this...
 	}
 	
-	
+	/**
+	 * Here will be setup basic variants for some {@link VarCmdFieldAbs}
+	 */
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		ReflexFillCfg rfcfg = null;
 		
+		boolean bCodePrefixIsDefault = rfcv.isCodePrefixVariantEqualDefault();
 		if(rfcv.getClass().isAssignableFrom(BoolTogglerCmdField.class)){
-			if(BoolTogglerCmdField.strTogglerCodePrefix.equals(rfcv.getCodePrefixVariant())){
+//			if(BoolTogglerCmdField.getCodePrefixDefault().equals(rfcv.getCodePrefixVariant())){
+			if(bCodePrefixIsDefault){
 				rfcfg = new ReflexFillCfg(rfcv);
 				rfcfg.setSuffix("Toggle");
+			}
+			
+			if(rfcfg!=null)rfcfg.setAsCommandToo(true);
+		}else
+		if(rfcv.getClass().isAssignableFrom(TimedDelayVarField.class)){
+			if(bCodePrefixIsDefault){
+				rfcfg = new ReflexFillCfg(rfcv);
+				rfcfg.setSuffix("TimedDelay");
 			}
 			
 			if(rfcfg!=null)rfcfg.setAsCommandToo(true);
@@ -340,18 +352,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				rfcfg = new ReflexFillCfg(rfcv);
 				rfcfg.setPrefixCmd(""+RESTRICTED_TOKEN);
 			}else
-			if(StringCmdField.strCodePrefix.equals(rfcv.getCodePrefixVariant())){
+			if(bCodePrefixIsDefault){
 				rfcfg = new ReflexFillCfg(rfcv);
 			}
 			
 			if(rfcfg!=null)rfcfg.setAsCommandToo(true);
 		}
-//		else
-//		if(rfcv.getClass().isAssignableFrom(TimedDelayVarField.class)){
-//			if(TimedDelayVarField.strCodePrefixVariant.equals(rfcv.getCodePrefixVariant())){
-//				rfcfg = new ReflexFillCfg();
-//			}
-//		}
 		
 		if(rfcfg!=null){
 			if(rfcfg.isCommandToo()){
@@ -815,7 +821,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			if(!data.isSimpleCmdIdConflicting()){
 				dumpWarnEntry("cmd has no conflicts: "+data.getUniqueCmdId(), data.asHelp());
 				bFail=true;
-			}else{
+			}
+			else{
 				CommandData dataFromSimple = getCmdDataFor(strNewSimpleCmdId,true);
 				if(dataFromSimple!=null){
 					dumpWarnEntry("cmd simple already used: "+strNewSimpleCmdId, dataFromSimple.asHelp());
@@ -824,7 +831,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			}
 			
 			if(!bFail){
-				data.fixSimpleCmdIdConflict(ccSelf, strNewSimpleCmdId);//, trmCmds.values());
+				data.applySimpleCmdIdConflictFixed(ccSelf, strNewSimpleCmdId);//, trmCmds.values());
 				
 				dumpSubEntry(data.asHelp());
 				

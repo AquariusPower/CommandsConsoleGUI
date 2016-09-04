@@ -43,7 +43,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 public class IntLongVarField extends VarCmdFieldAbs<Long,IntLongVarField>{
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
-	private static String	strCodePrefixVariant = "ilv";
+//	private static String	strCodePrefix = "ilv";
 //	private static ArrayList<IntLongVarField> ailvList = new ArrayList<IntLongVarField>();
 	
 	private Long lValue;
@@ -104,10 +104,10 @@ public class IntLongVarField extends VarCmdFieldAbs<Long,IntLongVarField>{
 //		return strHelp==null?"":strHelp;
 //	}
 	
-	@Override
-	public String getCodePrefixVariant() {
-		return IntLongVarField.strCodePrefixVariant ;
-	}
+//	@Override
+//	public String getCodePrefixVariant() {
+//		return IntLongVarField.getCodePrefixDefault();
+//	}
 
 	public Integer getInt() {
 		if(lValue==null)return null;
@@ -167,5 +167,14 @@ public class IntLongVarField extends VarCmdFieldAbs<Long,IntLongVarField>{
 	@Override
 	protected IntLongVarField getThis() {
 		return this;
+	}
+
+//	public static String getCodePrefixDefault() {
+//		return "ilv";
+//	}
+	private static String strCodePrefixDefault="ilv";
+	@Override
+	public String getCodePrefixDefault() {
+		return strCodePrefixDefault;
 	}
 }

@@ -33,6 +33,7 @@ import com.github.commandsconsolegui.cmd.CommandData;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
+import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -51,6 +52,8 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	private String strUniqueCmdId = null;
 	private String strSimpleCmdId = null;
 	
+	private String strCodePrefixVariant = null;
+	
 	/** keep unused, just used in debug as a hint */
 	@SuppressWarnings("unused")
 	private String strDebugErrorHelper = "ERROR: "+this.getClass().getName()+" not yet properly initialized!!!";
@@ -61,6 +64,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	private CommandData	cmdd;
 	private O	objRawValueLazy;
 	private boolean	bLazyValueWasSet;
+	private IdTmp	idt;
 	
 	private static ArrayList<VarCmdFieldAbs> avcfList = new ArrayList<VarCmdFieldAbs>();
 	public static final HashChangeHolder hvhVarList = new HashChangeHolder(avcfList);
@@ -190,33 +194,35 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 //		return getThis();
 //	}
 	
-	protected S setUniqueId(IdTmp id){
+	protected S setUniqueId(IdTmp idt){
+		this.idt = idt;
+		
 		String strExceptionId = null;
 		
 		/**
 		 * must be an exception as it can have already been read/collected with automatic value.
 		 * The exception control is strExceptionId.
 		 */
-		if(id.bIsVariable){
+		if(idt.bIsVariable){
 			if(strUniqueVarId!=null){
 				strExceptionId=strUniqueVarId;
 			}else{
-				strUniqueVarId=id.strUniqueCmdId;
+				strUniqueVarId=idt.strUniqueId;
 			}
 		}else{
 			if(strUniqueCmdId!=null){
 				strExceptionId=strUniqueCmdId;
 			}else{
-				strUniqueCmdId=id.strUniqueCmdId;
+				strUniqueCmdId=idt.strUniqueId;
 			}
 		}
 		
-		PrerequisitesNotMetException.assertNotAlreadySet("UniqueCmdId", strExceptionId, id.strUniqueCmdId);
+		PrerequisitesNotMetException.assertNotAlreadySet("UniqueCmdId", strExceptionId, idt.strUniqueId);
 //		if(strExceptionId!=null){
 ////			throw new NullPointerException("asked for '"+id.strUniqueCmdId+"' but was already set to: "+strExceptionId);
 //		}
 		
-		strSimpleCmdId = id.strSimpleCmdId;
+		strSimpleCmdId = idt.strSimpleId;
 		
 		strDebugErrorHelper=null; //clear error helper
 		
@@ -240,12 +246,6 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		return strSimpleCmdId;
 	}
 	
-	private void chkAndInit(){
-		if(strUniqueCmdId==null){
-			setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this,false));
-		}
-	}
-	
 	@Override
 	public IReflexFillCfg getOwner() {
 		return rfcfgOwner;
@@ -256,11 +256,15 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 //		return getThis();
 //	}
 
+	protected void chkAndInit(){
+		if(strUniqueCmdId==null){
+			setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this,false));
+		}
+	}
 	public String getUniqueCmdId(){
 		chkAndInit();
 		return strUniqueCmdId;
 	}
-
 	protected S setUniqueCmdId(String strUniqueCmdId) {
 		this.strUniqueCmdId = strUniqueCmdId;
 		return getThis();
@@ -339,5 +343,26 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	public boolean isField(){ // will be a field if it has an owner. Must have var link!
 		return rfcfgOwner!=null;
 	}
+
+	@Override
+	public String getCodePrefixVariant() {
+		if(strCodePrefixVariant==null){
+			strCodePrefixVariant=MiscI.i().assertGetValidId(null, getCodePrefixDefault());
+		}
+		
+		return strCodePrefixVariant;
+	}
+
+	public S setCodePrefixVariant(String strCodePrefixVariant) {
+		this.strCodePrefixVariant = MiscI.i().assertGetValidId(
+			strCodePrefixVariant, getCodePrefixDefault());
+		return getThis();
+	}
 	
+	public abstract String getCodePrefixDefault();
+	
+	@Override
+	public boolean isCodePrefixVariantEqualDefault() {
+		return getCodePrefixVariant().equals(getCodePrefixDefault());
+	}
 }

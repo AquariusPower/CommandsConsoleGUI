@@ -84,14 +84,9 @@ public abstract class LemurBasicDialogStateAbs<T,R extends LemurBasicDialogState
 	}
 	
 	@Override
-	protected String getTextInfo() {
-		return super.getTextInfo()+"Custom Dialog: Test.";
-	};
-	
-	@Override
 	protected boolean updateAttempt(float tpf) {
-		if(getDiagModalCurrent()!=null){
-			if(getDiagModalCurrent().getDiagModal().isChoiceMade()){
+		if(getDiagModalInfoCurrent()!=null){
+			if(getDiagModalInfoCurrent().getDiagModal().isChoiceMade()){
 				applyResultsFromModalDialog();
 			}
 		}

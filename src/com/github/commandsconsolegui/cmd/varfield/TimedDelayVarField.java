@@ -59,7 +59,7 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 
 	private boolean	bOscilate;
 
-	public static final String	strCodePrefixVariant = "td";
+//	public static final String	strCodePrefix = "td";
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
@@ -279,7 +279,7 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 
 	@Override
 	public String getCodePrefixVariant() {
-		return strCodePrefixVariant;
+		return getCodePrefixDefault();
 	}
 
 //	public TimedDelayVarField setObjectRawValue(CommandsDelegator.CompositeControl cc, Object objValue) {
@@ -348,5 +348,14 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 	public boolean isReflexing() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+//	public static String getCodePrefixDefault() {
+//		return "td";
+//	}
+	private static String strCodePrefixDefault="td";
+	@Override
+	public String getCodePrefixDefault() {
+		return strCodePrefixDefault;
 	}
 }

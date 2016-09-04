@@ -41,7 +41,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 public class FloatDoubleVarField extends VarCmdFieldAbs<Double,FloatDoubleVarField>{
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
-	private static String	strCodePrefixVariant = "fdv";
+//	private static String	strCodePrefix = "fdv";
 //	private static ArrayList<FloatDoubleVarField> afdvList = new ArrayList<FloatDoubleVarField>();
 	private Double dValue;
 	private Double dMin;
@@ -101,10 +101,10 @@ public class FloatDoubleVarField extends VarCmdFieldAbs<Double,FloatDoubleVarFie
 		return this;
 	}
 
-	@Override
-	public String getCodePrefixVariant() {
-		return FloatDoubleVarField.strCodePrefixVariant ;
-	}
+//	@Override
+//	public String getCodePrefixVariant() {
+//		return FloatDoubleVarField.getCodePrefixDefault();
+//	}
 
 	public Float getFloat(){
 		if(dValue==null)return null;
@@ -182,5 +182,14 @@ public class FloatDoubleVarField extends VarCmdFieldAbs<Double,FloatDoubleVarFie
 	@Override
 	protected FloatDoubleVarField getThis() {
 		return this;
+	}
+
+//	public static String getCodePrefixDefault() {
+//		return "fdv";
+//	}
+	private static String strCodePrefixDefault="fdv";
+	@Override
+	public String getCodePrefixDefault() {
+		return strCodePrefixDefault;
 	}
 }

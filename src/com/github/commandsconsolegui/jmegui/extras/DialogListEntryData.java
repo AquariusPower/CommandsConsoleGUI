@@ -112,9 +112,25 @@ public class DialogListEntryData<T> implements Savable{
 	public Object getUserObj(){
 		return this.objUser;
 	}
+	
+	/**
+	 * if text is null, empty or blank, will be surrounded by {},
+	 * TODO lemur seems to only accept with some actual text.
+	 * 
+	 * @param strText 
+	 * @return
+	 */
 	public DialogListEntryData<T> updateTextTo(String strText) {
-		if(strText==null)throw new PrerequisitesNotMetException("null text", this, strText);
+		if(strText==null){
+			strText="{null}";
+		}else
+		if(strText.trim().isEmpty()){
+			strText="{"+strText+"}";
+//			throw new PrerequisitesNotMetException("text cant be null, empty or blank", this, strText);
+		}
+		
 		this.strText=strText;
+		
 		return this;
 	}
 	

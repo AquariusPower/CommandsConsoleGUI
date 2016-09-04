@@ -63,6 +63,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		public IReflexFillCfg getOwner();
 		public boolean isReflexing();
 		public String getVariablePrefix();
+		public boolean isCodePrefixVariantEqualDefault();
 	}
 	
 	public static class ReflexFillCfg{
@@ -165,11 +166,11 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 			this.strPrefixDeclaringClass = strPrefixDeclaringClass;
 		}
 
-		public String getPrefixInstancedClass() {
+		public String getPrefixInstancedConcreteClass() {
 			return strPrefixInstancedClass;
 		}
 
-		public void setPrefixInstancedClass(String strPrefixInstancedClass) {
+		public void setPrefixInstancedConcreteClass(String strPrefixInstancedClass) {
 			this.strPrefixInstancedClass = strPrefixInstancedClass;
 		}
 
@@ -182,11 +183,11 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 			this.strPrefixCustomId = strPrefixCustomId;
 		}
 
-		public boolean isUsePrefixInstancedClass() {
+		public boolean isUsePrefixInstancedConcreteClass() {
 			return bUsePrefixInstancedClass;
 		}
 		
-		public void setUsePrefixInstancedClass(boolean bUsePrefixInstancedClass) {
+		public void setUsePrefixInstancedConcreteClass(boolean bUsePrefixInstancedClass) {
 			this.bUsePrefixInstancedClass = bUsePrefixInstancedClass;
 		}
 
@@ -305,14 +306,15 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	}
 	
 	public static class IdTmp{
-		public String strUniqueCmdId;
-		public String strSimpleCmdId;
+		public String strUniqueId;
+		public String strSimpleId;
 		public boolean	bIsVariable;
+		public String	strPrefixCustomToSolveConflicts;
 		public IdTmp() {
 		}
 		public IdTmp(boolean bIsVariable, String strCore, String strFull) {
-			this.strUniqueCmdId = strFull;
-			this.strSimpleCmdId = strCore;
+			this.strUniqueId = strFull;
+			this.strSimpleId = strCore;
 			this.bIsVariable = bIsVariable;
 		}
 	}
@@ -381,8 +383,10 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		}
 		
 		IdTmp id = new IdTmp();
-		id.strUniqueCmdId = prepareFullCommand(strCommandCore, rfcfg, bIsVariable);
-		id.strSimpleCmdId = strCommandCore;
+		id.strUniqueId = prepareFullCommand(strCommandCore, rfcfg, bIsVariable);
+//		id.strSimpleCmdId = rfcfg.getPrefixCustomId()+strCommandCore;
+		id.strPrefixCustomToSolveConflicts=rfcfg.getPrefixCustomId();
+		id.strSimpleId = strCommandCore;
 		id.bIsVariable=bIsVariable;
 		return id;
 	}
@@ -422,15 +426,15 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		}
 		
 		String strPrefixInstanced="";
-		if(rfcfg.isUsePrefixInstancedClass()){
-			if(rfcfg.getPrefixInstancedClass().isEmpty()){
-				rfcfg.setPrefixInstancedClass(rfcfg.rfcv.getOwner().getClass().getSimpleName());
+		if(rfcfg.isUsePrefixInstancedConcreteClass()){
+			if(rfcfg.getPrefixInstancedConcreteClass().isEmpty()){
+				rfcfg.setPrefixInstancedConcreteClass(rfcfg.rfcv.getOwner().getClass().getSimpleName());
 			}
 			
-			if(!rfcfg.getPrefixDeclaringClass().equalsIgnoreCase(rfcfg.getPrefixInstancedClass())){
-				strPrefixInstanced=preparePart(rfcfg.getPrefixInstancedClass());
+			if(!rfcfg.getPrefixDeclaringClass().equalsIgnoreCase(rfcfg.getPrefixInstancedConcreteClass())){
+				strPrefixInstanced=preparePart(rfcfg.getPrefixInstancedConcreteClass());
 				
-				if(rfcfg.getPrefixCustomId().equalsIgnoreCase(rfcfg.getPrefixInstancedClass())){
+				if(rfcfg.getPrefixCustomId().equalsIgnoreCase(rfcfg.getPrefixInstancedConcreteClass())){
 					bUseCustomId=false;
 				}
 			}

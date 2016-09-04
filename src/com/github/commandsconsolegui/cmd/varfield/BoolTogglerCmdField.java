@@ -48,7 +48,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
  *
  */
 public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdField>{
-	public static final String strTogglerCodePrefix="btg";
+//	public static final String strCodePrefix="btg";
 //	private static ArrayList<BoolTogglerCmdField> abtgList = new ArrayList<BoolTogglerCmdField>();
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
@@ -56,7 +56,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 	private boolean bPrevious;
 	private boolean bCurrent;
 
-	private String	strReflexFillCfgCodePrefixVariant;
+//	private String	strReflexFillCfgCodePrefixVariant;
 	private boolean bDoCallOnChange = true;
 	private CallableX	caller;
 	private boolean	bConstructed;
@@ -79,37 +79,40 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 ////		abtgList.add(this);
 //	}
 	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitValue){
-		this( rfcfgOwnerUseThis,  bInitValue, BoolTogglerCmdField.strTogglerCodePrefix, "");
+		this( rfcfgOwnerUseThis,  bInitValue, "");
 	}
-	/**
-	 * 
-	 * @param rfcfgOwnerUseThis always pass as "this", the very class must implement it.
-	 * @param bInitValue
-	 * @param strReflexFillCfgCodePrefixVariant if null, will be default. Can be emtpy "".
-	 */
-	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitValue, String strReflexFillCfgCodePrefixVariant){
-		this( rfcfgOwnerUseThis,  bInitValue,  strReflexFillCfgCodePrefixVariant, "");
-	}
+//	/**
+//	 * 
+//	 * @param rfcfgOwnerUseThis always pass as "this", the very class must implement it.
+//	 * @param bInitValue
+//	 * @param strReflexFillCfgCodePrefixVariant if null, will be default. Can be emtpy "".
+//	 */
+//	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitValue, String strReflexFillCfgCodePrefixVariant){
+//		this( rfcfgOwnerUseThis,  bInitValue,  strReflexFillCfgCodePrefixVariant, "");
+//	}
 	/**
 	 * 
 	 * @param rfcfgOwnerUseThis always pass as "this", the very class must implement it.
 	 * @param bInitialValue
-	 * @param strReflexFillCfgCodePrefixVariant if null, will be default. Can be emtpy "".
 	 * @param strHelp
 	 */
-	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitialValue, String strReflexFillCfgCodePrefixVariant, String strHelp){
+//	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitialValue, String strReflexFillCfgCodePrefixVariant, String strHelp){
+	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitialValue, String strHelp){
 		super(rfcfgOwnerUseThis);
 		
 //		ReflexFill.assertAndGetField(rfcfgOwnerUseThis, this);
 		
-		this.strReflexFillCfgCodePrefixVariant=strReflexFillCfgCodePrefixVariant;
-		if(this.strReflexFillCfgCodePrefixVariant==null){
-			this.strReflexFillCfgCodePrefixVariant=BoolTogglerCmdField.strTogglerCodePrefix;
-		}else{
-			if(!MiscI.i().isValidIdentifierCmdVarAliasFuncString(this.strReflexFillCfgCodePrefixVariant)){
-				throw new PrerequisitesNotMetException("invalid code prefix", this.strReflexFillCfgCodePrefixVariant);
-			}
-		}
+//		setCodePrefixVariant(strReflexFillCfgCodePrefixVariant);
+		
+//		this.strReflexFillCfgCodePrefixVariant=MiscI.i().assertAndGetValidId(strReflexFillCfgCodePrefixVariant,BoolTogglerCmdField.getCodePrefixDefault());
+//		this.strReflexFillCfgCodePrefixVariant=strReflexFillCfgCodePrefixVariant;
+//		if(this.strReflexFillCfgCodePrefixVariant==null){
+//			this.strReflexFillCfgCodePrefixVariant=BoolTogglerCmdField.getCodePrefixDefault();
+//		}else{
+//			if(!MiscI.i().isValidIdentifierCmdVarAliasFuncString(this.strReflexFillCfgCodePrefixVariant)){
+//				throw new PrerequisitesNotMetException("invalid code prefix", this.strReflexFillCfgCodePrefixVariant);
+//			}
+//		}
 		
 //		setOwner(rfcfgOwnerUseThis);
 		setHelp(strHelp);
@@ -197,10 +200,10 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 //		return iReflexFillCfgVariant;
 //	}
 
-	@Override
-	public String getCodePrefixVariant() {
-		return strReflexFillCfgCodePrefixVariant;
-	}
+//	@Override
+//	public String getCodePrefixVariant() {
+//		return strReflexFillCfgCodePrefixVariant;
+//	}
 	
 	public String getCmdIdAsCommand(boolean bForceState) {
 		return getUniqueCmdId()+" "+bForceState;
@@ -388,5 +391,11 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 	public boolean toggle(){
 		setObjectRawValue(!getBoolean());
 		return getBoolean();
+	}
+	
+	private static String strCodePrefixDefault="btg";
+	@Override
+	public String getCodePrefixDefault() {
+		return strCodePrefixDefault;
 	}
 }

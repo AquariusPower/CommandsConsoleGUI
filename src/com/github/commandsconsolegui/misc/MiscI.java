@@ -480,6 +480,14 @@ public class MiscI {
 		return strCmdPart.matches("["+strValidCmdCharsRegex+"]*");
 	}
 	
+	public String assertGetValidId(String strId, String strDefaultId){
+		if(strId==null)strId=strDefaultId;
+		if(!isValidIdentifierCmdVarAliasFuncString(strId)){
+			throw new PrerequisitesNotMetException("invalid id", strId);
+		}
+		return strId;
+	}
+	
 	public String getClassTreeReportFor(Object obj,boolean bSimpleName){
 		ArrayList<Class<?>> ac = getClassTreeFor(obj);
 		String strClassTree="";

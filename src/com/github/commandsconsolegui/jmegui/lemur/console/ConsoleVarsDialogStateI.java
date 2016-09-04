@@ -38,6 +38,7 @@ import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.AudioUII;
+import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceDialogState;
@@ -56,18 +57,58 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	private static ConsoleVarsDialogStateI<Command<Button>>	instance=new ConsoleVarsDialogStateI<Command<Button>>();
 	public static ConsoleVarsDialogStateI<Command<Button>> i(){return instance;}
 	
-	private static class VarChoiceDialogState extends ChoiceDialogState{
+	private static class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceDialogState<T>{
 		private static class CfgParm extends ChoiceDialogState.CfgParm{
 			public CfgParm(Float fDialogWidthPercentOfAppWindow,
 					Float fDialogHeightPercentOfAppWindow,
 					Float fInfoHeightPercentOfDialog, Float fEntryHeightMultiplier) {
 				super(fDialogWidthPercentOfAppWindow, fDialogHeightPercentOfAppWindow,
 						fInfoHeightPercentOfDialog, fEntryHeightMultiplier);
-				// TODO Auto-generated constructor stub
 			}
 		}
+
+		private VarCmdFieldAbs	vcf;
+		private DialogListEntryData<T>	dledAtParent;
+		
+		@Override
+		protected boolean enableAttempt() {
+			if(!super.enableAttempt())return false;
+			
+			dledAtParent = getParentReferencedDledListCopy().get(0);
+			vcf = (VarCmdFieldAbs)dledAtParent.getUserObj();
+			
+			btgSortListEntries.setObjectRawValue(false);
+			
+			return true;
+		}
+		
+		@Override
+		protected String getTextInfo() {
+			String str="";
+			
+			str+="Help("+ConsoleVarsDialogStateI.class.getSimpleName()+"):\n";
+			if(vcf!=null)str+="\t"+vcf.getHelp()+"\n";
+			
+			str+=super.getTextInfo();
+			
+			return str;
+		}
+		
+		@Override
+		protected void updateList() {
+			clearList();
+			
+			if(vcf!=null){
+				addEntry(new DialogListEntryData<T>().setText(vcf.getHelp(), vcf));
+				addEntry(new DialogListEntryData<T>().setText(vcf.getUniqueVarId(), vcf));
+				addEntry(new DialogListEntryData<T>().setText(""+vcf.getValueRaw(), vcf));
+			}
+			
+			super.updateList();
+		}
 	}
-	private VarChoiceDialogState chd = new VarChoiceDialogState();
+	
+	private ChoiceVarDialogState chd = new ChoiceVarDialogState();
 	
 	public static class CfgParm extends MaintenanceListDialogState.CfgParm{
 		public CfgParm(Float fDialogWidthPercentOfAppWindow,
@@ -82,7 +123,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	public ConsoleVarsDialogStateI<T> configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;
 		
-		chd.configure(new VarChoiceDialogState.CfgParm(0.9f, 0.5f, 0.5f, null));//.setId(strId));
+		chd.configure(new ChoiceVarDialogState.CfgParm(0.9f, 0.5f, 0.5f, null));//.setId(strId));
 		chd.setInputToTypeValueMode(true);
 		cfg.setDiagChoice(chd);
 		
@@ -121,13 +162,6 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	}
 	
 	@Override
-	protected void updateList() {
-//		clearList(); //TODO could just update each entry value...
-		updateDledList();
-		super.updateList();
-	}
-	
-	@Override
 	protected void actionCustomAtEntry(DialogListEntryData<T> dledSelected) {
 		if(dledSelected.getUserObj() instanceof BoolTogglerCmdField){
 			changeValue(dledSelected);
@@ -137,7 +171,8 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		}
 	}
 	
-	private void updateDledList() {
+	@Override
+	protected void updateList() {
 		ArrayList<VarCmdFieldAbs> avcf = VarCmdFieldAbs.getListFullCopy();
 		
 		ArrayList<DialogListEntryData<T>> adled = getCompleteEntriesListCopy();
@@ -196,6 +231,8 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			}
 			
 		}
+		
+		super.updateList();
 	}
 	
 	@Override
