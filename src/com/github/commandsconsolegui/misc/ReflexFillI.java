@@ -306,16 +306,41 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	}
 	
 	public static class IdTmp{
-		public String strUniqueId;
-		public String strSimpleId;
-		public boolean	bIsVariable;
-		public String	strPrefixCustomToSolveConflicts;
+		private String strUniqueId;
+		private String strSimpleId;
+		private boolean	bIsVariable;
+		private String	strPrefixCustomToSolveConflicts;
+		
 		public IdTmp() {
 		}
 		public IdTmp(boolean bIsVariable, String strCore, String strFull) {
-			this.strUniqueId = strFull;
-			this.strSimpleId = strCore;
+			this.setUniqueId(strFull);
+			this.setSimpleId(strCore);
+			this.setAsVariable(bIsVariable);
+		}
+		public String getUniqueId() {
+			return strUniqueId;
+		}
+		public void setUniqueId(String strUniqueId) {
+			this.strUniqueId = strUniqueId;
+		}
+		public String getSimpleId() {
+			return strSimpleId;
+		}
+		public void setSimpleId(String strSimpleId) {
+			this.strSimpleId = strSimpleId;
+		}
+		public boolean isVariable() {
+			return bIsVariable;
+		}
+		public void setAsVariable(boolean bIsVariable) {
 			this.bIsVariable = bIsVariable;
+		}
+		public String getPrefixCustomToSolveConflicts() {
+			return strPrefixCustomToSolveConflicts;
+		}
+		public void setPrefixCustomToSolveConflicts(String strPrefixCustomToSolveConflicts) {
+			this.strPrefixCustomToSolveConflicts = strPrefixCustomToSolveConflicts;
 		}
 	}
 	
@@ -364,30 +389,30 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 			strCodeTypePrefix=rfcvFieldAtTheOwner.getCodePrefixVariant();
 		}
 		
-		String strCommandCore = strFieldName;
+		String strCommandSimple = strFieldName;
 		if(strCodeTypePrefix!=null){
-			if(strCommandCore.startsWith(strCodeTypePrefix)){
+			if(strCommandSimple.startsWith(strCodeTypePrefix)){
 				//remove prefix
-				strCommandCore=strCommandCore.substring(strCodeTypePrefix.length());
+				strCommandSimple=strCommandSimple.substring(strCodeTypePrefix.length());
 			}else{
 				throw new PrerequisitesNotMetException("code prefix was set but field doesnt begin with it: "
-					+strCodeTypePrefix+", "+strFieldName, strCommandCore);
+					+strCodeTypePrefix+", "+strFieldName, strCommandSimple);
 			}
 		}
 		
 		if(bMakePretty){
-			strCommandCore=MiscI.i().makePretty(strCommandCore, rfcfg.bFirstLetterUpperCase);
+			strCommandSimple=MiscI.i().makePretty(strCommandSimple, rfcfg.bFirstLetterUpperCase);
 		}else{
 			/** Already nice to read field name. */
-			strCommandCore=MiscI.i().firstLetter(strCommandCore,rfcfg.bFirstLetterUpperCase);
+			strCommandSimple=MiscI.i().firstLetter(strCommandSimple,rfcfg.bFirstLetterUpperCase);
 		}
 		
 		IdTmp id = new IdTmp();
-		id.strUniqueId = prepareFullCommand(strCommandCore, rfcfg, bIsVariable);
+		id.setUniqueId(prepareFullCommand(strCommandSimple, rfcfg, bIsVariable));
 //		id.strSimpleCmdId = rfcfg.getPrefixCustomId()+strCommandCore;
-		id.strPrefixCustomToSolveConflicts=rfcfg.getPrefixCustomId();
-		id.strSimpleId = strCommandCore;
-		id.bIsVariable=bIsVariable;
+		id.setPrefixCustomToSolveConflicts(rfcfg.getPrefixCustomId());
+		id.setSimpleId(strCommandSimple);
+		id.setAsVariable(bIsVariable);
 		return id;
 	}
 	

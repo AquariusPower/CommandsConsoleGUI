@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.cmd;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -55,7 +56,9 @@ public class CommandData implements Comparable<CommandData>{
 	private IReflexFillCfg irfcOwner;
 	private StackTraceElement[] asteCodeTrackUniqueId;
 
-	private ArrayList<CommandData>	acmddCoreIdConflicts = new ArrayList<CommandData>();
+	private ArrayList<CommandData>	acmddSimpleIdConflicts = new ArrayList<CommandData>();
+
+	private VarCmdFieldAbs	vcf;
 	
 	public String getSimpleCmdId(){
 		return strSimpleCmdId;
@@ -70,10 +73,15 @@ public class CommandData implements Comparable<CommandData>{
 	public IReflexFillCfg getOwner() {
 		return irfcOwner;
 	}
+	public VarCmdFieldAbs getVar() {
+		return vcf;
+	}
 	
+//	public CommandData(IReflexFillCfg irfcOwner, VarCmdFieldAbs vcf, String strBaseCmd, String strSimpleCmdId, String strComment) {
 	public CommandData(IReflexFillCfg irfcOwner, String strBaseCmd, String strSimpleCmdId, String strComment) {
 		super();
 		this.irfcOwner = irfcOwner;
+//		this.vcf=vcf;
 		this.strUniqueCmdId = strBaseCmd;
 		this.strSimpleCmdId=strSimpleCmdId;
 		this.strComment = strComment;
@@ -111,18 +119,18 @@ public class CommandData implements Comparable<CommandData>{
 			;
 	}
 	
-	public void addCoreIdConflict(CommandData cmdd){
-		if(!acmddCoreIdConflicts.contains(cmdd)){
-			acmddCoreIdConflicts.add(cmdd);
+	public void addSimpleIdConflict(CommandData cmdd){
+		if(!acmddSimpleIdConflicts.contains(cmdd)){
+			acmddSimpleIdConflicts.add(cmdd);
 		}
 	}
 	
 	public boolean isSimpleCmdIdConflicting(){
-		return acmddCoreIdConflicts.size()>0;
+		return acmddSimpleIdConflicts.size()>0;
 	}
 	
-	public ArrayList<CommandData> getCoreIdConflictListClone() {
-		return new ArrayList<CommandData>(acmddCoreIdConflicts);
+	public ArrayList<CommandData> getSimpleIdConflictListClone() {
+		return new ArrayList<CommandData>(acmddSimpleIdConflicts);
 	}
 
 	@Override
@@ -130,15 +138,22 @@ public class CommandData implements Comparable<CommandData>{
 		return this.getSimpleCmdId().toLowerCase().compareTo(o.getSimpleCmdId().toLowerCase());
 	}
 
-	public void applySimpleCmdIdConflictFixed(CommandsDelegator.CompositeControl cc, String strNewSimpleCmdId){//, Collection<CommandData> cmdListToClearConflicts) {
+	public void applySimpleCmdIdConflictFixed(CommandsDelegator.CompositeControl cc, String strNewSimpleCmdId, boolean bForce){//, Collection<CommandData> cmdListToClearConflicts) {
 		cc.assertSelfNotNull();
 		
-		if(!isSimpleCmdIdConflicting())throw new PrerequisitesNotMetException("can only be directly set if it has conflicts");
+		if(!isSimpleCmdIdConflicting()){
+			if(bForce){
+				GlobalCommandsDelegatorI.i().dumpDebugEntry("forcing change of simple id even without conflicts: "
+					+this.getSimpleCmdId()+", "+this.getUniqueCmdId());
+			}else{
+				throw new PrerequisitesNotMetException("can only be directly set if it has conflicts",this, this.getSimpleCmdId(), this.getUniqueCmdId());
+			}
+		}
 		
 		// clear conflicts
-		for(CommandData cmddOther:acmddCoreIdConflicts.toArray(new CommandData[0])){
-			cmddOther.acmddCoreIdConflicts.remove(this);
-			this.acmddCoreIdConflicts.remove(cmddOther);
+		for(CommandData cmddOther:acmddSimpleIdConflicts.toArray(new CommandData[0])){
+			cmddOther.acmddSimpleIdConflicts.remove(this);
+			this.acmddSimpleIdConflicts.remove(cmddOther);
 		}
 		
 //		for(CommandData dataOther:cmdListToClearConflicts){
@@ -148,6 +163,11 @@ public class CommandData implements Comparable<CommandData>{
 //		}
 		
 		this.strSimpleCmdId=strNewSimpleCmdId;
+	}
+
+	public CommandData setVar(VarCmdFieldAbs vcf) {
+		this.vcf=vcf;
+		return this;
 	}
 	
 }

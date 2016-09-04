@@ -203,26 +203,26 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		 * must be an exception as it can have already been read/collected with automatic value.
 		 * The exception control is strExceptionId.
 		 */
-		if(idt.bIsVariable){
+		if(idt.isVariable()){
 			if(strUniqueVarId!=null){
 				strExceptionId=strUniqueVarId;
 			}else{
-				strUniqueVarId=idt.strUniqueId;
+				strUniqueVarId=idt.getUniqueId();
 			}
 		}else{
 			if(strUniqueCmdId!=null){
 				strExceptionId=strUniqueCmdId;
 			}else{
-				strUniqueCmdId=idt.strUniqueId;
+				strUniqueCmdId=idt.getUniqueId();
 			}
 		}
 		
-		PrerequisitesNotMetException.assertNotAlreadySet("UniqueCmdId", strExceptionId, idt.strUniqueId);
+		PrerequisitesNotMetException.assertNotAlreadySet("UniqueCmdId", strExceptionId, idt.getUniqueId());
 //		if(strExceptionId!=null){
 ////			throw new NullPointerException("asked for '"+id.strUniqueCmdId+"' but was already set to: "+strExceptionId);
 //		}
 		
-		strSimpleCmdId = idt.strSimpleId;
+		strSimpleCmdId = idt.getSimpleId();
 		
 		strDebugErrorHelper=null; //clear error helper
 		
@@ -364,5 +364,10 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	@Override
 	public boolean isCodePrefixVariantEqualDefault() {
 		return getCodePrefixVariant().equals(getCodePrefixDefault());
+	}
+
+	public IdTmp getIdTmp(CommandsDelegator.CompositeControl cc) {
+		cc.assertSelfNotNull();
+		return idt;
 	}
 }

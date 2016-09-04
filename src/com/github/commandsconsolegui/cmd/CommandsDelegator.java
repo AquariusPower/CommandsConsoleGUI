@@ -188,6 +188,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public final StringCmdField scfAlias = new StringCmdField(this);
 	public final StringCmdField scfCmdOS = new StringCmdField(this);
 	public final StringCmdField scfFileShowData = new StringCmdField(this);
+	public final StringCmdField scfFixAllCmdsConflictsAutomatically = new StringCmdField(this);
 	public final StringCmdField scfExit = new StringCmdField(this);
 	public final StringCmdField scfExecBatchCmdsFromFile = new StringCmdField(this);
 	public final StringCmdField scfEditCut = new StringCmdField(this);
@@ -288,7 +289,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //	private ArrayList<String> astrBaseCmdValidList = new ArrayList<String>();
 	private ArrayList<AliasData> aAliasList = new ArrayList<AliasData>();
 //	private ArrayList<CommandData> acmdList = new ArrayList<CommandData>();
-	private TreeMap<String,CommandData> trmCmds = new TreeMap<String,CommandData>(String.CASE_INSENSITIVE_ORDER);
+	private TreeMap<String,CommandData> trmCmddList = new TreeMap<String,CommandData>(String.CASE_INSENSITIVE_ORDER);
 //	LinkedHashMap<String,CommandData> asdf = new LinkedHashMap<String,CommandData>(String.CASE_INSENSITIVE_ORDER);
 	
 	private class PreQueueCmdsBlockSubListData{
@@ -812,30 +813,42 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			String strUniqueCmdIdWithSimpleConflict = ccl.paramString(1);
 			String strNewSimpleCmdId = ccl.paramString(2);
 			
-			boolean bFail=false;
-			CommandData data = getCmdDataFor(strUniqueCmdIdWithSimpleConflict,false);
-			if(data==null){
+			boolean bUserFail=false;
+			CommandData cmddWithSimpleConflict = getCmdDataFor(strUniqueCmdIdWithSimpleConflict,false);
+			if(cmddWithSimpleConflict==null){
 				dumpWarnEntry("command not found "+strUniqueCmdIdWithSimpleConflict);
-				bFail=true;
+				bUserFail=true;
 			}else
-			if(!data.isSimpleCmdIdConflicting()){
-				dumpWarnEntry("cmd has no conflicts: "+data.getUniqueCmdId(), data.asHelp());
-				bFail=true;
+			if(!cmddWithSimpleConflict.isSimpleCmdIdConflicting()){
+				dumpWarnEntry("cmd has no conflicts: "+cmddWithSimpleConflict.getUniqueCmdId(), cmddWithSimpleConflict.asHelp());
+				bUserFail=true;
 			}
-			else{
-				CommandData dataFromSimple = getCmdDataFor(strNewSimpleCmdId,true);
-				if(dataFromSimple!=null){
-					dumpWarnEntry("cmd simple already used: "+strNewSimpleCmdId, dataFromSimple.asHelp());
-					bFail=true;
-				}
-			}
+//			else{
+//				CommandData dataFromSimple = getCmdDataFor(strNewSimpleCmdId,true);
+//				if(dataFromSimple!=null){
+//					dumpWarnEntry("cmd simple already used: "+strNewSimpleCmdId, dataFromSimple.asHelp());
+//					bFail=true;
+//				}
+//			}
 			
-			if(!bFail){
-				data.applySimpleCmdIdConflictFixed(ccSelf, strNewSimpleCmdId);//, trmCmds.values());
+			if(!bUserFail){
+				if(fixSimpleCmdConflict(cmddWithSimpleConflict,strNewSimpleCmdId,false)){
+					dumpSubEntry(cmddWithSimpleConflict.asHelp());
+					bCmdWorked=true;
+				}else{
+					dumpWarnEntry("cmd simple already used: "+strNewSimpleCmdId); //TODO wild guess?
+				}
 				
-				dumpSubEntry(data.asHelp());
-				
-				bCmdWorked=true;
+//				CommandData dataFromNewSimple = getCmdDataFor(strNewSimpleCmdId,true);
+//				if(dataFromNewSimple==null){
+//					cmddWithSimpleConflict.applySimpleCmdIdConflictFixed(ccSelf, strNewSimpleCmdId);//, trmCmds.values());
+//					
+//					dumpSubEntry(cmddWithSimpleConflict.asHelp());
+//					
+//					bCmdWorked=true;
+//				}else{
+//					dumpWarnEntry("cmd simple already used: "+strNewSimpleCmdId, dataFromNewSimple.asHelp());
+//				}
 			}
 		}else
 		if(checkCmdValidity(getPseudoListener(),scfCmdOS,"<strOSName> <astrOSCommandAndParams> runs an OS command. Will only be executed if in the correponding OS, otherwise will be skipped, so use with the other OS alternatives nearby.")){
@@ -912,6 +925,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			icui().setVisibleRowsAdjustRequest(ccl.paramInt(1));
 			if(!icui().isVisibleRowsAdjustRequested())icui().setVisibleRowsAdjustRequest(0);
 			bCmdWorked=true;
+		}else
+		if(checkCmdValidity(icclPseudo,scfFixAllCmdsConflictsAutomatically,"[strSimpleCmdFilter]")){
+			String strSimpleCmdFilter = ccl.paramString(1);
+
+			bCmdWorked=fixSimpleCmdConflictForAll(strSimpleCmdFilter);
 		}else
 		if(checkCmdValidity(icclPseudo,CMD_HELP,"[strFilter...] show (filtered) available commands")){
 			String strFilter=null;
@@ -1025,9 +1043,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}else
 		if(checkCmdValidity(icclPseudo,scfShowCommandsCoreIdConflicts,"")){
 			ArrayList<CommandData> aC = new ArrayList<CommandData>();
-			for(CommandData cmdd:trmCmds.values()){
+			for(CommandData cmdd:trmCmddList.values()){
 //				aC.addAll(cmdd.getCoreIdConflictListClone());
-				for(CommandData cmddC:cmdd.getCoreIdConflictListClone()){
+				for(CommandData cmddC:cmdd.getSimpleIdConflictListClone()){
 					if(!aC.contains(cmddC))aC.add(cmddC);
 				}
 			}
@@ -1175,6 +1193,55 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //		paramCommand()
 //	}
 	
+	private boolean fixSimpleCmdConflictForAll(String strSimpleCmdFilter){
+//		boolean bFixedAll=true;
+		ArrayList<String> astrFailedList = new ArrayList<String>();
+		ArrayList<CommandData> acmddWithConflict = new ArrayList<CommandData>();
+		for(CommandData cmdd:trmCmddList.values()){
+			if(!cmdd.isSimpleCmdIdConflicting())continue;
+			if(
+					strSimpleCmdFilter!=null && 
+					!cmdd.getSimpleCmdId().toLowerCase().contains(strSimpleCmdFilter.toLowerCase())
+			){
+				continue;
+			}
+			
+			acmddWithConflict.add(cmdd);
+		}
+		
+		for(CommandData cmdd:acmddWithConflict){	
+			boolean b=fixSimpleCmdConflict(cmdd);
+			String str = cmdd.getSimpleCmdId()+", "+cmdd.getUniqueCmdId();
+			if(b){
+				dumpSubEntry("Fixed cmd conflict for: "+str);
+			}else{
+				astrFailedList.add(str);
+//				bFixedAll=false;
+			}
+		}
+		
+		for(String str:astrFailedList){
+			dumpWarnEntry("FAILED to fix cmd conflict for: "+str);
+		}
+		
+//		return astrFailedList.size()==0;
+		return true; //just see warning messages for the failures...
+	}
+	private boolean fixSimpleCmdConflict(CommandData cmddWithSimpleConflict) {
+		String strNewSimpleCmdId = cmddWithSimpleConflict.getVar().getIdTmp(ccSelf).getPrefixCustomToSolveConflicts();
+		strNewSimpleCmdId+=cmddWithSimpleConflict.getSimpleCmdId();
+		return fixSimpleCmdConflict(cmddWithSimpleConflict,strNewSimpleCmdId, true);
+	}
+	private boolean fixSimpleCmdConflict(CommandData cmddWithSimpleConflict, String strNewSimpleCmdId, boolean bForce) {
+		CommandData dataFromNewSimple = getCmdDataFor(strNewSimpleCmdId,true);
+		if(dataFromNewSimple==null){
+			cmddWithSimpleConflict.applySimpleCmdIdConflictFixed(ccSelf, strNewSimpleCmdId, bForce);//, trmCmds.values());
+//			dumpSubEntry(cmddWithSimpleConflict.asHelp());
+			return true;
+		}
+		return false;
+	}
+
 	private IConsoleUI icui(){
 		return GlobalConsoleUII.i();
 	}
@@ -1677,14 +1744,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //		System.err.println("WARNING: removing: "+astr.toString());
 		
 		for(String strUCmd:astr){
-			if(trmCmds.remove(strUCmd) == null){
+			if(trmCmddList.remove(strUCmd) == null){
 				throw new PrerequisitesNotMetException("Inconsistent tree");
 			}
 		}
 		
 //		System.err.println("DBG: "+getAllCommandFor(iccl));
 		
-		if(trmCmds.get(cmddLastAdded.getUniqueCmdId())==null){
+		if(trmCmddList.get(cmddLastAdded.getUniqueCmdId())==null){
 			cmddLastAdded=null;
 		}
 		
@@ -1693,7 +1760,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	
 	public ArrayList<String> getAllCommandFor(IConsoleCommandListener iccl){
 		ArrayList<String> astr = new ArrayList<String>();
-		for(CommandData cmdd:trmCmds.values().toArray(new CommandData[0])){
+		for(CommandData cmdd:trmCmddList.values().toArray(new CommandData[0])){
 			if(cmdd.getOwner()==iccl){
 				astr.add(cmdd.getUniqueCmdId());
 			}
@@ -1723,7 +1790,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			/**
 			 * conflict check, will discard in case it is identical origin
 			 */
-			for(CommandData cmdd:trmCmds.values()){
+			for(CommandData cmdd:trmCmddList.values()){
 				if(cmdd.getUniqueCmdId().equalsIgnoreCase(cmddNew.getUniqueCmdId())){
 					/**
 					 * already set from same origin, just skip.
@@ -1746,25 +1813,36 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			 * Simple cmd conflict must be here, after the discarding happens to not store
 			 * discarded objects
 			 */
-			for(CommandData cmdd:trmCmds.values()){
+			for(CommandData cmdd:trmCmddList.values()){
 				if(cmdd.getSimpleCmdId().equalsIgnoreCase(cmddNew.getSimpleCmdId())){
-					cmdd.addCoreIdConflict(cmddNew);
-					cmddNew.addCoreIdConflict(cmdd);
+					cmdd.addSimpleIdConflict(cmddNew);
+					cmddNew.addSimpleIdConflict(cmdd);
 //					aAllCmdConflictList.add(cmddNew);
 				}
 			}
 			
+			/**
+			 * link data with var
+			 */
 			ArrayList<VarCmdFieldAbs> avcf = new ArrayList<VarCmdFieldAbs>();
+			ArrayList<VarCmdFieldAbs> avcfLinkList = new ArrayList<VarCmdFieldAbs>();
 			avcf.addAll(VarCmdFieldAbs.getListCopy(BoolTogglerCmdField.class));
 			avcf.addAll(BoolTogglerCmdField.getListCopy(StringCmdField.class));
+//			int iCount=0;
 			for(VarCmdFieldAbs vcf:avcf){
 				if(vcf.getUniqueCmdId().equalsIgnoreCase(cmddNew.getUniqueCmdId())){
 					vcf.setCmdData(cmddNew);
+					cmddNew.setVar(vcf);
+//					iCount++;
+					avcfLinkList.add(vcf);
 				}
+			}
+			if(avcfLinkList.size()>1){
+				throw new PrerequisitesNotMetException("there should have only one var data link", cmddNew, avcf);
 			}
 			
 //			acmdList.add(cmddNew);
-			trmCmds.put(cmddNew.getUniqueCmdId(), cmddNew);
+			trmCmddList.put(cmddNew.getUniqueCmdId(), cmddNew);
 			cmddLastAdded = cmddNew;
 			MsgI.i().dbg(cmddNew.getOwner().getClass().getSimpleName()+":"+cmddNew.getUniqueCmdId(), true, this);
 			
@@ -1772,7 +1850,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			 * coded sorting check (unnecessary actually), just useful for developers
 			 * be more organized. 
 			 */
-			if(!bSkipSortCheck && trmCmds.size()>0){
+			if(!bSkipSortCheck && trmCmddList.size()>0){
 //				String strLast = acmdList.get(acmdList.size()-1).getBaseCmd();
 				String strLast = cmddLastAdded.getUniqueCmdId();
 				if(strLast.compareToIgnoreCase(strBaseCmdNew)>0){
@@ -2756,14 +2834,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	public void cmdShowHelp(String strFilter) {
 		if(strFilter==null){
-			dumpInfoEntry("Available Commands ("+trmCmds.size()+"):");
+			dumpInfoEntry("Available Commands ("+trmCmddList.size()+"):");
 		}else{
 			dumpInfoEntry("Help for '"+strFilter+"':");
 		}
 		
 //		Collections.sort(acmdList, CommandData.getCmdComparator());
 		
-		ArrayList<CommandData> cmdList = new ArrayList<CommandData>(trmCmds.values());
+		ArrayList<CommandData> cmdList = new ArrayList<CommandData>(trmCmddList.values());
 		Collections.sort(cmdList);
 		
 		for(CommandData cmd:cmdList){//trmCmds.values()){
@@ -2788,7 +2866,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public ArrayList<String> getAllPossibleCommands(){
 		ArrayList<String> a = new ArrayList<String>();
 		
-		for(CommandData cmdd:trmCmds.values()){
+		for(CommandData cmdd:trmCmddList.values()){
 			if(!a.contains(cmdd.getSimpleCmdId()))a.add(cmdd.getSimpleCmdId());
 			a.add(cmdd.getUniqueCmdId());
 		}
@@ -2799,7 +2877,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	public ArrayList<String> getUniqueCommands(){
-		return new ArrayList<String>(Arrays.asList(trmCmds.keySet().toArray(new String[0])));
+		return new ArrayList<String>(Arrays.asList(trmCmddList.keySet().toArray(new String[0])));
 //		if(astrBaseCmdCacheList.size()!=hmCmds.size()){
 //			astrBaseCmdCacheList.clear();
 //			for(CommandData cmd:hmCmds.values()){ //keys would suffice tho
@@ -3857,7 +3935,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 
 	public boolean isFullCmd(String strMainCmd) {
-		return trmCmds.containsKey(strMainCmd);
+		return trmCmddList.containsKey(strMainCmd);
 	}
 
 //	public boolean isCoreCmd(String strMainCmd) {
@@ -3870,10 +3948,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //	}
 	
 	public String convertToFullCmdIfItIsCoreCmd(String strCmd, boolean bDumpMessages) {
-		for(Entry<String, CommandData> entry:trmCmds.entrySet()){
+		for(Entry<String, CommandData> entry:trmCmddList.entrySet()){
 			CommandData cmdd = entry.getValue();
 			if(cmdd.getSimpleCmdId().equalsIgnoreCase(strCmd)){
-				ArrayList<CommandData> acmddConflictList = cmdd.getCoreIdConflictListClone();
+				ArrayList<CommandData> acmddConflictList = cmdd.getSimpleIdConflictListClone();
 				if(acmddConflictList.size()>0){
 					if(bDumpMessages){
 						dumpWarnEntry("Unable to converto core command '"+cmdd.getSimpleCmdId()+"', it has conflicts:");
@@ -3904,8 +3982,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @return 
 	 */
 	public CommandData getCmdDataIfSame(String strCmdId1,String strCmdId2){
-		CommandData cmdd1 = trmCmds.get(strCmdId1);
-		CommandData cmdd2 = trmCmds.get(strCmdId2);
+		CommandData cmdd1 = trmCmddList.get(strCmdId1);
+		CommandData cmdd2 = trmCmddList.get(strCmdId2);
 		
 		if(cmdd1!=null){
 			if(cmdd1.getSimpleCmdId().equalsIgnoreCase(strCmdId2)){
@@ -3929,12 +4007,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @return
 	 */
 	public CommandData getCmdDataFor(String strCmdId, boolean bAllowSimpleWithConflicts) {
-		CommandData cmdd = trmCmds.get(strCmdId);
+		CommandData cmdd = trmCmddList.get(strCmdId);
 		if(cmdd==null){
 			/**
 			 * look for simple id
 			 */
-			for(CommandData cmddTmp:trmCmds.values()){
+			for(CommandData cmddTmp:trmCmddList.values()){
 				if(!bAllowSimpleWithConflicts){
 					if(cmddTmp.isSimpleCmdIdConflicting())continue; //only allow precise match
 				}
