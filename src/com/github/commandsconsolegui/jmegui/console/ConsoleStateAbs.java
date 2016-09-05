@@ -93,8 +93,6 @@ import com.jme3.texture.Texture2D;
  * This class connects the console commands class with JMonkeyEngine.
  * It must contain the base for the GUI to work.
  * 
- * Project at: https://github.com/AquariusPower/CommandsConsoleGUI
- * 
  * More info at {@link BaseDialogStateAbs}
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower>
@@ -818,14 +816,14 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		
 		// console toggle
 //		if(iToggleConsoleKey!=null){
-			if(!app().getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_TOGGLE.toString())){
-				app().getInputManager().addMapping(INPUT_MAPPING_CONSOLE_TOGGLE.toString(), 
+			if(!app().getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_TOGGLE.getUniqueCmdId())){
+				app().getInputManager().addMapping(INPUT_MAPPING_CONSOLE_TOGGLE.getUniqueCmdId(), 
 					new KeyTrigger(cfg.iToggleConsoleKey));
 					
 				alConsoleToggle = new ActionListener() {
 					@Override
 					public void onAction(String name, boolean isPressed, float tpf) {
-						if(isPressed && INPUT_MAPPING_CONSOLE_TOGGLE.equals(name)){
+						if(isPressed && INPUT_MAPPING_CONSOLE_TOGGLE.getUniqueCmdId().equals(name)){
 //							if(!isInitialized()){
 //								initialize();
 //							}
@@ -840,12 +838,12 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 						}
 					}
 				};
-				app().getInputManager().addListener(alConsoleToggle, INPUT_MAPPING_CONSOLE_TOGGLE.toString());            
+				app().getInputManager().addListener(alConsoleToggle, INPUT_MAPPING_CONSOLE_TOGGLE.getUniqueCmdId());            
 			}
 //		}
 		
-		if(!app().getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_CONTROL_PRESSED.toString())){
-			app().getInputManager().addMapping(INPUT_MAPPING_CONSOLE_CONTROL_PRESSED.toString(), 
+		if(!app().getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_CONTROL_PRESSED.getUniqueCmdId())){
+			app().getInputManager().addMapping(INPUT_MAPPING_CONSOLE_CONTROL_PRESSED.getUniqueCmdId(), 
 					new KeyTrigger(KeyInput.KEY_LCONTROL),
 					new KeyTrigger(KeyInput.KEY_RCONTROL));
 			
@@ -855,11 +853,11 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 					bKeyControlIsPressed  = isPressed;
 				}
 			};
-			app().getInputManager().addListener(al, INPUT_MAPPING_CONSOLE_CONTROL_PRESSED.toString());            
+			app().getInputManager().addListener(al, INPUT_MAPPING_CONSOLE_CONTROL_PRESSED.getUniqueCmdId());            
 		}
 		
-		if(!app().getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_SHIFT_PRESSED.toString())){
-			app().getInputManager().addMapping(INPUT_MAPPING_CONSOLE_SHIFT_PRESSED.toString(), 
+		if(!app().getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_SHIFT_PRESSED.getUniqueCmdId())){
+			app().getInputManager().addMapping(INPUT_MAPPING_CONSOLE_SHIFT_PRESSED.getUniqueCmdId(), 
 				new KeyTrigger(KeyInput.KEY_LSHIFT),
 				new KeyTrigger(KeyInput.KEY_RSHIFT));
 				
@@ -869,7 +867,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 					bKeyShiftIsPressed  = isPressed;
 				}
 			};
-			app().getInputManager().addListener(al, INPUT_MAPPING_CONSOLE_SHIFT_PRESSED.toString());            
+			app().getInputManager().addListener(al, INPUT_MAPPING_CONSOLE_SHIFT_PRESSED.getUniqueCmdId());            
 		}
 		
 		// mouse scroll
@@ -909,11 +907,11 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 			}
 		};
     
-		app().getInputManager().addMapping(INPUT_MAPPING_CONSOLE_SCROLL_UP+"", tggScrollUp);
-		app().getInputManager().addListener(alConsoleScroll, INPUT_MAPPING_CONSOLE_SCROLL_UP+"");
+		app().getInputManager().addMapping(INPUT_MAPPING_CONSOLE_SCROLL_UP.getUniqueCmdId(), tggScrollUp);
+		app().getInputManager().addListener(alConsoleScroll, INPUT_MAPPING_CONSOLE_SCROLL_UP.getUniqueCmdId());
     
-		app().getInputManager().addMapping(INPUT_MAPPING_CONSOLE_SCROLL_DOWN+"", tggScrollDown);
-		app().getInputManager().addListener(alConsoleScroll, INPUT_MAPPING_CONSOLE_SCROLL_DOWN+"");
+		app().getInputManager().addMapping(INPUT_MAPPING_CONSOLE_SCROLL_DOWN.getUniqueCmdId(), tggScrollDown);
+		app().getInputManager().addListener(alConsoleScroll, INPUT_MAPPING_CONSOLE_SCROLL_DOWN.getUniqueCmdId());
 		
 		return true;
 	}

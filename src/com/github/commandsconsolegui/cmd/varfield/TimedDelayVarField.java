@@ -323,10 +323,18 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 //		this.vivo=vivo;
 //	}
 	
+//	@Override
+//	public String toString() {
+////		if(getValueRaw()==null)return null;
+//		return MiscI.i().fmtFloat(getDelayLimitSeconds(),3);
+//	}
 	@Override
-	public String toString() {
-//		if(getValueRaw()==null)return null;
-		return MiscI.i().fmtFloat(getDelayLimitSeconds(),3);
+	public String getValueAsString() {
+		return getValueAsString(3);
+	}
+	@Override
+	public String getValueAsString(int iIfFloatPrecision) {
+		return MiscI.i().fmtFloat(getDelayLimitSeconds(), iIfFloatPrecision);
 	}
 
 	@Override

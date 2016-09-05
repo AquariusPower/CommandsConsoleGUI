@@ -124,10 +124,18 @@ public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 //		this.vivo=vivo;
 //	}
 	
+//	@Override
+//	public String toString() {
+//		if(strValue==null)return null;
+//		return ""+strValue;
+//	}
 	@Override
-	public String toString() {
-		if(strValue==null)return null;
-		return ""+strValue;
+	public String getValueAsString() {
+		return getStringValue();
+	}
+	@Override
+	public String getValueAsString(int iIfFloatPrecision) {
+		return getValueAsString();
 	}
 
 	public String getStringValue() {

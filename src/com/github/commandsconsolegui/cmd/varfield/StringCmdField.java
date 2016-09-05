@@ -113,13 +113,22 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 		this(rfcfgOwner, strReflexFillCfgCodePrefixVariant, null);
 	}
 	
-	/**
-	 * returns the string value stored on this field.
-	 */
+//	/**
+//	 * returns the string value stored on this field.
+//	 */
+//	@Override
+//	public String toString() {
+//		if(getUniqueCmdId()==null)chkAndInit();
+//		return getUniqueCmdId();
+//	}
 	@Override
-	public String toString() {
-		if(getUniqueCmdId()==null)chkAndInit();//initialize();
+	public String getValueAsString() {
+		if(getUniqueCmdId()==null)chkAndInit();
 		return getUniqueCmdId();
+	}
+	@Override
+	public String getValueAsString(int iIfFloatPrecision) {
+		return getValueAsString();
 	}
 	
 //	public String getHelpComment(){

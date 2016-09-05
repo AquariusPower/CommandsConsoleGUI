@@ -555,7 +555,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				strComment+="\n"+scf.getHelp();
 			}
 		}
-		return checkCmdValidity(irfc, scf.toString(), scf.getSimpleCmdId(), strComment);
+		return checkCmdValidity(irfc, scf.getUniqueCmdId(), scf.getSimpleCmdId(), strComment);
 	}
 	public boolean checkCmdValidity(IReflexFillCfg irfc, String strUniqueCmdId, String strSimpleCmdId, String strComment){
 		return checkCmdValidity(irfc, strUniqueCmdId, strSimpleCmdId, strComment, false);
@@ -2577,7 +2577,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				str+=CMD_VAR_SET.getCmdData().getSimpleCmdId();
 			}
 		}else{
-			str+=CMD_VAR_SET.toString();
+			str+=CMD_VAR_SET.getUniqueCmdId();
 		}
 		
 		str+=" ";
@@ -2623,9 +2623,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		dumpSubEntry("");//for readability
 	}
 	
-	public boolean varSet(StringCmdField sfId, String strValue, boolean bSave) {
+	public boolean varSet(StringCmdField scfId, String strValue, boolean bSave) {
 		return varSet(
-			RESTRICTED_TOKEN+sfId.toString(),
+			RESTRICTED_TOKEN+scfId.getUniqueCmdId(),
 			strValue,
 			bSave);
 	}
@@ -3139,8 +3139,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			}
 		}
 	}
-	public void addCmdToQueue(StringCmdField sfFullCmdLine){
-		addCmdToQueue(sfFullCmdLine.toString());
+	public void addCmdToQueue(StringCmdField scfFullCmdLine){
+		addCmdToQueue(scfFullCmdLine.getUniqueCmdId());
 	}
 	public void addCmdToQueue(String strFullCmdLine){
 		addCmdToQueue(strFullCmdLine,false);
@@ -3511,8 +3511,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		// init DB
 		flDB = new File(fileNamePrepareCfg(strFileDatabase,false));
-		addCmdToQueue(CMD_DB+" "+EDataBaseOperations.load);
-		addCmdToQueue(CMD_DB+" "+EDataBaseOperations.save
+		addCmdToQueue(CMD_DB.getUniqueCmdId()+" "+EDataBaseOperations.load);
+		addCmdToQueue(CMD_DB.getUniqueCmdId()+" "+EDataBaseOperations.save
 			+" "+commentToAppend("to shrink it"));
 		
 		// init user cfg

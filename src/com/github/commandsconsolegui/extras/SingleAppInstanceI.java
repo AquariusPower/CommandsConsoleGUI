@@ -219,7 +219,7 @@ public class SingleAppInstanceI { //implements IReflexFillCfg{
 					/**
 					 * sleep after to help on avoiding allocating resources.
 					 */
-					Thread.sleep(lLockUpdateFastInitDelayMilis);
+					Thread.sleep(lLockUpdateFastInitDelayMilis);//Thread.getAllStackTraces()
 					lCheckTotalDelay+=lLockUpdateFastInitDelayMilis;
 					
 					if(lLockUpdateFastInitDelayMilis<lLockUpdateTargetDelayMilis){

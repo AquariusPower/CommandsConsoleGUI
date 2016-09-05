@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
+import groovy.util.IFileNameFinder;
+
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -153,10 +155,18 @@ public class FloatDoubleVarField extends VarCmdFieldAbs<Double,FloatDoubleVarFie
 //		this.vivo=vivo;
 //	}
 	
+//	@Override
+//	public String toString() {
+//		if(dValue==null)return null;
+//		return MiscI.i().fmtFloat(dValue,3);
+//	}
 	@Override
-	public String toString() {
-		if(dValue==null)return null;
-		return MiscI.i().fmtFloat(dValue,3);
+	public String getValueAsString() {
+		return getValueAsString(3);
+	}
+	@Override
+	public String getValueAsString(int iIfFloatPrecision) {
+		return MiscI.i().fmtFloat(getDouble(),iIfFloatPrecision);
 	}
 
 //	@Override

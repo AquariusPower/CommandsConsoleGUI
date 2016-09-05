@@ -76,11 +76,11 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 //	}
 	public boolean checkFuncExecEnd() {
 		if(ccl.getOriginalLine()==null)return false;
-		return ccl.getOriginalLine().startsWith(RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS.toString());
+		return ccl.getOriginalLine().startsWith(RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS.getUniqueCmdId());
 	}
 	public boolean checkFuncExecStart() {
 		if(ccl.getOriginalLine()==null)return false;
-		return ccl.getOriginalLine().startsWith(RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS.toString());
+		return ccl.getOriginalLine().startsWith(RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS.getUniqueCmdId());
 	}
 	public boolean cmdFunctionCall() {
 		String strFunctionId = ccl.paramString(1);
@@ -127,7 +127,7 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 //				astrFuncBlockToExec.add(0,getCommandPrefix()+
 //						CMD_VAR_SET.toString()+" "+getVarDeleteToken()+strUnsetVar);
 //			}
-			astrFuncBlockToExec.add(0,RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS+" "+strFunctionId);
+			astrFuncBlockToExec.add(0,RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS.getUniqueCmdId()+" "+strFunctionId);
 			
 			/**
 			 * append section
@@ -136,7 +136,7 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 				astrFuncBlockToExec.add(getCommandPrefix()+
 					CMD_VAR_SET.toString()+" "+getVarDeleteToken()+strUnsetVar);
 			}
-			astrFuncBlockToExec.add(RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS+" "+strFunctionId);
+			astrFuncBlockToExec.add(RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS.getUniqueCmdId()+" "+strFunctionId);
 			addCmdsBlockToPreQueue(astrFuncBlockToExec, true, true, "Func:"+strFunctionId);
 		}
 		

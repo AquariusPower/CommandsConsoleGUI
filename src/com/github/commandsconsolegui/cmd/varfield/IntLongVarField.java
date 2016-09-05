@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.cmd.varfield;
 
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
+import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 
 /**
@@ -153,10 +154,18 @@ public class IntLongVarField extends VarCmdFieldAbs<Long,IntLongVarField>{
 //		this.vivo=vivo;
 //	}
 	
+//	@Override
+//	public String toString() {
+//		if(lValue==null)return null;
+//		return ""+lValue;
+//	}
 	@Override
-	public String toString() {
-		if(lValue==null)return null;
-		return ""+lValue;
+	public String getValueAsString() {
+		return ""+getValueRaw();
+	}
+	@Override
+	public String getValueAsString(int iIfFloatPrecision) {
+		return getValueAsString();
 	}
 
 	@Override

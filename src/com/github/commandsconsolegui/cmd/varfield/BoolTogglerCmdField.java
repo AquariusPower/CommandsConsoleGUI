@@ -31,11 +31,10 @@ import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
-import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.IdTmp;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
 
 /**
  * This class can provide automatic boolean console command options to be toggled.<br>
@@ -139,7 +138,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 ////			throw new NullPointerException("asked for '"+strCmd+"' but was already set to: "+getUniqueCmdId());
 //		}
 		
-		setUniqueId(new IdTmp(false, strCmd, strCmd));
+		setUniqueId(new IdTmp().setAsVariable(false).setSimpleId(strCmd).setUniqueId(strCmd));
 	}
 	
 //	public String getCmdId(){
@@ -189,11 +188,19 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 	}
 	
 	
-	
 	@Override
-	public String toString() {
-		return ""+bCurrent;
+	public String getValueAsString() {
+		return ""+getValueRaw();
 	}
+	@Override
+	public String getValueAsString(int iIfFloatPrecision) {
+		return getValueAsString();
+	}
+	
+//	@Override
+//	public String toString() {
+//		return ""+bCurrent;
+//	}
 
 //	@Override
 //	public int getReflexFillCfgVariant() {

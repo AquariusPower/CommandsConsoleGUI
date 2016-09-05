@@ -38,15 +38,13 @@ import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.AudioUII;
-import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceDialogState;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.MaintenanceListDialogState;
-import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
+import com.github.commandsconsolegui.misc.IdTmp;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 
@@ -99,9 +97,10 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			clearList();
 			
 			if(vcf!=null){
-				addEntry(new DialogListEntryData<T>().setText(vcf.getHelp(), vcf));
-				addEntry(new DialogListEntryData<T>().setText(vcf.getUniqueVarId(), vcf));
-				addEntry(new DialogListEntryData<T>().setText(""+vcf.getValueRaw(), vcf));
+				addEntry(new DialogListEntryData<T>().setText("(Help)"+vcf.getHelp(), vcf));
+				addEntry(new DialogListEntryData<T>().setText("(UniqueId)"+vcf.getUniqueVarId(), vcf));
+				addEntry(new DialogListEntryData<T>().setText("(SimpleId)"+vcf.getSimpleCmdId(), vcf));
+				addEntry(new DialogListEntryData<T>().setText("(Value)"+vcf.getValueRaw(), vcf));
 			}
 			
 			super.updateList();
@@ -171,65 +170,62 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		}
 	}
 	
+	@SuppressWarnings("rawtypes")
 	@Override
 	protected void updateList() {
+//		clearList(); //TODO @@@Remove this line
 		ArrayList<VarCmdFieldAbs> avcf = VarCmdFieldAbs.getListFullCopy();
 		
-		ArrayList<DialogListEntryData<T>> adled = getCompleteEntriesListCopy();
-		
+		String strParentDeclaringClass="ParentDeclaringClass";
 		for(VarCmdFieldAbs vcf:avcf){
 			String strId = vcf.getUniqueVarId(true);
 			if(strId==null)continue;
 			
+			// check if already at the list
 			DialogListEntryData<T> dledWork = null;
-			for(DialogListEntryData<T> dled:adled){
-				VarCmdFieldAbs vcfEntry = ((VarCmdFieldAbs)dled.getUserObj());
-				if(vcf.getUniqueVarId().equals(vcfEntry.getUniqueVarId())){
+			for(DialogListEntryData<T> dled:getCompleteEntriesListCopy()){
+				if(dled.getUserObj()==strParentDeclaringClass)continue;
+				VarCmdFieldAbs vcfAtListEntry = ((VarCmdFieldAbs)dled.getUserObj());
+				if(vcf.getUniqueVarId().equals(vcfAtListEntry.getUniqueVarId())){
 					dledWork = dled;
 				}
 			}
 			
-			boolean bCreatedNow = false;
+			// create new if not at list
 			if(dledWork==null){
-//				if(strId!=null){
-					dledWork = new DialogListEntryData<T>();
-					dledWork.setText(strId, vcf);
-					addEntry(dledWork);
-//				}
-			}
-			
-//			if(vcf instanceof StringCmdField)
-			if(dledWork!=null){
-				String strVal=null;
-				if(vcf instanceof FloatDoubleVarField){
-					strVal = MiscI.i().fmtFloat(((FloatDoubleVarField)vcf).getDouble(),3);
-				}else
-				if(vcf instanceof IntLongVarField){
-					strVal = ""+((IntLongVarField)vcf).getLong();
-				}else
-				if(vcf instanceof BoolTogglerCmdField){
-					strVal = ""+((BoolTogglerCmdField)vcf).getBool();
-				}else
-				if(vcf instanceof StringVarField){
-					strVal = ((StringVarField)vcf).getStringValue();
-					if(strVal==null)strVal="";
-					if(strVal.length()>10)strVal=strVal.substring(0, 10)+"..."; //TODO use 3 dots single character if it exists..
-				}else
-				if(vcf instanceof TimedDelayVarField){
-					strVal = MiscI.i().fmtFloat(((TimedDelayVarField)vcf).getDelayLimitSeconds(),3);
-				}else
-				if(vcf instanceof StringCmdField){
-					// do nothing for now...
-				}else{
-					throw new PrerequisitesNotMetException("still unsupported type", vcf.getClass());
+				IdTmp idCopy = vcf.getIdTmpCopy();
+				
+				// prepare declaring class as tree parent  
+				DialogListEntryData<T> dledDeclaringClassParent=null;
+				String strDecl = idCopy.getDeclaringClassSName();
+				for(DialogListEntryData<T> dled:getCompleteEntriesListCopy()){
+					if(dled.getText().equals(strDecl)){
+						dledDeclaringClassParent=dled;
+						break;
+					}
+				}
+				if(dledDeclaringClassParent==null){
+					dledDeclaringClassParent=new DialogListEntryData<T>();
+					dledDeclaringClassParent.setText(strDecl,strParentDeclaringClass);
+					addEntry(dledDeclaringClassParent);
 				}
 				
-				if(!bCreatedNow){
-					dledWork.clearCustomButtonActions();
-				}
-				dledWork.addCustomButtonAction(strVal, (T)cv);
+				// prepare var linked one
+				dledWork = new DialogListEntryData<T>();
+				dledWork.setText(strId, vcf);
+				dledWork.setParent(dledDeclaringClassParent);
+				addEntry(dledWork);
 			}
 			
+			// truncate value string
+			String strVal=vcf.getValueAsString(3);
+			if(strVal==null)strVal="";
+			if(strVal.length()>10)strVal=strVal.substring(0, 10)+"..."; //TODO use 3 dots single character if it exists or some other symbol?
+			
+			// update custom buttons as values may have changed
+			//TODO compare if values changed?
+			dledWork.clearCustomButtonActions();
+			dledWork.addCustomButtonAction(strVal, (T)cv);
 		}
 		
 		super.updateList();

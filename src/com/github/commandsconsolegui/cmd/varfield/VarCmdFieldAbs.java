@@ -32,13 +32,14 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.cmd.CommandData;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
+import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
+import com.github.commandsconsolegui.misc.IdTmp;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
 
 /**
  * TODO migrate most things possible to here
@@ -237,7 +238,8 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	 * @return
 	 */
 	protected S setCustomUniqueCmdId(String strUniqueCmdId, boolean bIsVariable){
-		setUniqueId(new IdTmp(bIsVariable,strUniqueCmdId,strUniqueCmdId));
+//		setUniqueId(new IdTmp(bIsVariable,strUniqueCmdId,strUniqueCmdId));
+		setUniqueId(new IdTmp().setAsVariable(bIsVariable).setSimpleId(strUniqueCmdId).setUniqueId(strUniqueCmdId));
 		return getThis();
 	}
 
@@ -369,5 +371,25 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	public IdTmp getIdTmp(CommandsDelegator.CompositeControl cc) {
 		cc.assertSelfNotNull();
 		return idt;
+	}
+	
+	public abstract String getValueAsString();
+	public abstract String getValueAsString(int iIfFloatPrecision);
+	
+	@Override
+	public String toString() {
+		if(DebugI.i().isInIDEdebugMode()){
+			throw new PrerequisitesNotMetException("use getReport() instead!", this);
+//			/**
+//			 * use this method only for exceptions info, nothing else!
+//			 */
+//			int i=0;int i2=i;i=i2;//put breakpoint here!
+		}
+//		return strUniqueVarId+"='"+getValueAsString(3)+"'";
+		return super.toString();
+	}
+
+	public IdTmp getIdTmpCopy() {
+		return idt.clone();
 	}
 }

@@ -202,7 +202,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		
 		if(!ConsoleVarsDialogStateI.i().isConfigured()){
 			ConsoleVarsDialogStateI.i().configure(new ConsoleVarsDialogStateI.CfgParm(
-				0.9f, 0.9f, 0.1f, 2.0f));
+				0.9f, 0.9f, 0.1f, null));
 		}
 		
 		return storeCfgAndReturnSelf(icfg);
