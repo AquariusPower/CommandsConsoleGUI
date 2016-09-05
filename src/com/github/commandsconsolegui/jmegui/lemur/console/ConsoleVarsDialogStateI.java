@@ -174,20 +174,20 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		}else
 		{
 			if(objUser instanceof VarCmdFieldAbs){
-				super.actionCustomAtEntry(dledSelected);
+			super.actionCustomAtEntry(dledSelected);
 			}else{
 				throw new PrerequisitesNotMetException("user object not a var", objUser, dledSelected, this);
 			}
 		}
 	}
 	
-//	private String strParentDeclaringClassKey="ParentDeclaringClass";
-	private String strParentUserObj ="ParentKey";
+	private String strParentDeclaringClassKey="ParentDeclaringClass";
+	private String strParentConcreteClassKey ="ParentConcreteClass";
 	
 	@SuppressWarnings("rawtypes")
 	@Override
 	protected void updateList() {
-		//clearList();
+		//clearList()
 		ArrayList<VarCmdFieldAbs> avcf = VarCmdFieldAbs.getListFullCopy();
 		
 		for(VarCmdFieldAbs vcf:avcf){
@@ -196,8 +196,8 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			// check if already at the list
 			DialogListEntryData<T> dledVar = null;
 			for(DialogListEntryData<T> dled:getCompleteEntriesListCopy()){
-//				if(dled.getUserObj()==strParentDeclaringClassKey)continue;
-				if(dled.getUserObj()==strParentUserObj)continue;
+				if(dled.getUserObj()==strParentDeclaringClassKey)continue;
+				if(dled.getUserObj()==strParentConcreteClassKey)continue;
 				VarCmdFieldAbs vcfAtListEntry = ((VarCmdFieldAbs)dled.getUserObj());
 				if(vcf.getUniqueVarId().equals(vcfAtListEntry.getUniqueVarId())){
 					dledVar = dled;
@@ -227,54 +227,46 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		super.updateList();
 	}
 	
+	/**
+	 * For each var (field) there is only one declaring class (the super or concrete one).
+	 * But, each concrete class can have many super classes, the declaring ones.
+	 * So the top parent (root list entries) must be the concrete class!
+	 * @param vcf
+	 * @return
+	 */
 	private DialogListEntryData<T> createNewVarEntry(VarCmdFieldAbs vcf){
 		VarId vidCopy = vcf.getIdTmpCopy();
 		
+		DialogListEntryData<T> dledDeclaringClassParent = createParentEntry(
+			vidCopy.getConcreteClassSName()+vidCopy.getDeclaringClassSName(),
+			strParentDeclaringClassKey);
+
+		DialogListEntryData<T> dledConcreteClassParent = createParentEntry(
+			vidCopy.getConcreteClassSName(),
+			strParentConcreteClassKey);
+		
 		String strVarId = vcf.getUniqueVarId(true);
-		
-		String strParentTextKey = vidCopy.getConcreteClassSName()+vidCopy.getDeclaringClassSName();
-		if(vidCopy.getConcreteClassSName().equals(vidCopy.getDeclaringClassSName())){
-			strParentTextKey=vidCopy.getConcreteClassSName();
-		}
-		
-		DialogListEntryData<T> dledParent = createParentEntry(strParentTextKey, strParentUserObj);
 		strVarId=strVarId.replaceFirst(vidCopy.getDeclaringClassSName(), "");
 		strVarId=strVarId.replaceFirst(vidCopy.getConcreteClassSName(), "");
+		
+		if(!dledConcreteClassParent.equals(dledDeclaringClassParent)){
+			if(dledDeclaringClassParent.getParent()==null){
+				dledDeclaringClassParent.setParent(dledConcreteClassParent);
+			}else{
+				if(dledDeclaringClassParent.getParent()!=dledConcreteClassParent){
+					throw new PrerequisitesNotMetException("Cannot re-parent a declaring class list entry", dledDeclaringClassParent, dledDeclaringClassParent.getParent(), dledConcreteClassParent);
+				}
+			}
+		}
 		
 		// prepare var linked one
 		DialogListEntryData<T> dledVar = new DialogListEntryData<T>(this);
 		dledVar.setText(strVarId, vcf);
-		dledVar.setParent(dledParent);
+		dledVar.setParent(dledDeclaringClassParent);
 		addEntry(dledVar);
 		
 		return dledVar;
 	}
-//	@Deprecated
-//	private DialogListEntryData<T> _createNewVarEntry(VarCmdFieldAbs vcf){
-//		VarId vidCopy = vcf.getIdTmpCopy();
-//		
-//		String strVarId = vcf.getUniqueVarId(true);
-//		
-//		DialogListEntryData<T> dledDeclaringClassParent = createParentEntry(
-//			vidCopy.getDeclaringClassSName(),strParentDeclaringClassKey);
-//		strVarId=strVarId.replaceFirst(vidCopy.getDeclaringClassSName(), "");
-//
-//		DialogListEntryData<T> dledConcreteClassParent = createParentEntry(
-//			vidCopy.getConcreteClassSName(),strParentKey);
-//		strVarId=strVarId.replaceFirst(vidCopy.getConcreteClassSName(), "");
-//		
-//		if(!dledConcreteClassParent.equals(dledDeclaringClassParent)){
-//			dledConcreteClassParent.setParent(dledDeclaringClassParent);
-//		}
-//		
-//		// prepare var linked one
-//		DialogListEntryData<T> dledVar = new DialogListEntryData<T>(this);
-//		dledVar.setText(strVarId, vcf);
-//		dledVar.setParent(dledConcreteClassParent);
-//		addEntry(dledVar);
-//		
-//		return dledVar;
-//	}
 	
 	private DialogListEntryData<T> createParentEntry(String strParentTextKey, String strParentKindKey){
 		// prepare declaring class as tree parent  
