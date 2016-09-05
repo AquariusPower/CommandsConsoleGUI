@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#	Copyright (c) 2016, AquariusPower <https://github.com/AquariusPower>
+#	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
 #	
 #	All rights reserved.
 #

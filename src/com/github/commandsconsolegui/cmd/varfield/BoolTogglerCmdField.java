@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, AquariusPower <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
 	
 	All rights reserved.
 
@@ -44,7 +44,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
  * It is intended to change internal states, not to ex. toggle user interfaces, for that use
  * a normal command.
  * 
- * @author AquariusPower <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower>
  *
  */
 public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdField>{

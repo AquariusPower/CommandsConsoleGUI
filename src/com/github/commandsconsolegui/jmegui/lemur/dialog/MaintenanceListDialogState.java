@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, AquariusPower <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
 	
 	All rights reserved.
 
@@ -41,7 +41,7 @@ import com.simsilica.lemur.Command;
 /**
  * This is like the inventory list.
  * 
- * @author AquariusPower <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower>
  *
  */
 public class MaintenanceListDialogState<T extends Command<Button>> extends LemurBasicDialogStateAbs<T,MaintenanceListDialogState<T>> {

@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, AquariusPower <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
 	
 	All rights reserved.
 
@@ -36,7 +36,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  * This class is intended to be used only as class field variables.
  * It automatically creates console variables.
  *
- * @author AquariusPower <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower>
  */
 public class FloatDoubleVarField extends VarCmdFieldAbs<Double,FloatDoubleVarField>{
 	private static boolean	bConfigured;

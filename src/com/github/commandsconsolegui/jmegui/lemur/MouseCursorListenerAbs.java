@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, AquariusPower <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
 	
 	All rights reserved.
 
@@ -55,7 +55,7 @@ import com.simsilica.lemur.list.CellRenderer;
 /**
  * Click detection is based in time delay on this class.
  * 
- * @author AquariusPower <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower>
  *
  */
 public abstract class MouseCursorListenerAbs implements CursorListener {

@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, AquariusPower <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
 	
 	All rights reserved.
 
@@ -49,7 +49,7 @@ import com.jme3.export.Savable;
  * - a check box to simply enable/disable
  * - etc...
  * 
- * @author AquariusPower <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower>
  *
  * @param <T> is the action class for buttons
  */

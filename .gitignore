@@ -5,6 +5,7 @@ Console-*
 *.bkp
 *.old
 /bin/
-/tmp/
+/.tmp/
 !lib/**/*.jar
+!.gitignore
 

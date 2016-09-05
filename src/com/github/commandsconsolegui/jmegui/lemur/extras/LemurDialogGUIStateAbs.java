@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 2016, AquariusPower <https://github.com/AquariusPower>
+Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
 
 All rights reserved.
 
@@ -75,7 +75,7 @@ import com.simsilica.lemur.list.SelectionModel;
 * More info at {@link BaseDialogStateAbs}
 *	TODO implement docking dialogs, a small icon will be created at app window edges
 * 
-* @author AquariusPower <https://github.com/AquariusPower>
+* @author Henrique Abdalla <https://github.com/AquariusPower>
 *
 */
 public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<T,R>> extends BaseDialogStateAbs<T,R> {

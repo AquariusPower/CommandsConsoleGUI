@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, AquariusPower <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
 	
 	All rights reserved.
 
@@ -43,7 +43,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IdTmp;
 /**
  * TODO migrate most things possible to here
  *
- * @author AquariusPower <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower>
  * 
  */
 public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implements IReflexFillCfgVariant{//, IVarIdValueOwner{

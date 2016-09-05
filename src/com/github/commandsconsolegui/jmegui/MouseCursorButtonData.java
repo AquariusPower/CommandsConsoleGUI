@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, AquariusPower <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
 	
 	All rights reserved.
 
@@ -41,7 +41,7 @@ import com.jme3.scene.Spatial;
  * as it was a single call, so only the first call to each of such methods
  * will actually update/calculate things.
  * 
- * @author AquariusPower <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower>
  *
  */
 public class MouseCursorButtonData{

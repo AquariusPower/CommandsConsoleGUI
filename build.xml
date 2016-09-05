@@ -7,22 +7,32 @@
 	
 	<property name="projname" value="CommandsConsoleUI"/>
 	<property name="version" value="1.4.${DATE_TIME_NOW}.beta"/>
+	<property name="projv" value="${projname}-${version}"/>
 		
 	<target name="CreateAllJars" description="Create all Jar files">
-		<jar jarfile="${projname}-${version}.jar" >
+		<jar jarfile="${projv}.jar" >
 			<fileset dir="./" includes="LICENSE" />
 			<!-- <fileset dir="./bin/" includes="**/*.class" /> -->
 			<fileset dir="./bin/" />
 		</jar>
 		
-		<jar jarfile="${projname}-${version}-sources.jar" >
-			<fileset dir="./" includes="LICENSE" />
-			<fileset dir="./" includes="README.md" />
-			<fileset dir="./doc/" includes="**/*" />
+		<jar jarfile="${projv}-sources.jar" >
+			<fileset dir="./">
+				<include name="build.xml" />
+				<include name=".classpath" />
+				<include name=".gitignore" />
+				<include name=".project" />
+				<include name="Console-Init.cfg" />
+				<include name="LICENSE" />
+				<include name="README.md" />
+				<include name=".settings/org.eclipse.jdt.core.prefs" />
+				<include name="bin.projectManagement/**" />
+				<include name="doc/**" />
+			</fileset>
 			<fileset dir="./src/" includes="**/*.java" />
 		</jar>
 		
-		<jar jarfile="${projname}-${version}-assets.jar" >
+		<jar jarfile="${projv}-assets.jar" >
 			<!-- each asset file or path must contain it's license --> 
 			<fileset dir="./assets/" />
 		</jar>
@@ -30,3 +40,4 @@
 	</target>
 	
 </project>
+<!--  -->

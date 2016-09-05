@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, AquariusPower <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
 	
 	All rights reserved.
 
@@ -32,7 +32,7 @@ import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
 
 /**
  * 
- * @author AquariusPower <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower>
  *
  */
 public class GlobalConsoleGUII extends GlobalHolderAbs<ConsoleStateAbs<?,? extends ConsoleStateAbs<?,?>>>{

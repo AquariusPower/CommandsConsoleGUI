@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, AquariusPower <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
 	
 	All rights reserved.
 
@@ -33,7 +33,7 @@ package com.github.commandsconsolegui.misc;
  * more user friendly class types.
  * So, when an exception happens, it can come here at least.
  * 
- * @author AquariusPower <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower>
  *
  */
 public class HandleExceptionsRaw implements IHandleExceptions{

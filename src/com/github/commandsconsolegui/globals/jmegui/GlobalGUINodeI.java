@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, AquariusPower <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
 	
 	All rights reserved.
 
@@ -33,7 +33,7 @@ import com.jme3.scene.Node;
 /**
  * As you may not be using {@link SimpleApplication#}.
  *  
- * @author AquariusPower <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower>
  */
 public class GlobalGUINodeI extends GlobalHolderAbs<Node> {
 	private static GlobalGUINodeI instance = new GlobalGUINodeI();

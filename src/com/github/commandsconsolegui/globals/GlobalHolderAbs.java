@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, AquariusPower <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
 	
 	All rights reserved.
 
@@ -37,7 +37,7 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
  * To easily access what can/should be globally accessible.
  * The same object may be present in more than one global, scope dependency range.
  * 
- * @author AquariusPower <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower>
  * 
  * @param <T>
  */

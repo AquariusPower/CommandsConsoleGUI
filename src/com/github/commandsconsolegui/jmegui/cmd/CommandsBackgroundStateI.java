@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, AquariusPower <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
 	
 	All rights reserved.
 
@@ -35,7 +35,7 @@ import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGUII;
  * This is a state, at the main thread, that will keep the console running
  * while it is closed.
  * 
- * @author AquariusPower <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower>
  *
  */
 public class CommandsBackgroundStateI extends CmdConditionalStateAbs {

@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, AquariusPower <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
 	
 	All rights reserved.
 
@@ -58,7 +58,7 @@ import com.jme3.scene.Node;
  * <br>
  * SELFNOTE: Keep this class depending solely in JME!<br>
  * 
- * @author AquariusPower <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower>
  *
  */
 public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigure<ConditionalStateAbs>{
