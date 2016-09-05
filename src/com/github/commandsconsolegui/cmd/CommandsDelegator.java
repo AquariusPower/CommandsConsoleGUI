@@ -55,7 +55,7 @@ import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.DebugI;
-import com.github.commandsconsolegui.misc.DebugI.EDbgKey;
+import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
@@ -1794,7 +1794,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				if(cmdd.getUniqueCmdId().equalsIgnoreCase(cmddNew.getUniqueCmdId())){
 					/**
 					 * already set from same origin, just skip.
-					 * TODO explain clearly (after debug) WHY this is not a problem...
+					 * TODO explain clearly (after debug) WHY this is not an exception?!
 					 */
 					if(cmdd.identicalTo(cmddNew))return;
 					
@@ -3002,10 +3002,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	
 	private void updateNewDay() {
 		String str = MiscI.i().getSimpleDate();
-		if(!str.equalsIgnoreCase(strCurrentDay) || DebugI.i().isKeyEnabled(EDbgKey.NewDayInfo)){
+		if(!str.equalsIgnoreCase(strCurrentDay) || DebugI.i().isKeyEnabled(EDebugKey.NewDayInfo)){
 			strCurrentDay=str;
 			dumpInfoEntry("Welcome to a new day "+strCurrentDay+"!");
-			DebugI.i().disableKey(EDbgKey.NewDayInfo);
+			DebugI.i().disableKey(EDebugKey.NewDayInfo);
 		}
 	}
 	

@@ -326,11 +326,11 @@ public class MiscJmeI {
 		
 		R objUser = null;
 		if(sh==null){
-			try {
+//			try {
 				sh = new SavableHolder<R>(callCreateInstance.call());
-			} catch (Exception e) {
-				throw new PrerequisitesNotMetException("object instance creation failed", clReturn, sptHolder, strKey);
-			}
+//			} catch (Exception e) {
+//				throw new PrerequisitesNotMetException("object instance creation failed", clReturn, sptHolder, strKey);
+//			}
 			sptHolder.setUserData(strKey, sh);
 		}
 		objUser = sh.getRef();

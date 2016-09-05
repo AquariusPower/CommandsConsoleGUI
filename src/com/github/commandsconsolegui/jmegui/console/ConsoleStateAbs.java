@@ -61,7 +61,7 @@ import com.github.commandsconsolegui.misc.AutoCompleteI;
 import com.github.commandsconsolegui.misc.AutoCompleteI.AutoCompleteResult;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.DebugI;
-import com.github.commandsconsolegui.misc.DebugI.EDbgKey;
+import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -2131,7 +2131,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		
 		String str = cd().prepareStatsFieldText();
 		
-		if(DebugI.i().isKeyEnabled(DebugI.EDbgKey.StatsText))str+=cd().strDebugTest;
+		if(DebugI.i().isKeyEnabled(DebugI.EDebugKey.StatsText))str+=cd().strDebugTest;
 		
 		setStatsText(str);
 		
@@ -2371,10 +2371,10 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 //		imgTmp.getData(0).rewind();
 //		imgTmp.setData(0, imgTmp.getData(0).asReadOnlyBuffer());
 //		MiscI.i().saveImageToFile(imgTmp,"temp"+ttf.getFont().getName().replace(" ",""));
-		if(DebugI.i().isKeyEnabled(EDbgKey.DumpFontImg)){ //EDbgKey.values()
+		if(DebugI.i().isKeyEnabled(EDebugKey.DumpFontImg)){ //EDbgKey.values()
 			//TODO why image file ends empty??
 			MiscJmeI.i().saveImageToFile(t2d.getImage(),
-				EDbgKey.DumpFontImg.toString()+ttf.getFont().getName().replace(" ",""));
+				EDebugKey.DumpFontImg.toString()+ttf.getFont().getName().replace(" ",""));
 		}
 		
 		bcs.setBase(iMaxHeight); //TODO what is this!?

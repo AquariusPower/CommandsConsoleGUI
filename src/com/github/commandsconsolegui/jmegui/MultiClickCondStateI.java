@@ -31,6 +31,7 @@ import java.util.HashMap;
 
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableWeak;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 
 /**
  * Dispatches multi-click cmds when they are ready.
@@ -113,15 +114,15 @@ public class MultiClickCondStateI extends ConditionalStateAbs {
 			}
 			
 			if(bRunNow){
-				try {
+//				try {
 					if(callCmd==null || callCmd.call().booleanValue()){
 						mc.iRunCount++;
 					}
-				} catch (Exception e) {
-					NullPointerException npe = new NullPointerException("something went wrong...");
-					npe.initCause(e);
-					throw npe;
-				}
+//				} catch (Exception e) {
+//					PrerequisitesNotMetException npe = new PrerequisitesNotMetException("something went wrong...", this, objActivator, mc, callCmd);
+//					npe.initCause(e);
+//					throw npe;
+//				}
 			}
 			
 			if(bRemoveNow){

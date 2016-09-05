@@ -125,7 +125,7 @@ public abstract class LemurBasicDialogStateAbs<T,R extends LemurBasicDialogState
 	 */
 	@SuppressWarnings("unchecked")
 	public DialogListEntryData<T> addEntryQuick(String strText){
-		DialogListEntryData<T> dle = new DialogListEntryData<T>();
+		DialogListEntryData<T> dle = new DialogListEntryData<T>(this);
 		if(strText==null){
 			strText=this.getId()+": New test entry: "
 //				+MiscI.i().getDateTimeForFilename(true)

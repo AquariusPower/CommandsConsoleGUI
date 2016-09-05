@@ -233,7 +233,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 				
 				if(cell.dled.isParent()){
 					cell.dled.toggleExpanded();
-					cell.assignedCellRenderer.diagParent.requestRefreshList();
+//					cell.assignedCellRenderer.diagParent.requestRefreshList();
 				}
 				cell.updateTreeButton();
 			}

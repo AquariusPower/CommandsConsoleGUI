@@ -596,7 +596,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 			if(dataSelected!=null){
 				if(dataSelected.isParent()){
 					dataSelected.toggleExpanded();
-					requestRefreshList();
+//					requestRefreshList();
 				}else{
 					actionCustomAtEntry(dataSelected);
 				}

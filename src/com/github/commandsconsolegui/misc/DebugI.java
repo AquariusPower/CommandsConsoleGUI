@@ -30,8 +30,9 @@ package com.github.commandsconsolegui.misc;
 import java.lang.management.ManagementFactory;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
-import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -42,18 +43,27 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class DebugI implements IReflexFillCfg, IConsoleCommandListener{
+public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
 //	private ConsoleCommands	cc;
 	
 	/**
 	 * when enabled, these keys are used to perform debug tests
 	 */
-	public static enum EDbgKey{
+	public static enum EDebugKey implements IReflexFillCfg{
 		StatsText,
 		DumpFontImg, 
 		NewDayInfo,
+		VarToString,
 		;
-		boolean b;
+		BoolTogglerCmdField btgEnabled = new BoolTogglerCmdField(this,false);
+//		boolean b;
+
+		@Override
+		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+			ReflexFillCfg rfcfg = GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
+			rfcfg.setPrefixCustomId(this.toString());
+			return rfcfg;
+		}
 	}
 	
 	private static DebugI instance = new DebugI();
@@ -70,7 +80,7 @@ public class DebugI implements IReflexFillCfg, IConsoleCommandListener{
 		//		if(Debug.instance==null)Debug.instance=this;
 //		this.cc=cc;
 		if(cc==null)throw new NullPointerException("invalid instance for "+CommandsDelegator.class.getName()); // KEEP ON TOP
-		cc.addConsoleCommandListener(this);
+//		cc.addConsoleCommandListener(this);
 		
 		bConfigured=true;
 	}
@@ -79,45 +89,45 @@ public class DebugI implements IReflexFillCfg, IConsoleCommandListener{
 //		this.cc=cc;
 //	}
 //	
-	public boolean isKeyEnabled(EDbgKey ek){
-		return ek.b;
+	public boolean isKeyEnabled(EDebugKey ek){
+		return ek.btgEnabled.b();
 	}
 	
-	public void disableKey(EDbgKey ek){
-		ek.b=false;
+	public void disableKey(EDebugKey ek){
+		ek.btgEnabled.setObjectRawValue(false);
 	}
 
-	@Override
-	public ECmdReturnStatus execConsoleCommand(CommandsDelegator	cd) {
-		boolean bCmdWorked=false;
-		
-		if(cd.checkCmdValidity(this,"debug",null,"[optionToToggle] [force:true|false] empty for a list")){
-			String str = cd.getCurrentCommandLine().paramString(1);
-			Boolean bForce = cd.getCurrentCommandLine().paramBoolean(2);
-			if(str==null){
-				for(EDbgKey ek:EDbgKey.values()){
-					cd.dumpSubEntry(""+ek+" "+ek.b);
-				}
-			}else{
-				try{
-					EDbgKey ek = EDbgKey.valueOf(str);
-					if(bForce!=null){
-						ek.b=bForce;
-					}else{
-						ek.b=!ek.b; //toggle mode
-					}
-					bCmdWorked=true;
-				}catch(IllegalArgumentException ex){
-					cd.dumpExceptionEntry(ex);
-				}
-			}
-		}else
-		{
-			return ECmdReturnStatus.NotFound;
-		}
-		
-		return cd.cmdFoundReturnStatus(bCmdWorked);
-	}
+//	@Override
+//	public ECmdReturnStatus execConsoleCommand(CommandsDelegator	cd) {
+//		boolean bCmdWorked=false;
+//		
+//		if(cd.checkCmdValidity(this,"debug",null,"[optionToToggle] [force:true|false] empty for a list")){
+//			String str = cd.getCurrentCommandLine().paramString(1);
+//			Boolean bForce = cd.getCurrentCommandLine().paramBoolean(2);
+//			if(str==null){
+//				for(EDebugKey ek:EDebugKey.values()){
+//					cd.dumpSubEntry(""+ek+" "+ek.btgEnabled.b());
+//				}
+//			}else{
+//				try{
+//					EDebugKey ek = EDebugKey.valueOf(str);
+//					if(bForce!=null){
+//						ek.btgEnabled.setObjectRawValue(bForce);
+//					}else{
+//						ek.btgEnabled.toggle();
+//					}
+//					bCmdWorked=true;
+//				}catch(IllegalArgumentException ex){
+//					cd.dumpExceptionEntry(ex);
+//				}
+//			}
+//		}else
+//		{
+//			return ECmdReturnStatus.NotFound;
+//		}
+//		
+//		return cd.cmdFoundReturnStatus(bCmdWorked);
+//	}
 
 	public boolean isInIDEdebugMode() {
 		if(bDebugMode==null){

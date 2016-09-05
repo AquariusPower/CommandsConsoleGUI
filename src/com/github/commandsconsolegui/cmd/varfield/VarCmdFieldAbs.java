@@ -38,6 +38,7 @@ import com.github.commandsconsolegui.misc.VarId;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 
@@ -378,7 +379,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	
 	@Override
 	public String toString() {
-		if(DebugI.i().isInIDEdebugMode()){
+		if(DebugI.i().isKeyEnabled(EDebugKey.VarToString)){
 			throw new PrerequisitesNotMetException("use getReport() instead!", this);
 //			/**
 //			 * use this method only for exceptions info, nothing else!

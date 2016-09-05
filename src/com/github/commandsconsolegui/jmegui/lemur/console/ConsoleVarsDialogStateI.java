@@ -103,10 +103,10 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			clearList();
 			
 			if(vcf!=null){
-				addEntry(new DialogListEntryData<T>().setText("(Help)"+vcf.getHelp(), vcf));
-				addEntry(new DialogListEntryData<T>().setText("(UniqueId)"+vcf.getUniqueVarId(), vcf));
-				addEntry(new DialogListEntryData<T>().setText("(SimpleId)"+vcf.getSimpleCmdId(), vcf));
-				addEntry(new DialogListEntryData<T>().setText("(Value)"+vcf.getValueRaw(), vcf));
+				addEntry(new DialogListEntryData<T>(this).setText("(Help)"+vcf.getHelp(), vcf));
+				addEntry(new DialogListEntryData<T>(this).setText("(UniqueId)"+vcf.getUniqueVarId(), vcf));
+				addEntry(new DialogListEntryData<T>(this).setText("(SimpleId)"+vcf.getSimpleCmdId(), vcf));
+				addEntry(new DialogListEntryData<T>(this).setText("(Value)"+vcf.getValueRaw(), vcf));
 			}
 			
 			super.updateList();
@@ -168,11 +168,16 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	
 	@Override
 	protected void actionCustomAtEntry(DialogListEntryData<T> dledSelected) {
-		if(dledSelected.getUserObj() instanceof BoolTogglerCmdField){
+		Object objUser = dledSelected.getUserObj();
+		if(objUser instanceof BoolTogglerCmdField){
 			changeValue(dledSelected);
 		}else
 		{
-			super.actionCustomAtEntry(dledSelected);
+			if(objUser instanceof VarCmdFieldAbs){
+				super.actionCustomAtEntry(dledSelected);
+			}else{
+				throw new PrerequisitesNotMetException("user object not a var", objUser, dledSelected, this);
+			}
 		}
 	}
 	
@@ -240,7 +245,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		}
 		
 		// prepare var linked one
-		DialogListEntryData<T> dledVar = new DialogListEntryData<T>();
+		DialogListEntryData<T> dledVar = new DialogListEntryData<T>(this);
 		dledVar.setText(strVarId, vcf);
 		dledVar.setParent(dledConcreteClassParent);
 		addEntry(dledVar);
@@ -258,7 +263,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			}
 		}
 		if(dledParent==null){
-			dledParent=new DialogListEntryData<T>();
+			dledParent=new DialogListEntryData<T>(this);
 			dledParent.setText(strParentTextKey,strParentKindKey);
 			addEntry(dledParent);
 		}

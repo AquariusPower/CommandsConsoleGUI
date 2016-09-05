@@ -29,11 +29,11 @@ package com.github.commandsconsolegui.jmegui.extras;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
 import com.github.commandsconsolegui.jmegui.AudioUII;
+import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.export.JmeExporter;
@@ -57,19 +57,21 @@ public class DialogListEntryData<T> implements Savable{
 	private static String strLastUniqueId = "0";
 	
 	private String	strUniqueId;
+	private BaseDialogStateAbs diagOwner;
 	
-	HashMap<String,T> hmCustomButtonsActions = new HashMap<String,T>();
-	Object	objUser;
+	private HashMap<String,T> hmCustomButtonsActions = new HashMap<String,T>();
+	private Object	objUser;
 	
-	DialogListEntryData<T> parent; //it must be set as the parent type too
-	boolean bTreeExpanded = false; 
-	ArrayList<DialogListEntryData<T>> aChildList = new ArrayList<DialogListEntryData<T>>();
+	private DialogListEntryData<T> parent; //it must be set as the parent type too
+	private boolean bTreeExpanded = false; 
+	private ArrayList<DialogListEntryData<T>> aChildList = new ArrayList<DialogListEntryData<T>>();
 	
 //	int iKey;
-	String strText;
+	private String strText;
 //	T objRef;
 	
-	public DialogListEntryData() {
+	public DialogListEntryData(BaseDialogStateAbs diagOwner) {
+		this.diagOwner=diagOwner;
 		this.strUniqueId = DialogListEntryData.strLastUniqueId = (MiscI.i().getNextUniqueId(strLastUniqueId));
 	}
 	
@@ -238,6 +240,8 @@ public class DialogListEntryData<T> implements Savable{
 //		if(!isParent())return false;
 		
 		this.bTreeExpanded = !this.bTreeExpanded;
+		diagOwner.requestRefreshList();
+//		cell.assignedCellRenderer.diagParent.requestRefreshList();
 		
 		AudioUII.i().playOnUserAction(isTreeExpanded() ?
 				AudioUII.EAudio.ExpandSubTree : AudioUII.EAudio.ShrinkSubTree);
