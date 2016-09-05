@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 	
 	All rights reserved.
 
@@ -43,7 +43,7 @@ import com.jme3.app.Application;
 
 /**
  * 
- * @author Henrique Abdalla <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
 public class GlobalAppRefI extends GlobalHolderAbs<Application>{

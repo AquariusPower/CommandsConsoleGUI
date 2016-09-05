@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 	
 	All rights reserved.
 
@@ -30,7 +30,7 @@ package com.github.commandsconsolegui.misc;
 /**
  * To easily detect if an object has changed.
  * 
- * @author Henrique Abdalla <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
 public class HashChangeHolder {

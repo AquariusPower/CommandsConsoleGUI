@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 	
 	All rights reserved.
 
@@ -48,7 +48,7 @@ import com.simsilica.lemur.event.CursorMotionEvent;
 
 /**
  * This will track the parentest spatial and let mouse cursor move it!
- * @author Henrique Abdalla <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
 public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 	private static DialogMouseCursorListenerI instance = new DialogMouseCursorListenerI();

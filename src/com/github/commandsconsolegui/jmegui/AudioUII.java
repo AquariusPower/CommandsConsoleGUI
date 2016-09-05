@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 	
 	All rights reserved.
 
@@ -53,7 +53,7 @@ import com.jme3.audio.AudioNode;
 
 /**
  * 
- * @author Henrique Abdalla <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
 public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, IConsoleCommandListener {
@@ -101,10 +101,10 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 		Failure							(strBasePath+"220167__gameaudio__button-deny-spacey.mono.ogg"),
 		;
 		
-		CfgAudio cfga;
+		AudioCfg cfga;
 		
 		EAudio(String strFile){
-			cfga = new CfgAudio(this.toString());
+			cfga = new AudioCfg(this.toString());
 			cfga.setFile(strFile);
 		}
 		
@@ -112,18 +112,18 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 		 * cfg() not getCfg() in a sense that the cfg can be directly modified, is not a safe copy.
 		 * @return
 		 */
-		public CfgAudio cfg(){
+		public AudioCfg cfg(){
 			return cfga;
 		}
 		
 	}
 	
-	public static class CfgAudio implements IReflexFillCfg{
+	public static class AudioCfg implements IReflexFillCfg{
 		private String	strUId;
 		private String	strFile;
 		private FloatDoubleVarField fdvVolumeGain = new FloatDoubleVarField(this,1.0,"").setMin(0.0).setMax(1.0);
 		
-		public CfgAudio(String strUId) {
+		public AudioCfg(String strUId) {
 			this.strUId=strUId;
 		}
 		public String getFile(){return strFile;}
@@ -172,7 +172,7 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 		
 		AudioNode an = tmAudio.get(strAudioId);
 		
-		CfgAudio cfg = EAudio.valueOf(strAudioId).cfg();
+		AudioCfg cfg = EAudio.valueOf(strAudioId).cfg();
 		
 		if(an==null){
 			try{

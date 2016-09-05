@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 	
 	All rights reserved.
 
@@ -42,7 +42,7 @@ import com.google.common.collect.Lists;
  *	To prevent users using these scripting capabilities,
  *	extend from {@link #ConsoleCommands()} instead.
  *
- * @author Henrique Abdalla <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
 public class ScriptingCommandsDelegator extends CommandsDelegator {

@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/><https://sourceforge.net/u/teike/profile/>
 	
 	All rights reserved.
 
@@ -42,14 +42,14 @@ import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceDialogState;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.MaintenanceListDialogState;
-import com.github.commandsconsolegui.misc.IdTmp;
+import com.github.commandsconsolegui.misc.VarId;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 
 /**
- * @author Henrique Abdalla <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/><https://sourceforge.net/u/teike/profile/>
  */
 public class ConsoleVarsDialogStateI<T extends Command<Button>> extends MaintenanceListDialogState<T> {
 	private static ConsoleVarsDialogStateI<Command<Button>>	instance=new ConsoleVarsDialogStateI<Command<Button>>();
@@ -68,12 +68,18 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		private VarCmdFieldAbs	vcf;
 		private DialogListEntryData<T>	dledAtParent;
 		
+		@SuppressWarnings("rawtypes")
 		@Override
 		protected boolean enableAttempt() {
 			if(!super.enableAttempt())return false;
 			
 			dledAtParent = getParentReferencedDledListCopy().get(0);
-			vcf = (VarCmdFieldAbs)dledAtParent.getUserObj();
+			Object objUser = dledAtParent.getUserObj();
+			if(objUser instanceof VarCmdFieldAbs){
+				vcf = (VarCmdFieldAbs)objUser;
+			}else{
+				throw new PrerequisitesNotMetException("user object not a var", objUser, dledAtParent);
+			}
 			
 			btgSortListEntries.setObjectRawValue(false);
 			
@@ -170,65 +176,94 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		}
 	}
 	
+	private String strParentDeclaringClassKey="ParentDeclaringClass";
+	private String strParentConcreteClassKey ="ParentConcreteClass";
+	
 	@SuppressWarnings("rawtypes")
 	@Override
 	protected void updateList() {
-//		clearList(); //TODO @@@Remove this line
+		//clearList();
 		ArrayList<VarCmdFieldAbs> avcf = VarCmdFieldAbs.getListFullCopy();
 		
-		String strParentDeclaringClass="ParentDeclaringClass";
 		for(VarCmdFieldAbs vcf:avcf){
-			String strId = vcf.getUniqueVarId(true);
-			if(strId==null)continue;
+			if(vcf.getUniqueVarId()==null)continue;
 			
 			// check if already at the list
-			DialogListEntryData<T> dledWork = null;
+			DialogListEntryData<T> dledVar = null;
 			for(DialogListEntryData<T> dled:getCompleteEntriesListCopy()){
-				if(dled.getUserObj()==strParentDeclaringClass)continue;
+				if(dled.getUserObj()==strParentDeclaringClassKey)continue;
+				if(dled.getUserObj()==strParentConcreteClassKey)continue;
 				VarCmdFieldAbs vcfAtListEntry = ((VarCmdFieldAbs)dled.getUserObj());
 				if(vcf.getUniqueVarId().equals(vcfAtListEntry.getUniqueVarId())){
-					dledWork = dled;
+					dledVar = dled;
 				}
 			}
 			
 			// create new if not at list
-			if(dledWork==null){
-				IdTmp idCopy = vcf.getIdTmpCopy();
-				
-				// prepare declaring class as tree parent  
-				DialogListEntryData<T> dledDeclaringClassParent=null;
-				String strDecl = idCopy.getDeclaringClassSName();
-				for(DialogListEntryData<T> dled:getCompleteEntriesListCopy()){
-					if(dled.getText().equals(strDecl)){
-						dledDeclaringClassParent=dled;
-						break;
-					}
-				}
-				if(dledDeclaringClassParent==null){
-					dledDeclaringClassParent=new DialogListEntryData<T>();
-					dledDeclaringClassParent.setText(strDecl,strParentDeclaringClass);
-					addEntry(dledDeclaringClassParent);
-				}
-				
-				// prepare var linked one
-				dledWork = new DialogListEntryData<T>();
-				dledWork.setText(strId, vcf);
-				dledWork.setParent(dledDeclaringClassParent);
-				addEntry(dledWork);
-			}
+			if(dledVar==null)dledVar=createNewVarEntry(vcf);
 			
 			// truncate value string
-			String strVal=vcf.getValueAsString(3);
+			String strVal=vcf.getValueAsString(5);
 			if(strVal==null)strVal="";
-			if(strVal.length()>10)strVal=strVal.substring(0, 10)+"..."; //TODO use 3 dots single character if it exists or some other symbol?
+			if(vcf instanceof StringVarField){
+				strVal="'"+strVal+"'";
+				if(strVal.length()>10){
+					String strEtc="+"; //TODO use 3 dots single character if it exists or some other symbol?
+					strVal=strVal.substring(0, 10-strEtc.length())+strEtc;
+				}
+			}
 			
 			// update custom buttons as values may have changed
 			//TODO compare if values changed?
-			dledWork.clearCustomButtonActions();
-			dledWork.addCustomButtonAction(strVal, (T)cv);
+			dledVar.clearCustomButtonActions();
+			dledVar.addCustomButtonAction(strVal, (T)cv);
 		}
 		
 		super.updateList();
+	}
+	
+	private DialogListEntryData<T> createNewVarEntry(VarCmdFieldAbs vcf){
+		VarId vidCopy = vcf.getIdTmpCopy();
+		
+		String strVarId = vcf.getUniqueVarId(true);
+		
+		DialogListEntryData<T> dledDeclaringClassParent = createParentEntry(
+			vidCopy.getDeclaringClassSName(),strParentDeclaringClassKey);
+		strVarId=strVarId.replaceFirst(vidCopy.getDeclaringClassSName(), "");
+
+		DialogListEntryData<T> dledConcreteClassParent = createParentEntry(
+			vidCopy.getConcreteClassSName(),strParentConcreteClassKey);
+		strVarId=strVarId.replaceFirst(vidCopy.getConcreteClassSName(), "");
+		
+		if(!dledConcreteClassParent.equals(dledDeclaringClassParent)){
+			dledConcreteClassParent.setParent(dledDeclaringClassParent);
+		}
+		
+		// prepare var linked one
+		DialogListEntryData<T> dledVar = new DialogListEntryData<T>();
+		dledVar.setText(strVarId, vcf);
+		dledVar.setParent(dledConcreteClassParent);
+		addEntry(dledVar);
+		
+		return dledVar;
+	}
+	
+	private DialogListEntryData<T> createParentEntry(String strParentTextKey, String strParentKindKey){
+		// prepare declaring class as tree parent  
+		DialogListEntryData<T> dledParent=null;
+		for(DialogListEntryData<T> dled:getCompleteEntriesListCopy()){
+			if(dled.getText().equals(strParentTextKey)){
+				dledParent=dled;
+				break;
+			}
+		}
+		if(dledParent==null){
+			dledParent=new DialogListEntryData<T>();
+			dledParent.setText(strParentTextKey,strParentKindKey);
+			addEntry(dledParent);
+		}
+		
+		return dledParent;
 	}
 	
 	@Override

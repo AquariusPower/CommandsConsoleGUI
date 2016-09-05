@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 	
 	All rights reserved.
 
@@ -34,7 +34,7 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
 import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
-import com.github.commandsconsolegui.misc.IdTmp;
+import com.github.commandsconsolegui.misc.VarId;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -44,7 +44,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 /**
  * TODO migrate most things possible to here
  *
- * @author Henrique Abdalla <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 
  */
 public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implements IReflexFillCfgVariant{//, IVarIdValueOwner{
@@ -65,7 +65,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	private CommandData	cmdd;
 	private O	objRawValueLazy;
 	private boolean	bLazyValueWasSet;
-	private IdTmp	idt;
+	private VarId	idt;
 	
 	private static ArrayList<VarCmdFieldAbs> avcfList = new ArrayList<VarCmdFieldAbs>();
 	public static final HashChangeHolder hvhVarList = new HashChangeHolder(avcfList);
@@ -195,7 +195,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 //		return getThis();
 //	}
 	
-	protected S setUniqueId(IdTmp idt){
+	protected S setUniqueId(VarId idt){
 		this.idt = idt;
 		
 		String strExceptionId = null;
@@ -239,7 +239,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	 */
 	protected S setCustomUniqueCmdId(String strUniqueCmdId, boolean bIsVariable){
 //		setUniqueId(new IdTmp(bIsVariable,strUniqueCmdId,strUniqueCmdId));
-		setUniqueId(new IdTmp().setAsVariable(bIsVariable).setSimpleId(strUniqueCmdId).setUniqueId(strUniqueCmdId));
+		setUniqueId(new VarId().setAsVariable(bIsVariable).setSimpleId(strUniqueCmdId).setUniqueId(strUniqueCmdId));
 		return getThis();
 	}
 
@@ -368,7 +368,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		return getCodePrefixVariant().equals(getCodePrefixDefault());
 	}
 
-	public IdTmp getIdTmp(CommandsDelegator.CompositeControl cc) {
+	public VarId getIdTmp(CommandsDelegator.CompositeControl cc) {
 		cc.assertSelfNotNull();
 		return idt;
 	}
@@ -389,7 +389,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		return super.toString();
 	}
 
-	public IdTmp getIdTmpCopy() {
+	public VarId getIdTmpCopy() {
 		return idt.clone();
 	}
 }

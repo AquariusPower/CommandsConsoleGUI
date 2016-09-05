@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
+Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 
 All rights reserved.
 
@@ -47,7 +47,7 @@ import com.jme3.scene.Spatial;
 
 /**
  * Allows multiple mouse buttons to be clicked or dragged at same time.
- * @author Henrique Abdalla <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
 public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListener{
 	private static MouseCursorCentralI instance = new MouseCursorCentralI();

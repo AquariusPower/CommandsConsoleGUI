@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 	
 	All rights reserved.
 
@@ -31,7 +31,7 @@ import java.lang.reflect.Field;
 
 /**
  * 
- * @author Henrique Abdalla <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
 public class ReflexFillI{ //implements IConsoleCommandListener{
@@ -319,7 +319,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	 * @param bIsVariable otherwise is a command
 	 * @return
 	 */
-	public IdTmp createIdentifierWithFieldName(IReflexFillCfg rfcfgOwnerOfField, IReflexFillCfgVariant rfcvFieldAtTheOwner, boolean bIsVariable){
+	public VarId createIdentifierWithFieldName(IReflexFillCfg rfcfgOwnerOfField, IReflexFillCfgVariant rfcvFieldAtTheOwner, boolean bIsVariable){
 		if(rfcfgOwnerOfField==null){
 			throw new NullPointerException("Invalid usage, "
 				+IReflexFillCfg.class.getName()+" owner is null, is this a local (non field) variable?");
@@ -339,7 +339,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 			}
 		}
 		
-		IdTmp id = new IdTmp();
+		VarId id = new VarId();
 		
 		Field fld = assertAndGetField(rfcfgOwnerOfField, rfcvFieldAtTheOwner);
 		Class<?> cl = fld.getDeclaringClass();
@@ -389,7 +389,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	 * @param rfcfg
 	 * @return
 	 */
-	private String prepareFullCommand(IdTmp id, String strCommandSimple, ReflexFillCfg rfcfg, boolean bIsVariable){
+	private String prepareFullCommand(VarId id, String strCommandSimple, ReflexFillCfg rfcfg, boolean bIsVariable){
 //		DebugI.i().conditionalBreakpoint(rfcfg.getPrefixCustomId().equals("ConfigDialog"));
 		
 	//	strCommand=rfcfg.strPrefix+strCommand+rfcfg.strSuffix;

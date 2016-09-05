@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 	
 	All rights reserved.
 
@@ -33,7 +33,7 @@ import com.jme3.scene.Node;
 /**
  * As you may not be using {@link SimpleApplication#}.
  *  
- * @author Henrique Abdalla <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
 public class GlobalRootNodeI extends GlobalHolderAbs<Node> {
 	private static GlobalGUINodeI instance = new GlobalGUINodeI();

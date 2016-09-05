@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 	
 	All rights reserved.
 
@@ -49,7 +49,7 @@ import com.jme3.export.Savable;
  * - a check box to simply enable/disable
  * - etc...
  * 
- * @author Henrique Abdalla <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  * @param <T> is the action class for buttons
  */
@@ -201,6 +201,8 @@ public class DialogListEntryData<T> implements Savable{
 	 * @return
 	 */
 	public DialogListEntryData<T> setParent(DialogListEntryData<T> parent) {
+		if(this==parent)throw new PrerequisitesNotMetException("cant parent self: parent==this", this);
+		
 		if(this.parent!=null){
 			this.parent.aChildList.remove(this);
 		}

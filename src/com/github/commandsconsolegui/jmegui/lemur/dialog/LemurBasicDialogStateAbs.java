@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 	
 	All rights reserved.
 
@@ -41,7 +41,7 @@ import com.simsilica.lemur.Command;
 import com.simsilica.lemur.GuiGlobals;
 
 /**
- * @author Henrique Abdalla <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
 public abstract class LemurBasicDialogStateAbs<T,R extends LemurBasicDialogStateAbs<T,R>> extends LemurDialogGUIStateAbs<T,R>{
 	StringCmdField scfAddEntry = new StringCmdField(this,null,"[strEntryText]");

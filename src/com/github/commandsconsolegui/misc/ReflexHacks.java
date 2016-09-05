@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 	
 	All rights reserved.
 
@@ -63,7 +63,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
  *        such methods and fields, so basically they will maintain it.
  * C.2 - If possible, create a fork of such classes (but you will have to maintain it).
  * 
- * @author Henrique Abdalla <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 
  */
 public class ReflexHacks implements IConsoleCommandListener, IReflexFillCfg {

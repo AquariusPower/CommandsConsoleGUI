@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 	
 	All rights reserved.
 
@@ -58,7 +58,7 @@ import com.simsilica.lemur.Container;
  * A console command will be automatically created based on the configured {@link #strUIId}.<br>
  * See it at {@link BaseDialogStateAbs}.
  * 
- * @author Henrique Abdalla <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  * @param <T> see {@link DialogListEntryData}
  * @param <R> is for getThis() concrete auto class type inherited trick

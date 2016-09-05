@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 	
 	All rights reserved.
 
@@ -31,7 +31,7 @@ import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
-import com.github.commandsconsolegui.misc.IdTmp;
+import com.github.commandsconsolegui.misc.VarId;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -43,7 +43,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  * It is intended to change internal states, not to ex. toggle user interfaces, for that use
  * a normal command.
  * 
- * @author Henrique Abdalla <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
 public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdField>{
@@ -138,7 +138,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 ////			throw new NullPointerException("asked for '"+strCmd+"' but was already set to: "+getUniqueCmdId());
 //		}
 		
-		setUniqueId(new IdTmp().setAsVariable(false).setSimpleId(strCmd).setUniqueId(strCmd));
+		setUniqueId(new VarId().setAsVariable(false).setSimpleId(strCmd).setUniqueId(strCmd));
 	}
 	
 //	public String getCmdId(){

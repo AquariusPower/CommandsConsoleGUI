@@ -1,5 +1,5 @@
 /* 
-	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower>
+	Copyright (c) 2016, Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 	
 	All rights reserved.
 
@@ -95,7 +95,7 @@ import com.jme3.texture.Texture2D;
  * 
  * More info at {@link BaseDialogStateAbs}
  * 
- * @author Henrique Abdalla <https://github.com/AquariusPower>
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *	
  */
 public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends BaseDialogStateAbs<T,R> implements IConsoleUI, IWorkAroundBugFix {
