@@ -85,8 +85,8 @@ public abstract class LemurBasicDialogStateAbs<T,R extends LemurBasicDialogState
 	
 	@Override
 	protected boolean updateAttempt(float tpf) {
-		if(getDiagModalInfoCurrent()!=null){
-			if(getDiagModalInfoCurrent().getDiagModal().isChoiceMade()){
+		if(getChildDiagModalInfoCurrent()!=null){
+			if(getChildDiagModalInfoCurrent().getDiagModal().isChoiceMade()){
 				applyResultsFromModalDialog();
 			}
 		}

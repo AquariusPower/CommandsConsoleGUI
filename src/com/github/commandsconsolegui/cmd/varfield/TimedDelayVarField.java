@@ -291,7 +291,11 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 	public TimedDelayVarField setObjectRawValue(Object objValue) {
 		if(objValue instanceof Double){
 			setDelayLimitSeconds( ((Double)objValue).floatValue() );
-		}else{
+		}else
+		if(objValue instanceof String){
+			setDelayLimitSeconds( Float.parseFloat((String)objValue) );
+		}else
+		{
 			setDelayLimitSeconds((Float)objValue);
 		}
 		
@@ -314,7 +318,7 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 	}
 
 	@Override
-	public Object getValueRaw() {
+	public Object getRawValue() {
 		return getDelayLimitSeconds();
 	}
 

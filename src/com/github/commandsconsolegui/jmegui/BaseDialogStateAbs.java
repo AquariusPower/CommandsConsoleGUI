@@ -123,7 +123,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return bAtoZ ? cmpTextAtoZ : cmpTextZtoA;
 	}
 	
-	protected DiagModalInfo<T> getDiagModalInfoCurrent(){
+	protected DiagModalInfo<T> getChildDiagModalInfoCurrent(){
 		return dmi;
 	}
 	
@@ -263,6 +263,21 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	protected abstract boolean initKeyMappings();
 	public abstract String getInputText();
 	
+	/**
+	 * 
+	 * @return null means there is no user typed value (whatever is there is as a list filter not as a value)
+	 */
+	public String getInputTextAsUserTypedValue(){
+		if(!isInputToUserEnterCustomValueMode())throw new PrerequisitesNotMetException("not user typing value mode", this);
+		
+		String str = getInputText();
+		if(str.startsWith(getUserEnterCustomValueToken())){
+			return str.substring(getUserEnterCustomValueToken().length()); 
+		}
+		
+		return null;
+	}
+	
 	protected void requestActionSubmit() {
 		bRequestedActionSubmit=true;
 	}
@@ -351,7 +366,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	
 	@Override
 	protected boolean enableAttempt() {
-		updateAllParts();
+		if(!super.enableAttempt())return false;
 		
 		getNodeGUI().attachChild(sptContainerMain);
 		
@@ -371,7 +386,13 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 			if(bUserEnterCustomValueMode)setInputText(getUserEnterCustomValueToken());
 		}
 		
-		return super.enableAttempt();
+		return true;
+	}
+	
+	@Override
+	protected void enableSuccess() {
+		super.enableSuccess();
+		updateAllParts();
 	}
 	
 	public boolean isDialogEffectsDone(){
@@ -382,6 +403,8 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	
 	@Override
 	protected boolean disableAttempt() {
+		if(!super.disableAttempt())return false;
+		
 		if(btgEffect.b()){
 			Vector3f v3fScaleCopy = sptContainerMain.getLocalScale().clone();
 			
@@ -406,7 +429,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		if(diagParent!=null)diagParent.updateModalChild(false,this);
 //		updateModalParent(false);
 		
-		return super.disableAttempt();
+		return true;
 	}
 	
 	/**
@@ -451,6 +474,9 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return getThis();
 	}
 	
+	public boolean isInputToUserEnterCustomValueMode(){
+		return bUserEnterCustomValueMode;
+	}
 	public R setInputToUserEnterCustomValueMode(boolean bEnable){
 		this.bUserEnterCustomValueMode=bEnable;
 		return getThis();
@@ -543,7 +569,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	protected ArrayList<DialogListEntryData<T>> getParentReferencedDledListCopy() {
 		ArrayList<DialogListEntryData<T>> adled = new ArrayList<DialogListEntryData<T>>();
 		if(getParentDialog()!=null){
-			BaseDialogStateAbs<T, R>.DiagModalInfo<T> dmi = getParentDialog().getDiagModalInfoCurrent();
+			BaseDialogStateAbs<T, R>.DiagModalInfo<T> dmi = getParentDialog().getChildDiagModalInfoCurrent();
 			if(dmi!=null){
 				if(dmi.getDiagModal()!=this){
 					throw new PrerequisitesNotMetException("current parent's modal dialog should be 'this'",dmi,dmi.getDiagModal(),this);
@@ -626,7 +652,12 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		updateList();
 		
 		updateInputField();
-		
+	}
+	
+	protected abstract String getDefaultValueToUserModify();
+	
+	protected void applyDefaultValueToUserModify() {
+		setInputText(getUserEnterCustomValueToken()+getDefaultValueToUserModify());
 	}
 	
 	public ArrayList<DialogListEntryData<T>> getDataSelectionListCopy() {

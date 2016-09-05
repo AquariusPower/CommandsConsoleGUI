@@ -65,6 +65,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	private String strHelp=null;
 	private CommandData	cmdd;
 	private O	objRawValueLazy;
+	private O	objRawValueDefault;
 	private boolean	bLazyValueWasSet;
 	private VarId	idt;
 	
@@ -293,7 +294,9 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	}
 	
 	public abstract String getReport(); //this is safe to be public because it is just a report string
-	public abstract Object getValueRaw(); //this is safe to be public because it is a base access to the concrete class simple value ex.: will return a primitive Long on the concrete class
+	
+	/** TODO modify return to O, also on vivo? or will be too much unnecessary complexity? just casts should suffice? */ 
+	public abstract Object getRawValue(); //this is safe to be public because it is a base access to the concrete class simple value ex.: will return a primitive Long on the concrete class
 	
 	/**
 	 * implement only at concrete class (not the midlevel abstract ones)
@@ -318,6 +321,8 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 //	}else{
 //		vivo.setObjectValue(objValue);
 //	}
+		if(objRawValueDefault==null)objRawValueDefault=(O)objValue;
+		
 		if(vivo!=null){
 			vivo.setObjectValue(objValue);
 		}else{
@@ -392,5 +397,9 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 
 	public VarId getIdTmpCopy() {
 		return idt.clone();
+	}
+
+	public O getRawValueDefault() {
+		return objRawValueDefault;
 	}
 }

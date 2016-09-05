@@ -90,6 +90,9 @@ public class IntLongVarField extends VarCmdFieldAbs<Long,IntLongVarField>{
 		if(objValue instanceof IntLongVarField){
 			lValue = ((IntLongVarField)objValue).lValue;
 		}else
+		if(objValue instanceof String){
+			lValue = Long.parseLong((String)objValue);
+		}else
 		{
 			lValue = ((Integer)objValue).longValue();
 		}
@@ -145,7 +148,7 @@ public class IntLongVarField extends VarCmdFieldAbs<Long,IntLongVarField>{
 	}
 
 	@Override
-	public Object getValueRaw() {
+	public Object getRawValue() {
 		return getLong();
 	}
 
@@ -161,7 +164,7 @@ public class IntLongVarField extends VarCmdFieldAbs<Long,IntLongVarField>{
 //	}
 	@Override
 	public String getValueAsString() {
-		return ""+getValueRaw();
+		return ""+getRawValue();
 	}
 	@Override
 	public String getValueAsString(int iIfFloatPrecision) {

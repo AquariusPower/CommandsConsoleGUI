@@ -109,5 +109,10 @@ public class QuestionDialogState<T extends Command<Button>> extends LemurBasicDi
 //	protected Integer getEntryHeightPixels() {
 //		return super.getEntryHeightPixels()*2;
 //	}
+
+	@Override
+	protected String getDefaultValueToUserModify() {
+		return "(no default value)";
+	}
 }
 

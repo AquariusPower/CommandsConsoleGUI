@@ -190,7 +190,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 	
 	@Override
 	public String getValueAsString() {
-		return ""+getValueRaw();
+		return ""+getRawValue();
 	}
 	@Override
 	public String getValueAsString(int iIfFloatPrecision) {
@@ -257,7 +257,19 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 	public BoolTogglerCmdField setObjectRawValue(Object objValue) {
 		if(objValue instanceof BoolTogglerCmdField){
 			this.bCurrent = ((BoolTogglerCmdField)objValue).b();
-		}else{
+		}else
+		if(objValue instanceof String){
+			String str=(String)objValue;
+			if(str.equalsIgnoreCase("true")){
+				this.bCurrent = true;
+			}else
+			if(str.equalsIgnoreCase("false")){
+				this.bCurrent = false;
+			}else{
+				throw new PrerequisitesNotMetException("invalid boolean value", str);
+			}
+		}else
+		{
 			this.bCurrent = (Boolean)objValue;
 		}
 //		if(bConstructed)
@@ -316,7 +328,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 //	}
 
 	@Override
-	public Object getValueRaw() {
+	public Object getRawValue() {
 		return this.bCurrent;
 	}
 

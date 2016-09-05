@@ -191,4 +191,40 @@ public class MultiClickCondStateI extends ConditionalStateAbs {
 		mc.callCmd = callCmd; //can be null here, acts like a skipper
 		mc.iClickCount++;
 	}
+
+	@Override
+	protected void enableFailed() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void disableFailed() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void enableSuccess() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void disableSuccess() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void initSuccess() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void initFailed() {
+		// TODO Auto-generated method stub
+		
+	}
 }

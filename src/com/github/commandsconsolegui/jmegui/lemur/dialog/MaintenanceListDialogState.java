@@ -35,8 +35,10 @@ import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
+import com.simsilica.lemur.Label;
 
 /**
  * This is like the inventory list.
@@ -120,24 +122,20 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 
 	@Override
 	public void applyResultsFromModalDialog() {
-		BaseDialogStateAbs<T,?> diagModal = getDiagModalInfoCurrent().getDiagModal();
-		T cmdAtParent = getDiagModalInfoCurrent().getCmdAtParent();
-		ArrayList<DialogListEntryData<T>> adataToApplyResultsList = getDiagModalInfoCurrent().getParentReferencedDledListCopy();
+		BaseDialogStateAbs<T,?> diagModal = getChildDiagModalInfoCurrent().getDiagModal();
+		T cmdRequestedAtThisDiag = getChildDiagModalInfoCurrent().getCmdAtParent();
+		ArrayList<DialogListEntryData<T>> adataToApplyResultsList = getChildDiagModalInfoCurrent().getParentReferencedDledListCopy();
 		
 		boolean bChangesMade = false;
 		for(DialogListEntryData<T> dataAtModal:diagModal.getDataSelectionListCopy()){
-				if(cmdAtParent.equals(cmdDel)){
+				if(cmdRequestedAtThisDiag.equals(cmdDel)){
 					if(diagModal instanceof QuestionDialogState){
 						QuestionDialogState<T> qds = (QuestionDialogState<T>)diagModal;
-						
 						if(qds.isYes(dataAtModal)){
-//						if(dataAtModal.equals(qds.dataYes)){
-							for(DialogListEntryData<T> dataToApplyResults:adataToApplyResultsList){
-								removeEntry(dataToApplyResults);
-								bChangesMade=true;
-							}
+							bChangesMade = deleteEntry(adataToApplyResultsList);
 							
 							/**
+							 * !!! ATTENTION !!!
 							 * There is already a sound for entries removal
 							if(bChangesMade)AudioUII.i().play(EAudio.ReturnChosen);
 							 */
@@ -146,14 +144,12 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 //						if(dataAtModal.equals(qds.dataNo)){
 							AudioUII.i().play(EAudio.ReturnNothing);
 						}
+					}else{
+						throw new PrerequisitesNotMetException("unexpected diag", diagModal, QuestionDialogState.class);
 					}
 				}else
-				if(cmdAtParent.equals(cmdCfg)){
-					for(DialogListEntryData<T> dataToCfg:adataToApplyResultsList){
-						dataToCfg.updateTextTo(dataAtModal.getText());
-						bChangesMade=true;
-					}
-					
+				if(cmdRequestedAtThisDiag.equals(cmdCfg)){
+					bChangesMade = modifyEntry(diagModal, dataAtModal, adataToApplyResultsList);
 					if(bChangesMade)AudioUII.i().play(EAudio.ReturnChosen);
 				}
 		}
@@ -163,6 +159,32 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 		}
 		
 		super.applyResultsFromModalDialog();
+	}
+	
+	/**
+	 * 
+	 * @param diagModal mainly to give more options when overriding this method
+	 * @param dataAtModal
+	 * @param adataToApplyResultsList
+	 * @return
+	 */
+	protected boolean modifyEntry(BaseDialogStateAbs<T,?> diagModal, DialogListEntryData<T> dataAtModal, ArrayList<DialogListEntryData<T>> adataToApplyResultsList) {
+		boolean bChangesMade=false;
+		for(DialogListEntryData<T> dataToCfg:adataToApplyResultsList){
+			dataToCfg.updateTextTo(dataAtModal.getText());
+			bChangesMade=true;
+		}
+		return bChangesMade;
+	}
+
+	protected boolean deleteEntry(ArrayList<DialogListEntryData<T>> adataToApplyResultsList) {
+		boolean bChangesMade = false;
+		for(DialogListEntryData<T> dataToApplyResults:adataToApplyResultsList){
+			removeEntry(dataToApplyResults);
+			bChangesMade=true;
+		}
+		
+		return bChangesMade;
 	}
 
 	@Override
@@ -223,5 +245,10 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 	@Override
 	protected MaintenanceListDialogState<T> getThis() {
 		return this;
+	}
+
+	@Override
+	protected String getDefaultValueToUserModify() {
+		return "(no default value)";
 	}
 }

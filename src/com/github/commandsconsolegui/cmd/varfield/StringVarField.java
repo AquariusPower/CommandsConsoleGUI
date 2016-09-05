@@ -81,6 +81,8 @@ public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 		if(objValue instanceof StringVarField){
 			strValue = ((StringVarField)objValue).strValue;
 		}else
+//		if(objValue instanceof String){
+//		}else
 		{
 			strValue = ""+objValue; //TODO too much permissive?
 		}
@@ -115,7 +117,7 @@ public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 	}
 
 	@Override
-	public Object getValueRaw() {
+	public Object getRawValue() {
 		return strValue;
 	}
 

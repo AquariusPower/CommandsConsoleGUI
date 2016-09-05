@@ -37,6 +37,7 @@ import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
+import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
@@ -118,21 +119,21 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 	}
 	
 	public static class AudioCfg implements IReflexFillCfg{
-		private String	strUId;
-		private String	strFile;
+		private String	strId;
+		private StringVarField svfFile = new StringVarField(this,"","");
 		private FloatDoubleVarField fdvVolumeGain = new FloatDoubleVarField(this,1.0,"").setMin(0.0).setMax(1.0);
 		
 		public AudioCfg(String strUId) {
-			this.strUId=strUId;
+			this.strId=strUId;
 		}
-		public String getFile(){return strFile;}
-		public void setFile(String strFile){this.strFile=strFile;}
+		public String getFile(){return svfFile.getStringValue();}
+		public void setFile(String strFile){this.svfFile.setObjectRawValue(strFile);}
 		
 		@Override
 		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 			ReflexFillCfg rfcfg = GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 			if(rfcfg==null)rfcfg=new ReflexFillCfg(rfcv);
-			rfcfg.setPrefixCustomId(strUId);
+			rfcfg.setPrefixCustomId(strId);
 			return rfcfg;
 		} 
 	}
@@ -355,5 +356,41 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 		}
 		
 		return true;
+	}
+
+	@Override
+	protected void enableFailed() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void disableFailed() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void enableSuccess() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void disableSuccess() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void initSuccess() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void initFailed() {
+		// TODO Auto-generated method stub
+		
 	}
 }

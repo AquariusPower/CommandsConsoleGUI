@@ -230,13 +230,33 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 	protected boolean disableAttempt() {
 		if(!super.disableAttempt())return false;
 		
-		btgEnabled.setObjectRawValue(false);//,false);
-		
 		cd().dumpInfoEntry(getCmd()+" disable");
 		
 		return true;
 	}
 	
+	@Override
+	protected void enableSuccess() {
+		btgEnabled.setObjectRawValue(true);
+	}
+	
+	@Override
+	protected void disableSuccess() {
+		btgEnabled.setObjectRawValue(false);
+	}
+	
+	@Override
+	protected void enableFailed() {};
+	@Override
+	protected void disableFailed() {};
+	@Override
+	protected void initSuccess() {};
+	@Override
+	protected void initFailed() {
+		// TODO Auto-generated method stub
+		
+	}
+
 	private boolean bPrefixCmdWithIdToo=false;
 	
 	@Override

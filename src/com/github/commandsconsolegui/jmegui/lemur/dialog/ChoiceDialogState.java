@@ -73,4 +73,10 @@ public class ChoiceDialogState<T extends Command<Button>> extends LemurBasicDial
 	protected ChoiceDialogState<T> getThis() {
 		return this;
 	}
+	
+	@Override
+	protected String getDefaultValueToUserModify() {
+		return "(no default value)";
+	}
+
 }

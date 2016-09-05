@@ -2735,7 +2735,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		return varSet(
 			new VarIdValueOwnerData(
 				RESTRICTED_TOKEN+owner.getUniqueVarId(),
-				owner.getValueRaw(),
+				owner.getRawValue(),
 				owner,
 				rfcfg,
 				owner.getHelp()),

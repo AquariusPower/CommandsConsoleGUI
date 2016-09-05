@@ -38,6 +38,7 @@ import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.AudioUII;
+import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceDialogState;
@@ -78,7 +79,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			if(objUser instanceof VarCmdFieldAbs){
 				vcf = (VarCmdFieldAbs)objUser;
 			}else{
-				throw new PrerequisitesNotMetException("user object not a var", objUser, dledAtParent);
+				throw new PrerequisitesNotMetException("user object is not "+VarCmdFieldAbs.class, objUser, dledAtParent);
 			}
 			
 			btgSortListEntries.setObjectRawValue(false);
@@ -86,12 +87,22 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			return true;
 		}
 		
+//		@Override
+//		protected void enableSuccess() {
+//			super.enableSuccess();
+////			setInputText(getUserEnterCustomValueToken()+vcf.getValueAsString(10));
+//			setInputText(getUserEnterCustomValueToken()+vcf.getValueRaw());
+//		}
+		
 		@Override
 		protected String getTextInfo() {
 			String str="";
 			
+			str+="Help("+vcf.getClass().getSimpleName()+"):\n";
+			str+="\t"+(vcf.getHelp()==null ? "(no help)" : vcf.getHelp())+"\n";
+			
 			str+="Help("+ConsoleVarsDialogStateI.class.getSimpleName()+"):\n";
-			if(vcf!=null)str+="\t"+vcf.getHelp()+"\n";
+			str+="\tList and manage all console variables for all class listeners.\n";
 			
 			str+=super.getTextInfo();
 			
@@ -102,12 +113,12 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		protected void updateList() {
 			clearList();
 			
-			if(vcf!=null){
-				addEntry(new DialogListEntryData<T>(this).setText("(Help)"+vcf.getHelp(), vcf));
-				addEntry(new DialogListEntryData<T>(this).setText("(UniqueId)"+vcf.getUniqueVarId(), vcf));
-				addEntry(new DialogListEntryData<T>(this).setText("(SimpleId)"+vcf.getSimpleCmdId(), vcf));
-				addEntry(new DialogListEntryData<T>(this).setText("(Value)"+vcf.getValueRaw(), vcf));
-			}
+			addEntry(new DialogListEntryData<T>(this).setText("(UniqueId)"+vcf.getUniqueVarId(), vcf));
+			addEntry(new DialogListEntryData<T>(this).setText("(SimpleId)"+vcf.getSimpleCmdId(), vcf));
+			addEntry(new DialogListEntryData<T>(this).setText("(DefaultValueRaw)"+vcf.getRawValueDefault(), vcf));
+			addEntry(new DialogListEntryData<T>(this).setText("(ValueRaw)"+vcf.getRawValue(), vcf));
+			addEntry(new DialogListEntryData<T>(this).setText("(Value)"+vcf.getValueAsString(3), vcf));
+			addEntry(new DialogListEntryData<T>(this).setText("(Help)"+vcf.getHelp(), vcf));
 			
 			super.updateList();
 		}
@@ -115,10 +126,33 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		@Override
 		protected boolean disableAttempt() {
 			if(!super.disableAttempt())return false;
-			vcf=null;
+			vcf=null; 
 			clearList(); //from a previous enable
 			return true;
 		}
+		
+//		@Override
+//		protected void actionSubmit() {
+//			super.actionSubmit();
+//		}
+		@Override
+		protected String getDefaultValueToUserModify() {
+			return ""+vcf.getRawValue();
+		}
+		
+	}
+	
+	@Override
+	protected boolean modifyEntry(BaseDialogStateAbs<T, ?> diagModal,	DialogListEntryData<T> dataAtModal,	ArrayList<DialogListEntryData<T>> adataToApplyResultsList) {
+		boolean bChangesMade=false;
+		String strUserTypedValue = diagModal.getInputTextAsUserTypedValue();
+		if(strUserTypedValue!=null){
+			for(DialogListEntryData<T> dataToCfg:adataToApplyResultsList){
+				((VarCmdFieldAbs)dataToCfg.getUserObj()).setObjectRawValue(strUserTypedValue);
+				bChangesMade=true;
+			}
+		}
+		return bChangesMade;
 	}
 	
 	private ChoiceVarDialogState chd = new ChoiceVarDialogState();
@@ -216,13 +250,18 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			if(dledVar==null)dledVar=createNewVarEntry(vcf);
 			
 			// truncate value string
-			String strVal=vcf.getValueAsString(5);
-			if(strVal==null)strVal="";
-			if(vcf instanceof StringVarField){
-				strVal="'"+strVal+"'";
-				if(strVal.length()>10){
-					String strEtc="+"; //TODO use 3 dots single character if it exists or some other symbol?
-					strVal=strVal.substring(0, 10-strEtc.length())+strEtc;
+			String strVal=null;
+			if(vcf.getRawValue()==null){
+				strVal=""+null;
+			}else{
+				strVal=vcf.getValueAsString(3);
+	//			if(strVal==null)strVal="";
+				if(vcf instanceof StringVarField){
+					strVal="'"+strVal+"'";
+					if(strVal.length()>10){
+						String strEtc="+"; //TODO use 3 dots single character if it exists or some other symbol?
+						strVal=strVal.substring(0, 10-strEtc.length())+strEtc;
+					}
 				}
 			}
 			

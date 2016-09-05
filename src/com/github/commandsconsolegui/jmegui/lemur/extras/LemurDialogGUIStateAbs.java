@@ -364,8 +364,20 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	 */
 	@Override
 	protected void updateInputField(){
-		getInputField().setText(getLastFilter());
+		if(isInputToUserEnterCustomValueMode()){
+			if(getInputText().isEmpty() || getInputText().equals(getUserEnterCustomValueToken())){
+				applyDefaultValueToUserModify();
+			}
+		}else{
+			getInputField().setText(getLastFilter());
+		}
 	}
+	
+//	@Override
+//	protected void enableSuccess() {
+//		super.enableSuccess();
+//		updateInputField();
+//	}
 	
 	@Override
 	protected TextField getInputField(){
@@ -642,7 +654,13 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //						if(bControl)selectEntry(vlEntriesList.get(vlEntriesList.size()-1));
 						break;
 					case KeyInput.KEY_DELETE:
-						if(bControl)getInputField().setText("");
+						if(bControl){
+							if(isInputToUserEnterCustomValueMode() && getInputText().isEmpty()){
+								applyDefaultValueToUserModify();
+							}else{
+								getInputField().setText("");
+							}
+						}
 						break;
 					case KeyInput.KEY_NUMPADENTER:
 					case KeyInput.KEY_RETURN:
@@ -658,7 +676,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 						break;
 				}
 			}
-	
+
 		};
 		
 		bindKey("Navigate list to first entry", KeyInput.KEY_HOME, KeyAction.CONTROL_DOWN);
@@ -746,9 +764,9 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	}
 	
 	public void applyResultsFromModalDialog(){
-		if(getDiagModalInfoCurrent()==null)throw new PrerequisitesNotMetException("no modal active");
+		if(getChildDiagModalInfoCurrent()==null)throw new PrerequisitesNotMetException("no modal active");
 		
-		getDiagModalInfoCurrent().getDiagModal().resetChoice();
+		getChildDiagModalInfoCurrent().getDiagModal().resetChoice();
 //		dmi.getDiagModal().adataSelectedEntriesList.clear();
 		setDiagModalInfoCurrent(null);
 	}
@@ -1022,4 +1040,5 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		ListBox<String> lstbx = (ListBox<String>)node;
 		MiscLemurHelpersStateI.i().lineWrapDisableForListboxEntries(lstbx);
 	}
+	
 }

@@ -191,7 +191,7 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 	}
 
 	@Override
-	public Object getValueRaw() {
+	public Object getRawValue() {
 		// TODO Auto-generated method stub
 		return null;
 	}

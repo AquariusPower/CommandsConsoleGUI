@@ -1140,4 +1140,9 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		getInputField().setText(str);
 		return getThis();
 	}
+
+	@Override
+	protected String getDefaultValueToUserModify() {
+		return "(no default value)";
+	}
 }

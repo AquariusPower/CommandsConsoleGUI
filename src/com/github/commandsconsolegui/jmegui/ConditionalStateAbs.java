@@ -48,13 +48,14 @@ import com.jme3.scene.Node;
  * Life cycle steps: configure, initialize, enable, disable, discard <br>
  * <br>
  * Every step can be validated and delayed until proper conditions are met.<br>
+ * This allows for lazy assignments and instantiations: things will happen when they can.<br>
  * WARNING: a step not completed must self clean/undo before such method returns!<br>
  * <br>
  * After each step request, you must verify if it succeeded
  * before making new decisions.<br>
  * <br>
  * Most important steps will actually happen during {@link #doItAllProperly(float)},
- * where they will be properly validated and retried at specified time interval (default 0).<br>
+ * where they will be properly validated and retried at specified time interval (default 0, every frame).<br>
  * <br>
  * SELFNOTE: Keep this class depending solely in JME!<br>
  * 
@@ -173,6 +174,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 	
 	/**
 	 * Configure simple references assignments and variable values.<br>
+	 * Configure must not be laze, cannot fail, throw exception is something cant be done!
 	 * Must be used before initialization.<br>
 	 * Put here only things that will not change on {@link #cleanupProperly()} !<br>
 	 * Each sub-class must implement its own {@link CfgParm} ({@link ICfgParm}) to keep coding-flow 
@@ -356,9 +358,12 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		if(!rInit.isReadyToRetry())return false;
 		
 		if(!initCheckPrerequisites() || !initAttempt()){
+			initFailed();
 			rInit.resetStartTime();
 			msgDbg("init",false);
 			return false;
+		}else{
+			initSuccess();
 		}
 		
 		bProperlyInitialized=true;
@@ -405,8 +410,10 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 			bEnabled=bEnableSuccessful;
 			
 			if(bEnableSuccessful){
+				enableSuccess();
 				bEnabledRequested=false; //otherwise will keep trying
 			}else{
+				enableFailed();
 				rEnable.resetStartTime();
 			}
 		}else
@@ -421,8 +428,10 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 			bEnabled=!bDisableSuccessful;
 			
 			if(bDisableSuccessful){
+				disableSuccess();
 				bDisabledRequested=false; //otherwise will keep trying
 			}else{
+				disableFailed();
 				rDisable.resetStartTime();
 			}
 		}
@@ -442,6 +451,13 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		
 		return true;
 	}
+
+	protected abstract void enableFailed();
+	protected abstract void disableFailed();
+	protected abstract void enableSuccess();
+	protected abstract void disableSuccess();
+	protected abstract void initSuccess();
+	protected abstract void initFailed();
 
 	public void requestToggleEnabled(){
 //		assertIsPreInitialized();

@@ -70,7 +70,8 @@ public class FloatDoubleVarField extends VarCmdFieldAbs<Double,FloatDoubleVarFie
 //		super(rfcfgOwnerUseThis!=null); //only fields allowed
 		super(rfcfgOwnerUseThis); //only fields allowed
 //		setOwner(rfcfgOwnerUseThis);
-		this.dValue=dInitialValue;
+		setObjectRawValue(dInitialValue);
+//		this.dValue=dInitialValue;
 		setHelp(strHelp);
 //		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
 	}
@@ -89,6 +90,9 @@ public class FloatDoubleVarField extends VarCmdFieldAbs<Double,FloatDoubleVarFie
 		}else
 		if(objValue instanceof FloatDoubleVarField){
 			dValue = ((FloatDoubleVarField)objValue).dValue;
+		}else
+		if(objValue instanceof String){
+			dValue = Double.parseDouble((String)objValue);
 		}else
 		{
 			dValue = ((Float)objValue).doubleValue();
@@ -146,7 +150,7 @@ public class FloatDoubleVarField extends VarCmdFieldAbs<Double,FloatDoubleVarFie
 	}
 
 	@Override
-	public Object getValueRaw() {
+	public Object getRawValue() {
 		return getDouble();
 	}
 
