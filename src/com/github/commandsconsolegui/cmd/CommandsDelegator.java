@@ -231,6 +231,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	
 	/** 0 is auto wrap, -1 will trunc big lines */
 	private IntLongVarField ilvConsoleMaxWidthInCharsForLineWrap = new IntLongVarField(this,0,null);
+	
 	private IntLongVarField ilvCurrentFixedLineWrapAtColumn = new IntLongVarField(this,0,null);
 	private HashMap<IConsoleCommandListener,StackTraceElement[]> hmDebugListenerAddedStack = new HashMap<IConsoleCommandListener,StackTraceElement[]>();
 	

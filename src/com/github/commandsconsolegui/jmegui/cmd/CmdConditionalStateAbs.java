@@ -221,7 +221,7 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 	protected boolean enableAttempt() {
 		if(!super.enableAttempt())return false;
 		
-		cd().dumpInfoEntry(getCmd()+" enabled");
+		cd().dumpInfoEntry(getCmd()+" enable");
 		
 		return true;
 	}
@@ -232,7 +232,7 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 		
 		btgEnabled.setObjectRawValue(false);//,false);
 		
-		cd().dumpInfoEntry(getCmd()+" disabled");
+		cd().dumpInfoEntry(getCmd()+" disable");
 		
 		return true;
 	}

@@ -46,6 +46,7 @@ import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexHacks;
 import com.jme3.font.BitmapText;
+import com.jme3.font.LineWrapMode;
 import com.jme3.input.dummy.DummyKeyInput;
 import com.jme3.material.MatParam;
 import com.jme3.material.Material;
@@ -56,6 +57,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.DocumentModel;
+import com.simsilica.lemur.GridPanel;
 import com.simsilica.lemur.ListBox;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.TextField;
@@ -907,5 +909,21 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 			fScaleY==null?v3fCurrentScale.y:fScaleY,
 			v3fCurrentScale.z); // to not mess with Z order
 		return this;
+	}
+
+	public void lineWrapDisableForListboxEntries(ListBox<String> lstbx){
+		GridPanel gp = lstbx.getGridPanel();
+		for(Spatial spt:gp.getChildren()){
+			/**
+			 * must be button because lemur ListBox uses Button for entries!
+			 * this means that other Panels are not actual entries!
+			 */
+			if(spt instanceof Button){ // 
+				lineWrapDisableFor((Button)spt);
+			}
+		}
+	}
+	public void lineWrapDisableFor(Panel pnl){
+		MiscJmeI.i().retrieveBitmapTextFor(pnl).setLineWrapMode(LineWrapMode.NoWrap);
 	}
 }

@@ -344,7 +344,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	protected abstract ConsoleStateAbs setHintIndex(Integer i);
 	protected abstract ConsoleStateAbs setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines);
 	protected abstract void scrollHintToIndex(int i);
-	protected abstract void lineWrapDisableForChildrenOf(Node gp);
+//	protected abstract void lineWrapDisableForChildrenOf(Node node);
 	protected abstract boolean mapKeysForInputField();
 	protected abstract int getVisibleRows();
 	protected abstract Vector3f getSizeOf(Spatial spt);

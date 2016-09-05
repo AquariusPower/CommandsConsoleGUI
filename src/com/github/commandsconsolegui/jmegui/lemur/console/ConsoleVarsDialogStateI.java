@@ -111,6 +111,14 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			
 			super.updateList();
 		}
+		
+		@Override
+		protected boolean disableAttempt() {
+			if(!super.disableAttempt())return false;
+			vcf=null;
+			clearList(); //from a previous enable
+			return true;
+		}
 	}
 	
 	private ChoiceVarDialogState chd = new ChoiceVarDialogState();
@@ -129,7 +137,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		cfg = (CfgParm)icfg;
 		
 		chd.configure(new ChoiceVarDialogState.CfgParm(0.9f, 0.5f, 0.5f, null));//.setId(strId));
-		chd.setInputToTypeValueMode(true);
+		chd.setInputToUserEnterCustomValueMode(true);
 		cfg.setDiagChoice(chd);
 		
 		cfg.setDiagQuestion(null);
@@ -237,19 +245,21 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	private DialogListEntryData<T> createNewVarEntry(VarCmdFieldAbs vcf){
 		VarId vidCopy = vcf.getIdTmpCopy();
 		
-		DialogListEntryData<T> dledDeclaringClassParent = createParentEntry(
-			vidCopy.getConcreteClassSName()+vidCopy.getDeclaringClassSName(),
-			strParentDeclaringClassKey);
-
-		DialogListEntryData<T> dledConcreteClassParent = createParentEntry(
-			vidCopy.getConcreteClassSName(),
-			strParentConcreteClassKey);
+		DialogListEntryData<T> dledVarEntryParent = null;
 		
-		String strVarId = vcf.getUniqueVarId(true);
-		strVarId=strVarId.replaceFirst(vidCopy.getDeclaringClassSName(), "");
-		strVarId=strVarId.replaceFirst(vidCopy.getConcreteClassSName(), "");
-		
-		if(!dledConcreteClassParent.equals(dledDeclaringClassParent)){
+		if(vidCopy.getConcreteClassSName().equals(vidCopy.getDeclaringClassSName())){
+			dledVarEntryParent = createParentEntry(
+					vidCopy.getDeclaringClassSName(),
+					strParentDeclaringClassKey);
+		}else{
+			DialogListEntryData<T> dledDeclaringClassParent = createParentEntry(
+				vidCopy.getConcreteClassSName()+vidCopy.getDeclaringClassSName(),
+				strParentDeclaringClassKey);
+			
+			DialogListEntryData<T> dledConcreteClassParent = createParentEntry(
+				vidCopy.getConcreteClassSName(),
+				strParentConcreteClassKey);
+			
 			if(dledDeclaringClassParent.getParent()==null){
 				dledDeclaringClassParent.setParent(dledConcreteClassParent);
 			}else{
@@ -257,12 +267,18 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 					throw new PrerequisitesNotMetException("Cannot re-parent a declaring class list entry", dledDeclaringClassParent, dledDeclaringClassParent.getParent(), dledConcreteClassParent);
 				}
 			}
+			
+			dledVarEntryParent = dledDeclaringClassParent;
 		}
 		
 		// prepare var linked one
+		String strVarId = vcf.getUniqueVarId(true);
+		strVarId=strVarId.replaceFirst(vidCopy.getDeclaringClassSName(), "");
+		strVarId=strVarId.replaceFirst(vidCopy.getConcreteClassSName(), "");
+		
 		DialogListEntryData<T> dledVar = new DialogListEntryData<T>(this);
 		dledVar.setText(strVarId, vcf);
-		dledVar.setParent(dledDeclaringClassParent);
+		dledVar.setParent(dledVarEntryParent);
 		addEntry(dledVar);
 		
 		return dledVar;

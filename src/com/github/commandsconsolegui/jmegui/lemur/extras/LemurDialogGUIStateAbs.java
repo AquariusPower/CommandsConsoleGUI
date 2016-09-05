@@ -54,6 +54,7 @@ import com.jme3.input.KeyInput;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GridPanel;
@@ -81,7 +82,7 @@ import com.simsilica.lemur.list.SelectionModel;
 public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<T,R>> extends BaseDialogStateAbs<T,R> {
 	private Label	lblTitle;
 	private Label	lblTextInfo;
-	private ListBox<DialogListEntryData<T>>	lstbxEntriesToSelect;
+//	private ListBox<DialogListEntryData<T>>	lstbxEntriesToSelect;
 	private VersionedList<DialogListEntryData<T>>	vlVisibleEntriesList = new VersionedList<DialogListEntryData<T>>();
 	private int	iVisibleRows;
 //	private Integer	iEntryHeightPixels; //TODO this is init is failing why? = 20; 
@@ -249,6 +250,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		// simple info
 		lblTextInfo = new Label("",getStyle());
 		lblTextInfo.setName(getId()+"_TxtInfo");
+		MiscLemurHelpersStateI.i().lineWrapDisableFor(lblTextInfo);
 		getNorthContainer().addChild(lblTextInfo, BorderLayout.Position.Center);
 		
 		getContainerMain().addChild(getNorthContainer(), BorderLayout.Position.North);
@@ -259,20 +261,20 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		float fListPerc = 1.0f - cfg.fInfoHeightPercentOfDialog;
 //		v3fEntryListSize.y *= fListPerc;
 		v3fEntryListSize.y -= fInfoHeightPixels;
-		lstbxEntriesToSelect = new ListBox<DialogListEntryData<T>>(
+		setMainList(new ListBox<DialogListEntryData<T>>(
 			new VersionedList<DialogListEntryData<T>>(), 
 			getCellRenderer(), 
-			getStyle());
-		selectionModel = lstbxEntriesToSelect.getSelectionModel();
-		lstbxEntriesToSelect.setName(getId()+"_EntriesList");
-		lstbxEntriesToSelect.setSize(v3fEntryListSize); //not preferred, so the input field can fit properly
+			getStyle()));
+		selectionModel = getMainList().getSelectionModel();
+		getMainList().setName(getId()+"_EntriesList");
+		getMainList().setSize(v3fEntryListSize); //not preferred, so the input field can fit properly
 		//TODO multi was not implemented yet... lstbxVoucherListBox.getSelectionModel().setSelectionMode(SelectionMode.Multi);
-		getContainerMain().addChild(lstbxEntriesToSelect, BorderLayout.Position.Center);
+		getContainerMain().addChild(getMainList(), BorderLayout.Position.Center);
 		
 //		vlstrEntriesList.add("(Empty list)");
-		lstbxEntriesToSelect.setModel((VersionedList<DialogListEntryData<T>>)vlVisibleEntriesList);
+		getMainList().setModel((VersionedList<DialogListEntryData<T>>)vlVisibleEntriesList);
 		
-//		LemurMiscHelpersStateI.i().bugFix(null, LemurMiscHelpersStateI.i().btgBugFixListBoxSelectorArea, lstbxEntriesToSelect);
+//		LemurMiscHelpersStateI.i().bugFix(null, LemurMiscHelpersStateI.i().btgBugFixListBoxSelectorArea, getListEntries());
 		
 //		/**
 //		 * TODO entry height should be automatic... may be each entry could have its own height.
@@ -290,6 +292,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		
 		// status line, about the currently selected entry on the list
 		lblSelectedEntryStatus = new Label("Selected Entry Status",getStyle());
+		MiscLemurHelpersStateI.i().lineWrapDisableFor(lblSelectedEntryStatus);
 		getSouthContainer().addChild(lblSelectedEntryStatus, BorderLayout.Position.North);
 		
 		// mainly used as a list filter
@@ -310,6 +313,11 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		getNodeGUI().attachChild(getContainerMain());
 		
 		return true;
+	}
+	
+	@Override
+	protected ListBox<DialogListEntryData<T>> getMainList() {
+		return (ListBox<DialogListEntryData<T>>)super.getMainList();
 	}
 	
 	protected CellRendererDialogEntry<T> getCellRenderer(){
@@ -380,7 +388,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	}
 	
 	private GridModel<Panel> getListBoxGridPanelModel(){
-		return lstbxEntriesToSelect.getGridPanel().getModel();
+		return getMainList().getGridPanel().getModel();
 	}
 	
 	protected Integer getEntryHeightPixels(){
@@ -448,7 +456,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 			updateFinalEntryHeightPixels();
 			
 			iVisibleRows = (int) (v3fEntryListSize.y/getFinalEntryHeightPixels());
-			lstbxEntriesToSelect.setVisibleItems(iVisibleRows);
+			getMainList().setVisibleItems(iVisibleRows);
 			if(vlVisibleEntriesList.size()>0){
 				if(getSelectedEntryData()==null){
 					selectRelativeEntry(0);
@@ -519,10 +527,12 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		
 //		updateSelectEntryRequested();
 		
-		if(!getInputText().equalsIgnoreCase(getLastFilter())){
-//			setLastFilter(getInputText());
-			applyListKeyFilter();
-			updateList();
+		if(!getInputText().startsWith(getUserEnterCustomValueToken())){
+			if(!getInputText().equalsIgnoreCase(getLastFilter())){
+	//			setLastFilter(getInputText());
+				applyListKeyFilter();
+				updateList();
+			}
 		}
 		
 		updateEffectListEntries(isTryingToEnable());
@@ -543,7 +553,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //			}
 //		}
 		
-		MiscLemurHelpersStateI.i().updateBlinkListBoxSelector(lstbxEntriesToSelect);//,true);
+		MiscLemurHelpersStateI.i().updateBlinkListBoxSelector(getMainList());//,true);
 		
 		return true;
 	}
@@ -569,19 +579,19 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	 * @return max-1 (if total 1, max index 0)
 	 */
 	private int getMaxIndex(){
-//		return lstbxEntriesToSelect.getVisibleItems()
+//		return getListEntries().getVisibleItems()
 		return vlVisibleEntriesList.size()-1;
-//			+( ((int)lstbxEntriesToSelect.getSlider().getModel().getMaximum()) -1);
+//			+( ((int)getListEntries().getSlider().getModel().getMaximum()) -1);
 	}
 	
 	private int getTopEntryIndex(){
-		int iVisibleItems = lstbxEntriesToSelect.getVisibleItems();
+		int iVisibleItems = getMainList().getVisibleItems();
 		int iTotEntries = vlVisibleEntriesList.size();
 		if(iVisibleItems>iTotEntries){
 			return 0; //is not overflowing the max visible items amount
 		}
 		
-		int iSliderInvertedIndex=(int)lstbxEntriesToSelect.getSlider().getModel().getValue();
+		int iSliderInvertedIndex=(int)getMainList().getSlider().getModel().getValue();
 		int iTopEntryIndex = (int)(iTotEntries -iSliderInvertedIndex -iVisibleItems);
 		
 		return iTopEntryIndex;
@@ -592,10 +602,10 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	}
 	
 	private void scrollTo(int iIndex){
-		//lstbxEntriesToSelect.getSlider().getModel().getValue();
-//		lstbxEntriesToSelect.getSlider().getModel().setValue(getMaxIndex()-iIndex);
-		lstbxEntriesToSelect.getSlider().getModel().setValue(
-			vlVisibleEntriesList.size()-lstbxEntriesToSelect.getVisibleItems()-iIndex);
+		//getListEntries().getSlider().getModel().getValue();
+//		getListEntries().getSlider().getModel().setValue(getMaxIndex()-iIndex);
+		getMainList().getSlider().getModel().setValue(
+			vlVisibleEntriesList.size()-getMainList().getVisibleItems()-iIndex);
 		
 	}
 	
@@ -618,10 +628,10 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 							selectRelativeEntry(1);
 						break;
 					case KeyInput.KEY_PGUP:
-						selectRelativeEntry(-lstbxEntriesToSelect.getVisibleItems());
+						selectRelativeEntry(-getMainList().getVisibleItems());
 						break;
 					case KeyInput.KEY_PGDN:
-						selectRelativeEntry(lstbxEntriesToSelect.getVisibleItems());
+						selectRelativeEntry(getMainList().getVisibleItems());
 						break;
 					case KeyInput.KEY_HOME:
 						selectRelativeEntry(-vlVisibleEntriesList.size()); //uses underflow protection
@@ -779,8 +789,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 			+"'"+dled.getText()+"'"
 		);
 		
-//		LemurMiscHelpersStateI.i().bugFix(null, LemurMiscHelpersStateI.i().btgBugFixListBoxSelectorArea, lstbxEntriesToSelect);
-		MiscLemurHelpersStateI.i().listboxSelectorAsUnderline(lstbxEntriesToSelect);
+//		LemurMiscHelpersStateI.i().bugFix(null, LemurMiscHelpersStateI.i().btgBugFixListBoxSelectorArea, getListEntries());
+		MiscLemurHelpersStateI.i().listboxSelectorAsUnderline(getMainList());
 	}
 	public void selectEntry(DialogListEntryData<T> dledSelectRequested) {
 //		this.dataSelectRequested = data;
@@ -796,7 +806,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //			dataSelectRequested=null;
 			cd().dumpDebugEntry(getId()+",SelectIndex="+i+","+dledSelectRequested.toString());
 		}else{
-			throw new PrerequisitesNotMetException("data not present on the list", dledSelectRequested, lstbxEntriesToSelect);
+			throw new PrerequisitesNotMetException("data not present on the list", dledSelectRequested, getMainList());
 		}
 	}
 	
@@ -834,7 +844,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		iSel = selectionModel.getSelection();
 		cd().dumpDebugEntry(getId()+":"
 			+"SelectedEntry="+iSel+","
-			+"SliderValue="+MiscI.i().fmtFloat(lstbxEntriesToSelect.getSlider().getModel().getValue()));
+			+"SliderValue="+MiscI.i().fmtFloat(getMainList().getSlider().getModel().getValue()));
 		return iSel;
 //		return iSel==null?-1:iSel;
 	}
@@ -917,7 +927,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //	private void prepareEffectListEntries(boolean bApplyNow) {
 //		bRunningEffectAtAllListEntries=true;
 		
-		GridPanel gp = lstbxEntriesToSelect.getGridPanel();
+		GridPanel gp = getMainList().getGridPanel();
 		for(int iC=0;iC<gp.getVisibleColumns();iC++){
 			for(int iR=0;iR<gp.getVisibleRows();iR++){
 				Panel pnl = gp.getCell(iR, iC);
@@ -938,7 +948,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		if(!bPreparedForListEntriesEffects)prepareEffectListEntries(true);
 		if(!bRunningEffectAtAllListEntries)return;
 		
-		GridPanel gp = lstbxEntriesToSelect.getGridPanel();
+		GridPanel gp = getMainList().getGridPanel();
 		
 		int iTotal = gp.getVisibleColumns() * gp.getVisibleRows();
 		int iCount = 0;
@@ -1007,4 +1017,9 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		return iFinalEntryHeightPixels;
 	}
 	
+	@Override
+	protected <N extends Node> void lineWrapDisableForChildrenOf(N node) {
+		ListBox<String> lstbx = (ListBox<String>)node;
+		MiscLemurHelpersStateI.i().lineWrapDisableForListboxEntries(lstbx);
+	}
 }

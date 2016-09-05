@@ -66,15 +66,16 @@ import com.simsilica.lemur.Container;
 public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> extends CmdConditionalStateAbs implements IReflexFillCfg{
 	private Spatial	sptContainerMain;
 	private Spatial	sptIntputField;
+	private Spatial sptMainList;
 	private String	strTitle;
 //	private String strStyle;
 	private StringVarField svfStyle = new StringVarField(this, (String)null, null);
 	
 	private Vector3f	v3fMainLocationBkp;
 	private Vector3f	v3fMainSize;
-	private String	strTokenTypeValue = "=";
+	private String	strUserEnterCustomValueToken = "=";
 	
-	private boolean	bTypeValueMode;
+	private boolean	bUserEnterCustomValueMode;
 	private BaseDialogStateAbs<T,?> diagParent;
 	private ArrayList<BaseDialogStateAbs<T,?>> aModalChildList = new ArrayList<BaseDialogStateAbs<T,?>>();
 //	private DialogListEntryData<T>	dataToCfgReference;
@@ -104,6 +105,8 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	private TimedDelayVarField tdDialogEffect = new TimedDelayVarField(this, 0.15f, "");
 	private float	fMinEffectScale=0.01f;
 	
+	protected abstract <N extends Node> void lineWrapDisableForChildrenOf(N node);
+	
 	private Comparator<DialogListEntryData<T>> cmpTextAtoZ = new Comparator<DialogListEntryData<T>>() {
 		@Override
 		public int compare(DialogListEntryData<T> o1, DialogListEntryData<T> o2) {
@@ -120,16 +123,16 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return bAtoZ ? cmpTextAtoZ : cmpTextZtoA;
 	}
 	
-	public DiagModalInfo<T> getDiagModalInfoCurrent(){
+	protected DiagModalInfo<T> getDiagModalInfoCurrent(){
 		return dmi;
 	}
 	
-	public R setDiagModalInfoCurrent(DiagModalInfo<T> dmi){
+	protected R setDiagModalInfoCurrent(DiagModalInfo<T> dmi){
 		this.dmi=dmi;
 		return getThis();
 	}
 	
-	public Spatial getContainerMain(){
+	protected Spatial getContainerMain(){
 		return sptContainerMain;
 	}
 	
@@ -260,7 +263,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	protected abstract boolean initKeyMappings();
 	public abstract String getInputText();
 	
-	public void requestActionSubmit() {
+	protected void requestActionSubmit() {
 		bRequestedActionSubmit=true;
 	}
 	
@@ -280,6 +283,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		
 		if(bRequestedRefreshList){
 			updateList();
+			lineWrapDisableForChildrenOf((Node)sptMainList);
 			bRequestedRefreshList=false;
 		}
 		
@@ -364,7 +368,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		}
 		
 		if(getInputText().isEmpty()){
-			if(bTypeValueMode)setInputText(strTokenTypeValue);
+			if(bUserEnterCustomValueMode)setInputText(getUserEnterCustomValueToken());
 		}
 		
 		return super.enableAttempt();
@@ -410,12 +414,12 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	 * vanishing with (grabbing) the mouse cursor.
 	 * @param b
 	 */
-	public R setMouseCursorKeepUngrabbed(boolean b) {
+	protected R setMouseCursorKeepUngrabbed(boolean b) {
 		UngrabMouseStateI.i().setKeepUngrabbedRequester(this,b);
 		return getThis();
 	}
 	
-	public R setTitle(String str){
+	protected R setTitle(String str){
 		this.strTitle = str;
 		return getThis();
 	}
@@ -447,18 +451,18 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return getThis();
 	}
 	
-	public R setInputToTypeValueMode(boolean bEnable){
-		this.bTypeValueMode=bEnable;
+	public R setInputToUserEnterCustomValueMode(boolean bEnable){
+		this.bUserEnterCustomValueMode=bEnable;
 		return getThis();
 	}
 	
 	protected abstract R setInputText(String str);
 	
-	public R getParentDialog(){
+	protected R getParentDialog(){
 		return (R)this.diagParent;
 	}
 	
-	public R setDiagParent(BaseDialogStateAbs<T,?> diagParent) {
+	protected R setDiagParent(BaseDialogStateAbs<T,?> diagParent) {
 //		if(this.diagParent!=null)throw new PrerequisitesNotMetException("modal parent already set",this.diagParent,diagParent);
 		PrerequisitesNotMetException.assertNotAlreadySet("modal parent", this.diagParent, diagParent, this);
 		this.diagParent = diagParent;
@@ -495,7 +499,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	protected abstract void updateInputField();
 	protected abstract void updateList();
 	protected abstract void updateTextInfo();
-	public abstract DialogListEntryData<T> getSelectedEntryData();
+	protected abstract DialogListEntryData<T> getSelectedEntryData();
 	
 	public void requestRefreshList(){
 		bRequestedRefreshList=true;
@@ -509,7 +513,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		
 		if(isOptionChoiceSelectionMode()){
 			str+="\tOption Mode: when hitting Enter, if an entry is selected, it's value will be chosen.\n";
-			str+="\tBut if the input begins with '"+getTokenTypeValue()+"', when hitting Enter, that specific value will be returned to the parent.\n";
+			str+="\tBut if the input begins with '"+getUserEnterCustomValueToken()+"', when hitting Enter, that specific value will be returned to the parent.\n";
 			
 			for(DialogListEntryData<T> dled:getParentReferencedDledListCopy()){
 				str+="\tRefAtParent: "+dled.getText()+"\n";
@@ -559,11 +563,11 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	protected void applyListKeyFilter(){
 		String str = getInputText();
 		
-		if(bTypeValueMode){
+		if(bUserEnterCustomValueMode){
 			if(
-					getTokenTypeValue()!=null && 
-					!getTokenTypeValue().isEmpty() && 
-					str.startsWith(getTokenTypeValue())
+					getUserEnterCustomValueToken()!=null && 
+					!getUserEnterCustomValueToken().isEmpty() && 
+					str.startsWith(getUserEnterCustomValueToken())
 			){
 				return; //is in type value mode, so skip updating filter
 			}
@@ -674,7 +678,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return adataChosenEntriesList.size()>0;
 	}
 
-	public R resetChoice() {
+	protected R resetChoice() {
 //		lChoiceMadeAtMilis=null;
 		adataChosenEntriesList.clear();
 		return getThis();
@@ -684,7 +688,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return bOptionChoiceSelectionMode;
 	}
 
-	public R setOptionChoiceSelectionMode(boolean bOptionChoiceSelectionMode) {
+	protected R setOptionChoiceSelectionMode(boolean bOptionChoiceSelectionMode) {
 		this.bOptionChoiceSelectionMode = bOptionChoiceSelectionMode;
 		return getThis();
 	}
@@ -747,7 +751,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		adleCompleteEntriesList.add(dled);
 	}
 
-	public void removeEntry(DialogListEntryData<T> dled){
+	protected void removeEntry(DialogListEntryData<T> dled){
 		removeEntry(dled, null);
 	}
 	private void removeEntry(DialogListEntryData<T> dled, DialogListEntryData<T> dledParent){
@@ -840,12 +844,20 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		svfStyle.setObjectRawValue(strStyle);
 	}
 
-	public String getTokenTypeValue() {
-		return strTokenTypeValue;
+	public String getUserEnterCustomValueToken() {
+		return strUserEnterCustomValueToken;
 	}
 
-	protected void setTokenTypeValue(String strTokenTypeValue) {
-		this.strTokenTypeValue = strTokenTypeValue;
+	protected void setUserEnterCustomValueToken(String strUserEnterCustomValueToken) {
+		this.strUserEnterCustomValueToken = strUserEnterCustomValueToken;
+	}
+
+	protected Spatial getMainList() {
+		return sptMainList;
+	}
+
+	protected void setMainList(Spatial sptListEntries) {
+		this.sptMainList = sptListEntries;
 	}
 
 //	public void setTitle(String strTitle) {

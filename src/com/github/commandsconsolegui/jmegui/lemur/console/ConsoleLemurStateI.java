@@ -520,15 +520,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	
 	@Override
 	public void lineWrapDisableForChildrenOf(Node node){
-		@SuppressWarnings("unchecked")
-		ListBox<String> lstbx = (ListBox<String>)node;
-		
-		GridPanel gp = lstbx.getGridPanel();
-		for(Spatial spt:gp.getChildren()){
-			if(spt instanceof Button){
-				MiscJmeI.i().retrieveBitmapTextFor((Button)spt).setLineWrapMode(LineWrapMode.NoWrap);
-			}
-		}
+		MiscLemurHelpersStateI.i().lineWrapDisableForListboxEntries((ListBox<String>)node);
 	}
 
 	@Override
