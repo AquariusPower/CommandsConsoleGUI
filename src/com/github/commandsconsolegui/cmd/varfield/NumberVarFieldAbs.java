@@ -72,6 +72,9 @@ public abstract class NumberVarFieldAbs<O, S extends NumberVarFieldAbs<O,S>> ext
 		return getThis();
 	}
 	
+	/**
+	 * TODO add console info message in case of under/overflow?
+	 */
 	@Override
 	public S setObjectRawValue(Object objValue) {
 		if( getMin()!=null && (nValue==null || cmpWith(getMin())<0) )nValue=getMin();

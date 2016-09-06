@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.cmd.varfield;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 
 /**
@@ -83,25 +84,34 @@ public class FloatDoubleVarField extends NumberVarFieldAbs<Double,FloatDoubleVar
 	@Override
 //	public FloatDoubleVarField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
 	public FloatDoubleVarField setObjectRawValue(Object objValue) {
+		if(objValue == null){
+			setValue( null );
+		}else
+		if(objValue instanceof Float){
+			setValue( ((Float)objValue).doubleValue() );
+		}else
 		if(objValue instanceof Double){
 			setValue( ((Double)objValue) );
 		}else
 		if(objValue instanceof FloatDoubleVarField){
 			setValue( ((FloatDoubleVarField)objValue).getValue() );
 		}else
-		if(objValue instanceof IntLongVarField){
-			setValue( ((IntLongVarField)objValue).getLong().doubleValue() );
-		}else
+//		if(objValue instanceof IntLongVarField){
+//			setValue( ((IntLongVarField)objValue).getLong().doubleValue() );
+//		}else
 		if(objValue instanceof String){
 			setValue( Double.parseDouble((String)objValue) );
-		}else
-		{
-			if(objValue!=null){
-				setValue( ((Float)objValue).doubleValue() );
-			}else{
-				setValue( null );
-			}
+		}else{
+			throw new PrerequisitesNotMetException("unsupported class type", objValue.getClass());
 		}
+//		}else
+//		{
+//			if(objValue!=null){
+//				setValue( ((Float)objValue).doubleValue() );
+//			}else{
+//				setValue( null );
+//			}
+//		}
 		
 //		super.setObjectValue(ccCD,objValue);
 		super.setObjectRawValue(objValue);

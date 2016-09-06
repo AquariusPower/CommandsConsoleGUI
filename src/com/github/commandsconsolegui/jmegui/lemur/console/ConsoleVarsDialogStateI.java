@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
+import com.github.commandsconsolegui.cmd.varfield.NumberVarFieldAbs;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
@@ -150,23 +151,8 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 					.setAddVisibleQuotes(vcf instanceof StringVarField)
 			).addCustomButtonAction("Value->",(T)cavai);
 			
-			if(vcf instanceof FloatDoubleVarField){
-				FloatDoubleVarField v = (FloatDoubleVarField)vcf;
-				
-				if(v.getMin()!=null){
-					addEntry(
-						new DialogListEntryData<T>(this).setText(v.getMin(), vcf)
-					).addCustomButtonAction("MinValue->",(T)cavai);
-				}
-				
-				if(v.getMax()!=null){
-					addEntry(
-						new DialogListEntryData<T>(this).setText(v.getMax(), vcf)
-					).addCustomButtonAction("MaxValue->",(T)cavai);
-				}
-			}else
-			if(vcf instanceof IntLongVarField){
-				IntLongVarField v = (IntLongVarField)vcf;
+			if(vcf instanceof NumberVarFieldAbs){
+				NumberVarFieldAbs v = (NumberVarFieldAbs)vcf;
 				
 				if(v.getMin()!=null){
 					addEntry(
@@ -180,6 +166,36 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 					).addCustomButtonAction("MaxValue->",(T)cavai);
 				}
 			}
+//			if(vcf instanceof FloatDoubleVarField){
+//				FloatDoubleVarField v = (FloatDoubleVarField)vcf;
+//				
+//				if(v.getMin()!=null){
+//					addEntry(
+//						new DialogListEntryData<T>(this).setText(v.getMin(), vcf)
+//					).addCustomButtonAction("MinValue->",(T)cavai);
+//				}
+//				
+//				if(v.getMax()!=null){
+//					addEntry(
+//						new DialogListEntryData<T>(this).setText(v.getMax(), vcf)
+//					).addCustomButtonAction("MaxValue->",(T)cavai);
+//				}
+//			}else
+//			if(vcf instanceof IntLongVarField){
+//				IntLongVarField v = (IntLongVarField)vcf;
+//				
+//				if(v.getMin()!=null){
+//					addEntry(
+//						new DialogListEntryData<T>(this).setText(v.getMin(), vcf)
+//					).addCustomButtonAction("MinValue->",(T)cavai);
+//				}
+//				
+//				if(v.getMax()!=null){
+//					addEntry(
+//						new DialogListEntryData<T>(this).setText(v.getMax(), vcf)
+//					).addCustomButtonAction("MaxValue->",(T)cavai);
+//				}
+//			}
 			
 //			addEntry(
 //					new DialogListEntryData<T>(this).setText(vcf.getValueAsString(3), vcf)

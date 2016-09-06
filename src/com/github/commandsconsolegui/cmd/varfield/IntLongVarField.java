@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.cmd.varfield;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 
 /**
@@ -41,15 +42,15 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class IntLongVarField extends VarCmdFieldAbs<Long,IntLongVarField>{
+public class IntLongVarField extends NumberVarFieldAbs<Long,IntLongVarField>{
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 //	private static String	strCodePrefix = "ilv";
 //	private static ArrayList<IntLongVarField> ailvList = new ArrayList<IntLongVarField>();
 	
-	private Long lValue;
-	private Long	lMin;
-	private Long	lMax;
+//	private Long lValue;
+//	private Long	lMin;
+//	private Long	lMax;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
@@ -58,7 +59,7 @@ public class IntLongVarField extends VarCmdFieldAbs<Long,IntLongVarField>{
 	}
 	
 	public IntLongVarField(IReflexFillCfg rfcfgOwnerUseThis, IntLongVarField ilv) {
-		this(rfcfgOwnerUseThis, ilv.lValue,null);
+		this(rfcfgOwnerUseThis, ilv.getValue(),null);
 	}
 	public IntLongVarField(IReflexFillCfg rfcfgOwnerUseThis, Integer iInitialValue, String strHelp) {
 		this(rfcfgOwnerUseThis, iInitialValue==null?null:iInitialValue.longValue(), strHelp);
@@ -86,28 +87,29 @@ public class IntLongVarField extends VarCmdFieldAbs<Long,IntLongVarField>{
 	@Override
 //	public IntLongVarField setObjectValue(CommandsDelegator.CompositeControl cc, Object objValue) {
 	public IntLongVarField setObjectRawValue(Object objValue) {
+		if(objValue == null){
+			setValue( null );
+		}else
+		if(objValue instanceof Integer){
+			setValue( ((Integer)objValue).longValue() );
+		}else
 		if(objValue instanceof Long){
-			lValue = ((Long)objValue);
+			setValue( ((Long)objValue) );
 		}else
 		if(objValue instanceof IntLongVarField){
-			lValue = ((IntLongVarField)objValue).lValue;
+			setValue( ((IntLongVarField)objValue).getValue() );
 		}else
-		if(objValue instanceof FloatDoubleVarField){
-			lValue = (long)Math.round(((FloatDoubleVarField)objValue).getFloat());
-		}else
+//		if(objValue instanceof FloatDoubleVarField){
+//			setValue( (long)Math.round(((FloatDoubleVarField)objValue).getFloat()) );
+//		}else
 		if(objValue instanceof String){
-			lValue = Long.parseLong((String)objValue);
-		}else
-		{
-			if(objValue!=null){
-				lValue = ((Integer)objValue).longValue(); //default is expected type
-			}else{
-				lValue = null;
-			}
+			setValue( Long.parseLong((String)objValue) );
+		}else{
+			throw new PrerequisitesNotMetException("unsupported class type", objValue.getClass());
 		}
 		
-		if(lMin!=null && (lValue==null || lValue<lMin))lValue=lMin;
-		if(lMax!=null && (lValue==null || lValue>lMax))lValue=lMax;
+//		if(lMin!=null && (lValue==null || lValue<lMin))lValue=lMin;
+//		if(lMax!=null && (lValue==null || lValue>lMax))lValue=lMax;
 		
 //		super.setObjectValue(cc,objValue);
 		super.setObjectRawValue(objValue);
@@ -115,25 +117,25 @@ public class IntLongVarField extends VarCmdFieldAbs<Long,IntLongVarField>{
 		return this;
 	}
 	
-	public IntLongVarField setMinMax(Long lMin,Long lMax) {
-		setMin(lMin);
-		setMax(lMax);
-		return this;
-	}
-	public IntLongVarField setMin(Long lMin) {
-		this.lMin=lMin;
-		return this;
-	}
-	public IntLongVarField setMax(Long lMax) {
-		this.lMax=lMax;
-		return this;
-	}
-	public Long getMin() {
-		return lMin;
-	}
-	public Long getMax() {
-		return lMax;
-	}
+//	public IntLongVarField setMinMax(Long lMin,Long lMax) {
+//		setMin(lMin);
+//		setMax(lMax);
+//		return this;
+//	}
+//	public IntLongVarField setMin(Long lMin) {
+//		this.lMin=lMin;
+//		return this;
+//	}
+//	public IntLongVarField setMax(Long lMax) {
+//		this.lMax=lMax;
+//		return this;
+//	}
+//	public Long getMin() {
+//		return lMin;
+//	}
+//	public Long getMax() {
+//		return lMax;
+//	}
 	
 //	@Override
 //	public String getHelp(){
@@ -146,18 +148,18 @@ public class IntLongVarField extends VarCmdFieldAbs<Long,IntLongVarField>{
 //	}
 
 	public Integer getInt() {
-		if(lValue==null)return null;
-		return lValue.intValue();
+		if(getValue()==null)return null;
+		return getValue().intValue();
 	}
 	public int intValue() {
-		return lValue.intValue();
+		return getValue().intValue();
 	}
 	
 	public Long getLong() {
-		return lValue;
+		return getValue();
 	}
 	public long longValue(){
-		return lValue.longValue();
+		return getValue().longValue();
 	}
 	
 //	public static ArrayList<IntLongVarField> getListCopy(){
