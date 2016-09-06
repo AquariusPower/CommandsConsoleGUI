@@ -608,9 +608,11 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		try {
 			return this.getClass().newInstance().configure(icfgOfInstance).copyCurrentValuesFrom(this);
 		} catch (InstantiationException | IllegalAccessException e) {
-			NullPointerException npe = new NullPointerException("new instance configuration failed");
-			npe.initCause(e);
-			throw npe;
+			throw new PrerequisitesNotMetException("new instance configuration failed", this)
+				.initCauseAndReturnSelf(e);
+//			NullPointerException npe = new NullPointerException("new instance configuration failed");
+//			npe.initCause(e);
+//			throw npe;
 		}
 	}
 

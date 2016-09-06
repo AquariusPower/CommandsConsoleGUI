@@ -56,6 +56,8 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.simsilica.lemur.Button;
+import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GridPanel;
 import com.simsilica.lemur.Label;
@@ -75,6 +77,8 @@ import com.simsilica.lemur.list.SelectionModel;
 * 
 * More info at {@link BaseDialogStateAbs}
 *	TODO implement docking dialogs, a small icon will be created at app window edges
+* 
+* TODO migrate from {@link BaseDialogStateAbs} to here, everything that is not usable at {@link ConsoleLemurStateI}
 * 
 * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 *
@@ -106,6 +110,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //	private TimedDelayVarField tdEffectListEachEntry = new TimedDelayVarField(this, 0.05f, "");
 //	private float fEffectListEntryDelay=0.05f;
 	private FloatDoubleVarField fdvEffectListEntryDelay = new FloatDoubleVarField(this, 0.15f, "");
+	
+//	public abstract T getCmdDummy();
 	
 	@Override
 	public Container getContainerMain(){
@@ -1041,4 +1047,14 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		MiscLemurHelpersStateI.i().lineWrapDisableForListboxEntries(lstbx);
 	}
 	
+	public T getCmdDummy() {
+		return (T) MiscLemurHelpersStateI.i().getCmdDummy();
+	}
+
+	protected abstract String getDefaultValueToUserModify();
+
+	protected void applyDefaultValueToUserModify() {
+		setInputText(getUserEnterCustomValueToken()+getDefaultValueToUserModify());
+	}
+
 }

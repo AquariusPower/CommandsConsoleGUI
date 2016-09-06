@@ -56,6 +56,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
+import com.simsilica.lemur.Command;
 import com.simsilica.lemur.DocumentModel;
 import com.simsilica.lemur.GridPanel;
 import com.simsilica.lemur.ListBox;
@@ -925,5 +926,18 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 	}
 	public void lineWrapDisableFor(Panel pnl){
 		MiscJmeI.i().retrieveBitmapTextFor(pnl).setLineWrapMode(LineWrapMode.NoWrap);
+	}
+
+	/**
+	 * to let the use of buttons as labels
+	 */
+	public static class CmdDummy implements Command<Button>{
+		@Override
+		public void execute(Button source) {
+		}
+	}
+	private final CmdDummy cmdDummy = new CmdDummy();
+	public CmdDummy getCmdDummy() {
+		return cmdDummy;
 	}
 }

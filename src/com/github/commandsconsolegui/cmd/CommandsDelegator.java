@@ -677,11 +677,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		if(icc==null)throw new NullPointerException("invalid null commands listener.");
 		
 		if(aConsoleCommandListenerList.contains(icc)){
-			NullPointerException ex = new NullPointerException("listener already added: "+icc.getClass().getName());
-			Throwable tw = new Throwable("Listener added at:");
-			tw.setStackTrace(hmDebugListenerAddedStack.get(icc));
-			ex.initCause(tw);
-			throw ex;
+			throw new PrerequisitesNotMetException("listener already added: "+icc.getClass().getName())
+				.initCauseAndReturnSelf("Listener added at:",hmDebugListenerAddedStack.get(icc));
+//			NullPointerException ex = new NullPointerException("listener already added: "+icc.getClass().getName());
+//			Throwable tw = new Throwable("Listener added at:");
+//			tw.setStackTrace(hmDebugListenerAddedStack.get(icc));
+//			ex.initCause(tw);
+//			throw ex;
 		}
 		
 		hmDebugListenerAddedStack.put(icc,Thread.currentThread().getStackTrace());
@@ -2584,16 +2586,22 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		str+=" ";
 		str+=strVarId;
 		str+=" ";
+		
+		Object objVal = vivod.getObjectValue();
 		if(vivod!=null){
-			str+="\""+vivod.getObjectValue()+"\"";
+			if(objVal==null){
+				str+=null;
+			}else{
+				str+="\""+vivod.getObjectValue()+"\"";
+			}
 			str+=" ";
 		}
 		
 		// comments
 		str+="#";
 		// var type
-		if(vivod!=null){
-			str+=vivod.getObjectValue().getClass().getSimpleName();
+		if(vivod!=null && objVal!=null){
+			str+=objVal.getClass().getSimpleName();
 		}else{
 			str+="(ValueNotSet)";
 		}

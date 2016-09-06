@@ -47,7 +47,7 @@ public class VarIdValueOwnerData {
 //	}
 	
 	private String strId;
-	private Object objValue;
+	private Object objValue = null;
 //	private IVarIdValueOwner owner;
 	private VarCmdFieldAbs owner;
 	private IReflexFillCfg rfcfgClassHoldingTheOwner;

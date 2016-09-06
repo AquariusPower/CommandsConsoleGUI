@@ -64,7 +64,7 @@ public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 //		super(rfcfgOwnerUseThis!=null); //only fields allowed
 		super(rfcfgOwnerUseThis);
 //		this.setOwner(rfcfgOwnerUseThis);
-		this.strValue=strInitialValue;
+		setObjectRawValue(strInitialValue);
 		this.setHelp(strHelp);
 //		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
 	}
@@ -81,10 +81,13 @@ public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 		if(objValue instanceof StringVarField){
 			strValue = ((StringVarField)objValue).strValue;
 		}else
-//		if(objValue instanceof String){
-//		}else
-		{
+		if(objValue instanceof String){ 
+			strValue = (String)objValue; //expected type
+		}else
+		if(objValue!=null){ 
 			strValue = ""+objValue; //TODO too much permissive?
+		}else{
+			strValue=null;
 		}
 		
 //		super.setObjectValue(ccCD,objValue);

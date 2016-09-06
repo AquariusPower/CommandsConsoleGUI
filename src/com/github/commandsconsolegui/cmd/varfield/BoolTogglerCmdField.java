@@ -53,7 +53,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 	
 	private boolean bPrevious;
-	private boolean bCurrent;
+	private boolean bCurrent = false;
 
 //	private String	strReflexFillCfgCodePrefixVariant;
 	private boolean bDoCallOnChange = true;
@@ -255,6 +255,8 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 	
 	@Override
 	public BoolTogglerCmdField setObjectRawValue(Object objValue) {
+		if(objValue==null)throw new PrerequisitesNotMetException(BoolTogglerCmdField.class.getSimpleName()+" can't be set to null!");
+		
 		if(objValue instanceof BoolTogglerCmdField){
 			this.bCurrent = ((BoolTogglerCmdField)objValue).b();
 		}else
@@ -270,7 +272,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 			}
 		}else
 		{
-			this.bCurrent = (Boolean)objValue;
+			this.bCurrent = (Boolean)objValue; //default is expected type
 		}
 //		if(bConstructed)
 		super.setObjectRawValue(this.bCurrent);

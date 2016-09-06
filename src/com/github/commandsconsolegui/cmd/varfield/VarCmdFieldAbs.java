@@ -64,8 +64,8 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	private VarIdValueOwnerData	vivo;
 	private String strHelp=null;
 	private CommandData	cmdd;
-	private O	objRawValueLazy;
-	private O	objRawValueDefault;
+	private O	objRawValueLazy = null;
+	private O	objRawValueDefault = null;
 	private boolean	bLazyValueWasSet;
 	private VarId	idt;
 	

@@ -497,6 +497,11 @@ public class MiscI {
 		}
 		return strClassTree;
 	}
+	/**
+	 * TODO is it: obj.getClass().getDeclaredClasses(); ?
+	 * @param obj
+	 * @return
+	 */
 	public ArrayList<Class<?>> getClassTreeFor(Object obj){
 		ArrayList<Class<?>> ac = new ArrayList<Class<?>>();
 		

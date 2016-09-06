@@ -45,9 +45,9 @@ public class FloatDoubleVarField extends VarCmdFieldAbs<Double,FloatDoubleVarFie
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 //	private static String	strCodePrefix = "fdv";
 //	private static ArrayList<FloatDoubleVarField> afdvList = new ArrayList<FloatDoubleVarField>();
-	private Double dValue;
-	private Double dMin;
-	private Double dMax;
+	private Double dValue = null;
+	private Double dMin = null;
+	private Double dMax = null;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
@@ -91,15 +91,22 @@ public class FloatDoubleVarField extends VarCmdFieldAbs<Double,FloatDoubleVarFie
 		if(objValue instanceof FloatDoubleVarField){
 			dValue = ((FloatDoubleVarField)objValue).dValue;
 		}else
+		if(objValue instanceof IntLongVarField){
+			dValue = ((IntLongVarField)objValue).getLong().doubleValue();
+		}else
 		if(objValue instanceof String){
 			dValue = Double.parseDouble((String)objValue);
 		}else
 		{
-			dValue = ((Float)objValue).doubleValue();
+			if(objValue!=null){
+				dValue = ((Float)objValue).doubleValue();
+			}else{
+				dValue = null;
+			}
 		}
 		
-		if(dMin!=null && dValue<dMin)dValue=dMin;
-		if(dMax!=null && dValue>dMax)dValue=dMax;
+		if(dMin!=null && (dValue==null || dValue<dMin))dValue=dMin;
+		if(dMax!=null && (dValue==null || dValue>dMax))dValue=dMax;
 		
 //		super.setObjectValue(ccCD,objValue);
 		super.setObjectRawValue(objValue);
@@ -183,14 +190,24 @@ public class FloatDoubleVarField extends VarCmdFieldAbs<Double,FloatDoubleVarFie
 		return "Float";
 	}
 
+	public FloatDoubleVarField setMinMax(Double dMin,Double dMax) {
+		setMin(dMin);
+		setMax(dMax);
+		return this;
+	}
 	public FloatDoubleVarField setMin(Double dMin) {
 		this.dMin=dMin;
 		return this;
 	}
-
 	public FloatDoubleVarField setMax(Double dMax) {
 		this.dMax=dMax;
 		return this;
+	}
+	public Double getMin() {
+		return dMin;
+	}
+	public Double getMax() {
+		return dMax;
 	}
 	
 	@Override
@@ -206,4 +223,5 @@ public class FloatDoubleVarField extends VarCmdFieldAbs<Double,FloatDoubleVarFie
 	public String getCodePrefixDefault() {
 		return strCodePrefixDefault;
 	}
+
 }

@@ -48,6 +48,8 @@ public class IntLongVarField extends VarCmdFieldAbs<Long,IntLongVarField>{
 //	private static ArrayList<IntLongVarField> ailvList = new ArrayList<IntLongVarField>();
 	
 	private Long lValue;
+	private Long	lMin;
+	private Long	lMax;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
@@ -70,7 +72,7 @@ public class IntLongVarField extends VarCmdFieldAbs<Long,IntLongVarField>{
 //		super(rfcfgOwnerUseThis!=null); //only fields allowed
 		super(rfcfgOwnerUseThis);
 //		this.setOwner(rfcfgOwnerUseThis);
-		this.lValue=lInitialValue;
+		setObjectRawValue(lInitialValue);
 		setHelp(strHelp);
 //		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
 	}
@@ -90,17 +92,47 @@ public class IntLongVarField extends VarCmdFieldAbs<Long,IntLongVarField>{
 		if(objValue instanceof IntLongVarField){
 			lValue = ((IntLongVarField)objValue).lValue;
 		}else
+		if(objValue instanceof FloatDoubleVarField){
+			lValue = (long)Math.round(((FloatDoubleVarField)objValue).getFloat());
+		}else
 		if(objValue instanceof String){
 			lValue = Long.parseLong((String)objValue);
 		}else
 		{
-			lValue = ((Integer)objValue).longValue();
+			if(objValue!=null){
+				lValue = ((Integer)objValue).longValue(); //default is expected type
+			}else{
+				lValue = null;
+			}
 		}
+		
+		if(lMin!=null && (lValue==null || lValue<lMin))lValue=lMin;
+		if(lMax!=null && (lValue==null || lValue>lMax))lValue=lMax;
 		
 //		super.setObjectValue(cc,objValue);
 		super.setObjectRawValue(objValue);
 		
 		return this;
+	}
+	
+	public IntLongVarField setMinMax(Long lMin,Long lMax) {
+		setMin(lMin);
+		setMax(lMax);
+		return this;
+	}
+	public IntLongVarField setMin(Long lMin) {
+		this.lMin=lMin;
+		return this;
+	}
+	public IntLongVarField setMax(Long lMax) {
+		this.lMax=lMax;
+		return this;
+	}
+	public Long getMin() {
+		return lMin;
+	}
+	public Long getMax() {
+		return lMax;
 	}
 	
 //	@Override

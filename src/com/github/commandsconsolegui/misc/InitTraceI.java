@@ -30,6 +30,8 @@ package com.github.commandsconsolegui.misc;
 import java.util.HashMap;
 
 /**
+ * see {@link CheckInitAndCleanupI}
+ * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
 @Deprecated
@@ -67,12 +69,14 @@ public class InitTraceI {
 				throw new NullPointerException("validating is not null, and there is no debug stack: "+
 					strObjValiInfo);
 			}else{
-				NullPointerException npe = new NullPointerException(
-					"already initialized, cannot be double initialized: "+strObjValiInfo);
-				Throwable trw = new Throwable("already initialized at");
-				trw.setStackTrace(icc.asteInitDebug);
-				npe.initCause(trw);
-				throw npe;
+				throw new PrerequisitesNotMetException("already initialized, cannot be double initialized: ", strObjValiInfo)
+					.initCauseAndReturnSelf("already initialized at", icc.asteInitDebug);
+//				NullPointerException npe = new NullPointerException(
+//					"already initialized, cannot be double initialized: "+strObjValiInfo);
+//				Throwable trw = new Throwable("already initialized at");
+//				trw.setStackTrace(icc.asteInitDebug);
+//				npe.initCause(trw);
+//				throw npe;
 			}
 		}
 		

@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.cmd.varfield;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 
 /**
@@ -104,7 +105,7 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 //		super(rfcfgOwnerUseThis!=null); //only fields allowed
 		super(rfcfgOwnerUseThis); //only fields allowed
 //		this.setOwner(rfcfgOwnerUseThis);
-		setDelayLimitSeconds(fDelay);
+		setObjectRawValue(fDelay);
 		setHelp(strHelp);
 	}
 	
@@ -289,14 +290,22 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 //	}
 	@Override
 	public TimedDelayVarField setObjectRawValue(Object objValue) {
+		if(objValue==null)throw new PrerequisitesNotMetException(TimedDelayVarField.class.getSimpleName()+" can't be set to null!");
+		
 		if(objValue instanceof Double){
 			setDelayLimitSeconds( ((Double)objValue).floatValue() );
+		}else
+		if(objValue instanceof FloatDoubleVarField){
+			setDelayLimitSeconds( ((FloatDoubleVarField)objValue).getFloat() );
+		}else
+		if(objValue instanceof IntLongVarField){
+			setDelayLimitSeconds( ((IntLongVarField)objValue).getInt().floatValue() );
 		}else
 		if(objValue instanceof String){
 			setDelayLimitSeconds( Float.parseFloat((String)objValue) );
 		}else
 		{
-			setDelayLimitSeconds((Float)objValue);
+			setDelayLimitSeconds((Float)objValue); //default is expected type
 		}
 		
 //		if(super.getConsoleVarLink()!=null)

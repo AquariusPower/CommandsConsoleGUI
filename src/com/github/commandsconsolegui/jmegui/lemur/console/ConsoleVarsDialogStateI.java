@@ -30,22 +30,17 @@ package com.github.commandsconsolegui.jmegui.lemur.console;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
-import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
-import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
-import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
-import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.AudioUII;
-import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
+import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceDialogState;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.MaintenanceListDialogState;
-import com.github.commandsconsolegui.misc.VarId;
-import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.VarId;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 
@@ -55,7 +50,7 @@ import com.simsilica.lemur.Command;
 public class ConsoleVarsDialogStateI<T extends Command<Button>> extends MaintenanceListDialogState<T> {
 	private static ConsoleVarsDialogStateI<Command<Button>>	instance=new ConsoleVarsDialogStateI<Command<Button>>();
 	public static ConsoleVarsDialogStateI<Command<Button>> i(){return instance;}
-	
+
 	private static class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceDialogState<T>{
 		private static class CfgParm extends ChoiceDialogState.CfgParm{
 			public CfgParm(Float fDialogWidthPercentOfAppWindow,
@@ -109,16 +104,36 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			return str;
 		}
 		
+		private class CmdApplyValueAtInput implements Command<Button>{
+			@Override
+			public void execute(Button source) {
+				setInputTextAsUserTypedValue(getDledFrom(source).getText());
+			}
+		}
+		CmdApplyValueAtInput cavai = new CmdApplyValueAtInput();
+		
 		@Override
 		protected void updateList() {
 			clearList();
 			
-			addEntry(new DialogListEntryData<T>(this).setText("(UniqueId)"+vcf.getUniqueVarId(), vcf));
-			addEntry(new DialogListEntryData<T>(this).setText("(SimpleId)"+vcf.getSimpleCmdId(), vcf));
-			addEntry(new DialogListEntryData<T>(this).setText("(DefaultValueRaw)"+vcf.getRawValueDefault(), vcf));
-			addEntry(new DialogListEntryData<T>(this).setText("(ValueRaw)"+vcf.getRawValue(), vcf));
-			addEntry(new DialogListEntryData<T>(this).setText("(Value)"+vcf.getValueAsString(3), vcf));
-			addEntry(new DialogListEntryData<T>(this).setText("(Help)"+vcf.getHelp(), vcf));
+			addEntry(new DialogListEntryData<T>(this).setText(vcf.getUniqueVarId(), vcf))
+				.addCustomButtonAction("UniqueId",getCmdDummy());
+			
+			addEntry(new DialogListEntryData<T>(this).setText(vcf.getSimpleCmdId(), vcf))
+				.addCustomButtonAction("SimpleId",getCmdDummy());
+				
+			addEntry(new DialogListEntryData<T>(this).setText(vcf.getHelp(), vcf))
+				.addCustomButtonAction("Help",getCmdDummy());
+			
+			addEntry(new DialogListEntryData<T>(this).setText(""+vcf.getRawValueDefault(), vcf))
+				.addCustomButtonAction("DefaultValueRaw->",(T) cavai);
+			
+			addEntry(new DialogListEntryData<T>(this).setText(""+vcf.getRawValue(), vcf))
+				.addCustomButtonAction("ValueRaw->",(T) cavai);
+			
+			addEntry(new DialogListEntryData<T>(this).setText(vcf.getValueAsString(3), vcf))
+				.addCustomButtonAction("Value->",(T) cavai);
+			
 			
 			super.updateList();
 		}

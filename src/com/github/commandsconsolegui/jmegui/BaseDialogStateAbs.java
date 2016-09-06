@@ -35,7 +35,6 @@ import java.util.Comparator;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
-import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
@@ -262,6 +261,14 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	protected abstract boolean initGUI();
 	protected abstract boolean initKeyMappings();
 	public abstract String getInputText();
+	
+	protected R setInputTextAsUserTypedValue(String str){
+		if(!isInputToUserEnterCustomValueMode())throw new PrerequisitesNotMetException("not user typing value mode", this);
+		
+		setInputText(getUserEnterCustomValueToken()+str);
+		
+		return getThis();
+	}
 	
 	/**
 	 * 
@@ -635,29 +642,12 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		
 	}
 	
-	
-	/**
-	 * Main/default action to be performed on the selected list entry.
-	 * Usually when pressing Enter or double click.
-	 * 
-	 * @param dataSelected
-	 */
-	protected void actionCustomAtEntry(DialogListEntryData<T> dataSelected){
-		AudioUII.i().playOnUserAction(AudioUII.EAudio.SubmitSelection);
-	}
-
 	private void updateAllParts(){
 		updateTextInfo();
 		
 		updateList();
 		
 		updateInputField();
-	}
-	
-	protected abstract String getDefaultValueToUserModify();
-	
-	protected void applyDefaultValueToUserModify() {
-		setInputText(getUserEnterCustomValueToken()+getDefaultValueToUserModify());
 	}
 	
 	public ArrayList<DialogListEntryData<T>> getDataSelectionListCopy() {
@@ -777,9 +767,10 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		}
 	}
 	
-	protected void addEntry(DialogListEntryData<T> dled) {
+	protected DialogListEntryData<T> addEntry(DialogListEntryData<T> dled) {
 		if(dled==null)throw new PrerequisitesNotMetException("cant be null!");
 		adleCompleteEntriesList.add(dled);
+		return dled;
 	}
 
 	protected void removeEntry(DialogListEntryData<T> dled){
@@ -894,5 +885,15 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 //	public void setTitle(String strTitle) {
 //		this.strTitle = strTitle;
 //	}
+	
+	/**
+	 * Main/default action to be performed on the selected list entry.
+	 * Usually when pressing Enter or double click.
+	 * 
+	 * @param dataSelected
+	 */
+	protected void actionCustomAtEntry(DialogListEntryData<T> dataSelected){
+		AudioUII.i().playOnUserAction(AudioUII.EAudio.SubmitSelection);
+	}
 	
 }

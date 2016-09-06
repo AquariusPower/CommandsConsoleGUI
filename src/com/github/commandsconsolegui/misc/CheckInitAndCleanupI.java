@@ -120,11 +120,13 @@ public class CheckInitAndCleanupI {
 	}
 	
 	private NullPointerException prepareNPEWithCause(StackTraceElement[] ste, Object obj){
-		NullPointerException npe = new NullPointerException(
-				"already initialized, cannot be double initialized: "+objInfo(obj));
-		Throwable trw = new Throwable("already initialized at");
-		trw.setStackTrace(ste);
-		npe.initCause(trw);
-		return npe;
+		throw new PrerequisitesNotMetException("already initialized, cannot be double initialized: ", objInfo(obj))
+			.initCauseAndReturnSelf("already initialized at",ste);
+//		NullPointerException npe = new NullPointerException(
+//				"already initialized, cannot be double initialized: "+objInfo(obj));
+//		Throwable trw = new Throwable("already initialized at");
+//		trw.setStackTrace(ste);
+//		npe.initCause(trw);
+//		return npe;
 	}
 }

@@ -79,8 +79,6 @@ import com.simsilica.lemur.style.Styles;
 /**
  * Here is the specific code that links the JME console state with Lemur GUI.
  * 
- * TODO complete specific code migration from ConsoleGuiStateAbs
- * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
@@ -1093,11 +1091,6 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	}
 
 	@Override
-	protected void actionCustomAtEntry(DialogListEntryData<T> dataSelected) {
-		super.actionCustomAtEntry(dataSelected);
-	}
-
-	@Override
 	public <BFR> BFR bugFix(Class<BFR> clReturnType, BoolTogglerCmdField btgBugFixId,	Object... aobjCustomParams) {
 		return null;
 	}
@@ -1141,8 +1134,4 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		return getThis();
 	}
 
-	@Override
-	protected String getDefaultValueToUserModify() {
-		return "(no default value)";
-	}
 }

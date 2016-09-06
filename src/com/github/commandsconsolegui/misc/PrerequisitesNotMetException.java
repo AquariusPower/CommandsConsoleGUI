@@ -73,7 +73,7 @@ public class PrerequisitesNotMetException extends NullPointerException {
 		return bRequestExit;
 	}
 	
-	public static void assertNotAlreadySet(String strDescWhat, Object objCurrent, Object objNew, Object... aobjMoreObjectsForDebugInfo){
+		public static void assertNotAlreadySet(String strDescWhat, Object objCurrent, Object objNew, Object... aobjMoreObjectsForDebugInfo){
 		ArrayList<Object> aobjAll = new ArrayList<Object>();
 		aobjAll.add(objCurrent);
 		aobjAll.add(objNew);
@@ -81,4 +81,20 @@ public class PrerequisitesNotMetException extends NullPointerException {
 		
 		if(objCurrent!=null)throw new PrerequisitesNotMetException(strDescWhat+": already set", aobjAll.toArray());
 	}
+	
+	public PrerequisitesNotMetException initCauseAndReturnSelf(String strCauseMessage, StackTraceElement[] asteCauseStack) {
+		Throwable tw = new Throwable(strCauseMessage);
+		tw.setStackTrace(asteCauseStack);
+		return initCauseAndReturnSelf(tw);
+	}
+	public PrerequisitesNotMetException initCauseAndReturnSelf(Throwable cause) {
+		super.initCause(cause);
+		return this;
+	}
+	
+//	@Override
+//	public synchronized Throwable initCause(Throwable cause) {
+//		// TODO Auto-generated method stub
+//		return super.initCause(cause);
+//	}
 }
