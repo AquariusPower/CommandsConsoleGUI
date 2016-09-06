@@ -34,12 +34,10 @@ import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
-import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
-import com.simsilica.lemur.Label;
 
 /**
  * This is like the inventory list.
@@ -125,15 +123,15 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 	public void applyResultsFromModalDialog() {
 		BaseDialogStateAbs<T,?> diagModal = getChildDiagModalInfoCurrent().getDiagModal();
 		T cmdRequestedAtThisDiag = getChildDiagModalInfoCurrent().getCmdAtParent();
-		ArrayList<DialogListEntryData<T>> adataToApplyResultsList = getChildDiagModalInfoCurrent().getParentReferencedDledListCopy();
+		ArrayList<DialogListEntryData<T>> adledToApplyResultsList = getChildDiagModalInfoCurrent().getParentReferencedDledListCopy();
 		
 		boolean bChangesMade = false;
-		for(DialogListEntryData<T> dataAtModal:diagModal.getDataSelectionListCopy()){
+		for(DialogListEntryData<T> dledAtModal:diagModal.getDataSelectionListCopy()){
 				if(cmdRequestedAtThisDiag.equals(cmdDel)){
 					if(diagModal instanceof QuestionDialogState){
 						QuestionDialogState<T> qds = (QuestionDialogState<T>)diagModal;
-						if(qds.isYes(dataAtModal)){
-							bChangesMade = deleteEntry(adataToApplyResultsList);
+						if(qds.isYes(dledAtModal)){
+							bChangesMade = deleteEntry(adledToApplyResultsList);
 							
 							/**
 							 * !!! ATTENTION !!!
@@ -141,7 +139,7 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 							if(bChangesMade)AudioUII.i().play(EAudio.ReturnChosen);
 							 */
 						}else
-						if(qds.isNo(dataAtModal)){
+						if(qds.isNo(dledAtModal)){
 //						if(dataAtModal.equals(qds.dataNo)){
 							AudioUII.i().play(EAudio.ReturnNothing);
 						}
@@ -150,7 +148,7 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 					}
 				}else
 				if(cmdRequestedAtThisDiag.equals(cmdCfg)){
-					bChangesMade = modifyEntry(diagModal, dataAtModal, adataToApplyResultsList);
+					bChangesMade = modifyEntry(diagModal, dledAtModal, adledToApplyResultsList);
 					if(bChangesMade)AudioUII.i().play(EAudio.ReturnChosen);
 				}
 		}
@@ -165,23 +163,23 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 	/**
 	 * 
 	 * @param diagModal mainly to give more options when overriding this method
-	 * @param dataAtModal
-	 * @param adataToApplyResultsList
+	 * @param dledAtModal
+	 * @param adledToApplyResultsList
 	 * @return
 	 */
-	protected boolean modifyEntry(BaseDialogStateAbs<T,?> diagModal, DialogListEntryData<T> dataAtModal, ArrayList<DialogListEntryData<T>> adataToApplyResultsList) {
+	protected boolean modifyEntry(BaseDialogStateAbs<T,?> diagModal, DialogListEntryData<T> dledAtModal, ArrayList<DialogListEntryData<T>> adledToApplyResultsList) {
 		boolean bChangesMade=false;
-		for(DialogListEntryData<T> dataToCfg:adataToApplyResultsList){
-			dataToCfg.updateTextTo(dataAtModal.getText());
+		for(DialogListEntryData<T> dledToCfg:adledToApplyResultsList){
+			dledToCfg.updateTextTo(dledAtModal.getTextValue());
 			bChangesMade=true;
 		}
 		return bChangesMade;
 	}
 
-	protected boolean deleteEntry(ArrayList<DialogListEntryData<T>> adataToApplyResultsList) {
+	protected boolean deleteEntry(ArrayList<DialogListEntryData<T>> adledToApplyResultsList) {
 		boolean bChangesMade = false;
-		for(DialogListEntryData<T> dataToApplyResults:adataToApplyResultsList){
-			removeEntry(dataToApplyResults);
+		for(DialogListEntryData<T> dledToApplyResults:adledToApplyResultsList){
+			removeEntry(dledToApplyResults);
 			bChangesMade=true;
 		}
 		

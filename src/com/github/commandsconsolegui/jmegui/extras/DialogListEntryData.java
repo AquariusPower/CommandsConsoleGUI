@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import javax.print.attribute.standard.Chromaticity;
+
 import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -108,33 +110,64 @@ public class DialogListEntryData<T> implements Savable{
 //		this.iKey = iKey;
 //		return this;
 //	}
-	public String getText() {
+	
+//	private char chQuotesL='"';
+//	private char chQuotesR='"';
+	private boolean bAddVisibleQuotes=false;
+	
+	public boolean isAddVisibleQuotes(){
+		return bAddVisibleQuotes;
+	}
+	
+	public DialogListEntryData<T> setAddVisibleQuotes(boolean b){
+		this.bAddVisibleQuotes=b;
+		return this;
+	}
+	
+	public String getTextValue() {
 		return strText;
 	}
+	
+	/**
+	 * if text is null will be set to "null"
+	 * if empty or blank, will be surrounded by quotes,
+	 * TODO lemur seems to only accept with some actual text?
+	 * 
+	 * @return
+	 */
+	public String getVisibleText() {
+		if(strText==null){
+			return ""+null;
+		}
+		
+		if(strText.trim().isEmpty() || isAddVisibleQuotes()){
+			return '"'+strText+'"';
+		}
+		
+		return strText;
+	}
+	
 	public Object getUserObj(){
 		return this.objUser;
 	}
 	
 	/**
-	 * if text is null, empty or blank, will be surrounded by {},
-	 * TODO lemur seems to only accept with some actual text.
-	 * 
 	 * @param strText 
 	 * @return
 	 */
-	public DialogListEntryData<T> updateTextTo(String strText) {
-		if(strText==null){
-			strText="{null}";
+	public DialogListEntryData<T> updateTextTo(Object objText) {
+		if(objText == null){
+			this.strText=null;
 		}else
-		if(strText.trim().isEmpty()){
-			strText="{"+strText+"}";
-//			throw new PrerequisitesNotMetException("text cant be null, empty or blank", this, strText);
+		if(objText instanceof String){
+			this.strText=(String)objText;
+		}else{
+			this.strText=objText.toString();
 		}
-		
-		this.strText=strText;
 		
 		return this;
 	}
+	
 	
 	/**
 	 * 
@@ -142,8 +175,8 @@ public class DialogListEntryData<T> implements Savable{
 	 * @param objUser the linked object represented by the text
 	 * @return
 	 */
-	public DialogListEntryData<T> setText(String strText, Object objUser) {
-		updateTextTo(strText);
+	public DialogListEntryData<T> setText(Object objText, Object objUser) {
+		updateTextTo(objText);
 //		this.strText = strText;
 		this.objUser=objUser;
 //		this.objRef=objReference;

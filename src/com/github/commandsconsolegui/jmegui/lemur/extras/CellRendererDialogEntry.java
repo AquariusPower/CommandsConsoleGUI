@@ -208,7 +208,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			btnTree.setUserData(Cell.class.getName(), this);
 			btnTree.setUserData(EUserData.colorFgBkp.toString(), btnTree.getColor());
 			
-			btnText = createButton("Text", this.dled.getText(), cntrBase, Position.Center);
+			btnText = createButton("Text", this.dled.getVisibleText(), cntrBase, Position.Center);
 			
 			cntrCustomButtons = new Container(new SpringGridLayout(), assignedCellRenderer.strStyle);
 			cntrBase.addChild(cntrCustomButtons,Position.East);
@@ -249,7 +249,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			updateTreeButton();
 			
 			// entry text
-			btnText.setText(dled.getText());
+			btnText.setText(dled.getVisibleText());
 			
 			// custom buttons
 			boolean bButtonsChanged = false;

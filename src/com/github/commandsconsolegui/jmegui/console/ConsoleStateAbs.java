@@ -233,7 +233,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	private Double	dMouseMaxScrollBy = null; //max scroll if set
 //	private boolean bShowLineIndex = true;
 //	private String strStyle = BaseStyles.GLASS;
-	private String strStyle = STYLE_CONSOLE;
+//	private String strStyle = STYLE_CONSOLE;
 //	private String strStyle = Styles.ROOT_STYLE;
 	private String	strInputTextPrevious = "";
 	private AnalogListener	alConsoleScroll;
@@ -429,6 +429,10 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		return storeCfgAndReturnSelf(icfg);
 	}
 	
+	/**
+	 * TODO rename to addKnownStyle()
+	 * @param strStyleId
+	 */
 	protected void addStyle(String strStyleId){
 		if(!astrStyleList.contains(strStyleId)){
 			astrStyleList.add(strStyleId);
@@ -437,6 +441,8 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	
 	@Override
 	protected boolean initGUI() {
+		if(!super.initGUI())return false;
+		
 //		initializePre();
 		addStyle(STYLE_CONSOLE);
 		
@@ -795,7 +801,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 //	}	
 	
 	private float fontWidth(String strChars){
-		return fontWidth(strChars, strStyle, true);
+		return fontWidth(strChars, getStyle(), true);
 	}
 	
 	private boolean isHintActive(){
@@ -1709,9 +1715,9 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	private boolean cmdStyleApply(String strStyleNew) {
 		boolean bOk = styleCheck(strStyleNew);
 		if(bOk){
-			strStyle=strStyleNew;
+			setStyle(strStyleNew);
 			
-			cd().varSet(CMD_CONSOLE_STYLE, strStyle, true);
+			cd().varSet(CMD_CONSOLE_STYLE, getStyle(), true);
 			
 //			updateFontStuff();
 			
@@ -2257,7 +2263,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		/**
 		 * Mono spaced fonts can always have a fixed linewrap column!
 		 */
-		if(!bUseFixedWrapColumn)bUseFixedWrapColumn=STYLE_CONSOLE.equals(strStyle);
+		if(!bUseFixedWrapColumn)bUseFixedWrapColumn=STYLE_CONSOLE.equals(getStyle());
 		
 		if(bUseFixedWrapColumn){
 			return (int)
@@ -2306,7 +2312,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 			String strAfter = "";
 			float fMaxWidth = widthForDumpEntryField() - iDotsMarginSafetyGUESSED;
 			while(strLine.length()>0){
-				while(fontWidth(strLine, strStyle, false) > fMaxWidth){
+				while(fontWidth(strLine, getStyle(), false) > fMaxWidth){
 					int iLimit = strLine.length()-iJumpBackGUESSED;
 					strAfter = strLine.substring(iLimit) + strAfter;
 					strLine = strLine.substring(0, iLimit);
@@ -2608,9 +2614,9 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		// TODO Auto-generated method stub
 	}
 	
-	public String getStyle() {
-		return strStyle;
-	}
+//	public String getStyle() {
+//		return strStyle;
+//	}
 	
 	public int getShowRowsAmount() {
 		return iShowRows;

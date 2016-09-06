@@ -210,9 +210,10 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	 */
 	@Override
 	protected boolean initGUI(){
-		if(getStyle()==null){
-			setStyle(ConsoleLemurStateI.i().STYLE_CONSOLE);
-		}
+		if(!super.initGUI())return false;
+//		if(getStyle()==null){
+//			setStyle(ConsoleLemurStateI.i().STYLE_CONSOLE);
+//		}
 		
 		Vector3f v3fApplicationWindowSize = new Vector3f(
 			app().getContext().getSettings().getWidth(),
@@ -446,7 +447,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		
 		for(DialogListEntryData<T> dled:getCompleteEntriesListCopy()){
 			if(!getLastFilter().isEmpty()){
-				if(dled.getText().toLowerCase().contains(getLastFilter())){
+				if(dled.getVisibleText().toLowerCase().contains(getLastFilter())){
 					vlVisibleEntriesList.add(dled);
 				}
 			}else{
@@ -810,7 +811,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 			+"i="+i+", "
 			+"uid="+dled.getUId()+", "
 			+"puid="+(dledParent==null?"(ROOT)":dledParent.getUId())+", "
-			+"'"+dled.getText()+"'"
+			+"'"+dled.getTextValue()+"'"
 		);
 		
 //		LemurMiscHelpersStateI.i().bugFix(null, LemurMiscHelpersStateI.i().btgBugFixListBoxSelectorArea, getListEntries());

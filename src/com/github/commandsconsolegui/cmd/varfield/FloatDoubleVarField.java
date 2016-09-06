@@ -27,8 +27,6 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import groovy.util.IFileNameFinder;
-
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -40,14 +38,14 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  *
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public class FloatDoubleVarField extends VarCmdFieldAbs<Double,FloatDoubleVarField>{
+public class FloatDoubleVarField extends NumberVarFieldAbs<Double,FloatDoubleVarField>{
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
 //	private static String	strCodePrefix = "fdv";
 //	private static ArrayList<FloatDoubleVarField> afdvList = new ArrayList<FloatDoubleVarField>();
-	private Double dValue = null;
-	private Double dMin = null;
-	private Double dMax = null;
+//	private Double dValue = null;
+//	private Double dMin = null;
+//	private Double dMax = null;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
@@ -56,7 +54,7 @@ public class FloatDoubleVarField extends VarCmdFieldAbs<Double,FloatDoubleVarFie
 	}
 	
 	public FloatDoubleVarField(IReflexFillCfg rfcfgOwnerUseThis, FloatDoubleVarField fdv, String strHelp) {
-		this(rfcfgOwnerUseThis, fdv.dValue, strHelp);
+		this(rfcfgOwnerUseThis, fdv.getValue(), strHelp);
 	}
 	public FloatDoubleVarField(IReflexFillCfg rfcfgOwnerUseThis, Float fInitialValue, String strHelp) {
 		this(rfcfgOwnerUseThis, fInitialValue==null?null:fInitialValue.doubleValue(), strHelp);
@@ -86,27 +84,24 @@ public class FloatDoubleVarField extends VarCmdFieldAbs<Double,FloatDoubleVarFie
 //	public FloatDoubleVarField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
 	public FloatDoubleVarField setObjectRawValue(Object objValue) {
 		if(objValue instanceof Double){
-			dValue = ((Double)objValue);
+			setValue( ((Double)objValue) );
 		}else
 		if(objValue instanceof FloatDoubleVarField){
-			dValue = ((FloatDoubleVarField)objValue).dValue;
+			setValue( ((FloatDoubleVarField)objValue).getValue() );
 		}else
 		if(objValue instanceof IntLongVarField){
-			dValue = ((IntLongVarField)objValue).getLong().doubleValue();
+			setValue( ((IntLongVarField)objValue).getLong().doubleValue() );
 		}else
 		if(objValue instanceof String){
-			dValue = Double.parseDouble((String)objValue);
+			setValue( Double.parseDouble((String)objValue) );
 		}else
 		{
 			if(objValue!=null){
-				dValue = ((Float)objValue).doubleValue();
+				setValue( ((Float)objValue).doubleValue() );
 			}else{
-				dValue = null;
+				setValue( null );
 			}
 		}
-		
-		if(dMin!=null && (dValue==null || dValue<dMin))dValue=dMin;
-		if(dMax!=null && (dValue==null || dValue>dMax))dValue=dMax;
 		
 //		super.setObjectValue(ccCD,objValue);
 		super.setObjectRawValue(objValue);
@@ -120,21 +115,21 @@ public class FloatDoubleVarField extends VarCmdFieldAbs<Double,FloatDoubleVarFie
 //	}
 
 	public Float getFloat(){
-		if(dValue==null)return null;
-		return dValue.floatValue();
+		if(getValue()==null)return null;
+		return getValue().floatValue();
 	}
 	public float floatValue(){
-		return dValue.floatValue();
+		return getValue().floatValue();
 	}
 	public float f() {
 		return getFloat();
 	}
 	
 	public Double getDouble(){
-		return dValue;
+		return getValue();
 	}
 	public double doubleValue(){
-		return dValue.doubleValue();
+		return getValue().doubleValue();
 	}
 	
 //	public static ArrayList<FloatDoubleVarField> getListCopy(){
@@ -190,25 +185,25 @@ public class FloatDoubleVarField extends VarCmdFieldAbs<Double,FloatDoubleVarFie
 		return "Float";
 	}
 
-	public FloatDoubleVarField setMinMax(Double dMin,Double dMax) {
-		setMin(dMin);
-		setMax(dMax);
-		return this;
-	}
-	public FloatDoubleVarField setMin(Double dMin) {
-		this.dMin=dMin;
-		return this;
-	}
-	public FloatDoubleVarField setMax(Double dMax) {
-		this.dMax=dMax;
-		return this;
-	}
-	public Double getMin() {
-		return dMin;
-	}
-	public Double getMax() {
-		return dMax;
-	}
+//	public FloatDoubleVarField setMinMax(Double dMin,Double dMax) {
+//		setMin(dMin);
+//		setMax(dMax);
+//		return this;
+//	}
+//	public FloatDoubleVarField setMin(Double dMin) {
+//		this.dMin=dMin;
+//		return this;
+//	}
+//	public FloatDoubleVarField setMax(Double dMax) {
+//		this.dMax=dMax;
+//		return this;
+//	}
+//	public Double getMin() {
+//		return dMin;
+//	}
+//	public Double getMax() {
+//		return dMax;
+//	}
 	
 	@Override
 	protected FloatDoubleVarField getThis() {

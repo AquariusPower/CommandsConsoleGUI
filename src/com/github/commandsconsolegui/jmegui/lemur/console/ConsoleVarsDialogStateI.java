@@ -30,6 +30,8 @@ package com.github.commandsconsolegui.jmegui.lemur.console;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
+import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
@@ -39,6 +41,7 @@ import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceDialogState;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.MaintenanceListDialogState;
+import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.VarId;
 import com.simsilica.lemur.Button;
@@ -104,13 +107,20 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			return str;
 		}
 		
+		@Override
+		protected void actionSubmit() { //just to help on debug...
+			super.actionSubmit();
+		}
+		
 		private class CmdApplyValueAtInput implements Command<Button>{
 			@Override
 			public void execute(Button source) {
-				setInputTextAsUserTypedValue(getDledFrom(source).getText());
+				ChoiceVarDialogState.this.setInputTextAsUserTypedValue(
+					ChoiceVarDialogState.this.getDledFrom(source).getVisibleText());
 			}
 		}
 		CmdApplyValueAtInput cavai = new CmdApplyValueAtInput();
+		private DialogListEntryData<T>	dledRawValue;
 		
 		@Override
 		protected void updateList() {
@@ -125,15 +135,56 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			addEntry(new DialogListEntryData<T>(this).setText(vcf.getHelp(), vcf))
 				.addCustomButtonAction("Help",getCmdDummy());
 			
-			addEntry(new DialogListEntryData<T>(this).setText(""+vcf.getRawValueDefault(), vcf))
-				.addCustomButtonAction("DefaultValueRaw->",(T) cavai);
+			addEntry(
+				new DialogListEntryData<T>(this).setText(vcf.getRawValueDefault(), vcf)
+					.setAddVisibleQuotes(vcf instanceof StringVarField)
+			).addCustomButtonAction("DefaultValueRaw->",(T)cavai);
 			
-			addEntry(new DialogListEntryData<T>(this).setText(""+vcf.getRawValue(), vcf))
-				.addCustomButtonAction("ValueRaw->",(T) cavai);
+			dledRawValue = 
+				new DialogListEntryData<T>(this).setText(vcf.getRawValue(), vcf)
+					.setAddVisibleQuotes(vcf instanceof StringVarField);
+			addEntry(dledRawValue).addCustomButtonAction("ValueRaw->",(T)cavai);
 			
-			addEntry(new DialogListEntryData<T>(this).setText(vcf.getValueAsString(3), vcf))
-				.addCustomButtonAction("Value->",(T) cavai);
+			addEntry(
+				new DialogListEntryData<T>(this).setText(vcf.getValueAsString(3), vcf)
+					.setAddVisibleQuotes(vcf instanceof StringVarField)
+			).addCustomButtonAction("Value->",(T)cavai);
 			
+			if(vcf instanceof FloatDoubleVarField){
+				FloatDoubleVarField v = (FloatDoubleVarField)vcf;
+				
+				if(v.getMin()!=null){
+					addEntry(
+						new DialogListEntryData<T>(this).setText(v.getMin(), vcf)
+					).addCustomButtonAction("MinValue->",(T)cavai);
+				}
+				
+				if(v.getMax()!=null){
+					addEntry(
+						new DialogListEntryData<T>(this).setText(v.getMax(), vcf)
+					).addCustomButtonAction("MaxValue->",(T)cavai);
+				}
+			}else
+			if(vcf instanceof IntLongVarField){
+				IntLongVarField v = (IntLongVarField)vcf;
+				
+				if(v.getMin()!=null){
+					addEntry(
+						new DialogListEntryData<T>(this).setText(v.getMin(), vcf)
+					).addCustomButtonAction("MinValue->",(T)cavai);
+				}
+				
+				if(v.getMax()!=null){
+					addEntry(
+						new DialogListEntryData<T>(this).setText(v.getMax(), vcf)
+					).addCustomButtonAction("MaxValue->",(T)cavai);
+				}
+			}
+			
+//			addEntry(
+//					new DialogListEntryData<T>(this).setText(vcf.getValueAsString(3), vcf)
+//						.setAddVisibleQuotes(vcf instanceof StringVarField)
+//				).addCustomButtonAction("CustomTypedReturnValue",(T)cavai);
 			
 			super.updateList();
 		}
@@ -143,6 +194,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			if(!super.disableAttempt())return false;
 			vcf=null; 
 			clearList(); //from a previous enable
+			setInputText("");
 			return true;
 		}
 		
@@ -152,21 +204,29 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 //		}
 		@Override
 		protected String getDefaultValueToUserModify() {
-			return ""+vcf.getRawValue();
+//			return ""+vcf.getRawValue();
+			return dledRawValue.getVisibleText();
 		}
 		
 	}
 	
 	@Override
-	protected boolean modifyEntry(BaseDialogStateAbs<T, ?> diagModal,	DialogListEntryData<T> dataAtModal,	ArrayList<DialogListEntryData<T>> adataToApplyResultsList) {
-		boolean bChangesMade=false;
+	protected boolean modifyEntry(BaseDialogStateAbs<T, ?> diagModal,	DialogListEntryData<T> dledAtModal,	ArrayList<DialogListEntryData<T>> adledAtThisToApplyResultsList) {
 		String strUserTypedValue = diagModal.getInputTextAsUserTypedValue();
-		if(strUserTypedValue!=null){
-			for(DialogListEntryData<T> dataToCfg:adataToApplyResultsList){
-				((VarCmdFieldAbs)dataToCfg.getUserObj()).setObjectRawValue(strUserTypedValue);
-				bChangesMade=true;
-			}
+		if(strUserTypedValue==null)return false; //was a filter
+		
+		if(strUserTypedValue.equals(""+null))strUserTypedValue=null; //user requested value to become null
+		
+		// must be after "null" string check above
+		strUserTypedValue=MiscI.i().removeQuotes(strUserTypedValue);
+		
+		boolean bChangesMade=false;
+		for(DialogListEntryData<T> dledToCfg:adledAtThisToApplyResultsList){
+			VarCmdFieldAbs vcf = (VarCmdFieldAbs)dledToCfg.getUserObj();
+			vcf.setObjectRawValue(strUserTypedValue);
+			bChangesMade=true;
 		}
+		
 		return bChangesMade;
 	}
 	
@@ -272,7 +332,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 				strVal=vcf.getValueAsString(3);
 	//			if(strVal==null)strVal="";
 				if(vcf instanceof StringVarField){
-					strVal="'"+strVal+"'";
+					strVal='"'+strVal+'"';
 					if(strVal.length()>10){
 						String strEtc="+"; //TODO use 3 dots single character if it exists or some other symbol?
 						strVal=strVal.substring(0, 10-strEtc.length())+strEtc;
@@ -342,7 +402,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		// prepare declaring class as tree parent  
 		DialogListEntryData<T> dledParent=null;
 		for(DialogListEntryData<T> dled:getCompleteEntriesListCopy()){
-			if(dled.getText().equals(strParentTextKey)){
+			if(dled.getTextValue().equals(strParentTextKey)){
 				dledParent=dled;
 				break;
 			}

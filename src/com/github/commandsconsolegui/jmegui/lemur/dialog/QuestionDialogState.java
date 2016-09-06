@@ -62,17 +62,19 @@ public class QuestionDialogState<T extends Command<Button>> extends LemurBasicDi
 	@Override
 	protected boolean initAttempt() {
 		super.setOptionChoiceSelectionMode(true);
+		if(!super.initAttempt())return false;
+		
+		btgSortListEntries.setObjectRawValue(false);
 		
 		dledYes = addEntryQuick("[ yes    ]");
 		dledNo  = addEntryQuick("[     no ]");
 		
-		return super.initAttempt();
+		return true;
 	}
 	
 	@Override
 	protected boolean initGUI() {
-		getCellRenderer().setCellHeightMult(2f);
-		
+		getCellRenderer().setCellHeightMult(2f); //before super call
 		if(!super.initGUI())return false;
 		
 		return true;
@@ -96,13 +98,19 @@ public class QuestionDialogState<T extends Command<Button>> extends LemurBasicDi
 		return this;
 	}
 	
+//	@Override
+//	protected boolean enableAttempt() {
+//		if(!super.enableAttempt())return false;
+//		
+//		selectEntry(dledNo);
+//		
+//		return true;
+//	}
+	
 	@Override
-	protected boolean enableAttempt() {
-		if(!super.enableAttempt())return false;
-		
+	protected void enableSuccess() {
+		super.enableSuccess();
 		selectEntry(dledNo);
-		
-		return true;
 	}
 	
 //	@Override

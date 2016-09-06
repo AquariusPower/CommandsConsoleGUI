@@ -39,6 +39,7 @@ import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
+import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -109,13 +110,13 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	private Comparator<DialogListEntryData<T>> cmpTextAtoZ = new Comparator<DialogListEntryData<T>>() {
 		@Override
 		public int compare(DialogListEntryData<T> o1, DialogListEntryData<T> o2) {
-			return o1.getText().compareTo(o2.getText());
+			return o1.getVisibleText().compareTo(o2.getVisibleText());
 		}
 	};
 	private Comparator<DialogListEntryData<T>> cmpTextZtoA = new Comparator<DialogListEntryData<T>>() {
 		@Override
 		public int compare(DialogListEntryData<T> o1, DialogListEntryData<T> o2) {
-			return o2.getText().compareTo(o1.getText());
+			return o2.getVisibleText().compareTo(o1.getVisibleText());
 		}
 	};
 	private Comparator<DialogListEntryData<T>> getComparatorText(boolean bAtoZ){
@@ -253,12 +254,22 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	 */
 	@Override
 	protected boolean initAttempt() {
+		if(!super.initAttempt())return false;
+		
 		if(!initGUI())return false;
 		if(!initKeyMappings())return false;
-		return super.initAttempt();
+		
+		return true;
 	}
 	
-	protected abstract boolean initGUI();
+	protected boolean initGUI(){
+		if(getStyle()==null){
+			setStyle(ConsoleLemurStateI.i().STYLE_CONSOLE);
+		}
+		
+		return true;
+	}
+	
 	protected abstract boolean initKeyMappings();
 	public abstract String getInputText();
 	
@@ -549,7 +560,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 			str+="\tBut if the input begins with '"+getUserEnterCustomValueToken()+"', when hitting Enter, that specific value will be returned to the parent.\n";
 			
 			for(DialogListEntryData<T> dled:getParentReferencedDledListCopy()){
-				str+="\tRefAtParent: "+dled.getText()+"\n";
+				str+="\tRefAtParent: "+dled.getVisibleText()+"\n";
 			}
 			
 		}
