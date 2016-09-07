@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.jmegui.lemur.console.test;
+package commandsconsoleguitests;
 
 import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegator;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
