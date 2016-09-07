@@ -27,6 +27,7 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
+import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs.EVarCmdMode;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -103,7 +104,7 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 	public TimedDelayVarField(IReflexFillCfg rfcfgOwnerUseThis, float fDelay, String strHelp) {
 //		if(rfcfgOwnerUseThis!=null)atdList.add(this); //only fields allowed
 //		super(rfcfgOwnerUseThis!=null); //only fields allowed
-		super(rfcfgOwnerUseThis); //only fields allowed
+		super(rfcfgOwnerUseThis,EVarCmdMode.Var); //only fields allowed
 //		this.setOwner(rfcfgOwnerUseThis);
 		setObjectRawValue(fDelay);
 		setHelp(strHelp);

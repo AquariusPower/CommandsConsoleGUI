@@ -2136,7 +2136,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		
 		String str = cd().prepareStatsFieldText();
 		
-		if(DebugI.i().isKeyEnabled(DebugI.EDebugKey.StatsText))str+=cd().strDebugTest;
+		if(DebugI.i().isKeyEnabled(DebugI.EDebugKey.AddTextToConsStats))str+=cd().strDebugTest;
 		
 		setStatsText(str);
 		
@@ -2376,10 +2376,10 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 //		imgTmp.getData(0).rewind();
 //		imgTmp.setData(0, imgTmp.getData(0).asReadOnlyBuffer());
 //		MiscI.i().saveImageToFile(imgTmp,"temp"+ttf.getFont().getName().replace(" ",""));
-		if(DebugI.i().isKeyEnabled(EDebugKey.DumpFontImg)){ //EDbgKey.values()
+		if(DebugI.i().isKeyEnabled(EDebugKey.DumpFontImgFile)){ //EDbgKey.values()
 			//TODO why image file ends empty??
 			MiscJmeI.i().saveImageToFile(t2d.getImage(),
-				EDebugKey.DumpFontImg.toString()+ttf.getFont().getName().replace(" ",""));
+				EDebugKey.DumpFontImgFile.toString()+ttf.getFont().getName().replace(" ",""));
 		}
 		
 		bcs.setBase(iMaxHeight); //TODO what is this!?

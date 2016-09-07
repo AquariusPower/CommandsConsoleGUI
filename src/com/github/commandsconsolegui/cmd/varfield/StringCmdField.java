@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.cmd.varfield;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
+import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs.EVarCmdMode;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -88,7 +89,7 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 	 */
 	public StringCmdField(IReflexFillCfg rfcfgOwner, String strReflexFillCfgCodePrefixVariant, String strHelpComment){ // int iReflexFillCfgVariant){
 //		this((String)null,strHelpComment);
-		super(rfcfgOwner);
+		super(rfcfgOwner,EVarCmdMode.Cmd);
 		setHelp(strHelpComment);
 		
 		setCodePrefixVariant(strReflexFillCfgCodePrefixVariant);
@@ -123,7 +124,8 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 //	}
 	@Override
 	public String getValueAsString() {
-		if(getUniqueCmdId()==null)chkAndInit();
+//		if(getUniqueCmdId()==null)
+		chkAndInit();
 		return getUniqueCmdId();
 	}
 	@Override
@@ -153,7 +155,9 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 	@Override
 	public boolean equals(Object obj) {
 //		if(strCmdId==null)throw new NullPointerException(errorMessage());
-		if(getUniqueCmdId()==null)chkAndInit();//initialize();
+//		if(getUniqueCmdId()==null)chkAndInit();//initialize();
+		chkAndInit();
+		
 		if(bIgnoreCaseOnComparison){
 			return getUniqueCmdId().equalsIgnoreCase(""+obj);
 		}else{
@@ -164,7 +168,8 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 	@Override
 	public int hashCode() {
 //		if(strCmdId==null)throw new NullPointerException(errorMessage());
-		if(getUniqueCmdId()==null)chkAndInit();//initialize();
+//		if(getUniqueCmdId()==null)chkAndInit();//initialize();
+		chkAndInit();
 		return getUniqueCmdId().hashCode();
 	}
 	

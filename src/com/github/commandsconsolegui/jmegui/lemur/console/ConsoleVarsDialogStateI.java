@@ -29,21 +29,24 @@ package com.github.commandsconsolegui.jmegui.lemur.console;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.PkgTopRef;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
+import com.github.commandsconsolegui.cmd.varfield.NumberVarFieldAbs;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
+import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI.CompositeControl;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceDialogState;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.MaintenanceListDialogState;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.misc.VarId;
+import com.github.commandsconsolegui.misc.VarCmdUId;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 
@@ -66,6 +69,14 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 
 		private VarCmdFieldAbs	vcf;
 		private DialogListEntryData<T>	dledAtParent;
+		
+//		@Override
+//		public boolean doItAllProperly(CompositeControl cc, float tpf) {
+////			if(isTryingToEnable()){
+////				int i=2;int i2=i;
+////			}
+//			return super.doItAllProperly(cc, tpf);
+//		}
 		
 		@SuppressWarnings("rawtypes")
 		@Override
@@ -121,72 +132,101 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		}
 		CmdApplyValueAtInput cavai = new CmdApplyValueAtInput();
 		private DialogListEntryData<T>	dledRawValue;
+		private boolean	bListIsFilled;
+		private DialogListEntryData<T>	dledVals;
+		private DialogListEntryData<T>	dledInfo;
 		
 		@Override
 		protected void updateList() {
-			clearList();
-			
-			addEntry(new DialogListEntryData<T>(this).setText(vcf.getUniqueVarId(), vcf))
-				.addCustomButtonAction("UniqueId",getCmdDummy());
-			
-			addEntry(new DialogListEntryData<T>(this).setText(vcf.getSimpleCmdId(), vcf))
-				.addCustomButtonAction("SimpleId",getCmdDummy());
+			if(!bListIsFilled){
+	//			clearList();
 				
-			addEntry(new DialogListEntryData<T>(this).setText(vcf.getHelp(), vcf))
-				.addCustomButtonAction("Help",getCmdDummy());
-			
-			addEntry(
-				new DialogListEntryData<T>(this).setText(vcf.getRawValueDefault(), vcf)
-					.setAddVisibleQuotes(vcf instanceof StringVarField)
-			).addCustomButtonAction("DefaultValueRaw->",(T)cavai);
-			
-			dledRawValue = 
-				new DialogListEntryData<T>(this).setText(vcf.getRawValue(), vcf)
-					.setAddVisibleQuotes(vcf instanceof StringVarField);
-			addEntry(dledRawValue).addCustomButtonAction("ValueRaw->",(T)cavai);
-			
-			addEntry(
-				new DialogListEntryData<T>(this).setText(vcf.getValueAsString(3), vcf)
-					.setAddVisibleQuotes(vcf instanceof StringVarField)
-			).addCustomButtonAction("Value->",(T)cavai);
-			
-			if(vcf instanceof FloatDoubleVarField){
-				FloatDoubleVarField v = (FloatDoubleVarField)vcf;
+				DialogListEntryData<T> dledNew = null;
 				
-				if(v.getMin()!=null){
-					addEntry(
-						new DialogListEntryData<T>(this).setText(v.getMin(), vcf)
-					).addCustomButtonAction("MinValue->",(T)cavai);
+				if(dledInfo==null){
+					dledInfo = new DialogListEntryData<T>(this);
+					dledInfo.setText("Info:", vcf);
+					dledInfo.setTreeExpanded(true);
+				}
+				addEntry(dledInfo);
+				
+				{
+					dledNew = new DialogListEntryData<T>(this);
+					dledNew.setText(vcf.getUniqueVarId(), vcf);
+					dledNew.setParent(dledInfo);
+					addEntry(dledNew).addCustomButtonAction("UniqueId",getCmdDummy());
+					
+					dledNew = new DialogListEntryData<T>(this);
+					dledNew.setText(vcf.getSimpleId(), vcf);
+					dledNew.setParent(dledInfo);
+					addEntry(dledNew).addCustomButtonAction("SimpleId",getCmdDummy());
+						
+					dledNew = new DialogListEntryData<T>(this);
+					dledNew.setText(vcf.getHelp(), vcf);
+					dledNew.setParent(dledInfo);
+					addEntry(dledNew).addCustomButtonAction("Help",getCmdDummy());
 				}
 				
-				if(v.getMax()!=null){
-					addEntry(
-						new DialogListEntryData<T>(this).setText(v.getMax(), vcf)
-					).addCustomButtonAction("MaxValue->",(T)cavai);
+				if(dledVals==null){
+					dledVals = new DialogListEntryData<T>(this);
+					dledVals.setText("Value:", vcf);
+					dledVals.setTreeExpanded(true);
 				}
-			}else
-			if(vcf instanceof IntLongVarField){
-				IntLongVarField v = (IntLongVarField)vcf;
+				addEntry(dledVals);
 				
-				if(v.getMin()!=null){
-					addEntry(
-						new DialogListEntryData<T>(this).setText(v.getMin(), vcf)
-					).addCustomButtonAction("MinValue->",(T)cavai);
+				{
+					if(vcf instanceof NumberVarFieldAbs){
+						NumberVarFieldAbs v = (NumberVarFieldAbs)vcf;
+						
+						if(v.getMin()!=null){
+							dledNew = new DialogListEntryData<T>(this);
+							dledNew.setParent(dledVals);
+							addEntry(dledNew.setText(v.getMin(), vcf)).addCustomButtonAction("MinValue->",(T)cavai);
+						}
+						
+						if(v.getMax()!=null){
+							dledNew = new DialogListEntryData<T>(this);
+							dledNew.setParent(dledVals);
+							addEntry(dledNew.setText(v.getMax(), vcf)).addCustomButtonAction("MaxValue->",(T)cavai);
+						}
+					}
+					
+					dledNew = new DialogListEntryData<T>(this);
+					dledNew.setText(vcf.getRawValueDefault(), vcf);
+					dledNew.setAddVisibleQuotes(vcf instanceof StringVarField);
+					dledNew.setParent(dledVals);
+					addEntry(dledNew).addCustomButtonAction("DefaultValueRaw->",(T)cavai);
+					
+					dledRawValue = new DialogListEntryData<T>(this);
+					dledRawValue.setText(vcf.getRawValue(), vcf);
+					dledRawValue.setAddVisibleQuotes(vcf instanceof StringVarField);
+					dledRawValue.setParent(dledVals);
+					addEntry(dledRawValue).addCustomButtonAction("ValueRaw->",(T)cavai);
+					
+					dledNew = new DialogListEntryData<T>(this);
+					dledNew.setText(vcf.getValueAsString(3), vcf);
+					dledNew.setAddVisibleQuotes(vcf instanceof StringVarField);
+					dledNew.setParent(dledVals);
+					addEntry(dledNew).addCustomButtonAction("Value->",(T)cavai);
 				}
 				
-				if(v.getMax()!=null){
-					addEntry(
-						new DialogListEntryData<T>(this).setText(v.getMax(), vcf)
-					).addCustomButtonAction("MaxValue->",(T)cavai);
-				}
+	//			addEntry(
+	//					new DialogListEntryData<T>(this).setText(vcf.getValueAsString(3), vcf)
+	//						.setAddVisibleQuotes(vcf instanceof StringVarField)
+	//				).addCustomButtonAction("CustomTypedReturnValue",(T)cavai);
+				
+				bListIsFilled=true;
 			}
 			
-//			addEntry(
-//					new DialogListEntryData<T>(this).setText(vcf.getValueAsString(3), vcf)
-//						.setAddVisibleQuotes(vcf instanceof StringVarField)
-//				).addCustomButtonAction("CustomTypedReturnValue",(T)cavai);
-			
 			super.updateList();
+		}
+		
+		@Override
+		protected void clearList() {
+			super.clearList();
+			dledInfo.clearChildren();
+			dledVals.clearChildren();
+			bListIsFilled=false;
 		}
 		
 		@Override
@@ -300,6 +340,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	
 	private String strParentDeclaringClassKey="ParentDeclaringClass";
 	private String strParentConcreteClassKey ="ParentConcreteClass";
+	private DialogListEntryData<T>	dledConsProjPackage;
 	
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -315,6 +356,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			for(DialogListEntryData<T> dled:getCompleteEntriesListCopy()){
 				if(dled.getUserObj()==strParentDeclaringClassKey)continue;
 				if(dled.getUserObj()==strParentConcreteClassKey)continue;
+				if(dled.getUserObj()==PkgTopRef.class)continue;
 				VarCmdFieldAbs vcfAtListEntry = ((VarCmdFieldAbs)dled.getUserObj());
 				if(vcf.getUniqueVarId().equals(vcfAtListEntry.getUniqueVarId())){
 					dledVar = dled;
@@ -322,7 +364,18 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			}
 			
 			// create new if not at list
-			if(dledVar==null)dledVar=createNewVarEntry(vcf);
+			if(dledVar==null){
+				dledVar=createNewVarEntry(vcf); //will return with parent already set
+				
+				// will set the package entry as the rootEntry's parent
+				String strVarConcrPkg = vcf.getIdTmpCopy().getConcreteClass().getPackage().getName();
+				if(strVarConcrPkg.startsWith(dledConsProjPackage.getTextValue())){
+					DialogListEntryData<T> dledParentest = dledVar.getParentest();
+					if(dledParentest!=dledConsProjPackage){ //the concrete's parent may have already been set properly
+						dledParentest.setParent(dledConsProjPackage);
+					}
+				}
+			}
 			
 			// truncate value string
 			String strVal=null;
@@ -346,7 +399,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			dledVar.addCustomButtonAction(strVal, (T)cv);
 		}
 		
-		super.updateList();
+		super.updateList(); //MiscI.i().getClassTreeFor(this)
 	}
 	
 	/**
@@ -357,7 +410,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	 * @return
 	 */
 	private DialogListEntryData<T> createNewVarEntry(VarCmdFieldAbs vcf){
-		VarId vidCopy = vcf.getIdTmpCopy();
+		VarCmdUId vidCopy = vcf.getIdTmpCopy();
 		
 		DialogListEntryData<T> dledVarEntryParent = null;
 		
@@ -420,8 +473,17 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	protected boolean initAttempt() {
 		if(!super.initAttempt())return false;
 		
-//		prepareListData();
+		// the top package as parent:
+		dledConsProjPackage = new DialogListEntryData<T>(this);
+		dledConsProjPackage.setText(PkgTopRef.class.getPackage().getName(), PkgTopRef.class);
 		
 		return true;
 	}
+	
+	@Override
+	protected void initSuccess() {
+		super.initSuccess();
+		addEntry(dledConsProjPackage);
+	}
+	
 }

@@ -498,7 +498,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	private boolean checkCmdValidityBoolTogglers(){
 		btgReferenceMatched=null;
 		for(BoolTogglerCmdField btg : VarCmdFieldAbs.getListCopy(BoolTogglerCmdField.class)){
-			String strSimpleCmdId = btg.getSimpleCmdId();
+			String strSimpleCmdId = btg.getSimpleId();
 			if(!strSimpleCmdId.endsWith("Toggle"))strSimpleCmdId+="Toggle";
 			if(checkCmdValidity(btg.getOwner(), btg.getUniqueCmdId(), strSimpleCmdId, "[bEnable] "+btg.getHelp(), true)){
 				btgReferenceMatched = btg;
@@ -556,7 +556,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				strComment+="\n"+scf.getHelp();
 			}
 		}
-		return checkCmdValidity(irfc, scf.getUniqueCmdId(), scf.getSimpleCmdId(), strComment);
+		return checkCmdValidity(irfc, scf.getUniqueCmdId(), scf.getSimpleId(), strComment);
 	}
 	public boolean checkCmdValidity(IReflexFillCfg irfc, String strUniqueCmdId, String strSimpleCmdId, String strComment){
 		return checkCmdValidity(irfc, strUniqueCmdId, strSimpleCmdId, strComment, false);
@@ -3011,10 +3011,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	
 	private void updateNewDay() {
 		String str = MiscI.i().getSimpleDate();
-		if(!str.equalsIgnoreCase(strCurrentDay) || DebugI.i().isKeyEnabled(EDebugKey.NewDayInfo)){
+		if(!str.equalsIgnoreCase(strCurrentDay) || DebugI.i().isKeyEnabled(EDebugKey.ShowConsNewDayInfoOnce)){
 			strCurrentDay=str;
 			dumpInfoEntry("Welcome to a new day "+strCurrentDay+"!");
-			DebugI.i().disableKey(EDebugKey.NewDayInfo);
+			DebugI.i().disableKey(EDebugKey.ShowConsNewDayInfoOnce);
 		}
 	}
 	

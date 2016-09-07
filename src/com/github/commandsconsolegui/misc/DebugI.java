@@ -50,10 +50,10 @@ public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
 	 * when enabled, these keys are used to perform debug tests
 	 */
 	public static enum EDebugKey implements IReflexFillCfg{
-		StatsText,
-		DumpFontImg, 
-		NewDayInfo,
-		VarToString,
+		AddTextToConsStats,
+		DumpFontImgFile, 
+		ShowConsNewDayInfoOnce,
+		VarToStringDenied,
 		;
 		BoolTogglerCmdField btgEnabled = new BoolTogglerCmdField(this,false);
 //		boolean b;

@@ -41,6 +41,7 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.export.Savable;
+import com.jme3.scene.Node;
 
 /**
  * Each list entry can show differently, they could be:
@@ -238,17 +239,44 @@ public class DialogListEntryData<T> implements Savable{
 	public DialogListEntryData<T> setParent(DialogListEntryData<T> parent) {
 		if(this==parent)throw new PrerequisitesNotMetException("cant parent self: parent==this", this);
 		
-		if(this.parent!=null){
-			this.parent.aChildList.remove(this);
+		// remove self from previous parent
+		DialogListEntryData<T> dledParentOld = this.getParent();
+		if(dledParentOld!=null){
+			dledParentOld.aChildList.remove(this);
 		}
 		
+		// consistency check
+		if(this.hasChild(parent)){
+			throw new PrerequisitesNotMetException("cant be child of a child", this, parent, this.aChildList);
+		}
+		
+		// parent can be null
 		this.parent = parent;
 		
-		if(this.parent!=null){
-			this.parent.aChildList.add(this);
+		// adds self to new parent child list
+		if(this.getParent()!=null){
+			if(!this.getParent().aChildList.contains(this)){
+				this.getParent().aChildList.add(this);
+			}
 		}
 		
 		return this;
+	}
+	
+	public boolean hasChild(DialogListEntryData<T> dledChildToCheck){
+		if(dledChildToCheck==null){
+			throw new PrerequisitesNotMetException("null child to check", this);
+		}
+		
+		for(DialogListEntryData<T> dledChild:this.aChildList){
+			if(dledChild==dledChildToCheck)return true;
+			
+			if(dledChild.aChildList.size()>0){
+				if(dledChild.hasChild(dledChildToCheck))return true;
+			}
+		}
+		
+		return false;
 	}
 
 //	public EEntryType geteType() {
@@ -292,6 +320,35 @@ public class DialogListEntryData<T> implements Savable{
 	
 	public String getUId() {
 		return strUniqueId;
+	}
+
+	public DialogListEntryData<T> clearChildren() {
+		aChildList.clear();
+		return this;
+	}
+	
+	/**
+	 * Returns root one (parent less). 
+	 * 
+	 * @return null if it has no parent
+	 */
+	public DialogListEntryData<T> getParentest() {
+		DialogListEntryData<T> dledParent = getParent();
+		if(dledParent==null)return null;
+		
+//		ArrayList<DialogListEntryData<T>> adledConsistencyChk = new ArrayList<DialogListEntryData<T>>();
+		while(true){
+			DialogListEntryData<T> dledParentTmp = dledParent.getParent();
+			if(dledParentTmp==null)return dledParent;
+			
+//			if(adledConsistencyChk.contains(dledParentTmp)){
+//				throw new PrerequisitesNotMetException("tree is inconsistent (child/parent loop)", adledConsistencyChk, dledParentTmp);
+//			}else{
+//				adledConsistencyChk.add(dledParentTmp);
+//			}
+			
+			dledParent = dledParentTmp;
+		}
 	}
 	
 //	public void setUId(String strUId) {

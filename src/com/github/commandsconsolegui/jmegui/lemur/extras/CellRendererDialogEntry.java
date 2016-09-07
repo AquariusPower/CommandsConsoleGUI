@@ -164,7 +164,15 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 				strDepth+=dled.getUId();//+":";
 			}
 			
-			String str = "["+strTreeAction+strDepth+"]";
+			if(strDepth.length()!=strDepth.trim().length()){
+				strDepth=strDepth.replace(" ", ".");
+				strDepth=strDepth.replace("\t", ".");
+				if(strDepth.length()!=strDepth.trim().length()){
+					throw new PrerequisitesNotMetException("unable to fix indentation", strDepth, this);
+				}
+			}
+			
+			String str = strDepth+"["+strTreeAction+"]";
 //			if(!strDepth.isEmpty() && strDepth.length()!=strDepth.trim().length()){
 //				strDepth = "["+strDepth+"]";
 //			}
@@ -338,7 +346,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 //					Vector3f v3fSize = new Vector3f(this.getPreferredSize());
 //					v3fSize.z=LemurMiscHelpersStateI.fPreferredThickness*2f;
 //					LemurMiscHelpersStateI.i().setGrantedSize(cntr, v3fSize, true);
-					cntr.setName(btgNOTWORKINGBugFixGapForListBoxSelectorArea.getSimpleCmdId()); //when mouse is over a cell, if the ListBox->selectorArea has the same world Z value of the button, it may be ordered before the button on the raycast collision results at PickEventSession.setCurrentHitTarget(ViewPort, Spatial, Vector2f, CollisionResult) line: 262	-> PickEventSession.cursorMoved(int, int) line: 482 
+					cntr.setName(btgNOTWORKINGBugFixGapForListBoxSelectorArea.getSimpleId()); //when mouse is over a cell, if the ListBox->selectorArea has the same world Z value of the button, it may be ordered before the button on the raycast collision results at PickEventSession.setCurrentHitTarget(ViewPort, Spatial, Vector2f, CollisionResult) line: 262	-> PickEventSession.cursorMoved(int, int) line: 482 
 					addChild(cntr, Position.Center);
 				}else{
 					cntr = this;

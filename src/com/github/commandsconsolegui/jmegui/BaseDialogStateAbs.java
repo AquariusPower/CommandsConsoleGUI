@@ -42,6 +42,7 @@ import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 //import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
@@ -258,6 +259,16 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		
 		if(!initGUI())return false;
 		if(!initKeyMappings())return false;
+		
+		CallableX cxRefresh = new CallableX() {
+			@Override
+			public Boolean call() {
+				requestRefreshList();
+				return true;
+			}
+		};
+		btgSortListEntries.setCallOnChange(cxRefresh);
+		btgSortListEntriesAtoZ.setCallOnChange(cxRefresh);
 		
 		return true;
 	}

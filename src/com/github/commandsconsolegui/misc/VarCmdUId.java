@@ -32,9 +32,11 @@ import java.lang.reflect.Field;
 /**
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public class VarId implements Cloneable{
+public class VarCmdUId implements Cloneable{
 	// parts of the unique id
-	private String strType=null;
+	private String strPrefixCmd=null;
+	private String strVarType=null;
+	
 	private String strConcreteClassSName=null;
 	private String strDeclaringClassSName=null;
 	private String strPrefix=null;
@@ -43,20 +45,34 @@ public class VarId implements Cloneable{
 	// the unique id
 	private String strUniqueId=null;
 	
-	private Boolean	bIsVariable;
+//	private Boolean	bIsVariable;
 	private String	strPrefixCustomToSolveConflicts;
+	private Class	clDeclaring;
+	private Class	clConcrete;
+	private String	strPartSeparator;
 	
-	public VarId() {
+	public VarCmdUId() {
 	}
 //	public IdTmp(boolean bIsVariable, String strSimpleId, String strUniqueId) {
 //		this.setUniqueId(strUniqueId);
 //		this.setSimpleId(strSimpleId);
 //		this.setAsVariable(bIsVariable);
 //	}
-	public String getUniqueId() {
-		return strUniqueId;
+	/**
+	 * 
+	 * @param bAsVariable if false will be as Command, if null will be without prefix.
+	 * @return
+	 */
+	public String getUniqueId(Boolean bAsVariable) {
+		if(bAsVariable==null)return strUniqueId;
+		
+		if(bAsVariable){
+			return strVarType+strPartSeparator+strUniqueId;
+		}else{
+			return strPrefixCmd+strPartSeparator+strUniqueId;
+		}
 	}
-	public VarId setUniqueId(String strUniqueId) {
+	public VarCmdUId setUniqueId(String strUniqueId) {
 		PrerequisitesNotMetException.assertNotAlreadySet("strUniqueId", this.strUniqueId, strUniqueId, this);
 		this.strUniqueId = strUniqueId;
 		return this;
@@ -64,55 +80,65 @@ public class VarId implements Cloneable{
 	public String getSimpleId() {
 		return strSimpleId;
 	}
-	public VarId setSimpleId(String strSimpleId) {
+	public VarCmdUId setSimpleId(String strSimpleId) {
 		PrerequisitesNotMetException.assertNotAlreadySet("simple id", this.strSimpleId, strSimpleId, this);
 		this.strSimpleId = strSimpleId;
 		return this;
 	}
-	public boolean isVariable() {
-		return bIsVariable;
-	}
-	public VarId setAsVariable(boolean bIsVariable) {
-		PrerequisitesNotMetException.assertNotAlreadySet("bIsVariable", this.bIsVariable, bIsVariable, this);
-		this.bIsVariable = bIsVariable;
-		return this;
-	}
+//	public boolean isVariable() {
+//		return bIsVariable;
+//	}
+//	public VarCmdUId setAsVariable(boolean bIsVariable) {
+//		PrerequisitesNotMetException.assertNotAlreadySet("bIsVariable", this.bIsVariable, bIsVariable, this);
+//		this.bIsVariable = bIsVariable;
+//		return this;
+//	}
 	public String getPrefixCustomToSolveConflicts() {
 		return strPrefixCustomToSolveConflicts;
 	}
-	public VarId setPrefixCustomToSolveConflicts(String strPrefixCustomToSolveConflicts) {
+	public VarCmdUId setPrefixCustomToSolveConflicts(String strPrefixCustomToSolveConflicts) {
 		PrerequisitesNotMetException.assertNotAlreadySet("strPrefixCustomToSolveConflicts", this.strPrefixCustomToSolveConflicts, strPrefixCustomToSolveConflicts, this);
 		this.strPrefixCustomToSolveConflicts = strPrefixCustomToSolveConflicts;
 		return this;
 	}
 	public String getVarType() {
-		return strType;
+		return strVarType;
 	}
-	public VarId setType(String strType) {
-		PrerequisitesNotMetException.assertNotAlreadySet("strType", this.strType, strType, this);
-		this.strType = strType;
+	public VarCmdUId setVarType(String strType) {
+		PrerequisitesNotMetException.assertNotAlreadySet("strType", this.strVarType, strType, this);
+		this.strVarType = strType;
 		return this;
 	}
+	
+	public Class getConcreteClass(){
+		return clConcrete;
+	}
+	public Class getDeclaringClass(){
+		return clDeclaring;
+	}
+	
 	public String getConcreteClassSName() {
 		return strConcreteClassSName;
 	}
-	public VarId setConcreteClassSName(String strConcreteClass) {
+	public VarCmdUId setConcreteClass(Class clConcrete, String strConcreteClass) {
 		PrerequisitesNotMetException.assertNotAlreadySet("strConcreteClassSName", this.strConcreteClassSName, strConcreteClassSName, this);
+		this.clConcrete=clConcrete;
 		this.strConcreteClassSName = strConcreteClass;
 		return this;
 	}
 	public String getDeclaringClassSName() {
 		return strDeclaringClassSName;
 	}
-	public VarId setDeclaringClassSName(String strDeclaringClass) {
+	public VarCmdUId setDeclaringClass(Class clDeclaring, String strDeclaringClass) {
 		PrerequisitesNotMetException.assertNotAlreadySet("strDeclaringClassSName", this.strDeclaringClassSName, strDeclaringClassSName, this);
+		this.clDeclaring=clDeclaring;
 		this.strDeclaringClassSName = strDeclaringClass;
 		return this;
 	}
 	public String getPrefix() {
 		return strPrefix;
 	}
-	public VarId setPrefix(String strPrefix) {
+	public VarCmdUId setPrefix(String strPrefix) {
 		PrerequisitesNotMetException.assertNotAlreadySet("prefix", this.strPrefix, strPrefix, this);
 		this.strPrefix = strPrefix;
 		return this;
@@ -120,25 +146,25 @@ public class VarId implements Cloneable{
 	public String getSuffix() {
 		return strSuffix;
 	}
-	public VarId setSuffix(String strSuffix) {
+	public VarCmdUId setSuffix(String strSuffix) {
 		PrerequisitesNotMetException.assertNotAlreadySet("suffix", this.strSuffix, strSuffix, this);
 		this.strSuffix = strSuffix;
 		return this;
 	}
 	
 	@Override
-	public VarId clone() {
-		for(Field fld:VarId.class.getFields()){
+	public VarCmdUId clone() {
+		for(Field fld:VarCmdUId.class.getFields()){
 			if(!fld.getType().isPrimitive())throw new PrerequisitesNotMetException("clone will fail!",this);
 		}
 		
-		VarId idCopy = null;
+		VarCmdUId idCopy = null;
 		
 		try {
 			/**
 			 * this will only work properly if all fields are primitives...
 			 */
-			idCopy = (VarId)super.clone();
+			idCopy = (VarCmdUId)super.clone();
 		} catch (CloneNotSupportedException e) {
 			e.printStackTrace();
 		}
@@ -146,4 +172,17 @@ public class VarId implements Cloneable{
 		return idCopy;
 	}
 	
+	public VarCmdUId setPrefixCmd(String strPrefixCmd) {
+		this.strPrefixCmd=strPrefixCmd;
+		return this;
+	}
+	
+	public String getPrefixCmd() {
+		return strPrefixCmd;
+	}
+	
+	public VarCmdUId setPartSeparator(String strCommandPartSeparator) {
+		this.strPartSeparator=strCommandPartSeparator;
+		return this;
+	}
 }

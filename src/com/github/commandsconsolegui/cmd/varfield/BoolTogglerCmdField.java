@@ -27,11 +27,12 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
+import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs.EVarCmdMode;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
-import com.github.commandsconsolegui.misc.VarId;
+import com.github.commandsconsolegui.misc.VarCmdUId;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -97,7 +98,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 	 */
 //	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitialValue, String strReflexFillCfgCodePrefixVariant, String strHelp){
 	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitialValue, String strHelp){
-		super(rfcfgOwnerUseThis);
+		super(rfcfgOwnerUseThis,EVarCmdMode.VarCmd);
 		
 //		ReflexFill.assertAndGetField(rfcfgOwnerUseThis, this);
 		
@@ -125,21 +126,21 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 //		setCustomCmdId(strCustomCmdId);
 //	}
 	
-	/**
-	 * sets the command identifier that user will type in the console
-	 * @param strCmd
-	 */
-	public void setCustomCmdId(String strCmd) {
-		/**
-		 * must be an exception as it can have already been read/collected with automatic value.
-		 */
-		PrerequisitesNotMetException.assertNotAlreadySet("CustomCmdId", getUniqueCmdId(), strCmd);
-//		if(getUniqueCmdId()!=null){
-////			throw new NullPointerException("asked for '"+strCmd+"' but was already set to: "+getUniqueCmdId());
-//		}
-		
-		setUniqueId(new VarId().setAsVariable(false).setSimpleId(strCmd).setUniqueId(strCmd));
-	}
+//	/**
+//	 * sets the command identifier that user will type in the console
+//	 * @param strCmd
+//	 */
+//	public void setCustomCmdId(String strCmd) {
+//		/**
+//		 * must be an exception as it can have already been read/collected with automatic value.
+//		 */
+//		PrerequisitesNotMetException.assertNotAlreadySet("CustomCmdId", getUniqueCmdId(), strCmd);
+////		if(getUniqueCmdId()!=null){
+//////			throw new NullPointerException("asked for '"+strCmd+"' but was already set to: "+getUniqueCmdId());
+////		}
+//		
+//		setUniqueId(new VarCmdId().setAsVariable(false).setSimpleId(strCmd).setUniqueId(strCmd));
+//	}
 	
 //	public String getCmdId(){
 //		if(super.strCmdId==null){

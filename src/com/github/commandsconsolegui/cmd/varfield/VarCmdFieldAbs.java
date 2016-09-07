@@ -34,13 +34,14 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
 import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
-import com.github.commandsconsolegui.misc.VarId;
+import com.github.commandsconsolegui.misc.VarCmdUId;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.jme3.effect.shapes.EmitterBoxShape;
 
 /**
  * TODO migrate most things possible to here
@@ -50,9 +51,18 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
  */
 public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implements IReflexFillCfgVariant{//, IVarIdValueOwner{
 //	private boolean bReflexingIdentifier = true;
-	private String strUniqueVarId = null;
-	private String strUniqueCmdId = null;
-	private String strSimpleCmdId = null;
+	public static enum EVarCmdMode{
+		Var,
+		Cmd,
+		VarCmd,
+		;
+	}
+	private EVarCmdMode evcm = null;
+	
+//	private String strUniqueVarId = null;
+//	private String strUniqueCmdId = null;
+//	
+//	private String strSimpleId = null;
 	
 	private String strCodePrefixVariant = null;
 	
@@ -67,7 +77,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	private O	objRawValueLazy = null;
 	private O	objRawValueDefault = null;
 	private boolean	bLazyValueWasSet;
-	private VarId	idt;
+	private VarCmdUId	vcuid;
 	
 	private static ArrayList<VarCmdFieldAbs> avcfList = new ArrayList<VarCmdFieldAbs>();
 	public static final HashChangeHolder hvhVarList = new HashChangeHolder(avcfList);
@@ -87,7 +97,8 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		return a;
 	}
 	
-	public VarCmdFieldAbs(IReflexFillCfg rfcfgOwner){
+	public VarCmdFieldAbs(IReflexFillCfg rfcfgOwner, EVarCmdMode evcm){
+		this.evcm=evcm;
 		this.rfcfgOwner=rfcfgOwner;
 		if(isField())VarCmdFieldAbs.avcfList.add(this);
 	}
@@ -179,75 +190,113 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	 * @return type_concreteClass[_declaringClass][_prefix]_id[_suffix]
 	 */
 	public String getUniqueVarId(boolean bRemoveType) {
-		if(strUniqueVarId==null){
-			setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(getOwner(), this, true));
-		}
+		if(!isVar())throw new PrerequisitesNotMetException("is not var", this);
 		
-		if(bRemoveType){
-//			return strUniqueVarId.replaceAll("^[[:alnum:]]*_", "");
-			return strUniqueVarId.replaceAll("^[a-zA-Z0-9]*_", "");
-		}else{
-			return strUniqueVarId;
-		}
+		chkAndInit();
+//		if(strUniqueVarId==null){
+//			setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(getOwner(), this, true));
+//		}
+		
+//		if(bRemoveType){ //the first prefix separated by "_"
+////			return strUniqueVarId.replaceAll("^[[:alnum:]]*_", "");
+////			return strUniqueVarId.replaceAll("^[a-zA-Z0-9]*_", "");
+//			return vcuid.getUniqueId();
+//		}else{
+////			return strUniqueVarId;
+//			return vcuid.getVarType()+vcuid.getUniqueId();
+//		}
+		return vcuid.getUniqueId(bRemoveType?null:true);
 	}
 	
+	public boolean isVar(){
+		switch(evcm){
+//			case Cmd:
+//				return true;
+			case Var:
+				return true;
+			case VarCmd:
+				return true;
+		}
+		return false;
+	}
+	
+	public boolean isCmd(){
+		switch(evcm){
+			case Cmd:
+				return true;
+//			case Var:
+//				return true;
+			case VarCmd:
+				return true;
+		}
+		return false;
+	}
 	
 //	protected S setReflexing(boolean b){
 //		this.bReflexingIdentifier=b;
 //		return getThis();
 //	}
 	
-	protected S setUniqueId(VarId idt){
-		this.idt = idt;
+	protected S setUniqueId(VarCmdUId vcuid){
+		if(this.vcuid!=null)PrerequisitesNotMetException.assertNotAlreadySet("UniqueId", this.vcuid, vcuid, vcuid.getUniqueId(null));
+		this.vcuid = vcuid;
 		
-		String strExceptionId = null;
-		
-		/**
-		 * must be an exception as it can have already been read/collected with automatic value.
-		 * The exception control is strExceptionId.
-		 */
-		if(idt.isVariable()){
-			if(strUniqueVarId!=null){
-				strExceptionId=strUniqueVarId;
-			}else{
-				strUniqueVarId=idt.getUniqueId();
-			}
-		}else{
-			if(strUniqueCmdId!=null){
-				strExceptionId=strUniqueCmdId;
-			}else{
-				strUniqueCmdId=idt.getUniqueId();
-			}
-		}
-		
-		PrerequisitesNotMetException.assertNotAlreadySet("UniqueCmdId", strExceptionId, idt.getUniqueId());
-//		if(strExceptionId!=null){
-////			throw new NullPointerException("asked for '"+id.strUniqueCmdId+"' but was already set to: "+strExceptionId);
-//		}
-		
-		strSimpleCmdId = idt.getSimpleId();
+//		String strExceptionId = null;
+//		
+//		/**
+//		 * must be an exception as it can have already been read/collected with automatic value.
+//		 * The exception control is strExceptionId.
+//		 */
+//		
+////		if(vcid.isVariable()){
+//			if(strUniqueVarId!=null){
+//				strExceptionId=strUniqueVarId;
+//			}else{
+//				strUniqueVarId=vcid.getUniqueId();
+//			}
+////		}else{
+//			if(strUniqueCmdId!=null){
+//				strExceptionId=strUniqueCmdId;
+//			}else{
+//				strUniqueCmdId=vcid.getUniqueId();
+//			}
+////		}
+//		
+//		PrerequisitesNotMetException.assertNotAlreadySet("UniqueCmdId", strExceptionId, vcid.getUniqueId());
+////		if(strExceptionId!=null){
+//////			throw new NullPointerException("asked for '"+id.strUniqueCmdId+"' but was already set to: "+strExceptionId);
+////		}
+//		
+//		strSimpleId = vcid.getSimpleId();
 		
 		strDebugErrorHelper=null; //clear error helper
 		
 		return getThis();
 	}
 	
-	/**
-	 * sets the command identifier that user will type in the console
-	 * 
-	 * @param strUniqueCmdId
-	 * @param bIsVariable
-	 * @return
-	 */
-	protected S setCustomUniqueCmdId(String strUniqueCmdId, boolean bIsVariable){
-//		setUniqueId(new IdTmp(bIsVariable,strUniqueCmdId,strUniqueCmdId));
-		setUniqueId(new VarId().setAsVariable(bIsVariable).setSimpleId(strUniqueCmdId).setUniqueId(strUniqueCmdId));
-		return getThis();
-	}
+//	/**
+//	 * sets the command identifier that user will type in the console
+//	 * 
+//	 * @param strUniqueCmdId
+//	 * @param bIsVariable
+//	 * @return
+//	 */
+//	protected S setCustomUniqueCmdId(String strUniqueCmdId, boolean bIsVariable){
+////		setUniqueId(new IdTmp(bIsVariable,strUniqueCmdId,strUniqueCmdId));
+//		setUniqueId(
+//			new VarCmdId()
+//				.setAsVariable(bIsVariable)
+//				.setSimpleId(strUniqueCmdId)
+//				.setUniqueId(strUniqueCmdId)
+//		);
+//		return getThis();
+//	}
 
-	public String getSimpleCmdId() {
+	public String getSimpleId() {
+//		idt.isVariable()
 		chkAndInit();
-		return strSimpleCmdId;
+//		return strSimpleId;
+		return vcuid.getSimpleId();
 	}
 	
 	@Override
@@ -261,18 +310,50 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 //	}
 
 	protected void chkAndInit(){
-		if(strUniqueCmdId==null){
-			setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this,false));
+//		if(strUniqueVarId==null && strUniqueCmdId==null){
+		if(vcuid==null){
+			setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this));
+			
+//			ArrayList<Boolean> ab = new ArrayList<Boolean>();
+//			switch(evcm){
+//				case Cmd:
+//					ab.add(false);
+//					break;
+//				case Var:
+//					ab.add(true);
+//					break;
+//				case VarCmd:
+//					ab.add(false);
+//					ab.add(true);
+//					break;
+//			}
+//			
+//			for(Boolean b:ab){
+//				setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this,b));
+//			}
 		}
+		
+//		if(idt.isVariable()){
+//			if(strUniqueVarId==null){
+//				setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this,true));
+//			}
+//		}else{
+//			if(strUniqueCmdId==null){
+//				setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this,false));
+//			}
+//		}
 	}
 	public String getUniqueCmdId(){
+		if(!isCmd())throw new PrerequisitesNotMetException("is var", this);
 		chkAndInit();
-		return strUniqueCmdId;
+//		return strUniqueCmdId;
+//		return vcuid.getPrefixCmd()+vcuid.getUniqueId();
+		return vcuid.getUniqueId(false);
 	}
-	protected S setUniqueCmdId(String strUniqueCmdId) {
-		this.strUniqueCmdId = strUniqueCmdId;
-		return getThis();
-	}
+//	protected S setUniqueCmdId(String strUniqueCmdId) {
+//		this.strUniqueCmdId = strUniqueCmdId;
+//		return getThis();
+//	}
 
 	public String getHelp(){
 		return strHelp==null?"":strHelp;
@@ -374,9 +455,9 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		return getCodePrefixVariant().equals(getCodePrefixDefault());
 	}
 
-	public VarId getIdTmp(CommandsDelegator.CompositeControl cc) {
+	public VarCmdUId getIdTmp(CommandsDelegator.CompositeControl cc) {
 		cc.assertSelfNotNull();
-		return idt;
+		return vcuid;
 	}
 	
 	public abstract String getValueAsString();
@@ -384,19 +465,21 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	
 	@Override
 	public String toString() {
-		if(DebugI.i().isKeyEnabled(EDebugKey.VarToString)){
-			throw new PrerequisitesNotMetException("use getReport() instead!", this);
-//			/**
-//			 * use this method only for exceptions info, nothing else!
-//			 */
-//			int i=0;int i2=i;i=i2;//put breakpoint here!
+		if(DebugI.i().isKeyEnabled(EDebugKey.VarToStringDenied)){
+			/**
+			 * enable the debug key to show improper use of toString()
+			 */
+			boolean bIgnoreOnce=false; // bIgnoreOnce=true // evaluate in debug, to ignore once.
+			if(!bIgnoreOnce){
+				throw new PrerequisitesNotMetException("use getReport() instead!", this);
+			}
 		}
-//		return strUniqueVarId+"='"+getValueAsString(3)+"'";
-		return super.toString();
+		
+		return getReport() + " (" + super.toString() + ")";
 	}
 
-	public VarId getIdTmpCopy() {
-		return idt.clone();
+	public VarCmdUId getIdTmpCopy() {
+		return vcuid.clone();
 	}
 
 	public O getRawValueDefault() {
