@@ -41,6 +41,7 @@ import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableWeak;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
+import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
@@ -294,7 +295,7 @@ public class MiscJmeI {
 	}
 
 	public TimedDelayVarField retrieveUserDataTimedDelay(Spatial sptHolder, String strKey, final float fDelay){
-		TimedDelayVarField td = retrieveUserData(TimedDelayVarField.class, sptHolder, strKey, new CallableWeak<TimedDelayVarField>() {
+		TimedDelayVarField td = retrieveUserData(TimedDelayVarField.class, sptHolder, strKey, null, new CallableWeak<TimedDelayVarField>() {
 			@Override
 			public TimedDelayVarField call() {
 				return new TimedDelayVarField(fDelay,"").setActive(true);
@@ -321,17 +322,24 @@ public class MiscJmeI {
 //		return td;
 //	}
 	
-	public <R> R retrieveUserData(Class<R> clReturn, Spatial sptHolder, String strKey, CallableWeak<R> callCreateInstance){
+	/**
+	 * Uses {@link SavableHolder}
+	 * 
+	 * @param clReturn
+	 * @param sptHolder
+	 * @param strKey
+	 * @param callCreateInstance
+	 * @return
+	 */
+	public <R> R retrieveUserData(Class<R> clReturn, Spatial sptHolder, String strKey, R objExisting, CallableWeak<R> callCreateInstance){
 		@SuppressWarnings("unchecked")
 		SavableHolder<R> sh = (SavableHolder<R>)sptHolder.getUserData(strKey);
 		
 		R objUser = null;
 		if(sh==null){
-//			try {
-				sh = new SavableHolder<R>(callCreateInstance.call());
-//			} catch (Exception e) {
+			if(objExisting==null)objExisting=callCreateInstance.call();
+			sh = new SavableHolder<R>(objExisting);
 //				throw new PrerequisitesNotMetException("object instance creation failed", clReturn, sptHolder, strKey);
-//			}
 			sptHolder.setUserData(strKey, sh);
 		}
 		objUser = sh.getRef();
@@ -346,5 +354,25 @@ public class MiscJmeI {
 				FastMath.abs(1f-clr.b),
 				clr.a
 			);
+	}
+
+	/**
+	 * 
+	 * @param spt
+	 * @param obj each key will be one super class of it
+	 */
+	public void setUserDataSH(Spatial spt, Object obj) {
+		for(Class<?> cl:MiscI.i().getSuperClassesOf(obj)){
+			setUserDataSH(spt, cl.getName(), obj);
+		}
+	}
+	public void setUserDataSH(Spatial spt, String strKey, Object obj) {
+		spt.setUserData(strKey, new SavableHolder(obj));
+	}
+	
+	public <R> R getUserDataSH(Spatial spt, String strKey){
+		SavableHolder<R> sh = (SavableHolder<R>)spt.getUserData(strKey);
+		if(sh==null)return null;
+		return sh.getRef();
 	}
 }

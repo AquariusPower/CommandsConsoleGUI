@@ -31,15 +31,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
-import com.github.commandsconsolegui.cmd.CommandsDelegator.CompositeControl;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
-import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
-import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.MouseCursorListenerAbs;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
@@ -47,7 +44,6 @@ import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.GuiGlobals;
@@ -323,6 +319,16 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 				
 				GuiControl gct = (GuiControl)ft;
 				Spatial spt = MiscJmeI.i().getParentestFrom(gct.getSpatial());
+				
+				BaseDialogStateAbs diag = MiscJmeI.i().getUserDataSH(spt, BaseDialogStateAbs.class.getName());
+//				BaseDialogStateAbs diag = (BaseDialogStateAbs)spt.getUserData(BaseDialogStateAbs.class.getName());
+				if(diag!=null){
+					if(ft==ftLatest){
+						diag.focusGained();
+					}else{
+						diag.focusLost();
+					}
+				}
 				
 				bugFix(null, null, btgBugFixZSortApply, spt, fZ);
 				

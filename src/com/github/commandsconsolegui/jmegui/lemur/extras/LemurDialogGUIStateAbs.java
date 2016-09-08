@@ -54,6 +54,7 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.input.KeyInput;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -158,6 +159,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	private float	fMinScale = 0.01f;
 	private boolean	bPreparedForListEntriesEffects;
 	private Integer	iFinalEntryHeightPixels;
+	private Quaternion	quaBkpMain;
 	@Override
 	public R configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
@@ -222,6 +224,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 			0);
 			
 		setContainerMain(new Container(new BorderLayout(), getStyle()));
+		quaBkpMain = getContainerMain().getLocalRotation().clone();
 		getContainerMain().setName(getId()+"_Dialog");
 		LemurFocusHelperStateI.i().prepareDialogToBeFocused(this);
 		CursorEventControl.addListenersToSpatial(getContainerMain(), DialogMouseCursorListenerI.i());
@@ -1076,5 +1079,19 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	protected void applyDefaultValueToUserModify() {
 		setInputText(getUserEnterCustomValueToken()+getDefaultValueToUserModify());
 	}
-
+	
+	@Override
+	public void focusGained() {
+//		if(quaBkpMain!=null){
+//			getContainerMain().setLocalRotation(quaBkpMain);
+//		}
+	}
+	
+	@Override
+	public void focusLost() {
+//		getContainerMain().getLocalRotation().lookAt(new Vector3f(0,1,1), new Vector3f(1,1,0));
+//		getContainerMain().getLocalRotation().lookAt(new Vector3f(1,0,1), new Vector3f(0,1,0));
+//		getContainerMain().getLocalRotation().lookAt(new Vector3f(0,1f,1f), new Vector3f(1,0,0));
+//		getContainerMain().getLocalRotation().lookAt(new Vector3f(0,1,1), new Vector3f(1,0,0));
+	}
 }

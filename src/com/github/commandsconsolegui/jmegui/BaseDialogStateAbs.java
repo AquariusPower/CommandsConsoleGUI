@@ -140,6 +140,13 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	
 	protected R setContainerMain(Spatial spt){
 		this.sptContainerMain=spt;
+		
+//		for(Class<?> cl:MiscI.i().getSuperClassesOf(this)){
+//			MiscJmeI.i().retrieveUserData(Spatial.class, this.sptContainerMain, cl.getName(), this, null);
+//			this.sptContainerMain.setUserData(cl.getName(), new SavableHolder(this));
+			MiscJmeI.i().setUserDataSH(this.sptContainerMain, this);
+//		}
+		
 		return getThis();
 	}
 	
@@ -931,5 +938,8 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	protected void actionCustomAtEntry(DialogListEntryData<T> dataSelected){
 		AudioUII.i().playOnUserAction(AudioUII.EAudio.SubmitSelection);
 	}
+	
+	public abstract void focusGained();
+	public abstract void focusLost();
 	
 }

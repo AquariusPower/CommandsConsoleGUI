@@ -2734,6 +2734,13 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		this.sliderDumpArea = sliderDumpArea;
 	}
 	protected abstract Float getStatsHeight();
+
+	@Override
+	public void focusGained() {
+	}
 	
+	@Override
+	public void focusLost() {
+	}
 }
 
