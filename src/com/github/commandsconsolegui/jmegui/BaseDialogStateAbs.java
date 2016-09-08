@@ -263,6 +263,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	 */
 	@Override
 	protected boolean initAttempt() {
+		if(getStyle()==null)setStyle(ConsoleLemurStateI.i().STYLE_CONSOLE);
 		if(!super.initAttempt())return false;
 		
 		if(!initGUI())return false;
@@ -282,10 +283,6 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	}
 	
 	protected boolean initGUI(){
-		if(getStyle()==null){
-			setStyle(ConsoleLemurStateI.i().STYLE_CONSOLE);
-		}
-		
 		return true;
 	}
 	
@@ -307,12 +304,18 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	public String getInputTextAsUserTypedValue(){
 		if(!isInputToUserEnterCustomValueMode())throw new PrerequisitesNotMetException("not user typing value mode", this);
 		
-		String str = getInputText();
+		String str = getInputText().trim();
 		if(str.startsWith(getUserEnterCustomValueToken())){
-			return str.substring(getUserEnterCustomValueToken().length()); 
+			str = str.substring(getUserEnterCustomValueToken().length()).trim();
+			
+			/**
+			 * if string must be surrounded by quotes, so empty one would be ""
+			 * if empty, there was no value typed, so ignore it.
+			 */
+			if(!str.isEmpty())return str;
 		}
 		
-		return null;
+		return null; //not a typed value, was a filter
 	}
 	
 	protected void requestActionSubmit() {

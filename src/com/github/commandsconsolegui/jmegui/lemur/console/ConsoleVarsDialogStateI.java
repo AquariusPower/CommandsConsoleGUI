@@ -60,8 +60,11 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		if(strUserTypedValue.equals(""+null))strUserTypedValue=null; //user requested value to become null
 		
 		// must be after "null" string check above
-		strUserTypedValue=MiscI.i().removeQuotes(strUserTypedValue);
+		if(strUserTypedValue!=null){
+			strUserTypedValue=MiscI.i().removeQuotes(strUserTypedValue);
+		}
 		
+		// can be null
 		boolean bChangesMade=false;
 		for(DialogListEntryData<T> dledToCfg:adledAtThisToApplyResultsList){
 			VarCmdFieldAbs vcf = (VarCmdFieldAbs)dledToCfg.getUserObj();
