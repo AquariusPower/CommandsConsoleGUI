@@ -48,7 +48,6 @@ import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.font.BitmapCharacter;
 import com.jme3.font.BitmapCharacterSet;
-import com.jme3.font.LineWrapMode;
 import com.jme3.input.KeyInput;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -57,7 +56,6 @@ import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
-import com.simsilica.lemur.GridPanel;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.HAlignment;
 import com.simsilica.lemur.Label;
@@ -1090,10 +1088,10 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		return cd.cmdFoundReturnStatus(bCommandWorked);
 	}
 
-	@Override
-	public <BFR> BFR bugFix(Class<BFR> clReturnType, BoolTogglerCmdField btgBugFixId,	Object... aobjCustomParams) {
-		return null;
-	}
+//	@Override
+//	public <BFR> BFR bugFix(Class<BFR> clReturnType, BFR objRetIfBugFixBoolDisabled, BoolTogglerCmdField btgBugFixId,	Object... aobjCustomParams) {
+//		return null;
+//	}
 
 	@Override
 	protected void updateSelected(DialogListEntryData<T> dledPreviouslySelected) {

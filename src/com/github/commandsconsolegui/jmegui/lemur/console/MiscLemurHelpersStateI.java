@@ -256,7 +256,7 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 			MiscJmeI.i().updateColorFading(tdTextCursorBlink, color, true);
 		}else{
 			if(MiscJmeI.i().updateBlink(tdTextCursorBlink, tf, geomCursor)){
-				bugFix(null,btgBugFixInvisibleCursor,tf);
+				bugFix(null,null,btgBugFixInvisibleCursor,tf);
 			}
 		}
 	}
@@ -320,7 +320,7 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 			dm.right();
 		}
 		
-		bugFix(null,btgBugFixUpdateTextFieldTextAndCaratVisibility,tf);
+		bugFix(null,null,btgBugFixUpdateTextFieldTextAndCaratVisibility,tf);
 //		bugFix(EBugFix.UpdateTextFieldTextAndCaratVisibility,tf);
 //		resetCursorPosition(tf);
 	}
@@ -420,10 +420,11 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 	BoolTogglerCmdField btgBugFixUpdateTextFieldTextAndCaratVisibility = 
 		new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 	@Override
-	public <T> T bugFix(Class<T> clReturnType, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams){
-		if(!btgBugFixId.b())return null;
+	public <BFR> BFR bugFix(Class<BFR> clReturnType, BFR objRetIfBugFixBoolDisabled, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams){
+		if(!btgBugFixId.b())return objRetIfBugFixBoolDisabled;
 		
 		boolean bFixed = false;
+		Object objRet = null;
 		
 //		if(btgBugFixListBoxSelectorArea.isEqualToAndEnabled(btgBugFixId)){
 //			ListBox<?> lstbx = (ListBox<?>)aobjCustomParams[0];
@@ -445,27 +446,27 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 			 *  
 			 * @param tf
 			 */
-			if(aobjCustomParams[0] instanceof TextField){
-				TextField tf = (TextField)aobjCustomParams[0];
-				tf.setFontSize(tf.getFontSize());
-				bFixed=true;
-			}				
+			TextField tf = MiscI.i().getParamFromArray(TextField.class, aobjCustomParams, 0);
+			
+			tf.setFontSize(tf.getFontSize());
+			
+			bFixed=true;
 		}else
 		if(btgBugFixInvisibleCursor.isEqualToAndEnabled(btgBugFixId)){
 			/**
 			 * To the point, but unnecessary.
 			 * see {@link TextEntryComponent#resetCursorColor()}
 			 */
-			if(aobjCustomParams[0] instanceof Geometry){
-				Geometry geomCursor = (Geometry)aobjCustomParams[0];
+			Geometry geomCursor = MiscI.i().getParamFromArray(Geometry.class, aobjCustomParams, 0);
+			TextField tf = MiscI.i().getParamFromArray(TextField.class, aobjCustomParams, 0);
+			if(geomCursor!=null){
 //				if(!bFixInvisibleTextInputCursor)return null;
 				
 //			getBitmapTextFrom(tf).setAlpha(1f); //this is a fix to let text cursor be visible.
 				geomCursor.getMaterial().setColor("Color",ColorRGBA.White.clone());
 				bFixed=true;
 			}else
-			if(aobjCustomParams[0] instanceof TextField){
-				TextField tf = (TextField)aobjCustomParams[0];
+			if(tf!=null){
 //				if(!bFixInvisibleTextInputCursor)return null;
 				
 				String strInvisibleCursorFixed="InvisibleCursorFixed";
@@ -500,7 +501,7 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 			throw new PrerequisitesNotMetException("cant bugfix this way...",aobjCustomParams);
 		}
 		
-		return null;
+		return (BFR)objRet;
 	}
 	
 //	@Override
@@ -619,7 +620,7 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 	public void insertTextAtCaratPosition(TextField tf, String str) {
 		DocumentModel dm = tf.getDocumentModel();
 		for(int i=0;i<str.length();i++)dm.insert(str.charAt(i));
-		bugFix(null,btgBugFixUpdateTextFieldTextAndCaratVisibility,tf);
+		bugFix(null,null,btgBugFixUpdateTextFieldTextAndCaratVisibility,tf);
 //		bugFix(EBugFix.UpdateTextFieldTextAndCaratVisibility, tf);
 	}
 

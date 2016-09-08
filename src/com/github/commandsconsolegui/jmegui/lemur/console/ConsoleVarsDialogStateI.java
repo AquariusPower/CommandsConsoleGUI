@@ -133,7 +133,10 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		}else
 		{
 			if(objUser instanceof VarCmdFieldAbs){
-			super.actionCustomAtEntry(dledSelected);
+				super.actionCustomAtEntry(dledSelected);
+			}else
+			if(objUser instanceof EGroupKeys){
+				// skipper, this is actually an empty group (no tree expanded/shrinked)
 			}else{
 				throw new PrerequisitesNotMetException("user object not a var", objUser, dledSelected, this);
 			}
@@ -158,11 +161,11 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		//clearList()
 		ArrayList<VarCmdFieldAbs> avcf = VarCmdFieldAbs.getListFullCopy();
 		
-		for(VarCmdFieldAbs vcfEntry:avcf){
-			if(vcfEntry.getUniqueVarId()==null)continue;
+		for(VarCmdFieldAbs vcfVarEntry:avcf){
+			if(vcfVarEntry.getUniqueVarId()==null)continue;
 			
 			// check if already at the list
-			DialogListEntryData<T> dledEntry = null;
+			DialogListEntryData<T> dledVarEntry = null;
 			for(DialogListEntryData<T> dled:getCompleteEntriesListCopy()){
 				Object obj = dled.getUserObj();
 				if (obj instanceof EGroupKeys)continue;
@@ -178,48 +181,33 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 //				}
 //				if(dled.getUserObj()==PkgTopRef.class)continue;
 				VarCmdFieldAbs vcfAtListEntry = ((VarCmdFieldAbs)obj);
-				if(vcfEntry.getUniqueVarId().equals(vcfAtListEntry.getUniqueVarId())){
-					dledEntry = dled;
+				if(vcfVarEntry.getUniqueVarId().equals(vcfAtListEntry.getUniqueVarId())){
+					dledVarEntry = dled;
 				}
 			}
 			
 			// create new if not at list
-			if(dledEntry==null){
-				dledEntry=createNewVarEntry(vcfEntry); //will return with parent already set
+			if(dledVarEntry==null){
+				dledVarEntry=createNewVarEntry(vcfVarEntry); //will return with parent already set
 				
 				// will set the package entry as the rootEntry's parent
-				String strVarConcrPkg = vcfEntry.getIdTmpCopy().getConcreteClass().getPackage().getName();
-				if(strVarConcrPkg.startsWith(dledConsProjPackage.getTextValue())){
-					if (vcfEntry.getOwner() instanceof BaseDialogStateAbs) {
-						setParentestParent(dledEntry, dledDiagsCons);
-//						dledEntry.getParentest().setParent(dledDiagsCons);
-					}
-					
-					setParentestParent(dledEntry, dledConsProjPackage);
-//					DialogListEntryData<T> dledParentest = dledEntry.getParentest();
-//					if(dledParentest!=dledConsProjPackage){ //the concrete's parent may have already been set properly
-//						dledParentest.setParent(dledConsProjPackage);
-//					}
+				String strVarConcrPkg = vcfVarEntry.getIdTmpCopy().getConcreteClass().getPackage().getName();
+				boolean bConsProj = strVarConcrPkg.startsWith(PkgTopRef.class.getPackage().getName());
+				if (vcfVarEntry.getOwner() instanceof BaseDialogStateAbs) {
+					setParentestParent(dledVarEntry, bConsProj ? dledDiagsCons : dledDiags);
 				}else{
-					if (vcfEntry.getOwner() instanceof BaseDialogStateAbs) {
-						setParentestParent(dledEntry, dledDiags);
-//						DialogListEntryData<T> dledParentest = dledEntry.getParentest();
-//						if(dledParentest!=dledDiags){
-//								dledParentest.setParent(dledDiags);
-//						}
-					}
+					if(bConsProj)setParentestParent(dledVarEntry, dledConsProjPackage);
 				}
-				
 			}
 			
 			// truncate value string
 			String strVal=null;
-			if(vcfEntry.getRawValue()==null){
+			if(vcfVarEntry.getRawValue()==null){
 				strVal=""+null;
 			}else{
-				strVal=vcfEntry.getValueAsString(3);
+				strVal=vcfVarEntry.getValueAsString(3);
 	//			if(strVal==null)strVal="";
-				if(vcfEntry instanceof StringVarField){
+				if(vcfVarEntry instanceof StringVarField){
 					strVal='"'+strVal+'"';
 					if(strVal.length()>10){
 						String strEtc="+"; //TODO use 3 dots single character if it exists or some other symbol?
@@ -230,17 +218,30 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			
 			// update custom buttons as values may have changed
 			//TODO compare if values changed?
-			dledEntry.clearCustomButtonActions();
-			dledEntry.addCustomButtonAction(strVal, (T)cv);
+			dledVarEntry.clearCustomButtonActions();
+			dledVarEntry.addCustomButtonAction(strVal, (T)cv);
 		}
+		
 		
 		super.updateList(); //MiscI.i().getClassTreeFor(this)
 	}
 	
 	private void setParentestParent(DialogListEntryData<T> dledEntry, DialogListEntryData<T> dledParent){
 		DialogListEntryData<T> dledParentest = dledEntry.getParentest();
+		
+		if (dledParentest.getUserObj() instanceof EGroupKeys) {
+			EGroupKeys egk = (EGroupKeys) dledParentest.getUserObj();
+			switch(egk){
+				case PkgTopRef:
+				case DialogsCons:
+				case Dialogs:
+					// constant top groups are already setup at initialization
+					return; 
+			}
+		}
+		
 		if(dledParentest!=dledParent){
-				dledParentest.setParent(dledParent);
+			dledParentest.setParent(dledParent);
 		}
 	}
 	
@@ -317,21 +318,34 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		
 		// the top package as parent:
 		dledConsProjPackage = new DialogListEntryData<T>(this);
-		dledConsProjPackage.setText("Pkg="+PkgTopRef.class.getPackage().getName(), EGroupKeys.PkgTopRef);//PkgTopRef.class);
+		dledConsProjPackage.setText("(Package: "+PkgTopRef.class.getPackage().getName()+")", EGroupKeys.PkgTopRef);//PkgTopRef.class);
 		
 		dledDiagsCons = new DialogListEntryData<T>(this);
-		dledDiagsCons.setText("DialogsCons",EGroupKeys.DialogsCons);
+		dledDiagsCons.setText("(DialogsCons)",EGroupKeys.DialogsCons);
+		dledDiagsCons.setParent(dledConsProjPackage);
 		
 		dledDiags = new DialogListEntryData<T>(this);
-		dledDiags.setText("Dialogs",EGroupKeys.Dialogs);
+		dledDiags.setText("(Dialogs)",EGroupKeys.Dialogs);
 		
 		return true;
+	}
+	
+	@Override
+	protected String getTextInfo() {
+		String str="";
+		
+		str+="Help("+ConsoleVarsDialogStateI.class.getSimpleName()+"):\n";
+		str+="\tAll console variables are accessible thru this dialog.\n";
+		
+		return str+super.getTextInfo();
 	}
 	
 	@Override
 	protected void initSuccess() {
 		super.initSuccess();
 		addEntry(dledConsProjPackage);
+		addEntry(dledDiagsCons);
+		addEntry(dledDiags);
 	}
 	
 }

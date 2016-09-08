@@ -51,6 +51,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 
+import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
@@ -530,5 +532,26 @@ public class MiscI {
 			str=str.substring(1,str.length()-1);
 		}
 		return str;
+	}
+	
+	/**
+	 * 
+	 * @param cl
+	 * @param aobj params are expected to be NOT null
+	 * @param iIndex
+	 * @return null if invalid class type to cast
+	 */
+	public <T> T getParamFromArray(Class<T> cl, Object[] aobj, int iIndex){
+		Object obj = aobj[iIndex];
+		if(cl.isInstance(obj))return (T)obj;
+		return null;
+	}
+
+	public <BFR> BFR bugFixRet(Class<BFR> clReturnType, boolean bFixed,	Object objRet, Object[] aobjCustomParams) {
+		if(!bFixed){
+			throw new PrerequisitesNotMetException("cant bugfix this way...",aobjCustomParams);
+		}
+		
+		return (BFR)objRet;
 	}
 }

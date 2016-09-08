@@ -47,10 +47,11 @@ import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 public interface IWorkAroundBugFix {
 	/**
 	 * BFR is bugfix return (type)
+	 * Collect param ex.: Float spt = MiscI.i().getParamFromArray(Float.class, aobjCustomParams, 0);
 	 * @param clReturnType
 	 * @param btgBugFixId
 	 * @param aobjCustomParams
 	 * @return
 	 */
-	public <BFR> BFR bugFix(Class<BFR> clReturnType, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams);
+	public <BFR> BFR bugFix(Class<BFR> clReturnType, BFR objRetIfBugFixBoolDisabled, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams);
 }

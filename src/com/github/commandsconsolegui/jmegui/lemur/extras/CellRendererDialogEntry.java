@@ -50,6 +50,7 @@ import com.jme3.font.LineWrapMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Button.ButtonAction;
@@ -209,7 +210,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			this.dled=dledToSet;
 			
 //			cntrBase = (Container)bugFix(0);
-			cntrBase = bugFix(Container.class, btgNOTWORKINGBugFixGapForListBoxSelectorArea);
+			cntrBase = bugFix(Container.class, this, btgNOTWORKINGBugFixGapForListBoxSelectorArea);
 			
 			btnTree = createButton("Tree", "?", cntrBase, Position.West);
 			btnTree.addCommands(ButtonAction.Click, ctt);
@@ -330,13 +331,21 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 //			return null;
 //		}
 		
-		@SuppressWarnings("unchecked")
 		@Override
-		public <BFR> BFR bugFix(Class<BFR> clReturnType, BoolTogglerCmdField btgBugFixId,	Object... aobjCustomParams) {
-			if(btgBugFixId==btgNOTWORKINGBugFixGapForListBoxSelectorArea){
+		public <BFR> BFR bugFix(Class<BFR> clReturnType, BFR objRetIfBugFixBoolDisabled, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams) {
+			if(!btgBugFixId.b())return objRetIfBugFixBoolDisabled;
+			
+			Object objRet = null;
+			boolean bFixed = false;
+			
+			if(btgNOTWORKINGBugFixGapForListBoxSelectorArea.isEqualToAndEnabled(btgBugFixId)){
+				/**
+				 * param ex.: Geometry geomCursor = MiscI.i().getParamFromArray(Geometry.class, aobjCustomParams, 0);
+				 */
+				
 //				MiscI.i().assertSameClass(Container.class,clReturnType);
 				Container cntr=null;
-				if(btgNOTWORKINGBugFixGapForListBoxSelectorArea.b()){ //TODO the fix is not working anymore
+//				if(btgNOTWORKINGBugFixGapForListBoxSelectorArea.b()){ //TODO the fix is not working anymore
 					/**
 					 * this requires that all childs (in this case buttons) have their style background
 					 * color transparent (like alpha 0.5f) or the listbox selector will not be visible below them...
@@ -348,13 +357,16 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 //					LemurMiscHelpersStateI.i().setGrantedSize(cntr, v3fSize, true);
 					cntr.setName(btgNOTWORKINGBugFixGapForListBoxSelectorArea.getSimpleId()); //when mouse is over a cell, if the ListBox->selectorArea has the same world Z value of the button, it may be ordered before the button on the raycast collision results at PickEventSession.setCurrentHitTarget(ViewPort, Spatial, Vector2f, CollisionResult) line: 262	-> PickEventSession.cursorMoved(int, int) line: 482 
 					addChild(cntr, Position.Center);
-				}else{
-					cntr = this;
-				}
-				return (BFR)cntr;
+//				}else{
+//					cntr = this;
+//				}
+				
+				bFixed=true;
+				
+				objRet=cntr;
 			}
 			
-			return null;
+			return MiscI.i().bugFixRet(clReturnType,bFixed, objRet, aobjCustomParams);
 		}
 
 		@Override

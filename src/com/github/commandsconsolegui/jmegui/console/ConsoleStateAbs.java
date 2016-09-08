@@ -2007,7 +2007,12 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	}
 	
 	@Override
-	public <BFR> BFR bugFix(Class<BFR> clReturnType, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams) {
+	public <BFR> BFR bugFix(Class<BFR> clReturnType, BFR objRetIfBugFixBoolDisabled, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams) {
+		if(!btgBugFixId.b())return objRetIfBugFixBoolDisabled;
+		
+		boolean bFixed = false;
+		Object objRet = null;
+		
 		if(btgBugFixStatsLabelTextSize.isEqualToAndEnabled(btgBugFixId)){
 			/**
 			 * BugFix: because the related crash should/could be prevented/preventable.
@@ -2060,9 +2065,11 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 				
 				if(!bRetry)break;
 			}
+			
+			bFixed=true;
 		}
 		
-		return null;
+		return MiscI.i().bugFixRet(clReturnType,bFixed, objRet, aobjCustomParams);
 	}
 	
 //	enum EBugFix{
@@ -2140,7 +2147,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		
 		setStatsText(str);
 		
-		bugFix(null,btgBugFixStatsLabelTextSize);
+		bugFix(null,null,btgBugFixStatsLabelTextSize);
 //		bugFix(EBugFix.StatsLabelTextSize);
 	}	
 	
