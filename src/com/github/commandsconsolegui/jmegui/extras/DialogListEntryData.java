@@ -29,6 +29,8 @@ package com.github.commandsconsolegui.jmegui.extras;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
@@ -198,7 +200,7 @@ public class DialogListEntryData<T> implements Savable{
 	@Override
 	public String toString() {
 //		return iKey+","+strText+","+objRef;
-		return "UId="+getUId()+","+strText;
+		return "UId="+getUId()+","+strText+",childCount="+aChildList.size();
 	}
 	
 //	public void setCfg(DialogListEntryData data) {
@@ -297,10 +299,29 @@ public class DialogListEntryData<T> implements Savable{
 		return this;
 	}
 	
+	public ArrayList<DialogListEntryData<T>> getAllParents(){
+		ArrayList<DialogListEntryData<T>> adledParentList = new ArrayList<DialogListEntryData<T>>();
+		
+		DialogListEntryData<T> dledParent = getParent();
+		while(dledParent!=null){
+			adledParentList.add(dledParent);
+			dledParent = dledParent.getParent();
+		}
+		
+		return adledParentList;
+	}
+	
 	public boolean toggleExpanded() {
 //		if(!isParent())return false;
 		
 		this.bTreeExpanded = !this.bTreeExpanded;
+		
+		if(this.bTreeExpanded){
+			for(DialogListEntryData<T> dledParent:getAllParents()){
+				dledParent.setTreeExpanded(true);
+			}
+		}
+		
 		diagOwner.requestRefreshList();
 //		cell.assignedCellRenderer.diagParent.requestRefreshList();
 		
@@ -349,6 +370,10 @@ public class DialogListEntryData<T> implements Savable{
 			
 			dledParent = dledParentTmp;
 		}
+	}
+
+	public void sortChildren(Comparator<DialogListEntryData<T>> cmpDled) {
+		Collections.sort(aChildList, cmpDled);
 	}
 	
 //	public void setUId(String strUId) {

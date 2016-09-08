@@ -31,18 +31,13 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.PkgTopRef;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
-import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
-import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
-import com.github.commandsconsolegui.cmd.varfield.NumberVarFieldAbs;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
-import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI.CompositeControl;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceDialogState;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.MaintenanceListDialogState;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -57,199 +52,6 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	private static ConsoleVarsDialogStateI<Command<Button>>	instance=new ConsoleVarsDialogStateI<Command<Button>>();
 	public static ConsoleVarsDialogStateI<Command<Button>> i(){return instance;}
 
-	private static class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceDialogState<T>{
-		private static class CfgParm extends ChoiceDialogState.CfgParm{
-			public CfgParm(Float fDialogWidthPercentOfAppWindow,
-					Float fDialogHeightPercentOfAppWindow,
-					Float fInfoHeightPercentOfDialog, Float fEntryHeightMultiplier) {
-				super(fDialogWidthPercentOfAppWindow, fDialogHeightPercentOfAppWindow,
-						fInfoHeightPercentOfDialog, fEntryHeightMultiplier);
-			}
-		}
-
-		private VarCmdFieldAbs	vcf;
-		private DialogListEntryData<T>	dledAtParent;
-		
-//		@Override
-//		public boolean doItAllProperly(CompositeControl cc, float tpf) {
-////			if(isTryingToEnable()){
-////				int i=2;int i2=i;
-////			}
-//			return super.doItAllProperly(cc, tpf);
-//		}
-		
-		@SuppressWarnings("rawtypes")
-		@Override
-		protected boolean enableAttempt() {
-			if(!super.enableAttempt())return false;
-			
-			dledAtParent = getParentReferencedDledListCopy().get(0);
-			Object objUser = dledAtParent.getUserObj();
-			if(objUser instanceof VarCmdFieldAbs){
-				vcf = (VarCmdFieldAbs)objUser;
-			}else{
-				throw new PrerequisitesNotMetException("user object is not "+VarCmdFieldAbs.class, objUser, dledAtParent);
-			}
-			
-			btgSortListEntries.setObjectRawValue(false);
-			
-			return true;
-		}
-		
-//		@Override
-//		protected void enableSuccess() {
-//			super.enableSuccess();
-////			setInputText(getUserEnterCustomValueToken()+vcf.getValueAsString(10));
-//			setInputText(getUserEnterCustomValueToken()+vcf.getValueRaw());
-//		}
-		
-		@Override
-		protected String getTextInfo() {
-			String str="";
-			
-			str+="Help("+vcf.getClass().getSimpleName()+"):\n";
-			str+="\t"+(vcf.getHelp()==null ? "(no help)" : vcf.getHelp())+"\n";
-			
-			str+="Help("+ConsoleVarsDialogStateI.class.getSimpleName()+"):\n";
-			str+="\tList and manage all console variables for all class listeners.\n";
-			
-			str+=super.getTextInfo();
-			
-			return str;
-		}
-		
-		@Override
-		protected void actionSubmit() { //just to help on debug...
-			super.actionSubmit();
-		}
-		
-		private class CmdApplyValueAtInput implements Command<Button>{
-			@Override
-			public void execute(Button source) {
-				ChoiceVarDialogState.this.setInputTextAsUserTypedValue(
-					ChoiceVarDialogState.this.getDledFrom(source).getVisibleText());
-			}
-		}
-		CmdApplyValueAtInput cavai = new CmdApplyValueAtInput();
-		private DialogListEntryData<T>	dledRawValue;
-		private boolean	bListIsFilled;
-		private DialogListEntryData<T>	dledVals;
-		private DialogListEntryData<T>	dledInfo;
-		
-		@Override
-		protected void updateList() {
-			if(!bListIsFilled){
-	//			clearList();
-				
-				DialogListEntryData<T> dledNew = null;
-				
-				if(dledInfo==null){
-					dledInfo = new DialogListEntryData<T>(this);
-					dledInfo.setText("Info:", vcf);
-					dledInfo.setTreeExpanded(true);
-				}
-				addEntry(dledInfo);
-				
-				{
-					dledNew = new DialogListEntryData<T>(this);
-					dledNew.setText(vcf.getUniqueVarId(), vcf);
-					dledNew.setParent(dledInfo);
-					addEntry(dledNew).addCustomButtonAction("UniqueId",getCmdDummy());
-					
-					dledNew = new DialogListEntryData<T>(this);
-					dledNew.setText(vcf.getSimpleId(), vcf);
-					dledNew.setParent(dledInfo);
-					addEntry(dledNew).addCustomButtonAction("SimpleId",getCmdDummy());
-						
-					dledNew = new DialogListEntryData<T>(this);
-					dledNew.setText(vcf.getHelp(), vcf);
-					dledNew.setParent(dledInfo);
-					addEntry(dledNew).addCustomButtonAction("Help",getCmdDummy());
-				}
-				
-				if(dledVals==null){
-					dledVals = new DialogListEntryData<T>(this);
-					dledVals.setText("Value:", vcf);
-					dledVals.setTreeExpanded(true);
-				}
-				addEntry(dledVals);
-				
-				{
-					if(vcf instanceof NumberVarFieldAbs){
-						NumberVarFieldAbs v = (NumberVarFieldAbs)vcf;
-						
-						if(v.getMin()!=null){
-							dledNew = new DialogListEntryData<T>(this);
-							dledNew.setParent(dledVals);
-							addEntry(dledNew.setText(v.getMin(), vcf)).addCustomButtonAction("MinValue->",(T)cavai);
-						}
-						
-						if(v.getMax()!=null){
-							dledNew = new DialogListEntryData<T>(this);
-							dledNew.setParent(dledVals);
-							addEntry(dledNew.setText(v.getMax(), vcf)).addCustomButtonAction("MaxValue->",(T)cavai);
-						}
-					}
-					
-					dledNew = new DialogListEntryData<T>(this);
-					dledNew.setText(vcf.getRawValueDefault(), vcf);
-					dledNew.setAddVisibleQuotes(vcf instanceof StringVarField);
-					dledNew.setParent(dledVals);
-					addEntry(dledNew).addCustomButtonAction("DefaultValueRaw->",(T)cavai);
-					
-					dledRawValue = new DialogListEntryData<T>(this);
-					dledRawValue.setText(vcf.getRawValue(), vcf);
-					dledRawValue.setAddVisibleQuotes(vcf instanceof StringVarField);
-					dledRawValue.setParent(dledVals);
-					addEntry(dledRawValue).addCustomButtonAction("ValueRaw->",(T)cavai);
-					
-					dledNew = new DialogListEntryData<T>(this);
-					dledNew.setText(vcf.getValueAsString(3), vcf);
-					dledNew.setAddVisibleQuotes(vcf instanceof StringVarField);
-					dledNew.setParent(dledVals);
-					addEntry(dledNew).addCustomButtonAction("Value->",(T)cavai);
-				}
-				
-	//			addEntry(
-	//					new DialogListEntryData<T>(this).setText(vcf.getValueAsString(3), vcf)
-	//						.setAddVisibleQuotes(vcf instanceof StringVarField)
-	//				).addCustomButtonAction("CustomTypedReturnValue",(T)cavai);
-				
-				bListIsFilled=true;
-			}
-			
-			super.updateList();
-		}
-		
-		@Override
-		protected void clearList() {
-			super.clearList();
-			dledInfo.clearChildren();
-			dledVals.clearChildren();
-			bListIsFilled=false;
-		}
-		
-		@Override
-		protected boolean disableAttempt() {
-			if(!super.disableAttempt())return false;
-			vcf=null; 
-			clearList(); //from a previous enable
-			setInputText("");
-			return true;
-		}
-		
-//		@Override
-//		protected void actionSubmit() {
-//			super.actionSubmit();
-//		}
-		@Override
-		protected String getDefaultValueToUserModify() {
-//			return ""+vcf.getRawValue();
-			return dledRawValue.getVisibleText();
-		}
-		
-	}
-	
 	@Override
 	protected boolean modifyEntry(BaseDialogStateAbs<T, ?> diagModal,	DialogListEntryData<T> dledAtModal,	ArrayList<DialogListEntryData<T>> adledAtThisToApplyResultsList) {
 		String strUserTypedValue = diagModal.getInputTextAsUserTypedValue();
@@ -338,9 +140,17 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		}
 	}
 	
-	private String strParentDeclaringClassKey="ParentDeclaringClass";
-	private String strParentConcreteClassKey ="ParentConcreteClass";
+	enum EGroupKeys{
+		ParentDeclaringClass,
+		ParentConcreteClass,
+		DialogsCons,
+		Dialogs,
+		PkgTopRef,
+		;
+	}
 	private DialogListEntryData<T>	dledConsProjPackage;
+	private DialogListEntryData<T>	dledDiagsCons;
+	private DialogListEntryData<T>	dledDiags;
 	
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -348,43 +158,68 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		//clearList()
 		ArrayList<VarCmdFieldAbs> avcf = VarCmdFieldAbs.getListFullCopy();
 		
-		for(VarCmdFieldAbs vcf:avcf){
-			if(vcf.getUniqueVarId()==null)continue;
+		for(VarCmdFieldAbs vcfEntry:avcf){
+			if(vcfEntry.getUniqueVarId()==null)continue;
 			
 			// check if already at the list
-			DialogListEntryData<T> dledVar = null;
+			DialogListEntryData<T> dledEntry = null;
 			for(DialogListEntryData<T> dled:getCompleteEntriesListCopy()){
-				if(dled.getUserObj()==strParentDeclaringClassKey)continue;
-				if(dled.getUserObj()==strParentConcreteClassKey)continue;
-				if(dled.getUserObj()==PkgTopRef.class)continue;
-				VarCmdFieldAbs vcfAtListEntry = ((VarCmdFieldAbs)dled.getUserObj());
-				if(vcf.getUniqueVarId().equals(vcfAtListEntry.getUniqueVarId())){
-					dledVar = dled;
+				Object obj = dled.getUserObj();
+				if (obj instanceof EGroupKeys)continue;
+//				{
+//					EGroupKeys ek = (EGroupKeys) obj;
+//					switch(ek){
+//						case DialogsCons:
+//						case ParentConcreteClass:
+//						case ParentDeclaringClass:
+//						case PkgTopRef:
+//							continue;
+//					}
+//				}
+//				if(dled.getUserObj()==PkgTopRef.class)continue;
+				VarCmdFieldAbs vcfAtListEntry = ((VarCmdFieldAbs)obj);
+				if(vcfEntry.getUniqueVarId().equals(vcfAtListEntry.getUniqueVarId())){
+					dledEntry = dled;
 				}
 			}
 			
 			// create new if not at list
-			if(dledVar==null){
-				dledVar=createNewVarEntry(vcf); //will return with parent already set
+			if(dledEntry==null){
+				dledEntry=createNewVarEntry(vcfEntry); //will return with parent already set
 				
 				// will set the package entry as the rootEntry's parent
-				String strVarConcrPkg = vcf.getIdTmpCopy().getConcreteClass().getPackage().getName();
+				String strVarConcrPkg = vcfEntry.getIdTmpCopy().getConcreteClass().getPackage().getName();
 				if(strVarConcrPkg.startsWith(dledConsProjPackage.getTextValue())){
-					DialogListEntryData<T> dledParentest = dledVar.getParentest();
-					if(dledParentest!=dledConsProjPackage){ //the concrete's parent may have already been set properly
-						dledParentest.setParent(dledConsProjPackage);
+					if (vcfEntry.getOwner() instanceof BaseDialogStateAbs) {
+						setParentestParent(dledEntry, dledDiagsCons);
+//						dledEntry.getParentest().setParent(dledDiagsCons);
+					}
+					
+					setParentestParent(dledEntry, dledConsProjPackage);
+//					DialogListEntryData<T> dledParentest = dledEntry.getParentest();
+//					if(dledParentest!=dledConsProjPackage){ //the concrete's parent may have already been set properly
+//						dledParentest.setParent(dledConsProjPackage);
+//					}
+				}else{
+					if (vcfEntry.getOwner() instanceof BaseDialogStateAbs) {
+						setParentestParent(dledEntry, dledDiags);
+//						DialogListEntryData<T> dledParentest = dledEntry.getParentest();
+//						if(dledParentest!=dledDiags){
+//								dledParentest.setParent(dledDiags);
+//						}
 					}
 				}
+				
 			}
 			
 			// truncate value string
 			String strVal=null;
-			if(vcf.getRawValue()==null){
+			if(vcfEntry.getRawValue()==null){
 				strVal=""+null;
 			}else{
-				strVal=vcf.getValueAsString(3);
+				strVal=vcfEntry.getValueAsString(3);
 	//			if(strVal==null)strVal="";
-				if(vcf instanceof StringVarField){
+				if(vcfEntry instanceof StringVarField){
 					strVal='"'+strVal+'"';
 					if(strVal.length()>10){
 						String strEtc="+"; //TODO use 3 dots single character if it exists or some other symbol?
@@ -395,11 +230,18 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			
 			// update custom buttons as values may have changed
 			//TODO compare if values changed?
-			dledVar.clearCustomButtonActions();
-			dledVar.addCustomButtonAction(strVal, (T)cv);
+			dledEntry.clearCustomButtonActions();
+			dledEntry.addCustomButtonAction(strVal, (T)cv);
 		}
 		
 		super.updateList(); //MiscI.i().getClassTreeFor(this)
+	}
+	
+	private void setParentestParent(DialogListEntryData<T> dledEntry, DialogListEntryData<T> dledParent){
+		DialogListEntryData<T> dledParentest = dledEntry.getParentest();
+		if(dledParentest!=dledParent){
+				dledParentest.setParent(dledParent);
+		}
 	}
 	
 	/**
@@ -417,15 +259,15 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		if(vidCopy.getConcreteClassSName().equals(vidCopy.getDeclaringClassSName())){
 			dledVarEntryParent = createParentEntry(
 					vidCopy.getDeclaringClassSName(),
-					strParentDeclaringClassKey);
+					EGroupKeys.ParentDeclaringClass);
 		}else{
 			DialogListEntryData<T> dledDeclaringClassParent = createParentEntry(
 				vidCopy.getConcreteClassSName()+vidCopy.getDeclaringClassSName(),
-				strParentDeclaringClassKey);
+				EGroupKeys.ParentDeclaringClass);
 			
 			DialogListEntryData<T> dledConcreteClassParent = createParentEntry(
 				vidCopy.getConcreteClassSName(),
-				strParentConcreteClassKey);
+				EGroupKeys.ParentConcreteClass);
 			
 			if(dledDeclaringClassParent.getParent()==null){
 				dledDeclaringClassParent.setParent(dledConcreteClassParent);
@@ -451,7 +293,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		return dledVar;
 	}
 	
-	private DialogListEntryData<T> createParentEntry(String strParentTextKey, String strParentKindKey){
+	private DialogListEntryData<T> createParentEntry(String strParentTextKey, EGroupKeys egk){
 		// prepare declaring class as tree parent  
 		DialogListEntryData<T> dledParent=null;
 		for(DialogListEntryData<T> dled:getCompleteEntriesListCopy()){
@@ -462,7 +304,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		}
 		if(dledParent==null){
 			dledParent=new DialogListEntryData<T>(this);
-			dledParent.setText(strParentTextKey,strParentKindKey);
+			dledParent.setText(strParentTextKey,egk);
 			addEntry(dledParent);
 		}
 		
@@ -475,7 +317,13 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		
 		// the top package as parent:
 		dledConsProjPackage = new DialogListEntryData<T>(this);
-		dledConsProjPackage.setText(PkgTopRef.class.getPackage().getName(), PkgTopRef.class);
+		dledConsProjPackage.setText("Pkg="+PkgTopRef.class.getPackage().getName(), EGroupKeys.PkgTopRef);//PkgTopRef.class);
+		
+		dledDiagsCons = new DialogListEntryData<T>(this);
+		dledDiagsCons.setText("DialogsCons",EGroupKeys.DialogsCons);
+		
+		dledDiags = new DialogListEntryData<T>(this);
+		dledDiags.setText("Dialogs",EGroupKeys.Dialogs);
 		
 		return true;
 	}

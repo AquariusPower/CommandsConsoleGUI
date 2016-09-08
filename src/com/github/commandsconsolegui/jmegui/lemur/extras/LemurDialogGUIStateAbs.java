@@ -39,6 +39,7 @@ import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
+import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
@@ -436,6 +437,21 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	//* call {@link #updateList(ArrayList)} from the method overriding this
 	//*/
 	
+	private void addWithParents(DialogListEntryData<T> dled){
+		if(vlVisibleEntriesList.contains(dled))return;
+		
+		vlVisibleEntriesList.add(dled);
+		
+		DialogListEntryData<T> dledParent = dled.getParent();
+		while(dledParent!=null){
+			if(!vlVisibleEntriesList.contains(dledParent)){
+				vlVisibleEntriesList.add(vlVisibleEntriesList.indexOf(dled),dledParent);
+			}
+			dled=dledParent;
+			dledParent=dledParent.getParent();
+		}
+	}
+	
 	@Override
 	protected void updateList(){
 //		updateList(adleCompleteEntriesList);
@@ -448,7 +464,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		for(DialogListEntryData<T> dled:getCompleteEntriesListCopy()){
 			if(!getLastFilter().isEmpty()){
 				if(dled.getVisibleText().toLowerCase().contains(getLastFilter())){
-					vlVisibleEntriesList.add(dled);
+					addWithParents(dled);
+//					vlVisibleEntriesList.add(dled);
 				}
 			}else{
 				if(dled.getParent()==null){
@@ -865,6 +882,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		setSelectedEntryIndex(iSel);
 //		selectionModel.setSelection(iSel);
 		bRefreshScroll=true;
+		
+		DialogMouseCursorListenerI.i().clearLastButtonHoverIn();
 		
 //		iSel = selectionModel.getSelection();
 		cd().dumpDebugEntry(getId()+":"

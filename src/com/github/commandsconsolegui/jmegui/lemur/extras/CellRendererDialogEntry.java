@@ -363,20 +363,20 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		}
 		
 		public void setOverrideBackgroundColorNegatingCurrent() {
-			setOverrideBackgroundColor(ColorRGBA.randomColor(),true); //dummy color...
+			overrideBackgroundColor(null,false,true);
 		}
 		public void resetOverrideBackgroundColor(){
-			setOverrideBackgroundColor(null,false);
+			overrideBackgroundColor(null,true,false);
 		}
 		public void setOverrideBackgroundColor(ColorRGBA colorApply) {
-			setOverrideBackgroundColor(colorApply,false);
+			overrideBackgroundColor(colorApply,false,false);
 		}
 		/**
 		 * 
-		 * @param colorApply if null, will reset (restore current normal bkg color)
+		 * @param colorOverride if null, will reset (restore current normal bkg color)
 		 * @param bNegateCurrentColor overrides color param (least if it is null)
 		 */
-		private void setOverrideBackgroundColor(ColorRGBA colorApply,boolean bNegateCurrentColor) {
+		private void overrideBackgroundColor(ColorRGBA colorOverride, boolean bResetToBackup, boolean bNegateCurrentColor) {
 			if(!btgHoverHighlight.b())return;
 			
 			GuiComponent gcBkg = getBackground();
@@ -394,20 +394,17 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 				setUserData("BkgColorBkp", colorBkp);
 			}
 			
-			if(colorApply!=null){
-				if(bNegateCurrentColor){
-					colorApply = new ColorRGBA(
-							FastMath.abs(1f-colorBkp.r),
-							FastMath.abs(1f-colorBkp.g),
-							FastMath.abs(1f-colorBkp.b),
-							colorBkp.a
-						);
-				}
-				
-				qbc.setColor(colorApply);
-			}else{ //restore
+			if(bResetToBackup){
 				qbc.setColor(colorBkp);
 				setUserData("BkgColorBkp", null); //clear to not leave useless value there
+			}else{
+				if(bNegateCurrentColor){
+					colorOverride = MiscJmeI.i().negateColor(colorBkp);
+				}else{
+					if(colorOverride==null)throw new PrerequisitesNotMetException("invalid null color override", this);
+				}
+				
+				qbc.setColor(colorOverride);
 			}
 			
 //			if(colorApply!=null){

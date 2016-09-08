@@ -40,6 +40,7 @@ import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButt
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell.EUserData;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
@@ -59,8 +60,9 @@ import com.simsilica.lemur.list.CellRenderer;
  *
  */
 public abstract class MouseCursorListenerAbs implements CursorListener {
+	private Button	btnLastHoverIn;
 	
-	MouseCursorButtonsControl mcab;
+	private MouseCursorButtonsControl mcab;
 	private boolean	bCancelNextMouseReleased;
 	
 	public MouseCursorListenerAbs() {
@@ -193,6 +195,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("activator has no cell?", source, Cell.class.getName());
 			}else{
 				cell.setOverrideBackgroundColorNegatingCurrent();
+				btnLastHoverIn = source;
 			}
 		}
 	};
@@ -204,9 +207,23 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("activator has no cell?", source, Cell.class.getName());
 			}else{
 				cell.resetOverrideBackgroundColor();
+				
+				if(btnLastHoverIn!=null){
+					if(btnLastHoverIn==source){
+						btnLastHoverIn=null;
+					}else{
+						throw new PrerequisitesNotMetException("is not last hover in?", btnLastHoverIn, source, this);
+					}
+				}
+				
 			}
 		}
 	};
+	
+	public void clearLastButtonHoverIn(){
+		if(btnLastHoverIn!=null)cmdbtnHoverOut.execute(btnLastHoverIn);
+	}
+	
 	public void addDefaultCommands(Button btn){
 		btn.addCommands(ButtonAction.HighlightOn, cmdbtnHoverOver);
 		btn.addCommands(ButtonAction.HighlightOff, cmdbtnHoverOut);

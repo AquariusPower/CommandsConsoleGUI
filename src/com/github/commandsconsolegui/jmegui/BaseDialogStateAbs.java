@@ -35,6 +35,7 @@ import java.util.Comparator;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
@@ -628,7 +629,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 			}
 		}
 		
-		this.strLastFilter=str;
+		this.strLastFilter=str.toLowerCase();
 	}
 	
 	/**
@@ -760,6 +761,10 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		adleTmp.remove(dled);
 		adleCompleteEntriesList.add(dled);
 		if(dled.isParent()){
+			if(btgSortListEntries.b()){
+				dled.sortChildren(getComparatorText(btgSortListEntriesAtoZ.b()));
+			}
+			
 			for(DialogListEntryData<T> dledChild:dled.getChildrenCopy()){
 				if(!dledChild.getParent().equals(dled)){
 					throw new PrerequisitesNotMetException("invalid parent", dled, dledChild);
@@ -776,6 +781,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		adleTmp = new ArrayList<DialogListEntryData<T>>(adleCompleteEntriesList);
 		
 		if(btgSortListEntries.b()){
+			// will work basically for the root entries only
 			Collections.sort(adleTmp, getComparatorText(btgSortListEntriesAtoZ.b()));
 		}
 		
@@ -791,7 +797,11 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	
 	protected DialogListEntryData<T> addEntry(DialogListEntryData<T> dled) {
 		if(dled==null)throw new PrerequisitesNotMetException("cant be null!");
-		adleCompleteEntriesList.add(dled);
+		if(adleCompleteEntriesList.contains(dled)){
+			GlobalCommandsDelegatorI.i().dumpDevWarnEntry("list already contains", adleCompleteEntriesList, dled, this);
+		}else{
+			adleCompleteEntriesList.add(dled);
+		}
 		return dled;
 	}
 
@@ -858,11 +868,15 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	protected DialogListEntryData<T> getLastSelected(){
 		return dleLastSelected;
 	}
-
+	
+	/**
+	 * will always be in lower case
+	 * @return
+	 */
 	public String getLastFilter() { //no problem be public
 		return strLastFilter;
 	}
-
+	
 //	protected R setLastFilter(String str) {
 //		this.strLastFilter=str;
 //		return getThis();

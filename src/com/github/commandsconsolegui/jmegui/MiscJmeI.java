@@ -45,6 +45,7 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -336,5 +337,14 @@ public class MiscJmeI {
 		objUser = sh.getRef();
 		
 		return (R)objUser;
+	}
+	
+	public ColorRGBA negateColor(ColorRGBA clr){
+		return new ColorRGBA(
+				FastMath.abs(1f-clr.r),
+				FastMath.abs(1f-clr.g),
+				FastMath.abs(1f-clr.b),
+				clr.a
+			);
 	}
 }
