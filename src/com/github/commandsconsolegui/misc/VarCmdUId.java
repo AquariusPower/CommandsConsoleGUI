@@ -34,9 +34,10 @@ import java.lang.reflect.Field;
  */
 public class VarCmdUId implements Cloneable{
 	// parts of the unique id
+	// cmd or var
 	private String strPrefixCmd=null;
 	private String strVarType=null;
-	
+	// other parts
 	private String strConcreteClassSName=null;
 	private String strDeclaringClassSName=null;
 	private String strPrefix=null;
@@ -46,7 +47,7 @@ public class VarCmdUId implements Cloneable{
 	private String strUniqueId=null;
 	
 //	private Boolean	bIsVariable;
-	private String	strPrefixCustomToSolveConflicts;
+	private String	strCustomPrefix;
 	private Class	clDeclaring;
 	private Class	clConcrete;
 	private String	strPartSeparator;
@@ -93,12 +94,12 @@ public class VarCmdUId implements Cloneable{
 //		this.bIsVariable = bIsVariable;
 //		return this;
 //	}
-	public String getPrefixCustomToSolveConflicts() {
-		return strPrefixCustomToSolveConflicts;
+	public String getPrefixCustom() {
+		return strCustomPrefix;
 	}
-	public VarCmdUId setPrefixCustomToSolveConflicts(String strPrefixCustomToSolveConflicts) {
-		PrerequisitesNotMetException.assertNotAlreadySet("strPrefixCustomToSolveConflicts", this.strPrefixCustomToSolveConflicts, strPrefixCustomToSolveConflicts, this);
-		this.strPrefixCustomToSolveConflicts = strPrefixCustomToSolveConflicts;
+	public VarCmdUId setPrefixCustom(String strPrefixCustom) {
+		PrerequisitesNotMetException.assertNotAlreadySet("strPrefixCustom", this.strCustomPrefix, strPrefixCustom, this);
+		this.strCustomPrefix = strPrefixCustom;
 		return this;
 	}
 	public String getVarType() {

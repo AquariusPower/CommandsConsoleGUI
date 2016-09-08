@@ -65,6 +65,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexHacks;
+import com.github.commandsconsolegui.misc.VarCmdUId;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
@@ -194,7 +195,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public final StringCmdField scfEditCut = new StringCmdField(this);
 	public final StringCmdField scfEditCopy = new StringCmdField(this);
 	public final StringCmdField scfEditShowClipboad = new StringCmdField(this);
-	public final StringCmdField scfShowCommandsCoreIdConflicts = new StringCmdField(this);
+	public final StringCmdField scfShowCommandsSimpleIdConflicts = new StringCmdField(this);
 	public final StringCmdField scfQuit = new StringCmdField(this);
 	
 	/**
@@ -835,12 +836,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //			}
 			
 			if(!bUserFail){
-				if(fixSimpleCmdConflict(cmddWithSimpleConflict,strNewSimpleCmdId,false)){
+				if(fixSimpleCmdConflict(cmddWithSimpleConflict,strNewSimpleCmdId,false,false)){
 					dumpSubEntry(cmddWithSimpleConflict.asHelp());
 					bCmdWorked=true;
-				}else{
-					dumpWarnEntry("cmd simple already used: "+strNewSimpleCmdId); //TODO wild guess?
 				}
+//				else{
+//					dumpWarnEntry("cmd simple already used: "+strNewSimpleCmdId); //TODO wild guess?
+//				}
 				
 //				CommandData dataFromNewSimple = getCmdDataFor(strNewSimpleCmdId,true);
 //				if(dataFromNewSimple==null){
@@ -1044,7 +1046,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			}
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,scfShowCommandsCoreIdConflicts,"")){
+		if(checkCmdValidity(icclPseudo,scfShowCommandsSimpleIdConflicts,"")){
 			ArrayList<CommandData> aC = new ArrayList<CommandData>();
 			for(CommandData cmdd:trmCmddList.values()){
 //				aC.addAll(cmdd.getCoreIdConflictListClone());
@@ -1231,17 +1233,48 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		return true; //just see warning messages for the failures...
 	}
 	private boolean fixSimpleCmdConflict(CommandData cmddWithSimpleConflict) {
-		String strNewSimpleCmdId = cmddWithSimpleConflict.getVar().getIdTmp(ccSelf).getPrefixCustomToSolveConflicts();
-		strNewSimpleCmdId+=cmddWithSimpleConflict.getSimpleCmdId();
-		return fixSimpleCmdConflict(cmddWithSimpleConflict,strNewSimpleCmdId, true);
+		VarCmdUId vcid = cmddWithSimpleConflict.getVar().getIdTmp(ccSelf);
+		
+		boolean b = fixSimpleCmdConflict(
+			cmddWithSimpleConflict,
+			vcid.getPrefixCustom() + cmddWithSimpleConflict.getSimpleCmdId(),
+			true,
+			true);
+		
+		if(!b && vcid.getPrefixCustom().isEmpty()){
+			b = fixSimpleCmdConflict(
+				cmddWithSimpleConflict,
+				vcid.getConcreteClass().getSimpleName() + cmddWithSimpleConflict.getSimpleCmdId(),
+				true,
+				false);
+		}
+		
+		return b;
 	}
-	private boolean fixSimpleCmdConflict(CommandData cmddWithSimpleConflict, String strNewSimpleCmdId, boolean bForce) {
-		CommandData dataFromNewSimple = getCmdDataFor(strNewSimpleCmdId,true);
-		if(dataFromNewSimple==null){
+	
+	/**
+	 * 
+	 * @param cmddWithSimpleConflict
+	 * @param strNewSimpleCmdId
+	 * @param bForce
+	 * @param bSupressMessages as it can be retried
+	 * @return
+	 */
+	private boolean fixSimpleCmdConflict(CommandData cmddWithSimpleConflict, String strNewSimpleCmdId, boolean bForce, boolean bSupressMessages) {
+		CommandData cmddFromNewSimple = getCmdDataFor(strNewSimpleCmdId,true);
+		if(cmddFromNewSimple==null){
 			cmddWithSimpleConflict.applySimpleCmdIdConflictFixed(ccSelf, strNewSimpleCmdId, bForce);//, trmCmds.values());
 //			dumpSubEntry(cmddWithSimpleConflict.asHelp());
 			return true;
+		}else{
+			if(cmddWithSimpleConflict==cmddFromNewSimple){ //not a conflict
+				if(!bSupressMessages)dumpInfoEntry("Simple command '"+strNewSimpleCmdId+"' already assigned to: "+cmddWithSimpleConflict.getUniqueCmdId());
+				return true;
+			}else{
+				if(!bSupressMessages)dumpWarnEntry("Simple command '"+strNewSimpleCmdId+"' already used by: "+cmddFromNewSimple.getUniqueCmdId(), cmddWithSimpleConflict.getUniqueCmdId());
+			}
 		}
+		
 		return false;
 	}
 
@@ -3517,6 +3550,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		addCmdToQueue(btgShowDebugEntries.getCmdIdAsCommand(false));
 		addCmdToQueue(btgShowDeveloperWarn.getCmdIdAsCommand(false));
 		addCmdToQueue(btgShowDeveloperInfo.getCmdIdAsCommand(false));
+		
+		addCmdToQueue(scfChangeCommandSimpleId.getUniqueCmdId()+" "+CMD_HELP.getUniqueCmdId()+" help");
 		
 		// init DB
 		flDB = new File(fileNamePrepareCfg(strFileDatabase,false));

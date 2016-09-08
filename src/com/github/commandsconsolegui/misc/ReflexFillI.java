@@ -384,7 +384,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		
 		id.setUniqueId(prepareFullCommand(id, strCommandSimple, rfcfg));//, bIsVariable));
 //		id.strSimpleCmdId = rfcfg.getPrefixCustomId()+strCommandCore;
-		id.setPrefixCustomToSolveConflicts(rfcfg.getPrefixCustomId());
+		id.setPrefixCustom(rfcfg.getPrefixCustomId());
 		id.setSimpleId(strCommandSimple);
 //		id.setAsVariable(bIsVariable);
 		return id;
