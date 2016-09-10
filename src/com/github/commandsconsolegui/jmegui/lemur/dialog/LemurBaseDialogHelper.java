@@ -37,6 +37,13 @@ import com.simsilica.lemur.TextField;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
 public class LemurBaseDialogHelper extends BaseDialogHelper{
+	public static enum ConsElementIds{
+		buttonResizeBorder,
+		;
+		public String s(){return this.toString();}
+		public String str(){return this.toString();}
+	}
+	
 	@Override
 	protected String getTextFromField(Spatial spt) {
 		return ((TextField)spt).getText();

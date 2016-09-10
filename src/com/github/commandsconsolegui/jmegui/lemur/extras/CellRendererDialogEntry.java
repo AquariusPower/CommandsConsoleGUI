@@ -74,7 +74,6 @@ import com.simsilica.lemur.list.CellRenderer;
 public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryData<T>>, IReflexFillCfg {
 	private static StringVarField svfTreeDepthToken;
 	private static BoolTogglerCmdField	btgShowTreeUId;
-	private static BoolTogglerCmdField	btgHoverHighlight;
 	
 	private float fCellHeightMult = 1f;
 	private String	strStyle;
@@ -97,7 +96,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			 */
 			CellRendererDialogEntry.svfTreeDepthToken = new StringVarField(this, " ", null);
 			CellRendererDialogEntry.btgShowTreeUId = new BoolTogglerCmdField(this,false).setCallNothingOnChange();
-			CellRendererDialogEntry.btgHoverHighlight = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
+//			CellRendererDialogEntry.btgHoverHighlight = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 		}
 	}
 	
@@ -374,65 +373,65 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 		}
 		
-		public void setOverrideBackgroundColorNegatingCurrent() {
-			overrideBackgroundColor(null,false,true);
-		}
-		public void resetOverrideBackgroundColor(){
-			overrideBackgroundColor(null,true,false);
-		}
-		public void setOverrideBackgroundColor(ColorRGBA colorApply) {
-			overrideBackgroundColor(colorApply,false,false);
-		}
-		/**
-		 * 
-		 * @param colorOverride if null, will reset (restore current normal bkg color)
-		 * @param bNegateCurrentColor overrides color param (least if it is null)
-		 */
-		private void overrideBackgroundColor(ColorRGBA colorOverride, boolean bResetToBackup, boolean bNegateCurrentColor) {
-			if(!btgHoverHighlight.b())return;
-			
-			GuiComponent gcBkg = getBackground();
-			if(gcBkg==null){
-				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("background is null", this);
-				return;
-			}
-			
-			QuadBackgroundComponent qbc = (QuadBackgroundComponent)
-					gcBkg.getGuiControl().getComponent("background");
-			
-			ColorRGBA colorBkp=getUserData("BkgColorBkp");
-			if(colorBkp==null){
-				colorBkp = qbc.getColor();
-				setUserData("BkgColorBkp", colorBkp);
-			}
-			
-			if(bResetToBackup){
-				qbc.setColor(colorBkp);
-				setUserData("BkgColorBkp", null); //clear to not leave useless value there
-			}else{
-				if(bNegateCurrentColor){
-					colorOverride = MiscJmeI.i().negateColor(colorBkp);
-				}else{
-					if(colorOverride==null)throw new PrerequisitesNotMetException("invalid null color override", this);
-				}
-				
-				qbc.setColor(colorOverride);
-			}
-			
-//			if(colorApply!=null){
-//				if(!qbc.getColor().equals(colorApply)){
-//					
+//		public void setOverrideBackgroundColorNegatingCurrent() {
+//			overrideBackgroundColor(null,false,true);
+//		}
+//		public void resetOverrideBackgroundColor(){
+//			overrideBackgroundColor(null,true,false);
+//		}
+//		public void setOverrideBackgroundColor(ColorRGBA colorApply) {
+//			overrideBackgroundColor(colorApply,false,false);
+//		}
+//		/**
+//		 * 
+//		 * @param colorOverride if null, will reset (restore current normal bkg color)
+//		 * @param bNegateCurrentColor overrides color param (least if it is null)
+//		 */
+//		private void overrideBackgroundColor(ColorRGBA colorOverride, boolean bResetToBackup, boolean bNegateCurrentColor) {
+//			if(!btgHoverHighlight.b())return;
+//			
+//			GuiComponent gcBkg = getBackground();
+//			if(gcBkg==null){
+//				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("background is null", this);
+//				return;
+//			}
+//			
+//			QuadBackgroundComponent qbc = (QuadBackgroundComponent)
+//					gcBkg.getGuiControl().getComponent("background");
+//			
+//			ColorRGBA colorBkp=getUserData("BkgColorBkp");
+//			if(colorBkp==null){
+//				colorBkp = qbc.getColor();
+//				setUserData("BkgColorBkp", colorBkp);
+//			}
+//			
+//			if(bResetToBackup){
+//				qbc.setColor(colorBkp);
+//				setUserData("BkgColorBkp", null); //clear to not leave useless value there
+//			}else{
+//				if(bNegateCurrentColor){
+//					colorOverride = MiscJmeI.i().negateColor(colorBkp);
+//				}else{
+//					if(colorOverride==null)throw new PrerequisitesNotMetException("invalid null color override", this);
 //				}
 //				
-//				qbc.setColor(colorApply);
-//			}else{
-//				if(colorBkp!=null){
-//					qbc.setColor(colorBkp);
-//					setUserData("BkgColorBkp", null); //clear to not leave useless value there
-//				}
+//				qbc.setColor(colorOverride);
 //			}
-			
-		}
+//			
+////			if(colorApply!=null){
+////				if(!qbc.getColor().equals(colorApply)){
+////					
+////				}
+////				
+////				qbc.setColor(colorApply);
+////			}else{
+////				if(colorBkp!=null){
+////					qbc.setColor(colorBkp);
+////					setUserData("BkgColorBkp", null); //clear to not leave useless value there
+////				}
+////			}
+//			
+//		}
 
 	}
 	

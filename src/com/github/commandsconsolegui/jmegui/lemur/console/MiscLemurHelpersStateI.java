@@ -38,7 +38,6 @@ import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
-import com.github.commandsconsolegui.jmegui.PseudoSavableHolder;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
@@ -62,6 +61,7 @@ import com.simsilica.lemur.GridPanel;
 import com.simsilica.lemur.ListBox;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.TextField;
+import com.simsilica.lemur.component.ColoredComponent;
 import com.simsilica.lemur.component.TextEntryComponent;
 import com.simsilica.lemur.event.KeyAction;
 import com.simsilica.lemur.event.KeyActionListener;
@@ -77,6 +77,8 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 	private static MiscLemurHelpersStateI instance = new MiscLemurHelpersStateI();
 	public static MiscLemurHelpersStateI i(){return instance;}
 	
+	private BoolTogglerCmdField	btgHoverHighlight = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
+
 	public final BoolTogglerCmdField	btgListBoxSelectorAsUnderline = 
 		new BoolTogglerCmdField(this,true,
 			" BUGFIX: this also work as a workaround/bugfix: "
@@ -803,7 +805,8 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 	
 //	public static final float fPreferredThickness = 5f; //thickness z=5f to distinguish what was set by this library
 	public static final float fPreferredThickness = 1f; //thickness z=1f to match lemur one and do not mess with its calculations, TODO try to collect it from lemur...
-	Vector3f v3fMinSize=new Vector3f(10f,10f,fPreferredThickness); 
+//	Vector3f v3fMinSize=new Vector3f(10f,10f,fPreferredThickness); 
+	Vector3f v3fMinSize=new Vector3f(1f,1f,fPreferredThickness); //minimum is 1x1 dot!!!! 
 	
 	/**
 	 * see {@link #setGrantedSize(Panel, Vector3f, boolean)}
@@ -942,4 +945,67 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 		return cmdDummy;
 	}
 
+
+	public void setOverrideBackgroundColorNegatingCurrent(Panel pnl) {
+		overrideBackgroundColor(pnl,null,false,true);
+	}
+	public void resetOverrideBackgroundColor(Panel pnl){
+		overrideBackgroundColor(pnl,null,true,false);
+	}
+	public void setOverrideBackgroundColor(Panel pnl, ColorRGBA colorApply) {
+		overrideBackgroundColor(pnl,colorApply,false,false);
+	}
+	/**
+	 * TODO use the lemur style instead?
+	 * @param colorOverride if null, will reset (restore current normal bkg color)
+	 * @param bNegateCurrentColor overrides color param (least if it is null)
+	 */
+	private void overrideBackgroundColor(Panel pnl, ColorRGBA colorOverride, boolean bResetToBackup, boolean bNegateCurrentColor) {
+		if(!btgHoverHighlight.b())return;
+		
+//		GuiComponent gcBkg = pnl.getBackground();
+//		if(gcBkg==null){
+//			GlobalCommandsDelegatorI.i().dumpDevWarnEntry("background is null", this);
+//			return;
+//		}
+//		
+//		QuadBackgroundComponent qbc = (QuadBackgroundComponent)
+//				gcBkg.getGuiControl().getComponent("background");
+		
+		ColoredComponent cc =(ColoredComponent)pnl.getBackground();
+		
+		String strKey="BkgColorBkp";
+		ColorRGBA colorBkp=pnl.getUserData(strKey);
+		if(colorBkp==null){
+			colorBkp = cc.getColor();
+			pnl.setUserData(strKey, colorBkp);
+		}
+		
+		if(bResetToBackup){
+			cc.setColor(colorBkp);
+			pnl.setUserData(strKey, null); //clear to not leave useless value there
+		}else{
+			if(bNegateCurrentColor){
+				colorOverride = MiscJmeI.i().negateColor(colorBkp);
+			}else{
+				if(colorOverride==null)throw new PrerequisitesNotMetException("invalid null color override", this);
+			}
+			
+			cc.setColor(colorOverride.clone());
+		}
+		
+//		if(colorApply!=null){
+//			if(!qbc.getColor().equals(colorApply)){
+//				
+//			}
+//			
+//			qbc.setColor(colorApply);
+//		}else{
+//			if(colorBkp!=null){
+//				qbc.setColor(colorBkp);
+//				setUserData(strKey, null); //clear to not leave useless value there
+//			}
+//		}
+		
+	}
 }

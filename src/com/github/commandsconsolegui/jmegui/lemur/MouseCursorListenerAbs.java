@@ -31,27 +31,24 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.AudioUII;
+import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
 import com.github.commandsconsolegui.jmegui.MouseCursorButtonsControl;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
-import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell.EUserData;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.jme3.math.ColorRGBA;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Button.ButtonAction;
 import com.simsilica.lemur.Command;
-import com.simsilica.lemur.component.QuadBackgroundComponent;
+import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.event.CursorButtonEvent;
 import com.simsilica.lemur.event.CursorListener;
 import com.simsilica.lemur.event.CursorMotionEvent;
-import com.simsilica.lemur.list.CellRenderer;
 
 /**
  * Click detection is based in time delay on this class.
@@ -190,32 +187,40 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 		public void execute(Button source) {
 			AudioUII.i().playOnUserAction(EAudio.HoverOverActivators);
 			
+			Panel pnlApplyEffect = source;
 			Cell<?> cell = (Cell<?>)source.getUserData(EUserData.cellClassRef.toString());
-			if(cell==null){
-				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("activator has no cell?", source, Cell.class.getName());
-			}else{
-				cell.setOverrideBackgroundColorNegatingCurrent();
-				btnLastHoverIn = source;
+			if(cell!=null){
+//				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("activator has no cell?", source, Cell.class.getName());
+//			}else{
+//				source=cell;
+				pnlApplyEffect = cell;
 			}
+			
+			MiscLemurHelpersStateI.i().setOverrideBackgroundColorNegatingCurrent(pnlApplyEffect);
+			
+			btnLastHoverIn = source;
 		}
 	};
 	Command<Button> cmdbtnHoverOut = new Command<Button>(){
 		@Override
 		public void execute(Button source) {
+			Panel pnlApplyEffect = source;
 			Cell<?> cell = (Cell<?>)source.getUserData(EUserData.cellClassRef.toString());
-			if(cell==null){
-				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("activator has no cell?", source, Cell.class.getName());
-			}else{
-				cell.resetOverrideBackgroundColor();
-				
-				if(btnLastHoverIn!=null){
-					if(btnLastHoverIn==source){
-						btnLastHoverIn=null;
-					}else{
-						throw new PrerequisitesNotMetException("is not last hover in?", btnLastHoverIn, source, this);
-					}
+			if(cell!=null){
+				pnlApplyEffect = cell;
+//				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("activator has no cell?", source, Cell.class.getName());
+//			}else{
+			}
+			
+			MiscLemurHelpersStateI.i().resetOverrideBackgroundColor(pnlApplyEffect);
+			
+			if(btnLastHoverIn!=null){
+				if(btnLastHoverIn==source){
+					btnLastHoverIn=null;
+				}else{
+					//TODO be less precise and just reset all like in app lost focus etc?
+					throw new PrerequisitesNotMetException("inconsistency, why is not last hover in?", btnLastHoverIn, source, this);
 				}
-				
 			}
 		}
 	};

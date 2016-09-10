@@ -44,6 +44,7 @@ import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI.BindKey;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelper.ConsElementIds;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -264,6 +265,10 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		clBg = new ColorRGBA(0,0.25f,0,0.75f);
 		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
+		attrs = styles.getSelector(ConsElementIds.buttonResizeBorder.s(), STYLE_CONSOLE);
+		clBg = ColorRGBA.Cyan.clone();
+		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
+		
 		attrs = styles.getSelector(TextField.ELEMENT_ID, STYLE_CONSOLE);
 		attrs.set("color", new ColorRGBA(0.75f,1,1,1));
 		clBg = new ColorRGBA(0.15f, 0.25f, 0, 1);
@@ -329,21 +334,21 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		getContainerStatsAndControls().addChild(lblStats,0,0);
 		
 		// buttons
-		ArrayList<Button> abu = new ArrayList<Button>();
+		ArrayList<Button> abtn = new ArrayList<Button>();
 		int iButtonIndex=0;
 		btnClipboardShow = new Button("ShwClpbrd",getStyle());
-		abu.add(btnClipboardShow);
+		abtn.add(btnClipboardShow);
 		
 		btnCopy = new Button("Copy",getStyle());
-		abu.add(btnCopy);
+		abtn.add(btnCopy);
 		
 		btnPaste = new Button("Paste",getStyle());
-		abu.add(btnPaste);
+		abtn.add(btnPaste);
 		
 		btnCut = new Button("Cut",getStyle());
-		abu.add(btnCut);
+		abtn.add(btnCut);
 		
-		for(Button btn:abu){
+		for(Button btn:abtn){
 			btn.setTextHAlignment(HAlignment.Center);
 			//TODO why buttons do not obbey this preferred size 50,1,0?
 			btn.addClickCommands(new ButtonClick());

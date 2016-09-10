@@ -898,7 +898,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return (Container)cntrSouth;
 	}
 
-	protected R setCntrNorth(Node cntrNorth) {
+	protected R setContainerNorth(Node cntrNorth) {
 		this.cntrNorth = cntrNorth;
 		return getThis();
 	}
