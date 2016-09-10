@@ -90,23 +90,9 @@ public class QuestionDialogState<T extends Command<Button>> extends LemurBasicDi
 	}
 
 	@Override
-	public boolean prepareTestData() {
-		return true;
-	}
-
-	@Override
 	protected QuestionDialogState<T> getThis() {
 		return this;
 	}
-	
-//	@Override
-//	protected boolean enableAttempt() {
-//		if(!super.enableAttempt())return false;
-//		
-//		selectEntry(dledNo);
-//		
-//		return true;
-//	}
 	
 	@Override
 	protected void enableSuccess() {
@@ -114,15 +100,5 @@ public class QuestionDialogState<T extends Command<Button>> extends LemurBasicDi
 		selectEntry(dledNo);
 	}
 	
-//	@Override
-//	protected Integer getEntryHeightPixels() {
-//		return super.getEntryHeightPixels()*2;
-//	}
-
-	@Override
-	protected String getDefaultValueToUserModify() {
-		return "(no default value)";
-	}
-
 }
 

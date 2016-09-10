@@ -222,7 +222,9 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 			app().getContext().getSettings().getWidth(),
 			app().getContext().getSettings().getHeight(),
 			0);
-			
+		
+		
+		
 		setContainerMain(new Container(new BorderLayout(), getStyle()));
 		quaBkpMain = getContainerMain().getLocalRotation().clone();
 		getContainerMain().setName(getId()+"_Dialog");
@@ -369,21 +371,6 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		return true;
 	}
 	
-	/**
-	 * when dialog is enabled,
-	 * default is to fill with the last filter
-	 */
-	@Override
-	protected void updateInputField(){
-		if(isInputToUserEnterCustomValueMode()){
-			if(getInputText().isEmpty() || getInputText().equals(getUserEnterCustomValueToken())){
-				applyDefaultValueToUserModify();
-			}
-		}else{
-			getInputField().setText(getLastFilter());
-		}
-	}
-	
 //	@Override
 //	protected void enableSuccess() {
 //		super.enableSuccess();
@@ -403,11 +390,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	}
 	
 	private void updateFinalEntryHeightPixels(){
-//		if(cfg.iEntryHeightPixels==null){
-			this.iFinalEntryHeightPixels = (int)FastMath.ceil(getEntryHeightPixels() 
-//				* cfg.fEntryHeightMultiplier);
-				* fdvEntryHeightMultiplier.f());
-//		}
+		this.iFinalEntryHeightPixels = (int)FastMath.ceil(
+			getEntryHeightPixels() * fdvEntryHeightMultiplier.f());
 	}
 	
 	private GridModel<Panel> getListBoxGridPanelModel(){
@@ -900,7 +884,6 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 
 	public abstract boolean execActionFor(EMouseCursorButton e, Spatial capture);
 
-	@Override
 	protected void updateSelected(DialogListEntryData<T> dledPreviouslySelected){
 		if(dledPreviouslySelected==null)return;
 		
@@ -1074,14 +1057,9 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		return (T) MiscLemurHelpersStateI.i().getCmdDummy();
 	}
 
-	protected abstract String getDefaultValueToUserModify();
-
-	protected void applyDefaultValueToUserModify() {
-		setInputText(getUserEnterCustomValueToken()+getDefaultValueToUserModify());
-	}
-	
 	@Override
 	public void focusGained() {
+		requestRefreshList();
 //		if(quaBkpMain!=null){
 //			getContainerMain().setLocalRotation(quaBkpMain);
 //		}
@@ -1095,20 +1073,4 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		getContainerMain().getLocalRotation().lookAt(new Vector3f(0,1,1), new Vector3f(1,0,0));
 	}
 	
-	//TODO remove after completed
-//	BaseDialogStateAbs tmp = new BaseDialogStateAbs(){
-//		//TODO below
-//		@Override		protected void updateInputField() {		}
-//		@Override		protected boolean initKeyMappings() {			return false;		}
-//		@Override		protected void lineWrapDisableForChildrenOf(Node node) {		}
-//		@Override		public void clearSelection() {		}
-//		@Override		protected void updateList() {		}
-//		@Override		protected void updateTextInfo() {		}
-//		@Override		protected DialogListEntryData getSelectedEntryData() {			return null;		}
-//		@Override		protected void updateSelected(DialogListEntryData dledPreviouslySelected) {		}
-//		@Override		protected void updateSelected(DialogListEntryData dledAbove,				DialogListEntryData dledParentTmp) {		}
-//		@Override		protected BaseDialogStateAbs getThis() {			return null;		}
-//		@Override		public void focusGained() {		}
-//		@Override		public void focusLost() {		}
-//	};
 }

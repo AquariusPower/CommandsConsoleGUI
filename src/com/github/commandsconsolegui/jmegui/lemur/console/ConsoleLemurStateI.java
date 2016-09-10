@@ -1155,22 +1155,8 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		return cd.cmdFoundReturnStatus(bCommandWorked);
 	}
 
-//	@Override
-//	public <BFR> BFR bugFix(Class<BFR> clReturnType, BFR objRetIfBugFixBoolDisabled, BoolTogglerCmdField btgBugFixId,	Object... aobjCustomParams) {
-//		return null;
-//	}
-
 	@Override
-	protected void updateSelected(DialogListEntryData<T> dledPreviouslySelected) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void updateSelected(DialogListEntryData<T> dledAbove,
-			DialogListEntryData<T> dledParentTmp) {
-		// TODO Auto-generated method stub
-		
+	protected void updateSelected(DialogListEntryData<T> dledAbove, DialogListEntryData<T> dledParentTmp) {
 	}
 
 	@Override
@@ -1188,15 +1174,4 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		return (Container)super.getContainerMain();
 	}
 	
-//	@Override
-//	public Vector3f getMainSize() {
-//		return getContainerMain().getPreferredSize();
-//	}
-
-//	@Override
-//	protected ConsoleLemurStateI<T> setInputText(String str) {
-//		getInputField().setText(str);
-//		return getThis();
-//	}
-
 }

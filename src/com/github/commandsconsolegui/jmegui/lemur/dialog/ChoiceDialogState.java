@@ -64,19 +64,8 @@ public class ChoiceDialogState<T extends Command<Button>> extends LemurBasicDial
 	}
 	
 	@Override
-	public boolean prepareTestData(){
-		for(int i=0;i<10;i++)addEntryQuick(null); //some test data
-		return true;
-	}
-
-	@Override
 	protected ChoiceDialogState<T> getThis() {
 		return this;
 	}
 	
-	@Override
-	protected String getDefaultValueToUserModify() {
-		return "(no default value)";
-	}
-
 }

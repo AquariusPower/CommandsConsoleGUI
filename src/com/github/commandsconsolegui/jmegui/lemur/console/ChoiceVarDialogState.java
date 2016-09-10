@@ -223,10 +223,6 @@ public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceDialo
 		return true;
 	}
 	
-//	@Override
-//	protected void actionSubmit() {
-//		super.actionSubmit();
-//	}
 	@Override
 	protected String getDefaultValueToUserModify() {
 //		return ""+vcf.getRawValue();

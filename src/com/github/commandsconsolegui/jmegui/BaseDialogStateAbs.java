@@ -573,14 +573,32 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return isOptionChoiceSelectionMode();
 	}
 	
+	protected abstract void updateList();
+	protected abstract void updateTextInfo();
+	protected abstract DialogListEntryData<T> getSelectedEntryData();
+	
 	/**
 	 * when dialog is enabled,
 	 * default is to fill with the last filter
 	 */
-	protected abstract void updateInputField();
-	protected abstract void updateList();
-	protected abstract void updateTextInfo();
-	protected abstract DialogListEntryData<T> getSelectedEntryData();
+	protected void updateInputField(){
+		if(isInputToUserEnterCustomValueMode()){
+			if(getInputText().isEmpty() || getInputText().equals(getUserEnterCustomValueToken())){
+				applyDefaultValueToUserModify();
+			}
+		}else{
+			setInputText(getLastFilter());
+//			getInputField().setText(getLastFilter());
+		}
+	}
+	
+	protected String getDefaultValueToUserModify() {
+		return "";
+	}
+	
+	protected void applyDefaultValueToUserModify() {
+		setInputText(getUserEnterCustomValueToken()+getDefaultValueToUserModify());
+	}
 	
 	public void requestRefreshList(){
 		bRequestedRefreshList=true;
@@ -869,7 +887,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		
 	}
 	
-	protected abstract void updateSelected(DialogListEntryData<T> dledPreviouslySelected);
+//	protected abstract void updateSelected(DialogListEntryData<T> dledPreviouslySelected);
 	protected abstract void updateSelected(final DialogListEntryData<T> dledAbove, final DialogListEntryData<T> dledParentTmp);
 
 	protected Container getNorthContainer() {
@@ -960,4 +978,23 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	public abstract void focusGained();
 	public abstract void focusLost();
 	
+	
+	/**
+	 * TODO remove after completed
+	 */
+	private static class _TMP_REMOVE_ME_ extends BaseDialogStateAbs{
+		@Override		protected DialogListEntryData getSelectedEntryData() {return null;}
+		@Override		protected void updateSelected(DialogListEntryData dledAbove,DialogListEntryData dledParentTmp) {}
+		@Override		public void focusGained() {		}
+		@Override		public void focusLost() {		}
+		@Override		protected void updateInputField() {		}
+		@Override		protected void updateList() {		}
+		
+		//TODO below
+		@Override		protected boolean initKeyMappings() {			return false;		}
+		@Override		protected void lineWrapDisableForChildrenOf(Node node) {		}
+		@Override		public void clearSelection() {		}
+		@Override		protected void updateTextInfo() {		}
+		@Override		protected BaseDialogStateAbs getThis() {			return null;		}
+	};
 }

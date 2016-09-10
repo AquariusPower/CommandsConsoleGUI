@@ -2600,8 +2600,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 
 	@Override
 	protected void updateInputField() {
-		// TODO Auto-generated method stub
-		
+		// dummified
 	}
 
 	@Override
@@ -2612,8 +2611,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 
 	@Override
 	protected void updateList() {
-		// TODO Auto-generated method stub
-		
+		//dummified
 	}
 
 	@Override

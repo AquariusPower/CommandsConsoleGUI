@@ -351,4 +351,10 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		addEntry(dledDiags);
 	}
 	
+//	@Override
+//	public void focusGained() {
+//		super.focusGained();
+//		requestRefreshList();
+//	}
+	
 }

@@ -246,9 +246,4 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 		return this;
 	}
 
-	@Override
-	protected String getDefaultValueToUserModify() {
-		return "(no default value)";
-	}
-	
 }
