@@ -224,8 +224,8 @@ public abstract class LemurBasicDialogStateAbs<T,R extends LemurBasicDialogState
 		return true;
 	}
 	
-	@Override
-	public Vector3f getMainSize() {
-		return getContainerMain().getPreferredSize();
-	}
+//	@Override
+//	public Vector3f getMainSize() {
+//		return getContainerMain().getPreferredSize();
+//	}
 }

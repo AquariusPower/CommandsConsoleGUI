@@ -31,19 +31,20 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
-import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGUII;
 import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
+import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI.BindKey;
+import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.font.BitmapCharacter;
@@ -751,10 +752,76 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 //		return getInputField().getSize();
 //	}
 	
-	@Override
-	public String getInputText() {
-		return getInputField().getText();
-	}
+//	@Override 
+//	public String getInputText() {
+//		return getInputField().getText();
+//	}
+	
+//	/**
+//	 * These functions must be copied identically at {@link LemurDialogGUIStateAbs}
+//	 * put between here and the functions class, all related methods...
+//	 */
+//	LemurBaseDialogFunctions base = new LemurBaseDialogFunctions();
+//	@Override public String getInputText() {return base.getInputText();}
+//	/**
+//	 * This class must be copied identically at {@link LemurDialogGUIStateAbs}
+//	 * This is a bad, but still functional, way to "share" behavior without encapsulation restrictions.
+//	 * TODO create a validator, may be a shell script using diff?
+//	 */
+//	private class LemurBaseDialogFunctions extends BaseDialogStateAbs{
+//		ConsoleLemurStateI owner = ConsoleLemurStateI.this;
+//		@Override
+//		public String getInputText() {
+//			return owner.getInputField().getText();
+//		}
+//		@Override
+//		protected void lineWrapDisableForChildrenOf(Node node) {
+//		}
+//		@Override
+//		protected boolean initKeyMappings() {
+//			return false;
+//		}
+//		@Override
+//		public Vector3f getMainSize() {
+//			return null;
+//		}
+//		@Override
+//		protected BaseDialogStateAbs setInputText(String str) {
+//			return null;
+//		}
+//		@Override
+//		public void clearSelection() {
+//		}
+//		@Override
+//		protected void updateInputField() {
+//		}
+//		@Override
+//		protected void updateList() {
+//		}
+//		@Override
+//		protected void updateTextInfo() {
+//		}
+//		@Override
+//		protected DialogListEntryData getSelectedEntryData() {
+//			return null;
+//		}
+//		@Override
+//		protected void updateSelected(DialogListEntryData dledPreviouslySelected) {
+//		}
+//		@Override
+//		protected void updateSelected(DialogListEntryData dledAbove,DialogListEntryData dledParentTmp) {
+//		}
+//		@Override
+//		protected BaseDialogStateAbs getThis() {
+//			return null;
+//		}
+//		@Override
+//		public void focusGained() {
+//		}
+//		@Override
+//		public void focusLost() {
+//		}
+//	}
 	
 	@Override
 	public void setInputFieldText(String str){
@@ -1121,15 +1188,15 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		return (Container)super.getContainerMain();
 	}
 	
-	@Override
-	public Vector3f getMainSize() {
-		return getContainerMain().getPreferredSize();
-	}
+//	@Override
+//	public Vector3f getMainSize() {
+//		return getContainerMain().getPreferredSize();
+//	}
 
-	@Override
-	protected ConsoleLemurStateI<T> setInputText(String str) {
-		getInputField().setText(str);
-		return getThis();
-	}
+//	@Override
+//	protected ConsoleLemurStateI<T> setInputText(String str) {
+//		getInputField().setText(str);
+//		return getThis();
+//	}
 
 }

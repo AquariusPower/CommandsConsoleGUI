@@ -3282,18 +3282,24 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				if(vcf==vcf2)continue; //skip self
 				
 				if(vcf.getUniqueVarId().equalsIgnoreCase(vcf2.getUniqueVarId())){
-					throw new PrerequisitesNotMetException("conflicting var id"
-						+"'"+vcf.getUniqueVarId()+"'"
-						+" for "
-						+"'"+(ReflexFillI.i().getDeclaringClass(vcf.getOwner(),vcf)).getName()
-							+"#"+vcf.getOwner().hashCode()+"'"
-//						+"'"+vcf.getOwner().getClass().getName()+"#"+vcf.getOwner().hashCode()+"'"
-						+" vs "
-						+"'"+(ReflexFillI.i().getDeclaringClass(vcf2.getOwner(),vcf2)).getName()
-							+"#"+vcf2.getOwner().hashCode()+"'"
-//						+"'"+vcf2.getOwner().getClass().getName()+"#"+vcf2.getOwner().hashCode()+"'");
-//					avcf.remove(vcf2);
-					);
+					throw new PrerequisitesNotMetException("conflicting var id: "+vcf.getUniqueVarId(),
+						(ReflexFillI.i().getDeclaringClass(vcf.getOwner(),vcf)),
+						vcf.getOwner().getClass(),
+						(ReflexFillI.i().getDeclaringClass(vcf2.getOwner(),vcf2)),
+						vcf2.getOwner().getClass());
+						
+//					throw new PrerequisitesNotMetException("conflicting var id"
+//						+"'"+vcf.getUniqueVarId()+"'"
+//						+" for "
+//						+"'"+(ReflexFillI.i().getDeclaringClass(vcf.getOwner(),vcf)).getName()
+//							+"#"+vcf.getOwner().hashCode()+"'"
+////						+"'"+vcf.getOwner().getClass().getName()+"#"+vcf.getOwner().hashCode()+"'"
+//						+" vs "
+//						+"'"+(ReflexFillI.i().getDeclaringClass(vcf2.getOwner(),vcf2)).getName()
+//							+"#"+vcf2.getOwner().hashCode()+"'"
+////						+"'"+vcf2.getOwner().getClass().getName()+"#"+vcf2.getOwner().hashCode()+"'");
+////					avcf.remove(vcf2);
+//					);
 				}
 			}
 		}

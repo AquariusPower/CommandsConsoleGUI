@@ -36,6 +36,7 @@ import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.jmegui.GlobalBaseDialogHelperI;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
@@ -257,6 +258,17 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return storeCfgAndReturnSelf(icfg);
 	}
 	
+	protected Spatial getInputField() {
+		return sptIntputField;
+	}
+//	public abstract String getInputText();
+	public String getInputText(){
+		return bdh().getTextFromField(getInputField());
+	}
+	private BaseDialogHelper bdh(){
+		return GlobalBaseDialogHelperI.i();
+	}
+	
 	/**
 	 * Activate, Start, Begin, Initiate.
 	 * This will setup and instantiate everything to make it actually be able to work.
@@ -287,7 +299,6 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	}
 	
 	protected abstract boolean initKeyMappings();
-	public abstract String getInputText();
 	
 	protected R setInputTextAsUserTypedValue(String str){
 		if(!isInputToUserEnterCustomValueMode())throw new PrerequisitesNotMetException("not user typing value mode", this);
@@ -439,7 +450,10 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return !tdDialogEffect.isActive();
 	}
 	
-	public abstract Vector3f getMainSize();
+//	public abstract Vector3f getMainSize();
+	public Vector3f getMainSize(){
+		return bdh().getSizeFrom(getContainerMain());
+	}
 	
 	@Override
 	protected boolean disableAttempt() {
@@ -501,9 +515,6 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		ccSelf.assertSelfNotNull();
 		return sptIntputField;
 	}
-	protected Spatial getInputField() {
-		return sptIntputField;
-	}
 	
 	public float getInputFieldHeight(){
 		return MiscJmeI.i().retrieveBitmapTextFor((Node)sptIntputField).getLineHeight();
@@ -522,7 +533,11 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return getThis();
 	}
 	
-	protected abstract R setInputText(String str);
+//	protected abstract R setInputText(String str);
+	protected R setInputText(String str){
+		bdh().setTextAt(getInputField(),str);
+		return getThis();
+	}
 	
 	protected R getParentDialog(){
 		return (R)this.diagParent;

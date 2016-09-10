@@ -38,7 +38,7 @@ import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
-import com.github.commandsconsolegui.jmegui.SavableHolder;
+import com.github.commandsconsolegui.jmegui.PseudoSavableHolder;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
@@ -941,4 +941,5 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 	public CmdDummy getCmdDummy() {
 		return cmdDummy;
 	}
+
 }

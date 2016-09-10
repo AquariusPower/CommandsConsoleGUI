@@ -27,39 +27,16 @@
 
 package com.github.commandsconsolegui.jmegui;
 
-import java.io.IOException;
-
-import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.jme3.export.JmeExporter;
-import com.jme3.export.JmeImporter;
-import com.jme3.export.Savable;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 
 /**
- * To use with {@link Spatial#setUserData()}
- * 
- * ATTENTION!: drawback is, it will not save neither load anything...
+ * Identical dialog behaviors must go here.
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
- *
- * @param <T>
  */
-public class SavableHolder<T> implements Savable{
-	T objRef;
-	public SavableHolder(T objRef){
-		this.objRef=objRef;
-	}
-	public T getRef(){
-		return objRef;
-	}
-	
-	@Override
-	public void write(JmeExporter ex) throws IOException {
-		throw new PrerequisitesNotMetException("this is a dummy/compatibility holder, cannot be used to actually save or load...",this,objRef);
-	}
-	
-	@Override
-	public void read(JmeImporter im) throws IOException {
-		throw new PrerequisitesNotMetException("this is a dummy/compatibility holder, cannot be used to actually save or load...",this,objRef);
-	}
+public abstract class BaseDialogHelper {
+	protected abstract String getTextFromField(Spatial spt);
+	protected abstract Vector3f getSizeFrom(Spatial spt);
+	protected abstract void setTextAt(Spatial spt,String str);
 }

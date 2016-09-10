@@ -28,6 +28,7 @@
 package com.github.commandsconsolegui.jmegui.lemur.dialog;
 
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
+import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 
@@ -122,5 +123,6 @@ public class QuestionDialogState<T extends Command<Button>> extends LemurBasicDi
 	protected String getDefaultValueToUserModify() {
 		return "(no default value)";
 	}
+
 }
 

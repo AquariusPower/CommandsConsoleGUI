@@ -323,7 +323,7 @@ public class MiscJmeI {
 //	}
 	
 	/**
-	 * Uses {@link SavableHolder}
+	 * Uses {@link PseudoSavableHolder}
 	 * 
 	 * @param clReturn
 	 * @param sptHolder
@@ -333,12 +333,12 @@ public class MiscJmeI {
 	 */
 	public <R> R retrieveUserData(Class<R> clReturn, Spatial sptHolder, String strKey, R objExisting, CallableWeak<R> callCreateInstance){
 		@SuppressWarnings("unchecked")
-		SavableHolder<R> sh = (SavableHolder<R>)sptHolder.getUserData(strKey);
+		PseudoSavableHolder<R> sh = (PseudoSavableHolder<R>)sptHolder.getUserData(strKey);
 		
 		R objUser = null;
 		if(sh==null){
 			if(objExisting==null)objExisting=callCreateInstance.call();
-			sh = new SavableHolder<R>(objExisting);
+			sh = new PseudoSavableHolder<R>(objExisting);
 //				throw new PrerequisitesNotMetException("object instance creation failed", clReturn, sptHolder, strKey);
 			sptHolder.setUserData(strKey, sh);
 		}
@@ -367,11 +367,11 @@ public class MiscJmeI {
 		}
 	}
 	public void setUserDataSH(Spatial spt, String strKey, Object obj) {
-		spt.setUserData(strKey, new SavableHolder(obj));
+		spt.setUserData(strKey, new PseudoSavableHolder(obj));
 	}
 	
 	public <R> R getUserDataSH(Spatial spt, String strKey){
-		SavableHolder<R> sh = (SavableHolder<R>)spt.getUserData(strKey);
+		PseudoSavableHolder<R> sh = (PseudoSavableHolder<R>)spt.getUserData(strKey);
 		if(sh==null)return null;
 		return sh.getRef();
 	}

@@ -758,16 +758,16 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		return cc.cmdFoundReturnStatus(bCommandWorked);
 	}
 	
-	@Override
-	public String getInputText() {
-		return getInputField().getText();
-	}
+//	@Override
+//	public String getInputText() {
+//		return getInputField().getText();
+//	}
 	
-	@Override
-	protected R setInputText(String str) {
-		getInputField().setText(str);
-		return getThis();
-	}
+//	@Override
+//	protected R setInputText(String str) {
+//		getInputField().setText(str);
+//		return getThis();
+//	}
 	
 	public R addModalDialog(LemurDialogGUIStateAbs<T,?> diagModal){
 		diagModal.setDiagParent(this);
@@ -1094,4 +1094,21 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		getContainerMain().getLocalRotation().lookAt(new Vector3f(0,1f,1f), new Vector3f(1,0,0));
 //		getContainerMain().getLocalRotation().lookAt(new Vector3f(0,1,1), new Vector3f(1,0,0));
 	}
+	
+	//TODO remove after completed
+//	BaseDialogStateAbs tmp = new BaseDialogStateAbs(){
+//		//TODO below
+//		@Override		protected void updateInputField() {		}
+//		@Override		protected boolean initKeyMappings() {			return false;		}
+//		@Override		protected void lineWrapDisableForChildrenOf(Node node) {		}
+//		@Override		public void clearSelection() {		}
+//		@Override		protected void updateList() {		}
+//		@Override		protected void updateTextInfo() {		}
+//		@Override		protected DialogListEntryData getSelectedEntryData() {			return null;		}
+//		@Override		protected void updateSelected(DialogListEntryData dledPreviouslySelected) {		}
+//		@Override		protected void updateSelected(DialogListEntryData dledAbove,				DialogListEntryData dledParentTmp) {		}
+//		@Override		protected BaseDialogStateAbs getThis() {			return null;		}
+//		@Override		public void focusGained() {		}
+//		@Override		public void focusLost() {		}
+//	};
 }
