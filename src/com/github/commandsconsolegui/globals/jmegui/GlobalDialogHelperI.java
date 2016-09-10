@@ -35,8 +35,8 @@ import com.github.commandsconsolegui.jmegui.BaseDialogHelper;
 *  
 * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 */
-public class GlobalBaseDialogHelperI extends GlobalHolderAbs<BaseDialogHelper> {
-private static GlobalBaseDialogHelperI instance = new GlobalBaseDialogHelperI();
-public static GlobalBaseDialogHelperI iGlobal(){return instance;}
-public static BaseDialogHelper i(){return iGlobal().get();}
+public class GlobalDialogHelperI extends GlobalHolderAbs<BaseDialogHelper> {
+	private static GlobalDialogHelperI instance = new GlobalDialogHelperI();
+	public static GlobalDialogHelperI iGlobal(){return instance;}
+	public static BaseDialogHelper i(){return iGlobal().get();}
 }

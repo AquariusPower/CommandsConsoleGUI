@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.jmegui;
 
+import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,13 +38,28 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import truetypefont.TrueTypeBitmapGlyph;
+import truetypefont.TrueTypeFont;
+import truetypefont.TrueTypeKey;
+import truetypefont.TrueTypeLoader;
+
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
+import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs.TrueTypeFontFromSystem;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableWeak;
+import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
+import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.jme3.asset.AssetNotFoundException;
+import com.jme3.asset.plugins.FileLocator;
+import com.jme3.font.BitmapCharacter;
+import com.jme3.font.BitmapCharacterSet;
+import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -53,6 +70,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.system.JmeSystem;
+import com.jme3.texture.Texture2D;
 import com.simsilica.lemur.event.AbstractCursorEvent;
 
 /**
@@ -251,6 +269,7 @@ public class MiscJmeI {
 			return 0;
 		}
 	};
+	private boolean	bTTFloaderRegistered;
 	
 	public ArrayList<Spatial> getAllChildrenFrom(Node node, String strChildName) {
 		return getAllChildrenFrom(node, strChildName, false);
@@ -375,4 +394,173 @@ public class MiscJmeI {
 		if(sh==null)return null;
 		return sh.getRef();
 	}
+
+	/**
+	 * TODO this is not working
+	 * @param strFontID
+	 * @param iFontSize
+	 * @return
+	 */
+	public BitmapFont fontFromTTF(String strFontID, int iFontSize){
+		if(true)return null; //TODO dummified
+		
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		Font fntFound=null;
+		for(Font fnt:ge.getAllFonts()){
+			if(fnt.getFontName().toLowerCase().equalsIgnoreCase(strFontID)){
+				fntFound=fnt;
+				break;
+			}
+		}
+		
+		if(fntFound==null)return null;
+		
+		GlobalCommandsDelegatorI.i().dumpInfoEntry("System font: "+strFontID);
+		
+		//TODO this is probably wrong...
+		TrueTypeKey ttk = new TrueTypeKey(strFontID,0,iFontSize,1);
+		fntFound = fntFound.deriveFont(ttk.getStyle(), ttk.getPointSize());
+		
+		/**
+		 * TODO how to directly get a system Font and create a TrueTypeFont without loading it with the file? 
+		 */
+		return convertTTFtoBitmapFont(
+			new TrueTypeFontFromSystem(
+				GlobalAppRefI.i().getAssetManager(), 
+				fntFound,
+				ttk.getPointSize(),
+				ttk.getOutline()
+			));
+	}
+	
+	public BitmapFont fontFromTTFFile(String strFilePath, int iFontSize){
+		File fontFile = new File(strFilePath);
+		
+		if(fontFile.getParent()==null)return null; //not a file with path
+		
+		GlobalAppRefI.i().getAssetManager().registerLocator(fontFile.getParent(), FileLocator.class);
+		
+		TrueTypeKey ttk = new TrueTypeKey(strFilePath, java.awt.Font.PLAIN, iFontSize);
+		
+		TrueTypeFont ttf=null;
+		
+		if(bTTFloaderRegistered){
+			//TODO check if asset loader already registered, how???
+			GlobalAppRefI.i().getAssetManager().registerLoader(TrueTypeLoader.class, "ttf");
+			bTTFloaderRegistered=true;
+		}
+		
+		try{
+			ttf = (TrueTypeFont)GlobalAppRefI.i().getAssetManager().loadAsset(ttk);
+		}catch(AssetNotFoundException|IllegalArgumentException ex){
+			// missing file
+			GlobalCommandsDelegatorI.i().dumpExceptionEntry(ex);
+		}
+		
+		GlobalAppRefI.i().getAssetManager().unregisterLocator(fontFile.getParent(), FileLocator.class);
+		
+		if(ttf==null)return null;
+		
+		GlobalCommandsDelegatorI.i().dumpInfoEntry("Font from file: "+strFilePath);
+		
+		return convertTTFtoBitmapFont(ttf);
+	}
+
+	/**
+	 * TODO WIP, not working yet... may be it is not possible to convert at all yet?
+	 * @param ttf
+	 * @return
+	 */
+	private BitmapFont convertTTFtoBitmapFont(TrueTypeFont ttf){
+		String strGlyphs="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789./*-+?\\;\"!@#$*()&^%";
+		TrueTypeBitmapGlyph attbg[] = ttf.getBitmapGlyphs(strGlyphs);
+		BitmapFont font = new BitmapFont();
+		BitmapCharacterSet bcs = new BitmapCharacterSet();
+		int iMaxHeight = -1;
+		int iMaxWidth = -1;
+		for(TrueTypeBitmapGlyph ttbg : attbg){
+			BitmapCharacter bc = new BitmapCharacter();
+			char ch = ttbg.getCharacter().charAt(0);
+			bc.setChar(ttbg.getCharacter().charAt(0));
+			
+			bc.setWidth(ttbg.w);
+			bc.setHeight(ttbg.h);
+			
+			bc.setX(ttbg.x);
+			bc.setY(ttbg.y);
+			
+			bc.setXAdvance(ttbg.xAdvance);
+			bc.setXOffset(ttbg.getHeightOffset());
+			bc.setYOffset(ttbg.y);
+			
+			bcs.addCharacter(ch, bc);
+			
+			if(bc.getHeight()>iMaxHeight)iMaxHeight=bc.getHeight();
+			if(bc.getWidth()>iMaxWidth)iMaxWidth=bc.getWidth();
+		}
+		font.setCharSet(bcs);
+		
+		Texture2D t2d = ttf.getAtlas();
+//		Image imgAtlas = t2d.getImage();
+//		Image imgTmp = imgAtlas.clone();
+//		imgTmp.getData(0).rewind();
+//		imgTmp.setData(0, imgTmp.getData(0).asReadOnlyBuffer());
+//		MiscI.i().saveImageToFile(imgTmp,"temp"+ttf.getFont().getName().replace(" ",""));
+		if(DebugI.i().isKeyEnabled(EDebugKey.DumpFontImgFile)){ //EDbgKey.values()
+			//TODO why image file ends empty??
+			MiscJmeI.i().saveImageToFile(t2d.getImage(),
+				EDebugKey.DumpFontImgFile.toString()+ttf.getFont().getName().replace(" ",""));
+		}
+		
+		bcs.setBase(iMaxHeight); //TODO what is this!?
+//		bcs.setBase(ttf.getFont().getSize()); 
+		bcs.setHeight(t2d.getImage().getHeight());
+		bcs.setLineHeight(iMaxHeight);
+		bcs.setWidth(t2d.getImage().getWidth());
+		bcs.setRenderedSize(iMaxHeight);
+//		bcs.setStyle(style);
+		
+		/**
+		 * TODO why this fails? missing material's "colorMap" ...
+		font.setPages(new Material[]{ttf.getBitmapGeom("A", ColorRGBA.White).getMaterial()});
+		 */
+		/*
+//		font.setPages(new Material[]{fontConsoleDefault.getPage(0)});
+//		Material mat = ttf.getBitmapGeom(strGlyphs, ColorRGBA.White).getMaterial();
+//		Material mat = fontConsoleDefault.getPage(0).clone();
+		Material mat = fontConsoleExtraDefault.getPage(0).clone();
+		mat.setTexture("ColorMap", t2d); //TODO wow, weird results from this...
+//		mat.setTexture("ColorMap", ttf.getAtlas());
+//		mat.setParam("ColorMap", VarType.Texture2D, ttf.getAtlas());
+		font.setPages(new Material[]{mat});
+		*/
+		
+//		Material m = new Material();
+//		m.setp
+		
+//		font.getCharSet().getCharacter(33);
+//		fontConsoleDefault.getCharSet().getCharacter(35).getChar();
+		
+//		Material[] amat = new Material[fontConsoleDefault.getPageSize()];
+		
+//	ttf.getAtlas();
+		
+		/**
+		 * 
+		 * check for missing glyphs?
+		private boolean hasContours(String character) {
+	    GlyphVector gv = font.createGlyphVector(frc, character);
+	    GeneralPath path = (GeneralPath)gv.getOutline();
+	    PathIterator pi = path.getPathIterator(null);
+	    if (pi.isDone())
+	        return false;
+	    
+	    return true;
+		}
+		 */
+		
+		//app().getAssetManager().unregisterLocator(fontFile.getParent(), FileLocator.class);
+		return font;
+	}
+
 }

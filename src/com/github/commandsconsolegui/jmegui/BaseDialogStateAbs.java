@@ -36,7 +36,7 @@ import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.globals.jmegui.GlobalBaseDialogHelperI;
+import com.github.commandsconsolegui.globals.jmegui.GlobalDialogHelperI;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
@@ -266,7 +266,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return bdh().getTextFromField(getInputField());
 	}
 	private BaseDialogHelper bdh(){
-		return GlobalBaseDialogHelperI.i();
+		return GlobalDialogHelperI.i();
 	}
 	
 	/**
@@ -275,7 +275,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	 */
 	@Override
 	protected boolean initAttempt() {
-		if(getStyle()==null)setStyle(ConsoleLemurStateI.i().STYLE_CONSOLE);
+		if(getStyle()==null)setStyle(GlobalDialogHelperI.i().STYLE_CONSOLE);
 		if(!super.initAttempt())return false;
 		
 		if(!initGUI())return false;

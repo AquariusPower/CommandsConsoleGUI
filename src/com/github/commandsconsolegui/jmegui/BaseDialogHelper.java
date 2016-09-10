@@ -27,6 +27,15 @@
 
 package com.github.commandsconsolegui.jmegui;
 
+import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
+import com.github.commandsconsolegui.cmd.varfield.StringVarField;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
+import com.jme3.asset.AssetNotFoundException;
+import com.jme3.font.BitmapFont;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 
@@ -35,8 +44,63 @@ import com.jme3.scene.Spatial;
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public abstract class BaseDialogHelper {
+public abstract class BaseDialogHelper implements IReflexFillCfg{
+	public final String STYLE_CONSOLE="console";
+	private String strDefaultFont = "DroidSansMono";
+	private StringVarField	svfUserFontOption = new StringVarField(this, strDefaultFont, null);
+	private int iDefaultFontSize = 12;
+	private IntLongVarField ilvFontSize = new IntLongVarField(this, iDefaultFontSize,null);
+	private BitmapFont	font;
+	private BitmapFont	fontConsoleDefault;
+	private String	strConsoleDefaultFontName = "Console";
+	private BitmapFont	fontConsoleExtraDefault;
+	
 	protected abstract String getTextFromField(Spatial spt);
 	protected abstract Vector3f getSizeFrom(Spatial spt);
 	protected abstract void setTextAt(Spatial spt,String str);
+	
+	public void prepareStyle() {
+		fontConsoleDefault = GlobalAppRefI.i().getAssetManager().loadFont("Interface/Fonts/Console.fnt");
+		fontConsoleExtraDefault = GlobalAppRefI.i().getAssetManager().loadFont("Interface/Fonts/DroidSansMono.fnt");
+		
+		String strFontName=svfUserFontOption.getStringValue();
+		
+		font=null;
+		try{
+			if(font==null){ //system font object
+				font = MiscJmeI.i().fontFromTTF(strFontName,ilvFontSize.intValue());
+			}
+			
+			if(font==null){ //custom font file
+				font = MiscJmeI.i().fontFromTTFFile(strFontName,ilvFontSize.intValue());
+			}
+			
+			if(font==null){ //bundled fonts
+				strFontName=strFontName.replace(" ","");
+				String strFile = "Interface/Fonts/"+strFontName+".fnt";
+				font = GlobalAppRefI.i().getAssetManager().loadFont(strFile);
+				if(font!=null)GlobalCommandsDelegatorI.i().dumpInfoEntry("Bundled font: "+strFile);
+			}
+		}catch(AssetNotFoundException ex){
+			GlobalCommandsDelegatorI.i().dumpExceptionEntry(ex);
+			font = fontConsoleDefault; //fontConsoleExtraDefault
+			svfUserFontOption.setObjectRawValue(strConsoleDefaultFontName );
+		}
+	}
+	
+	protected BitmapFont getFont() {
+		return font;
+	}
+	protected void setFont(BitmapFont font) {
+		this.font = font;
+	}
+	public void setDefault() {
+		svfUserFontOption.setObjectRawValue(strDefaultFont);
+		ilvFontSize.setObjectRawValue(iDefaultFontSize);
+	}
+
+	@Override
+	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
+	}
 }

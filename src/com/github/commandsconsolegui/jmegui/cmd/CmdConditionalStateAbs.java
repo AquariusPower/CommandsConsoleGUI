@@ -220,9 +220,6 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 	@Override
 	protected boolean enableAttempt() {
 		if(!super.enableAttempt())return false;
-		
-		cd().dumpInfoEntry(getCmd()+" enable");
-		
 		return true;
 	}
 	
@@ -230,19 +227,19 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 	protected boolean disableAttempt() {
 		if(!super.disableAttempt())return false;
 		
-		cd().dumpInfoEntry(getCmd()+" disable");
-		
 		return true;
 	}
 	
 	@Override
 	protected void enableSuccess() {
 		btgEnabled.setObjectRawValue(true);
+		cd().dumpInfoEntry(getCmd()+" enable");
 	}
 	
 	@Override
 	protected void disableSuccess() {
 		btgEnabled.setObjectRawValue(false);
+		cd().dumpInfoEntry(getCmd()+" disable");
 	}
 	
 	@Override

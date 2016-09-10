@@ -51,6 +51,7 @@ import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.globals.jmegui.GlobalDialogHelperI;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
@@ -110,7 +111,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	public final StringCmdField INPUT_MAPPING_CONSOLE_SHIFT_PRESSED	= new StringCmdField(this,strFinalFieldInputCodePrefix);
 	public final StringCmdField INPUT_MAPPING_CONSOLE_CONTROL_PRESSED	= new StringCmdField(this,strFinalFieldInputCodePrefix);
 	
-	public final String STYLE_CONSOLE="console";
+//	public final String STYLE_CONSOLE="console";
 	
 //	private boolean bStartupCmdQueueDone = false; 
 	
@@ -123,10 +124,10 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	public final StringCmdField CMD_DEFAULT = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
 	public final StringCmdField CMD_FONT_LIST = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
 	
-	private String strDefaultFont = "DroidSansMono";
-	private StringVarField	svfUserFontOption = new StringVarField(this, strDefaultFont, null);
-	private int iDefaultFontSize = 12;
-	private IntLongVarField ilvFontSize = new IntLongVarField(this, iDefaultFontSize,null);
+//	private String strDefaultFont = "DroidSansMono";
+//	private StringVarField	svfUserFontOption = new StringVarField(this, strDefaultFont, null);
+//	private int iDefaultFontSize = 12;
+//	private IntLongVarField ilvFontSize = new IntLongVarField(this, iDefaultFontSize,null);
 	
 //	/**
 //	 * keep "initialized" vars together!
@@ -307,12 +308,12 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 //	private boolean	bRestorePreviousFocus;
 	private boolean	bInitializeOnlyTheUI;
 //	private boolean	bConfigured;
-	private BitmapFont	font;
-	private BitmapFont	fontConsoleDefault;
-	private String	strConsoleDefaultFontName = "Console";
+//	private BitmapFont	font;
+//	private BitmapFont	fontConsoleDefault;
+//	private String	strConsoleDefaultFontName = "Console";
 	private int	iMargin;
 	private Node	sliderDumpArea;
-	private BitmapFont	fontConsoleExtraDefault;
+//	private BitmapFont	fontConsoleExtraDefault;
 //	private boolean	bConfigureSimpleCompleted;
 
 	BoolTogglerCmdField btgBugFixStatsLabelTextSize = 
@@ -444,7 +445,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		if(!super.initGUI())return false;
 		
 //		initializePre();
-		addStyle(STYLE_CONSOLE);
+		addStyle(GlobalDialogHelperI.i().STYLE_CONSOLE);
 		
 //		sapp = (SimpleApplication)app;
 //		cc.sapp = sapp;
@@ -455,9 +456,9 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 //		GuiGlobals.initialize(sapp);
 //		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
 		
-		fontConsoleDefault = app().getAssetManager().loadFont("Interface/Fonts/Console.fnt");
-		fontConsoleExtraDefault = app().getAssetManager().loadFont("Interface/Fonts/DroidSansMono.fnt");
-		app().getAssetManager().registerLoader(TrueTypeLoader.class, "ttf");
+//		fontConsoleDefault = app().getAssetManager().loadFont("Interface/Fonts/Console.fnt");
+//		fontConsoleExtraDefault = app().getAssetManager().loadFont("Interface/Fonts/DroidSansMono.fnt");
+//		app().getAssetManager().registerLoader(TrueTypeLoader.class, "ttf");
 		
 //		cc.configure(this,sapp);
 //		cd().initialize();
@@ -582,7 +583,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 //	private float fPreferredThickness=10.0f;
 	
 	private void initializeOnlyTheUIallSteps(){
-		prepareStyle();
+		GlobalDialogHelperI.i().prepareStyle();
 		initializeOnlyTheUI();
 		updateFontStuff();
 	}
@@ -1858,9 +1859,8 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		}else
 		if(cd.checkCmdValidity(this,CMD_DEFAULT,"will revert to default values/config/setup (use if something goes wrong)")){
 			//TODO apply all basic settings here, like font size etc
-			svfUserFontOption.setObjectRawValue(strDefaultFont);
-			ilvFontSize.setObjectRawValue(iDefaultFontSize);
-			bCommandWorked=cmdStyleApply(STYLE_CONSOLE);
+			GlobalDialogHelperI.i().setDefault();
+			bCommandWorked=cmdStyleApply(GlobalDialogHelperI.i().STYLE_CONSOLE);
 		}else
 		if(cd.checkCmdValidity(this,CMD_FONT_LIST,"[strFilter] use 'all' as filter to show all, otherwise only monospaced will be the default filter")){
 			String strFilter = cd.getCurrentCommandLine().paramString(1);
@@ -2270,7 +2270,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		/**
 		 * Mono spaced fonts can always have a fixed linewrap column!
 		 */
-		if(!bUseFixedWrapColumn)bUseFixedWrapColumn=STYLE_CONSOLE.equals(getStyle());
+		if(!bUseFixedWrapColumn)bUseFixedWrapColumn=GlobalDialogHelperI.i().STYLE_CONSOLE.equals(getStyle());
 		
 		if(bUseFixedWrapColumn){
 			return (int)
@@ -2343,100 +2343,100 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		this.sptScrollTarget = target;
 	}
 	
-	/**
-	 * TODO WIP, not working yet... may be it is not possible to convert at all yet?
-	 * @param ttf
-	 * @return
-	 */
-	private BitmapFont convertTTFtoBitmapFont(TrueTypeFont ttf){
-		String strGlyphs="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789./*-+?\\;\"!@#$*()&^%";
-		TrueTypeBitmapGlyph attbg[] = ttf.getBitmapGlyphs(strGlyphs);
-		BitmapFont font = new BitmapFont();
-		BitmapCharacterSet bcs = new BitmapCharacterSet();
-		int iMaxHeight = -1;
-		int iMaxWidth = -1;
-		for(TrueTypeBitmapGlyph ttbg : attbg){
-			BitmapCharacter bc = new BitmapCharacter();
-			char ch = ttbg.getCharacter().charAt(0);
-			bc.setChar(ttbg.getCharacter().charAt(0));
-			
-			bc.setWidth(ttbg.w);
-			bc.setHeight(ttbg.h);
-			
-			bc.setX(ttbg.x);
-			bc.setY(ttbg.y);
-			
-			bc.setXAdvance(ttbg.xAdvance);
-			bc.setXOffset(ttbg.getHeightOffset());
-			bc.setYOffset(ttbg.y);
-			
-			bcs.addCharacter(ch, bc);
-			
-			if(bc.getHeight()>iMaxHeight)iMaxHeight=bc.getHeight();
-			if(bc.getWidth()>iMaxWidth)iMaxWidth=bc.getWidth();
-		}
-		font.setCharSet(bcs);
-		
-		Texture2D t2d = ttf.getAtlas();
-//		Image imgAtlas = t2d.getImage();
-//		Image imgTmp = imgAtlas.clone();
-//		imgTmp.getData(0).rewind();
-//		imgTmp.setData(0, imgTmp.getData(0).asReadOnlyBuffer());
-//		MiscI.i().saveImageToFile(imgTmp,"temp"+ttf.getFont().getName().replace(" ",""));
-		if(DebugI.i().isKeyEnabled(EDebugKey.DumpFontImgFile)){ //EDbgKey.values()
-			//TODO why image file ends empty??
-			MiscJmeI.i().saveImageToFile(t2d.getImage(),
-				EDebugKey.DumpFontImgFile.toString()+ttf.getFont().getName().replace(" ",""));
-		}
-		
-		bcs.setBase(iMaxHeight); //TODO what is this!?
-//		bcs.setBase(ttf.getFont().getSize()); 
-		bcs.setHeight(t2d.getImage().getHeight());
-		bcs.setLineHeight(iMaxHeight);
-		bcs.setWidth(t2d.getImage().getWidth());
-		bcs.setRenderedSize(iMaxHeight);
-//		bcs.setStyle(style);
-		
-		/**
-		 * TODO why this fails? missing material's "colorMap" ...
-		font.setPages(new Material[]{ttf.getBitmapGeom("A", ColorRGBA.White).getMaterial()});
-		 */
-//		font.setPages(new Material[]{fontConsoleDefault.getPage(0)});
-//		Material mat = ttf.getBitmapGeom(strGlyphs, ColorRGBA.White).getMaterial();
-//		Material mat = fontConsoleDefault.getPage(0).clone();
-		Material mat = fontConsoleExtraDefault.getPage(0).clone();
-		mat.setTexture("ColorMap", t2d); //TODO wow, weird results from this...
-//		mat.setTexture("ColorMap", ttf.getAtlas());
-//		mat.setParam("ColorMap", VarType.Texture2D, ttf.getAtlas());
-		font.setPages(new Material[]{mat});
-		
-//		Material m = new Material();
-//		m.setp
-		
-//		font.getCharSet().getCharacter(33);
-//		fontConsoleDefault.getCharSet().getCharacter(35).getChar();
-		
-//		Material[] amat = new Material[fontConsoleDefault.getPageSize()];
-		
-//	ttf.getAtlas();
-		
-		/**
-		 * 
-		 * check for missing glyphs?
-		private boolean hasContours(String character) {
-	    GlyphVector gv = font.createGlyphVector(frc, character);
-	    GeneralPath path = (GeneralPath)gv.getOutline();
-	    PathIterator pi = path.getPathIterator(null);
-	    if (pi.isDone())
-	        return false;
-	    
-	    return true;
-		}
-		 */
-		
-		//app().getAssetManager().unregisterLocator(fontFile.getParent(), FileLocator.class);
-		return font;
-	}
+//	/**
+//	 * TODO WIP, not working yet... may be it is not possible to convert at all yet?
+//	 * @param ttf
+//	 * @return
+//	 */
+//	private BitmapFont convertTTFtoBitmapFont(TrueTypeFont ttf){
+//		String strGlyphs="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789./*-+?\\;\"!@#$*()&^%";
+//		TrueTypeBitmapGlyph attbg[] = ttf.getBitmapGlyphs(strGlyphs);
+//		BitmapFont font = new BitmapFont();
+//		BitmapCharacterSet bcs = new BitmapCharacterSet();
+//		int iMaxHeight = -1;
+//		int iMaxWidth = -1;
+//		for(TrueTypeBitmapGlyph ttbg : attbg){
+//			BitmapCharacter bc = new BitmapCharacter();
+//			char ch = ttbg.getCharacter().charAt(0);
+//			bc.setChar(ttbg.getCharacter().charAt(0));
+//			
+//			bc.setWidth(ttbg.w);
+//			bc.setHeight(ttbg.h);
+//			
+//			bc.setX(ttbg.x);
+//			bc.setY(ttbg.y);
+//			
+//			bc.setXAdvance(ttbg.xAdvance);
+//			bc.setXOffset(ttbg.getHeightOffset());
+//			bc.setYOffset(ttbg.y);
+//			
+//			bcs.addCharacter(ch, bc);
+//			
+//			if(bc.getHeight()>iMaxHeight)iMaxHeight=bc.getHeight();
+//			if(bc.getWidth()>iMaxWidth)iMaxWidth=bc.getWidth();
+//		}
+//		font.setCharSet(bcs);
+//		
+//		Texture2D t2d = ttf.getAtlas();
+////		Image imgAtlas = t2d.getImage();
+////		Image imgTmp = imgAtlas.clone();
+////		imgTmp.getData(0).rewind();
+////		imgTmp.setData(0, imgTmp.getData(0).asReadOnlyBuffer());
+////		MiscI.i().saveImageToFile(imgTmp,"temp"+ttf.getFont().getName().replace(" ",""));
+//		if(DebugI.i().isKeyEnabled(EDebugKey.DumpFontImgFile)){ //EDbgKey.values()
+//			//TODO why image file ends empty??
+//			MiscJmeI.i().saveImageToFile(t2d.getImage(),
+//				EDebugKey.DumpFontImgFile.toString()+ttf.getFont().getName().replace(" ",""));
+//		}
+//		
+//		bcs.setBase(iMaxHeight); //TODO what is this!?
+////		bcs.setBase(ttf.getFont().getSize()); 
+//		bcs.setHeight(t2d.getImage().getHeight());
+//		bcs.setLineHeight(iMaxHeight);
+//		bcs.setWidth(t2d.getImage().getWidth());
+//		bcs.setRenderedSize(iMaxHeight);
+////		bcs.setStyle(style);
+//		
+//		/**
+//		 * TODO why this fails? missing material's "colorMap" ...
+//		font.setPages(new Material[]{ttf.getBitmapGeom("A", ColorRGBA.White).getMaterial()});
+//		 */
+////		font.setPages(new Material[]{fontConsoleDefault.getPage(0)});
+////		Material mat = ttf.getBitmapGeom(strGlyphs, ColorRGBA.White).getMaterial();
+////		Material mat = fontConsoleDefault.getPage(0).clone();
+//		Material mat = fontConsoleExtraDefault.getPage(0).clone();
+//		mat.setTexture("ColorMap", t2d); //TODO wow, weird results from this...
+////		mat.setTexture("ColorMap", ttf.getAtlas());
+////		mat.setParam("ColorMap", VarType.Texture2D, ttf.getAtlas());
+//		font.setPages(new Material[]{mat});
+//		
+////		Material m = new Material();
+////		m.setp
+//		
+////		font.getCharSet().getCharacter(33);
+////		fontConsoleDefault.getCharSet().getCharacter(35).getChar();
+//		
+////		Material[] amat = new Material[fontConsoleDefault.getPageSize()];
+//		
+////	ttf.getAtlas();
+//		
+//		/**
+//		 * 
+//		 * check for missing glyphs?
+//		private boolean hasContours(String character) {
+//	    GlyphVector gv = font.createGlyphVector(frc, character);
+//	    GeneralPath path = (GeneralPath)gv.getOutline();
+//	    PathIterator pi = path.getPathIterator(null);
+//	    if (pi.isDone())
+//	        return false;
+//	    
+//	    return true;
+//		}
+//		 */
+//		
+//		//app().getAssetManager().unregisterLocator(fontFile.getParent(), FileLocator.class);
+//		return font;
+//	}
 	
 	/**
 	 * TODO this is probably not to be used...
@@ -2447,69 +2447,69 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
     }
 	}
 	
-	/**
-	 * TODO this is not working
-	 * @param strFontID
-	 * @param iFontSize
-	 * @return
-	 */
-	private BitmapFont fontFromTTF(String strFontID, int iFontSize){
-		if(true)return null; //TODO dummified
-		
-		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		Font fntFound=null;
-		for(Font fnt:ge.getAllFonts()){
-			if(fnt.getFontName().toLowerCase().equalsIgnoreCase(strFontID)){
-				fntFound=fnt;
-				break;
-			}
-		}
-		
-		if(fntFound==null)return null;
-		
-		cd().dumpInfoEntry("System font: "+strFontID);
-		
-		//TODO this is probably wrong...
-		TrueTypeKey ttk = new TrueTypeKey(strFontID,0,iFontSize,1);
-		fntFound = fntFound.deriveFont(ttk.getStyle(), ttk.getPointSize());
-		
-		/**
-		 * TODO how to directly get a system Font and create a TrueTypeFont without loading it with the file? 
-		 */
-		return convertTTFtoBitmapFont(
-			new TrueTypeFontFromSystem(
-				app().getAssetManager(), 
-				fntFound,
-				ttk.getPointSize(),
-				ttk.getOutline()
-			));
-	}
-	
-	private BitmapFont fontFromTTFFile(String strFilePath, int iFontSize){
-		File fontFile = new File(strFilePath);
-		
-		if(fontFile.getParent()==null)return null; //not a file with path
-		
-		app().getAssetManager().registerLocator(fontFile.getParent(), FileLocator.class);
-		
-		TrueTypeKey ttk = new TrueTypeKey(strFilePath, java.awt.Font.PLAIN, iFontSize);
-		
-		TrueTypeFont ttf=null;
-		try{
-			ttf = (TrueTypeFont)app().getAssetManager().loadAsset(ttk);
-		}catch(AssetNotFoundException|IllegalArgumentException ex){
-			// missing file
-			cd().dumpExceptionEntry(ex);
-		}
-		
-		app().getAssetManager().unregisterLocator(fontFile.getParent(), FileLocator.class);
-		
-		if(ttf==null)return null;
-		
-		cd().dumpInfoEntry("Font from file: "+strFilePath);
-		
-		return convertTTFtoBitmapFont(ttf);
-	}
+//	/**
+//	 * TODO this is not working
+//	 * @param strFontID
+//	 * @param iFontSize
+//	 * @return
+//	 */
+//	private BitmapFont fontFromTTF(String strFontID, int iFontSize){
+//		if(true)return null; //TODO dummified
+//		
+//		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+//		Font fntFound=null;
+//		for(Font fnt:ge.getAllFonts()){
+//			if(fnt.getFontName().toLowerCase().equalsIgnoreCase(strFontID)){
+//				fntFound=fnt;
+//				break;
+//			}
+//		}
+//		
+//		if(fntFound==null)return null;
+//		
+//		cd().dumpInfoEntry("System font: "+strFontID);
+//		
+//		//TODO this is probably wrong...
+//		TrueTypeKey ttk = new TrueTypeKey(strFontID,0,iFontSize,1);
+//		fntFound = fntFound.deriveFont(ttk.getStyle(), ttk.getPointSize());
+//		
+//		/**
+//		 * TODO how to directly get a system Font and create a TrueTypeFont without loading it with the file? 
+//		 */
+//		return convertTTFtoBitmapFont(
+//			new TrueTypeFontFromSystem(
+//				app().getAssetManager(), 
+//				fntFound,
+//				ttk.getPointSize(),
+//				ttk.getOutline()
+//			));
+//	}
+//	
+//	private BitmapFont fontFromTTFFile(String strFilePath, int iFontSize){
+//		File fontFile = new File(strFilePath);
+//		
+//		if(fontFile.getParent()==null)return null; //not a file with path
+//		
+//		app().getAssetManager().registerLocator(fontFile.getParent(), FileLocator.class);
+//		
+//		TrueTypeKey ttk = new TrueTypeKey(strFilePath, java.awt.Font.PLAIN, iFontSize);
+//		
+//		TrueTypeFont ttf=null;
+//		try{
+//			ttf = (TrueTypeFont)app().getAssetManager().loadAsset(ttk);
+//		}catch(AssetNotFoundException|IllegalArgumentException ex){
+//			// missing file
+//			cd().dumpExceptionEntry(ex);
+//		}
+//		
+//		app().getAssetManager().unregisterLocator(fontFile.getParent(), FileLocator.class);
+//		
+//		if(ttf==null)return null;
+//		
+//		cd().dumpInfoEntry("Font from file: "+strFilePath);
+//		
+//		return convertTTFtoBitmapFont(ttf);
+//	}
 	
 	/**
 	 * 
@@ -2527,38 +2527,38 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		return astr;
 	}
 	
-	public void prepareStyle() {
-		String strFontName=svfUserFontOption.getStringValue();
-	//	if(bConsoleStyleCreated)return;
-		
-		font=null;
-		try{
-			if(font==null){ //system font object
-				font = fontFromTTF(strFontName,ilvFontSize.intValue());
-			}
-			
-			if(font==null){ //custom font file
-				font = fontFromTTFFile(strFontName,ilvFontSize.intValue());
-			}
-			
-			if(font==null){ //bundled fonts
-				strFontName=strFontName.replace(" ","");
-				String strFile = "Interface/Fonts/"+strFontName+".fnt";
-				font = app().getAssetManager().loadFont(strFile);
-				if(font!=null)cd().dumpInfoEntry("Bundled font: "+strFile);
-			}
-		}catch(AssetNotFoundException ex){
-			cd().dumpExceptionEntry(ex);
-			font = fontConsoleDefault; //fontConsoleExtraDefault
-//			strFontName="Console";
-//			font = app().getAssetManager().loadFont("Interface/Fonts/"+strFontName+".fnt");
-//		svUserFontOption.setObjectValue(strFontName);
-			svfUserFontOption.setObjectRawValue(strConsoleDefaultFontName );
-		}
-	//	BitmapFont font = app().getAssetManager().loadFont("Interface/Fonts/Console512x.fnt");
-		
-//		updateFontStuff();
-	}
+//	public void prepareStyle() {
+//		String strFontName=svfUserFontOption.getStringValue();
+//	//	if(bConsoleStyleCreated)return;
+//		
+//		font=null;
+//		try{
+//			if(font==null){ //system font object
+//				font = fontFromTTF(strFontName,ilvFontSize.intValue());
+//			}
+//			
+//			if(font==null){ //custom font file
+//				font = fontFromTTFFile(strFontName,ilvFontSize.intValue());
+//			}
+//			
+//			if(font==null){ //bundled fonts
+//				strFontName=strFontName.replace(" ","");
+//				String strFile = "Interface/Fonts/"+strFontName+".fnt";
+//				font = app().getAssetManager().loadFont(strFile);
+//				if(font!=null)cd().dumpInfoEntry("Bundled font: "+strFile);
+//			}
+//		}catch(AssetNotFoundException ex){
+//			cd().dumpExceptionEntry(ex);
+//			font = fontConsoleDefault; //fontConsoleExtraDefault
+////			strFontName="Console";
+////			font = app().getAssetManager().loadFont("Interface/Fonts/"+strFontName+".fnt");
+////		svUserFontOption.setObjectValue(strFontName);
+//			svfUserFontOption.setObjectRawValue(strConsoleDefaultFontName );
+//		}
+//	//	BitmapFont font = app().getAssetManager().loadFont("Interface/Fonts/Console512x.fnt");
+//		
+////		updateFontStuff();
+//	}
 
 	protected void setDumpEntriesSlowedQueue(AbstractList<String> vlstrDumpEntriesSlowedQueue) {
 		this.vlstrDumpEntriesSlowedQueue = vlstrDumpEntriesSlowedQueue;
@@ -2700,13 +2700,13 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	protected void setKeyShiftIsPressed(boolean bKeyShiftIsPressed) {
 		this.bKeyShiftIsPressed = bKeyShiftIsPressed;
 	}
-	protected BitmapFont getFont() {
-		return font;
-	}
-	protected R setFont(BitmapFont font) {
-		this.font = font;
-		return getThis();
-	}
+//	protected BitmapFont getFont() {
+//		return font;
+//	}
+//	protected R setFont(BitmapFont font) {
+//		this.font = font;
+//		return getThis();
+//	}
 	protected BitmapFont getFntMakeFixedWidth() {
 		return fntMakeFixedWidth;
 	}
