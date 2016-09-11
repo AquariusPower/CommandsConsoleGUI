@@ -229,8 +229,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		private void applyEntryHeight(){
 			MiscLemurHelpersStateI.i().setGrantedSize(this, 
 					-1f, 
-					getPreferredSize().getY() * assignedCellRenderer.getCellHeightMult(),
-					true);
+					getPreferredSize().getY() * assignedCellRenderer.getCellHeightMult());
 		}
 		
 		static class CommandTreeToggle implements Command<Button>{

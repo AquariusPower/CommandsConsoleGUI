@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.jmegui.lemur;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
@@ -155,7 +156,10 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 					Spatial sptDialogMain = MiscJmeI.i().getParentestFrom(capture);
 					Vector3f v3fNewPos = MiscJmeI.i().eventToV3f(eventMotion);
 					Vector3f v3fDisplacement = buttonData.updateDragPosAndGetDisplacement(eventMotion, v3fNewPos);
-					sptDialogMain.move(v3fDisplacement);
+					
+					BaseDialogStateAbs diag = MiscJmeI.i().getUserDataPSH(sptDialogMain,BaseDialogStateAbs.class);
+					diag.drag(capture, v3fDisplacement);
+//					sptDialogMain.move(v3fDisplacement);
 					return true;
 			}
 		}

@@ -146,7 +146,7 @@ public abstract class LemurBasicDialogStateAbs<T,R extends LemurBasicDialogState
 		
 //		if(adleFullList.size()>100)adleFullList.remove(0);
 		
-		requestRefreshList();
+		requestRefreshUpdateList();
 		
 		return dle;
 	}

@@ -37,6 +37,7 @@ import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
 import com.github.commandsconsolegui.jmegui.MouseCursorButtonsControl;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
+import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell.EUserData;
@@ -143,12 +144,12 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 	
 	@Override
 	public void cursorEntered(CursorMotionEvent event, Spatial target,Spatial capture) {
-		// TODO Auto-generated method stub
+		//hover in?
 	}
 
 	@Override
 	public void cursorExited(CursorMotionEvent event, Spatial target,Spatial capture) {
-		// TODO Auto-generated method stub
+		//hover out?
 	}
 	
 	public boolean drag(ArrayList<MouseCursorButtonData> aButtonList, CursorMotionEvent eventMotion, Spatial target,	Spatial capture){
@@ -185,6 +186,8 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 	Command<Button> cmdbtnHoverOver = new Command<Button>(){
 		@Override
 		public void execute(Button source) {
+			if( !LemurFocusHelperStateI.i().isDialogFocusedFor(source) )return;
+			
 			AudioUII.i().playOnUserAction(EAudio.HoverOverActivators);
 			
 			Panel pnlApplyEffect = source;
@@ -204,6 +207,8 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 	Command<Button> cmdbtnHoverOut = new Command<Button>(){
 		@Override
 		public void execute(Button source) {
+			if( !LemurFocusHelperStateI.i().isDialogFocusedFor(source) )return;
+			
 			Panel pnlApplyEffect = source;
 			Cell<?> cell = (Cell<?>)source.getUserData(EUserData.cellClassRef.toString());
 			if(cell!=null){

@@ -120,7 +120,15 @@ public class MouseCursorButtonData{
 	public void setPressed(Object objEventRef, Vector3f v3fPressedPos){
 		if(hmEventRef.get(EMethodCall.setPressed)==objEventRef)return;
 		
-		if(isPressed())throw new PrerequisitesNotMetException("already pressed! ",this,v3fPressedPos);
+		if(isPressed()){
+			/**
+			 * This can happen if the application lost focus before the button being released.
+			 * Thats when the user comes back and press it again.
+			 */
+			GlobalCommandsDelegatorI.i().dumpDevWarnEntry("mouse button already pressed", this, v3fPressedPos);
+//			throw new PrerequisitesNotMetException("already pressed! ",this,v3fPressedPos);
+			return; //just skip
+		}
 		
 		this.lPressedMilis = System.currentTimeMillis();
 		this.v3fPressedPos = v3fPressedPos.clone();

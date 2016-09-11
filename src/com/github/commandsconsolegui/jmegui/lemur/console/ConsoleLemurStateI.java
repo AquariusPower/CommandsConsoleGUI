@@ -317,7 +317,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		
 		// main container
 		setContainerMain(new Container(new BorderLayout(), getStyle()));
-		MiscLemurHelpersStateI.i().setGrantedSize(getContainerConsole(), getConsoleSizeCopy(), true);
+		MiscLemurHelpersStateI.i().setGrantedSize(getContainerConsole(), getConsoleSizeCopy());
 		
 		/**
 		 * TOP ELEMENT =================================================================
@@ -329,7 +329,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		// console stats
 		lblStats = new Label("Console stats.",getStyle());
 		lblStats.setColor(new ColorRGBA(1,1,0.5f,1));
-		MiscLemurHelpersStateI.i().setGrantedSize(lblStats, getConsoleSizeCopy().x*0.75f, 1f, false); //TODO y=1f so it will expand?
+		MiscLemurHelpersStateI.i().setGrantedSize(lblStats, getConsoleSizeCopy().x*0.75f, 1f); //TODO y=1f so it will expand?
 		getContainerStatsAndControls().addChild(lblStats,0,0);
 		
 		// buttons
@@ -526,7 +526,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 
 	@Override
 	public ConsoleLemurStateI setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines) {
-		MiscLemurHelpersStateI.i().setGrantedSize(getHintBox(), v3fBoxSizeXY, false);
+		MiscLemurHelpersStateI.i().setGrantedSize(getHintBox(), v3fBoxSizeXY);
 		getHintBox().setVisibleItems(iVisibleLines);
 		return this;
 	}
@@ -1029,7 +1029,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	
 	@Override
 	public void setContainerConsolePreferredSize(Vector3f v3f) {
-		MiscLemurHelpersStateI.i().setGrantedSize(getContainerConsole(), v3f, true);
+		MiscLemurHelpersStateI.i().setGrantedSize(getContainerConsole(), v3f);
 	}
 	@Override
 	public void addRemoveContainerConsoleChild(boolean bAdd, Node pnlChild){
@@ -1122,7 +1122,8 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 
 	@Override
 	protected void updateOverrideInputFocus() {
-		if(!getInputField().equals(LemurFocusHelperStateI.i().getFocused())){
+		if( !LemurFocusHelperStateI.i().isDialogFocusedFor(getInputField()) ){
+//		if(!getInputField().equals(LemurFocusHelperStateI.i().getFocused())){
 			LemurFocusHelperStateI.i().requestFocus(getInputField(),true);
 		}
 	}

@@ -63,6 +63,7 @@ import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.component.ColoredComponent;
 import com.simsilica.lemur.component.TextEntryComponent;
+import com.simsilica.lemur.core.GuiControl;
 import com.simsilica.lemur.event.KeyAction;
 import com.simsilica.lemur.event.KeyActionListener;
 import com.simsilica.lemur.focus.FocusManagerState;
@@ -244,7 +245,8 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 	
 	private void updateBlinkInputFieldTextCursor(TextField tf) {
 		if(!bBlinkingTextCursor)return;
-		if(!tf.equals(LemurFocusHelperStateI.i().getFocused()))return;
+//		if(!tf.equals(LemurFocusHelperStateI.i().getFocused()))return;
+		if(!LemurFocusHelperStateI.i().isDialogFocusedFor(tf))return;
 		
 		Geometry geomCursor = tf.getUserData(EUserData.geomCursorHotLink.toString());
 		if(geomCursor==null){
@@ -588,6 +590,7 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 
 	@Override
 	protected boolean updateAttempt(float tpf) {
+		bAllowMinSizeCheckAndFix=true;
 //		LemurFocusHelperStateI.i().update(tpf);
 		
 		if(tfToBlinkCursor!=null){
@@ -759,7 +762,7 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 			if(v3fPrefSize!=null){
 				if(fNewZSize!=null && Float.compare(v3fPrefSize.z,0.0f)==0 ){
 					v3fPrefSize.z=fNewZSize;
-					setGrantedSize(panel,v3fPrefSize,false);
+					setGrantedSize(panel,v3fPrefSize);
 				}
 			}
 			
@@ -807,7 +810,12 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 	public static final float fPreferredThickness = 1f; //thickness z=1f to match lemur one and do not mess with its calculations, TODO try to collect it from lemur...
 //	Vector3f v3fMinSize=new Vector3f(10f,10f,fPreferredThickness); 
 	Vector3f v3fMinSize=new Vector3f(1f,1f,fPreferredThickness); //minimum is 1x1 dot!!!! 
+
+	private boolean	bAllowMinSizeCheckAndFix = false; //MUST BE INITIALLY FALSE!
 	
+	public Vector3f setGrantedSize(Panel pnl, float fX, float fY){
+		return setGrantedSize(pnl, fX, fY, false);
+	}
 	/**
 	 * see {@link #setGrantedSize(Panel, Vector3f, boolean)}
 	 * 
@@ -817,8 +825,12 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 	 * @param bEnsureSizeNow
 	 * @return
 	 */
-	public Vector3f setGrantedSize(Panel pnl, float fX, float fY, boolean bEnsureSizeNow){
-		return setGrantedSize(pnl, new Vector3f(fX,fY,-1), bEnsureSizeNow); //z=-1 will be fixed
+	public Vector3f setGrantedSize(Panel pnl, float fX, float fY, boolean bForce){
+		return setGrantedSize(pnl, new Vector3f(fX,fY,-1), bForce); //z=-1 will be fixed
+	}
+	
+	public Vector3f setGrantedSize(final Panel pnl, final Vector3f v3fSize){
+		return setGrantedSize(pnl, v3fSize, false);
 	}
 	/**
 	 * Sets size properly, acurately, precisely,
@@ -830,18 +842,38 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 	 * @param bEnsureSizeNow this means that the Preferred size will be used now!
 	 * @return
 	 */
-	public Vector3f setGrantedSize(final Panel pnl, final Vector3f v3fSize, final boolean bEnsureSizeNow){
+	public Vector3f setGrantedSize(final Panel pnl, final Vector3f v3fSize, boolean bForceSpecificSize){
 		if(v3fSize.x<v3fMinSize.x)v3fSize.x=v3fMinSize.x;
 		if(v3fSize.y<v3fMinSize.y)v3fSize.y=v3fMinSize.y;
 		if(v3fSize.z<v3fMinSize.z)v3fSize.z=v3fMinSize.z;
 		
-		Vector3f v3fP = pnl.getPreferredSize();
-		if(v3fSize.x<v3fP.x)v3fSize.x=v3fP.x;
-		if(v3fSize.y<v3fP.y)v3fSize.y=v3fP.y;
-		v3fSize.z=v3fP.z; // do not mess with Z !!!
+		Vector3f v3fPreferredBkp = pnl.getPreferredSize().clone();
+		
+		if(!bForceSpecificSize){
+			if(v3fSize.x<v3fPreferredBkp.x)v3fSize.x=v3fPreferredBkp.x;
+			if(v3fSize.y<v3fPreferredBkp.y)v3fSize.y=v3fPreferredBkp.y;
+		}
+		
+		v3fSize.z=v3fPreferredBkp.z; // do not mess with Z !!!
 		//if(v3fSize.z<v3fP.z)v3fSize.z=v3fP.z;
 		
-		pnl.setPreferredSize(v3fSize); 
+		pnl.setPreferredSize(v3fSize);
+		
+		/**
+		 * TODO only allow any changes if it is on GuiNode so it can be properly checked. So use the queue, but new calls must override existing identical queues! may be create a single call object and update it?
+		 */
+//		if(bAllowMinSizeCheckAndFix ){
+		if(MiscJmeI.i().getParentestFrom(pnl).getParent()!=null){
+			try{
+				pnl.getControl(GuiControl.class).update(1f/30f); //TODO use real?
+	//			pnl.updateLogicalState(1f/30f);
+			}catch(IllegalArgumentException ex){
+				GlobalCommandsDelegatorI.i().dumpWarnEntry("resize failed, restoring", pnl, v3fSize, bForceSpecificSize);
+				pnl.setPreferredSize(v3fPreferredBkp);
+			}
+		}
+		
+		//		pnl.setPreferredSize(v3fSize); 
 		
 //		pnl.setSize(v3fSize); //pnl.getPreferredSize(); pnl.getSize();
 //		
@@ -972,7 +1004,7 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 //		QuadBackgroundComponent qbc = (QuadBackgroundComponent)
 //				gcBkg.getGuiControl().getComponent("background");
 		
-		ColoredComponent cc =(ColoredComponent)pnl.getBackground();
+		ColoredComponent cc = (ColoredComponent)pnl.getBackground();
 		
 		String strKey="BkgColorBkp";
 		ColorRGBA colorBkp=pnl.getUserData(strKey);

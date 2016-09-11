@@ -135,6 +135,15 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 		return astr;
 	}
 	
+	public boolean isDialogFocusedFor(Spatial spt){
+		if(spt.equals(getFocused()))return true; //quick test 1st
+		if(getFocused()==null)return false;
+		
+		Node sptParentest = MiscJmeI.i().getParentestFrom(spt);
+		Node sptFocusedParentest = MiscJmeI.i().getParentestFrom(getFocused());
+		return sptParentest.equals(sptFocusedParentest);
+	}
+	
 	public Spatial getFocused(){
 		return getFocusManagerState().getFocus();
 	}
@@ -320,7 +329,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 				GuiControl gct = (GuiControl)ft;
 				Spatial spt = MiscJmeI.i().getParentestFrom(gct.getSpatial());
 				
-				BaseDialogStateAbs diag = MiscJmeI.i().getUserDataSH(spt, BaseDialogStateAbs.class.getName());
+				BaseDialogStateAbs diag = MiscJmeI.i().getUserDataPSH(spt, BaseDialogStateAbs.class.getName());
 //				BaseDialogStateAbs diag = (BaseDialogStateAbs)spt.getUserData(BaseDialogStateAbs.class.getName());
 				if(diag!=null){
 					if(ft==ftLatest){

@@ -93,7 +93,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	private VersionedList<DialogListEntryData<T>>	vlVisibleEntriesList = new VersionedList<DialogListEntryData<T>>();
 	private int	iVisibleRows;
 //	private Integer	iEntryHeightPixels; //TODO this is init is failing why? = 20; 
-	private Vector3f	v3fEntryListSize;
+	private Vector3f	v3fEntryListSizeIni;
 	private Container	cntrEntryCfg;
 	private SelectionModel	selectionModel;
 	private BoolTogglerCmdField btgAutoScroll = new BoolTogglerCmdField(this, true).setCallNothingOnChange();
@@ -130,6 +130,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		
 //		private Integer iEntryHeightPixels;
 		private Float fEntryHeightMultiplier = 1.0f;
+		private Vector3f	v3fIniPos;
+		private Vector3f	v3fIniSize;
 		
 //		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI) {
 //			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI);
@@ -237,7 +239,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		Vector3f v3fDiagWindowSize = new Vector3f(v3fApplicationWindowSize);
 		v3fDiagWindowSize.y = sizePercOrPixels(v3fDiagWindowSize.y,cfg.fDialogHeightPercentOfAppWindow);
 		v3fDiagWindowSize.x = sizePercOrPixels(v3fDiagWindowSize.x,cfg.fDialogWidthPercentOfAppWindow);
-		MiscLemurHelpersStateI.i().setGrantedSize(getContainerMain(), v3fDiagWindowSize, false);
+		MiscLemurHelpersStateI.i().setGrantedSize(getContainerMain(), v3fDiagWindowSize);
 		
 		LemurFocusHelperStateI.i().prepareDialogToBeFocused(this);
 		CursorEventControl.addListenersToSpatial(getContainerMain(), DialogMouseCursorListenerI.i());
@@ -248,6 +250,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 			0
 		);
 		getContainerMain().setLocalTranslation(v3fPos);
+		cfg.v3fIniPos=v3fPos.clone();
+		cfg.v3fIniSize=v3fDiagWindowSize.clone();
 		
 		// resizing borders
 		btnResizeNorth = prepareResizeBorder(BorderLayout.Position.North);
@@ -275,7 +279,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		 */
 		float fInfoHeightPixels = sizePercOrPixels(v3fDiagWindowSize.y, cfg.fInfoHeightPercentOfDialog);
 		v3fNorthSize.y = fInfoHeightPixels;
-		MiscLemurHelpersStateI.i().setGrantedSize(getNorthContainer(), v3fNorthSize, false);
+		MiscLemurHelpersStateI.i().setGrantedSize(getNorthContainer(), v3fNorthSize);
 		
 		//title 
 //		Container cntrTitleBox = new Container(new BorderLayout(), getStyle());
@@ -300,17 +304,17 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		
 		//////////////////////////// CENTER (list)
 		// list
-		v3fEntryListSize = v3fDiagWindowSize.clone();
+		v3fEntryListSizeIni = v3fDiagWindowSize.clone();
 //		float fListPerc = 1.0f - cfg.fInfoHeightPercentOfDialog;
 //		v3fEntryListSize.y *= fListPerc;
-		v3fEntryListSize.y -= fInfoHeightPixels;
+		v3fEntryListSizeIni.y -= fInfoHeightPixels;
 		setMainList(new ListBox<DialogListEntryData<T>>(
 			new VersionedList<DialogListEntryData<T>>(), 
 			getCellRenderer(), 
 			getStyle()));
 		selectionModel = getMainList().getSelectionModel();
 		getMainList().setName(getId()+"_EntriesList");
-		getMainList().setSize(v3fEntryListSize); //not preferred, so the input field can fit properly
+		getMainList().setSize(v3fEntryListSizeIni); //not preferred, so the input field can fit properly
 		//TODO multi was not implemented yet... lstbxVoucherListBox.getSelectionModel().setSelectionMode(SelectionMode.Multi);
 		cntrCenterMain.addChild(getMainList(), BorderLayout.Position.Center);
 		
@@ -352,6 +356,38 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		return true;
 	}
 	
+	@Override
+	public void drag(Spatial sptDraggedElement, Vector3f v3fDisplacement) {
+		Vector3f v3fSizeAdd = new Vector3f();
+		Vector3f v3fPosAdd = new Vector3f();
+		
+		if(sptDraggedElement==btnResizeNorth){
+			v3fSizeAdd.y+=v3fDisplacement.y;
+			v3fPosAdd.y+=v3fDisplacement.y;
+		}else
+		if(sptDraggedElement==btnResizeSouth){
+			v3fSizeAdd.y += -v3fDisplacement.y;
+		}else
+		if(sptDraggedElement==btnResizeWest){
+			v3fSizeAdd.x += -v3fDisplacement.x;
+			v3fPosAdd.x += v3fDisplacement.x;
+		}else
+		if(sptDraggedElement==btnResizeEast){
+			v3fSizeAdd.x+=v3fDisplacement.x;
+		}else{
+			super.drag(sptDraggedElement, v3fDisplacement);
+			return;
+		}
+		
+		Vector3f v3fSizeNew = getContainerMain().getPreferredSize().add(v3fSizeAdd);
+		MiscLemurHelpersStateI.i().setGrantedSize(getContainerMain(), v3fSizeNew, true);
+		
+		Vector3f v3fPosNew = getContainerMain().getLocalTranslation().add(v3fPosAdd);
+		getContainerMain().setLocalTranslation(v3fPosNew);
+		
+		requestRefreshUpdateList();
+	}
+	
 	private Button prepareResizeBorder(Position p) {
 		final Button btn = new Button("", new ElementId(ConsElementIds.buttonResizeBorder.s()), getStyle());
 		btn.setFontSize(0.1f); //this trick will let us set it with any dot size!
@@ -367,9 +403,15 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		});
 		
 		MiscLemurHelpersStateI.i().setGrantedSize(btn, 3, 3, true);
+		CursorEventControl.addListenersToSpatial(btn, DialogMouseCursorListenerI.i());
 		DialogMouseCursorListenerI.i().addDefaultCommands(btn);
-		getContainerMain().addChild(btn, p);
+		
+//		btn.setUserData("Border", p);
+//		super.addResizer(btn);
+		
 		abtnResizeBorderList.add(btn);
+		
+		getContainerMain().addChild(btn, p);
 		return btn;
 	}
 
@@ -523,7 +565,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		if(getListBoxGridPanelModel().getRowCount()>0){
 			updateFinalEntryHeightPixels();
 			
-			iVisibleRows = (int) (v3fEntryListSize.y/getFinalEntryHeightPixels());
+			iVisibleRows = (int) (v3fEntryListSizeIni.y/getFinalEntryHeightPixels());
+			//TODO			iVisibleRows = (int) (getMainList().getPreferredSize().y/getFinalEntryHeightPixels());
 			getMainList().setVisibleItems(iVisibleRows);
 			if(vlVisibleEntriesList.size()>0){
 				if(getSelectedEntryData()==null){
@@ -1104,7 +1147,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 
 	@Override
 	public void focusGained() {
-		requestRefreshList();
+		requestRefreshUpdateList();
 //		if(quaBkpMain!=null){
 //			getContainerMain().setLocalRotation(quaBkpMain);
 //		}
@@ -1126,4 +1169,13 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		getContainerMain().getLocalRotation().lookAt(new Vector3f(0,1,1), new Vector3f(1,0,0));
 	}
 	
+	@Override
+	protected void restorePosSize() {
+		super.restorePosSize();
+		
+		if(getContainerMain()!=null){
+			getContainerMain().setLocalTranslation(cfg.v3fIniPos);
+			getContainerMain().setPreferredSize(cfg.v3fIniSize);
+		}
+	}
 }

@@ -380,16 +380,19 @@ public class MiscJmeI {
 	 * @param spt
 	 * @param obj each key will be one super class of it
 	 */
-	public void setUserDataSH(Spatial spt, Object obj) {
+	public void setUserDataPSH(Spatial spt, Object obj) {
 		for(Class<?> cl:MiscI.i().getSuperClassesOf(obj)){
-			setUserDataSH(spt, cl.getName(), obj);
+			setUserDataPSH(spt, cl.getName(), obj);
 		}
 	}
-	public void setUserDataSH(Spatial spt, String strKey, Object obj) {
+	public void setUserDataPSH(Spatial spt, String strKey, Object obj) {
 		spt.setUserData(strKey, new PseudoSavableHolder(obj));
 	}
 	
-	public <R> R getUserDataSH(Spatial spt, String strKey){
+	public <R> R getUserDataPSH(Spatial spt, Class<R> cl){
+		return getUserDataPSH(spt, cl.getName());
+	}
+	public <R> R getUserDataPSH(Spatial spt, String strKey){
 		PseudoSavableHolder<R> sh = (PseudoSavableHolder<R>)spt.getUserData(strKey);
 		if(sh==null)return null;
 		return sh.getRef();

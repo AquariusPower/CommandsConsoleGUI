@@ -103,6 +103,8 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 //	private Long	lChoiceMadeAtMilis = null;
 	private ArrayList<DialogListEntryData<T>> adataChosenEntriesList = new ArrayList<DialogListEntryData<T>>();
 	
+	private BoolTogglerCmdField btgRestoreIniPosSizeOnce = new BoolTogglerCmdField(this, false);
+	
 	private BoolTogglerCmdField btgEffectLocation = new BoolTogglerCmdField(this, true);
 	private BoolTogglerCmdField btgEffect = new BoolTogglerCmdField(this, true);
 	private TimedDelayVarField tdDialogEffect = new TimedDelayVarField(this, 0.15f, "");
@@ -145,7 +147,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 //		for(Class<?> cl:MiscI.i().getSuperClassesOf(this)){
 //			MiscJmeI.i().retrieveUserData(Spatial.class, this.sptContainerMain, cl.getName(), this, null);
 //			this.sptContainerMain.setUserData(cl.getName(), new SavableHolder(this));
-			MiscJmeI.i().setUserDataSH(this.sptContainerMain, this);
+			MiscJmeI.i().setUserDataPSH(this.sptContainerMain, this);
 //		}
 		
 		return getThis();
@@ -213,6 +215,18 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	@Override
 	public R configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
+		
+		btgRestoreIniPosSizeOnce.setCallOnChange(new CallableX() {
+			@Override
+			public Boolean call() {
+				if(btgRestoreIniPosSizeOnce.b()){
+					restorePosSize();
+					btgRestoreIniPosSizeOnce.toggle(); //to false
+				}
+				return true;
+			}
+		});
+		
 //	private void configure(String strUIId,boolean bIgnorePrefixAndSuffix,Node nodeGUI) {
 		
 //		this.bOptionChoiceSelectionMode=cfg.bOptionSelectionMode;
@@ -284,7 +298,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		CallableX cxRefresh = new CallableX() {
 			@Override
 			public Boolean call() {
-				requestRefreshList();
+				requestRefreshUpdateList();
 				return true;
 			}
 		};
@@ -600,7 +614,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		setInputText(getUserEnterCustomValueToken()+getDefaultValueToUserModify());
 	}
 	
-	public void requestRefreshList(){
+	public void requestRefreshUpdateList(){
 		bRequestedRefreshList=true;
 	}
 	
@@ -883,7 +897,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 			updateSelected(dledAboveTmp,dledParentTmp);
 		}
 		
-		requestRefreshList();
+		requestRefreshUpdateList();
 		
 	}
 	
@@ -996,5 +1010,17 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		@Override		public void clearSelection() {		}
 		@Override		protected void updateTextInfo() {		}
 		@Override		protected BaseDialogStateAbs getThis() {			return null;		}
+	}
+	
+	/**
+	 * simply move around
+	 * @param sptDraggedElement
+	 * @param v3fDisplacement
+	 */
+	public void drag(Spatial sptDraggedElement, Vector3f v3fDisplacement) {
+		getContainerMain().move(v3fDisplacement);
 	};
+	
+	protected void restorePosSize(){
+	}
 }

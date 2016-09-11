@@ -125,7 +125,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			AudioUII.i().playOnUserAction(EAudio.Failure);				
 		}
 		
-		if(bChanged)requestRefreshList();
+		if(bChanged)requestRefreshUpdateList();
 	}
 	
 	@Override

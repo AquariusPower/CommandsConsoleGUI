@@ -154,7 +154,7 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 		}
 		
 		if(bChangesMade){
-			requestRefreshList();
+			requestRefreshUpdateList();
 		}
 		
 		super.applyResultsFromModalDialog();

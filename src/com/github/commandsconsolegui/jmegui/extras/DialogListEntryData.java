@@ -322,7 +322,7 @@ public class DialogListEntryData<T> implements Savable{
 			}
 		}
 		
-		diagOwner.requestRefreshList();
+		diagOwner.requestRefreshUpdateList();
 //		cell.assignedCellRenderer.diagParent.requestRefreshList();
 		
 		AudioUII.i().playOnUserAction(isTreeExpanded() ?
