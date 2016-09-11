@@ -34,6 +34,7 @@ import com.github.commandsconsolegui.extras.SingleAppInstanceI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.jmegui.console.SimpleConsoleAppAbs;
+import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceDialogState;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.MaintenanceListDialogState;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.QuestionDialogState;
@@ -140,22 +141,50 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 //		diagChoice = new BasicDialogStateAbs<T>(BasicDialogStateAbs.EDiag.Choice).configure(
 //			new BasicDialogStateAbs.CfgParm(true, 0.6f, 0.5f, null, null));
 		diagChoice = new ChoiceDialogState<T>().configure(new ChoiceDialogState.CfgParm(
-			0.6f, 0.5f, null, null).doPrepareTestData());
+			0.6f, 0.5f, null, null));
 		
 //		diagQuestion = new BasicDialogStateAbs<T>(BasicDialogStateAbs.EDiag.Question).configure(
 //			new BasicDialogStateAbs.CfgParm(true, 500f, 300f, null, null));
 		diagQuestion = new QuestionDialogState<T>().configure(new QuestionDialogState.CfgParm(
-			500f, 300f, null, null).doPrepareTestData());
+			500f, 300f, null, null));
 		
 //		diagList = new BasicDialogStateAbs<T>(BasicDialogStateAbs.EDiag.BrowseManagementList).configure(
 //			new BasicDialogStateAbs.CfgParm(false, null, null, null, null))
 //			.addModalDialog(diagChoice)
 //			.addModalDialog(diagQuestion);
 		diagList = new MaintenanceListDialogState<T>().configure(new MaintenanceListDialogState.CfgParm<T>(
-			null, null, null, null, diagChoice, diagQuestion).doPrepareTestData());
+			null, null, null, null, diagChoice, diagQuestion));
 		
+		prepareTestData();
 //		//////////////////////// super init depends on globals
 //		super.simpleInitApp(); // basic initializations
+	}
+	
+	private void prepareTestData(){
+		for(int i=0;i<10;i++){
+			diagChoice.addEntryQuick(null); 
+		}
+		
+		diagList.addEntryQuick(null);
+		diagList.addEntryQuick(null);
+		
+		DialogListEntryData<T> dleS1 = diagList.addEntryQuick("section 1");
+		diagList.addEntryQuick(null).setParent(dleS1);
+		diagList.addEntryQuick(null).setParent(dleS1);
+		diagList.addEntryQuick(null).setParent(dleS1);
+		
+		DialogListEntryData<T> dleS2 = diagList.addEntryQuick("section 2");
+		diagList.addEntryQuick(null).setParent(dleS2);
+		diagList.addEntryQuick(null).setParent(dleS2);
+		DialogListEntryData<T> dleS21 = diagList.addEntryQuick("section 2.1").setParent(dleS2);
+		diagList.addEntryQuick(null).setParent(dleS21);
+		diagList.addEntryQuick(null).setParent(dleS21);
+		diagList.addEntryQuick(null).setParent(dleS21);
+		
+		diagList.addEntryQuick("S2 child").setParent(dleS2); //ok, will be placed properly
+		
+		diagList.addEntryQuick("S1 child").setParent(dleS1); //out of order for test
+		diagList.addEntryQuick("S21 child").setParent(dleS21); //out of order for test
 	}
 	
 	/**

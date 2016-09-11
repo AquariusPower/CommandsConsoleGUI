@@ -566,8 +566,8 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return getThis();
 	}
 	
-	protected R getParentDialog(){
-		return (R)this.diagParent;
+	protected BaseDialogStateAbs<T,?> getParentDialog(){
+		return this.diagParent;
 	}
 	
 	protected R setDiagParent(BaseDialogStateAbs<T,?> diagParent) {
@@ -669,13 +669,13 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	protected ArrayList<DialogListEntryData<T>> getParentReferencedDledListCopy() {
 		ArrayList<DialogListEntryData<T>> adled = new ArrayList<DialogListEntryData<T>>();
 		if(getParentDialog()!=null){
-			BaseDialogStateAbs<T, R>.DiagModalInfo<T> dmi = getParentDialog().getChildDiagModalInfoCurrent();
-			if(dmi!=null){
-				if(dmi.getDiagModal()!=this){
-					throw new PrerequisitesNotMetException("current parent's modal dialog should be 'this'",dmi,dmi.getDiagModal(),this);
+			BaseDialogStateAbs<T,?>.DiagModalInfo<T> dmiSonsOfPapa = getParentDialog().getChildDiagModalInfoCurrent();
+			if(dmiSonsOfPapa!=null){
+				if(dmiSonsOfPapa.getDiagModal()!=this){
+					throw new PrerequisitesNotMetException("current parent's modal dialog should be 'this'",dmiSonsOfPapa,dmiSonsOfPapa.getDiagModal(),this);
 				}
 				
-				for(DialogListEntryData<T> dled:dmi.getParentReferencedDledListCopy()){
+				for(DialogListEntryData<T> dled:dmiSonsOfPapa.getParentReferencedDledListCopy()){
 					adled.add(dled);
 				}
 			}

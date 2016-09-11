@@ -34,6 +34,7 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
@@ -255,10 +256,16 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 		requestFocus(diagFocus.getInputField(ccSelf),true);
 	}
 	
+	/**
+	 * @param spt
+	 */
 	public void requestFocus(Spatial spt) {
 		requestFocus(spt, false);
 	}
+	
 	/**
+	 * We can have more than one input field in the same dialog, therefore
+	 * the focus request must be to the field.
 	 * 
 	 * @param spt
 	 * @param bOnlyIfAlreadyOnTheList if false, will be added to the list
@@ -268,12 +275,21 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 		
 		if(bOnlyIfAlreadyOnTheList){
 			if(!asptFocusRequestList.contains(spt)){
+//				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("not on the focus list", spt);
 				return;
 			}
 		}
 		
 		assertIsAtGUINode(spt);
 		asptFocusRequestList.remove(spt); //to update the priority
+		
+		/**
+		 * TODO bring all parents up when focusing a modal child
+		Node nodeParentest = MiscJmeI.i().getParentestFrom(spt);
+		LemurDialogGUIStateAbs diag = MiscJmeI.i().getUserDataPSH(nodeParentest, LemurDialogGUIStateAbs.class);
+		ArrayList adiagList = diag.getParentsDialogList(ccSelf);
+		 */
+		
 //		// validate
 //		Node node = MiscJmeI.i().getParentestFrom(spt);
 //		if(node==null || !GlobalGUINodeI.i().get().equals(node.getParent())){

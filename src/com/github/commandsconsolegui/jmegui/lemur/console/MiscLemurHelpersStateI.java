@@ -58,6 +58,7 @@ import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.DocumentModel;
 import com.simsilica.lemur.GridPanel;
+import com.simsilica.lemur.Label;
 import com.simsilica.lemur.ListBox;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.TextField;
@@ -1039,5 +1040,9 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 //			}
 //		}
 		
+	}
+
+	public void fixBitmapTextLimitsFor(Panel pnl) {
+		MiscJmeI.i().fixBitmapTextLimitsFor(pnl, pnl.getSize());
 	}
 }

@@ -52,11 +52,11 @@ public abstract class LemurBasicDialogStateAbs<T,R extends LemurBasicDialogState
 	}
 	
 	public static class CfgParm extends LemurDialogGUIStateAbs.CfgParm{
-		boolean bPrepareTestData;
-		public CfgParm doPrepareTestData(){
-			bPrepareTestData=true;
-			return this;
-		}
+//		boolean bPrepareTestData;
+//		public CfgParm doPrepareTestData(){
+//			bPrepareTestData=true;
+//			return this;
+//		}
 		public CfgParm(
 				Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow, Float fInfoHeightPercentOfDialog,
@@ -93,10 +93,10 @@ public abstract class LemurBasicDialogStateAbs<T,R extends LemurBasicDialogState
 		return super.updateAttempt(tpf);
 	}
 	
-	protected boolean prepareTestData(){
-		for(int i=0;i<10;i++)addEntryQuick(null); //some test data
-		return true;
-	}
+//	protected boolean prepareTestData(){
+//		for(int i=0;i<10;i++)addEntryQuick(null); //some test data
+//		return true;
+//	}
 	
 	@SuppressWarnings("unchecked")
 	public DialogListEntryData<T> getDledFrom(Spatial spt){
@@ -129,7 +129,7 @@ public abstract class LemurBasicDialogStateAbs<T,R extends LemurBasicDialogState
 	public DialogListEntryData<T> addEntryQuick(String strText){
 		DialogListEntryData<T> dle = new DialogListEntryData<T>(this);
 		if(strText==null){
-			strText=this.getId()+": New test entry: "
+			strText=this.getId()+": Quick filler temp entry: "
 //				+MiscI.i().getDateTimeForFilename(true)
 //				+", "
 				+System.nanoTime();
@@ -219,9 +219,9 @@ public abstract class LemurBasicDialogStateAbs<T,R extends LemurBasicDialogState
 	protected boolean initAttempt() {
 		if(!super.initAttempt())return false;
 		
-		if(cfg.bPrepareTestData){
-			if(!prepareTestData())return false;
-		}
+//		if(cfg.bPrepareTestData){
+//			if(!prepareTestData())return false;
+//		}
 		
 		return true;
 	}

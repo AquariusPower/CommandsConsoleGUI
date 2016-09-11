@@ -248,7 +248,7 @@ public class DialogListEntryData<T> implements Savable{
 		}
 		
 		// consistency check
-		if(this.hasChild(parent)){
+		if(parent!=null && this.hasChild(parent)){
 			throw new PrerequisitesNotMetException("cant be child of a child", this, parent, this.aChildList);
 		}
 		

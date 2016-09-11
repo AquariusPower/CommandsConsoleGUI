@@ -43,6 +43,7 @@ import truetypefont.TrueTypeFont;
 import truetypefont.TrueTypeKey;
 import truetypefont.TrueTypeLoader;
 
+import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
@@ -50,17 +51,20 @@ import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
 import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs.TrueTypeFontFromSystem;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableWeak;
-import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.DebugI;
+import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
-import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.asset.AssetNotFoundException;
 import com.jme3.asset.plugins.FileLocator;
 import com.jme3.font.BitmapCharacter;
 import com.jme3.font.BitmapCharacterSet;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
+import com.jme3.font.Rectangle;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
@@ -76,7 +80,7 @@ import com.simsilica.lemur.event.AbstractCursorEvent;
 /**
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public class MiscJmeI {
+public class MiscJmeI implements IReflexFillCfg{
 	private static MiscJmeI instance = new MiscJmeI();
 	public static MiscJmeI i(){return instance;}
 
@@ -148,13 +152,26 @@ public class MiscJmeI {
 		}             
 	}
 
-	public BitmapText retrieveBitmapTextFor(Node pnl){
-		for(Spatial c : pnl.getChildren()){
+	public BitmapText retrieveBitmapTextFor(Node node){
+		for(Spatial c : node.getChildren()){
 			if(c instanceof BitmapText){
 				return (BitmapText)c;
 			}
 		}
 		return null;
+	}
+	
+	BoolTogglerCmdField btgFixBitmapTextLimits = new BoolTogglerCmdField(this,false);
+	
+	public void fixBitmapTextLimitsFor(Node node,Vector3f v3fSizeLimits){
+		if(!btgFixBitmapTextLimits.b())return;
+		
+		BitmapText bmt = MiscJmeI.i().retrieveBitmapTextFor(node);
+		
+		Vector3f v3fPos = node.getLocalTranslation();
+		Rectangle rectfont = new Rectangle(v3fPos.x,v3fPos.y,v3fSizeLimits.x,v3fSizeLimits.y);
+		
+		bmt.setBox(rectfont);
 	}
 	
 	public Vector3f eventToV3f(AbstractCursorEvent event){
@@ -564,6 +581,11 @@ public class MiscJmeI {
 		
 		//app().getAssetManager().unregisterLocator(fontFile.getParent(), FileLocator.class);
 		return font;
+	}
+
+	@Override
+	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 	}
 
 }

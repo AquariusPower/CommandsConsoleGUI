@@ -689,6 +689,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	protected void updateTextInfo(){
 //		lblTextInfo.setText("DIALOG for "+this.getClass().getSimpleName());
 		lblTextInfo.setText(getTextInfo());
+		
+		MiscLemurHelpersStateI.i().fixBitmapTextLimitsFor(lblTextInfo);
 	}
 	
 	@Override
@@ -1190,5 +1192,19 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 			getContainerMain().setLocalTranslation(cfg.v3fIniPos);
 			getContainerMain().setPreferredSize(cfg.v3fIniSize);
 		}
+	}
+	
+	public ArrayList<LemurDialogGUIStateAbs<T,?>> getParentsDialogList(LemurFocusHelperStateI.CompositeControl cc) {
+		cc.assertSelfNotNull();
+		
+		ArrayList<LemurDialogGUIStateAbs<T,?>> adiag = new ArrayList<LemurDialogGUIStateAbs<T,?>>();
+		
+		LemurDialogGUIStateAbs<T,?> diag = (LemurDialogGUIStateAbs<T,?>)super.getParentDialog();
+		while(diag!=null){
+			adiag.add(diag);
+			diag = (LemurDialogGUIStateAbs<T,?>)diag.getParentDialog();
+		}
+		
+		return adiag;
 	}
 }

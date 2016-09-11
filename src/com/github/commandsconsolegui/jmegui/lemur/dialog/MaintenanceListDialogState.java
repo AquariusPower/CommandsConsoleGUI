@@ -93,31 +93,31 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 		return storeCfgAndReturnSelf(icfg);
 	}
 	
-	@Override
-	protected boolean prepareTestData(){
-		addEntryQuick(null);
-		addEntryQuick(null);
-		
-		DialogListEntryData<T> dleS1 = addEntryQuick("section 1");
-		addEntryQuick(null).setParent(dleS1);
-		addEntryQuick(null).setParent(dleS1);
-		addEntryQuick(null).setParent(dleS1);
-		
-		DialogListEntryData<T> dleS2 = addEntryQuick("section 2");
-		addEntryQuick(null).setParent(dleS2);
-		addEntryQuick(null).setParent(dleS2);
-		DialogListEntryData<T> dleS21 = addEntryQuick("section 2.1").setParent(dleS2);
-		addEntryQuick(null).setParent(dleS21);
-		addEntryQuick(null).setParent(dleS21);
-		addEntryQuick(null).setParent(dleS21);
-		
-		addEntryQuick("S2 child").setParent(dleS2); //ok, will be placed properly
-		
-		addEntryQuick("S1 child").setParent(dleS1); //out of order for test
-		addEntryQuick("S21 child").setParent(dleS21); //out of order for test
-		
-		return true;
-	}
+//	@Override
+//	protected boolean prepareTestData(){
+//		addEntryQuick(null);
+//		addEntryQuick(null);
+//		
+//		DialogListEntryData<T> dleS1 = addEntryQuick("section 1");
+//		addEntryQuick(null).setParent(dleS1);
+//		addEntryQuick(null).setParent(dleS1);
+//		addEntryQuick(null).setParent(dleS1);
+//		
+//		DialogListEntryData<T> dleS2 = addEntryQuick("section 2");
+//		addEntryQuick(null).setParent(dleS2);
+//		addEntryQuick(null).setParent(dleS2);
+//		DialogListEntryData<T> dleS21 = addEntryQuick("section 2.1").setParent(dleS2);
+//		addEntryQuick(null).setParent(dleS21);
+//		addEntryQuick(null).setParent(dleS21);
+//		addEntryQuick(null).setParent(dleS21);
+//		
+//		addEntryQuick("S2 child").setParent(dleS2); //ok, will be placed properly
+//		
+//		addEntryQuick("S1 child").setParent(dleS1); //out of order for test
+//		addEntryQuick("S21 child").setParent(dleS21); //out of order for test
+//		
+//		return true;
+//	}
 
 	@Override
 	public void applyResultsFromModalDialog() {
