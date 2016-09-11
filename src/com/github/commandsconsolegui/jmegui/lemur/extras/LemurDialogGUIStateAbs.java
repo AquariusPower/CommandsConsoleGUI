@@ -215,6 +215,15 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		return fSizeBase;
 	}
 	
+	@Override
+	protected boolean initAttempt() {
+		if(!super.initAttempt())return false;
+		
+//		setRetryDelayFor(300L, EDelayMode.Update.s()); //mainly useful when resizing
+		
+		return true;
+	}
+	
 	/**
 	 * The input field will not require height, will be small on south edge.
 	 * @param fDialogPerc the percentual width/height to cover the application screen/window 
@@ -357,10 +366,11 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	}
 	
 	@Override
-	public void drag(Spatial sptDraggedElement, Vector3f v3fDisplacement) {
+	public void move(Spatial sptDraggedElement, Vector3f v3fDisplacement) {
 		Vector3f v3fSizeAdd = new Vector3f();
 		Vector3f v3fPosAdd = new Vector3f();
 		
+		// will be resize
 		if(sptDraggedElement==btnResizeNorth){
 			v3fSizeAdd.y+=v3fDisplacement.y;
 			v3fPosAdd.y+=v3fDisplacement.y;
@@ -375,7 +385,10 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		if(sptDraggedElement==btnResizeEast){
 			v3fSizeAdd.x+=v3fDisplacement.x;
 		}else{
-			super.drag(sptDraggedElement, v3fDisplacement);
+			/**
+			 * simple move
+			 */
+			super.move(sptDraggedElement, v3fDisplacement);
 			return;
 		}
 		
@@ -565,8 +578,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		if(getListBoxGridPanelModel().getRowCount()>0){
 			updateFinalEntryHeightPixels();
 			
-			iVisibleRows = (int) (v3fEntryListSizeIni.y/getFinalEntryHeightPixels());
-			//TODO			iVisibleRows = (int) (getMainList().getPreferredSize().y/getFinalEntryHeightPixels());
+//			iVisibleRows = (int) (v3fEntryListSizeIni.y/getFinalEntryHeightPixels());
+			iVisibleRows = (int) (getMainList().getSize().y/getFinalEntryHeightPixels());
 			getMainList().setVisibleItems(iVisibleRows);
 			if(vlVisibleEntriesList.size()>0){
 				if(getSelectedEntryData()==null){
@@ -642,7 +655,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 			if(!getInputText().equalsIgnoreCase(getLastFilter())){
 	//			setLastFilter(getInputText());
 				applyListKeyFilter();
-				updateList();
+				requestRefreshUpdateList();	//updateList();				
 			}
 		}
 		

@@ -29,14 +29,21 @@ package com.github.commandsconsolegui.jmegui;
 
 //import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ERecreateConsoleSteps;
 import java.io.IOException;
+import java.util.ArrayList;
 
+import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.globals.GlobalHolderAbs.IGlobalOpt;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.misc.IConfigure;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppState;
 import com.jme3.export.JmeExporter;
@@ -85,33 +92,73 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 //	private boolean bPreInitHold=false;
 //	private boolean	bPreInitialized;
 	
-	// TRY INIT 
-	private class Retry{
-		long lStartMilis=0;
+	private ArrayList<Retry> aretry = new ArrayList<Retry>();
+	public Retry findRetryById(String strId){
+		for(Retry r:aretry){
+			if(r.isId(strId))return r;
+		}
+		return null;
+	}
+	public ArrayList<String> getRetryIdListCopy() {
+		ArrayList<String> astr = new ArrayList<String>();
+		for(Retry r:aretry){
+			astr.add(r.strId);
+		}
+		return astr;
+	}
+	protected static class Retry implements IReflexFillCfg{
+		private long lStartMilis=0;
 		
 		/** 0 means retry at every update*/
-		long lDelayMilis=0;
+		private IntLongVarField ilvDelayMilis = new IntLongVarField(this, 0L, "retry delay between failed state mode attempts");
+//		long lDelayMilis=0;
+
+		private String	strId;
+
+		private ConditionalStateAbs	cond;
+		
+		public Retry(ConditionalStateAbs cond, String strId){
+			this.cond=cond;
+			this.strId=strId;
+			
+			if(cond.findRetryById(strId)!=null)throw new PrerequisitesNotMetException("conflicting retry id", strId); 
+			cond.aretry.add(this);
+		}
+		
+		public boolean isId(String strId){
+			return (this.strId.equals(strId));
+		}
 		
 		public void setRetryDelay(long lMilis){
-			this.lDelayMilis=lMilis;
+			this.ilvDelayMilis.setObjectRawValue(lMilis);
 		}
 		
 		/**
 		 * @return
 		 */
 		boolean isReadyToRetry(){
-			return getUpdatedTime() > (lStartMilis+lDelayMilis);
+			return cond.getUpdatedTime() > (lStartMilis+ilvDelayMilis.getLong());
 		}
 
 		public void resetStartTime() {
-			lStartMilis=getUpdatedTime();
+			lStartMilis=cond.getUpdatedTime();
+		}
+
+		@Override
+		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+			ReflexFillCfg rfcfg = GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
+			if(rfcfg==null)rfcfg=new ReflexFillCfg(rfcv);
+//			rfcfg.setPrefixCustomId(cond.getId());
+			rfcfg.setPrefixCustomId(cond.getId()+ReflexFillI.i().getCommandPartSeparator()+this.strId);
+			return rfcfg;
 		}
 		
 	}
-	private Retry rInit = new Retry();
-	private Retry rEnable = new Retry();
-	private Retry rDisable = new Retry();
-	private Retry rDiscard = new Retry();
+	private Retry rInit = new Retry(this,EDelayMode.Init.s());
+	private Retry rEnable = new Retry(this,EDelayMode.Enable.s());
+	private Retry rUpdate = new Retry(this,EDelayMode.Update.s());
+	private Retry rDisable = new Retry(this,EDelayMode.Disable.s());
+	private Retry rDiscard = new Retry(this,EDelayMode.Discard.s());
 	
 	// PROPERLY INIT
 	private boolean	bProperlyInitialized;
@@ -438,10 +485,16 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		
 		if(bEnabled){
 			if(bHoldUpdates)return false;
+			if(!rUpdate.isReadyToRetry())return false;
 			
 			bLastUpdateSuccessful = updateAttempt(tpf);
-			if(!bLastUpdateSuccessful){
-				msgDbg("update",false); //only on fail!!!
+			if(bLastUpdateSuccessful){
+				updateSuccess();
+			}else{
+				updateFailed();
+				rUpdate.resetStartTime();
+				
+				msgDbg("update",false); //only on fail to avoid too much log!
 				return false;
 			}
 			/**
@@ -458,6 +511,8 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 	protected abstract void disableSuccess();
 	protected abstract void initSuccess();
 	protected abstract void initFailed();
+	protected void updateSuccess(){}
+	protected void updateFailed(){}
 
 	public void requestToggleEnabled(){
 //		assertIsPreInitialized();
@@ -647,44 +702,67 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		return strCaseInsensitiveId;
 	}
 	
-	/**
-	 * see {@link #setRetryDelay(EDelayMode, long)}
-	 * @param lMilis
-	 */
-	public void setRetryDelay(long lMilis){
-		setRetryDelay(null, lMilis);
-	}
+//	/**
+//	 * see {@link #setRetryDelay(EDelayMode, long)}
+//	 * @param lMilis
+//	 */
+//	public void setRetryDelay(long lMilis){
+//		prepareRetryDelay(null, lMilis);
+//	}
+	
 	/**
 	 * each state can have its delay value set individually also.
-	 * @param lMilis
+	 * 
+	 * @param e
+	 * @param lMilis if null will not apply
+	 * @return the previously setup delay milis if the mode was specified 
 	 */
-	public void setRetryDelay(EDelayMode e, long lMilis){
-		EDelayMode[] ae = {e};
-		if(e==null)ae=EDelayMode.values();
-		
-		for(EDelayMode eDoIt:ae){
-			switch(eDoIt){
-				case Init:
-					rInit.setRetryDelay(lMilis);
-					break;
-				case Enable:
-					rEnable.setRetryDelay(lMilis);
-					break;
-				case Disable:
-					rDisable.setRetryDelay(lMilis);
-					break;
-				case Discard:
-					rDiscard.setRetryDelay(lMilis);
-					break;
-			}
+	protected void setRetryDelayFor(Long lMilis, String... astrId){
+		for(String strId:astrId){
+			findRetryById(strId).setRetryDelay(lMilis);
 		}
 	}
+//	protected Long prepareRetryDelay(EDelayMode e, Long lMilis){
+//		EDelayMode[] ae = {e};
+//		
+//		if(e==null)ae=EDelayMode.values();
+//		
+//		for(EDelayMode eDoIt:ae){
+//			Retry.find(eDoIt.s()).setRetryDelay(lMilis);
+////			switch(eDoIt){
+////				case Init:
+////					rInit.setRetryDelay(lMilis);
+////					break;
+////				case Enable:
+////					rEnable.setRetryDelay(lMilis);
+////					break;
+////				case Update:
+////					rUpdate.setRetryDelay(lMilis);
+////					break;
+////				case Disable:
+////					rDisable.setRetryDelay(lMilis);
+////					break;
+////				case Discard:
+////					rDiscard.setRetryDelay(lMilis);
+////					break;
+////			}
+//		}
+//		
+//		if(e!=null){
+//			return Retry.find(e.s()).lDelayMilis;
+//		}
+//		
+//		return null;
+//	}
 	
 	public static enum EDelayMode{
 		Init,
 		Enable,
+		Update,
 		Disable,
-		Discard
+		Discard,
+		;
+		public String s(){return this.toString();}
 	}
 	
   @Override

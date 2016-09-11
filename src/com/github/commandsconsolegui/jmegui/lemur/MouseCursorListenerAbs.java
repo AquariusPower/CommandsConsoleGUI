@@ -163,21 +163,21 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 			return;
 		}
 		
-		ArrayList<MouseCursorButtonData> aButtonList = new ArrayList<MouseCursorButtonData>();
+		ArrayList<MouseCursorButtonData> aMouseCursorButtonsPressedList = new ArrayList<MouseCursorButtonData>();
 		for(EMouseCursorButton e:EMouseCursorButton.values()){
 			// Buttons pressed during drag
 			MouseCursorButtonData mdata = mb().getMouseCursorDataFor(e);
 			if(mdata.isPressed()){
 				if(mdata.getPressedDistanceTo(MiscJmeI.i().eventToV3f(eventMotion)).length()>3){
-					aButtonList.add(mdata);
+					aMouseCursorButtonsPressedList.add(mdata);
 				}
 			}
 		}
 		
-		if(aButtonList.size()>0){
-			if(drag(aButtonList, eventMotion, target, capture)){
+		if(aMouseCursorButtonsPressedList.size()>0){
+			if(drag(aMouseCursorButtonsPressedList, eventMotion, target, capture)){
 				eventMotion.setConsumed();
-				bCancelNextMouseReleased=true;
+				bCancelNextMouseReleased=true; //TODO explain why
 			}
 		}
 		

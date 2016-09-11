@@ -38,6 +38,7 @@ import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalDialogHelperI;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
+import com.github.commandsconsolegui.jmegui.ConditionalStateAbs.Retry;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
@@ -305,6 +306,8 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		btgSortListEntries.setCallOnChange(cxRefresh);
 		btgSortListEntriesAtoZ.setCallOnChange(cxRefresh);
 		
+		tdUpdateRefreshList.updateTime();
+		
 		return true;
 	}
 	
@@ -347,11 +350,17 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		bRequestedActionSubmit=true;
 	}
 	
+//	private Retry rUpdateList = new Retry();
+	
+	private TimedDelayVarField tdUpdateRefreshList = new TimedDelayVarField(this, 0.3f, "");
+	
 	/**
 	 * this will react to changes on the list
 	 */
 	@Override
 	protected boolean updateAttempt(float tpf) {
+		if(!super.updateAttempt(tpf))return false;
+		
 		DialogListEntryData<T> dle = getSelectedEntryData();
 		if(dle!=dleLastSelected)AudioUII.i().play(AudioUII.EAudio.SelectEntry);
 //		if(dle!=null)
@@ -362,9 +371,13 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 //		}
 		
 		if(bRequestedRefreshList){
-			updateList();
-			lineWrapDisableForChildrenOf((Node)sptMainList);
-			bRequestedRefreshList=false;
+			if(tdUpdateRefreshList.isReady(true)){
+//			if(rUpdateList.isReadyToRetry()){
+				updateList();
+				lineWrapDisableForChildrenOf((Node)sptMainList);
+				bRequestedRefreshList=false;
+//			}
+			}
 		}
 		
 		if(bRequestedActionSubmit){
@@ -376,7 +389,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 			updateEffect(!isTryingToDisable());
 		}
 		
-		return super.updateAttempt(tpf);
+		return true;
 	}
 	
 	protected boolean updateEffect(boolean bGrow){
@@ -457,7 +470,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	@Override
 	protected void enableSuccess() {
 		super.enableSuccess();
-		updateAllParts();
+		updateAllPartsNow();
 	}
 	
 	public boolean isDialogEffectsDone(){
@@ -694,7 +707,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	 */
 	protected void actionSubmit(){
 		applyListKeyFilter();
-		updateAllParts();
+		updateAllPartsNow();
 		
 		DialogListEntryData<T> dataSelected = getSelectedEntryData(); //this value is in this console variable now
 		
@@ -722,10 +735,10 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		
 	}
 	
-	private void updateAllParts(){
+	private void updateAllPartsNow(){
 		updateTextInfo();
 		
-		updateList();
+		updateList(); //requestRefreshUpdateList(); //
 		
 		updateInputField();
 	}
@@ -1017,9 +1030,9 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	 * @param sptDraggedElement
 	 * @param v3fDisplacement
 	 */
-	public void drag(Spatial sptDraggedElement, Vector3f v3fDisplacement) {
+	public void move(Spatial sptDraggedElement, Vector3f v3fDisplacement) {
 		getContainerMain().move(v3fDisplacement);
-	};
+	}
 	
 	protected void restorePosSize(){
 	}

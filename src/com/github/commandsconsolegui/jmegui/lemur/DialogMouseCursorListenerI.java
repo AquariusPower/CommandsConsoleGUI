@@ -158,7 +158,7 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 					Vector3f v3fDisplacement = buttonData.updateDragPosAndGetDisplacement(eventMotion, v3fNewPos);
 					
 					BaseDialogStateAbs diag = MiscJmeI.i().getUserDataPSH(sptDialogMain,BaseDialogStateAbs.class);
-					diag.drag(capture, v3fDisplacement);
+					diag.move(capture, v3fDisplacement);
 //					sptDialogMain.move(v3fDisplacement);
 					return true;
 			}
