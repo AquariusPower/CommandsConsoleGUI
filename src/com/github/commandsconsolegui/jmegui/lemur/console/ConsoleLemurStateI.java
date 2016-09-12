@@ -44,7 +44,7 @@ import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI.BindKey;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelper.ConsElementIds;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelper.DiagStyleElementIds;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -311,23 +311,23 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		
 		// auto complete hint
 		setHintList(new VersionedList<String>());
-		super.setHintBox(new ListBox<String>(new VersionedList<String>(),getStyle()));
+		super.setHintBox(new ListBox<String>(new VersionedList<String>(),getDiagStyle()));
 		getHintBox().setModel(getHintList());
 		CursorEventControl.addListenersToSpatial(getHintBox(), ConsoleMouseCursorListenerI.i());
 		
 		// main container
-		setContainerMain(new Container(new BorderLayout(), getStyle()));
+		setContainerMain(new Container(new BorderLayout(), getDiagStyle()));
 		MiscLemurHelpersStateI.i().setGrantedSize(getContainerConsole(), getConsoleSizeCopy());
 		
 		/**
 		 * TOP ELEMENT =================================================================
 		 */
-		super.setStatsAndControls(new Container(getStyle()));
+		super.setStatsAndControls(new Container(getDiagStyle()));
 //		getContainerStatsAndControls().setName("ConsoleStats");
 		getContainerConsole().addChild(getContainerStatsAndControls(), BorderLayout.Position.North);
 		
 		// console stats
-		lblStats = new Label("Console stats.",getStyle());
+		lblStats = new Label("Console stats.",getDiagStyle());
 		lblStats.setColor(new ColorRGBA(1,1,0.5f,1));
 		MiscLemurHelpersStateI.i().setGrantedSize(lblStats, getConsoleSizeCopy().x*0.75f, 1f); //TODO y=1f so it will expand?
 		getContainerStatsAndControls().addChild(lblStats,0,0);
@@ -335,16 +335,16 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		// buttons
 		ArrayList<Button> abtn = new ArrayList<Button>();
 		int iButtonIndex=0;
-		btnClipboardShow = new Button("ShwClpbrd",getStyle());
+		btnClipboardShow = new Button("ShwClpbrd",getDiagStyle());
 		abtn.add(btnClipboardShow);
 		
-		btnCopy = new Button("Copy",getStyle());
+		btnCopy = new Button("Copy",getDiagStyle());
 		abtn.add(btnCopy);
 		
-		btnPaste = new Button("Paste",getStyle());
+		btnPaste = new Button("Paste",getDiagStyle());
 		abtn.add(btnPaste);
 		
-		btnCut = new Button("Cut",getStyle());
+		btnCut = new Button("Cut",getDiagStyle());
 		abtn.add(btnCut);
 		
 		for(Button btn:abtn){
@@ -359,7 +359,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		/**
 		 * CENTER ELEMENT (dump entries area) ===========================================
 		 */
-		setLstbxDumpArea(new ListBox<String>(new VersionedList<String>(),getStyle()));
+		setLstbxDumpArea(new ListBox<String>(new VersionedList<String>(),getDiagStyle()));
     CursorEventControl.addListenersToSpatial(getDumpArea(), ConsoleMouseCursorListenerI.i());
 		Vector3f v3fLstbxSize = getConsoleSizeCopy();
 //		v3fLstbxSize.x/=2;
@@ -384,7 +384,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		 * BOTTOM ELEMENT =================================================================
 		 */
 		// input
-		super.setInputField(new TextField(""+cd().getCommandPrefix(),getStyle()));
+		super.setInputField(new TextField(""+cd().getCommandPrefix(),getDiagStyle()));
     CursorEventControl.addListenersToSpatial(getInputField(), ConsoleMouseCursorListenerI.i());
 		LemurFocusHelperStateI.i().addFocusChangeListener(getInputField());
 //		fInputHeight = MiscJmeI.i().retrieveBitmapTextFor(getInputField()).getLineHeight();

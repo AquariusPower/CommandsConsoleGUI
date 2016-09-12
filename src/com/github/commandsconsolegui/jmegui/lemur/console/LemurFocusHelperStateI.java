@@ -34,8 +34,6 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
-import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
@@ -72,6 +70,8 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	
 	ArrayList<FocusTarget> aftZOrderList = new ArrayList<FocusTarget>();
 	ArrayList<Spatial> asptFocusRequestList = new ArrayList<Spatial>();
+//	TreeMap<LemurDialogGUIStateAbs,Panel> tmFocusRequestList = new TreeMap<LemurDialogGUIStateAbs, Panel>(new Comparator<T>() {
+//	});
 	private FocusManagerState focusState;
 //	private SimpleApplication	sapp;
 //	private CommandsDelegatorI	cc;
@@ -140,8 +140,8 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 		if(spt.equals(getFocused()))return true; //quick test 1st
 		if(getFocused()==null)return false;
 		
-		Node sptParentest = MiscJmeI.i().getParentestFrom(spt);
-		Node sptFocusedParentest = MiscJmeI.i().getParentestFrom(getFocused());
+		Spatial sptParentest = MiscJmeI.i().getParentestFrom(spt);
+		Spatial sptFocusedParentest = MiscJmeI.i().getParentestFrom(getFocused());
 		return sptParentest.equals(sptFocusedParentest);
 	}
 	
@@ -163,38 +163,39 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	 * @param spt
 	 */
 	public void removeFocusableFromList(Spatial spt) {
-		assertIsNotAtGUINode(spt);
+		assertIsNotAtRenderingNode(spt);
 		asptFocusRequestList.remove(spt);
 		if(asptFocusRequestList.size()>0){
 //			requestFocus(asptFocusRequestList.get(asptFocusRequestList.size()-1));
 			requestFocus(getCurrentFocusRequester());
 		}else{
-			removeAllFocus();
+			removeAllFocus(); //this will also clear the list, np tho, already empty..
 		}
 	}
 	
-	public void assertIsAtGUINode(Spatial spt) {
-		assertAtGUINode(true,spt);
+	public void assertIsAtRenderingNode(Spatial spt) {
+		assertAtRenderingNode(true,spt);
 	}
-	public void assertIsNotAtGUINode(Spatial spt) {
-		assertAtGUINode(false,spt);
+	public void assertIsNotAtRenderingNode(Spatial spt) {
+		assertAtRenderingNode(false,spt);
 	}
-	public void assertAtGUINode(boolean bIs, Spatial sptAny){
-		Node parent = MiscJmeI.i().getParentestFrom(sptAny).getParent();
-		boolean bIsAtGuiNode = GlobalGUINodeI.i().equals(parent);
+	private void assertAtRenderingNode(boolean bIs, Spatial spt){
+		Node parent = MiscJmeI.i().getParentestFrom(spt).getParent();
+//		boolean bIsAtGuiNode = GlobalGUINodeI.i().equals(parent);
+		boolean b = MiscJmeI.i().isGoingToBeRenderedNow(spt);
 		if(bIs){
-			if(!bIsAtGuiNode){
-				throw new PrerequisitesNotMetException("it is not at GUI node "+sptAny.getName());
+			if(!b){
+				throw new PrerequisitesNotMetException("it is NOT at GUI node "+spt.getName());
 			}
 		}else{
-			if(bIsAtGuiNode){
-				throw new PrerequisitesNotMetException("it is still at GUI node "+sptAny.getName());
+			if(b){
+				throw new PrerequisitesNotMetException("it is STILL at GUI node "+spt.getName());
 			}
 		}
 	}
 	
 	public void removeAllFocus(){
-		for(Spatial spt:asptFocusRequestList)assertIsNotAtGUINode(spt);
+		for(Spatial spt:asptFocusRequestList)assertIsNotAtRenderingNode(spt);
 		asptFocusRequestList.clear();
 		GuiGlobals.getInstance().requestFocus(null);
 	}
@@ -212,15 +213,18 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	ClickFocusMouseCursorListener focusMouseCursorListener = new ClickFocusMouseCursorListener();
 	
 	public void prepareDialogToBeFocused(LemurDialogGUIStateAbs diag){
-		diag.getContainerMain().setUserData(LemurDialogGUIStateAbs.class.getName(), diag);
+		MiscJmeI.i().setUserDataPSH(diag.getInputField(ccSelf), diag);
+//		diag.getContainerMain().setUserData(LemurDialogGUIStateAbs.class.getName(), diag);
 		
 		CursorEventControl.addListenersToSpatial(diag.getContainerMain(), 
 			focusMouseCursorListener);
 	}
 	
 	public LemurDialogGUIStateAbs retrieveDialogFromSpatial(Spatial sptAny){
-		LemurDialogGUIStateAbs diag = (LemurDialogGUIStateAbs)MiscJmeI.i().getParentestFrom(sptAny)
-				.getUserData(LemurDialogGUIStateAbs.class.getName());
+		Spatial sptParentest = MiscJmeI.i().getParentestFrom(sptAny);
+		LemurDialogGUIStateAbs diag = MiscJmeI.i().getUserDataPSH(sptParentest, LemurDialogGUIStateAbs.class);
+//		LemurDialogGUIStateAbs diag = (LemurDialogGUIStateAbs)MiscJmeI.i().getParentestFrom(sptAny)
+//				.getUserData(LemurDialogGUIStateAbs.class.getName());
 		
 		if(diag==null)throw new PrerequisitesNotMetException(sptAny.getName());
 		
@@ -280,7 +284,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 			}
 		}
 		
-		assertIsAtGUINode(spt);
+		assertIsAtRenderingNode(spt);
 		asptFocusRequestList.remove(spt); //to update the priority
 		
 		/**

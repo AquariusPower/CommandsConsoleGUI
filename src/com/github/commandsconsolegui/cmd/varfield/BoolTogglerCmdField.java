@@ -27,12 +27,10 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs.EVarCmdMode;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
-import com.github.commandsconsolegui.misc.VarCmdUId;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -58,8 +56,8 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 
 //	private String	strReflexFillCfgCodePrefixVariant;
 	private boolean bDoCallOnChange = true;
-	private CallableX	caller;
-	private boolean	bConstructed;
+//	private CallableX	caller;
+//	private boolean	bConstructed;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
@@ -118,7 +116,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 		setHelp(strHelp);
 		setObjectRawValue(bInitialValue);
 		
-		this.bConstructed=true;
+		constructed();
 	}
 //	public BoolTogglerCmd(boolean bInitValue, String strCustomCmdId){
 //		this();
@@ -278,20 +276,38 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 //		if(bConstructed)
 		super.setObjectRawValue(this.bCurrent);
 		
-		if(bConstructed){
+//		prepareCallOnChange();
+//		if(bConstructed){
+//			if(isChangedAndRefresh()){
+//				if(bDoCallOnChange){
+//					prepareCallOnChange();
+////					if(!isCallOnValueChangedSet()){
+////						MsgI.i().warn("call on value changed not set for "+this.getReport(), this);
+//////						throw new PrerequisitesNotMetException("null caller for "+this.getReport());
+////					}else{
+////						CallQueueI.i().addCall(this.caller);
+////					}
+//				}
+//			}
+//		}
+		return getThis();
+	}
+	
+	@Override
+	protected void prepareCallOnValueChanged() {
+		if(isConstructed()){
 			if(isChangedAndRefresh()){
 				if(bDoCallOnChange){
-					if(this.caller==null){
-						MsgI.i().warn("null caller for "+this.getReport(), this);
-//						throw new PrerequisitesNotMetException("null caller for "+this.getReport());
+					if(isCallOnValueChangedSet()){
+						super.prepareCallOnValueChanged();
 					}else{
-						CallQueueI.i().addCall(this.caller);
+						MsgI.i().warn("call on value changed not set for "+this.getReport(), this);
 					}
 				}
 			}
 		}
-		return this;
 	}
+	
 //	public BoolTogglerCmdField setValue(Boolean b){
 //		this.bCurrent=b;
 ////		if(super.getConsoleVarLink()!=null)
@@ -310,7 +326,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 //			}
 //		}
 //		
-//		return this;
+//		return getThis();
 //	}
 	
 //	@Override
@@ -319,7 +335,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 //		this.set((Boolean)objValue);
 ////		super.setObjectValue(ccCD,objValue);
 //		super.setObjectRawValue(objValue);
-//		return this;
+//		return getThis();
 //	}
 
 //	@Override
@@ -349,14 +365,25 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 //		return null;
 //	}
 	
-	public BoolTogglerCmdField setCallOnChange(CallableX caller){
+//	public BoolTogglerCmdField setCallOnChange(CallableX caller){
+//		if(!bDoCallOnChange){
+//			// to avoid developer forgot already configured to call nothing
+//			throw new PrerequisitesNotMetException("was set to call nothing already!",this,getHelp());
+//		}
+//		
+//		this.caller=caller;
+//		return getThis();
+//	}
+	@Override
+	public BoolTogglerCmdField setCallOnValueChanged(CallableX caller) {
 		if(!bDoCallOnChange){
 			// to avoid developer forgot already configured to call nothing
 			throw new PrerequisitesNotMetException("was set to call nothing already!",this,getHelp());
 		}
 		
-		this.caller=caller;
-		return this;
+		super.setCallOnValueChanged(caller);
+		
+		return getThis();
 	}
 	
 	/**
@@ -365,7 +392,9 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 	 */
 	public BoolTogglerCmdField setCallNothingOnChange(){
 		// to avoid developer forgotten previously configured caller
-		PrerequisitesNotMetException.assertNotAlreadySet("caller", caller, null, this, getHelp());
+		if(isCallOnValueChangedSet())throw new PrerequisitesNotMetException("caller already set", this, getHelp());
+//		PrerequisitesNotMetException.assertNotAlreadySet("caller", caller, null, this, getHelp());
+		
 //		if(caller!=null){
 ////			throw new PrerequisitesNotMetException("caller already set!",this,getHelp());
 //		}
@@ -376,7 +405,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 //		}
 		
 		bDoCallOnChange=false;
-		return this;
+		return getThis();
 	}
 	
 	@Override
@@ -395,7 +424,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 //	@Override
 //	public BoolTogglerCmdField setHelp(String str) {
 //		this.strHelp = str;
-//		return this;
+//		return getThis();
 //	}
 
 //	public static void removeFromList(BoolTogglerCmdField bt) {

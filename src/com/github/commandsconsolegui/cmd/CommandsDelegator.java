@@ -3525,10 +3525,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				return true;
 			}
 		};
-		btgEngineStatsView.setCallOnChange(call);
-		btgEngineStatsFps.setCallOnChange(call);
+		btgEngineStatsView.setCallOnValueChanged(call);
+		btgEngineStatsFps.setCallOnValueChanged(call);
 		
-		btgConsoleCpuRest.setCallOnChange(new CallableX() {
+		btgConsoleCpuRest.setCallOnValueChanged(new CallableX() {
 			@Override
 			public Boolean call() {
 				tdLetCpuRest.setActive(btgConsoleCpuRest.b());

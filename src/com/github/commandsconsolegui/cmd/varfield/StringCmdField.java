@@ -106,6 +106,8 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 		if(getOwner()==null){
 			throw new NullPointerException("cant be null for: "+IReflexFillCfg.class.getName());
 		}
+		
+		constructed();
 	}
 	public StringCmdField(IReflexFillCfg rfcfgOwner){
 		this(rfcfgOwner, null, null);

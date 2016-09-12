@@ -217,7 +217,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	public R configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
 		
-		btgRestoreIniPosSizeOnce.setCallOnChange(new CallableX() {
+		btgRestoreIniPosSizeOnce.setCallOnValueChanged(new CallableX() {
 			@Override
 			public Boolean call() {
 				if(btgRestoreIniPosSizeOnce.b()){
@@ -290,7 +290,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	 */
 	@Override
 	protected boolean initAttempt() {
-		if(getStyle()==null)setStyle(GlobalDialogHelperI.i().STYLE_CONSOLE);
+		if(getDiagStyle()==null)setStyle(GlobalDialogHelperI.i().STYLE_CONSOLE);
 		if(!super.initAttempt())return false;
 		
 		if(!initGUI())return false;
@@ -303,8 +303,8 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 				return true;
 			}
 		};
-		btgSortListEntries.setCallOnChange(cxRefresh);
-		btgSortListEntriesAtoZ.setCallOnChange(cxRefresh);
+		btgSortListEntries.setCallOnValueChanged(cxRefresh);
+		btgSortListEntriesAtoZ.setCallOnValueChanged(cxRefresh);
 		
 		tdUpdateRefreshList.updateTime();
 		
@@ -962,7 +962,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return strTitle;
 	}
 
-	public String getStyle() {
+	public String getDiagStyle() {
 		return svfStyle.getStringValue();
 	}
 

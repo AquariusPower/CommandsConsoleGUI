@@ -802,7 +802,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 //	}	
 	
 	private float fontWidth(String strChars){
-		return fontWidth(strChars, getStyle(), true);
+		return fontWidth(strChars, getDiagStyle(), true);
 	}
 	
 	private boolean isHintActive(){
@@ -1718,7 +1718,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		if(bOk){
 			setStyle(strStyleNew);
 			
-			cd().varSet(CMD_CONSOLE_STYLE, getStyle(), true);
+			cd().varSet(CMD_CONSOLE_STYLE, getDiagStyle(), true);
 			
 //			updateFontStuff();
 			
@@ -2270,7 +2270,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		/**
 		 * Mono spaced fonts can always have a fixed linewrap column!
 		 */
-		if(!bUseFixedWrapColumn)bUseFixedWrapColumn=GlobalDialogHelperI.i().STYLE_CONSOLE.equals(getStyle());
+		if(!bUseFixedWrapColumn)bUseFixedWrapColumn=GlobalDialogHelperI.i().STYLE_CONSOLE.equals(getDiagStyle());
 		
 		if(bUseFixedWrapColumn){
 			return (int)
@@ -2319,7 +2319,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 			String strAfter = "";
 			float fMaxWidth = widthForDumpEntryField() - iDotsMarginSafetyGUESSED;
 			while(strLine.length()>0){
-				while(fontWidth(strLine, getStyle(), false) > fMaxWidth){
+				while(fontWidth(strLine, getDiagStyle(), false) > fMaxWidth){
 					int iLimit = strLine.length()-iJumpBackGUESSED;
 					strAfter = strLine.substring(iLimit) + strAfter;
 					strLine = strLine.substring(0, iLimit);

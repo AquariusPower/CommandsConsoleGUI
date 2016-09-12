@@ -73,6 +73,7 @@ public class FloatDoubleVarField extends NumberVarFieldAbs<Double,FloatDoubleVar
 //		this.dValue=dInitialValue;
 		setHelp(strHelp);
 //		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
+		constructed();
 	}
 	
 //	public FloatDoubleVarField setValue(Double d){

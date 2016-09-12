@@ -32,8 +32,11 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.cmd.CommandData;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
+import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.VarCmdUId;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -78,6 +81,9 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	private O	objRawValueDefault = null;
 	private boolean	bLazyValueWasSet;
 	private VarCmdUId	vcuid;
+	private boolean	bConstructed = false;
+
+	private CallableX	caller;
 	
 	private static ArrayList<VarCmdFieldAbs> avcfList = new ArrayList<VarCmdFieldAbs>();
 	public static final HashChangeHolder hvhVarList = new HashChangeHolder(avcfList);
@@ -405,6 +411,8 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		if(objRawValueDefault==null)objRawValueDefault=(O)objValue;
 		
 		if(vivo!=null){
+			if(vivo.getObjectValue()!=objValue)prepareCallOnValueChanged();
+			
 			vivo.setObjectValue(objValue);
 		}else{
 			bLazyValueWasSet=true; //as such value can be actually null
@@ -414,6 +422,14 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		return getThis();
 	}
 	
+	protected void prepareCallOnValueChanged() {
+		if(isConstructed()){ 
+			if(caller!=null){
+				CallQueueI.i().addCall(caller);
+			}
+		}
+	}
+
 	protected boolean isRawValueLazySet(){
 		return bLazyValueWasSet;
 	}
@@ -484,5 +500,34 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 
 	public O getRawValueDefault() {
 		return objRawValueDefault;
+	}
+	
+	public S setCallOnValueChanged(CallableX caller){
+		this.caller=caller;
+		return getThis();
+	}
+	
+	public boolean isCallOnValueChangedSet(){
+		return caller!=null;
+	}
+	
+	/**
+	 * use only at the end of concrete class constructor
+	 */
+	protected void constructed(){
+		bConstructed=true;
+	}
+	
+	/**
+	 * this is mainly to skip the initialing value at constructors
+	 * @return
+	 */
+	public boolean isConstructed(){
+		return bConstructed;
+	}
+	
+	public S applyValueCallNow(){
+		prepareCallOnValueChanged();
+		return getThis();
 	}
 }

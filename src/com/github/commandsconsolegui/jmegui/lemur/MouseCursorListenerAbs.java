@@ -79,7 +79,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 			EMouseCursorButton.get(eventButton.getButtonIndex()));
 		
 		if(eventButton.isPressed()){
-			mcbd.setPressed(eventButton, MiscJmeI.i().eventToV3f(eventButton));
+			mcbd.setPressed(eventButton, MiscLemurHelpersStateI.i().eventToV3f(eventButton));
 			
     	if(clickBegin(mcbd, eventButton, target, capture)){
     		eventButton.setConsumed();
@@ -168,7 +168,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 			// Buttons pressed during drag
 			MouseCursorButtonData mdata = mb().getMouseCursorDataFor(e);
 			if(mdata.isPressed()){
-				if(mdata.getPressedDistanceTo(MiscJmeI.i().eventToV3f(eventMotion)).length()>3){
+				if(mdata.getPressedDistanceTo(MiscLemurHelpersStateI.i().eventToV3f(eventMotion)).length()>3){
 					aMouseCursorButtonsPressedList.add(mdata);
 				}
 			}
@@ -223,8 +223,8 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 				if(btnLastHoverIn==source){
 					btnLastHoverIn=null;
 				}else{
-					//TODO be less precise and just reset all like in app lost focus etc?
-					throw new PrerequisitesNotMetException("inconsistency, why is not last hover in?", btnLastHoverIn, source, this);
+					//TODO also reset all like in app lost focus etc?
+					GlobalCommandsDelegatorI.i().dumpDevWarnEntry("inconsistency, why is not last hover in?", btnLastHoverIn, source, this);
 				}
 			}
 		}

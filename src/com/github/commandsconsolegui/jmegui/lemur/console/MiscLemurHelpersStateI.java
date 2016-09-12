@@ -40,8 +40,11 @@ import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell;
+import com.github.commandsconsolegui.misc.CallQueueI;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexHacks;
 import com.jme3.font.BitmapText;
@@ -58,13 +61,13 @@ import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.DocumentModel;
 import com.simsilica.lemur.GridPanel;
-import com.simsilica.lemur.Label;
 import com.simsilica.lemur.ListBox;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.component.ColoredComponent;
 import com.simsilica.lemur.component.TextEntryComponent;
 import com.simsilica.lemur.core.GuiControl;
+import com.simsilica.lemur.event.AbstractCursorEvent;
 import com.simsilica.lemur.event.KeyAction;
 import com.simsilica.lemur.event.KeyActionListener;
 import com.simsilica.lemur.focus.FocusManagerState;
@@ -827,100 +830,85 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 	 * @return
 	 */
 	public Vector3f setGrantedSize(Panel pnl, float fX, float fY, boolean bForce){
-		return setGrantedSize(pnl, new Vector3f(fX,fY,-1), bForce); //z=-1 will be fixed
+		return setGrantedSize(pnl, new Vector3f(fX,fY,-1), bForce, false); //z=-1 will be fixed
 	}
 	
-	public Vector3f setGrantedSize(final Panel pnl, final Vector3f v3fSize){
-		return setGrantedSize(pnl, v3fSize, false);
+	public Vector3f setGrantedSize(Panel pnl, Vector3f v3fSize){
+		return setGrantedSize(pnl, v3fSize, false, false);
 	}
+	
 	/**
-	 * Sets size properly, acurately, precisely,
-	 * without pitfalls.
-	 * Make it sure the thickness is correct (not 0.0f).
+	 * Sets custom sizes with crash prevention.
+	 * And make it sure the thickness is correct (not 0.0f).
 	 * 
 	 * @param pnl
-	 * @param v3fSize x,y,z use -1 to let it be automatic = preferred
-	 * @param bEnsureSizeNow this means that the Preferred size will be used now!
-	 * @return
+	 * @param v3fSizeF x,y,z use -1 to let it be automatic = preferred
+	 * @param bForceSpecificSize
+	 * @param bMustDoItNow only works if it is going to be rendered
+	 * @return null if size setup fails, like being too tiny. Or a valid size.
 	 */
-	public Vector3f setGrantedSize(final Panel pnl, final Vector3f v3fSize, boolean bForceSpecificSize){
-		if(v3fSize.x<v3fMinSize.x)v3fSize.x=v3fMinSize.x;
-		if(v3fSize.y<v3fMinSize.y)v3fSize.y=v3fMinSize.y;
-		if(v3fSize.z<v3fMinSize.z)v3fSize.z=v3fMinSize.z;
+	public Vector3f setGrantedSize(
+		final Panel pnl, 
+		final Vector3f v3fSizeF, 
+		final boolean bForceSpecificSize, 
+		boolean bMustDoItNow
+	){
+		final String strSizeKey="SizeKey";
 		
-		Vector3f v3fPreferredBkp = pnl.getPreferredSize().clone();
-		
-		if(!bForceSpecificSize){
-			if(v3fSize.x<v3fPreferredBkp.x)v3fSize.x=v3fPreferredBkp.x;
-			if(v3fSize.y<v3fPreferredBkp.y)v3fSize.y=v3fPreferredBkp.y;
-		}
-		
-		v3fSize.z=v3fPreferredBkp.z; // do not mess with Z !!!
-		//if(v3fSize.z<v3fP.z)v3fSize.z=v3fP.z;
-		
-		pnl.setPreferredSize(v3fSize);
+		CallableX caller = new CallableX() {
+			@Override
+			public Boolean call() {
+				if(!MiscJmeI.i().isGoingToBeRenderedNow(pnl))return false; //re-add to queue
+				
+				Vector3f v3fSize = v3fSizeF;
+				
+				if(v3fSize.x<v3fMinSize.x)v3fSize.x=v3fMinSize.x;
+				if(v3fSize.y<v3fMinSize.y)v3fSize.y=v3fMinSize.y;
+				if(v3fSize.z<v3fMinSize.z)v3fSize.z=v3fMinSize.z;
+				
+				Vector3f v3fPreferredBkp = pnl.getPreferredSize().clone();
+				
+				if(!bForceSpecificSize){
+					if(v3fSize.x<v3fPreferredBkp.x)v3fSize.x=v3fPreferredBkp.x;
+					if(v3fSize.y<v3fPreferredBkp.y)v3fSize.y=v3fPreferredBkp.y;
+				}
+				
+				v3fSize.z=v3fPreferredBkp.z; // do not mess with Z !!! //if(v3fSize.z<v3fP.z)v3fSize.z=v3fP.z;
+				
+				pnl.setPreferredSize(v3fSize);
+				
+				// the check
+				try{
+					pnl.getControl(GuiControl.class).update(1f/30f); //TODO use real?
+					pnl.setPreferredSize(v3fSize);
+//					pnl.updateLogicalState(1f/30f);
+				}catch(IllegalArgumentException ex){
+					GlobalCommandsDelegatorI.i().dumpWarnEntry("resize failed, restoring", pnl, v3fSize, bForceSpecificSize);
+					pnl.setPreferredSize(v3fPreferredBkp);
+					v3fSize = null;
+				}
+				
+				putCustomValue(strSizeKey, v3fSize);
+				
+				return true; //must always discard the queue.
+			}
+		};
 		
 		/**
-		 * TODO only allow any changes if it is on GuiNode so it can be properly checked. So use the queue, but new calls must override existing identical queues! may be create a single call object and update it?
+		 * only allow any changes if it can be properly priorly checked/tested 
 		 */
-//		if(bAllowMinSizeCheckAndFix ){
-		if(MiscJmeI.i().getParentestFrom(pnl).getParent()!=null){
-			try{
-				pnl.getControl(GuiControl.class).update(1f/30f); //TODO use real?
-	//			pnl.updateLogicalState(1f/30f);
-			}catch(IllegalArgumentException ex){
-				GlobalCommandsDelegatorI.i().dumpWarnEntry("resize failed, restoring", pnl, v3fSize, bForceSpecificSize);
-				pnl.setPreferredSize(v3fPreferredBkp);
+		if(MiscJmeI.i().isGoingToBeRenderedNow(pnl)){
+			caller.call(); //it will do it now if the check is granted to not crash.
+		}else{
+			if(bMustDoItNow){
+				throw new PrerequisitesNotMetException("not going to be rendered", pnl, v3fSizeF, bForceSpecificSize);
+			}else{
+				CallQueueI.i().addCall(caller);
+				MsgI.i().dbg("postponed resize "+pnl+", "+v3fSizeF, true, this);
 			}
 		}
 		
-		//		pnl.setPreferredSize(v3fSize); 
-		
-//		pnl.setSize(v3fSize); //pnl.getPreferredSize(); pnl.getSize();
-//		
-//		// check on the next frame, so lemur possibly had time to make its calculations. TODO how to be sure lemur did it?
-//		CallableX caller = new CallableX() {
-//			@Override
-//			public Boolean call() throws Exception {
-//				boolean bUsePreferred = bEnsureSizeNow;
-//				
-//				if(!bUsePreferred && pnl.getSize().distance(v3fSize)>0.01f){
-//					GlobalCommandsDelegatorI.i().dumpDevWarnEntry(
-//						"setSize() failed, using setPreferredSize() for "+elementInfo(pnl,true), 
-//						pnl,
-//						pnl.getClass().getName(),
-//						pnl.getName(),
-//						"size="+pnl.getSize(),
-//						"requestedSize="+v3fSize);
-//					
-//					bUsePreferred=true;
-//				}
-//				
-//				if(bUsePreferred){
-//					//TODO double/tripple try setSize() before preferred?
-//					pnl.setPreferredSize(v3fSize); 
-//					//TODO check after preferred?
-//					
-//					return true; //cuz could also return false here for some reason
-//				}
-//				
-//				return true;
-//			}
-//		};
-//		CallQueueI.i().addCall(caller.setAsPrepend(),bEnsureSizeNow);
-		
-//		if(bForcedSizeNow){
-//			try {
-//				caller.call();
-//			} catch (Exception e) {
-//				
-//				e.printStackTrace();
-//			}
-//		}else{
-//			CallQueueI.i().addCall(caller);
-//		}
-		
-		return v3fSize;
+		return (Vector3f)caller.getCustomValue(strSizeKey);
 	}
 
 	public Cell<?> getCellFor(Spatial source) {
@@ -1044,5 +1032,9 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 
 	public void fixBitmapTextLimitsFor(Panel pnl) {
 		MiscJmeI.i().fixBitmapTextLimitsFor(pnl, pnl.getSize());
+	}
+
+	public Vector3f eventToV3f(AbstractCursorEvent event){
+		return new Vector3f(event.getX(),event.getY(),0);
 	}
 }

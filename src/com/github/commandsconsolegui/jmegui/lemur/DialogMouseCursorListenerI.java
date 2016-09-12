@@ -37,6 +37,7 @@ import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButt
 import com.github.commandsconsolegui.jmegui.MultiClickCondStateI;
 import com.github.commandsconsolegui.jmegui.MultiClickCondStateI.ECallMode;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
+import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell.EUserData;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
@@ -154,7 +155,7 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 			switch(buttonData.getActivatorType()){
 				case Action1Click:
 					Spatial sptDialogMain = MiscJmeI.i().getParentestFrom(capture);
-					Vector3f v3fNewPos = MiscJmeI.i().eventToV3f(eventMotion);
+					Vector3f v3fNewPos = MiscLemurHelpersStateI.i().eventToV3f(eventMotion);
 					Vector3f v3fDisplacement = buttonData.updateDragPosAndGetDisplacement(eventMotion, v3fNewPos);
 					
 					BaseDialogStateAbs diag = MiscJmeI.i().getUserDataPSH(sptDialogMain,BaseDialogStateAbs.class);

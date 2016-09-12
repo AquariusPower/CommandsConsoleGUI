@@ -51,7 +51,7 @@ public class LemurBaseDialogHelper extends BaseDialogHelper{
 	private ColorRGBA	colorConsoleStyleBackground;
 	StringVarField svfBackgroundHexaColorRGBA = new StringVarField(this,"","XXXXXXXX ex.: 'FF12BC4A' Red Green Blue Alpha");
 
-	public static enum ConsElementIds{
+	public static enum DiagStyleElementIds{
 		buttonResizeBorder,
 		;
 		public String s(){return this.toString();}
@@ -120,7 +120,7 @@ public class LemurBaseDialogHelper extends BaseDialogHelper{
 		clBg = new ColorRGBA(0,0.25f,0,0.75f);
 		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
-		attrs = styles.getSelector(ConsElementIds.buttonResizeBorder.s(), STYLE_CONSOLE);
+		attrs = styles.getSelector(DiagStyleElementIds.buttonResizeBorder.s(), STYLE_CONSOLE);
 		clBg = ColorRGBA.Cyan.clone();
 		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		

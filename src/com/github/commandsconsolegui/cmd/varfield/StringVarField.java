@@ -67,6 +67,7 @@ public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 		setObjectRawValue(strInitialValue);
 		this.setHelp(strHelp);
 //		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
+		constructed();
 	}
 	
 //	public StringVarField setValue(String str){

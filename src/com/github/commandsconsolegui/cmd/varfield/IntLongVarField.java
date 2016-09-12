@@ -76,6 +76,7 @@ public class IntLongVarField extends NumberVarFieldAbs<Long,IntLongVarField>{
 		setObjectRawValue(lInitialValue);
 		setHelp(strHelp);
 //		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
+		constructed();
 	}
 	
 //	public IntLongVarField setValue(Long l){

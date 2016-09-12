@@ -108,6 +108,7 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 //		this.setOwner(rfcfgOwnerUseThis);
 		setObjectRawValue(fDelay);
 		setHelp(strHelp);
+		constructed();
 	}
 	
 	private TimedDelayVarField setDelayLimitSeconds(float fDelaySeconds){

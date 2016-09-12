@@ -28,6 +28,7 @@
 package com.github.commandsconsolegui.misc;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.Callable;
 
 
@@ -44,16 +45,26 @@ public class CallQueueI {
 		/**
 		 * without exception thrown, the debug will stop in the exact place where the exception
 		 * happens inside a call (finally!!)
+		 * 
+		 * @return true if succeeded and the queue can be discarded, false if failed and it must be retried.
 		 */
     @Override
 		V call();
 	}
 	
 	public static abstract class CallableX implements CallableWeak<Boolean>{
-		boolean bPrepend;
+		private boolean bPrepend;
+		private HashMap<String,Object> hmCustom = new HashMap<String, Object>();
+		
 		public CallableX setAsPrepend(){
 			bPrepend=true;
 			return this;
+		}
+		public void putCustomValue(String strKey, Object objValue){
+			hmCustom.put(strKey,objValue);
+		}
+		public Object getCustomValue(String strKey){
+			return hmCustom.get(strKey);
 		}
 	}
 	
@@ -114,7 +125,7 @@ public class CallQueueI {
 		if(caller==null)throw new PrerequisitesNotMetException("null caller");
 		
 //	if(aCallList.contains(caller))
-		aCallList.remove(caller); //prevent duplicity
+		while(aCallList.remove(caller)); //prevent multiplicity
 		
 		if(bTryToRunNow){
 			runCallerCode(caller);

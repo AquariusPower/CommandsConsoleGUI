@@ -75,7 +75,6 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.system.JmeSystem;
 import com.jme3.texture.Texture2D;
-import com.simsilica.lemur.event.AbstractCursorEvent;
 
 /**
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
@@ -92,23 +91,81 @@ public class MiscJmeI implements IReflexFillCfg{
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
 		this.ihe=ihe;
 //		this.sapp=GlobalSappRefI.i().get();
+		
+		cfgRenderingNode(GlobalRootNodeI.i(), true);
+		cfgRenderingNode(GlobalGUINodeI.i(), true);
+		
 		bConfigured=true;
 	}
 	
+//	public Node getParentestFrom(Spatial sptStart){
+//		return getParentestFrom(sptStart, true);
+//	}
+	public Spatial getParentestFrom(Spatial sptStart){
+		return getParentestFrom(sptStart,true);
+	}
 	/**
 	 * 
 	 * @param sptStart
-	 * @return parentest spatial, least top nodes like RootNode and GuiNode
+	 * @return parentest spatial
 	 */
-	public Node getParentestFrom(Spatial sptStart){
-		Spatial sptParentest = sptStart;
-		while(sptParentest.getParent()!=null){
-			if(GlobalGUINodeI.i().equals(sptParentest.getParent()))break;
-			if(GlobalRootNodeI.i().equals(sptParentest.getParent()))break;
-			sptParentest=sptParentest.getParent();
+	public Spatial getParentestFrom(Spatial sptStart, boolean bExcludeRenderingNodes){
+		/**
+		 * For best compatibility, do not use Node, return Spatial.
+		 * This way, the starting one can be returned also!
+		 */
+		
+		Spatial sptParent = sptStart.getParent();
+		if(sptParent==null)return sptStart;
+		
+		if(bExcludeRenderingNodes){
+			if(isRenderingNode(sptStart))return null; //wow ... :P
+			if(isRenderingNode(sptParent))return sptStart;
 		}
-		return (Node)sptParentest; //parent is always Node
+		
+		Spatial sptParentest = sptParent;
+		while(sptParent!=null){ //1st loop will not be null
+			if(bExcludeRenderingNodes){
+				if(isRenderingNode(sptParent))break; //will return the previously set one
+			}
+			
+			sptParentest = sptParent;
+			sptParent = sptParent.getParent();
+		}
+		
+		return sptParentest;
 	}
+//	/**
+//	 * 
+//	 * @param sptStart
+//	 * @return parentest spatial, or self if attached directly to a rendering node
+//	 */
+//	public Node getParentestFrom(Spatial sptStart, boolean bLeastTopRenderingNodes){
+//		if(sptStart.getParent()==null)return null;
+//		
+//		Node nodeParent = sptStart.getParent();
+//		if(bLeastTopRenderingNodes){
+//			if(isRenderingNode(nodeParent))return sptStart;
+////			for(Node nodeRendering:anodeRendering){
+////				if(nodeParent==nodeRendering)break;
+////			}
+//		}
+//		
+//		Node nodeParentest = nodeParent;
+//		while(nodeParent!=null){ //1st loop will not be null
+//			if(bLeastTopRenderingNodes){
+//				for(Node nodeRendering:anodeRendering){
+//					if(nodeParent==nodeRendering)break;
+//				}
+//			}
+////			if(GlobalGUINodeI.i().equals(sptParentest.getParent()))break;
+////			if(GlobalRootNodeI.i().equals(sptParentest.getParent()))break;
+//			nodeParentest = nodeParent;
+//			nodeParent = nodeParent.getParent();
+//		}
+//		
+//		return nodeParentest;
+//	}
 	
 	/**
 	 * first is the parentest
@@ -174,10 +231,6 @@ public class MiscJmeI implements IReflexFillCfg{
 		bmt.setBox(rectfont);
 	}
 	
-	public Vector3f eventToV3f(AbstractCursorEvent event){
-		return new Vector3f(event.getX(),event.getY(),0);
-	}
-
 	public void updateColorFading(TimedDelayVarField td, ColorRGBA color, boolean bFadeInAndOut){
 		float fMinAlpha=0.25f;
 		float fDeltaWorkAlpha = 1.0f - fMinAlpha;
@@ -287,6 +340,7 @@ public class MiscJmeI implements IReflexFillCfg{
 		}
 	};
 	private boolean	bTTFloaderRegistered;
+	private ArrayList<Node>	anodeRendering = new ArrayList<Node>();
 	
 	public ArrayList<Spatial> getAllChildrenFrom(Node node, String strChildName) {
 		return getAllChildrenFrom(node, strChildName, false);
@@ -587,5 +641,49 @@ public class MiscJmeI implements IReflexFillCfg{
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 	}
-
+	
+	/**
+	 * TODO check for all enabled viewport's scene node
+	 * @param pnl
+	 * @return
+	 */
+	public boolean isGoingToBeRenderedNow(Spatial spt) {
+		Spatial sptParentest = getParentestFrom(spt,false);
+		
+		return isRenderingNode(sptParentest);
+//		for(Node node:anodeRendering){
+//			if(p==node)return true;
+//		}
+//		
+//		return false;
+	}
+	
+	/**
+	 * 
+	 * @param spt
+	 * @return
+	 */
+	public boolean isRenderingNode(Spatial spt){
+		/**
+		 * keep the checking as Spatial for best compatibility with other methods. 
+		 */
+		for(Node node:anodeRendering){
+			if(spt==node)return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 
+	 * @param node
+	 * @param bAdd will remove the node if false
+	 */
+	public void cfgRenderingNode(Node node, boolean bAdd){
+		if(bAdd){
+			anodeRendering.add(node);
+		}else{
+			anodeRendering.remove(node);
+		}
+	}
+	
 }
