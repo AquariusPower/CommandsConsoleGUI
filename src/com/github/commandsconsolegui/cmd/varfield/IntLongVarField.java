@@ -82,8 +82,18 @@ public class IntLongVarField extends NumberVarFieldAbs<Long,IntLongVarField>{
 //	public IntLongVarField setValue(Long l){
 //		this.lValue=l;
 //		if(super.getConsoleVarLink()!=null)setObjectRawValue(this.lValue);
-//		return this;
+//return getThis();
 //	}
+	
+	public IntLongVarField setLong(Long l) {
+		this.setObjectRawValue(l);
+		return getThis();
+	}
+	
+	public IntLongVarField setInteger(Integer i) {
+		this.setObjectRawValue(i);
+		return getThis();
+	}
 	
 	@Override
 //	public IntLongVarField setObjectValue(CommandsDelegator.CompositeControl cc, Object objValue) {
@@ -100,9 +110,15 @@ public class IntLongVarField extends NumberVarFieldAbs<Long,IntLongVarField>{
 		if(objValue instanceof IntLongVarField){
 			setValue( ((IntLongVarField)objValue).getValue() );
 		}else
-//		if(objValue instanceof FloatDoubleVarField){
-//			setValue( (long)Math.round(((FloatDoubleVarField)objValue).getFloat()) );
-//		}else
+		if(objValue instanceof Float){
+			setValue( (long)Math.round(((Float)objValue).doubleValue()) );
+		}else
+		if(objValue instanceof Double){
+			setValue( (long)Math.round((Double)objValue) );
+		}else
+		if(objValue instanceof FloatDoubleVarField){
+			setValue( (long)Math.round(((FloatDoubleVarField)objValue).getDouble()) );
+		}else
 		if(objValue instanceof String){
 			setValue( Long.parseLong((String)objValue) );
 		}else{
@@ -115,21 +131,21 @@ public class IntLongVarField extends NumberVarFieldAbs<Long,IntLongVarField>{
 //		super.setObjectValue(cc,objValue);
 		super.setObjectRawValue(objValue);
 		
-		return this;
+		return getThis();
 	}
 	
 //	public IntLongVarField setMinMax(Long lMin,Long lMax) {
 //		setMin(lMin);
 //		setMax(lMax);
-//		return this;
+//return getThis();
 //	}
 //	public IntLongVarField setMin(Long lMin) {
 //		this.lMin=lMin;
-//		return this;
+//return getThis();
 //	}
 //	public IntLongVarField setMax(Long lMax) {
 //		this.lMax=lMax;
-//		return this;
+//return getThis();
 //	}
 //	public Long getMin() {
 //		return lMin;

@@ -31,9 +31,9 @@ import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.extras.SingleAppInstanceI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
-import com.github.commandsconsolegui.globals.jmegui.GlobalDialogHelperI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
+import com.github.commandsconsolegui.globals.jmegui.lemur.GlobalLemurDialogHelperI;
 import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CommandsBackgroundStateI;
@@ -89,7 +89,7 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
   	// globals must be set as soon as possible
 		GlobalGUINodeI.iGlobal().set(getGuiNode());
 		GlobalRootNodeI.iGlobal().set(getRootNode());
-		GlobalDialogHelperI.iGlobal().set(new LemurBaseDialogHelper());
+		GlobalLemurDialogHelperI.iGlobal().set(new LemurBaseDialogHelper());
 		
 		/**
 		 * Configs:

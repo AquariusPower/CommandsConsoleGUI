@@ -47,7 +47,8 @@ import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI.BindKey;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelper.DiagStyleElementIds;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelper.DialogStyleElementId;
+import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -411,7 +412,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	
 	private Button prepareResizeBorder(Position edge) {
 		final Button btnBorder = new Button(
-			"", new ElementId(DiagStyleElementIds.buttonResizeBorder.s()), getDiagStyle());
+			"", new ElementId(DialogStyleElementId.buttonResizeBorder.s()), getDiagStyle());
 //		btnBorder.setFontSize(0.1f); //this trick will let us set it with any dot size!
 		btnBorder.setName("Dialog_ResizeBorder_"+edge.toString());
 //		btn.getBackground().getGuiControl().set
@@ -670,9 +671,35 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		bRefreshScroll=false;
 	}
 	
+	protected ArrayList<CellDialogEntry<T>> getVisibleCellEntries(){
+		ArrayList<CellDialogEntry<T>> acell = new ArrayList<CellDialogEntry<T>>();
+		
+		GridPanel gp = getMainList().getGridPanel();
+		for(int iC=0;iC<gp.getVisibleColumns();iC++){
+			for(int iR=0;iR<gp.getVisibleRows();iR++){
+				Panel pnl = gp.getCell(gp.getRow()+iR, gp.getColumn()+iC);
+				if (pnl instanceof CellDialogEntry) {
+					CellDialogEntry<T> cell = (CellDialogEntry<T>) pnl;
+					acell.add(cell);
+				}
+			}
+		}
+		
+		return acell;
+	}
+	
+	protected boolean simpleUpdateVisibleCells(float tpf){
+		for(CellDialogEntry<T> cell:getVisibleCellEntries()){
+			cell.simpleUpdate(tpf);
+		}
+		return true;
+	}
+	
 	@Override
 	protected boolean updateAttempt(float tpf) {
 		if(!super.updateAttempt(tpf))return false;
+		
+		if(!simpleUpdateVisibleCells(tpf))return false;
 		
 		if(bRefreshScroll)autoScroll();
 		
@@ -1087,13 +1114,16 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //	private void prepareEffectListEntries(boolean bApplyNow) {
 //		bRunningEffectAtAllListEntries=true;
 		
-		GridPanel gp = getMainList().getGridPanel();
-		for(int iC=0;iC<gp.getVisibleColumns();iC++){
-			for(int iR=0;iR<gp.getVisibleRows();iR++){
-				Panel pnl = gp.getCell(iR, iC);
-				if(pnl!=null)MiscLemurHelpersStateI.i().setScaleXY(pnl, fMinScale, 1f);
-			}
+		for(CellDialogEntry<T> cell:getVisibleCellEntries()){
+			MiscLemurHelpersStateI.i().setScaleXY(cell, fMinScale, 1f);
 		}
+//		GridPanel gp = getMainList().getGridPanel();
+//		for(int iC=0;iC<gp.getVisibleColumns();iC++){
+//			for(int iR=0;iR<gp.getVisibleRows();iR++){
+//				Panel pnl = gp.getCell(iR, iC);
+//				if(pnl!=null)MiscLemurHelpersStateI.i().setScaleXY(pnl, fMinScale, 1f);
+//			}
+//		}
 		
 		if(bEnabling){
 			bPreparedForListEntriesEffects=true;
@@ -1117,17 +1147,18 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		int iCountConcurrent = 0;
 		
 		float fLastCalculatedEntryScale = 0f;
-		for(int iC=0;iC<gp.getVisibleColumns();iC++){
-			for(int iR=0;iR<gp.getVisibleRows();iR++){
-				Panel pnl = gp.getCell(iR, iC);
+		for(CellDialogEntry<T> cell:getVisibleCellEntries()){
+//		for(int iC=0;iC<gp.getVisibleColumns();iC++){
+//			for(int iR=0;iR<gp.getVisibleRows();iR++){
+//				Panel pnl = gp.getCell(iR, iC);
 				iCount++;
 				
-				if(pnl!=null){
-					if(Float.compare(pnl.getLocalScale().x,1f)==0){
+				if(cell!=null){
+					if(Float.compare(cell.getLocalScale().x,1f)==0){
 						continue;
 					}
 					
-					fLastCalculatedEntryScale=updateEffectOnEntry(pnl,bGrow);
+					fLastCalculatedEntryScale=updateEffectOnEntry(cell,bGrow);
 					if(fLastCalculatedEntryScale<0.33f){
 						break;
 					}
@@ -1137,7 +1168,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //					if(fScale<0f)fScale=fMinScale;
 					
 //					if(iCountConcurrent==iMaxConcurrent)break; //to update one entry step per frame
-				}
+//				}
 			}
 		}
 		

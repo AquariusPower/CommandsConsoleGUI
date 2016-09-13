@@ -79,8 +79,18 @@ public class FloatDoubleVarField extends NumberVarFieldAbs<Double,FloatDoubleVar
 //	public FloatDoubleVarField setValue(Double d){
 //		this.dValue=d;
 //		if(super.getConsoleVarLink()!=null)setObjectRawValue(this.dValue);
-//		return this;
+//		return getThis();
 //	}
+	
+	public FloatDoubleVarField setFloat(Float f) {
+		this.setObjectRawValue(f);
+		return getThis();
+	}
+	
+	public FloatDoubleVarField setDouble(Double d) {
+		this.setObjectRawValue(d);
+		return getThis();
+	}
 	
 	@Override
 //	public FloatDoubleVarField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
@@ -97,9 +107,15 @@ public class FloatDoubleVarField extends NumberVarFieldAbs<Double,FloatDoubleVar
 		if(objValue instanceof FloatDoubleVarField){
 			setValue( ((FloatDoubleVarField)objValue).getValue() );
 		}else
-//		if(objValue instanceof IntLongVarField){
-//			setValue( ((IntLongVarField)objValue).getLong().doubleValue() );
-//		}else
+		if(objValue instanceof Integer){
+			setValue( ((Integer)objValue).doubleValue() );
+		}else
+		if(objValue instanceof Long){
+			setValue( ((Long)objValue).doubleValue() );
+		}else
+		if(objValue instanceof IntLongVarField){
+			setValue( ((IntLongVarField)objValue).getLong().doubleValue() );
+		}else
 		if(objValue instanceof String){
 			setValue( Double.parseDouble((String)objValue) );
 		}else{
@@ -117,7 +133,7 @@ public class FloatDoubleVarField extends NumberVarFieldAbs<Double,FloatDoubleVar
 //		super.setObjectValue(ccCD,objValue);
 		super.setObjectRawValue(objValue);
 		
-		return this;
+		return getThis();
 	}
 
 //	@Override
@@ -199,15 +215,15 @@ public class FloatDoubleVarField extends NumberVarFieldAbs<Double,FloatDoubleVar
 //	public FloatDoubleVarField setMinMax(Double dMin,Double dMax) {
 //		setMin(dMin);
 //		setMax(dMax);
-//		return this;
+//		return getThis();
 //	}
 //	public FloatDoubleVarField setMin(Double dMin) {
 //		this.dMin=dMin;
-//		return this;
+//		return getThis();
 //	}
 //	public FloatDoubleVarField setMax(Double dMax) {
 //		this.dMax=dMax;
-//		return this;
+//		return getThis();
 //	}
 //	public Double getMin() {
 //		return dMin;

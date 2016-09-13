@@ -39,7 +39,7 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
-import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell;
+import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
@@ -911,11 +911,11 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 		return (Vector3f)caller.getCustomValue(strSizeKey);
 	}
 
-	public Cell<?> getCellFor(Spatial source) {
-		Cell<?> cell=null;
+	public CellDialogEntry<?> getCellFor(Spatial source) {
+		CellDialogEntry<?> cell=null;
 		for(Spatial sptParent:MiscJmeI.i().getParentListFrom(source, false)){
-			if(sptParent instanceof Cell<?>){
-				cell = (Cell<?>)sptParent;
+			if(sptParent instanceof CellDialogEntry<?>){
+				cell = (CellDialogEntry<?>)sptParent;
 				break;
 			}
 		}

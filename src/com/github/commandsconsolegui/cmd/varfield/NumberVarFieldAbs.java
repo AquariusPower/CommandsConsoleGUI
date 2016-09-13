@@ -80,7 +80,14 @@ public abstract class NumberVarFieldAbs<O, S extends NumberVarFieldAbs<O,S>> ext
 		if( getMin()!=null && (nValue==null || cmpWith(getMin())<0) )nValue=getMin();
 		if( getMax()!=null && (nValue==null || cmpWith(getMax())>0) )nValue=getMax();
 		
-		return super.setObjectRawValue(objValue);
+		super.setObjectRawValue(objValue);
+		
+		return getThis();
+	}
+	
+	public S setNumber(Number n){
+		this.setObjectRawValue(n);
+		return getThis();
 	}
 	
 	private int cmpWith(O nOther){
@@ -100,7 +107,7 @@ public abstract class NumberVarFieldAbs<O, S extends NumberVarFieldAbs<O,S>> ext
 		}
 	}
 	
-	protected O getValue() {
+	public O getValue() {
 		return nValue;
 	}
 

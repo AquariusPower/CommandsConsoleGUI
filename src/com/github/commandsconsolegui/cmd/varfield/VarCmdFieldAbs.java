@@ -530,4 +530,6 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		prepareCallOnValueChanged();
 		return getThis();
 	}
+
+	
 }

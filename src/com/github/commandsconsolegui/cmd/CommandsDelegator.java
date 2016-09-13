@@ -3892,7 +3892,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}
 		
 //		String strTime = new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime())+": ";
-		if(bShowInfo)dumpInfoEntry(strType+": "+strCmd);
+		if(bShowInfo){
+			if(bIsCmd){
+				dumpSubEntry("");
+				dumpSubEntry("<> <> <> <> <> <> USER COMMAND <> <> <> <> <> <>");
+			}
+			dumpInfoEntry(strType+": "+strCmd);
+		}
 		
 		icui().clearInputTextField(); 
 		

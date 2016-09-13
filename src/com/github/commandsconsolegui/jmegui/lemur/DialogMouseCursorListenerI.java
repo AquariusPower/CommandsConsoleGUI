@@ -38,8 +38,8 @@ import com.github.commandsconsolegui.jmegui.MultiClickCondStateI;
 import com.github.commandsconsolegui.jmegui.MultiClickCondStateI.ECallMode;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
-import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell;
-import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell.EUserData;
+import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
+import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserData;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableWeak;
 import com.jme3.math.Vector3f;
@@ -69,7 +69,7 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 		switch(e){
 			case Action1Click:
 //				if(iClickCount==1){
-					final Cell cell = (Cell<?>)capture.getUserData(EUserData.cellClassRef.toString());
+					final CellDialogEntry cell = (CellDialogEntry<?>)capture.getUserData(EUserData.cellClassRef.toString());
 					if(cell!=null){
 //						if(cell.isCfgButton(capture)){
 //							diag.openCfgDataDialog(cell.getData());

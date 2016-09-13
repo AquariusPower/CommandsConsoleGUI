@@ -45,6 +45,11 @@ public class HashChangeHolder {
 	}
 	
 	public boolean isChangedAndUpdateHash(){
+		return isChangedAndUpdateHash(objRef);
+	}
+	public boolean isChangedAndUpdateHash(Object objRefNew){
+		this.objRef = objRefNew;
+		
 		int iHashTmp = objRef.hashCode();
 		if(iHashTmp!=iHash){
 			iHash=iHashTmp;

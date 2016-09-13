@@ -44,7 +44,7 @@ import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI.BindKey;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelper.DiagStyleElementIds;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelper.DialogStyleElementId;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.MiscI;

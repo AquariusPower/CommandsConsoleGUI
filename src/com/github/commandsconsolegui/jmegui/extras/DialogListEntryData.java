@@ -34,16 +34,17 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import javax.print.attribute.standard.Chromaticity;
-
 import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
+import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData.SliderValueData.ESliderKey;
+import com.github.commandsconsolegui.misc.CallQueueI;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.export.Savable;
-import com.jme3.scene.Node;
+import com.simsilica.lemur.RangedValueModel;
 
 /**
  * Each list entry can show differently, they could be:
@@ -71,6 +72,68 @@ public class DialogListEntryData<T> implements Savable{
 	private boolean bTreeExpanded = false; 
 	private ArrayList<DialogListEntryData<T>> aChildList = new ArrayList<DialogListEntryData<T>>();
 	
+	public static class SliderValueData{
+		private Double dSliderMin;
+		private Double dSliderMax;
+		private boolean bSliderCallOnChange=false;
+		private boolean bSliderIntegerMode=false;
+		private CallableX callerSlider;
+		private Double dSliderCurrentValue;
+
+		public Double getMinValue() {
+			return dSliderMin;
+		}
+
+		public Double getMaxValue() {
+			return dSliderMax;
+		}
+		
+		public enum ESliderKey{
+			CurrentValue,
+			;
+			public String s(){return this.toString();}
+		}
+		
+		public boolean isCurrentValueEqualTo(double dNewValue) {
+			return Double.compare(this.dSliderCurrentValue, dNewValue)==0;
+		}
+		
+		public void setCurrentValue(double dNewValue) {
+			if(!isCurrentValueEqualTo(dNewValue)){
+				this.dSliderCurrentValue=dNewValue;
+				
+				if(bSliderCallOnChange){
+					doCallOnChange();
+				}
+			}
+		}
+		
+		public Double getCurrentValue() {
+			return dSliderCurrentValue;
+		}
+
+//		public void sliderCheckAndCallOnChange() {
+//			if(bSliderCallOnChange){
+//				sliderCall();
+//			}
+//		}
+		private void doCallOnChange() {
+			if(callerSlider!=null){
+				callerSlider.putCustomValue(ESliderKey.CurrentValue.s(), getCurrentValue());
+				CallQueueI.i().addCall(callerSlider);
+			}
+		}
+
+		public boolean isIntegerMode() {
+			return bSliderIntegerMode;
+		}
+
+//		public boolean isShowSlider() {
+//			return bShowSlider;
+//		}
+	}
+	private SliderValueData svd = null;
+	
 //	int iKey;
 	private String strText;
 //	T objRef;
@@ -88,6 +151,35 @@ public class DialogListEntryData<T> implements Savable{
 //		hmCustomButtonsActions.put(strLabelTextIdNew,action);
 //		return this;
 //	}
+	
+	/**
+	 * 
+	 * @param dMin
+	 * @param dMax
+	 * @param dCurrent
+	 * @param callerSlider will store {@link ESliderKey#CurrentValue} with {@link CallableX#putCustomValue(String, Object)}
+	 * @param bCallWhileChanging
+	 * @param bIntMode
+	 * @return
+	 */
+	public DialogListEntryData<T> setSlider(Double dMin, Double dMax, Double dCurrent, CallableX callerSlider, boolean bCallWhileChanging, boolean bIntMode){
+		this.svd = new SliderValueData();
+		
+		this.svd.dSliderMin=dMin;
+		this.svd.dSliderMax=dMax;
+		this.svd.dSliderCurrentValue=dCurrent;
+		this.svd.callerSlider=callerSlider;
+		this.svd.bSliderCallOnChange=bCallWhileChanging;
+		this.svd.bSliderIntegerMode=bIntMode;
+//		this.svd.bShowSlider=true;
+		
+		return this;
+	}
+	
+	public SliderValueData getSliderForValue(){
+		return svd;
+	}
+	
 	public DialogListEntryData<T> addCustomButtonAction(String strLabelTextId, T action){
 		hmCustomButtonsActions.put(strLabelTextId,action);
 		return this;
@@ -117,6 +209,8 @@ public class DialogListEntryData<T> implements Savable{
 //	private char chQuotesL='"';
 //	private char chQuotesR='"';
 	private boolean bAddVisibleQuotes=false;
+
+private RangedValueModel	modelSliderValue;
 	
 	public boolean isAddVisibleQuotes(){
 		return bAddVisibleQuotes;
@@ -375,8 +469,9 @@ public class DialogListEntryData<T> implements Savable{
 	public void sortChildren(Comparator<DialogListEntryData<T>> cmpDled) {
 		Collections.sort(aChildList, cmpDled);
 	}
-	
-//	public void setUId(String strUId) {
-//		this.strUId = strUId;
-//	}
+
+	public RangedValueModel getSliderValueModel() {
+		return modelSliderValue;
+	}
+
 }

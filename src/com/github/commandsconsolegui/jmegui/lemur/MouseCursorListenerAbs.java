@@ -39,8 +39,8 @@ import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
-import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell;
-import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.Cell.EUserData;
+import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
+import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserData;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
@@ -191,7 +191,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 			AudioUII.i().playOnUserAction(EAudio.HoverOverActivators);
 			
 			Panel pnlApplyEffect = source;
-			Cell<?> cell = (Cell<?>)source.getUserData(EUserData.cellClassRef.toString());
+			CellDialogEntry<?> cell = (CellDialogEntry<?>)source.getUserData(EUserData.cellClassRef.toString());
 			if(cell!=null){
 //				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("activator has no cell?", source, Cell.class.getName());
 //			}else{
@@ -210,7 +210,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 			if( !LemurFocusHelperStateI.i().isDialogFocusedFor(source) )return;
 			
 			Panel pnlApplyEffect = source;
-			Cell<?> cell = (Cell<?>)source.getUserData(EUserData.cellClassRef.toString());
+			CellDialogEntry<?> cell = (CellDialogEntry<?>)source.getUserData(EUserData.cellClassRef.toString());
 			if(cell!=null){
 				pnlApplyEffect = cell;
 //				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("activator has no cell?", source, Cell.class.getName());

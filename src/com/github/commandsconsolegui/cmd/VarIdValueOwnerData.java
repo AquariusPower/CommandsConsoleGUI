@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.cmd;
 
+import java.util.Arrays;
+
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 
@@ -87,5 +89,5 @@ public class VarIdValueOwnerData {
 	public IReflexFillCfg getRfcfgClassHoldingTheOwner() {
 		return rfcfgClassHoldingTheOwner;
 	}
-	
+
 }

@@ -28,16 +28,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.github.commandsconsolegui.jmegui.lemur.extras;
 
 import java.util.Map.Entry;
-import java.util.Vector;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegator;
-import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
-import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
+import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData.SliderValueData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
@@ -48,21 +45,19 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.font.LineWrapMode;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
-import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
+import com.simsilica.lemur.Axis;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Button.ButtonAction;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
+import com.simsilica.lemur.DefaultRangedValueModel;
 import com.simsilica.lemur.Insets3f;
 import com.simsilica.lemur.Panel;
+import com.simsilica.lemur.Slider;
 import com.simsilica.lemur.component.BorderLayout;
-import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.component.BorderLayout.Position;
 import com.simsilica.lemur.component.SpringGridLayout;
-import com.simsilica.lemur.core.GuiComponent;
 import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.list.CellRenderer;
 
@@ -100,7 +95,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		}
 	}
 	
-	public static class Cell<T> extends Container implements IWorkAroundBugFix, IReflexFillCfg {
+	public static class CellDialogEntry<T> extends Container implements IWorkAroundBugFix, IReflexFillCfg {
 		public static enum EUserData{
 			colorFgBkp,
 			cellClassRef,
@@ -111,6 +106,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		
 		private Button	btnText;
 		private Button	btnTree;
+		private Slider sliderForValue;
 		
 //		private Button	btnCfg;
 //		private Button btnSelect;
@@ -120,6 +116,8 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 //		private String	strColorFgBkpKey = "ColorFgBkp";
 		private Container	cntrCustomButtons;
 		private Container	cntrBase;
+
+		private SliderValueData	svd;
 		
 		public DialogListEntryData<T> getDialogListEntryData(){
 			return dled;
@@ -130,11 +128,28 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		 */
 		@Override
 		public void updateLogicalState(float tpf) {
+			/**
+			 * ATTENTION!!! 
+			 * beware what you put here, can mess things up, like changing Spatials when they shouldnt...
+			 */
+			
+//			if(sliderForValue!=null){
+//				double d = sliderForValue.getModel().getValue();
+//				if(!svd.isCurrentValueEqualTo(d))svd.setCurrentValue(d);
+//			}
+			
 			try{
 				super.updateLogicalState(tpf);
 			}catch(IllegalArgumentException ex){
 				//TODO remove this one day, this exception is happening randomly why?
 				GlobalCommandsDelegatorI.i().dumpExceptionEntry(ex, this, this.getName(), this.btnText);
+			}
+		}
+		
+		public void simpleUpdate(float tpf){
+			if(sliderForValue!=null){
+				double d = sliderForValue.getModel().getValue();
+				if(!svd.isCurrentValueEqualTo(d))svd.setCurrentValue(d);
 			}
 		}
 		
@@ -187,19 +202,19 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		}
 		
 		@SuppressWarnings("unchecked")
-		public Cell(CellRendererDialogEntry<T> parentCellRenderer, DialogListEntryData<T> dledToSet){
+		public CellDialogEntry(CellRendererDialogEntry<T> parentCellRenderer, DialogListEntryData<T> dledToSet){
 			super(new BorderLayout(), parentCellRenderer.strStyle);
 			
 			/**
 			 * all other can come here too, even ones related to each instance,
 			 * just put them outside the static ones block.
 			 */
-			if(Cell.btgNOTWORKINGBugFixGapForListBoxSelectorArea==null){
+			if(CellDialogEntry.btgNOTWORKINGBugFixGapForListBoxSelectorArea==null){
 				/**
 				 * Will be linked to the 1st instance of this class, 
 				 * no problem as it will be a global.
 				 */
-				Cell.btgNOTWORKINGBugFixGapForListBoxSelectorArea = 
+				CellDialogEntry.btgNOTWORKINGBugFixGapForListBoxSelectorArea = 
 					new BoolTogglerCmdField(this,false).setCallNothingOnChange();
 			}
 			
@@ -213,7 +228,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			
 			btnTree = createButton("Tree", "?", cntrBase, Position.West);
 			btnTree.addCommands(ButtonAction.Click, ctt);
-			btnTree.setUserData(Cell.class.getName(), this);
+			btnTree.setUserData(CellDialogEntry.class.getName(), this);
 			btnTree.setUserData(EUserData.colorFgBkp.toString(), btnTree.getColor());
 			
 			btnText = createButton("Text", this.dled.getVisibleText(), cntrBase, Position.Center);
@@ -223,9 +238,21 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			
 			applyEntryHeight();
 			
-			update(this.dled);
+			updateWithEntry(this.dled);
 		}
 		
+		private void createSlider(Container cntrParent, Object... aobjConstraints) {
+			svd = dled.getSliderForValue();
+			
+			sliderForValue = new Slider(
+				new DefaultRangedValueModel(svd.getMinValue(),svd.getMaxValue(),svd.getCurrentValue()),
+				Axis.X,
+				//TODO complete the style properly: new ElementId(DialogStyleElementId.SliderForValueChange.s()), 
+				assignedCellRenderer.strStyle);
+			
+			cntrParent.addChild(sliderForValue,aobjConstraints);
+		}
+
 		private void applyEntryHeight(){
 			MiscLemurHelpersStateI.i().setGrantedSize(this, 
 					-1f, 
@@ -236,7 +263,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			@Override
 			public void execute(Button source) {
 				@SuppressWarnings("rawtypes")
-				Cell cell = (Cell)source.getUserData(Cell.class.getName());
+				CellDialogEntry cell = (CellDialogEntry)source.getUserData(CellDialogEntry.class.getName());
 				
 				if(cell.dled.isParent()){
 					cell.dled.toggleExpanded();
@@ -248,7 +275,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		CommandTreeToggle ctt = new CommandTreeToggle();
 		
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public void update(DialogListEntryData<T> dled){
+		public void updateWithEntry(DialogListEntryData<T> dled){
 			DialogListEntryData<T> dledOld = this.dled;
 			this.dled=dled;
 			
@@ -257,6 +284,11 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			
 			// entry text
 			btnText.setText(dled.getVisibleText());
+			
+//			// optional slider
+//			if(sliderForValue!=null){
+//				svd.setCurrentValue(sliderForValue.getModel().getValue());
+//			}
 			
 			// custom buttons
 			boolean bButtonsChanged = false;
@@ -286,7 +318,16 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			if(bButtonsChanged){
 				Entry[] eList = this.dled.getCustomButtonsActionsListCopy();
 				cntrCustomButtons.clearChildren();
-				for(int i=eList.length-1;i>=0;i--){
+				
+				int iLastIndex = eList.length-1;
+				
+				if(dled.getSliderForValue()!=null){
+//				if(dled.isShowSlider()){
+					createSlider(cntrCustomButtons, iLastIndex);
+					iLastIndex--;
+				}
+				
+				for(int i=iLastIndex; i>=0; i--){
 					Entry<String, T> entry = eList[i];
 					createButton(entry.getKey(), "["+entry.getKey()+"]", cntrCustomButtons, i)
 						.addCommands(ButtonAction.Click, (Command<Button>)entry.getValue());
@@ -301,7 +342,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		 * @param p
 		 * @return
 		 */
-		private Button createButton(String strId, String strLabel, Container cntr, Object... aobjConstraints){
+		private Button createButton(String strId, String strLabel, Container cntrParent, Object... aobjConstraints){
 			if(strId==null)strId=strLabel;
 			Button btn = new Button(strLabel,assignedCellRenderer.strStyle);
 			MiscJmeI.i().retrieveBitmapTextFor(btn).setLineWrapMode(LineWrapMode.NoWrap);
@@ -309,7 +350,8 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			btn.setUserData(EUserData.cellClassRef.toString(),this);
 			btn.setUserData(dled.getClass().getName(), dled);
 			CursorEventControl.addListenersToSpatial(btn, DialogMouseCursorListenerI.i());
-			cntr.addChild(btn,aobjConstraints);
+			
+			cntrParent.addChild(btn,aobjConstraints);
 			
 			DialogMouseCursorListenerI.i().addDefaultCommands(btn);
 			
@@ -438,9 +480,9 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 	@Override
 	public Panel getView(DialogListEntryData<T> dled, boolean selected, Panel existing) {
     if( existing == null ) {
-      existing = new Cell<T>(this,dled);
+      existing = new CellDialogEntry<T>(this,dled);
 	  } else {
-      ((Cell<T>)existing).update(dled);
+      ((CellDialogEntry<T>)existing).updateWithEntry(dled);
 	  }
 	  return existing;
 	}

@@ -31,7 +31,10 @@ import com.github.commandsconsolegui.cmd.varfield.NumberVarFieldAbs;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
+import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData.SliderValueData.ESliderKey;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceDialogState;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.HashChangeHolder;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
@@ -72,6 +75,7 @@ public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceDialo
 		Object objUser = dledAtParent.getUserObj();
 		if(objUser instanceof VarCmdFieldAbs){
 			vcf = (VarCmdFieldAbs)objUser;
+			hchVar = new HashChangeHolder(vcf.getRawValue());
 		}else{
 			throw new PrerequisitesNotMetException("user object is not "+VarCmdFieldAbs.class, objUser, dledAtParent);
 		}
@@ -120,6 +124,112 @@ public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceDialo
 	private boolean	bListIsFilled;
 	private DialogListEntryData<T>	dledVals;
 	private DialogListEntryData<T>	dledInfo;
+	private HashChangeHolder	hchVar;
+	private DialogListEntryData<T>	dledValue;
+	
+	private void createInfoEntries(){
+		DialogListEntryData<T> dledNew = null;
+		
+		dledNew = new DialogListEntryData<T>(this);
+		dledNew.setText(vcf.getUniqueVarId(), vcf);
+		dledNew.setParent(dledInfo);
+		addEntry(dledNew).addCustomButtonAction("UniqueId",getCmdDummy());
+		
+		dledNew = new DialogListEntryData<T>(this);
+		dledNew.setText(vcf.getSimpleId(), vcf);
+		dledNew.setParent(dledInfo);
+		addEntry(dledNew).addCustomButtonAction("SimpleId",getCmdDummy());
+			
+		dledNew = new DialogListEntryData<T>(this);
+		dledNew.setText(vcf.getHelp(), vcf);
+		dledNew.setParent(dledInfo);
+		addEntry(dledNew).addCustomButtonAction("Help",getCmdDummy());
+	}
+	
+	private void createValueEntries(){
+		DialogListEntryData<T> dledNew = null;
+		
+		if(vcf instanceof NumberVarFieldAbs){
+			createValueNumberEntries();
+		}
+		
+		dledNew = new DialogListEntryData<T>(this);
+		dledNew.setText(vcf.getRawValueDefault(), vcf);
+		dledNew.setAddVisibleQuotes(vcf instanceof StringVarField);
+		dledNew.setParent(dledVals);
+		addEntry(dledNew).addCustomButtonAction("DefaultValueRaw->",(T)cavai);
+		
+		dledRawValue = new DialogListEntryData<T>(this);
+		dledRawValue.setText(vcf.getRawValue(), vcf);
+		dledRawValue.setAddVisibleQuotes(vcf instanceof StringVarField);
+		dledRawValue.setParent(dledVals);
+		addEntry(dledRawValue).addCustomButtonAction("ValueRaw->",(T)cavai);
+		
+		dledValue = new DialogListEntryData<T>(this);
+		dledValue.setText(vcf.getValueAsString(3), vcf);
+		dledValue.setAddVisibleQuotes(vcf instanceof StringVarField);
+		dledValue.setParent(dledVals);
+		addEntry(dledValue).addCustomButtonAction("Value->",(T)cavai);
+	}
+	
+	private void updateValueEntries(){
+		dledRawValue.updateTextTo(vcf.getRawValue());
+		dledValue.updateTextTo(vcf.getValueAsString(3));
+	}
+	
+	private void createValueNumberEntries(){
+		DialogListEntryData<T> dledNew = null;
+		
+		final NumberVarFieldAbs<Number,?> varn = (NumberVarFieldAbs<Number,?>)vcf;
+		
+		if(varn.getMin()!=null && varn.getMax()!=null){
+			dledNew = new DialogListEntryData<T>(this);
+			dledNew.setParent(dledVals);
+			addEntry(dledNew.setText(varn.getMin(), vcf)).addCustomButtonAction("MinValue->",(T)cavai);
+			
+			dledNew = new DialogListEntryData<T>(this);
+			dledNew.setParent(dledVals);
+			addEntry(dledNew.setText(varn.getMax(), vcf)).addCustomButtonAction("MaxValue->",(T)cavai);
+			
+			///////////// the slider
+			final DialogListEntryData<T> dledSlider = new DialogListEntryData<T>(this);
+			
+			CallableX caller = new CallableX(){
+				@Override
+				public Boolean call() {
+//					varn.setObjectRawValue(dledSlider.getSliderForValue().getCurrentValue());
+//					varn.setObjectRawValue(getCustomValue(ESliderKey.CurrentValue.s()));
+					varn.setNumber((Number)getCustomValue(ESliderKey.CurrentValue.s()));
+					return true;
+				}
+			};
+			
+			dledSlider.setParent(dledVals);
+			dledSlider.setText("Change value: ", vcf);
+			dledSlider.setSlider(
+				varn.getMin().doubleValue(), varn.getMax().doubleValue(), varn.getValue().doubleValue(),
+				caller, true, false);
+			addEntry(dledSlider);
+		}
+	}
+	
+	@Override
+	protected boolean updateAttempt(float tpf) {
+		// keep here to help on debug...
+		return super.updateAttempt(tpf);
+	}
+	
+	@Override
+	protected boolean simpleUpdateVisibleCells(float tpf) {
+		if(!super.simpleUpdateVisibleCells(tpf))return false;
+		
+		if(hchVar.isChangedAndUpdateHash(vcf.getRawValue())){
+			updateValueEntries();
+//			requestRefreshUpdateList();
+		}
+		
+		return true;
+	}
 	
 	@Override
 	protected void updateList() {
@@ -135,22 +245,7 @@ public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceDialo
 			}
 			addEntry(dledInfo);
 			
-			{
-				dledNew = new DialogListEntryData<T>(this);
-				dledNew.setText(vcf.getUniqueVarId(), vcf);
-				dledNew.setParent(dledInfo);
-				addEntry(dledNew).addCustomButtonAction("UniqueId",getCmdDummy());
-				
-				dledNew = new DialogListEntryData<T>(this);
-				dledNew.setText(vcf.getSimpleId(), vcf);
-				dledNew.setParent(dledInfo);
-				addEntry(dledNew).addCustomButtonAction("SimpleId",getCmdDummy());
-					
-				dledNew = new DialogListEntryData<T>(this);
-				dledNew.setText(vcf.getHelp(), vcf);
-				dledNew.setParent(dledInfo);
-				addEntry(dledNew).addCustomButtonAction("Help",getCmdDummy());
-			}
+			createInfoEntries();
 			
 			if(dledVals==null){
 				dledVals = new DialogListEntryData<T>(this);
@@ -159,41 +254,7 @@ public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceDialo
 			}
 			addEntry(dledVals);
 			
-			{
-				if(vcf instanceof NumberVarFieldAbs){
-					NumberVarFieldAbs v = (NumberVarFieldAbs)vcf;
-					
-					if(v.getMin()!=null){
-						dledNew = new DialogListEntryData<T>(this);
-						dledNew.setParent(dledVals);
-						addEntry(dledNew.setText(v.getMin(), vcf)).addCustomButtonAction("MinValue->",(T)cavai);
-					}
-					
-					if(v.getMax()!=null){
-						dledNew = new DialogListEntryData<T>(this);
-						dledNew.setParent(dledVals);
-						addEntry(dledNew.setText(v.getMax(), vcf)).addCustomButtonAction("MaxValue->",(T)cavai);
-					}
-				}
-				
-				dledNew = new DialogListEntryData<T>(this);
-				dledNew.setText(vcf.getRawValueDefault(), vcf);
-				dledNew.setAddVisibleQuotes(vcf instanceof StringVarField);
-				dledNew.setParent(dledVals);
-				addEntry(dledNew).addCustomButtonAction("DefaultValueRaw->",(T)cavai);
-				
-				dledRawValue = new DialogListEntryData<T>(this);
-				dledRawValue.setText(vcf.getRawValue(), vcf);
-				dledRawValue.setAddVisibleQuotes(vcf instanceof StringVarField);
-				dledRawValue.setParent(dledVals);
-				addEntry(dledRawValue).addCustomButtonAction("ValueRaw->",(T)cavai);
-				
-				dledNew = new DialogListEntryData<T>(this);
-				dledNew.setText(vcf.getValueAsString(3), vcf);
-				dledNew.setAddVisibleQuotes(vcf instanceof StringVarField);
-				dledNew.setParent(dledVals);
-				addEntry(dledNew).addCustomButtonAction("Value->",(T)cavai);
-			}
+			createValueEntries();
 			
 //			addEntry(
 //					new DialogListEntryData<T>(this).setText(vcf.getValueAsString(3), vcf)

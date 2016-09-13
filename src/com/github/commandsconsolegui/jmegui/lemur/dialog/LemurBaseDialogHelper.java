@@ -30,8 +30,6 @@ package com.github.commandsconsolegui.jmegui.lemur.dialog;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.BaseDialogHelper;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
@@ -39,6 +37,7 @@ import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.ListBox;
+import com.simsilica.lemur.Slider;
 import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.style.Attributes;
@@ -51,8 +50,13 @@ public class LemurBaseDialogHelper extends BaseDialogHelper{
 	private ColorRGBA	colorConsoleStyleBackground;
 	StringVarField svfBackgroundHexaColorRGBA = new StringVarField(this,"","XXXXXXXX ex.: 'FF12BC4A' Red Green Blue Alpha");
 
-	public static enum DiagStyleElementIds{
+	public static enum DialogStyleElementId{
+		
 		buttonResizeBorder,
+		
+		/** TODO not working yet */
+		SliderForValueChange,
+		
 		;
 		public String s(){return this.toString();}
 		public String str(){return this.toString();}
@@ -120,9 +124,14 @@ public class LemurBaseDialogHelper extends BaseDialogHelper{
 		clBg = new ColorRGBA(0,0.25f,0,0.75f);
 		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
-		attrs = styles.getSelector(DiagStyleElementIds.buttonResizeBorder.s(), STYLE_CONSOLE);
+		attrs = styles.getSelector(DialogStyleElementId.buttonResizeBorder.s(), STYLE_CONSOLE);
 		clBg = ColorRGBA.Cyan.clone();
 		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
+		
+		//TODO the slider style is not working yet... copy from another style temporarily?
+		attrs = styles.getSelector(DialogStyleElementId.SliderForValueChange.s(), STYLE_CONSOLE);
+		clBg = colorConsoleStyleBackground;
+		attrs.set(Slider.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
 		attrs = styles.getSelector(TextField.ELEMENT_ID, STYLE_CONSOLE);
 		attrs.set("color", new ColorRGBA(0.75f,1,1,1));
