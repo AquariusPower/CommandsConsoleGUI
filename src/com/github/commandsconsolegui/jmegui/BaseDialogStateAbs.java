@@ -141,6 +141,10 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return sptContainerMain;
 	}
 	
+	public boolean isLayoutValid(){
+		return ((ISpatialValidator)sptContainerMain).isLayoutValid();
+	}
+	
 	protected R setContainerMain(ISpatialValidator spt){
 		this.sptContainerMain=(Spatial)spt;
 		
@@ -445,6 +449,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	@Override
 	protected boolean enableAttempt() {
 		if(!super.enableAttempt())return false;
+		if(!isLayoutValid())return false;
 		
 		getNodeGUI().attachChild(sptContainerMain);
 		

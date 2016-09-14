@@ -508,11 +508,13 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	
 	@Override
 	protected boolean enableAttempt() {
+		if(!super.enableAttempt())return false;
+		
 		if(!bInitializeOnlyTheUI){
 			initializeOnlyTheUIallSteps();
 		}
 		
-		return super.enableAttempt();
+		return true;
 	}
 	
 //	@Override

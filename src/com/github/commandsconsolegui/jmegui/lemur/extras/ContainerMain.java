@@ -28,7 +28,11 @@
 package com.github.commandsconsolegui.jmegui.lemur.extras;
 
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 import com.simsilica.lemur.Container;
+import com.simsilica.lemur.Panel;
+import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.core.GuiLayout;
 import com.simsilica.lemur.style.ElementId;
 
@@ -38,6 +42,7 @@ import com.simsilica.lemur.style.ElementId;
  *
  */
 public class ContainerMain extends Container implements ISpatialValidator{
+	private boolean	bLayoutValid;
 //	ISpatialValidator diag;
 //	
 //	public ContainerMain setDiagOwner(ISpatialValidator diag){
@@ -45,12 +50,58 @@ public class ContainerMain extends Container implements ISpatialValidator{
 //		return this;
 //	}
 	
+	private Panel pnlDummy = new Panel();
+
+	private Vector3f	v3fLastValidSize;
+	
+	@Override
+	public boolean isLayoutValid() {
+		return bLayoutValid;
+	}
+	
 	@Override
 	public void updateLogicalState(float tpf) {
-		try{
+		if(bUseCrashPrevention){
+//			if(!isLayoutValid() && v3fLastValidSize!=null){
+//				setPreferredSize(v3fLastValidSize);
+//			}
+			
+			Vector3f v3fMinSize = new Vector3f(20,20,0);
+//			Vector3f v3fMinSize = pnlImpossibleLayout.getPreferredSize(); //TODO should consider the border size too...
+//			v3fMinSize.y*=2f; //TODO do not use this trick...
+//			Vector3f v3fMinSize = getPreferredSize();
+//			float fMin=20;
+			Vector3f v3fSize = getPreferredSize().clone();
+//			if(v3fSize.x<fMin)v3fSize.x=fMin;
+//			if(v3fSize.y<fMin)v3fSize.y=fMin;
+			if(v3fSize.x<v3fMinSize.x)v3fSize.x=v3fMinSize.x;
+			if(v3fSize.y<v3fMinSize.y)v3fSize.y=v3fMinSize.y;
+			if(!v3fSize.equals(getPreferredSize())){
+				setPreferredSize(v3fSize);
+			}
+			
+//			v3fLastValidSize = null;
+			try{
+//				if(!isLayoutValid()){
+					addChild(cntrCenterMain, BorderLayout.Position.Center); //actually replaces
+//				}
+				super.updateLogicalState(tpf);
+				v3fLastValidSize = getPreferredSize().clone();
+				bLayoutValid=true;
+			}catch(Exception e){
+				bLayoutValid=false;
+				
+				GlobalCommandsDelegatorI.i().dumpExceptionEntry(e, this, tpf);
+				
+//				if(pnlImpossibleLayout.getSize().length() >= pnlImpossibleLayout.getPreferredSize().length()){
+//					addChild(pnlImpossibleLayout, BorderLayout.Position.Center); //actually replaces
+//				}else{
+					addChild(pnlDummy, BorderLayout.Position.Center); //actually replaces
+//				}
+				try{super.updateLogicalState(tpf);}catch(Exception e2){}
+			}
+		}else{
 			super.updateLogicalState(tpf);
-		}catch(Exception e){
-			GlobalCommandsDelegatorI.i().dumpExceptionEntry(e, this, tpf);
 		}
 		
 //		if(isAllowLogicalStateUpdate()){
@@ -114,6 +165,15 @@ public class ContainerMain extends Container implements ISpatialValidator{
 	public ContainerMain(String style) {
 		super(style);
 		// TODO Auto-generated constructor stub
+	}
+
+	private Panel	pnlImpossibleLayout;
+	private Container cntrCenterMain;
+	private boolean	bUseCrashPrevention;
+	public void setImpossibleLayoutIndicatorAndCenterMain(Panel pnlImpossibleLayout, Container cntrCenterMain) {
+		bUseCrashPrevention=true;
+		this.pnlImpossibleLayout=pnlImpossibleLayout;
+		this.cntrCenterMain=cntrCenterMain;
 	}
 	
 //	@Override

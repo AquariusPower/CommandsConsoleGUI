@@ -88,7 +88,7 @@ import com.simsilica.lemur.style.ElementId;
 * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 *
 */
-public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<T,R>> extends BaseDialogStateAbs<T,R> implements ISpatialValidator{
+public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<T,R>> extends BaseDialogStateAbs<T,R> {
 	private Label	lblTitle;
 	private Label	lblTextInfo;
 //	private ListBox<DialogListEntryData<T>>	lstbxEntriesToSelect;
@@ -119,8 +119,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //	public abstract T getCmdDummy();
 	
 	@Override
-	public Container getContainerMain(){
-		return (Container)super.getContainerMain();
+	public ContainerMain getContainerMain(){
+		return (ContainerMain)super.getContainerMain();
 	}
 	
 	private FloatDoubleVarField fdvEntryHeightMultiplier = new FloatDoubleVarField(this,1f,"");
@@ -275,9 +275,17 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		
 		// main center container
 		cntrCenterMain = new Container(new BorderLayout(), getDiagStyle());
+		MiscJmeI.i().setUserDataPSH(cntrCenterMain, this);
 		quaBkpMain = cntrCenterMain.getLocalRotation().clone();
 		cntrCenterMain.setName(getId()+"_CenterMain");
 		getContainerMain().addChild(cntrCenterMain, BorderLayout.Position.Center);
+		
+		// impossible layout indicator
+		Label lbl = new Label("[X] impossible layout",getDiagStyle());
+//		lbl.setFontSize(0.5f);
+		getContainerMain().setImpossibleLayoutIndicatorAndCenterMain(
+			lbl,
+			cntrCenterMain);
 		
 		///////////////////////// NORTH (title + info/help)
 		setContainerNorth(new Container(new BorderLayout(), getDiagStyle()));
@@ -1270,8 +1278,4 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		return adiag;
 	}
 
-	public boolean isAllowLogicalStateUpdate(){
-//		return bAllowUpdateLogicalState;
-		return true;
-	}
 }

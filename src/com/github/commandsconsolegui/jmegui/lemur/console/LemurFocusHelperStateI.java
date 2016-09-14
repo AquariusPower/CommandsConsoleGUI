@@ -220,9 +220,9 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 			focusMouseCursorListener);
 	}
 	
-	public LemurDialogGUIStateAbs retrieveDialogFromSpatial(Spatial sptAny){
+	public BaseDialogStateAbs retrieveDialogFromSpatial(Spatial sptAny){
 		Spatial sptParentest = MiscJmeI.i().getParentestFrom(sptAny);
-		LemurDialogGUIStateAbs diag = MiscJmeI.i().getUserDataPSH(sptParentest, LemurDialogGUIStateAbs.class);
+		BaseDialogStateAbs diag = MiscJmeI.i().getUserDataPSH(sptParentest, BaseDialogStateAbs.class);
 //		LemurDialogGUIStateAbs diag = (LemurDialogGUIStateAbs)MiscJmeI.i().getParentestFrom(sptAny)
 //				.getUserData(LemurDialogGUIStateAbs.class.getName());
 		
@@ -232,7 +232,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	}
 	
 	public boolean lowerDialogFocusPriority(Spatial sptAny){
-		LemurDialogGUIStateAbs diag = retrieveDialogFromSpatial(sptAny);
+		BaseDialogStateAbs diag = retrieveDialogFromSpatial(sptAny);
 		Spatial sptFocusable = diag.getInputField(ccSelf);
 		
 		if(asptFocusRequestList.contains(sptFocusable)){
@@ -248,7 +248,8 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	}
 	
 	public void requestDialogFocus(Spatial sptChild) {
-		LemurDialogGUIStateAbs diag = retrieveDialogFromSpatial(sptChild);
+		BaseDialogStateAbs diag = retrieveDialogFromSpatial(sptChild);
+		if(!diag.isLayoutValid())return; //TODO return false? or queue this request?
 		
 		BaseDialogStateAbs diagFocus = diag;
 		for(Object objDiagModal:diag.getModalChildListCopy()){
@@ -283,6 +284,9 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 				return;
 			}
 		}
+		
+		BaseDialogStateAbs diag = retrieveDialogFromSpatial(spt);
+		if(!diag.isLayoutValid())return; //TODO return false? or queue this request?
 		
 		assertIsAtRenderingNode(spt);
 		asptFocusRequestList.remove(spt); //to update the priority

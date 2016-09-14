@@ -33,4 +33,5 @@ package com.github.commandsconsolegui.jmegui.lemur.extras;
  *
  */
 public interface ISpatialValidator{
+	public boolean isLayoutValid();
 }

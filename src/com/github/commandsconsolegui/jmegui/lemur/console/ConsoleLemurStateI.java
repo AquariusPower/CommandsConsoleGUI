@@ -78,7 +78,7 @@ import com.simsilica.lemur.style.Styles;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateAbs<T,ConsoleLemurStateI<T>> implements ISpatialValidator{
+public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateAbs<T,ConsoleLemurStateI<T>> {
 	private static ConsoleLemurStateI instance=null;//new ConsoleLemurStateI();
 	public static ConsoleLemurStateI i(){
 		if(instance==null)instance=new ConsoleLemurStateI();
