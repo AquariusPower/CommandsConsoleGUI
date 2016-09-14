@@ -32,20 +32,18 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
-import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleGUII;
 import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
-import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI.BindKey;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelper.DialogStyleElementId;
-import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
+import com.github.commandsconsolegui.jmegui.lemur.extras.ContainerMain;
+import com.github.commandsconsolegui.jmegui.lemur.extras.ISpatialValidator;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.jme3.font.BitmapCharacter;
@@ -66,13 +64,11 @@ import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.RangedValueModel;
 import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.component.BorderLayout;
-import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.component.TextEntryComponent;
 import com.simsilica.lemur.core.VersionedList;
 import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.event.KeyAction;
 import com.simsilica.lemur.event.KeyActionListener;
-import com.simsilica.lemur.style.Attributes;
 import com.simsilica.lemur.style.BaseStyles;
 import com.simsilica.lemur.style.Styles;
 
@@ -82,7 +78,7 @@ import com.simsilica.lemur.style.Styles;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateAbs<T,ConsoleLemurStateI<T>>{
+public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateAbs<T,ConsoleLemurStateI<T>> implements ISpatialValidator{
 	private static ConsoleLemurStateI instance=null;//new ConsoleLemurStateI();
 	public static ConsoleLemurStateI i(){
 		if(instance==null)instance=new ConsoleLemurStateI();
@@ -316,7 +312,8 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		CursorEventControl.addListenersToSpatial(getHintBox(), ConsoleMouseCursorListenerI.i());
 		
 		// main container
-		setContainerMain(new Container(new BorderLayout(), getDiagStyle()));
+//		setContainerMain(new ContainerMain(new BorderLayout(), getDiagStyle()).setDiagOwner(this));
+		setContainerMain(new ContainerMain(new BorderLayout(), getDiagStyle()));
 		MiscLemurHelpersStateI.i().setGrantedSize(getContainerConsole(), getConsoleSizeCopy());
 		
 		/**
@@ -1178,5 +1175,10 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	public Container getContainerMain(){
 		return (Container)super.getContainerMain();
 	}
+
+//	@Override
+//	public boolean isAllowLogicalStateUpdate() {
+//		return true;
+//	}
 	
 }

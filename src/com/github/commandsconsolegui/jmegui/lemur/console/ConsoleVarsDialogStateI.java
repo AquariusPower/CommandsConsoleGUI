@@ -101,7 +101,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		return storeCfgAndReturnSelf(cfg);
 	}
 	
-	protected class ChangeValue implements Command<Button>{
+	protected class CmdBtnChangeValue implements Command<Button>{
 		@Override
 		public void execute(Button source) {
 			ConsoleVarsDialogStateI.this.actionCustomAtEntry(
@@ -110,7 +110,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 //				ConsoleVarsDialogStateI.this.getDledFrom(source));
 		}
 	}
-	private ChangeValue cv = new ChangeValue();
+	private CmdBtnChangeValue cbcv = new CmdBtnChangeValue();
 	
 	private void changeValue(DialogListEntryData<T> dled){
 		AudioUII.i().playOnUserAction(EAudio.SelectEntry);
@@ -222,7 +222,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			// update custom buttons as values may have changed
 			//TODO compare if values changed?
 			dledVarEntry.clearCustomButtonActions();
-			dledVarEntry.addCustomButtonAction(strVal, (T)cv);
+			dledVarEntry.addCustomButtonAction(strVal, (T)cbcv);
 		}
 		
 		

@@ -40,6 +40,7 @@ import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
+import com.github.commandsconsolegui.jmegui.lemur.extras.ContainerMain;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
@@ -830,14 +831,47 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 	 * @return
 	 */
 	public Vector3f setGrantedSize(Panel pnl, float fX, float fY, boolean bForce){
-		return setGrantedSize(pnl, new Vector3f(fX,fY,-1), bForce, false); //z=-1 will be fixed
+		return setGrantedSize(pnl, new Vector3f(fX,fY,-1), bForce); //z=-1 will be fixed
 	}
 	
 	public Vector3f setGrantedSize(Panel pnl, Vector3f v3fSize){
-		return setGrantedSize(pnl, v3fSize, false, false);
+		return setGrantedSize(pnl, v3fSize, false);
 	}
 	
 	/**
+	 * this only works without crashing because of {@link ContainerMain#updateLogicalState()}
+	 * 
+	 * @param pnl
+	 * @param v3fSize x,y,z use -1 to let it be automatic = preferred
+	 * @param bForceSpecificSize
+	 * @return
+	 */
+	public Vector3f setGrantedSize(
+		final Panel pnl, 
+		final Vector3f v3fSize, 
+		final boolean bForceSpecificSize 
+	){
+		if(v3fSize.x<v3fMinSize.x)v3fSize.x=v3fMinSize.x;
+		if(v3fSize.y<v3fMinSize.y)v3fSize.y=v3fMinSize.y;
+		if(v3fSize.z<v3fMinSize.z)v3fSize.z=v3fMinSize.z; //actually gets overriden
+		
+		Vector3f v3fPreferredBkp = pnl.getPreferredSize().clone();
+		
+		if(!bForceSpecificSize){
+			if(v3fSize.x<v3fPreferredBkp.x)v3fSize.x=v3fPreferredBkp.x;
+			if(v3fSize.y<v3fPreferredBkp.y)v3fSize.y=v3fPreferredBkp.y;
+		}
+		
+		v3fSize.z=v3fPreferredBkp.z; // do not mess with Z !!! //if(v3fSize.z<v3fP.z)v3fSize.z=v3fP.z;
+		
+		pnl.setPreferredSize(v3fSize);
+		
+		return v3fSize;
+	}
+	
+	/**
+	 * IMPORTANT!! This is not strongly crash safe, prefer using {@link #setGrantedSize(Panel, Vector3f, boolean)}
+	 * 
 	 * Sets custom sizes with crash prevention.
 	 * And make it sure the thickness is correct (not 0.0f).
 	 * 
@@ -847,11 +881,11 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 	 * @param bMustDoItNow only works if it is going to be rendered
 	 * @return null if size setup fails, like being too tiny. Or a valid size.
 	 */
-	public Vector3f setGrantedSize(
+	public Vector3f setGrantedSizeValidateAndDelayed(
 		final Panel pnl, 
 		final Vector3f v3fSizeF, 
 		final boolean bForceSpecificSize, 
-		boolean bMustDoItNow
+		final boolean bMustDoItNow
 	){
 		final String strSizeKey="SizeKey";
 		
@@ -862,27 +896,16 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 				
 				Vector3f v3fSize = v3fSizeF;
 				
-				if(v3fSize.x<v3fMinSize.x)v3fSize.x=v3fMinSize.x;
-				if(v3fSize.y<v3fMinSize.y)v3fSize.y=v3fMinSize.y;
-				if(v3fSize.z<v3fMinSize.z)v3fSize.z=v3fMinSize.z;
-				
 				Vector3f v3fPreferredBkp = pnl.getPreferredSize().clone();
-				
-				if(!bForceSpecificSize){
-					if(v3fSize.x<v3fPreferredBkp.x)v3fSize.x=v3fPreferredBkp.x;
-					if(v3fSize.y<v3fPreferredBkp.y)v3fSize.y=v3fPreferredBkp.y;
-				}
-				
-				v3fSize.z=v3fPreferredBkp.z; // do not mess with Z !!! //if(v3fSize.z<v3fP.z)v3fSize.z=v3fP.z;
-				
-				pnl.setPreferredSize(v3fSize);
+				setGrantedSize(pnl, v3fSizeF, bForceSpecificSize);
 				
 				// the check
-				try{
-					pnl.getControl(GuiControl.class).update(1f/30f); //TODO use real?
-					pnl.setPreferredSize(v3fSize);
-//					pnl.updateLogicalState(1f/30f);
-				}catch(IllegalArgumentException ex){
+				if(!validatePanelUpdate(pnl)){
+//				try{
+//					pnl.getControl(GuiControl.class).update(1f/30f); //TODO use real?
+////					pnl.setPreferredSize(v3fSize);
+////					pnl.updateLogicalState(1f/30f);
+//				}catch(IllegalArgumentException ex){
 					GlobalCommandsDelegatorI.i().dumpWarnEntry("resize failed, restoring", pnl, v3fSize, bForceSpecificSize);
 					pnl.setPreferredSize(v3fPreferredBkp);
 					v3fSize = null;
@@ -909,6 +932,18 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 		}
 		
 		return (Vector3f)caller.getCustomValue(strSizeKey);
+	}
+	
+	public boolean validatePanelUpdate(Panel pnl){
+		try{
+			//TODO prefer updateLogicalState()?
+			pnl.getControl(GuiControl.class).update(1f/30f); //TODO use real?
+//		}catch(IllegalArgumentException ex){
+		}catch(Exception ex){
+			return false;
+		}
+		
+		return true;
 	}
 
 	public CellDialogEntry<?> getCellFor(Spatial source) {

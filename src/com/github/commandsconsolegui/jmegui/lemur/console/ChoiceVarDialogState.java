@@ -33,6 +33,7 @@ import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData.SliderValueData.ESliderKey;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceDialogState;
+import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -126,6 +127,7 @@ public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceDialo
 	private DialogListEntryData<T>	dledInfo;
 	private HashChangeHolder	hchVar;
 	private DialogListEntryData<T>	dledValue;
+	protected boolean	bUpdateFromSliderChange;
 	
 	private void createInfoEntries(){
 		DialogListEntryData<T> dledNew = null;
@@ -172,6 +174,9 @@ public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceDialo
 		addEntry(dledValue).addCustomButtonAction("Value->",(T)cavai);
 	}
 	
+	/**
+	 * see {@link CellRendererDialogEntry#updateVisibleText()}
+	 */
 	private void updateValueEntries(){
 		dledRawValue.updateTextTo(vcf.getRawValue());
 		dledValue.updateTextTo(vcf.getValueAsString(3));
@@ -200,6 +205,7 @@ public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceDialo
 //					varn.setObjectRawValue(dledSlider.getSliderForValue().getCurrentValue());
 //					varn.setObjectRawValue(getCustomValue(ESliderKey.CurrentValue.s()));
 					varn.setNumber((Number)getCustomValue(ESliderKey.CurrentValue.s()));
+					bUpdateFromSliderChange=true;
 					return true;
 				}
 			};
@@ -225,6 +231,11 @@ public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceDialo
 		
 		if(hchVar.isChangedAndUpdateHash(vcf.getRawValue())){
 			updateValueEntries();
+			
+			if(bUpdateFromSliderChange){
+				setInputTextAsUserTypedValue(""+vcf.getRawValue());
+				bUpdateFromSliderChange=false;
+			}
 //			requestRefreshUpdateList();
 		}
 		

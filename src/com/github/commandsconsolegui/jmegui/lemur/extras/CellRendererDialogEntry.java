@@ -27,6 +27,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.github.commandsconsolegui.jmegui.lemur.extras;
 
+import java.util.ArrayList;
 import java.util.Map.Entry;
 
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
@@ -130,7 +131,8 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		public void updateLogicalState(float tpf) {
 			/**
 			 * ATTENTION!!! 
-			 * beware what you put here, can mess things up, like changing Spatials when they shouldnt...
+			 * beware what you put here, can mess things up,
+			 * like changing Spatials when they shouldnt?
 			 */
 			
 //			if(sliderForValue!=null){
@@ -146,11 +148,27 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			}
 		}
 		
-		public void simpleUpdate(float tpf){
+		/**
+		 * the lemur rendered cell will detect the change and update related visible text
+		 */
+		private void updateVisibleText(){
+			if(dled.getTextValue()!=null){
+				if(!dled.getTextValue().equals(btnText.getText())){
+					updateWithEntry(dled);
+				}
+			}
+		}
+		
+		public void simpleUpdateThisCell(float tpf){
 			if(sliderForValue!=null){
 				double d = sliderForValue.getModel().getValue();
-				if(!svd.isCurrentValueEqualTo(d))svd.setCurrentValue(d);
+				
+				if(!svd.isCurrentValueEqualTo(d)){
+					svd.setCurrentValue(d);
+				}
 			}
+			
+			updateVisibleText();
 		}
 		
 		private void updateTreeButton(){
@@ -274,7 +292,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		}
 		CommandTreeToggle ctt = new CommandTreeToggle();
 		
-		@SuppressWarnings({ "unchecked", "rawtypes" })
+//		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public void updateWithEntry(DialogListEntryData<T> dled){
 			DialogListEntryData<T> dledOld = this.dled;
 			this.dled=dled;
@@ -293,15 +311,19 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			// custom buttons
 			boolean bButtonsChanged = false;
 			
-			if(this.dled.equals(dledOld))bButtonsChanged=true;//1st update is self
+			// check if the entry data changed
+			if(this.dled.equals(dledOld)){
+				bButtonsChanged=true;
+			}
 			
+			// check if buttons key and value changed
 			if(!bButtonsChanged){
-				Entry[] aenActionsListOld = dledOld.getCustomButtonsActionsListCopy();
-				Entry[] aenActionsList = this.dled.getCustomButtonsActionsListCopy();
-				if(aenActionsListOld.length==aenActionsList.length){
-					for(int i=0;i<aenActionsList.length;i++){
-						Entry enOld = aenActionsListOld[i];
-						Entry en = aenActionsList[i];
+				ArrayList<Entry<String, T>> aenActionsListOld = dledOld.getCustomButtonsActionsListCopy();
+				ArrayList<Entry<String, T>> aenActionsList = this.dled.getCustomButtonsActionsListCopy();
+				if(aenActionsListOld.size()==aenActionsList.size()){
+					for(int i=0;i<aenActionsList.size();i++){
+						Entry<String,T> enOld = aenActionsListOld.get(i);
+						Entry<String,T> en = aenActionsList.get(i);
 						if(
 							!en.getKey().equals(enOld.getKey()) ||
 							!en.getValue().equals(enOld.getValue())
@@ -315,22 +337,23 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 				}
 			}
 			
+			// apply changed (recreate buttons list)
 			if(bButtonsChanged){
-				Entry[] eList = this.dled.getCustomButtonsActionsListCopy();
 				cntrCustomButtons.clearChildren();
 				
-				int iLastIndex = eList.length-1;
+				ArrayList<Entry<String,T>> aenList = this.dled.getCustomButtonsActionsListCopy();
+				int iLastIndex = aenList.size()-1;
 				
+				int iExtra=0;
 				if(dled.getSliderForValue()!=null){
-//				if(dled.isShowSlider()){
-					createSlider(cntrCustomButtons, iLastIndex);
-					iLastIndex--;
+					iExtra++;
+					createSlider(cntrCustomButtons, iLastIndex+iExtra);
 				}
 				
 				for(int i=iLastIndex; i>=0; i--){
-					Entry<String, T> entry = eList[i];
-					createButton(entry.getKey(), "["+entry.getKey()+"]", cntrCustomButtons, i)
-						.addCommands(ButtonAction.Click, (Command<Button>)entry.getValue());
+					Entry<String, T> entry = aenList.get(i);
+					Button btn = createButton(entry.getKey(), "["+entry.getKey()+"]", cntrCustomButtons, i);
+					btn.addCommands(ButtonAction.Click, (Command<Button>)entry.getValue());
 				}
 			}
 		}

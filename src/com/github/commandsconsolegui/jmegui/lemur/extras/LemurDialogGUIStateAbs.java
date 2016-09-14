@@ -88,7 +88,7 @@ import com.simsilica.lemur.style.ElementId;
 * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 *
 */
-public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<T,R>> extends BaseDialogStateAbs<T,R> {
+public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<T,R>> extends BaseDialogStateAbs<T,R> implements ISpatialValidator{
 	private Label	lblTitle;
 	private Label	lblTextInfo;
 //	private ListBox<DialogListEntryData<T>>	lstbxEntriesToSelect;
@@ -244,7 +244,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 			0);
 		
 		//main top container
-		setContainerMain(new Container(new BorderLayout(), getDiagStyle()));
+//		setContainerMain(new ContainerMain(new BorderLayout(), getDiagStyle()).setDiagOwner(this));
+		setContainerMain(new ContainerMain(new BorderLayout(), getDiagStyle()));
 		getContainerMain().setName(getId()+"_Dialog");
 		
 		Vector3f v3fDiagWindowSize = new Vector3f(v3fApplicationWindowSize);
@@ -402,7 +403,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		if(bResizeEast)v3fSizeAdd.x += v3fDisplacement.x;
 		
 		Vector3f v3fSizeNew = getContainerMain().getPreferredSize().add(v3fSizeAdd);
-		if(MiscLemurHelpersStateI.i().setGrantedSize(getContainerMain(), v3fSizeNew, true, true)!=null){
+		if(MiscLemurHelpersStateI.i().setGrantedSize(getContainerMain(), v3fSizeNew, true)!=null){
 			Vector3f v3fPosNew = getContainerMain().getLocalTranslation().add(v3fPosAdd);
 			getContainerMain().setLocalTranslation(v3fPosNew);
 		}
@@ -449,6 +450,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 				return true;
 			}
 		});
+//	private boolean	bAllowUpdateLogicalState;
 	
 	public void setBordersSize(int iPixels){
 		for(Button btn:abtnResizeBorderList){
@@ -690,7 +692,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	
 	protected boolean simpleUpdateVisibleCells(float tpf){
 		for(CellDialogEntry<T> cell:getVisibleCellEntries()){
-			cell.simpleUpdate(tpf);
+			cell.simpleUpdateThisCell(tpf);
 		}
 		return true;
 	}
@@ -732,6 +734,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		}
 		
 		MiscLemurHelpersStateI.i().updateBlinkListBoxSelector(getMainList());//,true);
+		
+//		bAllowUpdateLogicalState=MiscLemurHelpersStateI.i().validatePanelUpdate(getContainerMain());
 		
 		return true;
 	}
@@ -1264,5 +1268,10 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		}
 		
 		return adiag;
+	}
+
+	public boolean isAllowLogicalStateUpdate(){
+//		return bAllowUpdateLogicalState;
+		return true;
 	}
 }

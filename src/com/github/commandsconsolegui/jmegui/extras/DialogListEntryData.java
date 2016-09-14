@@ -29,9 +29,11 @@ package com.github.commandsconsolegui.jmegui.extras;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 import com.github.commandsconsolegui.jmegui.AudioUII;
@@ -193,9 +195,11 @@ public class DialogListEntryData<T> implements Savable{
 //	public Entry<String,T>[] getLabelActionListCopy(){
 //		return (Entry<String,T>[])hmLabelAction.entrySet().toArray();
 //	}
-	@SuppressWarnings("rawtypes")
-	public Entry[] getCustomButtonsActionsListCopy(){
-		return hmCustomButtonsActions.entrySet().toArray(new Entry[0]);
+//	@SuppressWarnings("rawtypes")
+	@SuppressWarnings("unchecked")
+	public <E extends Entry<String,T>> ArrayList<E> getCustomButtonsActionsListCopy(){
+		E[] aen = (E[])hmCustomButtonsActions.entrySet().toArray(new Entry[0]);
+		return new ArrayList<E>(Arrays.asList(aen));
 	}
 	
 //	public int getKey() {

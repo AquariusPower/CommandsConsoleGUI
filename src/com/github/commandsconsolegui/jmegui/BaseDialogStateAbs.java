@@ -38,13 +38,12 @@ import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalDialogHelperI;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
-import com.github.commandsconsolegui.jmegui.ConditionalStateAbs.Retry;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
-import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
+import com.github.commandsconsolegui.jmegui.lemur.extras.ISpatialValidator;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
@@ -142,8 +141,8 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return sptContainerMain;
 	}
 	
-	protected R setContainerMain(Spatial spt){
-		this.sptContainerMain=spt;
+	protected R setContainerMain(ISpatialValidator spt){
+		this.sptContainerMain=(Spatial)spt;
 		
 //		for(Class<?> cl:MiscI.i().getSuperClassesOf(this)){
 //			MiscJmeI.i().retrieveUserData(Spatial.class, this.sptContainerMain, cl.getName(), this, null);
@@ -352,6 +351,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	
 //	private Retry rUpdateList = new Retry();
 	
+//	private TimedDelayVarField tdUpdateRefreshList = new TimedDelayVarField(this, /*0.3f*/0.0f, "PROBLEM: this can cause crash as the list will remain unchanged while the dialog is resized, and the specific list resize related to the dialog new size will not be checked for failure before being accepted...");
 	private TimedDelayVarField tdUpdateRefreshList = new TimedDelayVarField(this, 0.3f, "");
 	
 	/**
