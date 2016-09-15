@@ -35,6 +35,7 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
@@ -253,25 +254,27 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		v3fDiagWindowSize.x = sizePercOrPixels(v3fDiagWindowSize.x,cfg.fDialogWidthPercentOfAppWindow);
 		MiscLemurHelpersStateI.i().setGrantedSize(getDialogMainContainer(), v3fDiagWindowSize);
 		
-		Vector3f v3fPos = new Vector3f(
+		Vector3f v3fPosCentered = new Vector3f(
 			(v3fApplicationWindowSize.x-v3fDiagWindowSize.x)/2f,
 			(v3fApplicationWindowSize.y-v3fDiagWindowSize.y)/2f+v3fDiagWindowSize.y,
 			0
 		);
-		getDialogMainContainer().setLocalTranslation(v3fPos);
-		cfg.v3fIniPos=v3fPos.clone();
+		getDialogMainContainer().setLocalTranslation(v3fPosCentered);
+		cfg.v3fIniPos=v3fPosCentered.clone();
 		cfg.v3fIniSize=v3fDiagWindowSize.clone();
 		
 		// resizing borders
-		btnResizeNorth = prepareResizeBorder(BorderLayout.Position.North);
-		btnResizeSouth = prepareResizeBorder(BorderLayout.Position.South);
-		btnResizeEast = prepareResizeBorder(BorderLayout.Position.East);
-		btnResizeWest = prepareResizeBorder(BorderLayout.Position.West);
-		ilvBorderSize.applyValueCallNow();
-//		setBordersSize(ilvBorderSize.getInt());
-		
-		v3fDiagWindowSize.x -= btnResizeEast.getSize().x + btnResizeWest.getSize().x;
-		v3fDiagWindowSize.y -= btnResizeNorth.getSize().y + btnResizeSouth.getSize().y;
+//		CallQueueI.i().addCall(new CallableX() {
+//			@Override
+//			public Boolean call() {
+				reinitBorders();
+//				return true;
+//			}
+//		});
+//		if(false){
+			v3fDiagWindowSize.x -= btnResizeEast.getSize().x + btnResizeWest.getSize().x;
+			v3fDiagWindowSize.y -= btnResizeNorth.getSize().y + btnResizeSouth.getSize().y;
+//		}
 		
 		// main center container
 		cntrCenterMain = new Container(new BorderLayout(), getDiagStyle());
@@ -376,7 +379,20 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		return true;
 	}
 	
-	BoolTogglerCmdField btgResizeBordersNorthAndSouthAlsoApplyToEast = new BoolTogglerCmdField(this,true);
+	private void reinitBorders() {
+		abtnResizeBorderList.clear();
+		
+		btnResizeNorth = prepareResizeBorder(BorderLayout.Position.North);
+		btnResizeSouth = prepareResizeBorder(BorderLayout.Position.South);
+		btnResizeEast = prepareResizeBorder(BorderLayout.Position.East);
+		btnResizeWest = prepareResizeBorder(BorderLayout.Position.West);
+		
+		ilvBorderSize.queueValueCallNow();
+//		setBordersSize(ilvBorderSize.getInt());
+	}
+
+	BoolTogglerCmdField btgResizeBordersNorthAndSouthAlsoAffectEastBorder = new BoolTogglerCmdField(this,true);
+	BoolTogglerCmdField btgResizeBordersWestAndEastAlsoAffectSouthBorder = new BoolTogglerCmdField(this,true);
 	
 	@Override
 	public void move(Spatial sptDraggedElement, Vector3f v3fDisplacement) {
@@ -384,22 +400,25 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		Vector3f v3fPosAdd = new Vector3f();
 		
 		// will be resize
-		boolean bResizeEast = false;
+		boolean bWorkOnEastBorder = false;
+		boolean bWorkOnSouthBorder = false;
 		if(sptDraggedElement==btnResizeNorth){
 			v3fSizeAdd.y += v3fDisplacement.y;
 			v3fPosAdd.y += v3fDisplacement.y;
-			if(btgResizeBordersNorthAndSouthAlsoApplyToEast.b())bResizeEast=true;
+			if(btgResizeBordersNorthAndSouthAlsoAffectEastBorder.b())bWorkOnEastBorder=true;
 		}else
 		if(sptDraggedElement==btnResizeSouth){
-			v3fSizeAdd.y += -v3fDisplacement.y;
-			if(btgResizeBordersNorthAndSouthAlsoApplyToEast.b())bResizeEast=true;
+			bWorkOnSouthBorder = true;
+			if(btgResizeBordersNorthAndSouthAlsoAffectEastBorder.b())bWorkOnEastBorder=true;
 		}else
 		if(sptDraggedElement==btnResizeWest){
 			v3fSizeAdd.x += -v3fDisplacement.x;
 			v3fPosAdd.x += v3fDisplacement.x;
+			if(btgResizeBordersWestAndEastAlsoAffectSouthBorder.b())bWorkOnSouthBorder=true;
 		}else
 		if(sptDraggedElement==btnResizeEast){
-			bResizeEast=true;
+			bWorkOnEastBorder=true;
+			if(btgResizeBordersWestAndEastAlsoAffectSouthBorder.b())bWorkOnSouthBorder=true;
 		}else{
 			/**
 			 * simple move
@@ -408,7 +427,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 			return;
 		}
 		
-		if(bResizeEast)v3fSizeAdd.x += v3fDisplacement.x;
+		if(bWorkOnEastBorder)v3fSizeAdd.x += v3fDisplacement.x;
+		if(bWorkOnSouthBorder)v3fSizeAdd.y += -v3fDisplacement.y;
 		
 		Vector3f v3fSizeNew = getDialogMainContainer().getPreferredSize().add(v3fSizeAdd);
 		if(MiscLemurHelpersStateI.i().setGrantedSize(getDialogMainContainer(), v3fSizeNew, true)!=null){
@@ -445,10 +465,19 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		
 		abtnResizeBorderList.add(btnBorder);
 		
-		getDialogMainContainer().addChild(btnBorder, edge);
+		getDialogMainContainer().addChild(btnBorder, edge); //this actually replaces the current at that border
 		
 		return btnBorder;
 	}
+	
+	StringCmdField scfFixReinitDialogBorders = new StringCmdField(this)
+		.setCallOnValueChanged(new CallableX() {
+			@Override
+			public Boolean call() {
+				reinitBorders();
+				return true;
+			}
+		});
 	
 	IntLongVarField ilvBorderSize = new IntLongVarField(this, 3, "").setMinMax(1L, 20L)
 		.setCallOnValueChanged(new CallableX() {

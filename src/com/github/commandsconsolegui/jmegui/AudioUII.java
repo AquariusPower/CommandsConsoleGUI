@@ -289,7 +289,7 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 			
 			bCommandWorked=true;
 		}else
-		if(cd.checkCmdValidity(this,scfSoundList,"")){
+		if(cd.checkCmdValidity(this,scfSoundList)){
 			for(String strKey:tmAudio.keySet().toArray(new String[]{})){
 				AudioNode an = tmAudio.get(strKey);
 				String strMute=isMute(an)?"(Mute)":"";

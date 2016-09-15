@@ -1115,7 +1115,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 		boolean bCommandWorked = false;
 		
-		if(cd.checkCmdValidity(this,CMD_SHOW_BINDS,"")){
+		if(cd.checkCmdValidity(this,CMD_SHOW_BINDS)){
 			cd.dumpSubEntry("Shift+Ctrl+V - show clipboard");
 			cd.dumpSubEntry("Shift+Click - marks dump area CopyTo selection marker for copy/cut");
 			

@@ -294,12 +294,12 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 	}
 	
 	@Override
-	protected void prepareCallOnValueChanged() {
+	protected void prepareCallQueueOnValueChanged() {
 		if(isConstructed()){
 			if(isChangedAndRefresh()){
 				if(bDoCallOnChange){
 					if(isCallOnValueChangedSet()){
-						super.prepareCallOnValueChanged();
+						super.prepareCallQueueOnValueChanged();
 					}else{
 						MsgI.i().warn("call on value changed not set for "+this.getReport(), this);
 					}

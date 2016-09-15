@@ -32,6 +32,7 @@ import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs.EVarCmdMode;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 
 /**
@@ -243,5 +244,15 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 	@Override
 	public String getCodePrefixDefault() {
 		return strCodePrefixDefault;
+	}
+	
+	/**
+	 * Better use this alone, without the command listener code.
+	 * This call may work while the cmd listener code may fail.
+	 */
+	@Override
+	public StringCmdField setCallOnValueChanged(CallableX caller) {
+		// TODO Auto-generated method stub
+		return super.setCallOnValueChanged(caller);
 	}
 }

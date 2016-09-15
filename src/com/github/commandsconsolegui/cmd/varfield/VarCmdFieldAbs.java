@@ -411,7 +411,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		if(objRawValueDefault==null)objRawValueDefault=(O)objValue;
 		
 		if(vivo!=null){
-			if(vivo.getObjectValue()!=objValue)prepareCallOnValueChanged();
+			if(vivo.getObjectValue()!=objValue)prepareCallQueueOnValueChanged();
 			
 			vivo.setObjectValue(objValue);
 		}else{
@@ -422,7 +422,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		return getThis();
 	}
 	
-	protected void prepareCallOnValueChanged() {
+	protected void prepareCallQueueOnValueChanged() {
 		if(isConstructed()){ 
 			if(caller!=null){
 				CallQueueI.i().addCall(caller);
@@ -526,8 +526,8 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		return bConstructed;
 	}
 	
-	public S applyValueCallNow(){
-		prepareCallOnValueChanged();
+	public S queueValueCallNow(){
+		prepareCallQueueOnValueChanged();
 		return getThis();
 	}
 

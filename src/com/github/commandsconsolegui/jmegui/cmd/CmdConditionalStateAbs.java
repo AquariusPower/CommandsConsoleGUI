@@ -198,7 +198,7 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 	boolean bCommandWorked = false;
 	
-	if(cd.checkCmdValidity(this,scfRestart,null)){
+	if(cd.checkCmdValidity(this,scfRestart)){
 //		Boolean bEnabledForce = cc.paramBoolean(1);
 //		
 //		if(bEnabledForce!=null){

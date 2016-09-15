@@ -32,6 +32,7 @@ import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import truetypefont.TrueTypeBitmapGlyph;
@@ -67,6 +68,7 @@ import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
+import com.google.common.base.Strings;
 import com.jme3.app.StatsAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.AssetNotFoundException;
@@ -979,7 +981,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	protected boolean initAttempt() {
 		if(!super.initAttempt())return false;
 		
-		setRetryDelayFor(1000L, ERetryDelayMode.Enable.s());
+		setRetryDelayFor(1000L); //just to lower the output spam of possible problems
 		
 		return true;
 	}

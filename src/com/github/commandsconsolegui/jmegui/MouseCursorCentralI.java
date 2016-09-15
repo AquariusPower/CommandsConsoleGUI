@@ -175,7 +175,7 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
 		boolean bCommandWorked = false;
 		
-		if(cc.checkCmdValidity(this,CMD_FIX_RESETING_MOUSE_CURSOR,null)){
+		if(cc.checkCmdValidity(this,CMD_FIX_RESETING_MOUSE_CURSOR)){
 			String strBefore = getButtonsInstance().report();
 //			cc.dumpSubEntry(cc.getCommentPrefixStr()+"Before:\n"+strBefore);
 			
@@ -196,7 +196,7 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 			
 			bCommandWorked=true;
 		}else
-		if(cc.checkCmdValidity(this,scfMouseCursorReport,"")){
+		if(cc.checkCmdValidity(this,scfMouseCursorReport)){
 			cc.dumpSubEntry(getButtonsInstance().report());
 			bCommandWorked=true;
 		}else

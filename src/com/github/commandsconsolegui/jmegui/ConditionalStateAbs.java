@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.jmegui;
 //import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ERecreateConsoleSteps;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.globals.GlobalHolderAbs.IGlobalOpt;
@@ -93,7 +94,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 //	private boolean	bPreInitialized;
 	
 	private ArrayList<Retry> aretry = new ArrayList<Retry>();
-	public Retry findRetryById(String strId){
+	public Retry findRetryModeById(String strId){
 		for(Retry r:aretry){
 			if(r.isId(strId))return r;
 		}
@@ -107,7 +108,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		return astr;
 	}
 	protected static class Retry implements IReflexFillCfg{
-		private long lStartMilis=0;
+		private long lStartMilis=0; // as this is only in case of failure, the 1st attempt will always be ready!
 		
 		/** 0 means retry at every update*/
 		private IntLongVarField ilvDelayMilis = new IntLongVarField(this, 0L, "retry delay between failed state mode attempts");
@@ -121,7 +122,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 			this.cond=cond;
 			this.strId=strId;
 			
-			if(cond.findRetryById(strId)!=null)throw new PrerequisitesNotMetException("conflicting retry id", strId); 
+			if(cond.findRetryModeById(strId)!=null)throw new PrerequisitesNotMetException("conflicting retry id", strId); 
 			cond.aretry.add(this);
 		}
 		
@@ -718,8 +719,14 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 	 * @return the previously setup delay milis if the mode was specified 
 	 */
 	protected void setRetryDelayFor(Long lMilis, String... astrId){
+		if(astrId.length==0){
+//			astrId=Arrays.asList(ERetryDelayMode.values()).toArray(new String[0]);
+			astrId=new String[ERetryDelayMode.values().length];
+			for(ERetryDelayMode e:ERetryDelayMode.values())astrId[e.ordinal()]=e.toString();
+		}
+		
 		for(String strId:astrId){
-			findRetryById(strId).setRetryDelay(lMilis);
+			findRetryModeById(strId).setRetryDelay(lMilis);
 		}
 	}
 //	protected Long prepareRetryDelay(EDelayMode e, Long lMilis){
