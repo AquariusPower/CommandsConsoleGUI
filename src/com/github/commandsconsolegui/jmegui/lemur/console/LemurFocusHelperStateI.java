@@ -216,7 +216,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 		MiscJmeI.i().setUserDataPSH(diag.getInputField(ccSelf), diag);
 //		diag.getContainerMain().setUserData(LemurDialogGUIStateAbs.class.getName(), diag);
 		
-		CursorEventControl.addListenersToSpatial(diag.getContainerMain(), 
+		CursorEventControl.addListenersToSpatial(diag.getDialogMainContainer(), 
 			focusMouseCursorListener);
 	}
 	

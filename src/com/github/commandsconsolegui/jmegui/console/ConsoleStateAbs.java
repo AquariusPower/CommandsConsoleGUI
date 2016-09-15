@@ -559,10 +559,10 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	 */
 	private void setInitializationVisibility(boolean b){
 		if(b){
-			getContainerMain().setCullHint(CullHint.Inherit); //TODO use bkp with: Never ?
+			getDialogMainContainer().setCullHint(CullHint.Inherit); //TODO use bkp with: Never ?
 			lstbxAutoCompleteHint.setCullHint(CullHint.Inherit); //TODO use bkp with: Dynamic ?
 		}else{
-			getContainerMain().setCullHint(CullHint.Always); 
+			getDialogMainContainer().setCullHint(CullHint.Always); 
 			lstbxAutoCompleteHint.setCullHint(CullHint.Always);
 		}
 	}
@@ -600,7 +600,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		lstbxAutoCompleteHint.setName("ConsoleHints");
 		lstbxDumpArea.setName("ConsoleDumpArea");
 		getInputField().setName("ConsoleInput");
-		getContainerMain().setName("ConsoleContainer");
+		getDialogMainContainer().setName("ConsoleContainer");
 		ctnrStatsAndControls.setName("ConsoleStats");
 		
 //		tdLetCpuRest.updateTime();
@@ -610,8 +610,8 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 //		createMonoSpaceFixedFontStyle();
 		
 		// main container
-		getNodeGUI().attachChild(getContainerMain());
-		getContainerMain().setLocalTranslation(
+		getNodeGUI().attachChild(getDialogMainContainer());
+		getDialogMainContainer().setLocalTranslation(
 			iMargin, 
 			app().getContext().getSettings().getHeight()-iMargin, 
 			0); // Z translation controls what will be shown above+/below- others, will be automatically set by FocusChangeListenerI
@@ -973,6 +973,26 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		updateOverrideInputFocus();
 		
 		return true; 
+	}
+	
+	@Override
+	protected boolean initAttempt() {
+		if(!super.initAttempt())return false;
+		
+		setRetryDelayFor(1000L, ERetryDelayMode.Enable.s());
+		
+		return true;
+	}
+	
+	@Override
+	protected void initSuccess() {
+		super.initSuccess();
+		updateVisibleRowsAmount();
+	}
+	
+	@Override
+	protected void updateSuccess() {
+		super.updateSuccess();
 	}
 	
 	protected abstract void updateOverrideInputFocus();
@@ -1679,9 +1699,13 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		
 		v3fNew.y = fNewHeightPercent * app().getContext().getSettings().getHeight();
 		
-		float fMin = getInputFieldHeight() +getStatsHeight() +fLstbxEntryHeight*3; //will show only 2 rows, the 3 value is a safety margin
-		
-		if(v3fNew.y<fMin)v3fNew.y=fMin;
+		if(fLstbxEntryHeight!=null){
+			float fMin = getInputFieldHeight() +getStatsHeight() +fLstbxEntryHeight*3; //will show only 2 rows, the 3 value is a safety margin
+			
+			if(v3fNew.y<fMin)v3fNew.y=fMin;
+		}else{
+			cd().dumpDevWarnEntry("console listbox entry height is null");
+		}
 		
 		setContainerConsolePreferredSize(v3fNew); //setSize() does not work well..
 //		ctnrMainTopSubWindow.setSize(v3fNew); //setSize() does not work well..
@@ -1748,8 +1772,8 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	}
 	
 	@Override
-	public Node getContainerMain(){
-		return (Node)super.getContainerMain();
+	public Node getDialogMainContainer(){
+		return (Node)super.getDialogMainContainer();
 	}
 	
 	/**
@@ -1767,14 +1791,14 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 //		tdScrollToBottomRetry.reset();
 //		tdTextCursorBlinkHK.reset();
 		
-		if(getContainerMain().getChildren().size()>0){
+		if(getDialogMainContainer().getChildren().size()>0){
 			System.err.println("WARN: console container should have been properly/safely cleaned using specific gui methods by overriding this method.");
-			getContainerMain().detachAllChildren();
+			getDialogMainContainer().detachAllChildren();
 		}
 //		ctnrMainTopSubWindow.clearChildren();
 //		tfAutoCompleteHint.removeFromParent();
 		lstbxAutoCompleteHint.removeFromParent();
-		getContainerMain().removeFromParent();
+		getDialogMainContainer().removeFromParent();
 		
 		//TODO should keymappings be at setEnabled() ?
 //    /**
@@ -1890,7 +1914,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 			MiscI.i().getSimpleTime(cd().btgShowMiliseconds.get())
 				+cd().getDevInfoEntryPrefix()+"Console stats (Dev): "+"\n"
 			
-			+"Console Height = "+MiscI.i().fmtFloat(getSizeOf(getContainerMain()).y)+"\n"
+			+"Console Height = "+MiscI.i().fmtFloat(getSizeOf(getDialogMainContainer()).y)+"\n"
 			+"Visible Rows = "+getVisibleRows()+"\n"
 			+"Line Wrap At = "+cd().getCurrentFixedLineWrapAtColumn()+"\n"
 			+"ListBox Height = "+MiscI.i().fmtFloat(getSizeOf(lstbxDumpArea).y)+"\n"
@@ -2044,7 +2068,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 					/**
 					 * this is when crashes outside of here
 					 */
-					getContainerMain().updateLogicalState(0.05f);
+					getDialogMainContainer().updateLogicalState(0.05f);
 					
 					if(bFailed){ //had failed, so look for a safe length
 						if(iStatsTextSafeLength==null || !iStatsTextSafeLength.equals(str.length())){

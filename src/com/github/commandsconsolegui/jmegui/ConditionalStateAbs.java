@@ -154,11 +154,11 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		}
 		
 	}
-	private Retry rInit = new Retry(this,EDelayMode.Init.s());
-	private Retry rEnable = new Retry(this,EDelayMode.Enable.s());
-	private Retry rUpdate = new Retry(this,EDelayMode.Update.s());
-	private Retry rDisable = new Retry(this,EDelayMode.Disable.s());
-	private Retry rDiscard = new Retry(this,EDelayMode.Discard.s());
+	private Retry rInit = new Retry(this,ERetryDelayMode.Init.s());
+	private Retry rEnable = new Retry(this,ERetryDelayMode.Enable.s());
+	private Retry rUpdate = new Retry(this,ERetryDelayMode.Update.s());
+	private Retry rDisable = new Retry(this,ERetryDelayMode.Disable.s());
+	private Retry rDiscard = new Retry(this,ERetryDelayMode.Discard.s());
 	
 	// PROPERLY INIT
 	private boolean	bProperlyInitialized;
@@ -262,7 +262,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		
 		// configs above
 		this.bConfigured=true;
-		msgDbg("cfg",this.bConfigured);
+		MsgI.i().dbg("cfg",this.bConfigured,this);
 		
 		return storeCfgAndReturnSelf(icfg);
 	}
@@ -297,9 +297,9 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		return icfgOfInstance;
 	}
 	
-	private void msgDbg(String str, boolean bSuccess) {
-		MsgI.i().dbg(str, bSuccess, this);
-	}
+//	private void msgDbg(String str, boolean bSuccess) {
+//		MsgI.i().dbg(str, bSuccess, this);
+//	}
 
 	@Override
 	public boolean isConfigured(){
@@ -407,14 +407,14 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		if(!initCheckPrerequisites() || !initAttempt()){
 			initFailed();
 			rInit.resetStartTime();
-			msgDbg("init",false);
+			MsgI.i().dbg("init",false,this);
 			return false;
 		}else{
 			initSuccess();
 		}
 		
 		bProperlyInitialized=true;
-		msgDbg("init",bProperlyInitialized);
+		MsgI.i().dbg("init",bProperlyInitialized,this);
 		
 		return true;
 	}
@@ -453,7 +453,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 			if(!rEnable.isReadyToRetry())return false;
 			
 			bEnableSuccessful=enableAttempt();
-			msgDbg("enabled",bEnableSuccessful);
+			MsgI.i().dbg("enabled",bEnableSuccessful,this);
 			bEnabled=bEnableSuccessful;
 			
 			if(bEnableSuccessful){
@@ -471,7 +471,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 			if(!rDisable.isReadyToRetry())return false;
 			
 			bDisableSuccessful=disableAttempt();
-			msgDbg("disabled",bDisableSuccessful);
+			MsgI.i().dbg("disabled",bDisableSuccessful,this);
 			bEnabled=!bDisableSuccessful;
 			
 			if(bDisableSuccessful){
@@ -494,7 +494,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 				updateFailed();
 				rUpdate.resetStartTime();
 				
-				msgDbg("update",false); //only on fail to avoid too much log!
+				MsgI.i().dbg("update",false,this); //only on fail to avoid too much log!
 				return false;
 			}
 			/**
@@ -590,14 +590,14 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 			}
 			
 			if(bRetry){
-				msgDbg(""+ELogAction.discard,false);
+				MsgI.i().dbg(""+ELogAction.discard,false,this);
 				return false;
 			}
 		}
 		
 		asmParent=null;
 		
-		msgDbg(""+ELogAction.discard,true);
+		MsgI.i().dbg(""+ELogAction.discard,true,this);
 		
 		return true;
 	}
@@ -755,7 +755,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 //		return null;
 //	}
 	
-	public static enum EDelayMode{
+	public static enum ERetryDelayMode{
 		Init,
 		Enable,
 		Update,

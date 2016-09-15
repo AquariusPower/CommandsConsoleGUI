@@ -42,7 +42,7 @@ import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI.BindKey;
-import com.github.commandsconsolegui.jmegui.lemur.extras.ContainerMain;
+import com.github.commandsconsolegui.jmegui.lemur.extras.DialogMainContainer;
 import com.github.commandsconsolegui.jmegui.lemur.extras.ISpatialValidator;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -313,15 +313,15 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		
 		// main container
 //		setContainerMain(new ContainerMain(new BorderLayout(), getDiagStyle()).setDiagOwner(this));
-		setContainerMain(new ContainerMain(new BorderLayout(), getDiagStyle()));
-		MiscLemurHelpersStateI.i().setGrantedSize(getContainerConsole(), getConsoleSizeCopy());
+		setDialogMainContainer(new DialogMainContainer(new BorderLayout(), getDiagStyle()));
+		MiscLemurHelpersStateI.i().setGrantedSize(getDialogMainContainer(), getConsoleSizeCopy());
 		
 		/**
 		 * TOP ELEMENT =================================================================
 		 */
 		super.setStatsAndControls(new Container(getDiagStyle()));
 //		getContainerStatsAndControls().setName("ConsoleStats");
-		getContainerConsole().addChild(getContainerStatsAndControls(), BorderLayout.Position.North);
+		getDialogMainContainer().addChild(getContainerStatsAndControls(), BorderLayout.Position.North);
 		
 		// console stats
 		lblStats = new Label("Console stats.",getDiagStyle());
@@ -373,7 +373,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		getDumpArea().setModel((VersionedList<String>)getDumpEntries());
 		getDumpArea().setVisibleItems(getShowRowsAmount());
 //		lstbx.getGridPanel().setVisibleSize(getShowRowsAmount(),1);
-		getContainerConsole().addChild(getDumpArea(), BorderLayout.Position.Center);
+		getDialogMainContainer().addChild(getDumpArea(), BorderLayout.Position.Center);
 		
 		setSliderDumpArea(getDumpArea().getSlider());
 		
@@ -385,7 +385,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
     CursorEventControl.addListenersToSpatial(getInputField(), ConsoleMouseCursorListenerI.i());
 		LemurFocusHelperStateI.i().addFocusChangeListener(getInputField());
 //		fInputHeight = MiscJmeI.i().retrieveBitmapTextFor(getInputField()).getLineHeight();
-		getContainerConsole().addChild( getInputField(), BorderLayout.Position.South );
+		getDialogMainContainer().addChild( getInputField(), BorderLayout.Position.South );
 		
 		super.initializeOnlyTheUI();
 	}
@@ -700,31 +700,13 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		Integer iForceAmount = getVisibleRowsAdjustRequest();
 		if(iForceAmount>0){
 			super.setShowRowsAmount(iForceAmount);
-//			lstbx.setVisibleItems(iShowRows);
-//			lstbx.getGridPanel().setVisibleSize(iShowRows,1);
 		}else{
-//			if(getDumpArea().getGridPanel().getChildren().isEmpty())return;
-//			
-//			Button	btnFixVisibleRowsHelper = null;
-//			for(Spatial spt:getDumpArea().getGridPanel().getChildren()){
-//				if(spt instanceof Button){
-//					btnFixVisibleRowsHelper = (Button)spt;
-//					break;
-//				}
-//			}
-//			if(btnFixVisibleRowsHelper==null)return;
-//			
-//			fLstbxEntryHeight = retrieveBitmapTextFor(btnFixVisibleRowsHelper).getLineHeight();
 			setLstbxEntryHeight(MiscLemurHelpersStateI.i().guessEntryHeight(getDumpArea()));
 			if(getLstbxEntryHeight()==null)return;
 			
 			setLstbxHeight(getDumpArea().getSize().y);
 			
 			float fHeightAvailable = getLstbxHeight();
-//				float fHeightAvailable = fLstbxHeight -fInputHeight;
-//				if(getContainerConsole().hasChild(lblStats)){
-//					fHeightAvailable-=fStatsHeight;
-//				}
 			super.setShowRowsAmount((int) (fHeightAvailable / getLstbxEntryHeight()));
 		}
 		
@@ -989,8 +971,9 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 //		return getDumpArea().getSlider().getSize();
 //	}
 	
-	public Container getContainerConsole(){
-		return (Container)getContainerMain();
+	@Override
+	public DialogMainContainer getDialogMainContainer(){
+		return (DialogMainContainer)super.getDialogMainContainer();
 	}
 	
 	public Container getContainerStatsAndControls(){
@@ -1021,21 +1004,21 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	
 	@Override
 	public Vector3f getContainerConsolePreferredSize(){
-		return getContainerConsole().getPreferredSize();
+		return getDialogMainContainer().getPreferredSize();
 	}
 	
 	@Override
 	public void setContainerConsolePreferredSize(Vector3f v3f) {
-		MiscLemurHelpersStateI.i().setGrantedSize(getContainerConsole(), v3f);
+		MiscLemurHelpersStateI.i().setGrantedSize(getDialogMainContainer(), v3f);
 	}
 	@Override
 	public void addRemoveContainerConsoleChild(boolean bAdd, Node pnlChild){
 		if(bAdd){
 			BorderLayout.Position p = null;
 			if(pnlChild.equals(getContainerStatsAndControls()))p=BorderLayout.Position.North;
-			getContainerConsole().addChild(pnlChild,p);
+			getDialogMainContainer().addChild(pnlChild,p);
 		}else{
-			getContainerConsole().removeChild(pnlChild);
+			getDialogMainContainer().removeChild(pnlChild);
 		}
 	}
 	
@@ -1090,7 +1073,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	
 	@Override
 	public boolean prepareAndCheckIfReadyToDiscard(ConditionalStateManagerI.CompositeControl cc) {
-		getContainerConsole().clearChildren();
+		getDialogMainContainer().clearChildren();
 		return super.prepareAndCheckIfReadyToDiscard(cc);
 	}
 	
@@ -1171,11 +1154,6 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		return MiscJmeI.i().retrieveBitmapTextFor(lblStats).getLineHeight();
 	}
 	
-	@Override
-	public Container getContainerMain(){
-		return (Container)super.getContainerMain();
-	}
-
 //	@Override
 //	public boolean isAllowLogicalStateUpdate() {
 //		return true;

@@ -40,7 +40,7 @@ import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
-import com.github.commandsconsolegui.jmegui.lemur.extras.ContainerMain;
+import com.github.commandsconsolegui.jmegui.lemur.extras.DialogMainContainer;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
@@ -839,7 +839,7 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 	}
 	
 	/**
-	 * this only works without crashing because of {@link ContainerMain#updateLogicalState()}
+	 * this only works without crashing because of {@link DialogMainContainer#updateLogicalState()}
 	 * 
 	 * @param pnl
 	 * @param v3fSize x,y,z use -1 to let it be automatic = preferred

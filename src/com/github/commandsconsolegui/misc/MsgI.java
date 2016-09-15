@@ -60,6 +60,10 @@ public class MsgI {
 			+(objOwner!=null ? objOwner.getClass().getName()+": " : "")
 			+(bSuccess?"ok":"FAIL")+": "
 			+str);
+		
+		if(!bSuccess){
+			Thread.dumpStack();
+		}
 	}
 	
 	public void warn(String str, Object... aobj){

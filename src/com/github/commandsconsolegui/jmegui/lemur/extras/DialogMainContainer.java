@@ -41,7 +41,7 @@ import com.simsilica.lemur.style.ElementId;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class ContainerMain extends Container implements ISpatialValidator{
+public class DialogMainContainer extends Container implements ISpatialValidator{
 	private boolean	bLayoutValid;
 //	ISpatialValidator diag;
 //	
@@ -102,6 +102,7 @@ public class ContainerMain extends Container implements ISpatialValidator{
 			}
 		}else{
 			super.updateLogicalState(tpf);
+			bLayoutValid=true;
 		}
 		
 //		if(isAllowLogicalStateUpdate()){
@@ -121,55 +122,55 @@ public class ContainerMain extends Container implements ISpatialValidator{
 //		}
 //	}
 	
-	public ContainerMain() {
+	public DialogMainContainer() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 	
-	public ContainerMain(ElementId elementId, String style) {
+	public DialogMainContainer(ElementId elementId, String style) {
 		super(elementId, style);
 		// TODO Auto-generated constructor stub
 	}
 	
-	public ContainerMain(ElementId elementId) {
+	public DialogMainContainer(ElementId elementId) {
 		super(elementId);
 		// TODO Auto-generated constructor stub
 	}
 	
-	public ContainerMain(GuiLayout layout, boolean applyStyles,
+	public DialogMainContainer(GuiLayout layout, boolean applyStyles,
 			ElementId elementId, String style) {
 		super(layout, applyStyles, elementId, style);
 		// TODO Auto-generated constructor stub
 	}
 	
-	public ContainerMain(GuiLayout layout, ElementId elementId, String style) {
+	public DialogMainContainer(GuiLayout layout, ElementId elementId, String style) {
 		super(layout, elementId, style);
 		// TODO Auto-generated constructor stub
 	}
 	
-	public ContainerMain(GuiLayout layout, ElementId elementId) {
+	public DialogMainContainer(GuiLayout layout, ElementId elementId) {
 		super(layout, elementId);
 		// TODO Auto-generated constructor stub
 	}
 	
-	public ContainerMain(GuiLayout layout, String style) {
+	public DialogMainContainer(GuiLayout layout, String style) {
 		super(layout, style);
 		// TODO Auto-generated constructor stub
 	}
 	
-	public ContainerMain(GuiLayout layout) {
+	public DialogMainContainer(GuiLayout layout) {
 		super(layout);
 		// TODO Auto-generated constructor stub
 	}
 	
-	public ContainerMain(String style) {
+	public DialogMainContainer(String style) {
 		super(style);
 		// TODO Auto-generated constructor stub
 	}
 
 	private Panel	pnlImpossibleLayout;
 	private Container cntrCenterMain;
-	private boolean	bUseCrashPrevention;
+	private boolean	bUseCrashPrevention = false;
 	public void setImpossibleLayoutIndicatorAndCenterMain(Panel pnlImpossibleLayout, Container cntrCenterMain) {
 		bUseCrashPrevention=true;
 		this.pnlImpossibleLayout=pnlImpossibleLayout;

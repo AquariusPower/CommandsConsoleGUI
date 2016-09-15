@@ -77,7 +77,7 @@ public abstract class LemurBasicDialogStateAbs<T,R extends LemurBasicDialogState
 		 * but is an example as state changes can be delayed,
 		 * to save CPU or any other reason.
 		 */
-		setRetryDelayFor(100L, EDelayMode.Init.s());
+		setRetryDelayFor(100L, ERetryDelayMode.Init.s());
 		
 		return storeCfgAndReturnSelf(icfg);
 	}

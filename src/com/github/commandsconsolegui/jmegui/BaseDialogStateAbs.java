@@ -67,7 +67,7 @@ import com.simsilica.lemur.Container;
  * @param <R> is for getThis() concrete auto class type inherited trick
  */
 public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> extends CmdConditionalStateAbs implements IReflexFillCfg{
-	private Spatial	sptContainerMain;
+	private ISpatialValidator	sptvDialogMainContainer;
 	private Spatial	sptIntputField;
 	private Spatial sptMainList;
 	private String	strTitle;
@@ -137,21 +137,21 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return getThis();
 	}
 	
-	protected Spatial getContainerMain(){
-		return sptContainerMain;
+	protected Spatial getDialogMainContainer(){
+		return (Spatial)sptvDialogMainContainer;
 	}
 	
 	public boolean isLayoutValid(){
-		return ((ISpatialValidator)sptContainerMain).isLayoutValid();
+		return ((ISpatialValidator)sptvDialogMainContainer).isLayoutValid();
 	}
 	
-	protected R setContainerMain(ISpatialValidator spt){
-		this.sptContainerMain=(Spatial)spt;
+	protected R setDialogMainContainer(ISpatialValidator spt){
+		this.sptvDialogMainContainer=spt;
 		
 //		for(Class<?> cl:MiscI.i().getSuperClassesOf(this)){
 //			MiscJmeI.i().retrieveUserData(Spatial.class, this.sptContainerMain, cl.getName(), this, null);
 //			this.sptContainerMain.setUserData(cl.getName(), new SavableHolder(this));
-			MiscJmeI.i().setUserDataPSH(this.sptContainerMain, this);
+			MiscJmeI.i().setUserDataPSH(getDialogMainContainer(), this);
 //		}
 		
 		return getThis();
@@ -400,7 +400,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		boolean bCompleted=false;
 		
 		// SCALE
-		Vector3f v3fScaleCopy = sptContainerMain.getLocalScale().clone();
+		Vector3f v3fScaleCopy = getDialogMainContainer().getLocalScale().clone();
 		float fValAdd = tdDialogEffect.getCurrentDelayCalc(1f-fMinEffectScale,false);
 		float fVal=0f;
 		if(bGrow){
@@ -418,7 +418,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		}
 		v3fScaleCopy.x = v3fScaleCopy.y = fVal;
 		
-		sptContainerMain.setLocalScale(v3fScaleCopy);
+		getDialogMainContainer().setLocalScale(v3fScaleCopy);
 		
 		// LOCATION
 		if(btgEffectLocation.b()){
@@ -429,13 +429,13 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 			if(!bGrow)fPerc = 1.0f - fPerc;
 			v3f.x = v3f.x + fHalfWidth - (fHalfWidth*fPerc);
 			v3f.y = v3f.y - fHalfHeight + (fHalfHeight*fPerc);
-			MiscLemurHelpersStateI.i().setLocationXY(sptContainerMain,v3f);
+			MiscLemurHelpersStateI.i().setLocationXY(getDialogMainContainer(),v3f);
 		}
 		
 		if(bCompleted){
 			tdDialogEffect.setActive(false);
 			
-			MiscLemurHelpersStateI.i().setLocationXY(sptContainerMain,v3fMainLocationBkp);
+			MiscLemurHelpersStateI.i().setLocationXY(getDialogMainContainer(),v3fMainLocationBkp);
 			v3fMainLocationBkp=null;
 		}
 		
@@ -451,17 +451,17 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		if(!super.enableAttempt())return false;
 		if(!isLayoutValid())return false;
 		
-		getNodeGUI().attachChild(sptContainerMain);
+		getNodeGUI().attachChild(getDialogMainContainer());
 		
 		setMouseCursorKeepUngrabbed(true);
 		if(diagParent!=null)diagParent.updateModalChild(true,this);
 //		updateModalParent(true);
 		
 		if(btgEffect.b()){
-			Vector3f v3fScale = sptContainerMain.getLocalScale();
+			Vector3f v3fScale = getDialogMainContainer().getLocalScale();
 			v3fScale.x=v3fScale.y=fMinEffectScale;
 			tdDialogEffect.setActive(true);
-			v3fMainLocationBkp = sptContainerMain.getLocalTranslation().clone();
+			v3fMainLocationBkp = getDialogMainContainer().getLocalTranslation().clone();
 			v3fMainSize = getMainSize();
 		}
 		
@@ -484,7 +484,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	
 //	public abstract Vector3f getMainSize();
 	public Vector3f getMainSize(){
-		return bdh().getSizeFrom(getContainerMain());
+		return bdh().getSizeFrom(getDialogMainContainer());
 	}
 	
 	@Override
@@ -492,11 +492,11 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		if(!super.disableAttempt())return false;
 		
 		if(btgEffect.b()){
-			Vector3f v3fScaleCopy = sptContainerMain.getLocalScale().clone();
+			Vector3f v3fScaleCopy = getDialogMainContainer().getLocalScale().clone();
 			
 			if(Float.compare(v3fScaleCopy.x,1f)==0){
 				tdDialogEffect.setActive(true);
-				v3fMainLocationBkp = sptContainerMain.getLocalTranslation().clone();
+				v3fMainLocationBkp = getDialogMainContainer().getLocalTranslation().clone();
 				return false;
 			}else{
 				if(Float.compare(v3fScaleCopy.x,fMinEffectScale)>0){
@@ -505,10 +505,10 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 			}
 		}
 		
-		sptContainerMain.removeFromParent();
+		getDialogMainContainer().removeFromParent();
 		
 		if(btgEffect.b()){ //reset scale to normal
-			sptContainerMain.setLocalScale(1f);
+			getDialogMainContainer().setLocalScale(1f);
 		}
 		
 		setMouseCursorKeepUngrabbed(false);
@@ -1036,7 +1036,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	 * @param v3fDisplacement
 	 */
 	public void move(Spatial sptDraggedElement, Vector3f v3fDisplacement) {
-		getContainerMain().move(v3fDisplacement);
+		getDialogMainContainer().move(v3fDisplacement);
 	}
 	
 	protected void restorePosSize(){
