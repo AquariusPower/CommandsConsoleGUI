@@ -28,6 +28,9 @@
 package com.github.commandsconsolegui.misc;
 
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 
 /**
  * This interface exist to make it easy to track all bug fix implementations.
@@ -46,8 +49,43 @@ import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
  */
 public interface IWorkAroundBugFix {
 	/**
+	 * Simple template. Self note: try to not change it...
+	 */
+	public static class WorkAroundCodeTemplate implements IWorkAroundBugFix, IReflexFillCfg{
+		BoolTogglerCmdField btgBugFixCustom = new BoolTogglerCmdField(this,false);
+		@Override
+		public <BFR> BFR bugFix(Class<BFR> clReturnType,
+				BFR objRetIfBugFixBoolDisabled, BoolTogglerCmdField btgBugFixId,
+				Object... aobjCustomParams
+		) {
+			if(!btgBugFixId.b())return objRetIfBugFixBoolDisabled;
+			
+			boolean bFixed = false;
+			Object objRet = null;
+			
+			if(btgBugFixCustom.isEqualToAndEnabled(btgBugFixId)){
+				Float f = MiscI.i().getParamFromArray(Float.class, aobjCustomParams, 0);
+				String str = MiscI.i().getParamFromArray(String.class, aobjCustomParams, 1);
+				
+				//DO SPECIFIC BUGFIX HERE
+				
+				bFixed=true;
+			}
+			
+			return MiscI.i().bugFixRet(clReturnType,bFixed, objRet, aobjCustomParams);
+		}
+		
+		@Override
+		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {return null;}
+		
+	}
+	
+	/**
 	 * BFR is bugfix return (type)
 	 * Collect param ex.: Float spt = MiscI.i().getParamFromArray(Float.class, aobjCustomParams, 0);
+	 * 
+	 * Template at {@link WorkAroundCodeTemplate#bugFix(Class, Object, BoolTogglerCmdField, Object...)}
+	 * 
 	 * @param clReturnType
 	 * @param btgBugFixId
 	 * @param aobjCustomParams

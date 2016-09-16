@@ -43,6 +43,7 @@ import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry
 import com.github.commandsconsolegui.jmegui.lemur.extras.DialogMainContainer;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.MiscI.EStringMatchMode;
 import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
@@ -510,7 +511,8 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 			throw new PrerequisitesNotMetException("cant bugfix this way...",aobjCustomParams);
 		}
 		
-		return (BFR)objRet;
+		return MiscI.i().bugFixRet(clReturnType,bFixed, objRet, aobjCustomParams);
+//		return (BFR)objRet;
 	}
 	
 //	@Override
@@ -694,14 +696,14 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 		}
 	}
 	
-	StringCmdField scfCheckLemur = new StringCmdField(this);
+	StringCmdField scfDebugCheckLemur = new StringCmdField(this);
 	@Override
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
 		boolean bCommandWorked = false;
 		
 		if(
-			cc.checkCmdValidity(this,scfCheckLemur, 
-				"[strName] if name is provided, check only the spatials matching it"
+			cc.checkCmdValidity(this,scfDebugCheckLemur, 
+				"[strName] if name is provided, check only the spatials matching it. Only works for active/visible/attached GUI elements."
 //				"[fNewZSize] go thru all lemur elemets active on the GUI node to check if they are "
 //				+"all properly configured."
 //				+"The option will only modify Z thickness if it is 0.0f."
@@ -713,8 +715,17 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 			Spatial spt = GlobalGUINodeI.i();
 			
 			if(strName!=null){
-				spt=GlobalGUINodeI.i().getChild(strName);
-				if(spt==null)cc.dumpWarnEntry("spatial not found with name: "+strName);
+				spt=GlobalGUINodeI.i().getChild(strName); //it is recursive exact name match
+				if(spt==null){
+					cc.dumpWarnEntry("spatial not found with name: "+strName);
+					
+					ArrayList<Spatial> aspt = MiscJmeI.i().getAllChildrenRecursiveFrom(
+						GlobalGUINodeI.i(), strName, EStringMatchMode.Fuzzy, true);
+					GlobalCommandsDelegatorI.i().dumpInfoEntry("fuzzy search matches: "+aspt.size());
+					for(Spatial sptSearch:aspt){
+						GlobalCommandsDelegatorI.i().dumpSubEntry(sptSearch.getName());
+					}
+				}
 			}
 			
 			if(spt!=null){

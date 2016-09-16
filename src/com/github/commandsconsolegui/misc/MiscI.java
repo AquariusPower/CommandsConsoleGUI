@@ -341,25 +341,51 @@ public class MiscI {
 //		}
 //		return sptParentest;
 //	}
-
-	public boolean containsFuzzyMatch(String strToCheck, String strFuzzyMatcher, boolean bNormalContainsMode, boolean bIgnoreCase){
+	
+	public static enum EStringMatchMode{
+		Exact,
+		Contains,
+		
+		StartsWith,
+		EndsWith,
+		
+		Regex,
+		
+		/**
+		 * like a regex for each letter ex.: "Test"
+		 * regex = ".*[T].*[e].*[s].*[t].*"
+		 */
+		Fuzzy,
+		;
+	}
+	public boolean containsFuzzyMatch(String strToCheck, String strMatch, EStringMatchMode eMode, boolean bIgnoreCase){
 		if(bIgnoreCase){
 			strToCheck=strToCheck.toLowerCase();
-			strFuzzyMatcher=strFuzzyMatcher.toLowerCase();
+			strMatch=strMatch.toLowerCase();
 		}
 		
-		if(bNormalContainsMode){
-			return strToCheck.contains(strFuzzyMatcher);
-		}
-		
-		int iFuzzyIndex = 0;
-		for(char c : strToCheck.toCharArray()){
-			if(c == strFuzzyMatcher.charAt(iFuzzyIndex)){
-				iFuzzyIndex++;
-				if(strFuzzyMatcher.length()==iFuzzyIndex){
-					return true;
+		switch (eMode) {
+			case StartsWith:
+				return strToCheck.startsWith(strMatch);
+			case Contains:
+				return strToCheck.contains(strMatch);
+			case EndsWith:
+				return strToCheck.endsWith(strMatch);
+			case Exact:
+				return strToCheck.equals(strMatch);
+			case Fuzzy:
+				int iFuzzyIndex = 0;
+				for(char c : strToCheck.toCharArray()){
+					if(c == strMatch.charAt(iFuzzyIndex)){
+						iFuzzyIndex++;
+						if(strMatch.length()==iFuzzyIndex){
+							return true;
+						}
+					}
 				}
-			}
+				return false;
+			case Regex:
+				return strToCheck.matches(strMatch);
 		}
 		
 		return false;

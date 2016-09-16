@@ -53,6 +53,7 @@ import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelper.D
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.input.KeyInput;
@@ -90,7 +91,7 @@ import com.simsilica.lemur.style.ElementId;
 * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 *
 */
-public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<T,R>> extends BaseDialogStateAbs<T,R> {
+public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<T,R>> extends BaseDialogStateAbs<T,R> implements IWorkAroundBugFix{
 	private Label	lblTitle;
 	private Label	lblTextInfo;
 //	private ListBox<DialogListEntryData<T>>	lstbxEntriesToSelect;
@@ -1271,6 +1272,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		if(quaBkpMain!=null){
 //			getContainerMain().setLocalRotation(quaBkpMain);
 //		}
+		bugFix(null, null, btgBugFixAutoReinitBorderOnFocusGained);
 		changeResizeBorderColor(ColorRGBA.Cyan);
 	}
 	
@@ -1316,5 +1318,27 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		
 		return adiag;
 	}
-
+	
+	BoolTogglerCmdField btgBugFixAutoReinitBorderOnFocusGained = new BoolTogglerCmdField(this,false);
+	@Override
+	public <BFR> BFR bugFix(Class<BFR> clReturnType,
+			BFR objRetIfBugFixBoolDisabled, BoolTogglerCmdField btgBugFixId,
+			Object... aobjCustomParams
+	) {
+		if(!btgBugFixId.b())return objRetIfBugFixBoolDisabled;
+		
+		boolean bFixed = false;
+		Object objRet = null;
+		
+		if(btgBugFixAutoReinitBorderOnFocusGained.isEqualToAndEnabled(btgBugFixId)){
+//			Spatial spt = MiscI.i().getParamFromArray(Spatial.class, aobjCustomParams, 0);
+//			Float fZ = MiscI.i().getParamFromArray(Float.class, aobjCustomParams, 1);
+			
+			reinitBorders();
+			
+			bFixed=true;
+		}
+		
+		return MiscI.i().bugFixRet(clReturnType,bFixed, objRet, aobjCustomParams);
+	}
 }

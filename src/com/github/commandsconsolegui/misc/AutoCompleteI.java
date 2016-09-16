@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.github.commandsconsolegui.misc.MiscI.EStringMatchMode;
+
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
@@ -86,7 +88,7 @@ public class AutoCompleteI {
 							break;
 						case 2:
 							if(bAllowFuzzyFallBack){
-								if(MiscI.i().containsFuzzyMatch(strFull, strPart, false, true)){
+								if(MiscI.i().containsFuzzyMatch(strFull, strPart, EStringMatchMode.Fuzzy, true)){
 									astrPossibleMatches.add(strFull);
 									bUsingFuzzy=true;
 								}

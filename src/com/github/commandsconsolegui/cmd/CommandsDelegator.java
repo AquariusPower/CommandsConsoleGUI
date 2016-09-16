@@ -61,6 +61,7 @@ import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.misc.MiscI.EStringMatchMode;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -2234,9 +2235,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	private boolean containsFilterString(String strText, String strFilter){
 		if(strFilter==null)return true;
 		
-		boolean bFuzzyMatch=false;
+		EStringMatchMode eMode = EStringMatchMode.Contains;
 		if(strFilter.startsWith(""+getFuzzyFilterModeToken())){
-			bFuzzyMatch=true;
+			eMode=EStringMatchMode.Fuzzy;
 			if(strFilter.length()>1){
 				strFilter=strFilter.substring(1);
 			}else{
@@ -2245,7 +2246,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}
 		
 //		return MiscI.i().containsFuzzyMatch(strText, strFilter, !btgStringContainsFuzzyFilter.b(), true);
-		return MiscI.i().containsFuzzyMatch(strText, strFilter, !bFuzzyMatch, true);
+		return MiscI.i().containsFuzzyMatch(strText, strFilter, eMode, true);
 	}
 	
 	private boolean cmdShowHistory() {

@@ -55,6 +55,7 @@ import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.MiscI.EStringMatchMode;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -342,42 +343,41 @@ public class MiscJmeI implements IReflexFillCfg{
 	private boolean	bTTFloaderRegistered;
 	private ArrayList<Node>	anodeRendering = new ArrayList<Node>();
 	
-	public ArrayList<Spatial> getAllChildrenFrom(Node node, String strChildName) {
-		return getAllChildrenFrom(node, strChildName, false);
-	}
-	/**
-	 * 
-	 * @param node
-	 * @param strChildName
-	 * @param bIgnoreCase
-	 * @param asptList
-	 * @return
-	 */
-	public ArrayList<Spatial> getAllChildrenFrom(Node node, String strChildName, boolean bIgnoreCase) {
+//	public ArrayList<Spatial> getAllChildrenFrom(Node nodeParent, String strChildName) {
+//		return getAllChildrenFrom(nodeParent, strChildName, false);
+//	}
+	
+	public ArrayList<Spatial> getAllChildrenRecursiveFrom(Node nodeParent, String strMatchChildName, EStringMatchMode eMode, boolean bIgnoreCase) {
 		ArrayList<Spatial> asptList = new ArrayList<Spatial>();
 		
 		// add direct children
-		for(Spatial sptChild:node.getChildren()){
+		for(Spatial sptChild:nodeParent.getChildren()){
 			if(sptChild.getName()==null)continue;
 			
 			Spatial sptMatch = null;
-			if(bIgnoreCase){
-				if(sptChild.getName().equalsIgnoreCase(strChildName)){
-					sptMatch=(sptChild);
+//			if(bFuzzyMatch){
+				if(MiscI.i().containsFuzzyMatch(sptChild.getName(), strMatchChildName, eMode, bIgnoreCase)){
+					sptMatch=sptChild;
 				}
-			}else{
-				if(sptChild.getName().equals(strChildName)){
-					sptMatch=(sptChild);
-				}
-			}
+//			}else{
+//				if(bIgnoreCase){
+//					if(sptChild.getName().equalsIgnoreCase(strChildName)){
+//						sptMatch=(sptChild);
+//					}
+//				}else{
+//					if(sptChild.getName().equals(strChildName)){
+//						sptMatch=(sptChild);
+//					}
+//				}
+//			}
 			
 			if(sptMatch!=null)asptList.add(sptMatch);
 		}
 		
-		// deep search (even on node children matching name)
-		for(Spatial sptChild:node.getChildren()){
+		// deep search (even if parent doesnt match name will look at its children)
+		for(Spatial sptChild:nodeParent.getChildren()){
 			if(sptChild instanceof Node){
-				asptList.addAll(getAllChildrenFrom((Node)sptChild, strChildName));
+				asptList.addAll(getAllChildrenRecursiveFrom((Node)sptChild, strMatchChildName, eMode, bIgnoreCase));
 			}
 		}
 		
