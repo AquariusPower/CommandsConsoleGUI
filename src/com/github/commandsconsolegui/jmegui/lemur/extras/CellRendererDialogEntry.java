@@ -38,12 +38,13 @@ import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData.SliderValueData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
-import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
-import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
+import com.github.commandsconsolegui.misc.WorkAroundI;
+import com.github.commandsconsolegui.misc.WorkAroundI.BugFixBoolTogglerCmdField;
 import com.jme3.font.LineWrapMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Spatial;
@@ -96,14 +97,14 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		}
 	}
 	
-	public static class CellDialogEntry<T> extends Container implements IWorkAroundBugFix, IReflexFillCfg {
+	public static class CellDialogEntry<T> extends Container implements IReflexFillCfg {
 		public static enum EUserData{
 			colorFgBkp,
 			cellClassRef,
 			;
 		}
 		
-		private static BoolTogglerCmdField btgNOTWORKINGBugFixGapForListBoxSelectorArea;
+		private static BugFixBoolTogglerCmdField btgNOTWORKINGBugFixGapForListBoxSelectorArea;
 		
 		private Button	btnText;
 		private Button	btnTree;
@@ -233,7 +234,38 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 				 * no problem as it will be a global.
 				 */
 				CellDialogEntry.btgNOTWORKINGBugFixGapForListBoxSelectorArea = 
-					new BoolTogglerCmdField(this,false).setCallNothingOnChange();
+					new BugFixBoolTogglerCmdField(this,false)
+						.setCallerAssigned(new CallableX(this) {
+							@Override
+							public Boolean call() {
+								/**
+								 * param ex.: Geometry geomCursor = MiscI.i().getParamFromArray(Geometry.class, aobjCustomParams, 0);
+								 */
+								
+//								MiscI.i().assertSameClass(Container.class,clReturnType);
+								Container cntr=null;
+//								if(btgNOTWORKINGBugFixGapForListBoxSelectorArea.b()){ //TODO the fix is not working anymore
+									/**
+									 * this requires that all childs (in this case buttons) have their style background
+									 * color transparent (like alpha 0.5f) or the listbox selector will not be visible below them...
+									 */
+									// same layout as the cell container
+									cntr = new Container(new BorderLayout(), assignedCellRenderer.strStyle);
+//									Vector3f v3fSize = new Vector3f(this.getPreferredSize());
+//									v3fSize.z=LemurMiscHelpersStateI.fPreferredThickness*2f;
+//									LemurMiscHelpersStateI.i().setGrantedSize(cntr, v3fSize, true);
+									cntr.setName(btgNOTWORKINGBugFixGapForListBoxSelectorArea.getSimpleId()); //when mouse is over a cell, if the ListBox->selectorArea has the same world Z value of the button, it may be ordered before the button on the raycast collision results at PickEventSession.setCurrentHitTarget(ViewPort, Spatial, Vector2f, CollisionResult) line: 262	-> PickEventSession.cursorMoved(int, int) line: 482 
+									addChild(cntr, Position.Center);
+//								}else{
+//									cntr = this;
+//								}
+								
+								this.setCallerReturnValue(cntr);
+//								objRet=cntr;
+								
+								return true;
+							}
+						});
 			}
 			
 			this.setName(strPrefix+"MainContainer");
@@ -242,7 +274,8 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			this.dled=dledToSet;
 			
 //			cntrBase = (Container)bugFix(0);
-			cntrBase = bugFix(Container.class, this, btgNOTWORKINGBugFixGapForListBoxSelectorArea);
+//			cntrBase = bugFix(Container.class, this, btgNOTWORKINGBugFixGapForListBoxSelectorArea);
+			cntrBase = WorkAroundI.i().bugFix(btgNOTWORKINGBugFixGapForListBoxSelectorArea, Container.class, this);
 			
 			btnTree = createButton("Tree", "?", cntrBase, Position.West);
 			btnTree.addCommands(ButtonAction.Click, ctt);
@@ -394,43 +427,43 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 //			return null;
 //		}
 		
-		@Override
-		public <BFR> BFR bugFix(Class<BFR> clReturnType, BFR objRetIfBugFixBoolDisabled, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams) {
-			if(!btgBugFixId.b())return objRetIfBugFixBoolDisabled;
-			
-			Object objRet = null;
-			boolean bFixed = false;
-			
-			if(btgNOTWORKINGBugFixGapForListBoxSelectorArea.isEqualToAndEnabled(btgBugFixId)){
-				/**
-				 * param ex.: Geometry geomCursor = MiscI.i().getParamFromArray(Geometry.class, aobjCustomParams, 0);
-				 */
-				
-//				MiscI.i().assertSameClass(Container.class,clReturnType);
-				Container cntr=null;
-//				if(btgNOTWORKINGBugFixGapForListBoxSelectorArea.b()){ //TODO the fix is not working anymore
-					/**
-					 * this requires that all childs (in this case buttons) have their style background
-					 * color transparent (like alpha 0.5f) or the listbox selector will not be visible below them...
-					 */
-					// same layout as the cell container
-					cntr = new Container(new BorderLayout(), assignedCellRenderer.strStyle);
-//					Vector3f v3fSize = new Vector3f(this.getPreferredSize());
-//					v3fSize.z=LemurMiscHelpersStateI.fPreferredThickness*2f;
-//					LemurMiscHelpersStateI.i().setGrantedSize(cntr, v3fSize, true);
-					cntr.setName(btgNOTWORKINGBugFixGapForListBoxSelectorArea.getSimpleId()); //when mouse is over a cell, if the ListBox->selectorArea has the same world Z value of the button, it may be ordered before the button on the raycast collision results at PickEventSession.setCurrentHitTarget(ViewPort, Spatial, Vector2f, CollisionResult) line: 262	-> PickEventSession.cursorMoved(int, int) line: 482 
-					addChild(cntr, Position.Center);
-//				}else{
-//					cntr = this;
-//				}
-				
-				bFixed=true;
-				
-				objRet=cntr;
-			}
-			
-			return MiscI.i().bugFixRet(clReturnType,bFixed, objRet, aobjCustomParams);
-		}
+//		@Override
+//		public <BFR> BFR bugFix(Class<BFR> clReturnType, BFR objRetIfBugFixBoolDisabled, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams) {
+//			if(!btgBugFixId.b())return objRetIfBugFixBoolDisabled;
+//			
+//			Object objRet = null;
+//			boolean bFixed = false;
+//			
+//			if(btgNOTWORKINGBugFixGapForListBoxSelectorArea.isEqualToAndEnabled(btgBugFixId)){
+//				/**
+//				 * param ex.: Geometry geomCursor = MiscI.i().getParamFromArray(Geometry.class, aobjCustomParams, 0);
+//				 */
+//				
+////				MiscI.i().assertSameClass(Container.class,clReturnType);
+//				Container cntr=null;
+////				if(btgNOTWORKINGBugFixGapForListBoxSelectorArea.b()){ //TODO the fix is not working anymore
+//					/**
+//					 * this requires that all childs (in this case buttons) have their style background
+//					 * color transparent (like alpha 0.5f) or the listbox selector will not be visible below them...
+//					 */
+//					// same layout as the cell container
+//					cntr = new Container(new BorderLayout(), assignedCellRenderer.strStyle);
+////					Vector3f v3fSize = new Vector3f(this.getPreferredSize());
+////					v3fSize.z=LemurMiscHelpersStateI.fPreferredThickness*2f;
+////					LemurMiscHelpersStateI.i().setGrantedSize(cntr, v3fSize, true);
+//					cntr.setName(btgNOTWORKINGBugFixGapForListBoxSelectorArea.getSimpleId()); //when mouse is over a cell, if the ListBox->selectorArea has the same world Z value of the button, it may be ordered before the button on the raycast collision results at PickEventSession.setCurrentHitTarget(ViewPort, Spatial, Vector2f, CollisionResult) line: 262	-> PickEventSession.cursorMoved(int, int) line: 482 
+//					addChild(cntr, Position.Center);
+////				}else{
+////					cntr = this;
+////				}
+//				
+//				bFixed=true;
+//				
+//				objRet=cntr;
+//			}
+//			
+//			return MiscI.i().bugFixRet(clReturnType,bFixed, objRet, aobjCustomParams);
+//		}
 
 		@Override
 		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {

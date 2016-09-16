@@ -50,7 +50,7 @@ public class DialogMainContainer extends Container implements ISpatialValidator{
 //		return this;
 //	}
 	
-	private Panel pnlDummy = new Panel();
+//	private Panel pnlDummy = new Panel();
 
 	private Vector3f	v3fLastValidSize;
 	
@@ -96,7 +96,7 @@ public class DialogMainContainer extends Container implements ISpatialValidator{
 //				if(pnlImpossibleLayout.getSize().length() >= pnlImpossibleLayout.getPreferredSize().length()){
 //					addChild(pnlImpossibleLayout, BorderLayout.Position.Center); //actually replaces
 //				}else{
-					addChild(pnlDummy, BorderLayout.Position.Center); //actually replaces
+					addChild(pnlImpossibleLayout, BorderLayout.Position.Center); //actually replaces
 //				}
 				try{super.updateLogicalState(tpf);}catch(Exception e2){}
 			}
@@ -173,7 +173,7 @@ public class DialogMainContainer extends Container implements ISpatialValidator{
 	private boolean	bUseCrashPrevention = false;
 	public void setImpossibleLayoutIndicatorAndCenterMain(Panel pnlImpossibleLayout, Container cntrCenterMain) {
 		bUseCrashPrevention=true;
-		this.pnlImpossibleLayout=pnlImpossibleLayout;
+		this.pnlImpossibleLayout = pnlImpossibleLayout==null ? new Panel() : pnlImpossibleLayout;
 		this.cntrCenterMain=cntrCenterMain;
 	}
 	

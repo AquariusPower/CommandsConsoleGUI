@@ -28,6 +28,7 @@
 package com.github.commandsconsolegui.misc;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
@@ -68,7 +69,7 @@ public class CallQueueI {
 		private StackTraceElement[] asteDbgLastQueuedAt;
 		private long iFailCount=0;
 		private Object	objEnclosing;
-		private Object[]	aobjParams;
+//		private Object[]	aobjParams;
 		private boolean	bRetryOnFail = true;
 		private boolean bQuietOnFail = false;
 		private boolean bAllowQueue = true;
@@ -164,6 +165,12 @@ public class CallQueueI {
 		Parameters param = new Parameters();
 		public long	lDbgLastRunTimeMilis;
 		public long	lDbgLastQueueTimeMilis;
+		private Object	objReturnValue;
+		
+		/**
+		 * the access to the caller already is restricted 
+		 * @return
+		 */
 		public Parameters getParamsForMaintenance(){
 			return param;
 		}
@@ -174,6 +181,14 @@ public class CallQueueI {
 //		public Object[] getAllParams(){
 //			return this.aobjParams;
 //		}
+		
+		public Object getReturnValue() {
+			return objReturnValue;
+		}
+		
+		public void setCallerReturnValue(Object obj){
+			this.objReturnValue=obj;
+		}
 	}
 	
 	ArrayList<CallableX> aCallList = new ArrayList<CallableX>();
@@ -209,9 +224,11 @@ public class CallQueueI {
 				return true;
 			}else{
 				if(caller.iFailCount==0){
-					if(!caller.isQuietOnFail()){
-						GlobalCommandsDelegatorI.i().dumpDevWarnEntry("caller failed: "+caller.getId(),
-								caller, caller.getEnclosingObject());
+					if(!caller.isQuietOnFail()){ //TODO tho, for each i%100 failures, should warn, but if the delay is high, this number could be lowered like warn every 10s no matter the count... 
+						GlobalCommandsDelegatorI.i().dumpDevWarnEntry(
+							"caller failed: "+caller.getId(), caller, caller.getEnclosingObject(),
+							Arrays.toString(caller.asteDbgLastQueuedAt)
+						);
 					}
 				}
 				caller.iFailCount++;

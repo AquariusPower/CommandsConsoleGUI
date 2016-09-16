@@ -56,6 +56,7 @@ import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.WorkAroundI;
+import com.github.commandsconsolegui.misc.WorkAroundI.BugFixBoolTogglerCmdField;
 import com.jme3.input.KeyInput;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
@@ -286,10 +287,10 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		getDialogMainContainer().addChild(cntrCenterMain, BorderLayout.Position.Center);
 		
 		// impossible layout indicator
-		Label lbl = new Label("[X] impossible layout",getDiagStyle());
+//		Label lbl = new Label("[X] impossible layout",getDiagStyle());
 //		lbl.setFontSize(0.5f);
 		getDialogMainContainer().setImpossibleLayoutIndicatorAndCenterMain(
-			lbl,
+			null, //			lbl,
 			cntrCenterMain);
 		
 		///////////////////////// NORTH (title + info/help)
@@ -1273,7 +1274,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //			getContainerMain().setLocalRotation(quaBkpMain);
 //		}
 //		bugFix(null, null, btgBugFixAutoReinitBorderOnFocusGained);
-		WorkAroundI.i().bugFix(null, null, btgBugFixAutoReinitBorder);
+		WorkAroundI.i().bugFix(btgBugFixAutoReinitBorder);
 		changeResizeBorderColor(ColorRGBA.Cyan);
 	}
 	
@@ -1320,7 +1321,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		return adiag;
 	}
 	
-	BoolTogglerCmdField btgBugFixAutoReinitBorder = new BoolTogglerCmdField(this,false)
+	BugFixBoolTogglerCmdField btgBugFixAutoReinitBorder = new BugFixBoolTogglerCmdField(this,false)
 		.setCallerAssigned(new CallableX(this) {
 			@Override
 			public Boolean call() {

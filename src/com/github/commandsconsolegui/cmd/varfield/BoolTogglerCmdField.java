@@ -58,7 +58,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 	private boolean bDoCallOnChange = true;
 //	private CallableX	caller;
 //	private boolean	bConstructed;
-	private boolean	bBugFixerMode;
+//	private boolean	bBugFixerMode;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
@@ -451,10 +451,10 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 		return strCodePrefixDefault;
 	}
 
-	public BoolTogglerCmdField setAsBugFixerMode() {
-		bBugFixerMode=true;
-		WorkAroundI.i().prepareBugFix(this);
-		return getThis();
-	}
+//	public BoolTogglerCmdField setAsBugFixerMode() {
+//		bBugFixerMode=true;
+//		WorkAroundI.i().prepareBugFix(this);
+//		return getThis();
+//	}
 
 }

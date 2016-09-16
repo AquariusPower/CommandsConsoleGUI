@@ -29,6 +29,8 @@ package com.github.commandsconsolegui.misc;
 
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 
 /**
  * This exists to make it easy to track all bug fix implementations.
@@ -41,7 +43,7 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
  * 
  * Bug fixes should be a temporary code.
  * 
- * Implement bugfixes identifiers as {@link BoolTogglerCmdField}, 
+ * Implement bugfixes identifiers as {@link BugFixBoolTogglerCmdField}, 
  * so they become toggable user console commands.
  * The fixer code is a caller set at it.
  * 
@@ -56,6 +58,10 @@ public class WorkAroundI {
 	private static WorkAroundI	instance=new WorkAroundI();
 	public static WorkAroundI i(){return instance;}
 	
+	public void bugFix(BugFixBoolTogglerCmdField btgBugFixId, Object... aobjCustomParams) {
+		bugFix(btgBugFixId,null,null,aobjCustomParams);
+	}
+	
 	/**
 	 * BFR is bugfix return (type)
 	 * 
@@ -65,9 +71,8 @@ public class WorkAroundI {
 	 * @param aobjCustomParams
 	 * @return
 	 */
-	public <BFR> BFR bugFix(Class<BFR> clReturnType,
-			BFR objRetIfBugFixBoolDisabled, BoolTogglerCmdField btgBugFixId,
-			Object... aobjCustomParams
+	public <BFR> BFR bugFix(BugFixBoolTogglerCmdField btgBugFixId, Class<BFR> clReturnType,
+			BFR objRetIfBugFixBoolDisabled, Object... aobjCustomParams
 	) {
 		if(!btgBugFixId.b())return objRetIfBugFixBoolDisabled;
 		
@@ -86,6 +91,10 @@ public class WorkAroundI {
 //		Float f = MiscI.i().getParamFromArray(Float.class, aobjCustomParams, 0);
 //		String str = MiscI.i().getParamFromArray(String.class, aobjCustomParams, 1);
 			bFixed=btgBugFixId.callerAssignedRunNow(aobjCustomParams);
+			
+			if(bFixed){
+				objRet=btgBugFixId.getCallerAssignedForMaintenance(ccSelf).getReturnValue();
+			}
 		}
 		
 		if(!bFixed){
@@ -97,7 +106,37 @@ public class WorkAroundI {
 		return (BFR)objRet;
 	}
 	
-	public void prepareBugFix(BoolTogglerCmdField btgBugFix){
-		btgBugFix.getCallerAssignedForMaintenance(ccSelf).setQueueDenied();
+//	public void prepareBugFix(BoolTogglerCmdField btgBugFix){
+//		btgBugFix.getCallerAssignedForMaintenance(ccSelf).setQueueDenied();
+//	}
+	
+	public static class BugFixBoolTogglerCmdField extends BoolTogglerCmdField{
+
+		public BugFixBoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis,
+				boolean bInitialValue, String strHelp) {
+			super(rfcfgOwnerUseThis, bInitialValue, strHelp);
+			// TODO Auto-generated constructor stub
+		}
+
+		public BugFixBoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis,
+				boolean bInitValue) {
+			super(rfcfgOwnerUseThis, bInitValue);
+			// TODO Auto-generated constructor stub
+		}
+		
+		@Override
+		public BugFixBoolTogglerCmdField setCallerAssigned(CallableX caller) {
+			caller.setQueueDenied();
+//			WorkAroundI.i().prepareBugFix(this);
+			
+			super.setCallerAssigned(caller);
+			
+			return getThis();
+		}
+		
+		@Override
+		protected BugFixBoolTogglerCmdField getThis() {
+			return this;
+		}
 	}
 }

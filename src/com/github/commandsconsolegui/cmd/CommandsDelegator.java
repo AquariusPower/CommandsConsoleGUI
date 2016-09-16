@@ -722,7 +722,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		CallQueueI.i().addCall(new CallableX(this) {
 			@Override
 			public Boolean call() {
-				if(!CommandsDelegator.this.isInitialized())return false; //wait its initialization
+				if(!CommandsDelegator.this.isInitialized()){
+					this.setQuietOnFail(true); //no messages, this is expected
+					return false; //wait its initialization
+				}
+				this.setQuietOnFail(false);
 				
 				//this will let it fill the commands list for this listener
 				bFillCommandList=true;
@@ -1334,7 +1338,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //		icui().recreateConsoleGui();
 	}
 
-	private ECmdReturnStatus cmdRawLineCheckAlias(){
+	private ECmdReturnStatus precmdRawLineCheckAlias(){
 		bLastAliasCreatedSuccessfuly=false;
 		
 		if(ccl.getOriginalLine()==null)return ECmdReturnStatus.NotFound;
@@ -2334,7 +2338,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			
 			strCleaningCmdLine = strCleaningCmdLine.trim();
 			if(strCleaningCmdLine.startsWith(getCommandPrefixStr())){
-				strCleaningCmdLine = strCleaningCmdLine.substring(1); //cmd prefix 1 char
+				strCleaningCmdLine = strCleaningCmdLine.substring(getCommandPrefixStr().length()); //cmd prefix 1 char
 			}
 			
 			if(strCleaningCmdLine.endsWith(getCommentPrefixStr())){
@@ -3013,9 +3017,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //		boolean bCommandFound = false;
 		
 		try{
-			if(!isFound(ecrs))ecrs=cmdRawLineCheckEndOfStartupCmdQueue();
+			if(!isFound(ecrs))ecrs=precmdRawLineCheckEndOfStartupCmdQueue();
 			
-			if(!isFound(ecrs))ecrs=cmdRawLineCheckAlias();
+			if(!isFound(ecrs))ecrs=precmdRawLineCheckAlias();
+			
+			if(!isFound(ecrs))ecrs=precmdExpandRegexAsCommands();
 			
 			if(!isFound(ecrs)){
 				/**
@@ -3268,6 +3274,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		dumpDevInfoEntry("CmdQueued: "+strFullCmdLine+(bPrepend?" #Prepended":""));
 		
+//		if(strFullCmdLine==null || strFullCmdLine.equalsIgnoreCase(getCommandPrefix()+"null")){
+//			throw new PrerequisitesNotMetException("TODO what???", strFullCmdLine, bPrepend);
+//		}
+		
 		if(bPrepend){
 			astrExecConsoleCmdsQueue.add(0,strFullCmdLine);
 		}else{
@@ -3277,20 +3287,20 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	
 	private void updateExecConsoleCmdQueue() {
 		if(astrExecConsoleCmdsQueue.size()>0){ // one per time! NO while here!!!!
-			String str=astrExecConsoleCmdsQueue.remove(0);
-			if(!str.trim().endsWith(""+getCommentPrefix())){
+			String strCmdOnQueue=astrExecConsoleCmdsQueue.remove(0);
+			if(!strCmdOnQueue.trim().endsWith(""+getCommentPrefix())){
 				if(btgShowExecQueuedInfo.get()){ // prevent messing user init cfg console log
-					dumpInfoEntry("QueueExec: "+str);
+					dumpInfoEntry("QueueExec: "+strCmdOnQueue);
 				}
 			}
 			
-			ECmdReturnStatus ecrs = executeCommand(str);
+			ECmdReturnStatus ecrs = executeCommand(strCmdOnQueue);
 			switch(ecrs){
 				case FoundAndWorked:
 //				case FoundCallerAndQueuedIt:
 					break;
 				default:
-					dumpWarnEntry("QueueExecFail("+ecrs+"): "+str);
+					dumpWarnEntry("QueueExecFail("+ecrs+"): "+strCmdOnQueue);
 					break;
 			}
 //			if(ecrs.compareTo(ECmdReturnStatus.FoundAndWorked)!=0){
@@ -3739,8 +3749,35 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	private String fileNamePrepareLog(String strFileBaseName, boolean bAddDateTime){
 		return fileNamePrepare(strFileBaseName, strFileTypeLog, bAddDateTime);
 	}
-
-	private ECmdReturnStatus cmdRawLineCheckEndOfStartupCmdQueue() {
+	
+	private ECmdReturnStatus precmdExpandRegexAsCommands(){
+		String strCmdLine = ccl.getOriginalLine();
+		
+		if(isCommandString(strCmdLine)){
+			String strCmd = extractCommandPart(strCmdLine,0);
+			
+			if(!MiscI.i().isValidIdentifierCmdVarAliasFuncString(strCmd)){
+				String strCmdRegex=strCmd;
+				boolean bCmdRegexMatched=false;
+//				String strParams = ccl.getOriginalLine().substring(strCmd.length());
+				ArrayList<String> astrCmdParams = convertToCmdAndParamsList(strCmdLine);
+				astrCmdParams.remove(0); //keep only params
+				String strParams=String.join(" ",astrCmdParams);
+				for(String strCmdChk:getAllPossibleCommands()){
+					if(strCmdChk.matches(strCmdRegex)){
+						addCmdToQueue(getCommandPrefixStr()+strCmdChk+" "+strParams);
+						bCmdRegexMatched=true;
+					}
+				}
+				
+				if(bCmdRegexMatched)return ECmdReturnStatus.FoundAndWorked;
+			}
+		}
+		
+		return ECmdReturnStatus.NotFound;
+	}
+	
+	private ECmdReturnStatus precmdRawLineCheckEndOfStartupCmdQueue() {
 		if(!bStartupCmdQueueDone){
 			String strCmd = getCommandPrefixStr()+RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE.getUniqueCmdId();
 			if(strCmd.equalsIgnoreCase(ccl.getOriginalLine())){

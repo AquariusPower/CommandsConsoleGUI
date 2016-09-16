@@ -29,16 +29,11 @@ package com.github.commandsconsolegui.jmegui.console;
 
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
-import java.io.File;
 import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.regex.Pattern;
 
-import truetypefont.TrueTypeBitmapGlyph;
 import truetypefont.TrueTypeFont;
-import truetypefont.TrueTypeKey;
-import truetypefont.TrueTypeLoader;
 
 import com.github.commandsconsolegui.cmd.CommandData;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
@@ -46,35 +41,27 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.DumpEntryData;
 import com.github.commandsconsolegui.cmd.EDataBaseOperations;
 import com.github.commandsconsolegui.cmd.IConsoleUI;
-import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
-import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
-import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.jmegui.GlobalDialogHelperI;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
-import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
 import com.github.commandsconsolegui.misc.AutoCompleteI;
 import com.github.commandsconsolegui.misc.AutoCompleteI.AutoCompleteResult;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.DebugI;
-import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
-import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.google.common.base.Strings;
+import com.github.commandsconsolegui.misc.WorkAroundI;
+import com.github.commandsconsolegui.misc.WorkAroundI.BugFixBoolTogglerCmdField;
 import com.jme3.app.StatsAppState;
 import com.jme3.asset.AssetManager;
-import com.jme3.asset.AssetNotFoundException;
-import com.jme3.asset.plugins.FileLocator;
-import com.jme3.font.BitmapCharacter;
-import com.jme3.font.BitmapCharacterSet;
 import com.jme3.font.BitmapFont;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
@@ -83,12 +70,10 @@ import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.Trigger;
-import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
-import com.jme3.texture.Texture2D;
 
 /**
  * A graphical console where developers and users can issue application commands.
@@ -100,7 +85,7 @@ import com.jme3.texture.Texture2D;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *	
  */
-public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends BaseDialogStateAbs<T,R> implements IConsoleUI, IWorkAroundBugFix {
+public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends BaseDialogStateAbs<T,R> implements IConsoleUI {
 //	private FpsLimiterState fpslState = new FpsLimiterState();
 	
 //	ReattachSafelyState rss;
@@ -318,8 +303,69 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 //	private BitmapFont	fontConsoleExtraDefault;
 //	private boolean	bConfigureSimpleCompleted;
 
-	BoolTogglerCmdField btgBugFixStatsLabelTextSize = 
-		new BoolTogglerCmdField(this,false,"FIXED: By fixating the size of the label, this crash preventer is not that necesary anymore.");
+	BugFixBoolTogglerCmdField btgBugFixStatsLabelTextSize = new BugFixBoolTogglerCmdField(this,false,"FIXED: By fixating the size of the label, this crash preventer is not that necesary anymore.")
+		.setCallerAssigned(new CallableX(this) {
+			@Override
+			public Boolean call() {
+				if(!isEnabled())return true; //simple skipper
+				
+				/**
+				 * BugFix: because the related crash should/could be prevented/preventable.
+				 * TODO this bugfix is slow right?
+				 * 
+				 * Buttons get smashed, shrinking to less than 0, they seem to not accept preferred size constraint.
+				 */
+				
+				boolean bFailed=false;
+				while(true){
+					String str=getStatsText();
+					if(str.isEmpty())break;
+					
+					boolean bCheckAlways=true; //safer
+					if(!bCheckAlways){
+						if(iStatsTextSafeLength!=null){
+							if(str.length()>iStatsTextSafeLength){
+								str=str.substring(0,iStatsTextSafeLength);
+								setStatsText(str);
+							}
+							break;
+						}
+					}
+					
+					boolean bRetry=false;
+					try{
+						/**
+						 * this is when crashes outside of here
+						 */
+						getDialogMainContainer().updateLogicalState(0.05f);
+						
+						if(bFailed){ //had failed, so look for a safe length
+							if(iStatsTextSafeLength==null || !iStatsTextSafeLength.equals(str.length())){
+								iStatsTextSafeLength=str.length();
+								cd().dumpDebugEntry("StatsTextSafeLength="+str.length());
+							}
+						}
+					}catch(Exception ex){
+						if(bExceptionOnce){
+							cd().dumpExceptionEntry(ex);
+							bExceptionOnce=false;
+						}
+						
+						str=str.substring(0,str.length()-1);
+						setStatsText(str);
+						
+						bRetry = true;
+						bFailed = true;
+					}
+					
+					if(!bRetry)break;
+				}
+				
+				return !bFailed;
+			}
+		});
+//		.setAsBugFixerMode();
+		
 	private Object	ccTrustedManipulator;
 //	private boolean	bUsePreQueue = false; 
 	
@@ -2033,71 +2079,71 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		}
 	}
 	
-	@Override
-	public <BFR> BFR bugFix(Class<BFR> clReturnType, BFR objRetIfBugFixBoolDisabled, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams) {
-		if(!btgBugFixId.b())return objRetIfBugFixBoolDisabled;
-		
-		boolean bFixed = false;
-		Object objRet = null;
-		
-		if(btgBugFixStatsLabelTextSize.isEqualToAndEnabled(btgBugFixId)){
-			/**
-			 * BugFix: because the related crash should/could be prevented/preventable.
-			 * TODO this bugfix is slow right?
-			 * 
-			 * Buttons get smashed, shrinking to less than 0, they seem to not accept preferred size constraint.
-			 */
-			
-			boolean bFailed=false;
-			while(true){
-				String str=getStatsText();
-				if(str.isEmpty())break;
-				
-				boolean bCheckAlways=true; //safer
-				if(!bCheckAlways){
-					if(iStatsTextSafeLength!=null){
-						if(str.length()>iStatsTextSafeLength){
-							str=str.substring(0,iStatsTextSafeLength);
-							setStatsText(str);
-						}
-						break;
-					}
-				}
-				
-				boolean bRetry=false;
-				try{
-					/**
-					 * this is when crashes outside of here
-					 */
-					getDialogMainContainer().updateLogicalState(0.05f);
-					
-					if(bFailed){ //had failed, so look for a safe length
-						if(iStatsTextSafeLength==null || !iStatsTextSafeLength.equals(str.length())){
-							iStatsTextSafeLength=str.length();
-							cd().dumpDebugEntry("StatsTextSafeLength="+str.length());
-						}
-					}
-				}catch(Exception ex){
-					if(bExceptionOnce){
-						cd().dumpExceptionEntry(ex);
-						bExceptionOnce=false;
-					}
-					
-					str=str.substring(0,str.length()-1);
-					setStatsText(str);
-					
-					bRetry = true;
-					bFailed = true;
-				}
-				
-				if(!bRetry)break;
-			}
-			
-			bFixed=true;
-		}
-		
-		return MiscI.i().bugFixRet(clReturnType,bFixed, objRet, aobjCustomParams);
-	}
+//	@Override
+//	public <BFR> BFR bugFix(Class<BFR> clReturnType, BFR objRetIfBugFixBoolDisabled, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams) {
+//		if(!btgBugFixId.b())return objRetIfBugFixBoolDisabled;
+//		
+//		boolean bFixed = false;
+//		Object objRet = null;
+//		
+//		if(btgBugFixStatsLabelTextSize.isEqualToAndEnabled(btgBugFixId)){
+//			/**
+//			 * BugFix: because the related crash should/could be prevented/preventable.
+//			 * TODO this bugfix is slow right?
+//			 * 
+//			 * Buttons get smashed, shrinking to less than 0, they seem to not accept preferred size constraint.
+//			 */
+//			
+//			boolean bFailed=false;
+//			while(true){
+//				String str=getStatsText();
+//				if(str.isEmpty())break;
+//				
+//				boolean bCheckAlways=true; //safer
+//				if(!bCheckAlways){
+//					if(iStatsTextSafeLength!=null){
+//						if(str.length()>iStatsTextSafeLength){
+//							str=str.substring(0,iStatsTextSafeLength);
+//							setStatsText(str);
+//						}
+//						break;
+//					}
+//				}
+//				
+//				boolean bRetry=false;
+//				try{
+//					/**
+//					 * this is when crashes outside of here
+//					 */
+//					getDialogMainContainer().updateLogicalState(0.05f);
+//					
+//					if(bFailed){ //had failed, so look for a safe length
+//						if(iStatsTextSafeLength==null || !iStatsTextSafeLength.equals(str.length())){
+//							iStatsTextSafeLength=str.length();
+//							cd().dumpDebugEntry("StatsTextSafeLength="+str.length());
+//						}
+//					}
+//				}catch(Exception ex){
+//					if(bExceptionOnce){
+//						cd().dumpExceptionEntry(ex);
+//						bExceptionOnce=false;
+//					}
+//					
+//					str=str.substring(0,str.length()-1);
+//					setStatsText(str);
+//					
+//					bRetry = true;
+//					bFailed = true;
+//				}
+//				
+//				if(!bRetry)break;
+//			}
+//			
+//			bFixed=true;
+//		}
+//		
+//		return MiscI.i().bugFixRet(clReturnType,bFixed, objRet, aobjCustomParams);
+//	}
 	
 //	enum EBugFix{
 //		StatsLabelTextSize,
@@ -2174,7 +2220,8 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		
 		setStatsText(str);
 		
-		bugFix(null,null,btgBugFixStatsLabelTextSize);
+		WorkAroundI.i().bugFix(btgBugFixStatsLabelTextSize);
+//		bugFix(null,null,btgBugFixStatsLabelTextSize);
 //		bugFix(EBugFix.StatsLabelTextSize);
 	}	
 	

@@ -34,15 +34,17 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.MouseCursorListenerAbs;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
-import com.github.commandsconsolegui.misc.IWorkAroundBugFix;
-import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.WorkAroundI;
+import com.github.commandsconsolegui.misc.WorkAroundI.BugFixBoolTogglerCmdField;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.GuiGlobals;
@@ -60,7 +62,7 @@ import com.simsilica.lemur.focus.FocusTarget;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 
  */
-public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements FocusChangeListener, IWorkAroundBugFix {
+public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements FocusChangeListener {
 	public static final class CompositeControl extends CompositeControlAbs<LemurFocusHelperStateI>{
 		private CompositeControl(LemurFocusHelperStateI casm){super(casm);}; }
 	private CompositeControl ccSelf = new CompositeControl(this);
@@ -361,8 +363,8 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 					+ (i*fdvDialogDisplacement.floatValue())
 					+ fdvDialogDisplacement.floatValue(); 
 				
-				GuiControl gct = (GuiControl)ft;
-				Spatial spt = MiscJmeI.i().getParentestFrom(gct.getSpatial());
+				GuiControl gcTarget = (GuiControl)ft;
+				Spatial spt = MiscJmeI.i().getParentestFrom(gcTarget.getSpatial());
 				
 				BaseDialogStateAbs diag = MiscJmeI.i().getUserDataPSH(spt, BaseDialogStateAbs.class.getName());
 //				BaseDialogStateAbs diag = (BaseDialogStateAbs)spt.getUserData(BaseDialogStateAbs.class.getName());
@@ -374,7 +376,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 					}
 				}
 				
-				bugFix(null, null, btgBugFixZSortApply, spt, fZ);
+				WorkAroundI.i().bugFix(btgBugFixZSortApply, spt, fZ);
 				
 //				parentestApplyZ(gct.getSpatial(), fZ);
 //				gct.getSpatial().getLocalTranslation().z = (i*0.1f)+0.1f; //so will always be above all other GUI elements that are expectedly at 0
@@ -440,30 +442,55 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 		return super.updateAttempt(tpf);
 	}
 	
-	private BoolTogglerCmdField btgBugFixZSortApply = new BoolTogglerCmdField(this,true); 
-	@Override
-	public <BFR> BFR bugFix(Class<BFR> clReturnType, BFR objRetIfBugFixBoolDisabled, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams) {
-		if(!btgBugFixId.b())return objRetIfBugFixBoolDisabled;
-		
-		boolean bFixed = false;
-		Object objRet = null;
-		
-		if(btgBugFixZSortApply.isEqualToAndEnabled(btgBugFixId)){
-			Spatial spt = MiscI.i().getParamFromArray(Spatial.class, aobjCustomParams, 0);
-			Float fZ = MiscI.i().getParamFromArray(Float.class, aobjCustomParams, 1);
-			
-			/**
-			 * must be re-added to work...
-			 */
-			Node nodeParent = spt.getParent();
-			spt.removeFromParent();
-			spt.getLocalTranslation().z=fZ;
-			nodeParent.attachChild(spt);
-			
-			bFixed=true;
-		}
-		
-		return MiscI.i().bugFixRet(clReturnType,bFixed, objRet, aobjCustomParams);
-	}
+	private BugFixBoolTogglerCmdField btgBugFixZSortApply = new BugFixBoolTogglerCmdField(this,false)
+		.setCallerAssigned(new CallableX(this) {
+			@Override
+			public Boolean call() {
+				if(!isEnabled())return true; //skipper
+				
+				Spatial spt = this.getParamsForMaintenance().getParam(Spatial.class, 0);
+				Float fZ = this.getParamsForMaintenance().getParam(Float.class, 1);
+				
+				/**
+				 * must be re-added to work...
+				 */
+				Node nodeParent = spt.getParent();
+				if(nodeParent==null){
+					GlobalCommandsDelegatorI.i().dumpDevWarnEntry("parent shouldnt be null...", spt, this, btgBugFixZSortApply);
+					return false;
+				}
+				
+				spt.removeFromParent();
+				spt.getLocalTranslation().z=fZ;
+				nodeParent.attachChild(spt);
+				
+				return true;
+			}
+		});
+	
+//	@Override
+//	public <BFR> BFR bugFix(Class<BFR> clReturnType, BFR objRetIfBugFixBoolDisabled, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams) {
+//		if(!btgBugFixId.b())return objRetIfBugFixBoolDisabled;
+//		
+//		boolean bFixed = false;
+//		Object objRet = null;
+//		
+//		if(btgBugFixZSortApply.isEqualToAndEnabled(btgBugFixId)){
+//			Spatial spt = MiscI.i().getParamFromArray(Spatial.class, aobjCustomParams, 0);
+//			Float fZ = MiscI.i().getParamFromArray(Float.class, aobjCustomParams, 1);
+//			
+//			/**
+//			 * must be re-added to work...
+//			 */
+//			Node nodeParent = spt.getParent();
+//			spt.removeFromParent();
+//			spt.getLocalTranslation().z=fZ;
+//			nodeParent.attachChild(spt);
+//			
+//			bFixed=true;
+//		}
+//		
+//		return MiscI.i().bugFixRet(clReturnType,bFixed, objRet, aobjCustomParams);
+//	}
 
 }
