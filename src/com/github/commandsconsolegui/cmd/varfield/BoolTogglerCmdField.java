@@ -294,12 +294,12 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 	}
 	
 	@Override
-	protected void prepareCallQueueOnValueChanged() {
+	protected void prepareCallerAssigned() {
 		if(isConstructed()){
 			if(isChangedAndRefresh()){
 				if(bDoCallOnChange){
-					if(isCallOnValueChangedSet()){
-						super.prepareCallQueueOnValueChanged();
+					if(isCallerAssigned()){
+						super.prepareCallerAssigned();
 					}else{
 						MsgI.i().warn("call on value changed not set for "+this.getReport(), this);
 					}
@@ -375,13 +375,13 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 //		return getThis();
 //	}
 	@Override
-	public BoolTogglerCmdField setCallOnValueChanged(CallableX caller) {
+	public BoolTogglerCmdField setCallerAssigned(CallableX caller) {
 		if(!bDoCallOnChange){
 			// to avoid developer forgot already configured to call nothing
 			throw new PrerequisitesNotMetException("was set to call nothing already!",this,getHelp());
 		}
 		
-		super.setCallOnValueChanged(caller);
+		super.setCallerAssigned(caller);
 		
 		return getThis();
 	}
@@ -392,7 +392,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 	 */
 	public BoolTogglerCmdField setCallNothingOnChange(){
 		// to avoid developer forgotten previously configured caller
-		if(isCallOnValueChangedSet())throw new PrerequisitesNotMetException("caller already set", this, getHelp());
+		if(isCallerAssigned())throw new PrerequisitesNotMetException("caller already set", this, getHelp());
 //		PrerequisitesNotMetException.assertNotAlreadySet("caller", caller, null, this, getHelp());
 		
 //		if(caller!=null){

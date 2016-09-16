@@ -213,7 +213,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	ClickFocusMouseCursorListener focusMouseCursorListener = new ClickFocusMouseCursorListener();
 	
 	public void prepareDialogToBeFocused(LemurDialogGUIStateAbs diag){
-		MiscJmeI.i().setUserDataPSH(diag.getInputField(ccSelf), diag);
+		MiscJmeI.i().setUserDataPSH(diag.getInputFieldForManagement(ccSelf), diag);
 //		diag.getContainerMain().setUserData(LemurDialogGUIStateAbs.class.getName(), diag);
 		
 		CursorEventControl.addListenersToSpatial(diag.getDialogMainContainer(), 
@@ -233,7 +233,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	
 	public boolean lowerDialogFocusPriority(Spatial sptAny){
 		BaseDialogStateAbs diag = retrieveDialogFromSpatial(sptAny);
-		Spatial sptFocusable = diag.getInputField(ccSelf);
+		Spatial sptFocusable = diag.getInputFieldForManagement(ccSelf);
 		
 		if(asptFocusRequestList.contains(sptFocusable)){
 			asptFocusRequestList.remove(sptFocusable);
@@ -258,7 +258,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 			break;
 		}
 		
-		requestFocus(diagFocus.getInputField(ccSelf),true);
+		requestFocus(diagFocus.getInputFieldForManagement(ccSelf),true);
 	}
 	
 	/**
@@ -288,23 +288,34 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 		BaseDialogStateAbs diag = retrieveDialogFromSpatial(spt);
 		if(!diag.isLayoutValid())return; //TODO return false? or queue this request?
 		
-		assertIsAtRenderingNode(spt);
-		asptFocusRequestList.remove(spt); //to update the priority
+		ArrayList<BaseDialogStateAbs> adiag = new ArrayList<BaseDialogStateAbs>();
+		if (diag instanceof LemurDialogGUIStateAbs) {
+			LemurDialogGUIStateAbs diagLemur = (LemurDialogGUIStateAbs) diag;
+			
+			/**
+			 * TODO bring all parents up when focusing a modal child
+	//		Node nodeParentest = MiscJmeI.i().getParentestFrom(spt);
+	//		LemurDialogGUIStateAbs diag = MiscJmeI.i().getUserDataPSH(nodeParentest, LemurDialogGUIStateAbs.class);
+	//		ArrayList adiagList = diag.getParentsDialogList(ccSelf);
+			 */
+			adiag.addAll(diagLemur.getParentsDialogList());
+		}
+		adiag.add(diag);
 		
-		/**
-		 * TODO bring all parents up when focusing a modal child
-		Node nodeParentest = MiscJmeI.i().getParentestFrom(spt);
-		LemurDialogGUIStateAbs diag = MiscJmeI.i().getUserDataPSH(nodeParentest, LemurDialogGUIStateAbs.class);
-		ArrayList adiagList = diag.getParentsDialogList(ccSelf);
-		 */
-		
-//		// validate
-//		Node node = MiscJmeI.i().getParentestFrom(spt);
-//		if(node==null || !GlobalGUINodeI.i().get().equals(node.getParent())){
-//			msgDbg("not at GUI node "+spt.getName(),false);
-//			return;
-//		}
-		asptFocusRequestList.add(spt);
+		for(BaseDialogStateAbs diagWork:adiag){
+			spt = diagWork.getInputFieldForManagement(ccSelf);
+			
+			assertIsAtRenderingNode(spt);
+			asptFocusRequestList.remove(spt); //to update the priority
+			
+	//		// validate
+	//		Node node = MiscJmeI.i().getParentestFrom(spt);
+	//		if(node==null || !GlobalGUINodeI.i().get().equals(node.getParent())){
+	//			msgDbg("not at GUI node "+spt.getName(),false);
+	//			return;
+	//		}
+			asptFocusRequestList.add(spt);
+		}
 		
 		if(spt instanceof TextField){
 			MiscLemurHelpersStateI.i().setTextFieldInputToBlinkCursor((TextField) spt);

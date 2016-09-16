@@ -83,7 +83,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	private VarCmdUId	vcuid;
 	private boolean	bConstructed = false;
 
-	private CallableX	caller;
+	private CallableX	callerAssigned;
 	
 	private static ArrayList<VarCmdFieldAbs> avcfList = new ArrayList<VarCmdFieldAbs>();
 	public static final HashChangeHolder hvhVarList = new HashChangeHolder(avcfList);
@@ -103,6 +103,11 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		return a;
 	}
 	
+	/**
+	 * 
+	 * @param rfcfgOwner use null if this is not a class field, but a local variable, or for any reason the related console variable creation is to be skipped.
+	 * @param evcm
+	 */
 	public VarCmdFieldAbs(IReflexFillCfg rfcfgOwner, EVarCmdMode evcm){
 		this.evcm=evcm;
 		this.rfcfgOwner=rfcfgOwner;
@@ -411,7 +416,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		if(objRawValueDefault==null)objRawValueDefault=(O)objValue;
 		
 		if(vivo!=null){
-			if(vivo.getObjectValue()!=objValue)prepareCallQueueOnValueChanged();
+			if(vivo.getObjectValue()!=objValue)prepareCallerAssigned(false);
 			
 			vivo.setObjectValue(objValue);
 		}else{
@@ -422,12 +427,17 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		return getThis();
 	}
 	
-	protected void prepareCallQueueOnValueChanged() {
+	protected void prepareCallerAssigned() {
+		prepareCallerAssigned(false);
+	}
+	protected Boolean prepareCallerAssigned(boolean bRunNow) {
 		if(isConstructed()){ 
-			if(caller!=null){
-				CallQueueI.i().addCall(caller);
+			if(callerAssigned!=null){
+				return CallQueueI.i().addCall(callerAssigned,bRunNow);
 			}
 		}
+		
+		return false;
 	}
 
 	protected boolean isRawValueLazySet(){
@@ -471,7 +481,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		return getCodePrefixVariant().equals(getCodePrefixDefault());
 	}
 
-	public VarCmdUId getIdTmp(CommandsDelegator.CompositeControl cc) {
+	public VarCmdUId getVarCmdUIdForManagement(CommandsDelegator.CompositeControl cc) {
 		cc.assertSelfNotNull();
 		return vcuid;
 	}
@@ -502,13 +512,20 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		return objRawValueDefault;
 	}
 	
-	public S setCallOnValueChanged(CallableX caller){
-		this.caller=caller;
+	/**
+	 * Changes on raw value will trigger this caller.
+	 * Also, if this is a command, the caller can be directly invoked by the commands delegator (no queue). 
+	 * 
+	 * @param caller
+	 * @return
+	 */
+	public S setCallerAssigned(CallableX caller){
+		this.callerAssigned=caller;
 		return getThis();
 	}
 	
-	public boolean isCallOnValueChangedSet(){
-		return caller!=null;
+	public boolean isCallerAssigned(){
+		return callerAssigned!=null;
 	}
 	
 	/**
@@ -526,9 +543,11 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		return bConstructed;
 	}
 	
-	public S queueValueCallNow(){
-		prepareCallQueueOnValueChanged();
-		return getThis();
+	public Boolean callerAssignedRunNow(){
+		return prepareCallerAssigned(true);
+	}
+	public void callerAssignedQueueNow(){
+		prepareCallerAssigned(false);
 	}
 
 	

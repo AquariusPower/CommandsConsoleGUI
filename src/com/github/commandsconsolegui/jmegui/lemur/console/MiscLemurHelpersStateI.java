@@ -881,6 +881,7 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 	 * @param bMustDoItNow only works if it is going to be rendered
 	 * @return null if size setup fails, like being too tiny. Or a valid size.
 	 */
+	@Deprecated
 	public Vector3f setGrantedSizeValidateAndDelayed(
 		final Panel pnl, 
 		final Vector3f v3fSizeF, 
@@ -889,7 +890,7 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 	){
 		final String strSizeKey="SizeKey";
 		
-		CallableX caller = new CallableX() {
+		CallableX caller = new CallableX(this) {
 			@Override
 			public Boolean call() {
 				if(!MiscJmeI.i().isGoingToBeRenderedNow(pnl))return false; //re-add to queue

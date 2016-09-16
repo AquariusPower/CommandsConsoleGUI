@@ -199,7 +199,7 @@ public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceDialo
 			///////////// the slider
 			final DialogListEntryData<T> dledSlider = new DialogListEntryData<T>(this);
 			
-			CallableX caller = new CallableX(){
+			CallableX caller = new CallableX(this){
 				@Override
 				public Boolean call() {
 //					varn.setObjectRawValue(dledSlider.getSliderForValue().getCurrentValue());

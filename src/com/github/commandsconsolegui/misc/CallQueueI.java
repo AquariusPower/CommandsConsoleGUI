@@ -31,6 +31,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.misc.RetryOnFailure.IRetryListOwner;
+
 
 /**
  * 
@@ -52,10 +55,39 @@ public class CallQueueI {
 		V call();
 	}
 	
-	public static abstract class CallableX implements CallableWeak<Boolean>{
+	public static abstract class CallableX implements CallableWeak<Boolean>,IRetryListOwner{
 		private boolean bPrepend;
-		private HashMap<String,Object> hmCustom = new HashMap<String, Object>();
+		private HashMap<String,Object> hmCustom;
+//		private int	iDelayBetweenRetriesMilis = 0;
+		private RetryOnFailure rReQueue;
+		private ArrayList<RetryOnFailure>	arList;
+		private String	strId;
+		private long	lLastUpdateMilis;
+		private String strDbgGenericSuperClass;
+		private StackTraceElement[] asteDbgInstancedAt;
+		private long iFailCount=0;
+		private Object	objEnclosing;
 		
+		public CallableX(Object objEnclosing) {
+			this(objEnclosing,0);
+		}
+		public CallableX(Object objEnclosing, int i) {
+			super();
+			
+			this.objEnclosing=objEnclosing;
+			
+			strDbgGenericSuperClass = this.getClass().getGenericSuperclass().getTypeName();
+			asteDbgInstancedAt = Thread.currentThread().getStackTrace();
+			
+			hmCustom = new HashMap<String, Object>();
+			
+			// keep together in this order:
+			arList = new ArrayList<RetryOnFailure>(); //MUST BE BEFORE {@link RetryOnFailure} instance below!!! 
+			rReQueue = new RetryOnFailure(this, "ReQueue");
+			
+			rReQueue.setRetryDelay(i);
+//			this.iDelayBetweenRetriesMilis=i;
+		}
 		public CallableX setAsPrepend(){
 			bPrepend=true;
 			return this;
@@ -66,6 +98,37 @@ public class CallQueueI {
 		public Object getCustomValue(String strKey){
 			return hmCustom.get(strKey);
 		}
+//		public int getDelayBetweenRetries() {
+//			return iDelayBetweenRetriesMilis;
+//		}
+		
+		@Override
+		public ArrayList<RetryOnFailure> getRetryListForManagement(RetryOnFailure.CompositeControl ccSelf) {
+			return arList ;
+		}
+		
+		public void setId(String strId) {
+			if(this.strId!=null)PrerequisitesNotMetException.assertNotAlreadySet("id", this.strId, strId, this);
+			if(strId==null)throw new PrerequisitesNotMetException("null id", this);
+			this.strId = CallableX.class.getSimpleName()+ReflexFillI.i().getCommandPartSeparator()+strId;
+		}
+		
+		@Override
+		public String getId() {
+			return strId;
+		}
+		
+		@Override
+		public long getLastMainTopCoreUpdateTimeMilis() {
+			return lLastUpdateMilis;
+		}
+		public void setlLastUpdateMilis(long lLastUpdateMilis) {
+			this.lLastUpdateMilis = lLastUpdateMilis;
+		}
+		
+		public Object getEnclosingObject() {
+			return objEnclosing;
+		}
 	}
 	
 	ArrayList<CallableX> aCallList = new ArrayList<CallableX>();
@@ -74,6 +137,10 @@ public class CallQueueI {
 		int i=0;
 		
 		for(CallableX caller:new ArrayList<CallableX>(aCallList)){
+			if(!caller.rReQueue.isReady()){
+				continue;
+			}
+			
 			if(runCallerCode(caller))i++;
 		}
 		
@@ -83,9 +150,15 @@ public class CallQueueI {
 	private boolean runCallerCode(CallableX caller) {
 //		try {
 			if(caller.call().booleanValue()){
+				caller.iFailCount=0; //reset counter
 				aCallList.remove(caller);
 				return true;
 			}else{
+				if(caller.iFailCount==0){
+					GlobalCommandsDelegatorI.i().dumpDevWarnEntry("caller failed: "+caller.getId(),
+						caller, caller.getEnclosingObject());
+				}
+				caller.iFailCount++;
 				addCall(caller, false); //will retry
 			}
 //		} catch (Exception e) {
@@ -121,20 +194,22 @@ public class CallQueueI {
 	 * @param caller
 	 * @param bPrepend
 	 */
-	public synchronized void addCall(CallableX caller, boolean bTryToRunNow) {
+	public synchronized Boolean addCall(CallableX caller, boolean bTryToRunNow) {
 		if(caller==null)throw new PrerequisitesNotMetException("null caller");
 		
 //	if(aCallList.contains(caller))
 		while(aCallList.remove(caller)); //prevent multiplicity
 		
 		if(bTryToRunNow){
-			runCallerCode(caller);
+			return runCallerCode(caller);
 		}else{
 			if(caller.bPrepend){
 				aCallList.add(0,caller);
 			}else{
 				aCallList.add(caller);
 			}
+			
+			return true;
 		}
 	}
 }

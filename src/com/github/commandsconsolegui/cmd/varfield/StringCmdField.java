@@ -223,11 +223,6 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 	}
 
 	@Override
-	public String getHelp() {
-		return null; //TODO mmm... check its uses, and let it use super getHelp()
-	}
-
-	@Override
 	public String getVariablePrefix() {
 		return "StringCmd";
 	}
@@ -251,8 +246,8 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 	 * This call may work while the cmd listener code may fail.
 	 */
 	@Override
-	public StringCmdField setCallOnValueChanged(CallableX caller) {
+	public StringCmdField setCallerAssigned(CallableX caller) {
 		// TODO Auto-generated method stub
-		return super.setCallOnValueChanged(caller);
+		return super.setCallerAssigned(caller);
 	}
 }

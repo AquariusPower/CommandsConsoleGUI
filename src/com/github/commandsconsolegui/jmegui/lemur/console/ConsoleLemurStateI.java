@@ -127,8 +127,8 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		
 		BaseStyles.loadGlassStyle(); //do not mess with default user styles: GuiGlobals.getInstance().getStyles().setDefaultStyle(BaseStyles.GLASS);
 		
-		addStyle(BaseStyles.GLASS);
-		addStyle(Styles.ROOT_STYLE);
+		addKnownStyle(BaseStyles.GLASS);
+		addKnownStyle(Styles.ROOT_STYLE);
 		
 //		initializationCompleted();
 		

@@ -719,7 +719,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		/**
 		 * postponed to let configurations run smoothly
 		 */
-		CallQueueI.i().addCall(new CallableX() {
+		CallQueueI.i().addCall(new CallableX(this) {
 			@Override
 			public Boolean call() {
 				if(!CommandsDelegator.this.isInitialized())return false; //wait its initialization
@@ -742,7 +742,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public static enum ECmdReturnStatus{
 		// oks
 		FoundAndWorked,
-		FoundCallerAndQueuedIt, //TODO add a failed message for the caller?
+//		FoundCallerAndQueuedIt, //TODO add a failed message for the caller?
 		
 		// failers
 		FoundAndFailedGracefully,
@@ -818,12 +818,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //		}
 		
 		Boolean bCmdWorked = null; //must be filled with true or false to have been found!
-		boolean bCmdCallerPrepared = false;
+//		boolean bCmdCallerPrepared = false;
 		
 		for(StringCmdField scf:ascfCmdWithCallerList){
 			if(checkCmdValidity(icclPseudo,scf)){
-				scf.queueValueCallNow();
-				bCmdCallerPrepared = true;
+				bCmdWorked = scf.callerAssignedRunNow();
+//				bCmdCallerPrepared = true;
 				break;
 			}
 		}
@@ -841,7 +841,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(icclPseudo,scfClearDumpArea)){
-			icui().getDumpEntries(ccSelf).clear();
+			icui().getDumpEntriesForManagement(ccSelf).clear();
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(icclPseudo,CMD_CONSOLE_SCROLL_BOTTOM)){
@@ -1228,11 +1228,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}
 		
 		if(bCmdWorked==null){
-			if(bCmdCallerPrepared){
-				return ECmdReturnStatus.FoundCallerAndQueuedIt;
-			}else{
+//			if(bCmdCallerPrepared){
+//				return ECmdReturnStatus.FoundCallerAndQueuedIt;
+//			}else{
 				return ECmdReturnStatus.NotFound;
-			}
+//			}
 		}
 		
 		/**
@@ -1280,7 +1280,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		return true; //just see warning messages for the failures...
 	}
 	private boolean fixSimpleCmdConflict(CommandData cmddWithSimpleConflict) {
-		VarCmdUId vcid = cmddWithSimpleConflict.getVar().getIdTmp(ccSelf);
+		VarCmdUId vcid = cmddWithSimpleConflict.getVar().getVarCmdUIdForManagement(ccSelf);
 		
 		boolean b = fixSimpleCmdConflict(
 			cmddWithSimpleConflict,
@@ -1538,9 +1538,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 
 	private void applyDumpEntryOrPutToSlowQueue(boolean bUseSlowQueue, String str) {
 		if(bUseSlowQueue){
-			icui().getDumpEntriesSlowedQueue(ccSelf).add(str);
+			icui().getDumpEntriesSlowedQueueForManagement(ccSelf).add(str);
 		}else{
-			icui().getDumpEntries(ccSelf).add(str);
+			icui().getDumpEntriesForManagement(ccSelf).add(str);
 		}
 	}
 	
@@ -1551,11 +1551,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			
 		if(!tdDumpQueuedSlowEntry.isReady(true))return;
 		
-		if(icui().getDumpEntriesSlowedQueue(ccSelf).size()>0){
-			icui().getDumpEntries(ccSelf).add(icui().getDumpEntriesSlowedQueue(ccSelf).remove(0));
+		if(icui().getDumpEntriesSlowedQueueForManagement(ccSelf).size()>0){
+			icui().getDumpEntriesForManagement(ccSelf).add(icui().getDumpEntriesSlowedQueueForManagement(ccSelf).remove(0));
 			
-			while(icui().getDumpEntries(ccSelf).size() > ilvMaxDumpEntriesAmount.getLong()){
-				icui().getDumpEntries(ccSelf).remove(0);
+			while(icui().getDumpEntriesForManagement(ccSelf).size() > ilvMaxDumpEntriesAmount.getLong()){
+				icui().getDumpEntriesForManagement(ccSelf).remove(0);
 			}
 		}
 	}
@@ -2987,7 +2987,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public boolean isFound(ECmdReturnStatus ecrs){
 		switch(ecrs){
 			case FoundAndWorked:
-			case FoundCallerAndQueuedIt:
+//			case FoundCallerAndQueuedIt:
 				
 			case FoundAndExceptionHappened:
 			case FoundAndFailedGracefully:
@@ -3123,7 +3123,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	ArrayList<StringCmdField> ascfCmdWithCallerList = new ArrayList<StringCmdField>();
 	private void updateCmdWithCallerList() {
 		for(StringCmdField scf:VarCmdFieldAbs.getListCopy(StringCmdField.class)){
-			if(scf.isCallOnValueChangedSet()){
+			if(scf.isCallerAssigned()){
 				if(!ascfCmdWithCallerList.contains(scf)){
 					checkCmdValidity(icclPseudo, scf);
 					
@@ -3287,7 +3287,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			ECmdReturnStatus ecrs = executeCommand(str);
 			switch(ecrs){
 				case FoundAndWorked:
-				case FoundCallerAndQueuedIt:
+//				case FoundCallerAndQueuedIt:
 					break;
 				default:
 					dumpWarnEntry("QueueExecFail("+ecrs+"): "+str);
@@ -3576,7 +3576,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		/**
 		 * postponed to let configuration run smoothly
 		 */
-		CallQueueI.i().addCall(new CallableX() {
+		CallQueueI.i().addCall(new CallableX(this) {
 			@Override
 			public Boolean call() {
 				return initialize();
@@ -3592,17 +3592,17 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		tdDumpQueuedSlowEntry.updateTime();
 		
-		CallableX call = new CallableX() {
+		CallableX call = new CallableX(this) {
 			@Override
 			public Boolean call() {
 				icui().updateEngineStats();
 				return true;
 			}
 		};
-		btgEngineStatsView.setCallOnValueChanged(call);
-		btgEngineStatsFps.setCallOnValueChanged(call);
+		btgEngineStatsView.setCallerAssigned(call);
+		btgEngineStatsFps.setCallerAssigned(call);
 		
-		btgConsoleCpuRest.setCallOnValueChanged(new CallableX() {
+		btgConsoleCpuRest.setCallerAssigned(new CallableX(this) {
 			@Override
 			public Boolean call() {
 				tdLetCpuRest.setActive(btgConsoleCpuRest.b());
@@ -3813,9 +3813,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	  	int iMax=Math.max(iCpFrom,iCpTo);
 	  	for(int i=iMin;i<=iMax;i++){
 	  		if(bApply){
-		  		icui().getDumpEntries(ccSelf).set(i,strCopyRangeIndicator+icui().getDumpEntries(ccSelf).get(i));
+		  		icui().getDumpEntriesForManagement(ccSelf).set(i,strCopyRangeIndicator+icui().getDumpEntriesForManagement(ccSelf).get(i));
 	  		}else{
-		  		icui().getDumpEntries(ccSelf).set(i,icui().getDumpEntries(ccSelf).get(i)
+		  		icui().getDumpEntriesForManagement(ccSelf).set(i,icui().getDumpEntriesForManagement(ccSelf).get(i)
 		  			.replaceFirst("^["+strCopyRangeIndicator+"]",""));
 	  		}
 	  	}
@@ -3853,10 +3853,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			
 			strTextToCopy="";
 			while(true){ //multi-line copy
-				if(iCopyFromWork>=icui().getDumpEntries(ccSelf).size())break;
+				if(iCopyFromWork>=icui().getDumpEntriesForManagement(ccSelf).size())break;
 				
-				String strEntry =	bCut ? icui().getDumpEntries(ccSelf).remove(iCopyFromWork) :
-					icui().getDumpEntries(ccSelf).get(iCopyFromWork);
+				String strEntry =	bCut ? icui().getDumpEntriesForManagement(ccSelf).remove(iCopyFromWork) :
+					icui().getDumpEntriesForManagement(ccSelf).get(iCopyFromWork);
 	//			strEntry=strEntry.replace("\\n","\n"); //translate in-between newline requests into newline
 				
 				boolean bJoinWithNext = false;

@@ -220,7 +220,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	public R configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
 		
-		btgRestoreIniPosSizeOnce.setCallOnValueChanged(new CallableX() {
+		btgRestoreIniPosSizeOnce.setCallerAssigned(new CallableX(this) {
 			@Override
 			public Boolean call() {
 				if(btgRestoreIniPosSizeOnce.b()){
@@ -299,15 +299,16 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		if(!initGUI())return false;
 		if(!initKeyMappings())return false;
 		
-		CallableX cxRefresh = new CallableX() {
+		CallableX cxRefresh = new CallableX(this) {
 			@Override
 			public Boolean call() {
+				// if sort is true or false, will update on change.
 				requestRefreshUpdateList();
 				return true;
 			}
 		};
-		btgSortListEntries.setCallOnValueChanged(cxRefresh);
-		btgSortListEntriesAtoZ.setCallOnValueChanged(cxRefresh);
+		btgSortListEntries.setCallerAssigned(cxRefresh);
+		btgSortListEntriesAtoZ.setCallerAssigned(cxRefresh);
 		
 		tdUpdateRefreshList.updateTime();
 		
@@ -539,11 +540,10 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 //	}
 	
 	/**
-	 * TODO rename getInputField()
 	 * @param ccSelf 
 	 * @return
 	 */
-	public Spatial getInputField(LemurFocusHelperStateI.CompositeControl ccSelf) {
+	public Spatial getInputFieldForManagement(LemurFocusHelperStateI.CompositeControl ccSelf) {
 		ccSelf.assertSelfNotNull();
 		return sptIntputField;
 	}

@@ -37,6 +37,7 @@ import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
@@ -387,7 +388,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		btnResizeEast = prepareResizeBorder(BorderLayout.Position.East);
 		btnResizeWest = prepareResizeBorder(BorderLayout.Position.West);
 		
-		ilvBorderSize.queueValueCallNow();
+		ilvBorderSize.callerAssignedQueueNow();
 //		setBordersSize(ilvBorderSize.getInt());
 	}
 
@@ -470,17 +471,22 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		return btnBorder;
 	}
 	
-	StringCmdField scfFixReinitDialogBorders = new StringCmdField(this)
-		.setCallOnValueChanged(new CallableX() {
+	StringCmdField scfFixReinitDialogBorders = new StringCmdField(this,null,"it may require a few tries actually...")
+		.setCallerAssigned(new CallableX(1000) {
 			@Override
 			public Boolean call() {
-				reinitBorders();
-				return true;
+				if(isEnabled()){
+					reinitBorders();
+					return true;
+				}
+				
+				GlobalCommandsDelegatorI.i().dumpWarnEntry("not enabled: "+LemurDialogGUIStateAbs.this.getId(), this, LemurDialogGUIStateAbs.this);
+				return false;
 			}
 		});
 	
 	IntLongVarField ilvBorderSize = new IntLongVarField(this, 3, "").setMinMax(1L, 20L)
-		.setCallOnValueChanged(new CallableX() {
+		.setCallerAssigned(new CallableX(this) {
 			@Override
 			public Boolean call() {
 				setBordersSize(ilvBorderSize.getInt());
@@ -1097,7 +1103,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		/**
 		 * need to wait it actually get selected
 		 */
-		CallQueueI.i().addCall(new CallableX() {
+		CallQueueI.i().addCall(new CallableX(this) {
 			@Override
 			public Boolean call() {
 				DialogListEntryData<T> dledParent = dledParentTmp;
@@ -1293,9 +1299,13 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		}
 	}
 	
-	public ArrayList<LemurDialogGUIStateAbs<T,?>> getParentsDialogList(LemurFocusHelperStateI.CompositeControl cc) {
-		cc.assertSelfNotNull();
-		
+//	public ArrayList<LemurDialogGUIStateAbs<T,?>> getParentsDialogList(LemurFocusHelperStateI.CompositeControl cc) {
+//	cc.assertSelfNotNull();
+	/**
+	 * 
+	 * @return a new list of parent's dialogs
+	 */
+	public ArrayList<LemurDialogGUIStateAbs<T,?>> getParentsDialogList() {
 		ArrayList<LemurDialogGUIStateAbs<T,?>> adiag = new ArrayList<LemurDialogGUIStateAbs<T,?>>();
 		
 		LemurDialogGUIStateAbs<T,?> diag = (LemurDialogGUIStateAbs<T,?>)super.getParentDialog();

@@ -40,8 +40,7 @@ import com.github.commandsconsolegui.misc.CompositeControlAbs;
 public class CurrentCommandLine {
 	public static final class CompositeControl extends CompositeControlAbs<CurrentCommandLine>{
 		private CompositeControl(CurrentCommandLine casm){super(casm);};
-	};
-	private CompositeControl ccSelf = new CompositeControl(this);
+	};private CompositeControl ccSelf = new CompositeControl(this);
 	
 	private String	strCmdLineOriginal;
 	

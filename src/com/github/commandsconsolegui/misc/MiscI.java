@@ -40,6 +40,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -50,8 +51,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-
-import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 
 /**
  * 
@@ -526,6 +525,27 @@ public class MiscI {
 		return str;
 	}
 
+	public boolean isInnerClassOfConcrete(Object objInnerToCheck, Object objConcreteOwner){
+		return (objInnerToCheck.getClass().getTypeName().startsWith(
+			objConcreteOwner.getClass().getTypeName()+"$"));
+	}
+	
+	public boolean isAnonymousClass(Object obj){
+		/**
+		 * TODO could something like this be less guessing?
+		obj.getClass().getDeclaredClasses(); //[]
+		obj.getClass().getDeclaringClass(); //null
+		obj.getClass().getEnclosingClass(); //ex.: CommandsDelegator
+		obj.getClass().getGenericSuperclass(); //ex.: CallQueueI$CallableX
+		obj.getClass().getTypeName(); //ex.: CommandsDelegator$1
+		Modifier.isStatic(obj.getClass().getModifiers()); //false
+		Modifier.isTransient(obj.getClass().getModifiers()); //false
+		Modifier.isVolatile(obj.getClass().getModifiers()); //false
+		 */
+		String str = obj.getClass().getTypeName();
+		return (str.matches("^.*[$][0-9]*$"));
+	}
+	
 	public String removeQuotes(String str) {
 		str=str.trim();
 		if(str.startsWith("\"") && str.endsWith("\"")){
@@ -554,4 +574,6 @@ public class MiscI {
 		
 		return (BFR)objRet;
 	}
+	
+	
 }

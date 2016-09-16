@@ -433,10 +433,9 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	}
 	
 	/**
-	 * TODO rename to addKnownStyle()
 	 * @param strStyleId
 	 */
-	protected void addStyle(String strStyleId){
+	protected void addKnownStyle(String strStyleId){
 		if(!astrStyleList.contains(strStyleId)){
 			astrStyleList.add(strStyleId);
 		}
@@ -447,7 +446,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		if(!super.initGUI())return false;
 		
 //		initializePre();
-		addStyle(GlobalDialogHelperI.i().STYLE_CONSOLE);
+		addKnownStyle(GlobalDialogHelperI.i().STYLE_CONSOLE);
 		
 //		sapp = (SimpleApplication)app;
 //		cc.sapp = sapp;
@@ -2674,7 +2673,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		return getThis();
 	}
 	@Override
-	public AbstractList<String> getDumpEntries(CompositeControlAbs<?> ccTrustedManipulator) {
+	public AbstractList<String> getDumpEntriesForManagement(CompositeControlAbs<?> ccTrustedManipulator) {
 		chkCfgTrustedManipulator(ccTrustedManipulator);
 		return vlstrDumpEntries;
 	}
@@ -2687,7 +2686,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	}
 
 	@Override
-	public AbstractList<String> getDumpEntriesSlowedQueue(CompositeControlAbs<?> ccTrustedManipulator) {
+	public AbstractList<String> getDumpEntriesSlowedQueueForManagement(CompositeControlAbs<?> ccTrustedManipulator) {
 		chkCfgTrustedManipulator(ccTrustedManipulator);
 		return vlstrDumpEntriesSlowedQueue;
 	}

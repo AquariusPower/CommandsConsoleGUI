@@ -30,21 +30,17 @@ package com.github.commandsconsolegui.jmegui;
 //import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ERecreateConsoleSteps;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
-import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.globals.GlobalHolderAbs.IGlobalOpt;
-import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.misc.IConfigure;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.misc.ReflexFillI;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
+import com.github.commandsconsolegui.misc.RetryOnFailure;
+import com.github.commandsconsolegui.misc.RetryOnFailure.CompositeControl;
+import com.github.commandsconsolegui.misc.RetryOnFailure.IRetryListOwner;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppState;
 import com.jme3.export.JmeExporter;
@@ -70,7 +66,7 @@ import com.jme3.scene.Node;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigure<ConditionalStateAbs>{
+public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigure<ConditionalStateAbs>,IRetryListOwner{
 	
 	/**
 	 * This Id is only required if there is more than one state of the same class.
@@ -87,79 +83,79 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 	
 	// CONFIGURE 
 	private boolean bConfigured;
-	private Long lTimeReferenceMilis = null;
+	
+	private Long lLastMainTopCoreUpdateTimeMilis = null;
 	
 //	/** true to delay initialization*/
 //	private boolean bPreInitHold=false;
 //	private boolean	bPreInitialized;
 	
-	private ArrayList<Retry> aretry = new ArrayList<Retry>();
-	public Retry findRetryModeById(String strId){
-		for(Retry r:aretry){
-			if(r.isId(strId))return r;
-		}
-		return null;
+	private ArrayList<RetryOnFailure> arList = new ArrayList<RetryOnFailure>();
+	@Override
+	public ArrayList<RetryOnFailure> getRetryListForManagement(RetryOnFailure.CompositeControl cc) {
+		return arList;
 	}
+	
 	public ArrayList<String> getRetryIdListCopy() {
 		ArrayList<String> astr = new ArrayList<String>();
-		for(Retry r:aretry){
-			astr.add(r.strId);
+		for(RetryOnFailure r:arList){
+			astr.add(r.getId());
 		}
 		return astr;
 	}
-	protected static class Retry implements IReflexFillCfg{
-		private long lStartMilis=0; // as this is only in case of failure, the 1st attempt will always be ready!
-		
-		/** 0 means retry at every update*/
-		private IntLongVarField ilvDelayMilis = new IntLongVarField(this, 0L, "retry delay between failed state mode attempts");
-//		long lDelayMilis=0;
-
-		private String	strId;
-
-		private ConditionalStateAbs	cond;
-		
-		public Retry(ConditionalStateAbs cond, String strId){
-			this.cond=cond;
-			this.strId=strId;
-			
-			if(cond.findRetryModeById(strId)!=null)throw new PrerequisitesNotMetException("conflicting retry id", strId); 
-			cond.aretry.add(this);
-		}
-		
-		public boolean isId(String strId){
-			return (this.strId.equals(strId));
-		}
-		
-		public void setRetryDelay(long lMilis){
-			this.ilvDelayMilis.setObjectRawValue(lMilis);
-		}
-		
-		/**
-		 * @return
-		 */
-		boolean isReadyToRetry(){
-			return cond.getUpdatedTime() > (lStartMilis+ilvDelayMilis.getLong());
-		}
-
-		public void resetStartTime() {
-			lStartMilis=cond.getUpdatedTime();
-		}
-
-		@Override
-		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
-			ReflexFillCfg rfcfg = GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
-			if(rfcfg==null)rfcfg=new ReflexFillCfg(rfcv);
-//			rfcfg.setPrefixCustomId(cond.getId());
-			rfcfg.setPrefixCustomId(cond.getId()+ReflexFillI.i().getCommandPartSeparator()+this.strId);
-			return rfcfg;
-		}
-		
-	}
-	private Retry rInit = new Retry(this,ERetryDelayMode.Init.s());
-	private Retry rEnable = new Retry(this,ERetryDelayMode.Enable.s());
-	private Retry rUpdate = new Retry(this,ERetryDelayMode.Update.s());
-	private Retry rDisable = new Retry(this,ERetryDelayMode.Disable.s());
-	private Retry rDiscard = new Retry(this,ERetryDelayMode.Discard.s());
+//	protected static class RetryOnFailure implements IReflexFillCfg{
+//		private long lStartMilis=0; // as this is only in case of failure, the 1st attempt will always be ready!
+//		
+//		/** 0 means retry at every update*/
+//		private IntLongVarField ilvDelayMilis = new IntLongVarField(this, 0L, "retry delay between failed state mode attempts");
+////		long lDelayMilis=0;
+//
+//		private String	strId;
+//
+//		private ConditionalStateAbs	cond;
+//		
+//		public RetryOnFailure(ConditionalStateAbs cond, String strId){
+//			this.cond=cond;
+//			this.strId=strId;
+//			
+//			if(cond.findRetryModeById(strId)!=null)throw new PrerequisitesNotMetException("conflicting retry id", strId); 
+//			cond.aretry.add(this);
+//		}
+//		
+//		public boolean isId(String strId){
+//			return (this.strId.equals(strId));
+//		}
+//		
+//		public void setRetryDelay(long lMilis){
+//			this.ilvDelayMilis.setObjectRawValue(lMilis);
+//		}
+//		
+//		/**
+//		 * @return
+//		 */
+//		boolean isReadyToRetry(){
+//			return cond.getUpdatedTime() > (lStartMilis+ilvDelayMilis.getLong());
+//		}
+//
+//		public void resetStartTime() {
+//			lStartMilis=cond.getUpdatedTime();
+//		}
+//
+//		@Override
+//		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+//			ReflexFillCfg rfcfg = GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
+//			if(rfcfg==null)rfcfg=new ReflexFillCfg(rfcv);
+////			rfcfg.setPrefixCustomId(cond.getId());
+//			rfcfg.setPrefixCustomId(cond.getId()+ReflexFillI.i().getCommandPartSeparator()+this.strId);
+//			return rfcfg;
+//		}
+//		
+//	}
+	private RetryOnFailure rInit = new RetryOnFailure(this,ERetryDelayMode.Init.s());
+	private RetryOnFailure rEnable = new RetryOnFailure(this,ERetryDelayMode.Enable.s());
+	private RetryOnFailure rUpdate = new RetryOnFailure(this,ERetryDelayMode.Update.s());
+	private RetryOnFailure rDisable = new RetryOnFailure(this,ERetryDelayMode.Disable.s());
+	private RetryOnFailure rDiscard = new RetryOnFailure(this,ERetryDelayMode.Discard.s());
 	
 	// PROPERLY INIT
 	private boolean	bProperlyInitialized;
@@ -285,9 +281,10 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 				"cfg already set", this, this.icfgOfInstance, icfg);
 		}
 		
-		if(!icfg.getClass().getTypeName().startsWith(this.getClass().getTypeName()+"$")){
+		if(!MiscI.i().isInnerClassOfConcrete(icfg, this)){
+//		if(!icfg.getClass().getTypeName().startsWith(this.getClass().getTypeName()+"$")){
 			throw new PrerequisitesNotMetException(
-				"must be the concrete class one", this, icfg);
+				"must be the cfg of the concrete class one", this, icfg);
 		}
 		
 		this.icfgOfInstance=icfg;
@@ -310,16 +307,15 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 	
 	
 	/**
-	 * This can be used to override system time with your simulation time.
-	 * 
-	 * @param lMilis if null, will use system time.
+	 * you can override system time with your simulation time.
 	 */
-	public void updateTimeMilis(Long lMilis){
-		this.lTimeReferenceMilis=lMilis;
+	protected void updateLastMainTopCoreUpdateTimeMilis(){
+		lLastMainTopCoreUpdateTimeMilis = System.currentTimeMillis();
 	}
 	
-	private long getUpdatedTime(){
-		return lTimeReferenceMilis==null ? System.currentTimeMillis() : lTimeReferenceMilis;
+	@Override
+	public long getLastMainTopCoreUpdateTimeMilis(){
+		return lLastMainTopCoreUpdateTimeMilis;
 	}
 	
 	public Application getApp(){
@@ -382,7 +378,8 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		if(icfgOfInstance==null)throw new PrerequisitesNotMetException(
 			"the instantiated class needs to set the configuration params to be used on a restart!");
 		
-		if(!icfgOfInstance.getClass().getName().startsWith(this.getClass().getName()+"$")){
+		if(!MiscI.i().isInnerClassOfConcrete(icfgOfInstance, this)){
+//		if(!icfgOfInstance.getClass().getName().startsWith(this.getClass().getName()+"$")){
 //		if(!icfgOfInstance.getClass().equals(this.getClass())){
 			throw new PrerequisitesNotMetException(
 				"The stored cfg params must be of the instantiated class to be used on restarting it. "
@@ -403,7 +400,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 	private boolean doItInitializeProperly(float tpf){
 		if(bHoldProperInitialization)return false;
 		
-		if(!rInit.isReadyToRetry())return false;
+		if(!rInit.isReady())return false;
 		
 		if(!initCheckPrerequisites() || !initAttempt()){
 			initFailed();
@@ -431,6 +428,8 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 	public boolean doItAllProperly(ConditionalStateManagerI.CompositeControl cc, float tpf) {
 		cc.assertSelfNotNull();
 		assertConfigured();
+		
+		updateLastMainTopCoreUpdateTimeMilis();
 //		assertIsPreInitialized();
 //		if(bRestartRequested)return false;
 //		if(bDiscardRequested)return false;
@@ -440,18 +439,22 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 				if(!doItInitializeProperly(tpf))return false;
 			}
 		}else{
-			if(!doItUpdateOrEnableOrDisableProperly(tpf))return false;
+			if(!doUpdateEnableDisableProperly(tpf))return false;
 		}
 		
 		return true;
 	};
 	
-	private boolean doItUpdateOrEnableOrDisableProperly(float tpf) {
+	/**
+	 * @param tpf
+	 * @return
+	 */
+	private boolean doUpdateEnableDisableProperly(float tpf) {
 		if(bEnabledRequested && !bEnabled){
 			bTryingToEnable=true;
 			bTryingToDisable=false;
 			if(bHoldEnable)return false;
-			if(!rEnable.isReadyToRetry())return false;
+			if(!rEnable.isReady())return false;
 			
 			bEnableSuccessful=enableAttempt();
 			MsgI.i().dbg("enabled",bEnableSuccessful,this);
@@ -469,7 +472,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 			bTryingToDisable=true;
 			bTryingToEnable=false;
 			if(bHoldDisable)return false;
-			if(!rDisable.isReadyToRetry())return false;
+			if(!rDisable.isReady())return false;
 			
 			bDisableSuccessful=disableAttempt();
 			MsgI.i().dbg("disabled",bDisableSuccessful,this);
@@ -486,7 +489,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		
 		if(bEnabled){
 			if(bHoldUpdates)return false;
-			if(!rUpdate.isReadyToRetry())return false;
+			if(!rUpdate.isReady())return false;
 			
 			bLastUpdateSuccessful = updateAttempt(tpf);
 			if(bLastUpdateSuccessful){
@@ -579,7 +582,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		if(bEnabled){
 			boolean bRetry=false;
 			
-			if(!rDiscard.isReadyToRetry()){
+			if(!rDiscard.isReady()){
 //			if(getUpdatedTime() < (lCleanupRequestMilis+lCleanupRetryDelayMilis)){
 				bRetry=true;
 			}else{
@@ -692,6 +695,9 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		}
 	}
 	
+	/**
+	 * @return
+	 */
 	public String getId() {
 		assertConfigured();
 		
@@ -726,7 +732,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		}
 		
 		for(String strId:astrId){
-			findRetryModeById(strId).setRetryDelay(lMilis);
+			RetryOnFailure.findRetryModeById(arList,strId).setRetryDelay(lMilis);
 		}
 	}
 //	protected Long prepareRetryDelay(EDelayMode e, Long lMilis){

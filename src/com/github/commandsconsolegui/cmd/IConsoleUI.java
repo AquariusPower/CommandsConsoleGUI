@@ -52,9 +52,9 @@ public interface IConsoleUI extends ICheckInitAndCleanupI{
 
 //	public abstract Integer getConsoleMaxWidthInCharsForLineWrap();
 
-	public abstract AbstractList<String> getDumpEntriesSlowedQueue(CompositeControlAbs<?> ccTrustedManipulator);
+	public abstract AbstractList<String> getDumpEntriesSlowedQueueForManagement(CompositeControlAbs<?> ccTrustedManipulator);
 	
-	public abstract AbstractList<String> getDumpEntries(CompositeControlAbs<?> ccTrustedManipulator);
+	public abstract AbstractList<String> getDumpEntriesForManagement(CompositeControlAbs<?> ccTrustedManipulator);
 
 //	public abstract AbstractList<String> getAutoCompleteHintList();
 

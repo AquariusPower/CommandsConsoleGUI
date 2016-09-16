@@ -65,7 +65,6 @@ public class IntLongVarField extends NumberVarFieldAbs<Long,IntLongVarField>{
 		this(rfcfgOwnerUseThis, iInitialValue==null?null:iInitialValue.longValue(), strHelp);
 	}
 	/**
-	 * @param rfcfgOwnerUseThis use null if this is not a class field, but a local variable
 	 * @param lInitialValue if null, the variable will be removed from console vars.
 	 */
 	public IntLongVarField(IReflexFillCfg rfcfgOwnerUseThis, Long lInitialValue, String strHelp) {

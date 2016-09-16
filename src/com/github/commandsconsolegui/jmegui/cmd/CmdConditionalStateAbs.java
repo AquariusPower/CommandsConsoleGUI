@@ -119,7 +119,7 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 		
 		cd().addConsoleCommandListener(this);
 		
-		btgEnabled.setCallOnValueChanged(new CallableX() {
+		btgEnabled.setCallerAssigned(new CallableX(this) {
 			@Override
 			public Boolean call() {
 				setEnabledRequest(btgEnabled.b());
