@@ -62,6 +62,8 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 		
 		LemurFocusHelperStateI.i().requestDialogFocus(capture);
 		
+		//TODO try to disable elements at parent dialog (as modal child has focus), this didnt work: if(LemurFocusHelperStateI.i().isDialogFocusedFor(capture))return false;
+		
 		// missing ones are ignored so each element can consume it properly
 		boolean bConsumed = false;
 		final LemurDialogGUIStateAbs<?,?> diag = 

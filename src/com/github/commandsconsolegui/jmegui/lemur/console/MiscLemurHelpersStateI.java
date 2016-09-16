@@ -49,6 +49,7 @@ import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexHacks;
+import com.github.commandsconsolegui.misc.WorkAroundI;
 import com.jme3.font.BitmapText;
 import com.jme3.font.LineWrapMode;
 import com.jme3.input.dummy.DummyKeyInput;
@@ -266,7 +267,8 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 			MiscJmeI.i().updateColorFading(tdTextCursorBlink, color, true);
 		}else{
 			if(MiscJmeI.i().updateBlink(tdTextCursorBlink, tf, geomCursor)){
-				bugFix(null,null,btgBugFixInvisibleCursor,tf);
+				WorkAroundI.i().bugFix(null, null, btgBugFixInvisibleCursor, tf);
+//				bugFix(null,null,btgBugFixInvisibleCursor,tf);
 			}
 		}
 	}
@@ -425,8 +427,65 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 		}
 	}
 	
-	BoolTogglerCmdField btgBugFixInvisibleCursor = 
-		new BoolTogglerCmdField(this,true).setHelp("in case text cursor is invisible").setCallNothingOnChange();
+	BoolTogglerCmdField btgBugFixInvisibleCursor = new BoolTogglerCmdField(this,false)
+		.setHelp("in case text cursor is invisible")
+		.setCallerAssigned(new CallableX(this) {
+			@Override
+			public Boolean call() {
+				if(!isEnabled())return true; //successful skipper
+				
+				boolean bFixed=false;
+				
+				/**
+				 * To the point, but unnecessary.
+				 * see {@link TextEntryComponent#resetCursorColor()}
+				 */
+				Geometry geomCursor = this.getParamsForMaintenance().getParam(Geometry.class,0);
+				TextField tf = this.getParamsForMaintenance().getParam(TextField.class,0);
+//				Geometry geomCursor = MiscI.i().getParamFromArray(Geometry.class, aobjCustomParams, 0);
+//				TextField tf = MiscI.i().getParamFromArray(TextField.class, aobjCustomParams, 0);
+				if(geomCursor!=null){
+//					if(!bFixInvisibleTextInputCursor)return null;
+					
+//				getBitmapTextFrom(tf).setAlpha(1f); //this is a fix to let text cursor be visible.
+					geomCursor.getMaterial().setColor("Color",ColorRGBA.White.clone());
+					bFixed=true;
+				}else
+				if(tf!=null){
+//					if(!bFixInvisibleTextInputCursor)return null;
+					
+					String strInvisibleCursorFixed="InvisibleCursorFixed";
+					if(tf.getUserData(strInvisibleCursorFixed)!=null)return true;
+					
+					BitmapText bmt = getBitmapTextFrom(tf);
+					
+					/**
+					 * The BitmapText base alpha is set to an invalid value -1.
+					 * That value seems to be used as a marker/indicator of "invalidity?".
+					 * But the problem is, it is used as a normal value and never verified/validadted 
+					 * towards its invalidity of -1.
+					 * Wouldnt have been better if it was used 'null' as indicator of invalidity?
+					 * 
+					 * This flow will fix that base alpha to fully visible.
+					 * -> BitmapText.letters.setBaseAlpha(alpha);
+					 */
+					bmt.setAlpha(1f); // alpha need to be fixed, it was -1; -1 is an invalid value used as a merker/indicator, woulndt be better it be a null marker?
+					
+					/**
+					 * This flow will apply the base alpha of BitmapText to the text cursor.
+					 * -> TextField.text.setColor(color)->resetCursorColor()
+					 */
+					tf.setColor(tf.getColor());
+					
+					tf.setUserData(strInvisibleCursorFixed,true);
+					bFixed=true;
+				}
+				
+				return bFixed;
+			}
+		})
+		.setAsBugFixerMode();
+	
 	BoolTogglerCmdField btgBugFixUpdateTextFieldTextAndCaratVisibility = 
 		new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 	@Override
@@ -461,51 +520,51 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IW
 			tf.setFontSize(tf.getFontSize());
 			
 			bFixed=true;
-		}else
-		if(btgBugFixInvisibleCursor.isEqualToAndEnabled(btgBugFixId)){
-			/**
-			 * To the point, but unnecessary.
-			 * see {@link TextEntryComponent#resetCursorColor()}
-			 */
-			Geometry geomCursor = MiscI.i().getParamFromArray(Geometry.class, aobjCustomParams, 0);
-			TextField tf = MiscI.i().getParamFromArray(TextField.class, aobjCustomParams, 0);
-			if(geomCursor!=null){
-//				if(!bFixInvisibleTextInputCursor)return null;
-				
-//			getBitmapTextFrom(tf).setAlpha(1f); //this is a fix to let text cursor be visible.
-				geomCursor.getMaterial().setColor("Color",ColorRGBA.White.clone());
-				bFixed=true;
-			}else
-			if(tf!=null){
-//				if(!bFixInvisibleTextInputCursor)return null;
-				
-				String strInvisibleCursorFixed="InvisibleCursorFixed";
-				if(tf.getUserData(strInvisibleCursorFixed)!=null)return null;
-				
-				BitmapText bmt = getBitmapTextFrom(tf);
-				
-				/**
-				 * The BitmapText base alpha is set to an invalid value -1.
-				 * That value seems to be used as a marker/indicator of "invalidity?".
-				 * But the problem is, it is used as a normal value and never verified/validadted 
-				 * towards its invalidity of -1.
-				 * Wouldnt have been better if it was used 'null' as indicator of invalidity?
-				 * 
-				 * This flow will fix that base alpha to fully visible.
-				 * -> BitmapText.letters.setBaseAlpha(alpha);
-				 */
-				bmt.setAlpha(1f); // alpha need to be fixed, it was -1; -1 is an invalid value used as a merker/indicator, woulndt be better it be a null marker?
-				
-				/**
-				 * This flow will apply the base alpha of BitmapText to the text cursor.
-				 * -> TextField.text.setColor(color)->resetCursorColor()
-				 */
-				tf.setColor(tf.getColor());
-				
-				tf.setUserData(strInvisibleCursorFixed,true);
-				bFixed=true;
-			}				
-		}
+		}else{}
+//		if(btgBugFixInvisibleCursor.isEqualToAndEnabled(btgBugFixId)){
+//			/**
+//			 * To the point, but unnecessary.
+//			 * see {@link TextEntryComponent#resetCursorColor()}
+//			 */
+//			Geometry geomCursor = MiscI.i().getParamFromArray(Geometry.class, aobjCustomParams, 0);
+//			TextField tf = MiscI.i().getParamFromArray(TextField.class, aobjCustomParams, 0);
+//			if(geomCursor!=null){
+////				if(!bFixInvisibleTextInputCursor)return null;
+//				
+////			getBitmapTextFrom(tf).setAlpha(1f); //this is a fix to let text cursor be visible.
+//				geomCursor.getMaterial().setColor("Color",ColorRGBA.White.clone());
+//				bFixed=true;
+//			}else
+//			if(tf!=null){
+////				if(!bFixInvisibleTextInputCursor)return null;
+//				
+//				String strInvisibleCursorFixed="InvisibleCursorFixed";
+//				if(tf.getUserData(strInvisibleCursorFixed)!=null)return null;
+//				
+//				BitmapText bmt = getBitmapTextFrom(tf);
+//				
+//				/**
+//				 * The BitmapText base alpha is set to an invalid value -1.
+//				 * That value seems to be used as a marker/indicator of "invalidity?".
+//				 * But the problem is, it is used as a normal value and never verified/validadted 
+//				 * towards its invalidity of -1.
+//				 * Wouldnt have been better if it was used 'null' as indicator of invalidity?
+//				 * 
+//				 * This flow will fix that base alpha to fully visible.
+//				 * -> BitmapText.letters.setBaseAlpha(alpha);
+//				 */
+//				bmt.setAlpha(1f); // alpha need to be fixed, it was -1; -1 is an invalid value used as a merker/indicator, woulndt be better it be a null marker?
+//				
+//				/**
+//				 * This flow will apply the base alpha of BitmapText to the text cursor.
+//				 * -> TextField.text.setColor(color)->resetCursorColor()
+//				 */
+//				tf.setColor(tf.getColor());
+//				
+//				tf.setUserData(strInvisibleCursorFixed,true);
+//				bFixed=true;
+//			}				
+//		}
 		
 		if(!bFixed){
 			throw new PrerequisitesNotMetException("cant bugfix this way...",aobjCustomParams);

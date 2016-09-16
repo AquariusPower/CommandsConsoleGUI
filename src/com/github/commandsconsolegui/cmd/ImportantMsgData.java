@@ -38,7 +38,7 @@ import java.util.Comparator;
 public class ImportantMsgData {
 	String strMsg;
 	Exception ex;
-	StackTraceElement[] aste;
+	StackTraceElement[] asteInstancedAt;
 	DumpEntryData de;
 	Long lBufferedTimeNano;
 	Long lFirstOcurrenceCreationTimeNano;
@@ -80,14 +80,14 @@ public class ImportantMsgData {
 //		ex.setStackTrace(aste);
 //	}
 		this.ex=de.getException();
-		this.aste=de.getException().getStackTrace();
+		this.asteInstancedAt=de.getException().getStackTrace();
 		
 		lFirstOcurrenceCreationTimeNano=System.nanoTime();
 	}
 	
 	public boolean identicalTo(ImportantMsgData imdOther){
 		if (!strMsg.equals(imdOther.strMsg))return false; //equals() is faster, and such messages will not have case difference...
-		if (!Arrays.equals(aste, imdOther.aste))return false;
+		if (!Arrays.equals(asteInstancedAt, imdOther.asteInstancedAt))return false;
 		
 		return true;
 	}

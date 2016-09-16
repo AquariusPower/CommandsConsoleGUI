@@ -582,17 +582,16 @@ public class MiscI {
 	
 	/**
 	 * 
-	 * @param cl
+	 * @param clReturnType
 	 * @param aobj params are expected to be NOT null
 	 * @param iIndex
 	 * @return null if invalid class type to cast
 	 */
-	public <T> T getParamFromArray(Class<T> cl, Object[] aobj, int iIndex){
+	public <T> T getParamFromArray(Class<T> clReturnType, Object[] aobj, int iIndex){
 		Object obj = aobj[iIndex];
-		if(cl.isInstance(obj))return (T)obj;
+		if(clReturnType.isInstance(obj))return (T)obj;
 		return null;
 	}
-
 	public <BFR> BFR bugFixRet(Class<BFR> clReturnType, boolean bFixed,	Object objRet, Object[] aobjCustomParams) {
 		if(!bFixed){
 			throw new PrerequisitesNotMetException("cant bugfix this way...",aobjCustomParams);

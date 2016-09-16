@@ -25,69 +25,47 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.cmd;
+package com.github.commandsconsolegui.misc;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
-import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class VarIdValueOwnerData {
-//	public static interface IVarIdValueOwner{
-//		public abstract void setObjectValue(Object objValue);
-//		public abstract String getReport();
-//		public abstract String getVarId();
-//		public abstract Object getValueRaw();
-//		public abstract void setConsoleVarLink(VarIdValueOwnerData vivo);
-//		public abstract String getHelp();
-//		public abstract String getSimpleCmdId();
-//	}
+public class Parameters {
+	private ArrayList<Object> aobj = new ArrayList<Object>();
 	
-	private String strId;
-	private Object objValue = null;
-//	private IVarIdValueOwner owner;
-	private VarCmdFieldAbs owner;
-	private IReflexFillCfg rfcfgClassHoldingTheOwner;
-	private String	strHelp;
-	private StackTraceElement[] asteDbgLastSetOriginAt;
-	
-	public VarIdValueOwnerData(String strId, Object objValue,	VarCmdFieldAbs vivoOwner, IReflexFillCfg rfcfgClassHoldingTheOwner, String strHelp) {
-		super();
-		this.strId = strId;
-		this.objValue = objValue;
-		this.owner = vivoOwner;
-		this.rfcfgClassHoldingTheOwner = rfcfgClassHoldingTheOwner;
-		if(strHelp!=null)this.strHelp = strHelp; //to avoid removing it
-	}
-
-	public void setObjectValue(Object objValue) {
-		this.objValue=objValue;
-		this.asteDbgLastSetOriginAt=Thread.currentThread().getStackTrace();
+	public void setAllParams(Object... aobj) {
+		this.aobj.addAll(Arrays.asList(aobj));
 	}
 	
-	public Object getObjectValue(){
-		return this.objValue;
+	public ArrayList<Object> getAllParamsCopy() {
+		return new ArrayList<Object>(aobj);
 	}
 	
-	public String getHelp(){
-		return strHelp==null?"":strHelp;
+	public Parameters clearParams(){
+		aobj.clear();
+		return this;
 	}
-
-	public String getId() {
-		return strId;
+	
+	public Parameters addParam(Object obj){
+		aobj.add(obj);
+		return this;
 	}
-
-	public VarCmdFieldAbs getOwner() {
-		return owner;
+	
+	/**
+	 * 
+	 * @param clReturnType
+	 * @param aobj params are expected to be NOT null
+	 * @param iIndex
+	 * @return null if invalid class type to cast
+	 */
+	public <T> T getParam(Class<T> clReturnType, int iIndex){
+		Object obj = aobj.get(iIndex);
+		if(clReturnType.isInstance(obj))return (T)obj;
+		return null;
 	}
-
-	public IReflexFillCfg getRfcfgClassHoldingTheOwner() {
-		return rfcfgClassHoldingTheOwner;
-	}
-
 }

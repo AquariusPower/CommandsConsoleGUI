@@ -41,6 +41,7 @@ import com.github.commandsconsolegui.misc.VarCmdUId;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.misc.WorkAroundI;
 import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -433,7 +434,15 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	protected Boolean prepareCallerAssigned(boolean bRunNow) {
 		if(isConstructed()){ 
 			if(callerAssigned!=null){
-				return CallQueueI.i().addCall(callerAssigned,bRunNow);
+				if(bRunNow || callerAssigned.isAllowQueue()){
+					callerAssigned.setRetryOnFail(!bRunNow);
+					return CallQueueI.i().addCall(callerAssigned,bRunNow);
+//				}else{
+//					if(callerAssigned.isAllowQueue()){
+//						callerAssigned.setRetryOnFail(true);
+//						return CallQueueI.i().addCall(callerAssigned,false);
+//					}
+				}
 			}
 		}
 		
@@ -543,12 +552,28 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		return bConstructed;
 	}
 	
+//	public static String getCallerAssignedParamsKey(){
+//		return "Params";
+//	}
+	
 	public Boolean callerAssignedRunNow(){
+		return callerAssignedRunNow(new Object[]{});
+	}
+	public Boolean callerAssignedRunNow(Object... aobjParams){
+		if(callerAssigned!=null){
+//			callerAssigned.putCustomValue(getCallerAssignedParamsKey(), aobjParams);
+			callerAssigned.getParamsForMaintenance().setAllParams(aobjParams);
+		}
+		
 		return prepareCallerAssigned(true);
 	}
 	public void callerAssignedQueueNow(){
 		prepareCallerAssigned(false);
 	}
 
+	public CallableX getCallerAssignedForMaintenance(WorkAroundI.CompositeControl cc) {
+		cc.assertSelfNotNull();
+		return callerAssigned;
+	}
 	
 }

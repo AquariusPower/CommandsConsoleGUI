@@ -28,44 +28,76 @@
 package com.github.commandsconsolegui.misc;
 
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 
 /**
+ * This exists to make it easy to track all bug fix implementations.
+ * All bugfixes must be disablable dynamically, therefore, if some library dependency
+ * is updated, that bug may have been fixed and the bugfix can be disabled.
+ * Every bugfix must also be initialized as disabled, only the end user can enable them.
+ * 
+ * "Bug fix" is some workaround (be hackish or not) that make things work 
+ * as expected when they aren't (for any reason, even developer lack of knowledge :)).
+ * 
+ * Bug fixes should be a temporary code.
+ * 
+ * Implement bugfixes identifiers as {@link BoolTogglerCmdField}, 
+ * so they become toggable user console commands.
+ * The fixer code is a caller set at it.
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
 public class WorkAroundI {
+	public static final class CompositeControl extends CompositeControlAbs<WorkAroundI>{
+		private CompositeControl(WorkAroundI casm){super(casm);};
+	};private CompositeControl ccSelf = new CompositeControl(this);
+	
 	private static WorkAroundI	instance=new WorkAroundI();
 	public static WorkAroundI i(){return instance;}
 	
+	/**
+	 * BFR is bugfix return (type)
+	 * 
+	 * @param clReturnType
+	 * @param objRetIfBugFixBoolDisabled
+	 * @param btgBugFixId
+	 * @param aobjCustomParams
+	 * @return
+	 */
 	public <BFR> BFR bugFix(Class<BFR> clReturnType,
 			BFR objRetIfBugFixBoolDisabled, BoolTogglerCmdField btgBugFixId,
 			Object... aobjCustomParams
 	) {
 		if(!btgBugFixId.b())return objRetIfBugFixBoolDisabled;
 		
+		if(btgBugFixId.getRawValueDefault()){
+			throw new PrerequisitesNotMetException("default bugfix value must be 'false', let end user decide to enable it!", btgBugFixId);
+		}
+		
+		if(btgBugFixId.getCallerAssignedForMaintenance(ccSelf).isAllowQueue()){
+			throw new PrerequisitesNotMetException("bugfixers cannot be queued!", btgBugFixId);
+		}
+		
 		boolean bFixed = false;
 		Object objRet = null;
 		
 		if(btgBugFixId.b()){
-			btgBugFixId.callerAssignedRunNow();
-			
-//			Float f = MiscI.i().getParamFromArray(Float.class, aobjCustomParams, 0);
-//			String str = MiscI.i().getParamFromArray(String.class, aobjCustomParams, 1);
-//			
-//			//DO SPECIFIC BUGFIX HERE
-			
-			bFixed=true;
+//		Float f = MiscI.i().getParamFromArray(Float.class, aobjCustomParams, 0);
+//		String str = MiscI.i().getParamFromArray(String.class, aobjCustomParams, 1);
+			bFixed=btgBugFixId.callerAssignedRunNow(aobjCustomParams);
 		}
 		
-		return MiscI.i().bugFixRet(clReturnType,bFixed, objRet, aobjCustomParams);
-	}
-	
-	public <BFR> BFR bugFixRet(Class<BFR> clReturnType, boolean bFixed,	Object objRet, Object[] aobjCustomParams) {
 		if(!bFixed){
-			throw new PrerequisitesNotMetException("cant bugfix this way...",aobjCustomParams);
+			GlobalCommandsDelegatorI.i().dumpDevWarnEntry("cant bugfix this way...", 
+				clReturnType, objRetIfBugFixBoolDisabled, btgBugFixId, aobjCustomParams);
+//			throw new PrerequisitesNotMetException("cant bugfix this way...",aobjCustomParams);
 		}
 		
 		return (BFR)objRet;
+	}
+	
+	public void prepareBugFix(BoolTogglerCmdField btgBugFix){
+		btgBugFix.getCallerAssignedForMaintenance(ccSelf).setQueueDenied();
 	}
 }

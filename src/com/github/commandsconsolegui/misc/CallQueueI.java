@@ -65,13 +65,18 @@ public class CallQueueI {
 		private long	lLastUpdateMilis;
 		private String strDbgGenericSuperClass;
 		private StackTraceElement[] asteDbgInstancedAt;
+		private StackTraceElement[] asteDbgLastQueuedAt;
 		private long iFailCount=0;
 		private Object	objEnclosing;
+		private Object[]	aobjParams;
+		private boolean	bRetryOnFail = true;
+		private boolean bQuietOnFail = false;
+		private boolean bAllowQueue = true;
 		
 		public CallableX(Object objEnclosing) {
 			this(objEnclosing,0);
 		}
-		public CallableX(Object objEnclosing, int i) {
+		public CallableX(Object objEnclosing, int iRetryDelayMilis) {
 			super();
 			
 			this.objEnclosing=objEnclosing;
@@ -85,9 +90,35 @@ public class CallQueueI {
 			arList = new ArrayList<RetryOnFailure>(); //MUST BE BEFORE {@link RetryOnFailure} instance below!!! 
 			rReQueue = new RetryOnFailure(this, "ReQueue");
 			
-			rReQueue.setRetryDelay(i);
+			rReQueue.setRetryDelay(iRetryDelayMilis);
 //			this.iDelayBetweenRetriesMilis=i;
 		}
+		
+		public void setQueueDenied() {
+			this.bAllowQueue = false;
+		}
+		
+		public boolean isAllowQueue() {
+			return bAllowQueue;
+		}
+		
+		public void setQuietOnFail(boolean bQuietOnFail) {
+			this.bQuietOnFail = bQuietOnFail;
+		}
+		
+		public boolean isQuietOnFail() {
+			return bQuietOnFail;
+		}
+		
+		public CallableX setRetryOnFail(boolean bRetryOnFail) {
+			this.bRetryOnFail = bRetryOnFail;
+			return this;
+		}
+		
+		public boolean isRetryOnFail() {
+			return bRetryOnFail ;
+		}
+		
 		public CallableX setAsPrepend(){
 			bPrepend=true;
 			return this;
@@ -129,6 +160,20 @@ public class CallQueueI {
 		public Object getEnclosingObject() {
 			return objEnclosing;
 		}
+		
+		Parameters param = new Parameters();
+		public long	lDbgLastRunTimeMilis;
+		public long	lDbgLastQueueTimeMilis;
+		public Parameters getParamsForMaintenance(){
+			return param;
+		}
+//		
+//		public void setParams(Object... aobjParams) {
+//			this.aobjParams=aobjParams;
+//		}
+//		public Object[] getAllParams(){
+//			return this.aobjParams;
+//		}
 	}
 	
 	ArrayList<CallableX> aCallList = new ArrayList<CallableX>();
@@ -137,6 +182,8 @@ public class CallQueueI {
 		int i=0;
 		
 		for(CallableX caller:new ArrayList<CallableX>(aCallList)){
+			assertQueueAllowed(caller);
+			
 			if(!caller.rReQueue.isReady()){
 				continue;
 			}
@@ -147,19 +194,31 @@ public class CallQueueI {
 		return i;
 	}
 	
+	private void assertQueueAllowed(CallableX caller) {
+		if(!caller.isAllowQueue()){
+			throw new PrerequisitesNotMetException("cannot be run on queue mode", caller);
+		}
+	}
+
 	private boolean runCallerCode(CallableX caller) {
 //		try {
+			caller.lDbgLastRunTimeMilis=System.currentTimeMillis();
 			if(caller.call().booleanValue()){
 				caller.iFailCount=0; //reset counter
 				aCallList.remove(caller);
 				return true;
 			}else{
 				if(caller.iFailCount==0){
-					GlobalCommandsDelegatorI.i().dumpDevWarnEntry("caller failed: "+caller.getId(),
-						caller, caller.getEnclosingObject());
+					if(!caller.isQuietOnFail()){
+						GlobalCommandsDelegatorI.i().dumpDevWarnEntry("caller failed: "+caller.getId(),
+								caller, caller.getEnclosingObject());
+					}
 				}
 				caller.iFailCount++;
-				addCall(caller, false); //will retry
+				
+				if(caller.isRetryOnFail()){
+					addCall(caller, false); //will retry
+				}
 			}
 //		} catch (Exception e) {
 //			NullPointerException npe = new NullPointerException("callable exception");
@@ -169,6 +228,7 @@ public class CallQueueI {
 		
 		return false;
 	}
+	
 
 //	/**
 //	 * see {@link #addCall(Callable, boolean)}
@@ -201,8 +261,12 @@ public class CallQueueI {
 		while(aCallList.remove(caller)); //prevent multiplicity
 		
 		if(bTryToRunNow){
+//			caller.asteDbgQueuedAt=null;
 			return runCallerCode(caller);
 		}else{
+			assertQueueAllowed(caller);
+			caller.lDbgLastQueueTimeMilis=System.currentTimeMillis();
+			caller.asteDbgLastQueuedAt=Thread.currentThread().getStackTrace();
 			if(caller.bPrepend){
 				aCallList.add(0,caller);
 			}else{

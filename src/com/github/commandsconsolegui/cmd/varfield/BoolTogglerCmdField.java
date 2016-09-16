@@ -27,12 +27,12 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.WorkAroundI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 
 /**
@@ -58,6 +58,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 	private boolean bDoCallOnChange = true;
 //	private CallableX	caller;
 //	private boolean	bConstructed;
+	private boolean	bBugFixerMode;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
@@ -449,4 +450,11 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 	public String getCodePrefixDefault() {
 		return strCodePrefixDefault;
 	}
+
+	public BoolTogglerCmdField setAsBugFixerMode() {
+		bBugFixerMode=true;
+		WorkAroundI.i().prepareBugFix(this);
+		return getThis();
+	}
+
 }

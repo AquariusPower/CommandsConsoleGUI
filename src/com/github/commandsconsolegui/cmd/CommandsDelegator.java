@@ -86,8 +86,7 @@ import com.google.common.io.Files;
 public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public static final class CompositeControl extends CompositeControlAbs<CommandsDelegator>{
 		private CompositeControl(CommandsDelegator casm){super(casm);};
-	}
-	private CompositeControl ccSelf = new CompositeControl(this);
+	};private CompositeControl ccSelf = new CompositeControl(this);
 //	public static final T instance;
 	
 	
@@ -1055,7 +1054,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				if(iIndex==null && !containsFilterString(imsg.strMsg,strFilter))continue;
 				
 //				dumpSubEntry(""+i+": "+imsg.strMsg);
-				if(iIndex!=null && (imsg.ex!=null||imsg.aste!=null)){
+				if(iIndex!=null && (imsg.ex!=null||imsg.asteInstancedAt!=null)){
 					dumpExceptionEntry(imsg, iStackLimit==null?0:iStackLimit);
 				}else{
 					dumpSubEntry(""+i+": "+imsg.getDumpEntryData().getLineFinal(false));
@@ -1724,7 +1723,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		/**
 		 * it is coming from the message buffer, so will not read it...
 		 */
-		dumpExceptionEntry(imsg.ex, imsg.aste, iShowStackElementsCount, false, imsg.getDumpEntryData().getCustomObjects());
+		dumpExceptionEntry(imsg.ex, imsg.asteInstancedAt, iShowStackElementsCount, false, imsg.getDumpEntryData().getCustomObjects());
 	}
 	/**
 	 * see {@link #dumpEntry(DumpEntryData)}

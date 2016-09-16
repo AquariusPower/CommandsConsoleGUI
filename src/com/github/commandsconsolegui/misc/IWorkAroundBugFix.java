@@ -47,38 +47,39 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 
  */
+@Deprecated
 public interface IWorkAroundBugFix {
-	/**
-	 * Simple template. Self note: try to not change it...
-	 */
-	public static class WorkAroundCodeTemplate implements IWorkAroundBugFix, IReflexFillCfg{
-		BoolTogglerCmdField btgBugFixCustom = new BoolTogglerCmdField(this,false);
-		@Override
-		public <BFR> BFR bugFix(Class<BFR> clReturnType,
-				BFR objRetIfBugFixBoolDisabled, BoolTogglerCmdField btgBugFixId,
-				Object... aobjCustomParams
-		) {
-			if(!btgBugFixId.b())return objRetIfBugFixBoolDisabled;
-			
-			boolean bFixed = false;
-			Object objRet = null;
-			
-			if(btgBugFixCustom.isEqualToAndEnabled(btgBugFixId)){
-				Float f = MiscI.i().getParamFromArray(Float.class, aobjCustomParams, 0);
-				String str = MiscI.i().getParamFromArray(String.class, aobjCustomParams, 1);
-				
-				//DO SPECIFIC BUGFIX HERE
-				
-				bFixed=true;
-			}
-			
-			return MiscI.i().bugFixRet(clReturnType,bFixed, objRet, aobjCustomParams);
-		}
-		
-		@Override
-		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {return null;}
-		
-	}
+//	/**
+//	 * Simple template. Self note: try to not change it...
+//	 */
+//	public static class WorkAroundCodeTemplate implements IWorkAroundBugFix, IReflexFillCfg{
+//		BoolTogglerCmdField btgBugFixCustom = new BoolTogglerCmdField(this,false);
+//		@Override
+//		public <BFR> BFR bugFix(Class<BFR> clReturnType,
+//				BFR objRetIfBugFixBoolDisabled, BoolTogglerCmdField btgBugFixId,
+//				Object... aobjCustomParams
+//		) {
+//			if(!btgBugFixId.b())return objRetIfBugFixBoolDisabled;
+//			
+//			boolean bFixed = false;
+//			Object objRet = null;
+//			
+//			if(btgBugFixCustom.isEqualToAndEnabled(btgBugFixId)){
+//				Float f = MiscI.i().getParamFromArray(Float.class, aobjCustomParams, 0);
+//				String str = MiscI.i().getParamFromArray(String.class, aobjCustomParams, 1);
+//				
+//				//DO SPECIFIC BUGFIX HERE
+//				
+//				bFixed=true;
+//			}
+//			
+//			return MiscI.i().bugFixRet(clReturnType,bFixed, objRet, aobjCustomParams);
+//		}
+//		
+//		@Override
+//		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {return null;}
+//		
+//	}
 	
 	/**
 	 * BFR is bugfix return (type)
@@ -91,5 +92,6 @@ public interface IWorkAroundBugFix {
 	 * @param aobjCustomParams
 	 * @return
 	 */
+	@Deprecated
 	public <BFR> BFR bugFix(Class<BFR> clReturnType, BFR objRetIfBugFixBoolDisabled, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams);
 }
