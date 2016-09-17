@@ -6,6 +6,7 @@ Console-*
 *.old
 /bin/
 /.tmp/
+/.jme3
 !lib/**/*.jar
 !.gitignore
 

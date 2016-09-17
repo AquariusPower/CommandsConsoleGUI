@@ -25,29 +25,17 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.globals.jmegui.lemur;
+package com.github.commandsconsolegui.globals;
 
-import com.github.commandsconsolegui.globals.GlobalHolderAbs;
-import com.github.commandsconsolegui.globals.jmegui.GlobalDialogHelperI;
-import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
-import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleUII;
-import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelperI;
+import com.github.commandsconsolegui.OperationalSystem;
 
 /**
-* As you may not be using {@link SimpleApplication#}.
-*  
-* @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
-*/
-public class GlobalLemurDialogHelperI extends GlobalHolderAbs<LemurBaseDialogHelperI> {
-	private static GlobalLemurDialogHelperI instance = new GlobalLemurDialogHelperI();
-	public static GlobalLemurDialogHelperI iGlobal(){return instance;}
-	public static LemurBaseDialogHelperI i(){return iGlobal().get();}
-	
-	@Override
-	public LemurBaseDialogHelperI set(LemurBaseDialogHelperI obj) {
-		GlobalDialogHelperI.iGlobal().set(obj);
-		return super.set(obj);
-	}
+ * 
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
+ *
+ */
+public class GlobalOperationalSystemI extends GlobalHolderAbs<OperationalSystem>{
+	private static GlobalOperationalSystemI instance = new GlobalOperationalSystemI();
+	public static GlobalOperationalSystemI iGlobal(){return instance;}
+	public static OperationalSystem i(){return iGlobal().get();}
 }
-

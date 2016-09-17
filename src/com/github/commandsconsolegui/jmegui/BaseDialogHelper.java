@@ -27,14 +27,28 @@
 
 package com.github.commandsconsolegui.jmegui;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
+import jme3tools.savegame.SaveGame;
+
 import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
+import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
+import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.asset.AssetNotFoundException;
+import com.jme3.export.InputCapsule;
+import com.jme3.export.JmeExporter;
+import com.jme3.export.JmeImporter;
+import com.jme3.export.OutputCapsule;
+import com.jme3.export.Savable;
 import com.jme3.font.BitmapFont;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
@@ -103,4 +117,21 @@ public abstract class BaseDialogHelper implements IReflexFillCfg{
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 	}
+	
+	private ArrayList<BaseDialogStateAbs> adiagList = new ArrayList<BaseDialogStateAbs>();
+	public void addDialog(BaseDialogStateAbs diag){
+		adiagList.add(diag);
+	}
+	public <T extends BaseDialogStateAbs> ArrayList<T> getDialogListCopy(Class<T> clFilter) {
+		ArrayList<T> adiag = new ArrayList<T>();
+		for(BaseDialogStateAbs diag:adiagList){
+			if (clFilter.isInstance(diag)) {
+				adiag.add((T)diag);
+			}
+		}
+		return adiag;
+	}
+	
+//	public abstract void saveAllDialogs();
+
 }

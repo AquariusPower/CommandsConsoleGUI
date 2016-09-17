@@ -516,11 +516,6 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	}
 	
 	@Override
-	public void lineWrapDisableForChildrenOf(Node node){
-		MiscLemurHelpersStateI.i().lineWrapDisableForListboxEntries((ListBox<String>)node);
-	}
-
-	@Override
 	public ConsoleLemurStateI setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines) {
 		MiscLemurHelpersStateI.i().setGrantedSize(getHintBox(), v3fBoxSizeXY);
 		getHintBox().setVisibleItems(iVisibleLines);
@@ -725,85 +720,6 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	public int getVisibleRows(){
 		return getDumpArea().getGridPanel().getVisibleRows();
 	}
-//	@Override
-//	public Vector3f getDumpAreaSize(){
-//		return getDumpArea().getSize();
-//	}
-//	@Override
-//	public Vector3f getInputFieldSize(){
-//		return getInputField().getSize();
-//	}
-	
-//	@Override 
-//	public String getInputText() {
-//		return getInputField().getText();
-//	}
-	
-//	/**
-//	 * These functions must be copied identically at {@link LemurDialogGUIStateAbs}
-//	 * put between here and the functions class, all related methods...
-//	 */
-//	LemurBaseDialogFunctions base = new LemurBaseDialogFunctions();
-//	@Override public String getInputText() {return base.getInputText();}
-//	/**
-//	 * This class must be copied identically at {@link LemurDialogGUIStateAbs}
-//	 * This is a bad, but still functional, way to "share" behavior without encapsulation restrictions.
-//	 * TODO create a validator, may be a shell script using diff?
-//	 */
-//	private class LemurBaseDialogFunctions extends BaseDialogStateAbs{
-//		ConsoleLemurStateI owner = ConsoleLemurStateI.this;
-//		@Override
-//		public String getInputText() {
-//			return owner.getInputField().getText();
-//		}
-//		@Override
-//		protected void lineWrapDisableForChildrenOf(Node node) {
-//		}
-//		@Override
-//		protected boolean initKeyMappings() {
-//			return false;
-//		}
-//		@Override
-//		public Vector3f getMainSize() {
-//			return null;
-//		}
-//		@Override
-//		protected BaseDialogStateAbs setInputText(String str) {
-//			return null;
-//		}
-//		@Override
-//		public void clearSelection() {
-//		}
-//		@Override
-//		protected void updateInputField() {
-//		}
-//		@Override
-//		protected void updateList() {
-//		}
-//		@Override
-//		protected void updateTextInfo() {
-//		}
-//		@Override
-//		protected DialogListEntryData getSelectedEntryData() {
-//			return null;
-//		}
-//		@Override
-//		protected void updateSelected(DialogListEntryData dledPreviouslySelected) {
-//		}
-//		@Override
-//		protected void updateSelected(DialogListEntryData dledAbove,DialogListEntryData dledParentTmp) {
-//		}
-//		@Override
-//		protected BaseDialogStateAbs getThis() {
-//			return null;
-//		}
-//		@Override
-//		public void focusGained() {
-//		}
-//		@Override
-//		public void focusLost() {
-//		}
-//	}
 	
 	@Override
 	public void setInputFieldText(String str){
@@ -815,11 +731,6 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 //		LemurMiscHelpersStateI.i().bugFix(EBugFix.UpdateTextFieldTextAndCaratVisibility, getInputField());
 	}
 	
-//	@Override
-//	private void editPasteFromClipBoard() {
-//		super.editPasteFromClipBoard();
-//		LemurMiscHelpersStateI.i().positionCaratProperly(getInputField());
-//	}
 	@Override
 	protected boolean editInsertAtCaratPosition(String str) {
 		MiscLemurHelpersStateI.i().insertTextAtCaratPosition(getInputField(), str);
@@ -888,59 +799,9 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		}
 		iNewPos=i;
 		
-		
-//		String strWork=new StringBuffer(bForward?strAfter:strBefore).reverse().toString();
-//		for(int i=0; i<strWork.length(); i++){
-//			char c = strWork.charAt(i);
-//			if(iNewPos!=null){
-//				if(bForward){
-//					
-//				}else{
-//					
-//				}
-//				
-//				if(isBlank(c)){
-//					iNewPos++;
-//					continue;
-//				}else{
-//					break; //the begin of next/previous word
-//				}
-//			}
-//			
-//			if(isBlank(c)){
-//				bFoundBlank=true;
-//			}else{
-//				if(bFoundBlank){
-//					iNewPos=bForward?i:-i;
-//				}
-//			}
-//		}
-//		
-//		if(iNewPos==null){
-//			iNewPos=bForward ? iCurPos+strAfter.length() : 0;
-//		}else{
-//			iNewPos+=iCurPos;
-//		}
-//		
-//		if(bForward){
-//			iNewPos++;
-//		}else{
-//		}
-		
 		MiscLemurHelpersStateI.i().setCaratPosition(getInputField(),iNewPos);
 	}
 	
-//	@Override
-//	private String prepareToPaste(String strPasted, String strCurrent) {
-//		if(!isInputTextFieldEmpty()){
-//			strCurrent = LemurMiscHelpersStateI.i().prepareStringToPasteAtCaratPosition(
-//				getInputField(), strCurrent, strPasted);
-//		}else{
-//			return super.prepareToPaste(strPasted, strCurrent);
-//		}
-//		
-//		return strCurrent;
-//	}
 	@Override
 	protected void updateDumpAreaSelectedIndex(){
 		Integer i = getDumpArea().getSelectionModel().getSelection();
@@ -1075,28 +936,10 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		getDialogMainContainer().clearChildren();
 		return super.prepareAndCheckIfReadyToDiscard(cc);
 	}
-	
-//	@Override
-//	public void initializationCompleted() {
-//		// TODO Auto-generated method stub
-//		
-//	}
 
 	@Override
 	public boolean isInitializationCompleted() {
 		return super.isInitializedProperly();
-	}
-
-//	@Override
-//	public void requestFocus(Spatial spt) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-
-	@Override
-	protected void actionSubmit() {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -1140,10 +983,6 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	}
 
 	@Override
-	protected void updateSelected(DialogListEntryData<T> dledAbove, DialogListEntryData<T> dledParentTmp) {
-	}
-
-	@Override
 	protected ConsoleLemurStateI<T> getThis() {
 		return this;
 	}
@@ -1152,10 +991,22 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	protected Float getStatsHeight() {
 		return MiscJmeI.i().retrieveBitmapTextFor(lblStats).getLineHeight();
 	}
-	
-//	@Override
-//	public boolean isAllowLogicalStateUpdate() {
-//		return true;
-//	}
-	
+
+	@Override
+	protected void updateSelected(DialogListEntryData<T> dledAbove, DialogListEntryData<T> dledParentTmp) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("method not implemented yet");
+	}
+
+	@Override
+	protected void setPositionSize(Vector3f v3fPos, Vector3f v3fSize) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("method not implemented yet");
+	}
+
+	@Override
+	protected <N extends Node> void lineWrapDisableForChildrenOf(N node) {
+		MiscLemurHelpersStateI.i().lineWrapDisableForListboxEntries((ListBox<String>)node);
+	}
+
 }

@@ -49,7 +49,7 @@ import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI.BindKey;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelper.DialogStyleElementId;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelperI.DialogStyleElementId;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
@@ -136,8 +136,6 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		
 //		private Integer iEntryHeightPixels;
 		private Float fEntryHeightMultiplier = 1.0f;
-		private Vector3f	v3fIniPos;
-		private Vector3f	v3fIniSize;
 		
 //		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix, Node nodeGUI) {
 //			super(strUIId, bIgnorePrefixAndSuffix, nodeGUI);
@@ -263,8 +261,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 			0
 		);
 		getDialogMainContainer().setLocalTranslation(v3fPosCentered);
-		cfg.v3fIniPos=v3fPosCentered.clone();
-		cfg.v3fIniSize=v3fDiagWindowSize.clone();
+		cfg.setIniPos(v3fPosCentered.clone());
+		cfg.setIniSize(v3fDiagWindowSize.clone());
 		
 		// resizing borders
 //		CallQueueI.i().addCall(new CallableX() {
@@ -291,7 +289,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		lbl.setFontSize(0.5f);
 		getDialogMainContainer().setImpossibleLayoutIndicatorAndCenterMain(
 			null, //			lbl,
-			cntrCenterMain);
+			cntrCenterMain,
+			this);
 		
 		///////////////////////// NORTH (title + info/help)
 		setContainerNorth(new Container(new BorderLayout(), getDiagStyle()));
@@ -446,6 +445,9 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		final Button btnBorder = new Button(
 			"", new ElementId(DialogStyleElementId.buttonResizeBorder.s()), getDiagStyle());
 //		btnBorder.setFontSize(0.1f); //this trick will let us set it with any dot size!
+		
+		MiscJmeI.i().setUserDataPSH(btnBorder, this); //if a border is clicked, the bugfixer that recreates it will make the old border object have no parent. Its parentest would have a reference to the dialog, but now it is alone, so such reference must be on it.
+		
 		btnBorder.setName("Dialog_ResizeBorder_"+edge.toString());
 //		btn.getBackground().getGuiControl().set
 		
@@ -1294,15 +1296,21 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	}
 	
 	@Override
-	protected void restorePosSize() {
-		super.restorePosSize();
+	protected void restoreDefaultPositionSize() {
+		super.restoreDefaultPositionSize();
 		
 		if(getDialogMainContainer()!=null){
-			getDialogMainContainer().setLocalTranslation(cfg.v3fIniPos);
-			getDialogMainContainer().setPreferredSize(cfg.v3fIniSize);
+			setPositionSize(cfg.getIniPos(),cfg.getIniSize());
+//			getDialogMainContainer().setLocalTranslation(cfg.getIniPos());
+//			getDialogMainContainer().setPreferredSize(cfg.getIniSize());
 		}
 	}
 	
+	protected void setPositionSize(Vector3f v3fPos, Vector3f v3fSize) {
+		getDialogMainContainer().setLocalTranslation(v3fPos);
+		getDialogMainContainer().setPreferredSize(v3fSize);
+	}
+
 //	public ArrayList<LemurDialogGUIStateAbs<T,?>> getParentsDialogList(LemurFocusHelperStateI.CompositeControl cc) {
 //	cc.assertSelfNotNull();
 	/**

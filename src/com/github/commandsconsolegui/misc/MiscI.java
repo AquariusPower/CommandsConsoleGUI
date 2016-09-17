@@ -163,7 +163,10 @@ public class MiscI {
 		BufferedWriter bw = null;
 		try{
 			try {
-				if(!fl.exists())fl.createNewFile();
+				if(!fl.exists()){
+					if(!fl.getParentFile().exists())fl.getParentFile().mkdirs();
+					fl.createNewFile();
+				}
 				bw = new BufferedWriter(new FileWriter(fl, true));
 				for(String str:astr){
 					bw.write(str);

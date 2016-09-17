@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import jme3tools.savegame.SaveGame;
 import truetypefont.TrueTypeBitmapGlyph;
 import truetypefont.TrueTypeFont;
 import truetypefont.TrueTypeKey;
@@ -45,6 +46,7 @@ import truetypefont.TrueTypeLoader;
 
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.globals.GlobalOperationalSystemI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
@@ -55,12 +57,14 @@ import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.MiscI.EStringMatchMode;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.asset.AssetNotFoundException;
 import com.jme3.asset.plugins.FileLocator;
+import com.jme3.export.Savable;
 import com.jme3.font.BitmapCharacter;
 import com.jme3.font.BitmapCharacterSet;
 import com.jme3.font.BitmapFont;
@@ -75,6 +79,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.system.JmeSystem;
+import com.jme3.system.JmeSystem.StorageFolderType;
 import com.jme3.texture.Texture2D;
 
 /**
@@ -684,6 +689,61 @@ public class MiscJmeI implements IReflexFillCfg{
 		}else{
 			anodeRendering.remove(node);
 		}
+	}
+
+	/**
+	 * 
+	 * @param strFileName
+	 * @param svMain must gather all other required Savables
+	 */
+	private Savable consoleDataStoring(String strFileName, Savable svMain, boolean bSave) {
+		StorageFolderType esft = GlobalOperationalSystemI.i().getStorageFolderType();
+		
+		String strPathFull = GlobalCommandsDelegatorI.i().getConsoleSaveDataPath();
+		String strPathRelative = null;
+		String strSFT = JmeSystem.getStorageFolder(esft).getAbsolutePath();
+		if(strPathFull.startsWith(strSFT)){
+			strPathRelative = strPathFull.substring(strSFT.length());
+		}else{
+			throw new PrerequisitesNotMetException("console save data path value not expected", strPathFull, strSFT);
+		}
+		
+		/**
+		 * it does not check if the path is absolute and uses it as relative...
+		 */
+		String str=null;
+		Savable svLoaded = null;
+		if(bSave){
+			str="saving";
+			SaveGame.saveGame(
+				strPathRelative,
+				strFileName,
+				svMain,
+				esft);
+		}else{
+			str="loading";
+			svLoaded = SaveGame.loadGame(
+				strPathRelative,
+				strFileName,
+				null,//GlobalAppRefI.i().getAssetManager(),
+				esft);
+			
+			if(svLoaded==null){
+				GlobalCommandsDelegatorI.i().dumpWarnEntry("failed to load", strPathFull, strFileName);
+			}
+		}
+		
+		GlobalCommandsDelegatorI.i().dumpInfoEntry(str+" "+strFileName+" at "+strPathFull);
+		
+		return svLoaded;
+	}
+
+	public void saveWriteConsoleData(String strFileName, Savable svMain) {
+		consoleDataStoring(strFileName, svMain, true);
+	}
+
+	public Savable loadReadConsoleData(String strFileName) {
+		return consoleDataStoring(strFileName, null, false);
 	}
 	
 }

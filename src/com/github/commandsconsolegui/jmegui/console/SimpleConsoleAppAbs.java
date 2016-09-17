@@ -29,12 +29,14 @@ package com.github.commandsconsolegui.jmegui.console;
 
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.extras.SingleAppInstanceI;
+import com.github.commandsconsolegui.globals.GlobalOperationalSystemI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalRootNodeI;
 import com.github.commandsconsolegui.globals.jmegui.lemur.GlobalLemurDialogHelperI;
 import com.github.commandsconsolegui.jmegui.AudioUII;
+import com.github.commandsconsolegui.jmegui.JMEOperationalSystem;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CommandsBackgroundStateI;
 import com.github.commandsconsolegui.jmegui.extras.FpsLimiterStateI;
@@ -42,7 +44,7 @@ import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.MouseCursorListenerAbs;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelper;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelperI;
 import com.github.commandsconsolegui.misc.IConfigure;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -50,11 +52,14 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppState;
 import com.jme3.input.KeyInput;
+import com.jme3.system.JmeSystem.StorageFolderType;
 import com.simsilica.lemur.event.KeyInterceptState;
 import com.simsilica.lemur.event.MouseEventControl;
 
 
 /**
+* 
+* TODO remove SimpleApplication dependency... make this a plugin like...
 * 
 * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 *
@@ -80,6 +85,13 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
   }
   
   public static class CfgParm implements ICfgParm {
+  	private String strApplicationBaseSaveDataPath;
+
+		public CfgParm(String strApplicationBaseSaveDataPath) {
+			super();
+			this.strApplicationBaseSaveDataPath = strApplicationBaseSaveDataPath;
+		}
+  	
   }
   private CfgParm cfg = null;
   @Override
@@ -89,7 +101,8 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
   	// globals must be set as soon as possible
 		GlobalGUINodeI.iGlobal().set(getGuiNode());
 		GlobalRootNodeI.iGlobal().set(getRootNode());
-		GlobalLemurDialogHelperI.iGlobal().set(new LemurBaseDialogHelper());
+		GlobalLemurDialogHelperI.iGlobal().set(LemurBaseDialogHelperI.i());
+		GlobalOperationalSystemI.iGlobal().set(new JMEOperationalSystem(cfg.strApplicationBaseSaveDataPath,StorageFolderType.Internal));
 		
 		/**
 		 * Configs:

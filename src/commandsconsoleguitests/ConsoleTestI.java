@@ -27,6 +27,8 @@
 
 package commandsconsoleguitests;
 
+import java.io.File;
+
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
@@ -107,6 +109,9 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 	}
 	
   public static class CfgParm extends SimpleConsoleAppAbs.CfgParm {
+		public CfgParm(String strApplicationBaseSaveDataPath) {
+			super(strApplicationBaseSaveDataPath);
+		}
   }
   private CfgParm cfg = null;
   @Override
@@ -215,7 +220,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		
 		SingleAppInstanceI.i().configureOptionalAtMainMethod();
 		
-		ConsoleTestI.i().configure(new ConsoleTestI.CfgParm());
+		ConsoleTestI.i().configure(new ConsoleTestI.CfgParm(ConsoleTestI.class.getName().replace(".",File.separator)));
 		ConsoleTestI.i().start();
 	}
 

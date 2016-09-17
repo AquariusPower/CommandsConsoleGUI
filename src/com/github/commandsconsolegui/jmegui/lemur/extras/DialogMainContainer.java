@@ -28,8 +28,9 @@
 package com.github.commandsconsolegui.jmegui.lemur.extras;
 
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
+import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Node;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.component.BorderLayout;
@@ -171,10 +172,15 @@ public class DialogMainContainer extends Container implements ISpatialValidator{
 	private Panel	pnlImpossibleLayout;
 	private Container cntrCenterMain;
 	private boolean	bUseCrashPrevention = false;
-	public void setImpossibleLayoutIndicatorAndCenterMain(Panel pnlImpossibleLayout, Container cntrCenterMain) {
+
+	private BaseDialogStateAbs	diagOwner;
+	public void setImpossibleLayoutIndicatorAndCenterMain(Panel pnlImpossibleLayout, Container cntrCenterMain, BaseDialogStateAbs diagOwner) {
 		bUseCrashPrevention=true;
 		this.pnlImpossibleLayout = pnlImpossibleLayout==null ? new Panel() : pnlImpossibleLayout;
 		this.cntrCenterMain=cntrCenterMain;
+		this.diagOwner=diagOwner;
+		
+		MiscJmeI.i().setUserDataPSH(this.pnlImpossibleLayout, diagOwner);
 	}
 	
 //	@Override

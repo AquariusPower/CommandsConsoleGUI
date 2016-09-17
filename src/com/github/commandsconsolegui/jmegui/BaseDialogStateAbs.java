@@ -27,16 +27,19 @@
 
 package com.github.commandsconsolegui.jmegui;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalDialogHelperI;
+import com.github.commandsconsolegui.globals.jmegui.lemur.GlobalLemurDialogHelperI;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
@@ -45,11 +48,16 @@ import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.ISpatialValidator;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 //import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.jme3.export.InputCapsule;
+import com.jme3.export.JmeExporter;
+import com.jme3.export.JmeImporter;
+import com.jme3.export.OutputCapsule;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -66,7 +74,7 @@ import com.simsilica.lemur.Container;
  * @param <T> see {@link DialogListEntryData}
  * @param <R> is for getThis() concrete auto class type inherited trick
  */
-public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> extends CmdConditionalStateAbs implements IReflexFillCfg{
+public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> extends CmdConditionalStateAbs implements IReflexFillCfg {
 	private ISpatialValidator	sptvDialogMainContainer;
 	private Spatial	sptIntputField;
 	private Spatial sptMainList;
@@ -195,14 +203,31 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 //	}
 	
 	public static class CfgParm extends CmdConditionalStateAbs.CfgParm{
+		private Vector3f	v3fIniPos;
+		private Vector3f	v3fIniSize;
 		private boolean	bOptionSelectionMode;
 //		private Node nodeGUI;
 		private boolean bInitiallyEnabled = false; //the console needs this "true"
 //		public CfgParm(String strUIId, Node nodeGUI){//, R diagParent) {
+		
 		public CfgParm(String strUIId){//, R diagParent) {
 			super(strUIId);
 //			this.nodeGUI = nodeGUI;
 		}
+		
+		public void setIniSize(Vector3f v3fIniSize) {
+			this.v3fIniSize = v3fIniSize;
+		}
+		public Vector3f getIniSize() {
+			return v3fIniSize;
+		}
+		public void setIniPos(Vector3f v3fIniPos) {
+			this.v3fIniPos = v3fIniPos;
+		}
+		public Vector3f getIniPos() {
+			return v3fIniPos;
+		}
+		
 		public void setUIId(String strUIId){
 //			if(getId()!=null)throw new PrerequisitesNotMetException("UI Id already set",getId(),strUIId);
 			PrerequisitesNotMetException.assertNotAlreadySet("UI id", getId(), strUIId, this);
@@ -224,7 +249,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 			@Override
 			public Boolean call() {
 				if(btgRestoreIniPosSizeOnce.b()){
-					restorePosSize();
+					restoreDefaultPositionSize();
 					btgRestoreIniPosSizeOnce.toggle(); //to false
 				}
 				return true;
@@ -313,6 +338,13 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		tdUpdateRefreshList.updateTime();
 		
 		return true;
+	}
+	
+	@Override
+	protected void initSuccess() {
+		super.initSuccess();
+		
+		GlobalDialogHelperI.i().addDialog(this);
 	}
 	
 	protected boolean initGUI(){
@@ -1022,12 +1054,13 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		@Override		protected void updateInputField() {		}
 		@Override		protected void updateList() {		}
 		
-		//TODO below
+		//TODO verify below what can go to BaseDialogHelper or LemurBaseDialogHelper  
 		@Override		protected boolean initKeyMappings() {			return false;		}
 		@Override		protected void lineWrapDisableForChildrenOf(Node node) {		}
 		@Override		public void clearSelection() {		}
 		@Override		protected void updateTextInfo() {		}
 		@Override		protected BaseDialogStateAbs getThis() {			return null;		}
+		@Override		protected void setPositionSize(Vector3f v3fPos, Vector3f v3fSize) {		}
 	}
 	
 	/**
@@ -1039,6 +1072,77 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		getDialogMainContainer().move(v3fDisplacement);
 	}
 	
-	protected void restorePosSize(){
+	protected void restoreDefaultPositionSize(){
 	}
+	
+//	StringVarField svfSavedValues = new 
+//	protected void save(){
+//		
+//	}
+	
+	public static enum ESaveKey{
+		posX,
+		posY,
+		width,
+		height,
+		;
+		public String s(){return this.toString();}
+	}
+	
+	@Override
+	public void write(JmeExporter ex) throws IOException {
+		if(!isInitializedProperly())return; //just skip
+		super.write(ex);
+		
+		OutputCapsule oc = ex.getCapsule(this);
+		
+//		assertInitializedProperly();
+		
+		Vector3f v3fPos = getDialogMainContainer().getLocalTranslation().clone();
+		oc.write(v3fPos.x, ESaveKey.posX.s(), cfg.v3fIniPos.x);
+		oc.write(v3fPos.y, ESaveKey.posY.s(), cfg.v3fIniPos.y);
+		
+		Vector3f v3fSize = getMainSize();
+		oc.write(v3fSize.x, ESaveKey.width.s(), cfg.v3fIniSize.x);
+		oc.write(v3fSize.y, ESaveKey.height.s(), cfg.v3fIniSize.y);
+	}
+	
+	@Override
+	public void read(final JmeImporter im) throws IOException {
+		super.read(im);
+		
+		CallableX caller = new CallableX(this,1000) {
+			@Override
+			public Boolean call() {
+				if(!isInitializedProperly())return false;
+				
+		    InputCapsule in = im.getCapsule(BaseDialogStateAbs.this);
+		    
+				try {
+			    Vector3f v3fPos = new Vector3f(
+						in.readFloat(ESaveKey.posX.s(), cfg.v3fIniPos.x),
+						in.readFloat(ESaveKey.posY.s(), cfg.v3fIniPos.y),
+						0);
+		    
+			    Vector3f v3fSize = new Vector3f(
+		    		in.readFloat(ESaveKey.width.s(), cfg.v3fIniSize.x),
+		    		in.readFloat(ESaveKey.height.s(), cfg.v3fIniSize.y),
+		    		0);
+			    
+			    // apply to self
+			    setPositionSize(v3fPos, v3fSize);
+				} catch (IOException e) {
+					GlobalCommandsDelegatorI.i().dumpExceptionEntry(e, BaseDialogStateAbs.this, im, in);
+					// if failed just ignore (return true to not re-add to queue).
+				}
+		    
+		    return true;
+			}
+		};
+		
+		CallQueueI.i().addCall(caller, isInitializedProperly());
+	}
+
+	protected abstract void setPositionSize(Vector3f v3fPos, Vector3f v3fSize);
+	
 }

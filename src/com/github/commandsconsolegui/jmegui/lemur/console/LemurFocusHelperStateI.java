@@ -222,13 +222,18 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 			focusMouseCursorListener);
 	}
 	
+	/**
+	 * The parentest spatial (or the current) must contain a user data reference to it's dialog owner.
+	 * @param sptAny
+	 * @return
+	 */
 	public BaseDialogStateAbs retrieveDialogFromSpatial(Spatial sptAny){
 		Spatial sptParentest = MiscJmeI.i().getParentestFrom(sptAny);
 		BaseDialogStateAbs diag = MiscJmeI.i().getUserDataPSH(sptParentest, BaseDialogStateAbs.class);
 //		LemurDialogGUIStateAbs diag = (LemurDialogGUIStateAbs)MiscJmeI.i().getParentestFrom(sptAny)
 //				.getUserData(LemurDialogGUIStateAbs.class.getName());
 		
-		if(diag==null)throw new PrerequisitesNotMetException(sptAny.getName());
+		if(diag==null)throw new PrerequisitesNotMetException("no dialog at: "+sptAny.getName());
 		
 		return diag;
 	}

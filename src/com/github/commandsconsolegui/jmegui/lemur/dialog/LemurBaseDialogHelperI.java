@@ -27,9 +27,21 @@
 
 package com.github.commandsconsolegui.jmegui.lemur.dialog;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.BaseDialogHelper;
+import com.github.commandsconsolegui.jmegui.MiscJmeI;
+import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.jme3.export.InputCapsule;
+import com.jme3.export.JmeExporter;
+import com.jme3.export.JmeImporter;
+import com.jme3.export.OutputCapsule;
+import com.jme3.export.Savable;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
@@ -44,9 +56,14 @@ import com.simsilica.lemur.style.Attributes;
 import com.simsilica.lemur.style.Styles;
 
 /**
+ * TODO rename to LemurBaseDialogHelperI
+ * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public class LemurBaseDialogHelper extends BaseDialogHelper{
+public class LemurBaseDialogHelperI extends BaseDialogHelper{
+	private static LemurBaseDialogHelperI instance = new LemurBaseDialogHelperI();
+	public static LemurBaseDialogHelperI i(){return instance;}
+	
 	private ColorRGBA	colorConsoleStyleBackground;
 	StringVarField svfBackgroundHexaColorRGBA = new StringVarField(this,"","XXXXXXXX ex.: 'FF12BC4A' Red Green Blue Alpha");
 
@@ -166,5 +183,74 @@ public class LemurBaseDialogHelper extends BaseDialogHelper{
 		
 //		updateFontStuff();
 	}
-
+	
+//	Savable svAllDiags = new Savable(){
+//		@Override
+//		public void write(JmeExporter ex) throws IOException {
+//			OutputCapsule oc = ex.getCapsule(this);
+//			for(BaseDialogStateAbs diag:getDialogListCopy()){
+//				oc.write(diag, diag.getId(), null);
+//			}
+//		}
+//		@Override
+//		public void read(JmeImporter im) throws IOException {
+//			InputCapsule ic = im.getCapsule(this);
+//			for(BaseDialogStateAbs diag:getDialogListCopy()){
+//				Savable svDiag = ic.readSavable(diag.getId(), diag);
+//				diag.read(im);
+//			}
+//		}
+//	};
+//	
+//	@Override
+//	public void saveAllDialogs() {
+//		SaveGame.saveGame("ConsoleConfig", "Dialogs", svAllDiags);
+////		BinaryExporter ex; 
+////    ex.save(data, new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(saveFile))););
+//	}
+	
+	public ArrayList<LemurDialogGUIStateAbs> getDialogListCopy() {
+		return super.getDialogListCopy(LemurDialogGUIStateAbs.class);
+	}
+	
+	DialogsStorage svAllDiags = new DialogsStorage();
+	public static class DialogsStorage implements Savable{
+		@Override
+		public void write(JmeExporter ex) throws IOException {
+			OutputCapsule oc = ex.getCapsule(this);
+			for(LemurDialogGUIStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy()){
+				oc.write(diag, diag.getId(), null);
+			}
+		}
+		@Override
+		public void read(JmeImporter im) throws IOException {
+			InputCapsule ic = im.getCapsule(this);
+			for(LemurDialogGUIStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy()){
+//				Savable svDiag = ic.readSavable(diag.getId(), diag);
+				diag.read(im);
+			}
+		}
+		
+	};
+	
+	private String strFileDialogs="Dialogs.jmesave";
+	
+	private StringCmdField scfSaveDialogs = new StringCmdField(this)
+		.setCallerAssigned(new CallableX(this) {
+			@Override
+			public Boolean call() {
+				MiscJmeI.i().saveWriteConsoleData(strFileDialogs,svAllDiags);
+				return true;
+			}
+		});
+	
+	private StringCmdField scfLoadDialogs = new StringCmdField(this)
+		.setCallerAssigned(new CallableX(this) {
+			@Override
+			public Boolean call() {
+				MiscJmeI.i().loadReadConsoleData(strFileDialogs);
+				return true;
+			}
+		});
+	
 }

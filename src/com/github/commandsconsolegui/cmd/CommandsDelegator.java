@@ -49,6 +49,7 @@ import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
+import com.github.commandsconsolegui.globals.GlobalOperationalSystemI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleUII;
 import com.github.commandsconsolegui.misc.CallQueueI;
@@ -70,6 +71,7 @@ import com.github.commandsconsolegui.misc.VarCmdUId;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
+import com.jme3.system.JmeSystem;
 
 /**
  * All methods starting with "cmd" are directly accessible by user console commands.
@@ -1565,6 +1567,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	/**
+	 * TODO concatenate custom objects in the message key?
 	 * see {@link #dumpEntry(DumpEntryData)}
 	 * @param strMessageKey
 	 * @param aobj
@@ -3127,6 +3130,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 	
 	ArrayList<StringCmdField> ascfCmdWithCallerList = new ArrayList<StringCmdField>();
+	private File	flConsDataPath;
 	private void updateCmdWithCallerList() {
 		for(StringCmdField scf:VarCmdFieldAbs.getListCopy(StringCmdField.class)){
 			if(scf.isCallerAssigned()){
@@ -3737,9 +3741,17 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	//	dumpEntry("");
 		icui().scrollToBottomRequest();
 	}
-
+	
+	public String getConsoleSaveDataPath(){
+		File flPath = GlobalOperationalSystemI.i().getBaseSaveDataPath();
+		flConsDataPath = new File(flPath.getAbsolutePath()+File.separator+"CommandsConsoleSaveData"+File.separator);
+		if(!flConsDataPath.exists())flConsDataPath.mkdirs();
+		return flConsDataPath+File.separator;
+	}
+	
 	private String fileNamePrepare(String strFileBaseName, String strFileType, boolean bAddDateTime){
-		return strFileBaseName
+		return getConsoleSaveDataPath()
+			+strFileBaseName
 				+(bAddDateTime?"-"+MiscI.i().getDateTimeForFilename():"")
 				+"."+strFileType;
 	}

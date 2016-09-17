@@ -695,6 +695,12 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		}
 	}
 	
+	public void assertInitializedProperly(){
+		if(!isInitializedProperly()){
+			throw new PrerequisitesNotMetException("not properly initialized yet!", this);
+		}
+	}
+	
 	/**
 	 * @return
 	 */
@@ -780,11 +786,9 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 	
   @Override
 	public void write(JmeExporter ex) throws IOException{
-  	
   };
   @Override
 	public void read(JmeImporter im) throws IOException{
-  	
   }
 
 	public boolean isTryingToEnable() {
