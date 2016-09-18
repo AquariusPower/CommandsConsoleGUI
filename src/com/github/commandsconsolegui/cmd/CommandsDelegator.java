@@ -3260,8 +3260,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			}
 		}
 	}
-	public void addCmdToQueue(StringCmdField scfFullCmdLine){
-		addCmdToQueue(scfFullCmdLine.getUniqueCmdId());
+	public void addCmdToQueue(StringCmdField scf){
+		addCmdToQueue(scf.getUniqueCmdId());
 	}
 	public void addCmdToQueue(String strFullCmdLine){
 		addCmdToQueue(strFullCmdLine,false);

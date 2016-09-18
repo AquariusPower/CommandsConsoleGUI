@@ -154,7 +154,7 @@ public class CallQueueI {
 		public long getLastMainTopCoreUpdateTimeMilis() {
 			return lLastUpdateMilis;
 		}
-		public void setlLastUpdateMilis(long lLastUpdateMilis) {
+		public void setLastUpdateMilis(long lLastUpdateMilis) {
 			this.lLastUpdateMilis = lLastUpdateMilis;
 		}
 		
@@ -199,6 +199,7 @@ public class CallQueueI {
 		for(CallableX caller:new ArrayList<CallableX>(aCallList)){
 			assertQueueAllowed(caller);
 			
+			caller.setLastUpdateMilis(System.currentTimeMillis());
 			if(!caller.rReQueue.isReady()){
 				continue;
 			}

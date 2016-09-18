@@ -694,11 +694,15 @@ public class MiscI {
 		
 		if (n instanceof Float) {
 			Float v = (Float) n;
-			if(v.isNaN() || v.isInfinite())throw new IllegalArgumentException("invalid value");
+			if(v.isNaN() || v.isInfinite()){
+				throw new IllegalArgumentException("invalid value");
+			}
 		}else
 		if (n instanceof Double) {
 			Double v = (Double) n;
-			if(v.isNaN() || v.isInfinite())throw new IllegalArgumentException("invalid value");
+			if(v.isNaN() || v.isInfinite()){
+				throw new IllegalArgumentException("invalid value");
+			}
 		}else{
 			throw new UnsupportedOperationException(""+n.getClass()+","+n);
 		}

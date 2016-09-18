@@ -135,11 +135,13 @@ public class SingleAppInstanceI { //implements IReflexFillCfg{
 			
 			if(lOtherLastUpdateTimeMilis==null)bDelete=true;
 			
-			long lMaxDelayWithoutUpdate = lLockUpdateTargetDelayMilis*5;
-			
-			long lOtherLastUpdateDelayMilis = System.currentTimeMillis()-lOtherLastUpdateTimeMilis;
-			boolean bOtherIsAlive = lOtherLastUpdateDelayMilis < lMaxDelayWithoutUpdate;
-			if(!bOtherIsAlive)bDelete=true;
+			if(!bDelete){
+				long lMaxDelayWithoutUpdate = lLockUpdateTargetDelayMilis*5;
+				
+				long lOtherLastUpdateDelayMilis = System.currentTimeMillis()-lOtherLastUpdateTimeMilis;
+				boolean bOtherIsAlive = lOtherLastUpdateDelayMilis < lMaxDelayWithoutUpdate;
+				if(!bOtherIsAlive)bDelete=true;
+			}
 			
 //			long lTimeLimit = System.currentTimeMillis() - lMaxDelayWithoutUpdate;
 //			if(attr.lastModifiedTime().toMillis() < lTimeLimit){

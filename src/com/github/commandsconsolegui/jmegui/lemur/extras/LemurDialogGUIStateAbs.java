@@ -1309,6 +1309,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	protected void setPositionSize(Vector3f v3fPos, Vector3f v3fSize) {
 		getDialogMainContainer().setLocalTranslation(v3fPos);
 		getDialogMainContainer().setPreferredSize(v3fSize);
+		requestRefreshUpdateList();
 	}
 
 //	public ArrayList<LemurDialogGUIStateAbs<T,?>> getParentsDialogList(LemurFocusHelperStateI.CompositeControl cc) {

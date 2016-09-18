@@ -33,16 +33,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
-import javax.naming.directory.InvalidAttributeValueException;
-import javax.xml.ws.Holder;
-
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
-import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalDialogHelperI;
-import com.github.commandsconsolegui.globals.jmegui.lemur.GlobalLemurDialogHelperI;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
@@ -50,8 +45,8 @@ import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.ISpatialValidator;
-import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.CallQueueI;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
@@ -62,6 +57,7 @@ import com.jme3.export.InputCapsule;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.export.OutputCapsule;
+import com.jme3.export.Savable;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -1099,69 +1095,84 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		public String s(){return this.toString();}
 	}
 	
-	@Override
-	public void write(JmeExporter ex) throws IOException {
-		if(!isInitializedProperly())return; //just skip
-		super.write(ex);
+	public static class DialogSavable implements Savable{
+		private BaseDialogStateAbs	diag;
+
+		public DialogSavable(){} //required when loading
 		
-		OutputCapsule oc = ex.getCapsule(this);
+		public DialogSavable setOwner(BaseDialogStateAbs diag){
+			this.diag=diag;
+			return this;
+		}
 		
-//		assertInitializedProperly();
+		@Override
+		public void write(JmeExporter ex) throws IOException {
+			if(!diag.isInitializedProperly())return; //just skip
+			
+			OutputCapsule oc = ex.getCapsule(this);
+			
+//			assertInitializedProperly();
+			
+			oc.write(diag.getId(), E.Id.s(), null);
+			
+			Vector3f v3fPos = diag.getDialogMainContainer().getLocalTranslation().clone();
+			oc.write(v3fPos.x, ESaveKey.posX.s(), diag.cfg.v3fIniPos.x);
+			oc.write(v3fPos.y, ESaveKey.posY.s(), diag.cfg.v3fIniPos.y);
+			
+			Vector3f v3fSize = diag.getMainSize();
+			oc.write(v3fSize.x, ESaveKey.width.s(), diag.cfg.v3fIniSize.x);
+			oc.write(v3fSize.y, ESaveKey.height.s(), diag.cfg.v3fIniSize.y);
+		}
+
+		@Override
+		public void read(JmeImporter im) throws IOException {
+	    InputCapsule ic = im.getCapsule(this);
+			
+	  	final String strDiagId = ic.readString(E.Id.s(),null);
+	  	
+	  	final HashChangeHolder<Vector3f> hchv3fPos = new HashChangeHolder<Vector3f>(new Vector3f());
+	  	final HashChangeHolder<Vector3f> hchv3fSize = new HashChangeHolder<Vector3f>(new Vector3f());
+			try {
+				hchv3fPos.getObjRef().set(
+					MiscI.i().assertValidFloating(ic.readFloat(ESaveKey.posX.s(), Float.NaN)),
+					MiscI.i().assertValidFloating(ic.readFloat(ESaveKey.posY.s(), Float.NaN)),
+					0);
+				
+				hchv3fSize.getObjRef().set(
+	      	MiscI.i().assertValidFloating(ic.readFloat(ESaveKey.width.s(), Float.NaN)),
+	      	MiscI.i().assertValidFloating(ic.readFloat(ESaveKey.height.s(), Float.NaN)),
+	    		0);
+			} catch (IllegalArgumentException e) {
+				GlobalCommandsDelegatorI.i().dumpExceptionEntry(e,im,ic,this);
+				return;
+			}
+	  	
+			CallQueueI.i().addCall(new CallableX(this,1000) {
+				private BaseDialogStateAbs diagApplyAt;
+
+				@Override
+				public Boolean call() {
+		    	diagApplyAt = ConditionalStateManagerI.i().getConditionalState(
+			    		BaseDialogStateAbs.class,strDiagId);
+		    	if(diagApplyAt==null)return false;
+					if(!diagApplyAt.isInitializedProperly())return false;
+			    
+			    diagApplyAt.setPositionSize(hchv3fPos.getObjRef(), hchv3fSize.getObjRef());
+			    
+			    return true;
+				}
+			});
+	 
+		}
 		
-		oc.write(this.getId(), E.Id.s(), null);
-		
-		Vector3f v3fPos = getDialogMainContainer().getLocalTranslation().clone();
-		oc.write(v3fPos.x, ESaveKey.posX.s(), cfg.v3fIniPos.x);
-		oc.write(v3fPos.y, ESaveKey.posY.s(), cfg.v3fIniPos.y);
-		
-		Vector3f v3fSize = getMainSize();
-		oc.write(v3fSize.x, ESaveKey.width.s(), cfg.v3fIniSize.x);
-		oc.write(v3fSize.y, ESaveKey.height.s(), cfg.v3fIniSize.y);
 	}
 	
-	@Override
-	public void read(final JmeImporter im) throws IOException {
-		super.read(im);
-		
-    InputCapsule ic = im.getCapsule(BaseDialogStateAbs.this);
-		
-  	final String strDiagId = ic.readString(E.Id.s(),null);
-  	
-  	final HashChangeHolder<Vector3f> hchv3fPos = new HashChangeHolder<Vector3f>(new Vector3f());
-  	final HashChangeHolder<Vector3f> hchv3fSize = new HashChangeHolder<Vector3f>(new Vector3f());
-		try {
-			hchv3fPos.getObjRef().set(
-				MiscI.i().assertValidFloating(ic.readFloat(ESaveKey.posX.s(), Float.NaN)),
-				MiscI.i().assertValidFloating(ic.readFloat(ESaveKey.posY.s(), Float.NaN)),
-				0);
-			
-			hchv3fSize.getObjRef().set(
-      	MiscI.i().assertValidFloating(ic.readFloat(ESaveKey.width.s(), Float.NaN)),
-      	MiscI.i().assertValidFloating(ic.readFloat(ESaveKey.height.s(), Float.NaN)),
-    		0);
-		} catch (IllegalArgumentException e) {
-			GlobalCommandsDelegatorI.i().dumpExceptionEntry(e,im,ic,this);
-			return;
-		}
-  	
-		CallQueueI.i().addCall(new CallableX(this,1000) {
-			private BaseDialogStateAbs diagApplyAt;
-
-			@Override
-			public Boolean call() {
-	    	diagApplyAt = ConditionalStateManagerI.i().getConditionalState(
-		    		BaseDialogStateAbs.class,strDiagId);
-	    	if(diagApplyAt==null)return false;
-				if(!diagApplyAt.isInitializedProperly())return false;
-		    
-		    diagApplyAt.setPositionSize(hchv3fPos.getObjRef(), hchv3fSize.getObjRef());
-		    
-		    return true;
-			}
-		});
- 
-	}
-
 	protected abstract void setPositionSize(Vector3f v3fPos, Vector3f v3fSize);
+
+	private DialogSavable dsv = new DialogSavable().setOwner(this);
+	public Savable getSavable(BaseDialogHelper.CompositeControl ccSelf) {
+		ccSelf.assertSelfNotNull();
+		return dsv;
+	}
 	
 }

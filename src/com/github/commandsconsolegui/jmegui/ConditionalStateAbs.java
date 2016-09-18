@@ -66,13 +66,13 @@ import com.jme3.scene.Node;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigure<ConditionalStateAbs>,IRetryListOwner{
+public abstract class ConditionalStateAbs implements IGlobalOpt,IConfigure<ConditionalStateAbs>,IRetryListOwner{
 	private StackTraceElement[] asteDbgInstance;
 	
 	public ConditionalStateAbs(){
 		super();
 		
-		MiscI.i().assertFieldsHaveDefaultValue(this);
+//		MiscI.i().assertFieldsHaveDefaultValue(this);
 		
 		asteDbgInstance = Thread.currentThread().getStackTrace();
 		
@@ -830,13 +830,6 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 		public String s(){return this.toString();}
 	}
 	
-  @Override
-	public void write(JmeExporter ex) throws IOException{
-  };
-  @Override
-	public void read(JmeImporter im) throws IOException{
-  }
-
 	public boolean isTryingToEnable() {
 		return bTryingToEnable;
 	}
