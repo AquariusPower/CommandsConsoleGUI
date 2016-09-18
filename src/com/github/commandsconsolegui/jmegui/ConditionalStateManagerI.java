@@ -184,17 +184,17 @@ public class ConditionalStateManagerI extends AbstractAppState {
 	 * @param strRequiredId can be null
 	 * @return
 	 */
-	public ConditionalStateAbs getConditionalState(Class<ConditionalStateAbs> c, String strRequiredId) {
+	public <T extends ConditionalStateAbs> T getConditionalState(Class<T> c, String strRequiredId) {
 		if(strRequiredId==null)return null;
 		
 		for(ConditionalStateAbs csa:aCondStateList){
 			if(c.isAssignableFrom(csa.getClass())){
 				if(strRequiredId==null){
-					return csa;
+					return (T)csa;
 				}else{
 					if(csa.getId()!=null){
 						if(csa.getId().equalsIgnoreCase(strRequiredId)){
-							return csa;
+							return (T)csa;
 						}
 					}
 				}

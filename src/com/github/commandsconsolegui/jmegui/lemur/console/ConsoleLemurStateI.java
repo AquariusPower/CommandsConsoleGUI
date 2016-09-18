@@ -104,6 +104,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	private KeyActionListener	actSimpleActions;
 	
 	public ConsoleLemurStateI(){
+		super();
 		setDumpEntriesSlowedQueue(new VersionedList<String>());
 		setDumpEntries(new VersionedList<String>());
 		setPrefixCmdWithIdToo(true);

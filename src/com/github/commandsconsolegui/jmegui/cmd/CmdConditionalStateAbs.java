@@ -58,7 +58,7 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 //	private String strCmdSuffix="State";
 	
 	public CmdConditionalStateAbs() {
-		// TODO Auto-generated constructor stub
+		super();
 	}
 	
 //	public CommandsDelegator getCmdDelegator(){

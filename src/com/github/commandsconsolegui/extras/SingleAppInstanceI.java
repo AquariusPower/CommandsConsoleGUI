@@ -46,12 +46,12 @@ import com.github.commandsconsolegui.misc.MiscI;
 public class SingleAppInstanceI { //implements IReflexFillCfg{
 //	public final BoolTogglerCmd	btgSingleInstaceMode = new BoolTogglerCmd(this,true,BoolTogglerCmd.strTogglerCodePrefix,
 //		"better keep this enabled, other instances may conflict during files access.");
-	private boolean bDevModeExitIfThereIsANewerInstance = true; //true if in debug mode
+	private boolean bDevModeExitIfThereIsANewerInstance;
 //	public final BoolToggler	btgSingleInstaceOverrideOlder = new BoolToggler(this,false,ConsoleCommands.strTogglerCodePrefix,
 //		"If true, any older instance will exit and this will keep running."
 //		+"If false, the oldest instance will keep running and this one will exit.");
-	String strPrefix=SingleAppInstanceI.class.getSimpleName()+"-";
-	String strSuffix=".lock";
+	String strPrefix;
+	String strSuffix;
 	String strId;
 	private File	flSelfLock;
 //	private ConsoleCommands	cc;
@@ -59,15 +59,37 @@ public class SingleAppInstanceI { //implements IReflexFillCfg{
 //	private boolean	bInitialized;
 	private FilenameFilter	fnf;
 	private File	flFolder;
-	private long lLockUpdateTargetDelayMilis=3000;
-	private long	lSelfLockCreationTime;
-	private String	strExitReasonOtherInstance = "";
+	private long lLockUpdateTargetDelayMilis;
+	private long	lSelfLockCreationTimeMilis;
+	private String	strExitReasonOtherInstance;
 	public int	lCheckCountsTD;
 	private boolean	bExitApplicationTD;
 	public long	lCheckTotalDelay;
+	private boolean	bUseFilesystemFileAttributeModifiedTime;
+	private boolean	bRecreateLockEveryLoop;
 	
 	private static SingleAppInstanceI instance = new SingleAppInstanceI();
 	public static SingleAppInstanceI i(){return instance;}
+	
+	public SingleAppInstanceI() {
+		bDevModeExitIfThereIsANewerInstance = true; //true if in debug mode
+		lLockUpdateTargetDelayMilis=3000;
+		strPrefix=SingleAppInstanceI.class.getSimpleName()+"-";
+		strSuffix=".lock";
+		strExitReasonOtherInstance = "";
+		setUseFilesystemFileAttributeModifiedTime(false);
+	}
+	
+	/**
+	 * instead of the one written on the lock file
+	 * @param b
+	 * @return 
+	 */
+	public SingleAppInstanceI setUseFilesystemFileAttributeModifiedTime(boolean b) {
+		this.bUseFilesystemFileAttributeModifiedTime = b;
+		this.bRecreateLockEveryLoop = !this.bUseFilesystemFileAttributeModifiedTime;
+		return this;
+	}
 	
 	private File[] getAllLocksTD(){
 		return flFolder.listFiles(fnf);
@@ -99,9 +121,33 @@ public class SingleAppInstanceI { //implements IReflexFillCfg{
 			BasicFileAttributes attr = MiscI.i().fileAttributesTS(fl);
 			if(attr==null)continue;
 			
-			long lTimeLimit = System.currentTimeMillis() - (lLockUpdateTargetDelayMilis*2);
-			if(attr.lastModifiedTime().toMillis() < lTimeLimit){
+			Long lOtherLastUpdateTimeMilis = null;
+			if(bUseFilesystemFileAttributeModifiedTime){
+				/**
+				 * this may fail on some filesystems
+				 */
+				lOtherLastUpdateTimeMilis = attr.lastModifiedTime().toMillis();
+			}else{
+				lOtherLastUpdateTimeMilis = getLastUpdateTimeOfTD(fl);
+			}
+			
+			boolean bDelete=false;
+			
+			if(lOtherLastUpdateTimeMilis==null)bDelete=true;
+			
+			long lMaxDelayWithoutUpdate = lLockUpdateTargetDelayMilis*5;
+			
+			long lOtherLastUpdateDelayMilis = System.currentTimeMillis()-lOtherLastUpdateTimeMilis;
+			boolean bOtherIsAlive = lOtherLastUpdateDelayMilis < lMaxDelayWithoutUpdate;
+			if(!bOtherIsAlive)bDelete=true;
+			
+//			long lTimeLimit = System.currentTimeMillis() - lMaxDelayWithoutUpdate;
+//			if(attr.lastModifiedTime().toMillis() < lTimeLimit){
+			if(bDelete){
 				outputTD("Cleaning old lock: "+fl.getName());
+//				System.out.println(""+lOtherLastUpdateDelayMilis);
+//				System.out.println(""+lMaxDelayWithoutUpdate);
+//				System.out.println(""+bOtherIsAlive);
 				fl.delete();
 			}
 		}
@@ -123,23 +169,42 @@ public class SingleAppInstanceI { //implements IReflexFillCfg{
 		for(File flOtherLock:getAllLocksTD()){
 			if(cmpSelfWithTD(flOtherLock))continue;
 			
-			Long lOtherCreationTime = getCreationTimeOfTD(flOtherLock);
-			if(lOtherCreationTime==null)continue;
+			Long lOtherCreationTimeMilis = getCreationTimeOfTD(flOtherLock);
+			if(lOtherCreationTimeMilis==null)continue;
+			
+//			Long lOtherLastUpdateTimeMilis = getLastUpdateTimeOfTD(flOtherLock);
+//			if(lOtherLastUpdateTimeMilis==null)continue;
 			
 			ERunMode ermOther = getLockRunModeOfTD(flOtherLock);
 			strReport+="OtherLock: "+flOtherLock.getName()+" "+getMode(ermOther,true)+"\n";
 			
-			boolean  bOtherIsNewer = lSelfLockCreationTime < lOtherCreationTime;
+			boolean  bOtherIsNewer = lSelfLockCreationTimeMilis < lOtherCreationTimeMilis;
+//			long lOtherLastUpdateDelayMilis = System.currentTimeMillis()-lOtherLastUpdateTimeMilis;
+//			boolean bOtherIsAlive = lOtherLastUpdateDelayMilis < (lLockUpdateTargetDelayMilis*3) ;
+//			
+//			if(lOtherLastUpdateDelayMilis>lLockUpdateTargetDelayMilis*6){
+////				File flOtherDead=new File(flOtherLock.getAbsoluteFile()+".DEAD");
+////				System.out.println(flOtherDead);
+////				flOtherLock.renameTo(flOtherDead);
+//				flOtherLock.delete();
+//			}
 			
-			if(bDevModeExitIfThereIsANewerInstance && bOtherIsNewer){
-				applyExitReason("NEWER"+getMode(ermOther,true));
-			}else
-			if(!bDevModeExitIfThereIsANewerInstance && !bOtherIsNewer){
-				/**
-				 * exit if there is an older instance
-				 */
-				applyExitReason("OLDER"+getMode(ermOther,true));
-			}
+//			if(!bOtherIsAlive){
+//				applyExitReasonAboutOtherInstanceStatus("STILLALIVE"+getMode(ermOther,true));
+//			}else{
+				if(bDevModeExitIfThereIsANewerInstance && bOtherIsNewer){
+					/**
+					 * exits if there is a newer debug application instance (development machine)
+					 */
+					applyExitReasonAboutOtherInstanceStatus("NEWER"+getMode(ermOther,true));
+				}else
+				if(!bDevModeExitIfThereIsANewerInstance && !bOtherIsNewer){
+					/**
+					 * exits if there is an older release application instance (end user machine)
+					 */
+					applyExitReasonAboutOtherInstanceStatus("OLDER"+getMode(ermOther,true));
+				}
+//			}
 			
 			/**
 			 * the priority is to keep the release mode instance running
@@ -163,7 +228,7 @@ public class SingleAppInstanceI { //implements IReflexFillCfg{
 				 */
 				if(bSelfIsDebugMode){
 					if(ermOther.compareTo(ERunMode.Release)==0){
-						applyExitReason(ermOther.toString());
+						applyExitReasonAboutOtherInstanceStatus(ermOther.toString());
 					}
 				}
 			}
@@ -185,7 +250,7 @@ public class SingleAppInstanceI { //implements IReflexFillCfg{
 		return bExitApplicationTD;
 	}
 	
-	private void applyExitReason(String str){
+	private void applyExitReasonAboutOtherInstanceStatus(String str){
 		strExitReasonOtherInstance=str;
 		bExitApplicationTD=true;
 	}
@@ -199,9 +264,18 @@ public class SingleAppInstanceI { //implements IReflexFillCfg{
 			long lLockUpdateFastInitDelayMilis=lIncStep;
 			while(threadMain==null || threadMain.isAlive()){ //null means not configured yet
 				try {
+					boolean bWasDeleted=false;
 					if(!flSelfLock.exists()){
-						outputTD("Lock was deleted, recreating: "+flSelfLock.getName());
-						createSelfLockFileTD();
+						outputTD("WARNING!!! Lock was deleted, recreating: "+flSelfLock.getName());
+						bWasDeleted=true;
+					}
+					
+					/**
+					 * to recreate it every loop is to show the application is alive
+					 * by updating its contents with last update time
+					 */
+					if(bWasDeleted||bRecreateLockEveryLoop){
+						createSelfLockFileTD(); 
 					}
 					
 					if(checkExitTD()){
@@ -258,32 +332,31 @@ public class SingleAppInstanceI { //implements IReflexFillCfg{
 	private int	lWaitCount;
 	private boolean	bAllowCfgOutOfMainMethod = false;
 	
-	private Long getCreationTimeOfTD(File fl){
+//	private Long getCreationTimeOfTD(File fl){
+//		ArrayList<String> astr = MiscI.i().fileLoad(fl);
+//		Long l = null;
+//		if(astr.size()>0){
+//			// line 1
+//			try{l = Long.parseLong(astr.get(0));}catch(NumberFormatException ex){};
+//		}
+//		return l;
+//	}
+	
+	private Long getCreationTimeOfTD(File fl){ //LINE 1
 		ArrayList<String> astr = MiscI.i().fileLoad(fl);
-		Long l = null;
-		if(astr.size()>0){
-			// line 1
-			try{l = Long.parseLong(astr.get(0));}catch(NumberFormatException ex){};
-		}
+		Long l = null;if(astr.size()>0){try{l = Long.parseLong(astr.get(0));}catch(NumberFormatException|IndexOutOfBoundsException ex){};}
 		return l;
 	}
-	
-	private enum ERunMode{
-		Debug,
-		Release,
-		Undefined,
-		;
-	}
-	
-	/**
-	 * LINE 2
-	 * @param fl
-	 * @return
-	 */
-	private ERunMode getLockRunModeOfTD(File fl){
+	private enum ERunMode{Debug,Release,Undefined,;}
+	private ERunMode getLockRunModeOfTD(File fl){ //LINE 2
 		ArrayList<String> astr = MiscI.i().fileLoad(fl);
 		try{return ERunMode.valueOf(astr.get(1));}catch(IllegalArgumentException|IndexOutOfBoundsException e){}
 		return ERunMode.Undefined;
+	}
+	private Long getLastUpdateTimeOfTD(File fl){ //LINE 3
+		ArrayList<String> astr = MiscI.i().fileLoad(fl);
+		Long l = null;if(astr.size()>0){try{l = Long.parseLong(astr.get(2));}catch(NumberFormatException|IndexOutOfBoundsException ex){};}
+		return l;
 	}
 	
 //	/**
@@ -309,27 +382,34 @@ public class SingleAppInstanceI { //implements IReflexFillCfg{
 			;
 	}
 	
+	boolean bCreateLockOutputOnce=true;
 	private void createSelfLockFileTD() {
-		try{
-			flSelfLock.createNewFile();
+//		try{
+//			flSelfLock.createNewFile();
 			
 			ArrayList<String> astr = new ArrayList<String>();
 			// line 1
-			astr.add(""+lSelfLockCreationTime);
+			astr.add(""+lSelfLockCreationTimeMilis);
 			// line 2
 			astr.add(getSelfMode(false));
+			// line 3
+			astr.add(""+System.currentTimeMillis()); //last update time
 			
-			MiscI.i().fileAppendListTS(flSelfLock, astr);
-			
-			attrSelfLock = MiscI.i().fileAttributesTS(flSelfLock);
-			
-			outputTD("Created lock: "+flSelfLock.getName()+" "+getSelfMode(true));
-			
-			flSelfLock.deleteOnExit();
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw new NullPointerException("unable to create lock file "+flSelfLock.getAbsolutePath());
-		}
+			flSelfLock.delete();
+			if(MiscI.i().fileAppendListTS(flSelfLock, astr)){
+				attrSelfLock = MiscI.i().fileAttributesTS(flSelfLock);
+				
+				if(bCreateLockOutputOnce){
+					outputTD("Created lock: "+flSelfLock.getName()+" "+getSelfMode(true));
+					bCreateLockOutputOnce=false;
+				}
+				
+				flSelfLock.deleteOnExit();
+			}else{
+//		} catch (IOException e) {
+//			e.printStackTrace();
+				throw new NullPointerException("unable to create lock file "+flSelfLock.getAbsolutePath());
+			}
 	}
 	
 	/**
@@ -367,8 +447,8 @@ public class SingleAppInstanceI { //implements IReflexFillCfg{
 		
 //		if(Debug.i().isInIDEdebugMode())strPrefix="DebugMode-"+strPrefix;
 		
-		lSelfLockCreationTime = System.currentTimeMillis();
-		strId=strPrefix+MiscI.i().getDateTimeForFilename(lSelfLockCreationTime,true)+strSuffix;
+		lSelfLockCreationTimeMilis = System.currentTimeMillis();
+		strId=strPrefix+MiscI.i().getDateTimeForFilename(lSelfLockCreationTimeMilis,true)+strSuffix;
 		flSelfLock = new File(strId);
 		
 		flFolder = new File("./");

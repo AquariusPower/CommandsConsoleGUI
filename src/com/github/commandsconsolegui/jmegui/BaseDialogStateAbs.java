@@ -33,6 +33,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
+import javax.naming.directory.InvalidAttributeValueException;
+import javax.xml.ws.Holder;
+
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
@@ -49,6 +52,7 @@ import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI
 import com.github.commandsconsolegui.jmegui.lemur.extras.ISpatialValidator;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.CallQueueI;
+import com.github.commandsconsolegui.misc.HashChangeHolder;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 //import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
@@ -1089,6 +1093,12 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		public String s(){return this.toString();}
 	}
 	
+	enum E{
+		Id,
+		;
+		public String s(){return this.toString();}
+	}
+	
 	@Override
 	public void write(JmeExporter ex) throws IOException {
 		if(!isInitializedProperly())return; //just skip
@@ -1097,6 +1107,8 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		OutputCapsule oc = ex.getCapsule(this);
 		
 //		assertInitializedProperly();
+		
+		oc.write(this.getId(), E.Id.s(), null);
 		
 		Vector3f v3fPos = getDialogMainContainer().getLocalTranslation().clone();
 		oc.write(v3fPos.x, ESaveKey.posX.s(), cfg.v3fIniPos.x);
@@ -1111,36 +1123,43 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	public void read(final JmeImporter im) throws IOException {
 		super.read(im);
 		
-		CallableX caller = new CallableX(this,1000) {
+    InputCapsule ic = im.getCapsule(BaseDialogStateAbs.this);
+		
+  	final String strDiagId = ic.readString(E.Id.s(),null);
+  	
+  	final HashChangeHolder<Vector3f> hchv3fPos = new HashChangeHolder<Vector3f>(new Vector3f());
+  	final HashChangeHolder<Vector3f> hchv3fSize = new HashChangeHolder<Vector3f>(new Vector3f());
+		try {
+			hchv3fPos.getObjRef().set(
+				MiscI.i().assertValidFloating(ic.readFloat(ESaveKey.posX.s(), Float.NaN)),
+				MiscI.i().assertValidFloating(ic.readFloat(ESaveKey.posY.s(), Float.NaN)),
+				0);
+			
+			hchv3fSize.getObjRef().set(
+      	MiscI.i().assertValidFloating(ic.readFloat(ESaveKey.width.s(), Float.NaN)),
+      	MiscI.i().assertValidFloating(ic.readFloat(ESaveKey.height.s(), Float.NaN)),
+    		0);
+		} catch (IllegalArgumentException e) {
+			GlobalCommandsDelegatorI.i().dumpExceptionEntry(e,im,ic,this);
+			return;
+		}
+  	
+		CallQueueI.i().addCall(new CallableX(this,1000) {
+			private BaseDialogStateAbs diagApplyAt;
+
 			@Override
 			public Boolean call() {
-				if(!isInitializedProperly())return false;
-				
-		    InputCapsule in = im.getCapsule(BaseDialogStateAbs.this);
+	    	diagApplyAt = ConditionalStateManagerI.i().getConditionalState(
+		    		BaseDialogStateAbs.class,strDiagId);
+	    	if(diagApplyAt==null)return false;
+				if(!diagApplyAt.isInitializedProperly())return false;
 		    
-				try {
-			    Vector3f v3fPos = new Vector3f(
-						in.readFloat(ESaveKey.posX.s(), cfg.v3fIniPos.x),
-						in.readFloat(ESaveKey.posY.s(), cfg.v3fIniPos.y),
-						0);
-		    
-			    Vector3f v3fSize = new Vector3f(
-		    		in.readFloat(ESaveKey.width.s(), cfg.v3fIniSize.x),
-		    		in.readFloat(ESaveKey.height.s(), cfg.v3fIniSize.y),
-		    		0);
-			    
-			    // apply to self
-			    setPositionSize(v3fPos, v3fSize);
-				} catch (IOException e) {
-					GlobalCommandsDelegatorI.i().dumpExceptionEntry(e, BaseDialogStateAbs.this, im, in);
-					// if failed just ignore (return true to not re-add to queue).
-				}
+		    diagApplyAt.setPositionSize(hchv3fPos.getObjRef(), hchv3fSize.getObjRef());
 		    
 		    return true;
 			}
-		};
-		
-		CallQueueI.i().addCall(caller, isInitializedProperly());
+		});
+ 
 	}
 
 	protected abstract void setPositionSize(Vector3f v3fPos, Vector3f v3fSize);

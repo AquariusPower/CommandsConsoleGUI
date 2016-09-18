@@ -27,7 +27,7 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
+import com.github.commandsconsolegui.misc.SimpleHandleExceptionsI;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -44,7 +44,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  */
 public class IntLongVarField extends NumberVarFieldAbs<Long,IntLongVarField>{
 	private static boolean	bConfigured;
-	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
+	private static IHandleExceptions	ihe = SimpleHandleExceptionsI.i();
 //	private static String	strCodePrefix = "ilv";
 //	private static ArrayList<IntLongVarField> ailvList = new ArrayList<IntLongVarField>();
 	

@@ -51,6 +51,10 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map.Entry;
+
+import javax.naming.directory.InvalidAttributeValueException;
 
 /**
  * 
@@ -59,7 +63,7 @@ import java.util.Date;
  */
 public class MiscI {
 //	public long lLastUniqueId = 0;
-	private IHandleExceptions	ihe = HandleExceptionsRaw.i();
+	private IHandleExceptions	ihe = SimpleHandleExceptionsI.i();
 	private String	strLastUid = "0";
 	private boolean	bConfigured;
 //	private SimpleApplication	sapp;
@@ -159,12 +163,18 @@ public class MiscI {
 		
 		return astr;
 	}
-	synchronized public void fileAppendListTS(File fl, ArrayList<String> astr) {
+	synchronized public boolean fileAppendListTS(File fl, ArrayList<String> astr) {
 		BufferedWriter bw = null;
+		boolean bWrote=false;
 		try{
 			try {
 				if(!fl.exists()){
-					if(!fl.getParentFile().exists())fl.getParentFile().mkdirs();
+					File flParent = fl.getParentFile();
+					if(flParent!=null){
+						if(!flParent.exists()){
+							flParent.mkdirs();
+						}
+					}
 					fl.createNewFile();
 				}
 				bw = new BufferedWriter(new FileWriter(fl, true));
@@ -172,6 +182,8 @@ public class MiscI {
 					bw.write(str);
 					bw.newLine();
 				}
+				
+				bWrote=true;
 			} catch (IOException e) {
 				ihe.handleExceptionThreaded(e);
 			}finally{
@@ -180,6 +192,8 @@ public class MiscI {
 		} catch (IOException e) {
 			ihe.handleExceptionThreaded(e);
 		}
+		
+		return bWrote;
 	}
 	
 	/**
@@ -604,5 +618,103 @@ public class MiscI {
 		return (BFR)objRet;
 	}
 	
+	public <T> T assertCurrentIsNull(T currentValue, T newValue){
+		PrerequisitesNotMetException.assertNotAlreadySet("Field", currentValue, newValue);
+		return newValue;
+	}
 	
+	HashMap<Class,Object> hmPrimitivesDefaultValues;
+	/**
+	 * Use on constructors to prevent initializations in the class body.
+	 * @param objOwner
+	 */
+	public void assertFieldsHaveDefaultValue(Object objOwner){
+		if(!DebugI.i().isInIDEdebugMode()){
+			return; //spend this time only in development mode
+		}
+		
+		if(hmPrimitivesDefaultValues==null){
+			hmPrimitivesDefaultValues = new HashMap<Class, Object>();
+			hmPrimitivesDefaultValues.put(boolean.class, new Boolean(false));
+			hmPrimitivesDefaultValues.put(byte.class, new Byte((byte)0));
+			hmPrimitivesDefaultValues.put(char.class, new Character((char) 0));
+			hmPrimitivesDefaultValues.put(short.class, new Short((short) 0));
+			hmPrimitivesDefaultValues.put(int.class, new Integer(0));
+			hmPrimitivesDefaultValues.put(long.class, new Long(0));
+			hmPrimitivesDefaultValues.put(float.class, new Float(0));
+			hmPrimitivesDefaultValues.put(double.class, new Double(0));
+		}
+		
+		ArrayList<Class<?>> superClassesOf = MiscI.i().getSuperClassesOf(objOwner);
+		for(Class cl:superClassesOf){
+			@SuppressWarnings("unused") int iDbgBreakPoint=0;
+			for(Field fld:cl.getDeclaredFields()){
+				if(Modifier.isStatic(fld.getModifiers()))continue;
+				
+				boolean b=fld.isAccessible();
+				if(!b)fld.setAccessible(true);
+				
+				try {
+					Object objValue = fld.get(objOwner);
+					
+					boolean bIsDefault=false;
+					if(fld.getType().isPrimitive()){
+						for(Entry<Class, Object> entry:hmPrimitivesDefaultValues.entrySet()){
+							Class clPrimitive = entry.getKey();
+							if(fld.getType().isAssignableFrom(clPrimitive)){
+								if(objValue.equals(entry.getValue()))bIsDefault=true;
+								break;
+							}
+						}
+					}else{
+						if(objValue==null)bIsDefault=true;
+					}
+//					if(fld.getType().isAssignableFrom(Boolean.class)){
+//						if(((Boolean)objValue)!=Boolean.class.newInstance())bIsDefault=false;
+//					}else
+//					{} //just for easy coding
+					
+					if(!bIsDefault){
+						throw new PrerequisitesNotMetException(
+							"not default"+(fld.getType().isPrimitive() ? " (primitive)" : ""),
+							objOwner, cl, fld, objValue);
+					}
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					throw new PrerequisitesNotMetException("check for default values failed", objOwner, cl, fld)
+						.initCauseAndReturnSelf(e);
+				}
+				
+				if(!b)fld.setAccessible(false);
+			}
+		}
+	}
+	
+	public <T extends Number> T assertValidFloating(T n) throws IllegalArgumentException{
+		if(n==null)throw new IllegalArgumentException("null invalid value");
+		
+		if (n instanceof Float) {
+			Float v = (Float) n;
+			if(v.isNaN() || v.isInfinite())throw new IllegalArgumentException("invalid value");
+		}else
+		if (n instanceof Double) {
+			Double v = (Double) n;
+			if(v.isNaN() || v.isInfinite())throw new IllegalArgumentException("invalid value");
+		}else{
+			throw new UnsupportedOperationException(""+n.getClass()+","+n);
+		}
+		
+		return n;
+	}
+	
+	public <T> T assertNotNull(Class<T> cl, T value) throws InvalidAttributeValueException{
+		if(value==null)throw new InvalidAttributeValueException();
+		return value;
+	}
+	
+	public boolean stackTraceContainsClass(StackTraceElement[] aste,Class cl) {
+		for(StackTraceElement ste:aste){
+			if(ste.getClassName().equals(cl.getName()))return true;
+		}
+		return false;
+	}
 }

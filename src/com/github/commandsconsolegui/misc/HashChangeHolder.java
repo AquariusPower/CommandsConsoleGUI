@@ -33,21 +33,25 @@ package com.github.commandsconsolegui.misc;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class HashChangeHolder {
-	private Object	objRef;
+public class HashChangeHolder<T> {
+	private T objRef;
 	private int	iHash;
 	private long lCount;
 	private long	lLastChangeTime;
 	private StackTraceElement[] ste;
 
-	public HashChangeHolder(Object objRef){
+	public HashChangeHolder(T objRef){
 		this.objRef=objRef;
+	}
+	
+	public T getObjRef(){
+		return objRef;
 	}
 	
 	public boolean isChangedAndUpdateHash(){
 		return isChangedAndUpdateHash(objRef);
 	}
-	public boolean isChangedAndUpdateHash(Object objRefNew){
+	public boolean isChangedAndUpdateHash(T objRefNew){
 		this.objRef = objRefNew;
 		
 		int iHashTmp = objRef.hashCode();

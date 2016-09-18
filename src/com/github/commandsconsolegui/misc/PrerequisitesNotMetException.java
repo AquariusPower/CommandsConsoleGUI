@@ -82,11 +82,29 @@ public class PrerequisitesNotMetException extends NullPointerException {
 		if(objCurrent!=null)throw new PrerequisitesNotMetException(strDescWhat+": already set", aobjAll.toArray());
 	}
 	
+	public PrerequisitesNotMetException setCauseAndReturnSelf(String strCauseMessage, StackTraceElement[] asteCauseStack) {
+		return initCauseAndReturnSelf(strCauseMessage, asteCauseStack);
+	}
+	/**
+	 * this one helps as reads like {@link #initCause(Throwable)}
+	 * @param strCauseMessage
+	 * @param asteCauseStack
+	 * @return
+	 */
 	public PrerequisitesNotMetException initCauseAndReturnSelf(String strCauseMessage, StackTraceElement[] asteCauseStack) {
 		Throwable tw = new Throwable(strCauseMessage);
 		tw.setStackTrace(asteCauseStack);
 		return initCauseAndReturnSelf(tw);
 	}
+	
+	public PrerequisitesNotMetException setCauseAndReturnSelf(Throwable cause) {
+		return initCauseAndReturnSelf(cause);
+	}
+	/**
+	 * this one helps as reads like {@link #initCause(Throwable)}
+	 * @param cause
+	 * @return
+	 */
 	public PrerequisitesNotMetException initCauseAndReturnSelf(Throwable cause) {
 		super.initCause(cause);
 		return this;

@@ -67,11 +67,56 @@ import com.jme3.scene.Node;
  *
  */
 public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigure<ConditionalStateAbs>,IRetryListOwner{
+	private StackTraceElement[] asteDbgInstance;
+	
+	public ConditionalStateAbs(){
+		super();
+		
+		MiscI.i().assertFieldsHaveDefaultValue(this);
+		
+		asteDbgInstance = Thread.currentThread().getStackTrace();
+		
+		/**
+		 * make a hollow instance while loading
+		 */
+		if(!MiscI.i().stackTraceContainsClass(asteDbgInstance,Savable.class)){
+//			this.strCaseInsensitiveId=null;
+//			this.bConfigured = bConfigured;
+//			this.lLastMainTopCoreUpdateTimeMilis = lLastMainTopCoreUpdateTimeMilis;
+			arList = new ArrayList<RetryOnFailure>();
+			rInit = new RetryOnFailure(this,ERetryDelayMode.Init.s());
+			rEnable = new RetryOnFailure(this,ERetryDelayMode.Enable.s());
+			rUpdate = new RetryOnFailure(this,ERetryDelayMode.Update.s());
+			rDisable = new RetryOnFailure(this,ERetryDelayMode.Disable.s());
+			rDiscard = new RetryOnFailure(this,ERetryDelayMode.Discard.s());
+//			this.bProperlyInitialized = bProperlyInitialized;
+			this.bEnabled = false;
+			this.bEnabledRequested = true;
+//			this.bDisabledRequested = bDisabledRequested;
+			this.bHoldProperInitialization = false;
+//			this.bLastUpdateSuccessful = bLastUpdateSuccessful;
+//			this.bHoldUpdates = bHoldUpdates;
+//			this.bEnableSuccessful = bEnableSuccessful;
+//			this.bHoldEnable = bHoldEnable;
+//			this.bDisableSuccessful = bDisableSuccessful;
+//			this.bHoldDisable = bHoldDisable;
+//			this.bDiscardRequested = bDiscardRequested;
+//			this.asmParent = asmParent;
+//			this.bDiscarded = bDiscarded;
+//			this.cfg = cfg;
+//			this.icfgOfInstance = icfgOfInstance;
+//			this.bRestartRequested = bRestartRequested;
+//			this.bTryingToEnable = bTryingToEnable;
+//			this.bTryingToDisable = bTryingToDisable;
+		}
+	}
+	
+	
 	
 	/**
 	 * This Id is only required if there is more than one state of the same class.
 	 */
-	private String strCaseInsensitiveId = null;
+	private String strCaseInsensitiveId;
 	
 //	public static interface IConditionalStateAbsForConsoleUI{
 //		public abstract void requestRestart();
@@ -90,7 +135,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 //	private boolean bPreInitHold=false;
 //	private boolean	bPreInitialized;
 	
-	private ArrayList<RetryOnFailure> arList = new ArrayList<RetryOnFailure>();
+	private ArrayList<RetryOnFailure> arList;
 	@Override
 	public ArrayList<RetryOnFailure> getRetryListForManagement(RetryOnFailure.CompositeControl cc) {
 		return arList;
@@ -151,23 +196,24 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 //		}
 //		
 //	}
-	private RetryOnFailure rInit = new RetryOnFailure(this,ERetryDelayMode.Init.s());
-	private RetryOnFailure rEnable = new RetryOnFailure(this,ERetryDelayMode.Enable.s());
-	private RetryOnFailure rUpdate = new RetryOnFailure(this,ERetryDelayMode.Update.s());
-	private RetryOnFailure rDisable = new RetryOnFailure(this,ERetryDelayMode.Disable.s());
-	private RetryOnFailure rDiscard = new RetryOnFailure(this,ERetryDelayMode.Discard.s());
+	private RetryOnFailure rInit;
+	private RetryOnFailure rEnable;
+	private RetryOnFailure rUpdate;
+	private RetryOnFailure rDisable;
+	private RetryOnFailure rDiscard;
 	
 	// PROPERLY INIT
 	private boolean	bProperlyInitialized;
 	
 	/** it must be initially disabled, the request will properly enable it*/
-	private boolean	bEnabled = false;
+	private boolean	bEnabled;
 	
-	private boolean	bEnabledRequested = true; //initially all will be wanted as enabled by default
+	/** initially all will be wanted as enabled by default */
+	private boolean	bEnabledRequested;
 	private boolean	bDisabledRequested;
 	
 	/** set to true to allow instant configuration but wait before properly initializing*/
-	private boolean bHoldProperInitialization = false;
+	private boolean bHoldProperInitialization;
 	
 	private boolean	bLastUpdateSuccessful;
 	private boolean	bHoldUpdates;
@@ -457,7 +503,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 			if(!rEnable.isReady())return false;
 			
 			bEnableSuccessful=enableAttempt();
-			MsgI.i().dbg("enabled",bEnableSuccessful,this);
+//			MsgI.i().dbg("enabled",bEnableSuccessful,this);
 			bEnabled=bEnableSuccessful;
 			
 			if(bEnableSuccessful){
@@ -475,7 +521,7 @@ public abstract class ConditionalStateAbs implements Savable,IGlobalOpt,IConfigu
 			if(!rDisable.isReady())return false;
 			
 			bDisableSuccessful=disableAttempt();
-			MsgI.i().dbg("disabled",bDisableSuccessful,this);
+//			MsgI.i().dbg("disabled",bDisableSuccessful,this);
 			bEnabled=!bDisableSuccessful;
 			
 			if(bDisableSuccessful){

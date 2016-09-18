@@ -36,9 +36,9 @@ package com.github.commandsconsolegui.misc;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class HandleExceptionsRaw implements IHandleExceptions{
-	private static HandleExceptionsRaw instance = new HandleExceptionsRaw();
-	public static HandleExceptionsRaw i(){return instance;}
+public class SimpleHandleExceptionsI implements IHandleExceptions{
+	private static SimpleHandleExceptionsI instance = new SimpleHandleExceptionsI();
+	public static SimpleHandleExceptionsI i(){return instance;}
 	
 	@Override
 	public void handleExceptionThreaded(Exception e) {

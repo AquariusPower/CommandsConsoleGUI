@@ -836,6 +836,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 //		convertCommandIfPossible();
 		
+		if(bCmdWorked!=null && bCmdWorked){
+			//keep empty
+		}else
 		if(checkCmdValidityBoolTogglers()){
 			bCmdWorked=toggle(btgReferenceMatched);
 		}else
@@ -3491,6 +3494,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		IfConditionalBlock(true),
 		MouseCursorPosition,
 		TimePerFrame,
+		CallQueueSize,
 		;
 		
 		private boolean bShow;
@@ -3533,12 +3537,18 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //						+";";
 //		}
 			
-					/**
-					 * KEEP HERE AS REFERENCE!
-					 * IMPORTANT, DO NOT USE
-					 * clipboard reading is too heavy...
-					+"Cpbd='"+retrieveClipboardString()+"', "
-					 */
+		if(EStats.CallQueueSize.isShow()){
+			strStatsLast+=
+				"Qu"+CallQueueI.i().getWaitingAmount()
+					+";";
+		}
+		
+		/**
+		 * KEEP HERE AS REFERENCE!
+		 * IMPORTANT, DO NOT USE
+		 * clipboard reading is too heavy...
+		+"Cpbd='"+retrieveClipboardString()+"', "
+		 */
 						
 					// less important (mainly for debug)
 		if(EStats.ConsoleSliderControl.isShow()){
@@ -3553,7 +3563,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //							:"")
 //						+";";
 //		}
-						
+		
 		return strStatsLast;
 	}
 	

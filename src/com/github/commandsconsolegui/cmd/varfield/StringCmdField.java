@@ -194,8 +194,7 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 
 	@Override
 	public String getReport() {
-		// TODO Auto-generated method stub
-		return null;
+		return getUniqueCmdId();
 	}
 
 	@Override

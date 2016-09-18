@@ -215,20 +215,28 @@ public class LemurBaseDialogHelperI extends BaseDialogHelper{
 	
 	DialogsStorage svAllDiags = new DialogsStorage();
 	public static class DialogsStorage implements Savable{
+		enum E{
+			DialogList,
+			;
+			public String s(){return this.toString();}
+		}
 		@Override
 		public void write(JmeExporter ex) throws IOException {
 			OutputCapsule oc = ex.getCapsule(this);
-			for(LemurDialogGUIStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy()){
-				oc.write(diag, diag.getId(), null);
-			}
+			oc.writeSavableArrayList(LemurBaseDialogHelperI.i().getDialogListCopy(), 
+				E.DialogList.s(), null);
+//			for(LemurDialogGUIStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy()){
+//				oc.write(diag, diag.getId(), null);
+//			}
 		}
 		@Override
 		public void read(JmeImporter im) throws IOException {
 			InputCapsule ic = im.getCapsule(this);
-			for(LemurDialogGUIStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy()){
-//				Savable svDiag = ic.readSavable(diag.getId(), diag);
-				diag.read(im);
-			}
+			ic.readSavableArrayList(E.DialogList.s(),null); //this will instance new objects with empty constructors
+//			for(LemurDialogGUIStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy()){
+////				Savable svDiag = ic.readSavable(diag.getId(), diag);
+//				diag.read(im);
+//			}
 		}
 		
 	};

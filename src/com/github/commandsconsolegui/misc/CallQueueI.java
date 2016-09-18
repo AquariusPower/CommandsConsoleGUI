@@ -293,4 +293,8 @@ public class CallQueueI {
 			return true;
 		}
 	}
+
+	public int getWaitingAmount() {
+		return aCallList.size();
+	}
 }

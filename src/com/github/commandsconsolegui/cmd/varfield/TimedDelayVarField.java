@@ -28,7 +28,7 @@
 package com.github.commandsconsolegui.cmd.varfield;
 
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs.EVarCmdMode;
-import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
+import com.github.commandsconsolegui.misc.SimpleHandleExceptionsI;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -46,7 +46,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  */
 
 public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
-	private static IHandleExceptions ihe = HandleExceptionsRaw.i();
+	private static IHandleExceptions ihe = SimpleHandleExceptionsI.i();
 //	private static ArrayList<TimedDelayVarField> atdList = new ArrayList<TimedDelayVarField>();
 	
 	private static Long lCurrentTimeNano;

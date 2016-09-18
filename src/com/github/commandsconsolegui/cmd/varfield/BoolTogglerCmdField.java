@@ -28,7 +28,7 @@
 package com.github.commandsconsolegui.cmd.varfield;
 
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
-import com.github.commandsconsolegui.misc.HandleExceptionsRaw;
+import com.github.commandsconsolegui.misc.SimpleHandleExceptionsI;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -49,7 +49,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 //	public static final String strCodePrefix="btg";
 //	private static ArrayList<BoolTogglerCmdField> abtgList = new ArrayList<BoolTogglerCmdField>();
 	private static boolean	bConfigured;
-	private static IHandleExceptions	ihe = HandleExceptionsRaw.i();
+	private static IHandleExceptions	ihe = SimpleHandleExceptionsI.i();
 	
 	private boolean bPrevious;
 	private boolean bCurrent = false;
