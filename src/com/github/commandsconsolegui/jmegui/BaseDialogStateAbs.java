@@ -1170,9 +1170,20 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	protected abstract void setPositionSize(Vector3f v3fPos, Vector3f v3fSize);
 
 	private DialogSavable dsv = new DialogSavable().setOwner(this);
-	public Savable getSavable(BaseDialogHelper.CompositeControl ccSelf) {
-		ccSelf.assertSelfNotNull();
+	private boolean	bRequestSaveDialog;
+	public Savable getSavable(BaseDialogHelper.CompositeControl cc) {
+		cc.assertSelfNotNull();
 		return dsv;
 	}
+
+	public void requestSaveDialog() {
+		this.bRequestSaveDialog=true;
+	}
 	
+	public boolean isRequestSaveDialogAndReset(BaseDialogHelper.CompositeControl cc){
+		cc.assertSelfNotNull();
+		boolean b=this.bRequestSaveDialog;
+		this.bRequestSaveDialog=false;
+		return b;
+	}
 }

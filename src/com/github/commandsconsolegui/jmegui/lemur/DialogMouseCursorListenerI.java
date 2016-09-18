@@ -57,7 +57,7 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 	public static DialogMouseCursorListenerI i(){return instance;}
 	
 	@Override
-	public boolean click(MouseCursorButtonData buttonData, CursorButtonEvent eventButton, Spatial target,Spatial capture) {
+	public boolean clickEnd(MouseCursorButtonData buttonData, CursorButtonEvent eventButton, Spatial target,Spatial capture) {
 		if(capture==null)return false; //TODO ??? if(capture==null)capture=target; ??? 
 		
 		LemurFocusHelperStateI.i().requestDialogFocus(capture);
@@ -148,11 +148,11 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 		
 		if(bConsumed)return true;
 		
-		return super.click(buttonData, eventButton, target, capture);
+		return super.clickEnd(buttonData, eventButton, target, capture);
 	}
 	
 	@Override
-	public boolean drag(ArrayList<MouseCursorButtonData> aButtonList,CursorMotionEvent eventMotion, Spatial target, Spatial capture) {
+	public boolean dragging(ArrayList<MouseCursorButtonData> aButtonList,CursorMotionEvent eventMotion, Spatial target, Spatial capture) {
 		for(MouseCursorButtonData buttonData:aButtonList){
 			// missing ones are ignored so each element can consume it properly
 			switch(buttonData.getActivatorType()){
@@ -168,6 +168,22 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 			}
 		}
 			
-		return super.drag(aButtonList, eventMotion, target, capture);
+		return super.dragging(aButtonList, eventMotion, target, capture);
+	}
+	
+	@Override
+	public boolean dragEnd(MouseCursorButtonData buttonData, CursorButtonEvent eventButton, Spatial target, Spatial capture) {
+		switch(buttonData.getActivatorType()){
+			case Action1Click:
+				Spatial sptDialogMain = MiscJmeI.i().getParentestFrom(capture);
+				
+				BaseDialogStateAbs diag = MiscJmeI.i().getUserDataPSH(sptDialogMain,BaseDialogStateAbs.class);
+				
+				diag.requestSaveDialog();
+				
+				return true;
+		}
+		
+		return super.dragEnd(buttonData, eventButton, target, capture);
 	}
 }

@@ -104,12 +104,16 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 						 * In this case, any displacement will be ignored.
 						 * TODO could the minimal displacement it be used in some way?
 						 */
-		      	if(click(mcbd, eventButton, target, capture)){
+		      	if(clickEnd(mcbd, eventButton, target, capture)){
 		      		eventButton.setConsumed();
 //		      		mcbd.getClicks().clearClicks();
 		      	}
+		      	
+//		      	dragEnd(mcbd, eventButton, target, capture);
 //					}
 				}
+				
+      	dragEnd(mcbd, eventButton, target, capture);
 //			}
 		}
 	}
@@ -121,9 +125,12 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 	 * @param capture
 	 * @return if it is to be consumed
 	 */
-	public boolean click(MouseCursorButtonData buttonData, CursorButtonEvent eventButton, Spatial target,	Spatial capture){
+	public boolean clickEnd(MouseCursorButtonData buttonData, CursorButtonEvent eventButton, Spatial target,	Spatial capture){
 		return false;
 	}
+//	public boolean clickEnd(MouseCursorButtonData button, CursorButtonEvent eventButton, Spatial target,	Spatial capture){
+//		return false;
+//	}
 	
 	/**
 	 * this method is if you want to consume the event when the mouse cursor button 
@@ -138,10 +145,6 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 		return false;
 	}
 	
-	public boolean clickEnd(MouseCursorButtonData button, CursorButtonEvent eventButton, Spatial target,	Spatial capture){
-		return false;
-	}
-	
 	@Override
 	public void cursorEntered(CursorMotionEvent event, Spatial target,Spatial capture) {
 		//hover in?
@@ -152,10 +155,14 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 		//hover out?
 	}
 	
-	public boolean drag(ArrayList<MouseCursorButtonData> aButtonList, CursorMotionEvent eventMotion, Spatial target,	Spatial capture){
+	public boolean dragging(ArrayList<MouseCursorButtonData> aButtonList, CursorMotionEvent eventMotion, Spatial target,	Spatial capture){
 		return false;
 	}
-
+	
+	public boolean dragEnd(MouseCursorButtonData buttonData, CursorButtonEvent eventButton, Spatial target,	Spatial capture){
+		return false;
+	}
+	
 	@Override
 	public void cursorMoved(CursorMotionEvent eventMotion, Spatial target, Spatial capture) {
 		if(capture==null){
@@ -175,7 +182,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 		}
 		
 		if(aMouseCursorButtonsPressedList.size()>0){
-			if(drag(aMouseCursorButtonsPressedList, eventMotion, target, capture)){
+			if(dragging(aMouseCursorButtonsPressedList, eventMotion, target, capture)){
 				eventMotion.setConsumed();
 				bCancelNextMouseReleased=true; //TODO explain why
 			}

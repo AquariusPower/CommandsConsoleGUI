@@ -1006,6 +1006,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		 */
 		
 		cd().update(tpf);
+		GlobalDialogHelperI.i().update(tpf);
 		
 		updateInputFieldFillWithSelectedEntry();
 		updateCurrentCmdHistoryEntryReset();

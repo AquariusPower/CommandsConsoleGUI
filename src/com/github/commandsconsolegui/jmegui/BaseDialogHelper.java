@@ -134,7 +134,10 @@ public abstract class BaseDialogHelper implements IReflexFillCfg{
 		return asv;
 	}
 
-	
-//	public abstract void saveAllDialogs();
+	protected boolean isDialogSaveRequestedAndReset(BaseDialogStateAbs diag){
+		return diag.isRequestSaveDialogAndReset(ccSelf);
+	}
 
+	public void update(float tpf){
+	}
 }

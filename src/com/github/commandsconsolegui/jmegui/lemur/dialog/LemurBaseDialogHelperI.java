@@ -286,4 +286,16 @@ public class LemurBaseDialogHelperI extends BaseDialogHelper{
 			}
 		});
 	}
+	
+	@Override
+	public void update(float tpf){
+		super.update(tpf);
+		
+		for(LemurBasicDialogStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy(LemurBasicDialogStateAbs.class)){
+			if(super.isDialogSaveRequestedAndReset(diag)){
+				GlobalCommandsDelegatorI.i().addCmdToQueue(scfSaveDialogs);
+				break;
+			}
+		}
+	}
 }
