@@ -1178,6 +1178,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 
 	public void requestSaveDialog() {
 		this.bRequestSaveDialog=true;
+		GlobalDialogHelperI.i().requestSaveDialog(this);
 	}
 	
 	public boolean isRequestSaveDialogAndReset(BaseDialogHelper.CompositeControl cc){

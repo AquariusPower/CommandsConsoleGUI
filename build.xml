@@ -10,6 +10,7 @@
 	<property name="projv" value="${projname}-${version}"/>
 		
 	<target name="CreateAllJars" description="Create all Jar files">
+		<!-- binary -->
 		<jar jarfile="${projv}.jar" >
 			<fileset dir="./" includes="LICENSE" />
 			<!-- <fileset dir="./bin/" includes="**/*.class" /> -->
@@ -18,18 +19,20 @@
 		
 		<jar jarfile="${projv}-sources.jar" >
 			<fileset dir="./">
-				<include name="build.xml" />
+				<include name=".jme3/**/Console-Init.cfg" />
+				<include name=".settings/org.eclipse.jdt.core.prefs" />
+				<include name=".project" />
 				<include name=".classpath" />
 				<include name=".gitignore" />
-				<include name=".project" />
-				<include name="Console-Init.cfg" />
-				<include name="LICENSE" />
-				<include name="README.md" />
-				<include name=".settings/org.eclipse.jdt.core.prefs" />
 				<include name="bin.projectManagement/**" />
 				<include name="doc/**" />
+				<include name="src/Interface/**" />
+				<include name="src/**/*.java" />
+				<include name="build.xml" />
+				<include name="LICENSE" />
+				<include name="README.md" />
 			</fileset>
-			<fileset dir="./src/" includes="**/*.java" />
+			<!-- <fileset dir="./src/" includes="**/*.java" /> -->
 		</jar>
 		
 		<jar jarfile="${projv}-assets.jar" >

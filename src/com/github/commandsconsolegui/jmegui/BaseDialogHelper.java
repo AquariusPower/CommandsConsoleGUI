@@ -113,6 +113,8 @@ public abstract class BaseDialogHelper implements IReflexFillCfg{
 	}
 	
 	private ArrayList<BaseDialogStateAbs> adiagList = new ArrayList<BaseDialogStateAbs>();
+
+	private boolean	bRequestSaveDialog;
 	public void addDialog(BaseDialogStateAbs diag){
 		adiagList.add(diag);
 	}
@@ -133,11 +135,24 @@ public abstract class BaseDialogHelper implements IReflexFillCfg{
 		}
 		return asv;
 	}
-
+	
 	protected boolean isDialogSaveRequestedAndReset(BaseDialogStateAbs diag){
 		return diag.isRequestSaveDialogAndReset(ccSelf);
 	}
-
+	
+	public void requestSaveDialog(BaseDialogStateAbs diag){
+		//TODO log diag?
+		this.bRequestSaveDialog=true;
+	}
+	
+	public boolean isDialogSaveRequested(){
+		return this.bRequestSaveDialog;
+	}
+	
+	protected void resetDialogSaveRequest(){
+		this.bRequestSaveDialog=false;
+	}
+	
 	public void update(float tpf){
 	}
 }

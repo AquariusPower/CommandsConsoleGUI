@@ -291,10 +291,13 @@ public class LemurBaseDialogHelperI extends BaseDialogHelper{
 	public void update(float tpf){
 		super.update(tpf);
 		
-		for(LemurBasicDialogStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy(LemurBasicDialogStateAbs.class)){
-			if(super.isDialogSaveRequestedAndReset(diag)){
-				GlobalCommandsDelegatorI.i().addCmdToQueue(scfSaveDialogs);
-				break;
+		if(isDialogSaveRequested()){
+			for(LemurBasicDialogStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy(LemurBasicDialogStateAbs.class)){
+				if(super.isDialogSaveRequestedAndReset(diag)){
+					GlobalCommandsDelegatorI.i().addCmdToQueue(scfSaveDialogs);
+					resetDialogSaveRequest();
+					break;
+				}
 			}
 		}
 	}
