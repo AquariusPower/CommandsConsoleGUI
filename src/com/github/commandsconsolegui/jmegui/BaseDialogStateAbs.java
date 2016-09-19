@@ -45,6 +45,9 @@ import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.ISpatialValidator;
+import com.github.commandsconsolegui.jmegui.savablevalues.SaveFloat;
+import com.github.commandsconsolegui.jmegui.savablevalues.SaveString;
+import com.github.commandsconsolegui.jmegui.savablevalues.SaveValueAbs;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
@@ -53,6 +56,8 @@ import com.github.commandsconsolegui.misc.MsgI;
 //import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.export.InputCapsule;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
@@ -241,9 +246,15 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		}
 	}
 	private CfgParm	cfg;
+	private boolean	bSaveDialog = true;
+	private Vector3f	v3fApplicationWindowSize;
 	@Override
 	public R configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
+		
+		if(isSaveDialog()){
+			dsv = new DialogSavable().setOwner(this);
+		}
 		
 		btgRestoreIniPosSizeOnce.setCallerAssigned(new CallableX(this) {
 			@Override
@@ -301,6 +312,14 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return storeCfgAndReturnSelf(icfg);
 	}
 	
+	protected void setSaveDialog(boolean b){
+		this.bSaveDialog=b;
+	}
+	
+	private boolean isSaveDialog() {
+		return bSaveDialog;
+	}
+
 	protected Spatial getInputField() {
 		return sptIntputField;
 	}
@@ -1081,27 +1100,55 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 //	}
 	
 	public static enum ESaveKey{
-		posX,
-		posY,
-		width,
-		height,
+//		posX,
+//		posY,
+//		width,
+//		height, 
+		FieldList,
 		;
 		public String s(){return this.toString();}
 	}
 	
-	enum E{
-		Id,
-		;
-		public String s(){return this.toString();}
-	}
+//	enum E{
+//		Id,
+//		;
+//		public String s(){return this.toString();}
+//	}
 	
-	public static class DialogSavable implements Savable{
+	public static class DialogSavable implements Savable, IReflexFillCfg{
 		private BaseDialogStateAbs	diag;
-
+		
+		private SaveString svsId = new SaveString(this, null);
+		private SaveFloat svfPosX = new SaveFloat(this, null);
+		private SaveFloat svfPosY = new SaveFloat(this, null);
+		private SaveFloat svfWidth = new SaveFloat(this, null);
+		private SaveFloat svfHeight = new SaveFloat(this, null);
+		
 		public DialogSavable(){} //required when loading
+		
+		public BaseDialogStateAbs getOwner(){
+			return diag;
+		}
 		
 		public DialogSavable setOwner(BaseDialogStateAbs diag){
 			this.diag=diag;
+			final BaseDialogStateAbs diagF = diag;
+			
+			CallQueueI.i().addCall(new CallableX(this,1000) {
+				@Override
+				public Boolean call() {
+					if(diagF.cfg.v3fIniPos==null)return false; //retry later
+					
+					svsId.setDefaultValue(diagF.getId());
+					svfPosX.setDefaultValue(diagF.cfg.v3fIniPos.x);
+					svfPosY.setDefaultValue(diagF.cfg.v3fIniPos.y);
+					svfWidth.setDefaultValue(diagF.cfg.v3fIniSize.x);
+					svfHeight.setDefaultValue(diagF.cfg.v3fIniSize.y);
+					
+					return true;
+				}
+			}.setQuietOnFail(true)); //will keep retrying until the dialog shows up and its values get initialized properly
+			
 			return this;
 		}
 		
@@ -1109,51 +1156,67 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		public void write(JmeExporter ex) throws IOException {
 			if(!diag.isInitializedProperly())return; //just skip
 			
-			OutputCapsule oc = ex.getCapsule(this);
-			
-//			assertInitializedProperly();
-			
-			oc.write(diag.getId(), E.Id.s(), null);
+			svsId.setValue(diag.getId());
 			
 			Vector3f v3fPos = diag.getDialogMainContainer().getLocalTranslation().clone();
-			oc.write(v3fPos.x, ESaveKey.posX.s(), diag.cfg.v3fIniPos.x);
-			oc.write(v3fPos.y, ESaveKey.posY.s(), diag.cfg.v3fIniPos.y);
+			svfPosX.setValue(v3fPos.x);
+			svfPosY.setValue(v3fPos.y);
 			
 			Vector3f v3fSize = diag.getMainSize();
-			oc.write(v3fSize.x, ESaveKey.width.s(), diag.cfg.v3fIniSize.x);
-			oc.write(v3fSize.y, ESaveKey.height.s(), diag.cfg.v3fIniSize.y);
+			svfWidth.setValue(v3fSize.x);
+			svfHeight.setValue(v3fSize.y);
+			
+			OutputCapsule oc = ex.getCapsule(this);
+			oc.writeSavableArrayList(SaveValueAbs.getSaveValueListCopy(this), ESaveKey.FieldList.s(), null);
 		}
 
 		@Override
 		public void read(JmeImporter im) throws IOException {
 	    InputCapsule ic = im.getCapsule(this);
+	    
+	    // apply loaded values to this owner fields
+	    ArrayList<SaveValueAbs> asvFieldList = ic.readSavableArrayList(ESaveKey.FieldList.s(), null);
+    	for(SaveValueAbs svLoaded:asvFieldList){svLoaded.setOwner(this);}
+	    for(SaveValueAbs sv:SaveValueAbs.getSaveValueListCopy(this)){
+	    	for(SaveValueAbs svLoaded:asvFieldList.toArray(new SaveValueAbs[0])){
+	    		if(svLoaded==null){
+	    			GlobalCommandsDelegatorI.i().dumpWarnEntry("null saved field value? failed to load", this);
+	    			return;
+	    		}
+	    		
+		    	if(sv.getUniqueId().equals(svLoaded.getUniqueId())){
+		    		sv.setValue(svLoaded.getValue());
+		    		asvFieldList.remove(svLoaded);
+		    		break;
+		    	}
+	    	}
+	    }
 			
-	  	final String strDiagId = ic.readString(E.Id.s(),null);
-	  	
 	  	final HashChangeHolder<Vector3f> hchv3fPos = new HashChangeHolder<Vector3f>(new Vector3f());
 	  	final HashChangeHolder<Vector3f> hchv3fSize = new HashChangeHolder<Vector3f>(new Vector3f());
 			try {
 				hchv3fPos.getObjRef().set(
-					MiscI.i().assertValidFloating(ic.readFloat(ESaveKey.posX.s(), Float.NaN)),
-					MiscI.i().assertValidFloating(ic.readFloat(ESaveKey.posY.s(), Float.NaN)),
+					MiscI.i().assertValidFloating(svfPosX.getValue()),
+					MiscI.i().assertValidFloating(svfPosY.getValue()),
 					0);
 				
 				hchv3fSize.getObjRef().set(
-	      	MiscI.i().assertValidFloating(ic.readFloat(ESaveKey.width.s(), Float.NaN)),
-	      	MiscI.i().assertValidFloating(ic.readFloat(ESaveKey.height.s(), Float.NaN)),
+					MiscI.i().assertValidFloating(svfWidth.getValue()),
+					MiscI.i().assertValidFloating(svfHeight.getValue()),
 	    		0);
 			} catch (IllegalArgumentException e) {
 				GlobalCommandsDelegatorI.i().dumpExceptionEntry(e,im,ic,this);
 				return;
 			}
 	  	
+			// apply to the dialog whenever it is ready
 			CallQueueI.i().addCall(new CallableX(this,1000) {
 				private BaseDialogStateAbs diagApplyAt;
 
 				@Override
 				public Boolean call() {
 		    	diagApplyAt = ConditionalStateManagerI.i().getConditionalState(
-			    		BaseDialogStateAbs.class,strDiagId);
+			    		BaseDialogStateAbs.class, svsId.getValue());
 		    	if(diagApplyAt==null)return false;
 					if(!diagApplyAt.isInitializedProperly())return false;
 			    
@@ -1161,17 +1224,28 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 			    
 			    return true;
 				}
-			});
+			}.setQuietOnFail(true)); //will calmily wait dialog get ready
 	 
+		}
+
+		@Override
+		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+			ReflexFillCfg rfcfg = new ReflexFillCfg(rfcv);
+			
+			if(rfcv.getClass().isInstance(SaveFloat.class)){
+				rfcfg.setCodingStyleFieldNamePrefix(rfcv.getCodePrefixVariant());
+			}
+			
+			return rfcfg;
 		}
 		
 	}
 	
 	protected abstract void setPositionSize(Vector3f v3fPos, Vector3f v3fSize);
 
-	private DialogSavable dsv = new DialogSavable().setOwner(this);
+	private DialogSavable dsv;
 	private boolean	bRequestSaveDialog;
-	public Savable getSavable(BaseDialogHelper.CompositeControl cc) {
+	public DialogSavable getSavable(BaseDialogHelper.CompositeControl cc) {
 		cc.assertSelfNotNull();
 		return dsv;
 	}

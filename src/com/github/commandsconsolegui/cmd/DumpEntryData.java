@@ -28,6 +28,7 @@
 package com.github.commandsconsolegui.cmd;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -109,11 +110,43 @@ public class DumpEntryData{
 //				}
 				
 //				str+="\t["+i+"]("+obj.getClass().getName()+":"+(obj==null?obj:obj.toString())+")\n";
-				str+="\n\t["+i+"]("+(obj==null?null:obj.getClass().getName()+":"+obj.toString())+")";
+//				str+="\n\t["+i+"]("+(obj==null?null:obj.getClass().getName()+":"+obj.toString())+")";
+				str+=multilineIfArray("\n\t["+i+"]",obj);
 			}
 		}
 		
 		return str;
+	}
+	
+	private String multilineIfArray(String strPrefix, Object obj){
+		Object[] aobj = null; //obj instanceof Object[]
+		if(obj!=null){
+			if (obj instanceof ArrayList) {
+				ArrayList aobjList = (ArrayList) obj;
+				aobj=aobjList.toArray();
+			}else
+			if(obj.getClass().isArray()){
+				aobj = (Object[])obj;
+	//			for(Object objInner:aobj){
+			}
+		}
+		
+		if(aobj==null)return strPrefix+fmtObj(obj,true);
+		
+		String str="";
+		for(int i=0;i<aobj.length;i++){
+			Object objInner=aobj[i]; //objInner.getClass().getName()
+			if(i==0){
+				str+=strPrefix+"ArrayOf:"+objInner.getClass().getName();
+			}
+			str+=strPrefix+"["+i+"] "+fmtObj(objInner,false);
+		}
+		return str;
+	}
+	
+	private String fmtObj(Object obj,boolean bShowClassName){
+		String strCl = bShowClassName ? obj.getClass().getName() : "";
+		return ""+(obj==null ? null : strCl+": "+obj.toString()); //this is better when dumping a sub-stacktrace
 	}
 	
 	/**

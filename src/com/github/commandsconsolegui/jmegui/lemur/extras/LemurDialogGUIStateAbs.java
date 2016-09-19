@@ -173,6 +173,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	private Button	btnResizeEast;
 	private Button	btnResizeWest;
 	private ArrayList<Button>	abtnResizeBorderList = new ArrayList<Button>();
+	private Vector3f	v3fDiagWindowSize;
+	private Vector3f	v3fPosCentered;
 	@Override
 	public R configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
@@ -240,29 +242,27 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //			setStyle(ConsoleLemurStateI.i().STYLE_CONSOLE);
 //		}
 		
-		Vector3f v3fApplicationWindowSize = new Vector3f(
-			app().getContext().getSettings().getWidth(),
-			app().getContext().getSettings().getHeight(),
-			0);
-		
 		//main top container
 //		setContainerMain(new ContainerMain(new BorderLayout(), getDiagStyle()).setDiagOwner(this));
 		setDialogMainContainer(new DialogMainContainer(new BorderLayout(), getDiagStyle()));
 		getDialogMainContainer().setName(getId()+"_Dialog");
 		
-		Vector3f v3fDiagWindowSize = new Vector3f(v3fApplicationWindowSize);
+		Vector3f v3fAppWindowSize = MiscJmeI.i().getAppWindowSize();
+		v3fDiagWindowSize = new Vector3f(v3fAppWindowSize);
 		v3fDiagWindowSize.y = sizePercOrPixels(v3fDiagWindowSize.y,cfg.fDialogHeightPercentOfAppWindow);
 		v3fDiagWindowSize.x = sizePercOrPixels(v3fDiagWindowSize.x,cfg.fDialogWidthPercentOfAppWindow);
-		MiscLemurHelpersStateI.i().setGrantedSize(getDialogMainContainer(), v3fDiagWindowSize);
 		
-		Vector3f v3fPosCentered = new Vector3f(
-			(v3fApplicationWindowSize.x-v3fDiagWindowSize.x)/2f,
-			(v3fApplicationWindowSize.y-v3fDiagWindowSize.y)/2f+v3fDiagWindowSize.y,
+		v3fPosCentered = new Vector3f(
+			(v3fAppWindowSize.x-v3fDiagWindowSize.x)/2f,
+			(v3fAppWindowSize.y-v3fDiagWindowSize.y)/2f+v3fDiagWindowSize.y,
 			0
 		);
-		getDialogMainContainer().setLocalTranslation(v3fPosCentered);
+		
 		cfg.setIniPos(v3fPosCentered.clone());
 		cfg.setIniSize(v3fDiagWindowSize.clone());
+		
+		MiscLemurHelpersStateI.i().setGrantedSize(getDialogMainContainer(), v3fDiagWindowSize);
+		getDialogMainContainer().setLocalTranslation(v3fPosCentered);
 		
 		// resizing borders
 //		CallQueueI.i().addCall(new CallableX() {
@@ -476,7 +476,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	}
 	
 	StringCmdField scfFixReinitDialogBorders = new StringCmdField(this,null,"it may require a few tries actually...")
-		.setCallerAssigned(new CallableX(1000) {
+		.setCallerAssigned(new CallableX(this,1000) {
 			@Override
 			public Boolean call() {
 				if(isEnabled()){
@@ -1300,7 +1300,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		super.restoreDefaultPositionSize();
 		
 		if(getDialogMainContainer()!=null){
-			setPositionSize(cfg.getIniPos(),cfg.getIniSize());
+			setPositionSize(cfg.getIniPos(), cfg.getIniSize());
 //			getDialogMainContainer().setLocalTranslation(cfg.getIniPos());
 //			getDialogMainContainer().setPreferredSize(cfg.getIniSize());
 		}

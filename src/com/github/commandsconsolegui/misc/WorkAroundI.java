@@ -81,7 +81,7 @@ public class WorkAroundI {
 		}
 		
 		if(btgBugFixId.getCallerAssignedForMaintenance(ccSelf).isAllowQueue()){
-			throw new PrerequisitesNotMetException("bugfixers cannot be queued!", btgBugFixId);
+			throw new PrerequisitesNotMetException("bugfixer's main caller cannot be queued directly!", btgBugFixId);
 		}
 		
 		boolean bFixed = false;

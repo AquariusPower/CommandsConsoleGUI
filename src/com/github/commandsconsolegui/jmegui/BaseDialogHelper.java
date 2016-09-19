@@ -33,12 +33,12 @@ import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
+import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs.DialogSavable;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.asset.AssetNotFoundException;
-import com.jme3.export.Savable;
 import com.jme3.font.BitmapFont;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
@@ -128,8 +128,8 @@ public abstract class BaseDialogHelper implements IReflexFillCfg{
 		}
 		return adiag;
 	}
-	public <T extends BaseDialogStateAbs> ArrayList<Savable> getListOfSavableForDialogCopy(Class<T> clFilter){
-		ArrayList<Savable> asv = new ArrayList<Savable>();
+	public <T extends BaseDialogStateAbs> ArrayList<DialogSavable> getDialogsSavableObjectListCopy(Class<T> clFilter){
+		ArrayList<DialogSavable> asv = new ArrayList<DialogSavable>();
 		for(BaseDialogStateAbs diag:getDialogListCopy(clFilter)){
 			asv.add(diag.getSavable(ccSelf));
 		}

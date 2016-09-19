@@ -700,12 +700,20 @@ public class MiscJmeI implements IReflexFillCfg{
 		StorageFolderType esft = GlobalOperationalSystemI.i().getStorageFolderType();
 		
 		String strPathFull = GlobalCommandsDelegatorI.i().getConsoleSaveDataPath();
+		if(!strPathFull.endsWith("/ConsoleSave/")){
+			strPathFull+="/ConsoleSave/";
+		}
+		
 		String strPathRelative = null;
 		String strSFT = JmeSystem.getStorageFolder(esft).getAbsolutePath();
 		if(strPathFull.startsWith(strSFT)){
 			strPathRelative = strPathFull.substring(strSFT.length());
 		}else{
 			throw new PrerequisitesNotMetException("console save data path value not expected", strPathFull, strSFT);
+		}
+		
+		if(!strFileName.endsWith(".j3o")){
+			strFileName+=".j3o";
 		}
 		
 		/**
@@ -746,4 +754,10 @@ public class MiscJmeI implements IReflexFillCfg{
 		return consoleDataStoring(strFileName, null, false);
 	}
 	
+	public Vector3f getAppWindowSize(){
+		return new Vector3f(
+			GlobalAppRefI.i().getContext().getSettings().getWidth(),
+			GlobalAppRefI.i().getContext().getSettings().getHeight(),
+			0);
+	}
 }

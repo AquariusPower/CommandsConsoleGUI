@@ -471,6 +471,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		 * Even if initially enabled, for the looks it will be made invisible.
 		 */
 		
+		setSaveDialog(false);
 		super.configure(cfg);
 		
 //		this.iToggleConsoleKey=cfg.iToggleConsoleKey;
