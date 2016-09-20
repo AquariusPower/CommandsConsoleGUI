@@ -45,7 +45,7 @@ import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurStateI;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelperI;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurDialogHelperI;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBasicDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.extras.ISpatialValidator;
 import com.github.commandsconsolegui.jmegui.savablevalues.CompositeSavableAbs;
@@ -1359,8 +1359,9 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	public CompositeSavable load(){
 		if(!isSaveDialog())return null;
 		CompositeSavable svTmp = MiscJmeI.i().loadReadConsoleData(CompositeSavable.class, strFilePrefix+getId());
-		sv.applyValuesFrom(svTmp);
-		setPositionSize(new Vector3f(sv.fPosX,sv.fPosY,0), new Vector3f(sv.fWidth,sv.fHeight,0));
+		if(sv.applyValuesFrom(svTmp)){
+			setPositionSize(new Vector3f(sv.fPosX,sv.fPosY,0), new Vector3f(sv.fWidth,sv.fHeight,0));
+		}
 		return svTmp;
 	}
 	

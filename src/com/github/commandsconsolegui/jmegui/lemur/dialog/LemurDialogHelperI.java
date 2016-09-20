@@ -31,7 +31,9 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.jmegui.BaseDialogHelper;
+import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
@@ -53,9 +55,9 @@ import com.simsilica.lemur.style.Styles;
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public class LemurBaseDialogHelperI extends BaseDialogHelper{
-	private static LemurBaseDialogHelperI instance = new LemurBaseDialogHelperI();
-	public static LemurBaseDialogHelperI i(){return instance;}
+public class LemurDialogHelperI extends BaseDialogHelper{
+	private static LemurDialogHelperI instance = new LemurDialogHelperI();
+	public static LemurDialogHelperI i(){return instance;}
 	
 	private ColorRGBA	colorConsoleStyleBackground;
 	StringVarField svfBackgroundHexaColorRGBA = new StringVarField(this,"","XXXXXXXX ex.: 'FF12BC4A' Red Green Blue Alpha");
@@ -281,7 +283,7 @@ public class LemurBaseDialogHelperI extends BaseDialogHelper{
 //			}
 //		});
 	
-	public LemurBaseDialogHelperI() {
+	public LemurDialogHelperI() {
 		super();
 //		CallQueueI.i().addCall(new CallableX(this,1000) {
 //			@Override
@@ -308,4 +310,19 @@ public class LemurBaseDialogHelperI extends BaseDialogHelper{
 //			}
 //		}
 //	}
+	@Override
+	public void update(float tpf) {
+		super.update(tpf);
+		
+		for(LemurDialogGUIStateAbs diag:getDialogListCopy(LemurDialogGUIStateAbs.class)){
+			fixDialogPosition(diag);
+		}
+	}
+
+	public boolean fixDialogPosition(LemurDialogGUIStateAbs diag) {
+		Vector3f v3fPos = diag.getDialogMainContainer().getLocalTranslation();
+		Vector3f v3fSize = diag.getDialogMainContainer().getSize();
+		//TODO get current app window size
+		return false;
+	}
 }

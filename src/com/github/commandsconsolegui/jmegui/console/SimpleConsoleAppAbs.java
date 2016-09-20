@@ -44,7 +44,7 @@ import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.MouseCursorListenerAbs;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelperI;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurDialogHelperI;
 import com.github.commandsconsolegui.misc.IConfigure;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -101,7 +101,7 @@ public abstract class SimpleConsoleAppAbs extends SimpleApplication implements I
   	// globals must be set as soon as possible
 		GlobalGUINodeI.iGlobal().set(getGuiNode());
 		GlobalRootNodeI.iGlobal().set(getRootNode());
-		GlobalLemurDialogHelperI.iGlobal().set(LemurBaseDialogHelperI.i());
+		GlobalLemurDialogHelperI.iGlobal().set(LemurDialogHelperI.i());
 		GlobalOperationalSystemI.iGlobal().set(new JMEOperationalSystem(cfg.strApplicationBaseSaveDataPath,StorageFolderType.Internal));
 		
 		/**

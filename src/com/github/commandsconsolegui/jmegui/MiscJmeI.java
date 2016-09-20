@@ -716,6 +716,8 @@ public class MiscJmeI implements IReflexFillCfg{
 			strFileName+=".j3o";
 		}
 		
+		String strFullPathAndFileName=strPathFull+strFileName;
+		
 		/**
 		 * it does not check if the path is absolute and uses it as relative...
 		 */
@@ -729,15 +731,27 @@ public class MiscJmeI implements IReflexFillCfg{
 				svMain,
 				esft);
 		}else{
-			str="loading";
-			svLoaded = SaveGame.loadGame(
-				strPathRelative,
-				strFileName,
-				null,//GlobalAppRefI.i().getAssetManager(),
-				esft);
+			File fl = new File(strFullPathAndFileName);
+			if(fl.exists()){
+				try{
+					svLoaded = SaveGame.loadGame(
+						strPathRelative,
+						strFileName,
+						null,//GlobalAppRefI.i().getAssetManager(),
+						esft);
+					str="loading";
+				}catch(NullPointerException e){
+					GlobalCommandsDelegatorI.i().dumpWarnEntry("invalid save file", strPathFull, strFileName);
+					fl.renameTo(new File(strFullPathAndFileName+"."+MiscI.i().getDateTimeForFilename()+".broken"));
+//					svLoaded=null;
+				}
 			
-			if(svLoaded==null){
-				GlobalCommandsDelegatorI.i().dumpWarnEntry("failed to load", strPathFull, strFileName);
+				if(svLoaded==null){
+					GlobalCommandsDelegatorI.i().dumpWarnEntry("failed to load", strPathFull, strFileName);
+					str="when loading";
+				}
+			}else{
+				str="not found";
 			}
 		}
 		

@@ -32,20 +32,20 @@ import com.github.commandsconsolegui.globals.jmegui.GlobalDialogHelperI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleUII;
 import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelperI;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurDialogHelperI;
 
 /**
 * As you may not be using {@link SimpleApplication#}.
 *  
 * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 */
-public class GlobalLemurDialogHelperI extends GlobalHolderAbs<LemurBaseDialogHelperI> {
+public class GlobalLemurDialogHelperI extends GlobalHolderAbs<LemurDialogHelperI> {
 	private static GlobalLemurDialogHelperI instance = new GlobalLemurDialogHelperI();
 	public static GlobalLemurDialogHelperI iGlobal(){return instance;}
-	public static LemurBaseDialogHelperI i(){return iGlobal().get();}
+	public static LemurDialogHelperI i(){return iGlobal().get();}
 	
 	@Override
-	public LemurBaseDialogHelperI set(LemurBaseDialogHelperI obj) {
+	public LemurDialogHelperI set(LemurDialogHelperI obj) {
 		GlobalDialogHelperI.iGlobal().set(obj);
 		return super.set(obj);
 	}

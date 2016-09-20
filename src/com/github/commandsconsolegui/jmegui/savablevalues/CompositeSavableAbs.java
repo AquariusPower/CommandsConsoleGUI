@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.jmegui.savablevalues;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.nio.channels.UnsupportedAddressTypeException;
 
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
@@ -108,6 +109,12 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 		
 		if(ISaveSkipper.class.isAssignableFrom(fld.getType()))return true;
 		
+		/**
+		 * table switch for enum, dynamically generated for each switch(){} you code... 
+		 * switch( ($SWITCH_TABLE$com$...())[this.ENUM_ID.ordinal] )
+		 */
+		if(fld.getName().startsWith("$SWITCH_TABLE$"))return true;
+		
 		return false;
 	}
 	
@@ -153,32 +160,24 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 					
 //					float fD=1,f=fD;
 //					if(fldDefault!=null)valueDefault=fldDefault.get(this);
-					Object valueDefault = getDefaultValueFor(fld,false);
-					Object objValue = fld.get(this);
+					Object valDef = getDefaultValueFor(fld,false);
+					Object val = fld.get(this);
 					String strName = fld.getName();
 					
-					Class clValue=objValue.getClass();
+					Class clValue=val.getClass();
 					
-					aobjDbg=new Object[]{clOwner,clValue,fld,strName,objValue,valueDefault,oc};
+					aobjDbg=new Object[]{clOwner,clValue.getName(),fld,strName,val,valDef,oc};
 					
-					/**
-					 * A missing default means to always save.
-					 * If default value is not present, try to use an invalid value (like Float.Nan) to grant 
-					 * value will always be saved in case there is no default.
-					 * To grant it will be saved, the default just needs to differ from the actual valid value.
-					 */
-					if(clValue==Float.class || clValue==float.class){
-						if(valueDefault==null)valueDefault=Float.NaN;
-						oc.write((float)objValue, strName, (float)valueDefault);
-					}else
-					if(clValue==Integer.class || clValue==int.class){
-						if(valueDefault==null)valueDefault=((int)objValue)+1;
-						oc.write((int)objValue, strName, (int)valueDefault);
-					}else
-					{throw new PrerequisitesNotMetException("unsupported value class type "+clValue,aobjDbg);}
-					
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					throw new PrerequisitesNotMetException("failed to colled field/default value",aobjDbg)
+					switch(EType.forClass(clValue)){
+						case Boolean:	oc.write((boolean)val,	strName, changeVal(boolean.class,	val, valDef));break;
+						case Double:	oc.write((double)val,		strName, changeVal(double.class,	val, valDef));break;
+						case Float:		oc.write((float)val,		strName, changeVal(float.class,		val, valDef));break;
+						case Int:			oc.write((int)val,			strName, changeVal(int.class,			val, valDef));break;
+						case Long:		oc.write((long)val,			strName, changeVal(long.class,		val, valDef));break;
+						case String:	oc.write((String)val,		strName, changeVal(String.class,	val, valDef));break;
+					}
+				} catch (IllegalArgumentException | IllegalAccessException | UnsupportedOperationException e) {
+					throw new PrerequisitesNotMetException("failed to retrieve field/default value",aobjDbg)
 						.initCauseAndReturnSelf(e);
 				}finally{
 					restoreAccessMode(fld, bAccessible);
@@ -195,6 +194,74 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 //				}
 			}
 		}
+	}
+	
+	public static enum EType{
+		Int,
+		Long,
+		Float,
+		Double,
+		String,
+		Boolean,
+		;
+		
+		public static EType forClass(Class clValue) throws UnsupportedOperationException{
+			EType e = null;
+			if(clValue==Float.class || clValue==float.class){
+				e=EType.Float;
+			}else
+			if(clValue==Double.class || clValue==double.class){
+				e=EType.Double;
+			}else
+			if(clValue==Integer.class || clValue==int.class){
+				e=EType.Int;
+			}else
+			if(clValue==Long.class || clValue==long.class){
+				e=EType.Long;
+			}else
+			if(clValue==Boolean.class || clValue==boolean.class){
+				e=EType.Boolean;
+			}else
+			if(clValue==String.class){
+				e=EType.String;
+			}else
+			{
+				throw new UnsupportedOperationException("unsupported value class type "+clValue.getName());
+			}
+			
+			return e;
+		}
+		
+	}
+	
+	/**
+	 * A missing default means to always save.
+	 * If default value is not present, try to use an invalid value (like Float.Nan) to grant 
+	 * value will always be saved in case there is no default.
+	 * To grant it will be saved, the default just needs to differ from the actual valid value.
+	 */
+	private <T> T changeVal(Class<T> clValue, Object objValue, Object valueDefault){
+		if(clValue==Float.class || clValue==float.class){
+			if(valueDefault==null)valueDefault=Float.NaN;
+		}else
+		if(clValue==Double.class || clValue==double.class){
+			if(valueDefault==null)valueDefault=Double.NaN;
+		}else
+		if(clValue==Integer.class || clValue==int.class){
+			if(valueDefault==null)valueDefault=((int)objValue)+1; //TODO if max check -> then do subtract
+		}else
+		if(clValue==Long.class || clValue==long.class){
+			if(valueDefault==null)valueDefault=((long)objValue)+1; //TODO if max check -> then do subtract
+		}else
+		if(clValue==Boolean.class || clValue==boolean.class){
+			if(valueDefault==null)valueDefault=!((boolean)objValue);
+		}else
+		if(clValue==String.class){
+			if(valueDefault==null)valueDefault=((String)objValue)+"_MakeMeDifferent";
+		}else
+		{throw new PrerequisitesNotMetException("unsupported value class type "+clValue);}
+		
+		return (T)valueDefault;
 	}
 	
 //	private <T> void write(OutputCapsule oc, Class<T> cl, Field fld, Field fldDefault) throws IOException{
@@ -240,12 +307,25 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 					if(checkSkip(fld))continue;
 					
 					clField = fld.getType();
+					Object objValDef = getDefaultValueFor(fld,true);
+					String strName=fld.getName();
 					if(clField==Float.class || clField==float.class){
-						fld.set(this, ic.readFloat(fld.getName(), (float)getDefaultValueFor(fld,true)));
-//						if(new Float(fld.getFloat(this)).isNaN())throw new IllegalArgumentException("could not load");
+						fld.set(this, ic.readFloat(strName, (float)objValDef));
+					}else
+					if(clField==Double.class || clField==double.class){
+						fld.set(this, ic.readDouble(strName, (double)objValDef));
 					}else
 					if(clField==Integer.class || clField==int.class){
-						fld.set(this, ic.readInt(fld.getName(), (int)getDefaultValueFor(fld,true)));
+						fld.set(this, ic.readInt(strName, (int)objValDef));
+					}else
+					if(clField==Long.class || clField==long.class){
+						fld.set(this, ic.readLong(strName, (long)objValDef));
+					}else
+					if(clField==Boolean.class || clField==boolean.class){
+						fld.set(this, ic.readBoolean(strName, (boolean)objValDef));
+					}else
+					if(clField==String.class){
+						fld.set(this, ic.readString(strName, (String)objValDef));
 					}else
 					{}
 				} catch (IllegalArgumentException | IllegalAccessException e) {
