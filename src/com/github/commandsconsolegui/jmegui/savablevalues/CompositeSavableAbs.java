@@ -241,25 +241,31 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 	 * To grant it will be saved, the default just needs to differ from the actual valid value.
 	 */
 	private <T> T changeVal(Class<T> clValue, Object objValue, Object valueDefault){
-		if(clValue==Float.class || clValue==float.class){
-			if(valueDefault==null)valueDefault=Float.NaN;
-		}else
-		if(clValue==Double.class || clValue==double.class){
-			if(valueDefault==null)valueDefault=Double.NaN;
-		}else
-		if(clValue==Integer.class || clValue==int.class){
-			if(valueDefault==null)valueDefault=((int)objValue)+1; //TODO if max check -> then do subtract
-		}else
-		if(clValue==Long.class || clValue==long.class){
-			if(valueDefault==null)valueDefault=((long)objValue)+1; //TODO if max check -> then do subtract
-		}else
-		if(clValue==Boolean.class || clValue==boolean.class){
-			if(valueDefault==null)valueDefault=!((boolean)objValue);
-		}else
-		if(clValue==String.class){
-			if(valueDefault==null)valueDefault=((String)objValue)+"_MakeMeDifferent";
-		}else
-		{throw new PrerequisitesNotMetException("unsupported value class type "+clValue);}
+		switch(EType.forClass(clValue)){
+			case Boolean:	if(valueDefault==null)valueDefault=!((boolean)objValue);	break;
+			case Double:	if(valueDefault==null)valueDefault=Double.NaN;						break;
+			case Float:		if(valueDefault==null)valueDefault=Float.NaN;							break;
+			case Int:
+				if(valueDefault==null){
+					if(((int)objValue)==Integer.MAX_VALUE){
+						valueDefault=((int)objValue)-1;
+					}else{
+						valueDefault=((int)objValue)+1;
+					}
+				}
+				break;
+			case Long:
+				if(valueDefault==null){
+					if(((long)objValue)==Long.MAX_VALUE){
+						valueDefault=((long)objValue)-1;
+					}else{
+						valueDefault=((long)objValue)+1;
+					}
+				}
+				break;
+			case String:	if(valueDefault==null)valueDefault=((String)objValue)+"_MakeMeDifferent";	break;
+		}
+//		{throw new PrerequisitesNotMetException("unsupported value class type "+clValue);}
 		
 		return (T)valueDefault;
 	}
@@ -309,25 +315,14 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 					clField = fld.getType();
 					Object objValDef = getDefaultValueFor(fld,true);
 					String strName=fld.getName();
-					if(clField==Float.class || clField==float.class){
-						fld.set(this, ic.readFloat(strName, (float)objValDef));
-					}else
-					if(clField==Double.class || clField==double.class){
-						fld.set(this, ic.readDouble(strName, (double)objValDef));
-					}else
-					if(clField==Integer.class || clField==int.class){
-						fld.set(this, ic.readInt(strName, (int)objValDef));
-					}else
-					if(clField==Long.class || clField==long.class){
-						fld.set(this, ic.readLong(strName, (long)objValDef));
-					}else
-					if(clField==Boolean.class || clField==boolean.class){
-						fld.set(this, ic.readBoolean(strName, (boolean)objValDef));
-					}else
-					if(clField==String.class){
-						fld.set(this, ic.readString(strName, (String)objValDef));
-					}else
-					{}
+					switch(EType.forClass(clField)){
+						case Boolean:	fld.set(this, ic.readBoolean(strName, (boolean)objValDef));	break;
+						case Double:	fld.set(this, ic.readDouble(strName, (double)objValDef));		break;
+						case Float:		fld.set(this, ic.readFloat(strName, (float)objValDef));			break;
+						case Int:			fld.set(this, ic.readInt(strName, (int)objValDef));					break;
+						case Long:		fld.set(this, ic.readLong(strName, (long)objValDef));				break;
+						case String:	fld.set(this, ic.readString(strName, (String)objValDef));		break;
+					}
 				} catch (IllegalArgumentException | IllegalAccessException e) {
 					GlobalCommandsDelegatorI.i().dumpExceptionEntry(e,this,im,ic,clOwner,fld,clField);
 					ss.bFailedToLoad=true;
