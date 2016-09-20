@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
@@ -43,8 +44,14 @@ import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
-import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
+import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurStateI;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelperI;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBasicDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.extras.ISpatialValidator;
+import com.github.commandsconsolegui.jmegui.savablevalues.CompositeSavableAbs;
+import com.github.commandsconsolegui.jmegui.savablevalues.SaveFloat;
+import com.github.commandsconsolegui.jmegui.savablevalues.SaveString;
+import com.github.commandsconsolegui.jmegui.savablevalues.SaveValueAbs;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
@@ -53,6 +60,8 @@ import com.github.commandsconsolegui.misc.MsgI;
 //import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.export.InputCapsule;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
@@ -241,9 +250,15 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		}
 	}
 	private CfgParm	cfg;
+	private boolean	bSaveDialog = true;
+	private Vector3f	v3fApplicationWindowSize;
 	@Override
 	public R configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
+		
+//		if(isSaveDialog()){
+////			dsv = new DialogSavable().setOwner(this);
+//		}
 		
 		btgRestoreIniPosSizeOnce.setCallerAssigned(new CallableX(this) {
 			@Override
@@ -301,6 +316,14 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return storeCfgAndReturnSelf(icfg);
 	}
 	
+	protected void setSaveDialog(boolean b){
+		this.bSaveDialog=b;
+	}
+	
+	private boolean isSaveDialog() {
+		return bSaveDialog;
+	}
+
 	protected Spatial getInputField() {
 		return sptIntputField;
 	}
@@ -429,6 +452,11 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return true;
 	}
 	
+	/**
+	 * TODO try this instead: https://github.com/jMonkeyEngine-Contributions/Lemur/wiki/Effects-and-Animation#open-close-effect
+	 * @param bGrow
+	 * @return
+	 */
 	protected boolean updateEffect(boolean bGrow){
 		boolean bCompleted=false;
 		
@@ -462,13 +490,13 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 			if(!bGrow)fPerc = 1.0f - fPerc;
 			v3f.x = v3f.x + fHalfWidth - (fHalfWidth*fPerc);
 			v3f.y = v3f.y - fHalfHeight + (fHalfHeight*fPerc);
-			MiscLemurHelpersStateI.i().setLocationXY(getDialogMainContainer(),v3f);
+			MiscLemurStateI.i().setLocationXY(getDialogMainContainer(),v3f);
 		}
 		
 		if(bCompleted){
 			tdDialogEffect.setActive(false);
 			
-			MiscLemurHelpersStateI.i().setLocationXY(getDialogMainContainer(),v3fMainLocationBkp);
+			MiscLemurStateI.i().setLocationXY(getDialogMainContainer(),v3fMainLocationBkp);
 			v3fMainLocationBkp=null;
 		}
 		
@@ -509,6 +537,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	protected void enableSuccess() {
 		super.enableSuccess();
 		updateAllPartsNow();
+		if(isSaveDialog())GlobalCommandsDelegatorI.i().addCmdToQueue(scfLoad);
 	}
 	
 	public boolean isDialogEffectsDone(){
@@ -549,6 +578,12 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 //		updateModalParent(false);
 		
 		return true;
+	}
+	
+	@Override
+	protected void disableSuccess() {
+		super.disableSuccess();
+		if(isSaveDialog())GlobalCommandsDelegatorI.i().addCmdToQueue(scfSave);
 	}
 	
 	/**
@@ -1081,110 +1116,228 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 //	}
 	
 	public static enum ESaveKey{
-		posX,
-		posY,
-		width,
-		height,
+//		posX,
+//		posY,
+//		width,
+//		height, 
+		FieldList,
 		;
 		public String s(){return this.toString();}
 	}
 	
-	enum E{
-		Id,
-		;
-		public String s(){return this.toString();}
-	}
+//	enum E{
+//		Id,
+//		;
+//		public String s(){return this.toString();}
+//	}
 	
-	public static class DialogSavable implements Savable{
-		private BaseDialogStateAbs	diag;
-
-		public DialogSavable(){} //required when loading
-		
-		public DialogSavable setOwner(BaseDialogStateAbs diag){
-			this.diag=diag;
-			return this;
-		}
-		
-		@Override
-		public void write(JmeExporter ex) throws IOException {
-			if(!diag.isInitializedProperly())return; //just skip
-			
-			OutputCapsule oc = ex.getCapsule(this);
-			
-//			assertInitializedProperly();
-			
-			oc.write(diag.getId(), E.Id.s(), null);
-			
-			Vector3f v3fPos = diag.getDialogMainContainer().getLocalTranslation().clone();
-			oc.write(v3fPos.x, ESaveKey.posX.s(), diag.cfg.v3fIniPos.x);
-			oc.write(v3fPos.y, ESaveKey.posY.s(), diag.cfg.v3fIniPos.y);
-			
-			Vector3f v3fSize = diag.getMainSize();
-			oc.write(v3fSize.x, ESaveKey.width.s(), diag.cfg.v3fIniSize.x);
-			oc.write(v3fSize.y, ESaveKey.height.s(), diag.cfg.v3fIniSize.y);
-		}
-
-		@Override
-		public void read(JmeImporter im) throws IOException {
-	    InputCapsule ic = im.getCapsule(this);
-			
-	  	final String strDiagId = ic.readString(E.Id.s(),null);
-	  	
-	  	final HashChangeHolder<Vector3f> hchv3fPos = new HashChangeHolder<Vector3f>(new Vector3f());
-	  	final HashChangeHolder<Vector3f> hchv3fSize = new HashChangeHolder<Vector3f>(new Vector3f());
-			try {
-				hchv3fPos.getObjRef().set(
-					MiscI.i().assertValidFloating(ic.readFloat(ESaveKey.posX.s(), Float.NaN)),
-					MiscI.i().assertValidFloating(ic.readFloat(ESaveKey.posY.s(), Float.NaN)),
-					0);
-				
-				hchv3fSize.getObjRef().set(
-	      	MiscI.i().assertValidFloating(ic.readFloat(ESaveKey.width.s(), Float.NaN)),
-	      	MiscI.i().assertValidFloating(ic.readFloat(ESaveKey.height.s(), Float.NaN)),
-	    		0);
-			} catch (IllegalArgumentException e) {
-				GlobalCommandsDelegatorI.i().dumpExceptionEntry(e,im,ic,this);
-				return;
-			}
-	  	
-			CallQueueI.i().addCall(new CallableX(this,1000) {
-				private BaseDialogStateAbs diagApplyAt;
-
-				@Override
-				public Boolean call() {
-		    	diagApplyAt = ConditionalStateManagerI.i().getConditionalState(
-			    		BaseDialogStateAbs.class,strDiagId);
-		    	if(diagApplyAt==null)return false;
-					if(!diagApplyAt.isInitializedProperly())return false;
-			    
-			    diagApplyAt.setPositionSize(hchv3fPos.getObjRef(), hchv3fSize.getObjRef());
-			    
-			    return true;
-				}
-			});
-	 
-		}
-		
-	}
+//	public static class DialogSavable implements Savable, IReflexFillCfg{
+//		private BaseDialogStateAbs	diag;
+//		
+//		private SaveString svsId = new SaveString(this, null);
+//		private SaveFloat svfPosX = new SaveFloat(this, null);
+//		private SaveFloat svfPosY = new SaveFloat(this, null);
+//		private SaveFloat svfWidth = new SaveFloat(this, null);
+//		private SaveFloat svfHeight = new SaveFloat(this, null);
+//		
+//		public DialogSavable(){} //required when loading
+//		
+//		public BaseDialogStateAbs getOwner(){
+//			return diag;
+//		}
+//		
+//		public DialogSavable setOwner(BaseDialogStateAbs diag){
+//			this.diag=diag;
+//			final BaseDialogStateAbs diagF = diag;
+//			
+//			CallQueueI.i().addCall(new CallableX(this,1000) {
+//				@Override
+//				public Boolean call() {
+//					if(diagF.cfg.v3fIniPos==null)return false; //retry later
+//					
+//					svsId.setDefaultValue(diagF.getId());
+//					svfPosX.setDefaultValue(diagF.cfg.v3fIniPos.x);
+//					svfPosY.setDefaultValue(diagF.cfg.v3fIniPos.y);
+//					svfWidth.setDefaultValue(diagF.cfg.v3fIniSize.x);
+//					svfHeight.setDefaultValue(diagF.cfg.v3fIniSize.y);
+//					
+//					return true;
+//				}
+//			}.setQuietOnFail(true)); //will keep retrying until the dialog shows up and its values get initialized properly
+//			
+//			return this;
+//		}
+//		
+//		@Override
+//		public void write(JmeExporter ex) throws IOException {
+//			if(!diag.isInitializedProperly())return; //just skip
+//			
+//			svsId.setValue(diag.getId());
+//			
+//			Vector3f v3fPos = diag.getDialogMainContainer().getLocalTranslation().clone();
+//			svfPosX.setValue(v3fPos.x);
+//			svfPosY.setValue(v3fPos.y);
+//			
+//			Vector3f v3fSize = diag.getMainSize();
+//			svfWidth.setValue(v3fSize.x);
+//			svfHeight.setValue(v3fSize.y);
+//			
+//			OutputCapsule oc = ex.getCapsule(this);
+//			oc.writeSavableArrayList(SaveValueAbs.getSaveValueListCopy(this), ESaveKey.FieldList.s(), null);
+//		}
+//
+//		@Override
+//		public void read(JmeImporter im) throws IOException {
+//	    InputCapsule ic = im.getCapsule(this);
+//	    
+//	    // apply loaded values to this owner fields
+//	    ArrayList<SaveValueAbs> asvFieldList = ic.readSavableArrayList(ESaveKey.FieldList.s(), null);
+//    	for(SaveValueAbs svLoaded:asvFieldList){svLoaded.setOwner(this);}
+//	    for(SaveValueAbs sv:SaveValueAbs.getSaveValueListCopy(this)){
+//	    	for(SaveValueAbs svLoaded:asvFieldList.toArray(new SaveValueAbs[0])){
+//	    		if(svLoaded==null){
+//	    			GlobalCommandsDelegatorI.i().dumpWarnEntry("null saved field value? failed to load", this);
+//	    			return;
+//	    		}
+//	    		
+//		    	if(sv.getUniqueId().equals(svLoaded.getUniqueId())){
+//		    		sv.setValue(svLoaded.getValue());
+//		    		asvFieldList.remove(svLoaded);
+//		    		break;
+//		    	}
+//	    	}
+//	    }
+//			
+//	  	final HashChangeHolder<Vector3f> hchv3fPos = new HashChangeHolder<Vector3f>(new Vector3f());
+//	  	final HashChangeHolder<Vector3f> hchv3fSize = new HashChangeHolder<Vector3f>(new Vector3f());
+//			try {
+//				hchv3fPos.getObjRef().set(
+//					MiscI.i().assertValidFloating(svfPosX.getValue()),
+//					MiscI.i().assertValidFloating(svfPosY.getValue()),
+//					0);
+//				
+//				hchv3fSize.getObjRef().set(
+//					MiscI.i().assertValidFloating(svfWidth.getValue()),
+//					MiscI.i().assertValidFloating(svfHeight.getValue()),
+//	    		0);
+//			} catch (IllegalArgumentException e) {
+//				GlobalCommandsDelegatorI.i().dumpExceptionEntry(e,im,ic,this);
+//				return;
+//			}
+//	  	
+//			// apply to the dialog whenever it is ready
+//			CallQueueI.i().addCall(new CallableX(this,1000) {
+//				private BaseDialogStateAbs diagApplyAt;
+//
+//				@Override
+//				public Boolean call() {
+//		    	diagApplyAt = ConditionalStateManagerI.i().getConditionalState(
+//			    		BaseDialogStateAbs.class, svsId.getValue());
+//		    	if(diagApplyAt==null)return false;
+//					if(!diagApplyAt.isInitializedProperly())return false;
+//			    
+//			    diagApplyAt.setPositionSize(hchv3fPos.getObjRef(), hchv3fSize.getObjRef());
+//			    
+//			    return true;
+//				}
+//			}.setQuietOnFail(true)); //will calmily wait dialog get ready
+//	 
+//		}
+//
+//		@Override
+//		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+//			ReflexFillCfg rfcfg = new ReflexFillCfg(rfcv);
+//			
+//			if(rfcv.getClass().isInstance(SaveFloat.class)){
+//				rfcfg.setCodingStyleFieldNamePrefix(rfcv.getCodePrefixVariant());
+//			}
+//			
+//			return rfcfg;
+//		}
+//		
+//	}
 	
 	protected abstract void setPositionSize(Vector3f v3fPos, Vector3f v3fSize);
 
-	private DialogSavable dsv = new DialogSavable().setOwner(this);
-	private boolean	bRequestSaveDialog;
-	public Savable getSavable(BaseDialogHelper.CompositeControl cc) {
-		cc.assertSelfNotNull();
-		return dsv;
-	}
+//	private DialogSavable dsv;
+//	private boolean	bRequestSaveDialog;
+//	public DialogSavable getSavable(BaseDialogHelper.CompositeControl cc) {
+//		cc.assertSelfNotNull();
+//		return dsv;
+//	}
 
-	public void requestSaveDialog() {
-		this.bRequestSaveDialog=true;
-		GlobalDialogHelperI.i().requestSaveDialog(this);
+//	public void requestSaveDialog() {
+//		this.bRequestSaveDialog=true;
+//		GlobalDialogHelperI.i().requestSaveDialog(this);
+//	}
+	
+//	public boolean isRequestSaveDialogAndReset(BaseDialogHelper.CompositeControl cc){
+//		cc.assertSelfNotNull();
+//		boolean b=this.bRequestSaveDialog;
+//		this.bRequestSaveDialog=false;
+//		return b;
+//	}
+	
+	public static class CompositeSavable extends CompositeSavableAbs<BaseDialogStateAbs,CompositeSavable> {
+		public CompositeSavable(){super();}; //required by savable
+		@Override public CompositeSavable getThis() {return this;}
+		
+		public CompositeSavable(BaseDialogStateAbs owner) {
+			super(owner);
+		}
+		
+//		private String strId=null;
+		
+		private float fPosX=0;
+		private float fPosY=0;
+		private float fWidth=0;
+		private float fHeight=0;
+		
+//		@Override
+//		public CompositeSavableConcrete setOwner(BaseDialogStateAbs owner) {
+//			super.setOwner(owner);
+////			strId=getOwner().getId();
+//			return getThis();
+//		}
+		
+		@Override
+		public void write(JmeExporter ex) throws IOException {
+			// basically update everything before writing, in case not done outside here
+//			strId=getOwner().getId();
+			
+			Vector3f v3fPos = getOwner().getDialogMainContainer().getLocalTranslation().clone();
+			fPosX=v3fPos.x;
+			fPosY=v3fPos.y;
+			
+			Vector3f v3fSize = getOwner().getMainSize();
+			fWidth=(v3fSize.x);
+			fHeight=(v3fSize.y);
+			
+			super.write(ex);
+		}
+		
+//		@Override
+//		public void read(JmeImporter im) throws IOException {
+//			super.read(im);
+//		}
+	}
+	private CompositeSavable sv = new CompositeSavable(this);
+	
+	private String strFilePrefix="Dialog_";
+	public void save(){
+		if(!isSaveDialog())return;
+		MiscJmeI.i().saveWriteConsoleData(strFilePrefix+getId(), sv);
+	}
+	public void load(){
+		if(!isSaveDialog())return;
+		CompositeSavable svTmp = MiscJmeI.i().loadReadConsoleData(CompositeSavable.class, strFilePrefix+getId());
+		sv.applyValuesFrom(svTmp);
+		setPositionSize(new Vector3f(sv.fPosX,sv.fPosY,0), new Vector3f(sv.fWidth,sv.fHeight,0));
 	}
 	
-	public boolean isRequestSaveDialogAndReset(BaseDialogHelper.CompositeControl cc){
-		cc.assertSelfNotNull();
-		boolean b=this.bRequestSaveDialog;
-		this.bRequestSaveDialog=false;
-		return b;
-	}
+	final public StringCmdField scfSave = new StringCmdField(this)
+		.setCallerAssigned(new CallableX(this) {@Override public Boolean call() {save();return true;}});
+	final public StringCmdField scfLoad = new StringCmdField(this)
+		.setCallerAssigned(new CallableX(this) {@Override public Boolean call() {load();return true;}});
+	
 }

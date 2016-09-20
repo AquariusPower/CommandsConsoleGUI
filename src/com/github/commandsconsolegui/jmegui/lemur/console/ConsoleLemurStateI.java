@@ -41,7 +41,7 @@ import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
-import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI.BindKey;
+import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurStateI.BindKey;
 import com.github.commandsconsolegui.jmegui.lemur.extras.DialogMainContainer;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -173,8 +173,8 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 //		GuiGlobals.initialize(GlobalAppRefI.i());
 		
 		// misc cfg
-		if(!MiscLemurHelpersStateI.i().isConfigured()){ //in case of restarting the console
-			MiscLemurHelpersStateI.i().configure(new MiscLemurHelpersStateI.CfgParm());
+		if(!MiscLemurStateI.i().isConfigured()){ //in case of restarting the console
+			MiscLemurStateI.i().configure(new MiscLemurStateI.CfgParm());
 		}
 		
 //		LemurMiscHelpersStateI.i().initialize(app().getStateManager(), sapp);
@@ -314,7 +314,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		// main container
 //		setContainerMain(new ContainerMain(new BorderLayout(), getDiagStyle()).setDiagOwner(this));
 		setDialogMainContainer(new DialogMainContainer(new BorderLayout(), getDiagStyle()));
-		MiscLemurHelpersStateI.i().setGrantedSize(getDialogMainContainer(), getConsoleSizeCopy());
+		MiscLemurStateI.i().setSizeSafely(getDialogMainContainer(), getConsoleSizeCopy());
 		
 		/**
 		 * TOP ELEMENT =================================================================
@@ -326,7 +326,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		// console stats
 		lblStats = new Label("Console stats.",getDiagStyle());
 		lblStats.setColor(new ColorRGBA(1,1,0.5f,1));
-		MiscLemurHelpersStateI.i().setGrantedSize(lblStats, getConsoleSizeCopy().x*0.75f, 1f); //TODO y=1f so it will expand?
+		MiscLemurStateI.i().setSizeSafely(lblStats, getConsoleSizeCopy().x*0.75f, 1f); //TODO y=1f so it will expand?
 		getContainerStatsAndControls().addChild(lblStats,0,0);
 		
 		// buttons
@@ -518,7 +518,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	
 	@Override
 	public ConsoleLemurStateI setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines) {
-		MiscLemurHelpersStateI.i().setGrantedSize(getHintBox(), v3fBoxSizeXY);
+		MiscLemurStateI.i().setSizeSafely(getHintBox(), v3fBoxSizeXY);
 		getHintBox().setVisibleItems(iVisibleLines);
 		return this;
 	}
@@ -658,7 +658,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		return bindKey(actSimpleActions,strActionPerformedHelp, iKeyCode, aiKeyModifiers);
 	}
 	private BindKey bindKey(KeyActionListener act, String strActionPerformedHelp, int iKeyCode, int... aiKeyModifiers){
-		BindKey bk = MiscLemurHelpersStateI.i().bindKey(getInputField(), act,
+		BindKey bk = MiscLemurStateI.i().bindKey(getInputField(), act,
 			strActionPerformedHelp, iKeyCode, aiKeyModifiers);
 		abkList.add(bk);
 		return bk;
@@ -696,7 +696,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		if(iForceAmount>0){
 			super.setShowRowsAmount(iForceAmount);
 		}else{
-			setLstbxEntryHeight(MiscLemurHelpersStateI.i().guessEntryHeight(getDumpArea()));
+			setLstbxEntryHeight(MiscLemurStateI.i().guessEntryHeight(getDumpArea()));
 			if(getLstbxEntryHeight()==null)return;
 			
 			setLstbxHeight(getDumpArea().getSize().y);
@@ -734,7 +734,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	
 	@Override
 	protected boolean editInsertAtCaratPosition(String str) {
-		MiscLemurHelpersStateI.i().insertTextAtCaratPosition(getInputField(), str);
+		MiscLemurStateI.i().insertTextAtCaratPosition(getInputField(), str);
 //		DocumentModel dm = getInputField().getDocumentModel();
 //		for(int i=0;i<str.length();i++)dm.insert(str.charAt(i));
 //		LemurMiscHelpersStateI.i().bugFix(EBugFix.UpdateTextFieldTextAndCaratVisibility, getInputField());
@@ -800,7 +800,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		}
 		iNewPos=i;
 		
-		MiscLemurHelpersStateI.i().setCaratPosition(getInputField(),iNewPos);
+		MiscLemurStateI.i().setCaratPosition(getInputField(),iNewPos);
 	}
 	
 	@Override
@@ -824,7 +824,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	@Override
 	protected String autoCompleteInputFieldWithCmd(boolean bMatchContains) {
 		String strCompletedCmd = super.autoCompleteInputFieldWithCmd(bMatchContains);
-		MiscLemurHelpersStateI.i().setCaratPosition(getInputField(), strCompletedCmd.length());
+		MiscLemurStateI.i().setCaratPosition(getInputField(), strCompletedCmd.length());
 		return strCompletedCmd;
 	}
 //	@Override
@@ -870,7 +870,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	
 	@Override
 	public void setContainerConsolePreferredSize(Vector3f v3f) {
-		MiscLemurHelpersStateI.i().setGrantedSize(getDialogMainContainer(), v3f);
+		MiscLemurStateI.i().setSizeSafely(getDialogMainContainer(), v3f);
 	}
 	@Override
 	public void addRemoveContainerConsoleChild(boolean bAdd, Node pnlChild){
@@ -1007,7 +1007,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 
 	@Override
 	protected <N extends Node> void lineWrapDisableForChildrenOf(N node) {
-		MiscLemurHelpersStateI.i().lineWrapDisableForListboxEntries((ListBox<String>)node);
+		MiscLemurStateI.i().lineWrapDisableForListboxEntries((ListBox<String>)node);
 	}
 
 }

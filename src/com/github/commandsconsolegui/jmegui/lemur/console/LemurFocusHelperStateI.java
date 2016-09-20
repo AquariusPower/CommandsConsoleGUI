@@ -325,7 +325,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 		}
 		
 		if(spt instanceof TextField){
-			MiscLemurHelpersStateI.i().setTextFieldInputToBlinkCursor((TextField) spt);
+			MiscLemurStateI.i().setTextFieldInputToBlinkCursor((TextField) spt);
 		}
 		
 		GuiGlobals.getInstance().requestFocus(spt);

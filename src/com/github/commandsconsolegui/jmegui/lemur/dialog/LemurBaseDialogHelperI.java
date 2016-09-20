@@ -27,23 +27,14 @@
 
 package com.github.commandsconsolegui.jmegui.lemur.dialog;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.BaseDialogHelper;
-import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs.DialogSavable;
-import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
-import com.jme3.export.InputCapsule;
-import com.jme3.export.JmeExporter;
-import com.jme3.export.JmeImporter;
-import com.jme3.export.OutputCapsule;
-import com.jme3.export.Savable;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
@@ -215,90 +206,106 @@ public class LemurBaseDialogHelperI extends BaseDialogHelper{
 		return super.getDialogListCopy(LemurDialogGUIStateAbs.class);
 	}
 	
-	DialogsStorage svAllDiags = new DialogsStorage();
-	
-	public static class DialogsStorage implements Savable{
-		enum E{
-			DialogList,
-			;
-			public String s(){return this.toString();}
-		}
-		
-		public DialogsStorage(){} //required when loading
-		
-		@Override
-		public void write(JmeExporter ex) throws IOException {
-			OutputCapsule oc = ex.getCapsule(this);
-			oc.writeSavableArrayList(LemurBaseDialogHelperI.i().getListOfSavableForDialogCopy(LemurBasicDialogStateAbs.class), 
-				E.DialogList.s(), null);
-//			for(LemurDialogGUIStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy()){
-//				oc.write(diag, diag.getId(), null);
+//	DialogsStorage svAllDiags = new DialogsStorage();
+//	public static class DialogsStorage implements Savable{
+//		enum E{
+//			DialogList,
+//			;
+//			public String s(){return this.toString();}
+//		}
+//		
+//		public DialogsStorage(){} //required when loading
+//		
+//		@Override
+//		public void write(JmeExporter ex) throws IOException {
+//			OutputCapsule oc = ex.getCapsule(this);
+//			oc.writeSavableArrayList(LemurBaseDialogHelperI.i().getDialogsSavableObjectListCopy(LemurBasicDialogStateAbs.class), 
+//				E.DialogList.s(), null);
+////			for(LemurDialogGUIStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy()){
+////				oc.write(diag, diag.getId(), null);
+////			}
+//		}
+//		@Override
+//		public void read(JmeImporter im) throws IOException {
+////			try {
+////				DialogSavable.class.newInstance();
+////			} catch (InstantiationException | IllegalAccessException e) {
+////				// TODO Auto-generated catch block
+////				e.printStackTrace();
+////			}
+//			InputCapsule ic = im.getCapsule(this);
+//			ArrayList asvList = ic.readSavableArrayList(E.DialogList.s(),null); //this will instance new objects with empty constructors
+//			boolean bHasSomething=false;for(Object obj:asvList){if(obj!=null){bHasSomething=true;break;}}
+//			if(!bHasSomething){ 
+//				GlobalCommandsDelegatorI.i().dumpWarnEntry("failed to load dialogs", this, im, ic);
 //			}
-		}
-		@Override
-		public void read(JmeImporter im) throws IOException {
-//			try {
-//				DialogSavable.class.newInstance();
-//			} catch (InstantiationException | IllegalAccessException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
+////			for(LemurDialogGUIStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy()){
+//////				Savable svDiag = ic.readSavable(diag.getId(), diag);
+////				diag.read(im);
+////			}
+//		}
+//		
+//	};
+	
+//	private String strFilePrefix="Dialog_";
+	
+//	private StringCmdField scfSaveDialogs = new StringCmdField(this)
+//		.setCallerAssigned(new CallableX(this) {
+//			@Override
+//			public Boolean call() {
+//				for(LemurBasicDialogStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy(LemurBasicDialogStateAbs.class)){
+//					diag.save();
+//				}
+//				
+////				ArrayList<DialogSavable> asvDiagList = LemurBaseDialogHelperI.i().getDialogsSavableObjectListCopy(LemurBasicDialogStateAbs.class);
+////				for(DialogSavable dsv:asvDiagList){
+////					MiscJmeI.i().saveWriteConsoleData(strFilePrefix+dsv.getOwner().getId(), dsv);
+////				}
+//				return true;
 //			}
-			InputCapsule ic = im.getCapsule(this);
-			ArrayList asvList = ic.readSavableArrayList(E.DialogList.s(),null); //this will instance new objects with empty constructors
-			boolean bHasSomething=false;for(Object obj:asvList){if(obj!=null){bHasSomething=true;break;}}
-			if(!bHasSomething){ 
-				GlobalCommandsDelegatorI.i().dumpWarnEntry("failed to load dialogs", this, im, ic);
-			}
-//			for(LemurDialogGUIStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy()){
-////				Savable svDiag = ic.readSavable(diag.getId(), diag);
-//				diag.read(im);
+//		});
+	
+//	private StringCmdField scfLoadDialogs = new StringCmdField(this)
+//		.setCallerAssigned(new CallableX(this) {
+//			@Override
+//			public Boolean call() {
+//				for(LemurBasicDialogStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy(LemurBasicDialogStateAbs.class)){
+//					diag.load();
+//				}
+//				
+////				ArrayList<DialogSavable> asvDiagList = LemurBaseDialogHelperI.i().getDialogsSavableObjectListCopy(LemurBasicDialogStateAbs.class);
+////				for(DialogSavable dsv:asvDiagList){
+////					MiscJmeI.i().loadReadConsoleData(strFilePrefix+dsv.getOwner().getId());
+////				}
+//				return true;
 //			}
-		}
-		
-	};
-	
-	private String strFileDialogs="Dialogs.jmesave";
-	
-	private StringCmdField scfSaveDialogs = new StringCmdField(this)
-		.setCallerAssigned(new CallableX(this) {
-			@Override
-			public Boolean call() {
-				MiscJmeI.i().saveWriteConsoleData(strFileDialogs,svAllDiags);
-				return true;
-			}
-		});
-	
-	private StringCmdField scfLoadDialogs = new StringCmdField(this)
-		.setCallerAssigned(new CallableX(this) {
-			@Override
-			public Boolean call() {
-				MiscJmeI.i().loadReadConsoleData(strFileDialogs);
-				return true;
-			}
-		});
+//		});
 	
 	public LemurBaseDialogHelperI() {
-		CallQueueI.i().addCall(new CallableX(this,1000) {
-			@Override
-			public Boolean call() {
-				GlobalCommandsDelegatorI.i().addCmdToQueue(scfLoadDialogs);
-				return true;
-			}
-		});
+		super();
+//		CallQueueI.i().addCall(new CallableX(this,1000) {
+//			@Override
+//			public Boolean call() {
+//				for(LemurBasicDialogStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy(LemurBasicDialogStateAbs.class)){
+//					GlobalCommandsDelegatorI.i().addCmdToQueue(diag.scfLoad);
+//				}
+//				return true;
+//			}
+//		});
 	}
 	
-	@Override
-	public void update(float tpf){
-		super.update(tpf);
-		
-		if(isDialogSaveRequested()){
-			for(LemurBasicDialogStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy(LemurBasicDialogStateAbs.class)){
-				if(super.isDialogSaveRequestedAndReset(diag)){
-					GlobalCommandsDelegatorI.i().addCmdToQueue(scfSaveDialogs);
-					resetDialogSaveRequest();
-					break;
-				}
-			}
-		}
-	}
+//	@Override
+//	public void update(float tpf){
+//		super.update(tpf);
+//		
+//		if(isDialogSaveRequested()){
+//			for(LemurBasicDialogStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy(LemurBasicDialogStateAbs.class)){
+//				if(super.isDialogSaveRequestedAndReset(diag)){
+//					GlobalCommandsDelegatorI.i().addCmdToQueue(scfSaveDialogs);
+//					resetDialogSaveRequest();
+//					break;
+//				}
+//			}
+//		}
+//	}
 }

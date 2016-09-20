@@ -50,7 +50,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	 *
 	 */
 	public static interface IReflexFillCfg{
-		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv);
+		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField);
 	}
 	
 	/**
@@ -58,12 +58,25 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	 * for each class type implementing this interface.
 	 */
 	public static interface IReflexFillCfgVariant{
-//		public int getReflexFillCfgVariant();
+		/** used at the specific owner field type coding name prefix style */
 		public String getCodePrefixVariant();
+		
+		/** for the class used as the field instance */
+		public String getCodePrefixDefault();
+		
 		public IReflexFillCfg getOwner();
+		
+		/** TODO remove? use owner!=null */
 		public boolean isReflexing();
+		
+		/** 
+		 * for creation of console variables
+		 * TODO rename to getConsoleVariablePrefix  
+		 */
 		public String getVariablePrefix();
-		public boolean isCodePrefixVariantEqualDefault();
+		
+//		/** TODO remove: collect and test against default */
+//		public boolean isCodePrefixVariantEqualDefault();
 	}
 	
 	public static class ReflexFillCfg{

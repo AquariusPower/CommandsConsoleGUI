@@ -38,7 +38,6 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.jme3.asset.AssetNotFoundException;
-import com.jme3.export.Savable;
 import com.jme3.font.BitmapFont;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
@@ -114,7 +113,7 @@ public abstract class BaseDialogHelper implements IReflexFillCfg{
 	
 	private ArrayList<BaseDialogStateAbs> adiagList = new ArrayList<BaseDialogStateAbs>();
 
-	private boolean	bRequestSaveDialog;
+//	private boolean	bRequestSaveDialog;
 	public void addDialog(BaseDialogStateAbs diag){
 		adiagList.add(diag);
 	}
@@ -128,30 +127,30 @@ public abstract class BaseDialogHelper implements IReflexFillCfg{
 		}
 		return adiag;
 	}
-	public <T extends BaseDialogStateAbs> ArrayList<Savable> getListOfSavableForDialogCopy(Class<T> clFilter){
-		ArrayList<Savable> asv = new ArrayList<Savable>();
-		for(BaseDialogStateAbs diag:getDialogListCopy(clFilter)){
-			asv.add(diag.getSavable(ccSelf));
-		}
-		return asv;
-	}
+//	public <T extends BaseDialogStateAbs> ArrayList<DialogSavable> getDialogsSavableObjectListCopy(Class<T> clFilter){
+//		ArrayList<DialogSavable> asv = new ArrayList<DialogSavable>();
+//		for(BaseDialogStateAbs diag:getDialogListCopy(clFilter)){
+//			asv.add(diag.getSavable(ccSelf));
+//		}
+//		return asv;
+//	}
 	
-	protected boolean isDialogSaveRequestedAndReset(BaseDialogStateAbs diag){
-		return diag.isRequestSaveDialogAndReset(ccSelf);
-	}
+//	protected boolean isDialogSaveRequestedAndReset(BaseDialogStateAbs diag){
+//		return diag.isRequestSaveDialogAndReset(ccSelf);
+//	}
 	
-	public void requestSaveDialog(BaseDialogStateAbs diag){
-		//TODO log diag?
-		this.bRequestSaveDialog=true;
-	}
-	
-	public boolean isDialogSaveRequested(){
-		return this.bRequestSaveDialog;
-	}
-	
-	protected void resetDialogSaveRequest(){
-		this.bRequestSaveDialog=false;
-	}
+//	public void requestSaveDialog(BaseDialogStateAbs diag){
+//		//TODO log diag?
+//		this.bRequestSaveDialog=true;
+//	}
+//	
+//	public boolean isDialogSaveRequested(){
+//		return this.bRequestSaveDialog;
+//	}
+//	
+//	protected void resetDialogSaveRequest(){
+//		this.bRequestSaveDialog=false;
+//	}
 	
 	public void update(float tpf){
 	}

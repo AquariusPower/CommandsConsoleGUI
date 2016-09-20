@@ -367,15 +367,6 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 		return this;
 	}
 
-	@Override
-	public boolean isReflexing() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-//	public static String getCodePrefixDefault() {
-//		return "td";
-//	}
 	private static String strCodePrefixDefault="td";
 	@Override
 	public String getCodePrefixDefault() {

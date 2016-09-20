@@ -37,7 +37,7 @@ import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData.SliderValueData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
-import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
+import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurStateI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -305,7 +305,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		}
 
 		private void applyEntryHeight(){
-			MiscLemurHelpersStateI.i().setGrantedSize(this, 
+			MiscLemurStateI.i().setSizeSafely(this, 
 					-1f, 
 					getPreferredSize().getY() * assignedCellRenderer.getCellHeightMult());
 		}

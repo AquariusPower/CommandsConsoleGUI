@@ -696,16 +696,24 @@ public class MiscJmeI implements IReflexFillCfg{
 	 * @param strFileName
 	 * @param svMain must gather all other required Savables
 	 */
-	private Savable consoleDataStoring(String strFileName, Savable svMain, boolean bSave) {
+	private <T extends Savable> T consoleDataStoringManagement(Class<T> cl, String strFileName, Savable svMain, boolean bSave) {
 		StorageFolderType esft = GlobalOperationalSystemI.i().getStorageFolderType();
 		
 		String strPathFull = GlobalCommandsDelegatorI.i().getConsoleSaveDataPath();
+		if(!strPathFull.endsWith("/ConsoleSave/")){
+			strPathFull+="/ConsoleSave/";
+		}
+		
 		String strPathRelative = null;
 		String strSFT = JmeSystem.getStorageFolder(esft).getAbsolutePath();
 		if(strPathFull.startsWith(strSFT)){
 			strPathRelative = strPathFull.substring(strSFT.length());
 		}else{
 			throw new PrerequisitesNotMetException("console save data path value not expected", strPathFull, strSFT);
+		}
+		
+		if(!strFileName.endsWith(".j3o")){
+			strFileName+=".j3o";
 		}
 		
 		/**
@@ -735,15 +743,21 @@ public class MiscJmeI implements IReflexFillCfg{
 		
 		GlobalCommandsDelegatorI.i().dumpInfoEntry(str+" "+strFileName+" at "+strPathFull);
 		
-		return svLoaded;
+		return (T)svLoaded;
 	}
 
-	public void saveWriteConsoleData(String strFileName, Savable svMain) {
-		consoleDataStoring(strFileName, svMain, true);
+	public <T extends Savable> void saveWriteConsoleData(String strFileName, T svMain) {
+		consoleDataStoringManagement(svMain.getClass(), strFileName, svMain, true);
 	}
 
-	public Savable loadReadConsoleData(String strFileName) {
-		return consoleDataStoring(strFileName, null, false);
+	public <T extends Savable> T loadReadConsoleData(Class<T> cl, String strFileName) {
+		return (T)consoleDataStoringManagement(cl, strFileName, null, false);
 	}
 	
+	public Vector3f getAppWindowSize(){
+		return new Vector3f(
+			GlobalAppRefI.i().getContext().getSettings().getWidth(),
+			GlobalAppRefI.i().getContext().getSettings().getHeight(),
+			0);
+	}
 }

@@ -54,7 +54,7 @@ public class RetryOnFailure implements IReflexFillCfg{
 		 * at {@link RetryOnFailure}
 		 * @return
 		 */
-		long getLastMainTopCoreUpdateTimeMilis();
+		long getCurrentTimeMilis();
 		
 		/**
 		 * to compose field's Id's
@@ -114,11 +114,18 @@ public class RetryOnFailure implements IReflexFillCfg{
 	 * @return
 	 */
 	public boolean isReady(){
-		return irlo.getLastMainTopCoreUpdateTimeMilis() >= (lStartMilis+ilvDelayMilis.getLong());
+		return irlo.getCurrentTimeMilis() >= (lStartMilis+ilvDelayMilis.getLong());
+	}
+	public boolean isReadyAndUpdate(){
+		if(isReady()){
+			updateStartTime();
+			return true;
+		}
+		return false;
 	}
 
-	public void resetStartTime() {
-		lStartMilis=irlo.getLastMainTopCoreUpdateTimeMilis();
+	public void updateStartTime() {
+		lStartMilis=irlo.getCurrentTimeMilis();
 	}
 
 	@Override

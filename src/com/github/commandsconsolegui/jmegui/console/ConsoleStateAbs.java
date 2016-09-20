@@ -48,7 +48,7 @@ import com.github.commandsconsolegui.globals.jmegui.GlobalDialogHelperI;
 import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
-import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
+import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurStateI;
 import com.github.commandsconsolegui.misc.AutoCompleteI;
 import com.github.commandsconsolegui.misc.AutoCompleteI.AutoCompleteResult;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
@@ -471,6 +471,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		 * Even if initially enabled, for the looks it will be made invisible.
 		 */
 		
+		setSaveDialog(false);
 		super.configure(cfg);
 		
 //		this.iToggleConsoleKey=cfg.iToggleConsoleKey;
@@ -620,13 +621,13 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		v3fApplicationWindowSize = new Vector3f(
 				app().getContext().getSettings().getWidth(),
 				app().getContext().getSettings().getHeight(),
-				MiscLemurHelpersStateI.fPreferredThickness);
+				MiscLemurStateI.fPreferredThickness);
 		
 		iMargin=2;
 		v3fConsoleSize = new Vector3f(
 			v3fApplicationWindowSize.x -(iMargin*2),
 			(v3fApplicationWindowSize.y * fConsoleHeightPerc) -iMargin,
-			MiscLemurHelpersStateI.fPreferredThickness);
+			MiscLemurStateI.fPreferredThickness);
 	}
 	
 //	private float fPreferredThickness=10.0f;

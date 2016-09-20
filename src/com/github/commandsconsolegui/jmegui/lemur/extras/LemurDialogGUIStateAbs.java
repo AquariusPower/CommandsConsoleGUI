@@ -47,8 +47,8 @@ import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
-import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
-import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI.BindKey;
+import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurStateI;
+import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurStateI.BindKey;
 import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelperI.DialogStyleElementId;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
 import com.github.commandsconsolegui.misc.CallQueueI;
@@ -173,6 +173,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	private Button	btnResizeEast;
 	private Button	btnResizeWest;
 	private ArrayList<Button>	abtnResizeBorderList = new ArrayList<Button>();
+	private Vector3f	v3fDiagWindowSize;
+	private Vector3f	v3fPosCentered;
 	@Override
 	public R configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
@@ -240,29 +242,27 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //			setStyle(ConsoleLemurStateI.i().STYLE_CONSOLE);
 //		}
 		
-		Vector3f v3fApplicationWindowSize = new Vector3f(
-			app().getContext().getSettings().getWidth(),
-			app().getContext().getSettings().getHeight(),
-			0);
-		
 		//main top container
 //		setContainerMain(new ContainerMain(new BorderLayout(), getDiagStyle()).setDiagOwner(this));
 		setDialogMainContainer(new DialogMainContainer(new BorderLayout(), getDiagStyle()));
 		getDialogMainContainer().setName(getId()+"_Dialog");
 		
-		Vector3f v3fDiagWindowSize = new Vector3f(v3fApplicationWindowSize);
+		Vector3f v3fAppWindowSize = MiscJmeI.i().getAppWindowSize();
+		v3fDiagWindowSize = new Vector3f(v3fAppWindowSize);
 		v3fDiagWindowSize.y = sizePercOrPixels(v3fDiagWindowSize.y,cfg.fDialogHeightPercentOfAppWindow);
 		v3fDiagWindowSize.x = sizePercOrPixels(v3fDiagWindowSize.x,cfg.fDialogWidthPercentOfAppWindow);
-		MiscLemurHelpersStateI.i().setGrantedSize(getDialogMainContainer(), v3fDiagWindowSize);
 		
-		Vector3f v3fPosCentered = new Vector3f(
-			(v3fApplicationWindowSize.x-v3fDiagWindowSize.x)/2f,
-			(v3fApplicationWindowSize.y-v3fDiagWindowSize.y)/2f+v3fDiagWindowSize.y,
+		v3fPosCentered = new Vector3f(
+			(v3fAppWindowSize.x-v3fDiagWindowSize.x)/2f,
+			(v3fAppWindowSize.y-v3fDiagWindowSize.y)/2f+v3fDiagWindowSize.y,
 			0
 		);
-		getDialogMainContainer().setLocalTranslation(v3fPosCentered);
+		
 		cfg.setIniPos(v3fPosCentered.clone());
 		cfg.setIniSize(v3fDiagWindowSize.clone());
+		
+		MiscLemurStateI.i().setSizeSafely(getDialogMainContainer(), v3fDiagWindowSize);
+		getDialogMainContainer().setLocalTranslation(v3fPosCentered);
 		
 		// resizing borders
 //		CallQueueI.i().addCall(new CallableX() {
@@ -301,7 +301,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		 */
 		float fInfoHeightPixels = sizePercOrPixels(v3fDiagWindowSize.y, cfg.fInfoHeightPercentOfDialog);
 		v3fNorthSize.y = fInfoHeightPixels;
-		MiscLemurHelpersStateI.i().setGrantedSize(getNorthContainer(), v3fNorthSize);
+		MiscLemurStateI.i().setSizeSafely(getNorthContainer(), v3fNorthSize);
 		
 		//title 
 //		Container cntrTitleBox = new Container(new BorderLayout(), getStyle());
@@ -319,7 +319,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		// simple info
 		lblTextInfo = new Label("",getDiagStyle());
 		lblTextInfo.setName(getId()+"_TxtInfo");
-		MiscLemurHelpersStateI.i().lineWrapDisableFor(lblTextInfo);
+		MiscLemurStateI.i().lineWrapDisableFor(lblTextInfo);
 		getNorthContainer().addChild(lblTextInfo, BorderLayout.Position.Center);
 		
 		cntrCenterMain.addChild(getNorthContainer(), BorderLayout.Position.North);
@@ -361,7 +361,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		
 		// status line, about the currently selected entry on the list
 		lblSelectedEntryStatus = new Label("Selected Entry Status",getDiagStyle());
-		MiscLemurHelpersStateI.i().lineWrapDisableFor(lblSelectedEntryStatus);
+		MiscLemurStateI.i().lineWrapDisableFor(lblSelectedEntryStatus);
 		getSouthContainer().addChild(lblSelectedEntryStatus, BorderLayout.Position.North);
 		
 		// mainly used as a list filter
@@ -433,7 +433,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		if(bWorkOnSouthBorder)v3fSizeAdd.y += -v3fDisplacement.y;
 		
 		Vector3f v3fSizeNew = getDialogMainContainer().getPreferredSize().add(v3fSizeAdd);
-		if(MiscLemurHelpersStateI.i().setGrantedSize(getDialogMainContainer(), v3fSizeNew, true)!=null){
+		if(MiscLemurStateI.i().setSizeSafely(getDialogMainContainer(), v3fSizeNew, true)!=null){
 			Vector3f v3fPosNew = getDialogMainContainer().getLocalTranslation().add(v3fPosAdd);
 			getDialogMainContainer().setLocalTranslation(v3fPosNew);
 		}
@@ -476,7 +476,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	}
 	
 	StringCmdField scfFixReinitDialogBorders = new StringCmdField(this,null,"it may require a few tries actually...")
-		.setCallerAssigned(new CallableX(1000) {
+		.setCallerAssigned(new CallableX(this,1000) {
 			@Override
 			public Boolean call() {
 				if(isEnabled()){
@@ -501,7 +501,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	
 	public void setBordersSize(int iPixels){
 		for(Button btn:abtnResizeBorderList){
-			MiscLemurHelpersStateI.i().setGrantedSize(btn, iPixels, iPixels, true);
+			MiscLemurStateI.i().setSizeSafely(btn, iPixels, iPixels, true);
 		}
 	}
 
@@ -780,7 +780,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //			}
 //		}
 		
-		MiscLemurHelpersStateI.i().updateBlinkListBoxSelector(getMainList());//,true);
+		MiscLemurStateI.i().updateBlinkListBoxSelector(getMainList());//,true);
 		
 //		bAllowUpdateLogicalState=MiscLemurHelpersStateI.i().validatePanelUpdate(getContainerMain());
 		
@@ -795,7 +795,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		lblTextInfo.setText("DIALOG for "+this.getClass().getSimpleName());
 		lblTextInfo.setText(getTextInfo());
 		
-		MiscLemurHelpersStateI.i().fixBitmapTextLimitsFor(lblTextInfo);
+		MiscLemurStateI.i().fixBitmapTextLimitsFor(lblTextInfo);
 	}
 	
 	@Override
@@ -887,7 +887,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 						break;
 					case KeyInput.KEY_V: 
 						if(bControl){
-							MiscLemurHelpersStateI.i().insertTextAtCaratPosition(getInputField(),
+							MiscLemurStateI.i().insertTextAtCaratPosition(getInputField(),
 								MiscI.i().retrieveClipboardString(true));
 //							getInputField().setText(getInputField().getText()
 //								+MiscI.i().retrieveClipboardString(true));
@@ -916,7 +916,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	}
 	
 	private BindKey bindKey(String strActionPerformedHelp, int iKeyCode, int... aiKeyModifiers){
-		BindKey bk = MiscLemurHelpersStateI.i().bindKey(getInputField(), actSimpleActions,
+		BindKey bk = MiscLemurStateI.i().bindKey(getInputField(), actSimpleActions,
 			strActionPerformedHelp, iKeyCode, aiKeyModifiers);
 		abkList.add(bk);
 		return bk;
@@ -1027,7 +1027,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		);
 		
 //		LemurMiscHelpersStateI.i().bugFix(null, LemurMiscHelpersStateI.i().btgBugFixListBoxSelectorArea, getListEntries());
-		MiscLemurHelpersStateI.i().listboxSelectorAsUnderline(getMainList());
+		MiscLemurStateI.i().listboxSelectorAsUnderline(getMainList());
 	}
 	public void selectEntry(DialogListEntryData<T> dledSelectRequested) {
 //		this.dataSelectRequested = data;
@@ -1166,7 +1166,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		bRunningEffectAtAllListEntries=true;
 		
 		for(CellDialogEntry<T> cell:getVisibleCellEntries()){
-			MiscLemurHelpersStateI.i().setScaleXY(cell, fMinScale, 1f);
+			MiscLemurStateI.i().setScaleXY(cell, fMinScale, 1f);
 		}
 //		GridPanel gp = getMainList().getGridPanel();
 //		for(int iC=0;iC<gp.getVisibleColumns();iC++){
@@ -1250,7 +1250,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		
 		if(!bGrow)fScale=1f-fScale; //shrink
 		
-		MiscLemurHelpersStateI.i().setScaleXY(spt, fScale, 1f);
+		MiscLemurStateI.i().setScaleXY(spt, fScale, 1f);
 		
 		return fScale;
 	}
@@ -1262,11 +1262,11 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	@Override
 	protected <N extends Node> void lineWrapDisableForChildrenOf(N node) {
 		ListBox<String> lstbx = (ListBox<String>)node;
-		MiscLemurHelpersStateI.i().lineWrapDisableForListboxEntries(lstbx);
+		MiscLemurStateI.i().lineWrapDisableForListboxEntries(lstbx);
 	}
 	
 	public T getCmdDummy() {
-		return (T) MiscLemurHelpersStateI.i().getCmdDummy();
+		return (T) MiscLemurStateI.i().getCmdDummy();
 	}
 
 	@Override
@@ -1282,7 +1282,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	
 	private void changeResizeBorderColor(ColorRGBA c){
 		for(Button btn:abtnResizeBorderList){
-			MiscLemurHelpersStateI.i().setOverrideBackgroundColor(btn, c);
+			MiscLemurStateI.i().setOverrideBackgroundColor(btn, c);
 		}
 	}
 	
@@ -1300,15 +1300,21 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		super.restoreDefaultPositionSize();
 		
 		if(getDialogMainContainer()!=null){
-			setPositionSize(cfg.getIniPos(),cfg.getIniSize());
+			setPositionSize(cfg.getIniPos(), cfg.getIniSize());
 //			getDialogMainContainer().setLocalTranslation(cfg.getIniPos());
 //			getDialogMainContainer().setPreferredSize(cfg.getIniSize());
 		}
 	}
 	
+	@Override
 	protected void setPositionSize(Vector3f v3fPos, Vector3f v3fSize) {
-		getDialogMainContainer().setLocalTranslation(v3fPos);
-		getDialogMainContainer().setPreferredSize(v3fSize);
+		MiscLemurStateI.i().setPositionSafely(getDialogMainContainer(), v3fPos);
+//		v3fPos.setZ(getDialogMainContainer().getLocalTranslation().getZ());
+//		getDialogMainContainer().setLocalTranslation(v3fPos);
+		
+//		getDialogMainContainer().setPreferredSize(v3fSize);
+		MiscLemurStateI.i().setSizeSafely(getDialogMainContainer(), v3fSize, true);
+		
 		requestRefreshUpdateList();
 	}
 

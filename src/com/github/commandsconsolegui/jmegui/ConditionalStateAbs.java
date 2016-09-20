@@ -360,7 +360,7 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,IConfigure<Condi
 	}
 	
 	@Override
-	public long getLastMainTopCoreUpdateTimeMilis(){
+	public long getCurrentTimeMilis(){
 		return lLastMainTopCoreUpdateTimeMilis;
 	}
 	
@@ -450,7 +450,7 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,IConfigure<Condi
 		
 		if(!initCheckPrerequisites() || !initAttempt()){
 			initFailed();
-			rInit.resetStartTime();
+			rInit.updateStartTime();
 			MsgI.i().dbg("init",false,this);
 			return false;
 		}else{
@@ -511,7 +511,7 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,IConfigure<Condi
 				bEnabledRequested=false; //otherwise will keep trying
 			}else{
 				enableFailed();
-				rEnable.resetStartTime();
+				rEnable.updateStartTime();
 			}
 		}else
 		if(bDisabledRequested && bEnabled){
@@ -529,7 +529,7 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,IConfigure<Condi
 				bDisabledRequested=false; //otherwise will keep trying
 			}else{
 				disableFailed();
-				rDisable.resetStartTime();
+				rDisable.updateStartTime();
 			}
 		}
 		
@@ -542,7 +542,7 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,IConfigure<Condi
 				updateSuccess();
 			}else{
 				updateFailed();
-				rUpdate.resetStartTime();
+				rUpdate.updateStartTime();
 				
 				MsgI.i().dbg("update",false,this); //only on fail to avoid too much log!
 				return false;
@@ -634,7 +634,7 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,IConfigure<Condi
 			}else{
 				bRetry = !disableAttempt();
 				if(bRetry){ //failed, retry
-					rDiscard.resetStartTime();
+					rDiscard.updateStartTime();
 //					lCleanupRequestMilis=getUpdatedTime();
 				}
 			}

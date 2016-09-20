@@ -331,7 +331,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		ReflexFillCfg rfcfg = null;
 		
-		boolean bCodePrefixIsDefault = rfcv.isCodePrefixVariantEqualDefault();
+//		boolean bCodePrefixIsDefault = rfcv.isCodePrefixVariantEqualDefault();
+		boolean bCodePrefixIsDefault = rfcv.getCodePrefixDefault().equals(rfcv.getCodePrefixVariant());
 		if(rfcv.getClass().isAssignableFrom(BoolTogglerCmdField.class)){
 //			if(BoolTogglerCmdField.getCodePrefixDefault().equals(rfcv.getCodePrefixVariant())){
 			if(bCodePrefixIsDefault){

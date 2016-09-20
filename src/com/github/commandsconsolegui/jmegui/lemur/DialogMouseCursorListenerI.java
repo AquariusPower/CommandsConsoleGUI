@@ -37,7 +37,7 @@ import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButt
 import com.github.commandsconsolegui.jmegui.MultiClickCondStateI;
 import com.github.commandsconsolegui.jmegui.MultiClickCondStateI.ECallMode;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
-import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
+import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserData;
 import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
@@ -158,7 +158,7 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 			switch(buttonData.getActivatorType()){
 				case Action1Click:
 					Spatial sptDialogMain = MiscJmeI.i().getParentestFrom(capture);
-					Vector3f v3fNewPos = MiscLemurHelpersStateI.i().eventToV3f(eventMotion);
+					Vector3f v3fNewPos = MiscLemurStateI.i().eventToV3f(eventMotion);
 					Vector3f v3fDisplacement = buttonData.updateDragPosAndGetDisplacement(eventMotion, v3fNewPos);
 					
 					BaseDialogStateAbs diag = MiscJmeI.i().getUserDataPSH(sptDialogMain,BaseDialogStateAbs.class);
@@ -175,13 +175,16 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 	public boolean dragEnd(MouseCursorButtonData buttonData, CursorButtonEvent eventButton, Spatial target, Spatial capture) {
 		switch(buttonData.getActivatorType()){
 			case Action1Click:
-				Spatial sptDialogMain = MiscJmeI.i().getParentestFrom(capture);
-				
-				BaseDialogStateAbs diag = MiscJmeI.i().getUserDataPSH(sptDialogMain,BaseDialogStateAbs.class);
-				
-				diag.requestSaveDialog();
-				
-				return true;
+				if(capture!=null){
+					Spatial sptDialogMain = MiscJmeI.i().getParentestFrom(capture);
+					
+					BaseDialogStateAbs diag = MiscJmeI.i().getUserDataPSH(sptDialogMain,BaseDialogStateAbs.class);
+					
+					diag.save();
+	//				diag.requestSaveDialog();
+					
+					return true;
+				}
 		}
 		
 		return super.dragEnd(buttonData, eventButton, target, capture);

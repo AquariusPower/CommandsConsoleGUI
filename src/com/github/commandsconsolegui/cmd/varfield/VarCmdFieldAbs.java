@@ -322,38 +322,9 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 //	}
 
 	protected void chkAndInit(){
-//		if(strUniqueVarId==null && strUniqueCmdId==null){
 		if(vcuid==null){
 			setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this));
-			
-//			ArrayList<Boolean> ab = new ArrayList<Boolean>();
-//			switch(evcm){
-//				case Cmd:
-//					ab.add(false);
-//					break;
-//				case Var:
-//					ab.add(true);
-//					break;
-//				case VarCmd:
-//					ab.add(false);
-//					ab.add(true);
-//					break;
-//			}
-//			
-//			for(Boolean b:ab){
-//				setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this,b));
-//			}
 		}
-		
-//		if(idt.isVariable()){
-//			if(strUniqueVarId==null){
-//				setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this,true));
-//			}
-//		}else{
-//			if(strUniqueCmdId==null){
-//				setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this,false));
-//			}
-//		}
 	}
 	public String getUniqueCmdId(){
 		if(!isCmd())throw new PrerequisitesNotMetException("is var", this);
@@ -485,10 +456,10 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	
 	public abstract String getCodePrefixDefault();
 	
-	@Override
-	public boolean isCodePrefixVariantEqualDefault() {
-		return getCodePrefixVariant().equals(getCodePrefixDefault());
-	}
+//	@Override
+//	public boolean isCodePrefixVariantEqualDefault() {
+//		return getCodePrefixVariant().equals(getCodePrefixDefault());
+//	}
 
 	public VarCmdUId getVarCmdUIdForManagement(CommandsDelegator.CompositeControl cc) {
 		cc.assertSelfNotNull();

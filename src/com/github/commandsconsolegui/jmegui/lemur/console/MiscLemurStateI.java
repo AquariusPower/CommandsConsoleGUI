@@ -81,9 +81,9 @@ import com.simsilica.lemur.focus.FocusManagerState;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IConsoleCommandListener {
-	private static MiscLemurHelpersStateI instance = new MiscLemurHelpersStateI();
-	public static MiscLemurHelpersStateI i(){return instance;}
+public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleCommandListener {
+	private static MiscLemurStateI instance = new MiscLemurStateI();
+	public static MiscLemurStateI i(){return instance;}
 	
 	private BoolTogglerCmdField	btgHoverHighlight = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 
@@ -134,7 +134,7 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IC
 
 //	private int	iMoveCaratTo;
 	
-	public MiscLemurHelpersStateI() {
+	public MiscLemurStateI() {
 		setPrefixCmdWithIdToo(true);
 	}
 	
@@ -696,7 +696,7 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IC
 		}
 	}
 	@Override
-	public MiscLemurHelpersStateI configure(ICfgParm icfg) {
+	public MiscLemurStateI configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
 		
 //		super.icfgOfInstance=icfg;
@@ -861,7 +861,7 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IC
 			if(v3fPrefSize!=null){
 				if(fNewZSize!=null && Float.compare(v3fPrefSize.z,0.0f)==0 ){
 					v3fPrefSize.z=fNewZSize;
-					setGrantedSize(panel,v3fPrefSize);
+					setSizeSafely(panel,v3fPrefSize);
 				}
 			}
 			
@@ -912,11 +912,11 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IC
 
 	private boolean	bAllowMinSizeCheckAndFix = false; //MUST BE INITIALLY FALSE!
 	
-	public Vector3f setGrantedSize(Panel pnl, float fX, float fY){
-		return setGrantedSize(pnl, fX, fY, false);
+	public Vector3f setSizeSafely(Panel pnl, float fX, float fY){
+		return setSizeSafely(pnl, fX, fY, false);
 	}
 	/**
-	 * see {@link #setGrantedSize(Panel, Vector3f, boolean)}
+	 * see {@link #setSizeSafely(Panel, Vector3f, boolean)}
 	 * 
 	 * @param pnl
 	 * @param fX
@@ -924,12 +924,12 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IC
 	 * @param bEnsureSizeNow
 	 * @return
 	 */
-	public Vector3f setGrantedSize(Panel pnl, float fX, float fY, boolean bForce){
-		return setGrantedSize(pnl, new Vector3f(fX,fY,-1), bForce); //z=-1 will be fixed
+	public Vector3f setSizeSafely(Panel pnl, float fX, float fY, boolean bForce){
+		return setSizeSafely(pnl, new Vector3f(fX,fY,-1), bForce); //z=-1 will be fixed
 	}
 	
-	public Vector3f setGrantedSize(Panel pnl, Vector3f v3fSize){
-		return setGrantedSize(pnl, v3fSize, false);
+	public Vector3f setSizeSafely(Panel pnl, Vector3f v3fSize){
+		return setSizeSafely(pnl, v3fSize, false);
 	}
 	
 	/**
@@ -940,7 +940,7 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IC
 	 * @param bForceSpecificSize
 	 * @return
 	 */
-	public Vector3f setGrantedSize(
+	public Vector3f setSizeSafely(
 		final Panel pnl, 
 		final Vector3f v3fSize, 
 		final boolean bForceSpecificSize 
@@ -964,7 +964,7 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IC
 	}
 	
 	/**
-	 * IMPORTANT!! This is not strongly crash safe, prefer using {@link #setGrantedSize(Panel, Vector3f, boolean)}
+	 * IMPORTANT!! This is not strongly crash safe, prefer using {@link #setSizeSafely(Panel, Vector3f, boolean)}
 	 * 
 	 * Sets custom sizes with crash prevention.
 	 * And make it sure the thickness is correct (not 0.0f).
@@ -992,7 +992,7 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IC
 				Vector3f v3fSize = v3fSizeF;
 				
 				Vector3f v3fPreferredBkp = pnl.getPreferredSize().clone();
-				setGrantedSize(pnl, v3fSizeF, bForceSpecificSize);
+				setSizeSafely(pnl, v3fSizeF, bForceSpecificSize);
 				
 				// the check
 				if(!validatePanelUpdate(pnl)){
@@ -1053,12 +1053,12 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IC
 		return cell;
 	}
 
-	public MiscLemurHelpersStateI setLocationXY(Spatial spt, Vector3f v3f) {
+	public MiscLemurStateI setLocationXY(Spatial spt, Vector3f v3f) {
 		spt.setLocalTranslation(v3f.x, v3f.y, spt.getLocalTranslation().z); // to not mess with Z order
 		return this;
 	}
 
-	public MiscLemurHelpersStateI setScaleXY(Spatial spt, Float fScaleX, Float fScaleY) {
+	public MiscLemurStateI setScaleXY(Spatial spt, Float fScaleX, Float fScaleY) {
 		Vector3f v3fCurrentScale = spt.getLocalScale();
 		spt.setLocalScale(
 			fScaleX==null?v3fCurrentScale.x:fScaleX,
@@ -1166,5 +1166,11 @@ public class MiscLemurHelpersStateI extends CmdConditionalStateAbs implements IC
 
 	public Vector3f eventToV3f(AbstractCursorEvent event){
 		return new Vector3f(event.getX(),event.getY(),0);
+	}
+
+	public void setPositionSafely(Panel pnl,Vector3f v3fPos) {
+		// DO NOT MESS WITH Z!!!
+		v3fPos.setZ(pnl.getLocalTranslation().getZ());
+		pnl.setLocalTranslation(v3fPos);
 	}
 }

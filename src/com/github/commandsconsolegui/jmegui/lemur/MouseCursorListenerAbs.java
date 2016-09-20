@@ -38,7 +38,7 @@ import com.github.commandsconsolegui.jmegui.MouseCursorButtonsControl;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
-import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurHelpersStateI;
+import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserData;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -79,7 +79,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 			EMouseCursorButton.get(eventButton.getButtonIndex()));
 		
 		if(eventButton.isPressed()){
-			mcbd.setPressed(eventButton, MiscLemurHelpersStateI.i().eventToV3f(eventButton));
+			mcbd.setPressed(eventButton, MiscLemurStateI.i().eventToV3f(eventButton));
 			
     	if(clickBegin(mcbd, eventButton, target, capture)){
     		eventButton.setConsumed();
@@ -175,7 +175,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 			// Buttons pressed during drag
 			MouseCursorButtonData mdata = mb().getMouseCursorDataFor(e);
 			if(mdata.isPressed()){
-				if(mdata.getPressedDistanceTo(MiscLemurHelpersStateI.i().eventToV3f(eventMotion)).length()>3){
+				if(mdata.getPressedDistanceTo(MiscLemurStateI.i().eventToV3f(eventMotion)).length()>3){
 					aMouseCursorButtonsPressedList.add(mdata);
 				}
 			}
@@ -206,7 +206,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 				pnlApplyEffect = cell;
 			}
 			
-			MiscLemurHelpersStateI.i().setOverrideBackgroundColorNegatingCurrent(pnlApplyEffect);
+			MiscLemurStateI.i().setOverrideBackgroundColorNegatingCurrent(pnlApplyEffect);
 			
 			btnLastHoverIn = source;
 		}
@@ -224,7 +224,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 //			}else{
 			}
 			
-			MiscLemurHelpersStateI.i().resetOverrideBackgroundColor(pnlApplyEffect);
+			MiscLemurStateI.i().resetOverrideBackgroundColor(pnlApplyEffect);
 			
 			if(btnLastHoverIn!=null){
 				if(btnLastHoverIn==source){

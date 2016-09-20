@@ -211,7 +211,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 			as.setTitle(ConsoleTestI.class.getSimpleName());
 			as.setResizable(true);
 			as.setWidth(1024);
-			as.setHeight(700); //768
+			as.setHeight(650); //768
 //			as.setFullscreen(false);
 			//as.setFrameRate(30); //TODO are we unable to change this on-the-fly after starting the application?
 			ConsoleTestI.i().setSettings(as);

@@ -28,7 +28,6 @@
 package com.github.commandsconsolegui.misc;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
@@ -37,6 +36,12 @@ import com.github.commandsconsolegui.misc.RetryOnFailure.IRetryListOwner;
 
 
 /**
+ * 
+ * Useful for:
+ * - lazy/conditoinal initializations
+ * - conditional tasks
+ * - to lower the complexity avoiding creating unnecesary methods
+ * - what more?
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
@@ -73,6 +78,7 @@ public class CallQueueI {
 		private boolean	bRetryOnFail = true;
 		private boolean bQuietOnFail = false;
 		private boolean bAllowQueue = true;
+		private int	iFailTimesWarn;
 		
 		public CallableX(Object objEnclosing) {
 			this(objEnclosing,0);
@@ -80,6 +86,9 @@ public class CallQueueI {
 		public CallableX(Object objEnclosing, int iRetryDelayMilis) {
 			super();
 			
+			// this is a guess check...
+			if(objEnclosing instanceof Integer)throw new PrerequisitesNotMetException("use 'this' on enclosing", objEnclosing, iRetryDelayMilis, this);
+				
 			this.objEnclosing=objEnclosing;
 			
 			strDbgGenericSuperClass = this.getClass().getGenericSuperclass().getTypeName();
@@ -95,16 +104,22 @@ public class CallQueueI {
 //			this.iDelayBetweenRetriesMilis=i;
 		}
 		
-		public void setQueueDenied() {
+		/**
+		 * can only be run now
+		 * @return
+		 */
+		public CallableX setQueueDenied() {
 			this.bAllowQueue = false;
+			return this;
 		}
 		
 		public boolean isAllowQueue() {
 			return bAllowQueue;
 		}
 		
-		public void setQuietOnFail(boolean bQuietOnFail) {
+		public CallableX setQuietOnFail(boolean bQuietOnFail) {
 			this.bQuietOnFail = bQuietOnFail;
+			return this;
 		}
 		
 		public boolean isQuietOnFail() {
@@ -147,18 +162,24 @@ public class CallQueueI {
 		
 		@Override
 		public String getId() {
-			return strId;
+			if(strId!=null)return "CallerId="+strId;
+			return "Owner:"+getOwner();
+		}
+		
+		public CallableX setFailWarnEveryTimes(int iTimes){
+			this.iFailTimesWarn=iTimes;
+			return this;
 		}
 		
 		@Override
-		public long getLastMainTopCoreUpdateTimeMilis() {
+		public long getCurrentTimeMilis() {
 			return lLastUpdateMilis;
 		}
-		public void setLastUpdateMilis(long lLastUpdateMilis) {
+		public void updateTimeMilisTo(long lLastUpdateMilis) {
 			this.lLastUpdateMilis = lLastUpdateMilis;
 		}
 		
-		public Object getEnclosingObject() {
+		public Object getOwner() {
 			return objEnclosing;
 		}
 		
@@ -199,8 +220,8 @@ public class CallQueueI {
 		for(CallableX caller:new ArrayList<CallableX>(aCallList)){
 			assertQueueAllowed(caller);
 			
-			caller.setLastUpdateMilis(System.currentTimeMillis());
-			if(!caller.rReQueue.isReady()){
+			caller.updateTimeMilisTo(System.currentTimeMillis());
+			if(!caller.rReQueue.isReadyAndUpdate()){
 				continue;
 			}
 			
@@ -224,18 +245,25 @@ public class CallQueueI {
 				aCallList.remove(caller);
 				return true;
 			}else{
-				if(caller.iFailCount==0){
-					if(!caller.isQuietOnFail()){ //TODO tho, for each i%100 failures, should warn, but if the delay is high, this number could be lowered like warn every 10s no matter the count... 
+			//TODO tho, for each i%100 failures, should warn, but if the delay is high, this number could be lowered like warn every 10s no matter the count...
+				if(!caller.isQuietOnFail()){
+					boolean b=false;
+					if(b==false && (caller.iFailCount%caller.iFailTimesWarn)==0)b=true;
+					if(b==false && caller.iFailCount==0 && caller.iFailTimesWarn==0)b=true;
+					if(b){
 						GlobalCommandsDelegatorI.i().dumpDevWarnEntry(
-							"caller failed: "+caller.getId(), caller, caller.getEnclosingObject(),
-							Arrays.toString(caller.asteDbgLastQueuedAt)
+							"caller failed: "+caller.getId(), 
+							caller, 
+							caller.getOwner(), 
+//							caller.getClass().getDeclaringClass(),
+							caller.asteDbgLastQueuedAt
 						);
 					}
 				}
 				caller.iFailCount++;
 				
 				if(caller.isRetryOnFail()){
-					addCall(caller, false); //will retry
+					addCall(caller, false, false); //will retry
 				}
 			}
 //		} catch (Exception e) {
@@ -263,7 +291,7 @@ public class CallQueueI {
 	 * @param caller
 	 */
 	public synchronized void addCall(CallableX caller) {
-		addCall(caller,false);
+		addCall(caller,false,true);
 	}
 	
 	/**
@@ -273,6 +301,9 @@ public class CallQueueI {
 	 * @param bPrepend
 	 */
 	public synchronized Boolean addCall(CallableX caller, boolean bTryToRunNow) {
+		return addCall(caller,bTryToRunNow,true);
+	}
+	private synchronized Boolean addCall(CallableX caller, boolean bTryToRunNow, boolean bApplyOriginalDebugStack) {
 		if(caller==null)throw new PrerequisitesNotMetException("null caller");
 		
 //	if(aCallList.contains(caller))
@@ -284,7 +315,7 @@ public class CallQueueI {
 		}else{
 			assertQueueAllowed(caller);
 			caller.lDbgLastQueueTimeMilis=System.currentTimeMillis();
-			caller.asteDbgLastQueuedAt=Thread.currentThread().getStackTrace();
+			if(bApplyOriginalDebugStack)caller.asteDbgLastQueuedAt=Thread.currentThread().getStackTrace();
 			if(caller.bPrepend){
 				aCallList.add(0,caller);
 			}else{
