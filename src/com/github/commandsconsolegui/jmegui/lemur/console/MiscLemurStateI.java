@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.jmegui.lemur.console;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.CompositeControl;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
@@ -45,6 +46,7 @@ import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MiscI.EStringMatchMode;
+import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexHacks;
@@ -82,6 +84,10 @@ import com.simsilica.lemur.focus.FocusManagerState;
  *
  */
 public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleCommandListener {
+	public static final class CompositeControl extends CompositeControlAbs<MiscLemurStateI>{
+		private CompositeControl(MiscLemurStateI casm){super(casm);};
+	};private CompositeControl ccSelf = new CompositeControl(this);
+	
 	private static MiscLemurStateI instance = new MiscLemurStateI();
 	public static MiscLemurStateI i(){return instance;}
 	
@@ -1167,10 +1173,45 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 	public Vector3f eventToV3f(AbstractCursorEvent event){
 		return new Vector3f(event.getX(),event.getY(),0);
 	}
-
-	public void setPositionSafely(Panel pnl,Vector3f v3fPos) {
+	
+//	enum E{
+//		panel,
+//		pos,
+//		;
+//		public String s(){return this.toString();}
+//	}
+	
+//	BugFixBoolTogglerCmdField btgBugFixConfirmSetPosition = new BugFixBoolTogglerCmdField(this, false)
+//		.setCallerAssigned(new CallableX(this,100) {
+//			@Override
+//			public Boolean call() {
+//				Vector3f v3fPos = (Vector3f) getCustomValue(E.pos.s());
+//				Panel pnl = (Panel) getCustomValue(E.panel.s());
+//				
+//				if(applyPositionSafely(pnl, v3fPos))return false; //had to change it, so check again
+//				
+//				return true;
+//			}
+//		});
+	private boolean applyPositionSafely(Panel pnl,Vector3f v3fPos) {
+		Vector3f v3fCurrentPos = pnl.getLocalTranslation();
+		
 		// DO NOT MESS WITH Z!!!
-		v3fPos.setZ(pnl.getLocalTranslation().getZ());
+		v3fPos.setZ(v3fCurrentPos.getZ());
+		
+		if(v3fCurrentPos.equals(v3fPos)){
+			return false; //nothing applied
+		}
+		
 		pnl.setLocalTranslation(v3fPos);
+		return true;
+	}
+	public void setPositionSafely(Panel pnl,Vector3f v3fPos) {
+		if(applyPositionSafely(pnl, v3fPos)){
+//			btgBugFixConfirmSetPosition.getCallerAssignedForMaintenance(ccSelf)
+//				.putCustomValue(E.pos.s(), v3fPos.clone())
+//				.putCustomValue(E.panel.s(), pnl);
+//			btgBugFixConfirmSetPosition.callerAssignedQueueNow();
+		}
 	}
 }

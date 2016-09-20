@@ -53,4 +53,12 @@ public class CompositeControlAbs<T>{
 	 * quite fun this one...
 	 */
 	public void assertSelfNotNull(){/*yes, there is no point putting anything here...*/}
+
+	public CompositeControlAbs assertSelfNotNullEqualsStored(CompositeControlAbs ccStored) {
+		if(ccStored!=null && ccStored!=this){
+			throw new PrerequisitesNotMetException("forbidden composite change",this,ccStored);
+		}
+		
+		return this;
+	}
 }

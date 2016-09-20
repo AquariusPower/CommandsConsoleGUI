@@ -507,6 +507,10 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return tdDialogEffect.getCurrentDelayPercentual(false);
 	}
 	
+	protected int getEffectMaxTimeMilis(){
+		return (int)tdDialogEffect.getDelayLimitMilis();
+	}
+	
 	@Override
 	protected boolean enableAttempt() {
 		if(!super.enableAttempt())return false;
@@ -1313,7 +1317,31 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 			fWidth=(v3fSize.x);
 			fHeight=(v3fSize.y);
 			
+			GlobalCommandsDelegatorI.i().dumpDevInfoEntry(toString());
+			
 			super.write(ex);
+		}
+		
+		@Override
+		public void read(JmeImporter im) throws IOException {
+			super.read(im);
+			
+			GlobalCommandsDelegatorI.i().dumpDevInfoEntry(toString());
+		}
+		
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append("CompositeSavable [fPosX=");
+			builder.append(fPosX);
+			builder.append(", fPosY=");
+			builder.append(fPosY);
+			builder.append(", fWidth=");
+			builder.append(fWidth);
+			builder.append(", fHeight=");
+			builder.append(fHeight);
+			builder.append("]");
+			return builder.toString();
 		}
 		
 //		@Override
@@ -1328,16 +1356,47 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		if(!isSaveDialog())return;
 		MiscJmeI.i().saveWriteConsoleData(strFilePrefix+getId(), sv);
 	}
-	public void load(){
-		if(!isSaveDialog())return;
+	public CompositeSavable load(){
+		if(!isSaveDialog())return null;
 		CompositeSavable svTmp = MiscJmeI.i().loadReadConsoleData(CompositeSavable.class, strFilePrefix+getId());
 		sv.applyValuesFrom(svTmp);
 		setPositionSize(new Vector3f(sv.fPosX,sv.fPosY,0), new Vector3f(sv.fWidth,sv.fHeight,0));
+		return svTmp;
 	}
 	
+	private int iSaveLoadRetryDelayMilis=100;
+//	private int saveLoadWarnAfterFailTimes(){
+//		return (getEffectMaxTimeMilis()/iSaveLoadRetryDelayMilis)+1;
+//	}
 	final public StringCmdField scfSave = new StringCmdField(this)
-		.setCallerAssigned(new CallableX(this) {@Override public Boolean call() {save();return true;}});
+		.setCallerAssigned(new CallableX(this,iSaveLoadRetryDelayMilis) {@Override public Boolean call() {
+			if(!isDialogEffectsDone()){
+				setQuietOnFail(true);
+				setRetryOnFail(true);
+				return false; //wait it end
+			}
+			
+			setQuietOnFail(false);
+			setRetryOnFail(false);
+			save();
+			
+			return true;
+//		}}.setFailWarnEveryTimes(saveLoadWarnAfterFailTimes())); //100 * 30 = 3s for the dialog effects to finish
+		}});
 	final public StringCmdField scfLoad = new StringCmdField(this)
-		.setCallerAssigned(new CallableX(this) {@Override public Boolean call() {load();return true;}});
+		.setCallerAssigned(new CallableX(this,iSaveLoadRetryDelayMilis) {@Override public Boolean call() {
+			if(!isDialogEffectsDone()){
+				setQuietOnFail(true);
+				setRetryOnFail(true);
+				return false; //wait it end
+			}
+			
+			setQuietOnFail(false);
+			setRetryOnFail(false);
+			load();
+			
+			return true;
+//		}}.setFailWarnEveryTimes(saveLoadWarnAfterFailTimes()));
+		}});
 	
 }

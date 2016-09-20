@@ -167,6 +167,9 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 		}
 		return bReady;
 	}
+	public long getDelayLimitMilis(){
+		return getDelayLimitNano()/1000000;
+	}
 	public long getDelayLimitNano(){
 		if(bOscilate){
 			return lDelayLimitNano*2;

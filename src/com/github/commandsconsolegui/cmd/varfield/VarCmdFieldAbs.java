@@ -32,20 +32,18 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.cmd.CommandData;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
-import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.CallQueueI;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.DebugI;
+import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
-import com.github.commandsconsolegui.misc.MsgI;
-import com.github.commandsconsolegui.misc.VarCmdUId;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
-import com.github.commandsconsolegui.misc.WorkAroundI;
-import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
-import com.jme3.effect.shapes.EmitterBoxShape;
+import com.github.commandsconsolegui.misc.VarCmdUId;
 
 /**
  * TODO migrate most things possible to here
@@ -85,6 +83,8 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	private boolean	bConstructed = false;
 
 	private CallableX	callerAssigned;
+
+	private CompositeControlAbs	ccOwner;
 	
 	private static ArrayList<VarCmdFieldAbs> avcfList = new ArrayList<VarCmdFieldAbs>();
 	public static final HashChangeHolder hvhVarList = new HashChangeHolder(avcfList);
@@ -542,8 +542,9 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		prepareCallerAssigned(false);
 	}
 
-	public CallableX getCallerAssignedForMaintenance(WorkAroundI.CompositeControl cc) {
-		cc.assertSelfNotNull();
+	public CallableX getCallerAssignedForMaintenance(CompositeControlAbs cc) {
+		this.ccOwner = cc.assertSelfNotNullEqualsStored(this.ccOwner);
+		
 		return callerAssigned;
 	}
 	

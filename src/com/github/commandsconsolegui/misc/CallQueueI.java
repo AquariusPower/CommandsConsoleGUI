@@ -139,8 +139,9 @@ public class CallQueueI {
 			bPrepend=true;
 			return this;
 		}
-		public void putCustomValue(String strKey, Object objValue){
+		public CallableX putCustomValue(String strKey, Object objValue){
 			hmCustom.put(strKey,objValue);
+			return this;
 		}
 		public Object getCustomValue(String strKey){
 			return hmCustom.get(strKey);
@@ -245,12 +246,17 @@ public class CallQueueI {
 				aCallList.remove(caller);
 				return true;
 			}else{
-			//TODO tho, for each i%100 failures, should warn, but if the delay is high, this number could be lowered like warn every 10s no matter the count...
+				caller.iFailCount++;
+				
 				if(!caller.isQuietOnFail()){
-					boolean b=false;
-					if(b==false && (caller.iFailCount%caller.iFailTimesWarn)==0)b=true;
-					if(b==false && caller.iFailCount==0 && caller.iFailTimesWarn==0)b=true;
-					if(b){
+					boolean bShowMsg=false;
+					if(caller.iFailTimesWarn>0){
+						bShowMsg = (caller.iFailCount%caller.iFailTimesWarn)==0;
+					}else{
+						bShowMsg = caller.iFailCount==1; //only 1st time
+					}
+					
+					if(bShowMsg){
 						GlobalCommandsDelegatorI.i().dumpDevWarnEntry(
 							"caller failed: "+caller.getId(), 
 							caller, 
@@ -260,7 +266,6 @@ public class CallQueueI {
 						);
 					}
 				}
-				caller.iFailCount++;
 				
 				if(caller.isRetryOnFail()){
 					addCall(caller, false, false); //will retry
