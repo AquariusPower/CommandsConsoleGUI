@@ -56,6 +56,8 @@ import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry
 import com.github.commandsconsolegui.jmegui.lemur.extras.DialogMainContainer;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
+import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -329,7 +331,7 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 		// simple info
 		lblTextInfo = new Label("",getDiagStyle());
 		lblTextInfo.setName(getId()+"_TxtInfo");
-		MiscLemurStateI.i().lineWrapDisableFor(lblTextInfo);
+		MiscJmeI.i().lineWrapDisableFor(lblTextInfo);
 		getNorthContainer().addChild(lblTextInfo, BorderLayout.Position.Center);
 		
 		cntrCenterMain.addChild(getNorthContainer(), BorderLayout.Position.North);
@@ -371,7 +373,7 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 		
 		// status line, about the currently selected entry on the list
 		lblSelectedEntryStatus = new Label("Selected Entry Status",getDiagStyle());
-		MiscLemurStateI.i().lineWrapDisableFor(lblSelectedEntryStatus);
+		MiscJmeI.i().lineWrapDisableFor(lblSelectedEntryStatus);
 		getSouthContainer().addChild(lblSelectedEntryStatus, BorderLayout.Position.North);
 		
 		// mainly used as a list filter
@@ -491,7 +493,8 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 //			return btnExisting;
 //		}else{
 			Button btnBorder=new Button("", new ElementId(DialogStyleElementId.buttonResizeBorder.s()), getDiagStyle());
-			//TRICK(seems not necessary?): btnBorder.setFontSize(0.1f); //this trick will let us set it with any dot size!
+			//TRICK(seems not necessary?): 
+			btnBorder.setFontSize(0.1f); //this trick will let us set it with any dot size!
 			
 			MiscJmeI.i().setUserDataPSH(btnBorder, this); //if a border is clicked, the bugfixer that recreates it will make the old border object have no parent. Its parentest would have a reference to the dialog, but now it is alone, so such reference must be on it.
 			
@@ -552,6 +555,8 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 				.setCallerAssigned(new CallableX(this,100) {
 					@Override
 					public Boolean call() {
+						if(LemurDialogCS.this.isThisInstanceALoadedTmp())return true; //skipper
+						
 						LemurDialogStateAbs diag = LemurDialogCS.this.getOwner();
 						if(diag==null)return false; //to retry
 						
@@ -818,6 +823,13 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 	@Override
 	protected boolean updateAttempt(float tpf) {
 		if(!super.updateAttempt(tpf))return false;
+		
+		if(DebugI.i().isKeyEnabled(EDebugKey.FillKeyValueHashmap)){
+			for(Button btn:abtnBorderList){
+				DebugI.i().putKeyValue(getId()+":"+btn.getName()+":size", btn.getSize());
+				DebugI.i().putKeyValue(getId()+":"+btn.getName()+":psize", btn.getPreferredSize());
+			}
+		}
 		
 		if(!simpleUpdateVisibleCells(tpf))return false;
 		

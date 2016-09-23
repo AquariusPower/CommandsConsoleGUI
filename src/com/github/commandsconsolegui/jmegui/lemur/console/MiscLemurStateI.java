@@ -970,6 +970,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 		v3fSize.z=v3fPreferredBkp.z; // do not mess with Z !!! //if(v3fSize.z<v3fP.z)v3fSize.z=v3fP.z;
 		
 		pnl.setPreferredSize(v3fSize);
+		pnl.setSize(v3fSize);
 		
 		return v3fSize;
 	}
@@ -1084,19 +1085,15 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 
 	public void lineWrapDisableForListboxEntries(ListBox<String> lstbx){
 		GridPanel gp = lstbx.getGridPanel();
-		for(Spatial spt:gp.getChildren()){
+		for(Spatial spt:MiscJmeI.i().getAllChildrenRecursiveFrom(gp)){//gp.getChildren()){
 			/**
 			 * must be button because lemur ListBox uses Button for entries!
 			 * this means that other Panels are not actual entries!
 			 */
 			if(spt instanceof Button){ // 
-				lineWrapDisableFor((Button)spt);
+				MiscJmeI.i().lineWrapDisableFor((Node)spt);
 			}
 		}
-	}
-	public void lineWrapDisableFor(Panel pnl){
-		GlobalMainThreadI.assertEqualsCurrentThread();
-		MiscJmeI.i().retrieveBitmapTextFor(pnl).setLineWrapMode(LineWrapMode.NoWrap);
 	}
 
 	/**

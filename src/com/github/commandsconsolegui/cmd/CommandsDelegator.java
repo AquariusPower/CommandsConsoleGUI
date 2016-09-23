@@ -30,7 +30,6 @@ package com.github.commandsconsolegui.cmd;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
@@ -59,19 +58,17 @@ import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.MiscI.EStringMatchMode;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
-import com.github.commandsconsolegui.misc.MiscI.EStringMatchMode;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexHacks;
 import com.github.commandsconsolegui.misc.VarCmdUId;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
-import com.jme3.system.JmeSystem;
 
 /**
  * All methods starting with "cmd" are directly accessible by user console commands.
@@ -328,38 +325,38 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * Here will be setup basic variants for some {@link VarCmdFieldAbs}
 	 */
 	@Override
-	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField) {
 		ReflexFillCfg rfcfg = null;
 		
 //		boolean bCodePrefixIsDefault = rfcv.isCodePrefixVariantEqualDefault();
-		boolean bCodePrefixIsDefault = rfcv.getCodePrefixDefault().equals(rfcv.getCodePrefixVariant());
-		if(rfcv.getClass().isAssignableFrom(BoolTogglerCmdField.class)){
+		boolean bCodePrefixIsDefault = rfcvField.getCodePrefixDefault().equals(rfcvField.getCodePrefixVariant());
+		if(rfcvField.getClass().isAssignableFrom(BoolTogglerCmdField.class)){
 //			if(BoolTogglerCmdField.getCodePrefixDefault().equals(rfcv.getCodePrefixVariant())){
 			if(bCodePrefixIsDefault){
-				rfcfg = new ReflexFillCfg(rfcv);
+				rfcfg = new ReflexFillCfg(rfcvField);
 				rfcfg.setSuffix("Toggle");
 			}
 			
 			if(rfcfg!=null)rfcfg.setAsCommandToo(true);
 		}else
-		if(rfcv.getClass().isAssignableFrom(TimedDelayVarField.class)){
+		if(rfcvField.getClass().isAssignableFrom(TimedDelayVarField.class)){
 			if(bCodePrefixIsDefault){
-				rfcfg = new ReflexFillCfg(rfcv);
+				rfcfg = new ReflexFillCfg(rfcvField);
 				rfcfg.setSuffix("TimedDelay");
 			}
 			
 			if(rfcfg!=null)rfcfg.setAsCommandToo(true);
 		}else
-		if(rfcv.getClass().isAssignableFrom(StringCmdField.class)){
-			if(strFinalCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
-				rfcfg = new ReflexFillCfg(rfcv);
+		if(rfcvField.getClass().isAssignableFrom(StringCmdField.class)){
+			if(strFinalCmdCodePrefix.equals(rfcvField.getCodePrefixVariant())){
+				rfcfg = new ReflexFillCfg(rfcvField);
 			}else
-			if(strFinalFieldRestrictedCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
-				rfcfg = new ReflexFillCfg(rfcv);
+			if(strFinalFieldRestrictedCmdCodePrefix.equals(rfcvField.getCodePrefixVariant())){
+				rfcfg = new ReflexFillCfg(rfcvField);
 				rfcfg.setPrefixCmd(""+RESTRICTED_TOKEN);
 			}else
 			if(bCodePrefixIsDefault){
-				rfcfg = new ReflexFillCfg(rfcv);
+				rfcfg = new ReflexFillCfg(rfcvField);
 			}
 			
 			if(rfcfg!=null)rfcfg.setAsCommandToo(true);
@@ -1798,6 +1795,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}
 	}
 	
+	public void dumpSubEntry(ArrayList<?> aobj){
+		for(Object obj:aobj)dumpSubEntry(obj.toString());
+	}
 	/**
 	 * a simple, usually indented, output
 	 * see {@link #dumpEntry(DumpEntryData)}
@@ -2513,11 +2513,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		return varAdd(getVarFromRightSource(strVarId), new ConsoleVariable(strVarId, strValueAdd, null, null, null), bSave);
 	}
 	
-	private boolean varAdd(ConsoleVariable vivoBase, ConsoleVariable vivoAdd, boolean bSave){
-		return varAddOrOverwriteWork(false, vivoBase, vivoAdd, bSave);
+	private boolean varAdd(ConsoleVariable cvarBase, ConsoleVariable cvarAdd, boolean bSave){
+		return varAddOrOverwriteWork(false, cvarBase, cvarAdd, bSave);
 	}
-	private boolean varOverwrite(ConsoleVariable vivoBase, ConsoleVariable vivoAdd, boolean bSave){
-		return varAddOrOverwriteWork(true, vivoBase, vivoAdd, bSave);
+	private boolean varOverwrite(ConsoleVariable cvarBase, ConsoleVariable cvarAdd, boolean bSave){
+		return varAddOrOverwriteWork(true, cvarBase, cvarAdd, bSave);
 	}
 	/**
 	 * TODO clarify this code
@@ -2529,28 +2529,28 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 */
 	private boolean varAddOrOverwriteWork(
 		boolean bOverwrite, 
-		ConsoleVariable vivoRequested, 
-		ConsoleVariable vivoAdd, 
+		ConsoleVariable cvarRequested, 
+		ConsoleVariable cvarAdd, 
 		boolean bSave
 	){
-		if(isRestrictedAndDoesNotExist(vivoRequested.getUniqueVarId()))return false;
+		if(isRestrictedAndDoesNotExist(cvarRequested.getUniqueVarId()))return false;
 		
-		ConsoleVariable vivoFound = getVarFromRightSource(vivoRequested.getUniqueVarId());
-		if(vivoFound!=vivoRequested){
-			dumpDevWarnEntry("shouldnt be the same object?", vivoRequested, vivoFound);
+		ConsoleVariable cvarFound = getVarFromRightSource(cvarRequested.getUniqueVarId());
+		if(cvarFound!=cvarRequested){
+			dumpDevWarnEntry("shouldnt be the same object?", cvarRequested, cvarFound);
 		}
 		
-		Object objValueCurrent = vivoFound.getRawValue();
+		Object objValueCurrent = cvarFound.getRawValue();
 		Object objValueNew = objValueCurrent;
 		if(objValueCurrent==null){
-			dumpExceptionEntry(new NullPointerException("value is null for var "+vivoRequested.getUniqueVarId()));
+			dumpExceptionEntry(new NullPointerException("value is null for var "+cvarRequested.getUniqueVarId()));
 			return false;
 		}
 		
 		Class clTypeRequired = objValueCurrent.getClass();
 		boolean bAddTypeMismatchError = false;
 		
-		String strValueAdd = ""+vivoAdd.getRawValue();
+		String strValueAdd = ""+cvarAdd.getRawValue();
 		if(Boolean.class.isAssignableFrom(clTypeRequired)){
 			// boolean is always overwrite
 			objValueNew = MiscI.i().parseBoolean(strValueAdd);
@@ -2591,8 +2591,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			return false;
 		}
 			
-		vivoRequested.setRawValue(objValueNew);
-		return varApply(vivoRequested,bSave);
+		cvarRequested.setRawValue(objValueNew);
+		return varApply(cvarRequested,bSave);
 	}
 	
 	private boolean isRestricted(String strId){
@@ -2654,27 +2654,27 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		MiscI.i().fileAppendLine(getVarFile(strVarId), strCommentOut+varReportPrepare(strVarId)+strReadOnlyComment);
 	}
 	
-	private boolean varApply(ConsoleVariable vivo, boolean bSave){
+	private boolean varApply(ConsoleVariable cvar, boolean bSave){
 		/**
 		 * creates the console variable
 		 */
-		TreeMap<String, ConsoleVariable> tmSrc = selectVarSource(vivo.getUniqueVarId());
-		ConsoleVariable vivoAtSrc = tmSrc.get(vivo.getUniqueVarId());
-		if(vivoAtSrc!=null && vivo!=vivoAtSrc){
-			dumpDevWarnEntry("vivo is being modified", vivo.getUniqueVarId(), vivoAtSrc, vivo);
+		TreeMap<String, ConsoleVariable> tmSrc = selectVarSource(cvar.getUniqueVarId());
+		ConsoleVariable cvarAtSrc = tmSrc.get(cvar.getUniqueVarId());
+		if(cvarAtSrc!=null && cvar!=cvarAtSrc){
+			dumpDevWarnEntry("console variable is being modified", cvar.getUniqueVarId(), cvarAtSrc, cvar);
 		}
-		tmSrc.put(vivo.getUniqueVarId(), vivo);
+		tmSrc.put(cvar.getUniqueVarId(), cvar);
 		
 //	if(vivo.getOwner()!=null){ //TODO!!! PROLEM: can only set owner if it is not set!
 //	// it can have no owner (field), it can be a simple variable.
 //	vivo.getOwner().setConsoleVarLink(ccSelf,vivo);
 //}
 		if(tmSrc==tmRestrictedVariables){
-			if(vivo.getRestrictedOwner()==null){
+			if(cvar.getRestrictedOwner()==null){
 				for(VarCmdFieldAbs vcfTmp:VarCmdFieldAbs.getListFullCopy()){
 					if(!vcfTmp.isVar())continue;
-					if(vcfTmp.getUniqueVarId().equals(vivo.getUniqueVarId())){
-						vcfTmp.setConsoleVarLink(ccSelf,vivo);
+					if(vcfTmp.getUniqueVarId().equals(cvar.getUniqueVarId())){
+						vcfTmp.setConsoleVarLink(ccSelf,cvar);
 						break;
 					}
 				}
@@ -2684,17 +2684,17 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		/**
 		 * save the console variable
 		 */
-		if(bSave)fileAppendVar(vivo.getUniqueVarId());
+		if(bSave)fileAppendVar(cvar.getUniqueVarId());
 		
-		if(isRestricted(vivo.getUniqueVarId()) && btgShowDeveloperInfo.b()){
-			varReport(vivo.getUniqueVarId());
+		if(isRestricted(cvar.getUniqueVarId()) && btgShowDeveloperInfo.b()){
+			varReport(cvar.getUniqueVarId());
 		}
 		
 		return true;
 	}
 	
 	public String varReportPrepare(String strVarId) {
-		ConsoleVariable vivod = getVarFromRightSource(strVarId);
+		ConsoleVariable cvar = getVarFromRightSource(strVarId);
 		String str="";
 		
 		// as reusable command
@@ -2714,12 +2714,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		str+=strVarId;
 		str+=" ";
 		
-		Object objVal = vivod.getRawValue();
-		if(vivod!=null){
+		Object objVal = cvar.getRawValue();
+		if(cvar!=null){
 			if(objVal==null){
 				str+=null;
 			}else{
-				str+="\""+vivod.getRawValue()+"\"";
+				str+="\""+cvar.getRawValue()+"\"";
 			}
 			str+=" ";
 		}
@@ -2727,7 +2727,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		// comments
 		str+="#";
 		// var type
-		if(vivod!=null && objVal!=null){
+		if(cvar!=null && objVal!=null){
 			str+=objVal.getClass().getSimpleName();
 		}else{
 			str+="(ValueNotSet)";
@@ -2737,21 +2737,21 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		str+=(isRestricted(strVarId)?"(Restricted)":"(User)");
 		// dev info
 		if(btgShowDeveloperInfo.b()){
-			if(vivod.getRestrictedOwner()!=null && vivod.getRfcfgClassHoldingTheOwner()!=null){
+			if(cvar.getRestrictedOwner()!=null && cvar.getRfcfgClassHoldingTheOwner()!=null){
 				str+=" ";
 //				str+="["+vivo.getRfcfgClassHoldingTheOwner().getClass().getName()+"]";
-				str+="["+ReflexFillI.i().getDeclaringClass(vivod.getRfcfgClassHoldingTheOwner(), vivod.getRestrictedOwner()).getName()+"]";
+				str+="["+ReflexFillI.i().getDeclaringClass(cvar.getRfcfgClassHoldingTheOwner(), cvar.getRestrictedOwner()).getName()+"]";
 			}
 		}
 		str+=" ";
-		str+=vivod.getHelp();
+		str+=cvar.getHelp();
 		
 		return str;
 	}
 	
 	public void varReport(String strVarId) {
-		ConsoleVariable vivo=getVarFromRightSource(strVarId);
-		if(vivo!=null){
+		ConsoleVariable cvar=getVarFromRightSource(strVarId);
+		if(cvar!=null){
 			dumpSubEntry(varReportPrepare(strVarId));
 		}else{
 			dumpSubEntry(strVarId+" is not set...");
@@ -2788,8 +2788,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @return
 	 */
 	private boolean varApplyAtRestrictedOwner(VarCmdFieldAbs owner, String strValue){
-		ConsoleVariable vivo = getVarFromRightSource(RESTRICTED_TOKEN+owner.getUniqueVarId());
-		if(vivo==null)return false;
+		ConsoleVariable cvar = getVarFromRightSource(RESTRICTED_TOKEN+owner.getUniqueVarId());
+		if(cvar==null)return false;
 		owner.setObjectRawValue(strValue);
 		dumpSubEntry(owner.getReport());
 		return true;
@@ -2877,9 +2877,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		boolean bOk=varSetFixingType(new ConsoleVariable(strVarId, strValue, null, null, null), bSave);
 		
 		if(bOk){
-			ConsoleVariable vivo = getVarFromRightSource(strVarId);
-			if(vivo.getRestrictedOwner()!=null){
-				varApplyAtRestrictedOwner(vivo.getRestrictedOwner(),strValue);
+			ConsoleVariable cvar = getVarFromRightSource(strVarId);
+			if(cvar.getRestrictedOwner()!=null){
+				varApplyAtRestrictedOwner(cvar.getRestrictedOwner(),strValue);
 			}
 		}
 		
@@ -2905,20 +2905,20 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @param strValue
 	 * @return
 	 */
-	public boolean varSetFixingType(ConsoleVariable vivo, boolean bSave) {
-		if(getAlias(vivo.getUniqueVarId())!=null){
-			dumpUserErrorEntry("Variable identifier '"+vivo.getUniqueVarId()+"' conflicts with existing alias!");
+	public boolean varSetFixingType(ConsoleVariable cvar, boolean bSave) {
+		if(getAlias(cvar.getUniqueVarId())!=null){
+			dumpUserErrorEntry("Variable identifier '"+cvar.getUniqueVarId()+"' conflicts with existing alias!");
 			return false;
 		}
 		
-		if(vivo.getRawValue()==null)return false; //strValue=""; //just creates the var
+		if(cvar.getRawValue()==null)return false; //strValue=""; //just creates the var
 		
-		ConsoleVariable vivoExisting = getVarFromRightSource(vivo.getUniqueVarId());
-		if(vivoExisting!=null){
+		ConsoleVariable cvarExisting = getVarFromRightSource(cvar.getUniqueVarId());
+		if(cvarExisting!=null){
 //			if(vivoExisting.getOwner() instanceof BoolToggler){
 //				int i=0;
 //			}
-			return varOverwrite(vivoExisting, vivo, bSave);
+			return varOverwrite(cvarExisting, cvar, bSave);
 		}else{
 			/**
 			 * Priority:
@@ -2927,11 +2927,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			 */
 			boolean bOk=false;
 			
-			String strValue = ""+vivo.getRawValue();
-			if(!bOk)try{vivo.setValFixType(ccSelf,Long  .parseLong      (strValue));bOk=varApply(vivo,bSave);}catch(NumberFormatException e){}// accepted exception!
-			if(!bOk)try{vivo.setValFixType(ccSelf,Double.parseDouble    (strValue));bOk=varApply(vivo,bSave);}catch(NumberFormatException e){}// accepted exception!
-			if(!bOk)try{vivo.setValFixType(ccSelf,MiscI.i().parseBoolean(strValue));bOk=varApply(vivo,bSave);}catch(NumberFormatException e){}// accepted exception!
-			if(!bOk){		vivo.setValFixType(ccSelf,strValue);bOk=varApply(vivo,bSave);}
+			String strValue = ""+cvar.getRawValue();
+			if(!bOk)try{cvar.setValFixType(ccSelf,Long  .parseLong      (strValue));bOk=varApply(cvar,bSave);}catch(NumberFormatException e){}// accepted exception!
+			if(!bOk)try{cvar.setValFixType(ccSelf,Double.parseDouble    (strValue));bOk=varApply(cvar,bSave);}catch(NumberFormatException e){}// accepted exception!
+			if(!bOk)try{cvar.setValFixType(ccSelf,MiscI.i().parseBoolean(strValue));bOk=varApply(cvar,bSave);}catch(NumberFormatException e){}// accepted exception!
+			if(!bOk){		cvar.setValFixType(ccSelf,strValue);bOk=varApply(cvar,bSave);}
 			
 			return bOk;
 		}
@@ -3424,13 +3424,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			""+aAliasList.hashCode(),
 			false);
 		
-		ArrayList<VarCmdFieldAbs> avivoAllVarsList = new ArrayList<VarCmdFieldAbs>();
-		avivoAllVarsList.addAll(VarCmdFieldAbs.getListCopy(BoolTogglerCmdField.class));
-		avivoAllVarsList.addAll(VarCmdFieldAbs.getListCopy(TimedDelayVarField.class));
-		avivoAllVarsList.addAll(VarCmdFieldAbs.getListCopy(FloatDoubleVarField.class));
-		avivoAllVarsList.addAll(VarCmdFieldAbs.getListCopy(IntLongVarField.class));
-		avivoAllVarsList.addAll(VarCmdFieldAbs.getListCopy(StringVarField.class));
-		setupVarsAllFrom(avivoAllVarsList);
+		ArrayList<VarCmdFieldAbs> acvarAllVarsList = new ArrayList<VarCmdFieldAbs>();
+		acvarAllVarsList.addAll(VarCmdFieldAbs.getListCopy(BoolTogglerCmdField.class));
+		acvarAllVarsList.addAll(VarCmdFieldAbs.getListCopy(TimedDelayVarField.class));
+		acvarAllVarsList.addAll(VarCmdFieldAbs.getListCopy(FloatDoubleVarField.class));
+		acvarAllVarsList.addAll(VarCmdFieldAbs.getListCopy(IntLongVarField.class));
+		acvarAllVarsList.addAll(VarCmdFieldAbs.getListCopy(StringVarField.class));
+		setupVarsAllFrom(acvarAllVarsList);
 		
 		if(bSave)varSaveSetupFile();
 	}
@@ -3801,9 +3801,22 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				ArrayList<String> astrCmdParams = convertToCmdAndParamsList(strCmdLine);
 				astrCmdParams.remove(0); //keep only params
 				String strParams=String.join(" ",astrCmdParams);
-				for(String strCmdChk:getAllPossibleCommands()){
+				ArrayList<String> astrAllCmds = getAllPossibleCommands();
+				ArrayList<String> astrRequestedCmds = new ArrayList<String>();
+				int iCount=0;
+				for(String strCmdChk:astrAllCmds){
 					if(strCmdChk.matches(strCmdRegex)){
-						addCmdToQueue(getCommandPrefixStr()+strCmdChk+" "+strParams);
+						astrRequestedCmds.add(getCommandPrefixStr()+strCmdChk+" "+strParams);
+//						addCmdToQueue(getCommandPrefixStr()+strCmdChk+" "+strParams);
+						iCount++;
+					}
+				}
+					
+				if(iCount==astrAllCmds.size()){
+					dumpWarnEntry("forbidden omni command regex "+strCmdRegex);
+				}else{
+					for(String str:astrRequestedCmds){
+						addCmdToQueue(str);
 						bCmdRegexMatched=true;
 					}
 				}

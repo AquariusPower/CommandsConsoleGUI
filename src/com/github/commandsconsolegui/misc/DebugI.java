@@ -28,12 +28,18 @@
 package com.github.commandsconsolegui.misc;
 
 import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map.Entry;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
-import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
-import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
+import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -54,8 +60,19 @@ public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
 		DumpFontImgFile, 
 		ShowConsNewDayInfoOnce,
 		VarToStringDenied,
+		FillKeyValueHashmap(true),
 		;
-		BoolTogglerCmdField btgEnabled = new BoolTogglerCmdField(this,false);
+		
+		private boolean	bDelayedMode;
+
+		EDebugKey(){}
+		EDebugKey(boolean bDelayedMode){
+			this.bDelayedMode=bDelayedMode;
+			if(this.bDelayedMode)tdBetweenValueApply.setActive(true);
+		}
+		
+		BoolTogglerCmdField btgEnabled = new BoolTogglerCmdField(this,false); //default is disabled
+		TimedDelayVarField tdBetweenValueApply = new TimedDelayVarField(this, 1f, "delay between feeding values to debug (where appliable), mainly to lower CPU usage");
 //		boolean b;
 
 		@Override
@@ -74,6 +91,7 @@ public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
 
 	private Boolean	bDebugMode;
 	private boolean	bConfigured;
+	private HashMap<String,Object> hmDebugKeyValue = new HashMap<String,Object>();
 	
 	public void configure(CommandsDelegator cc){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
@@ -89,14 +107,53 @@ public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
 //		this.cc=cc;
 //	}
 //	
+	
+	/**
+	 * Use this to spend less time processing the parameters that would be called
+	 * at ex.: {@link #putKeyValue(String, Object)}
+	 * @param ek
+	 * @return
+	 */
 	public boolean isKeyEnabled(EDebugKey ek){
-		return ek.btgEnabled.b();
+		if(ek.btgEnabled.b()){
+			if(ek.bDelayedMode){
+				if(ek.tdBetweenValueApply.isReady(true)){
+					return true;
+				}
+			}else{
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	public void disableKey(EDebugKey ek){
 		ek.btgEnabled.setObjectRawValue(false);
 	}
-
+	
+	public void putKeyValue(String strKey, Object val){
+		hmDebugKeyValue.put(strKey, val);
+	}
+	
+	public ArrayList<String> reportKeyValue(){
+		ArrayList<String> astr = new ArrayList<String>();
+		for(Entry<String, Object> entry:hmDebugKeyValue.entrySet()){
+			astr.add(entry.getKey()+"="+entry.getValue());
+		}
+		Collections.sort(astr);
+		return astr;
+	}
+	
+	StringCmdField scfReportKeyValue = new StringCmdField(this)
+		.setCallerAssigned(new CallableX(this) {
+			@Override
+			public Boolean call() {
+				GlobalCommandsDelegatorI.i().dumpSubEntry(reportKeyValue());
+				return true;
+			}
+		});
+	
 //	@Override
 //	public ECmdReturnStatus execConsoleCommand(CommandsDelegator	cd) {
 //		boolean bCmdWorked=false;

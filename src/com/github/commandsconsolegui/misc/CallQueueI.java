@@ -28,10 +28,15 @@
 package com.github.commandsconsolegui.misc;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.RetryOnFailure.IRetryListOwner;
 
 
@@ -46,7 +51,7 @@ import com.github.commandsconsolegui.misc.RetryOnFailure.IRetryListOwner;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CallQueueI {
+public class CallQueueI implements IReflexFillCfg {
 	private static CallQueueI instance = new CallQueueI();
 	public static CallQueueI i(){return instance;}
 	
@@ -224,6 +229,56 @@ public class CallQueueI {
 		public void setCallerReturnValue(Object obj){
 			this.objReturnValue=obj;
 		}
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append("CallableX [bPrepend=");
+			builder.append(bPrepend);
+			builder.append(", hmCustom=");
+			builder.append(hmCustom);
+			builder.append(", rReQueue=");
+			builder.append(rReQueue);
+			builder.append(", arList=");
+			builder.append(arList);
+			builder.append(", strId=");
+			builder.append(strId);
+			builder.append(", lLastUpdateMilis=");
+			builder.append(lLastUpdateMilis);
+			builder.append(", strDbgGenericSuperClass=");
+			builder.append(strDbgGenericSuperClass);
+			builder.append(", asteDbgInstancedAt=");
+			builder.append("\n"+Arrays.toString(asteDbgInstancedAt).replace(",",",\n")+"\n");
+			builder.append(", asteDbgLastQueuedAt=");
+			builder.append("\n"+Arrays.toString(asteDbgLastQueuedAt).replace(",",",\n")+"\n");
+			builder.append(", iFailCount=");
+			builder.append(iFailCount);
+			builder.append(", objEnclosing=");
+			builder.append(objEnclosing);
+			builder.append(", bRetryOnFail=");
+			builder.append(bRetryOnFail);
+			builder.append(", bQuietOnFail=");
+			builder.append(bQuietOnFail);
+			builder.append(", bAllowQueue=");
+			builder.append(bAllowQueue);
+			builder.append(", iFailTimesWarn=");
+			builder.append(iFailTimesWarn);
+			builder.append(", bIgnoreRecursiveCallWarning=");
+			builder.append(bIgnoreRecursiveCallWarning);
+			builder.append(", acallerListRecursion=");
+			builder.append(acallerListRecursion);
+			builder.append(", param=");
+			builder.append(param);
+			builder.append(", lDbgLastRunTimeMilis=");
+			builder.append(lDbgLastRunTimeMilis);
+			builder.append(", lDbgLastQueueTimeMilis=");
+			builder.append(lDbgLastQueueTimeMilis);
+			builder.append(", objReturnValue=");
+			builder.append(objReturnValue);
+			builder.append("]");
+			return builder.toString();
+		}
+		
+		
 	}
 	
 	ArrayList<CallableX> aCallList = new ArrayList<CallableX>();
@@ -375,6 +430,20 @@ public class CallQueueI {
 
 	public int getWaitingAmount() {
 		return aCallList.size();
+	}
+	
+	StringCmdField scfReport = new StringCmdField(this)
+		.setCallerAssigned(new CallableX(this) {
+			@Override
+			public Boolean call() {
+				GlobalCommandsDelegatorI.i().dumpSubEntry(aCallList);
+				return true;
+			}
+		});
+	
+	@Override
+	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField) {
+		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcvField);
 	}
 	
 }

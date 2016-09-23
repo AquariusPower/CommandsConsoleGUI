@@ -70,6 +70,7 @@ import com.jme3.font.BitmapCharacter;
 import com.jme3.font.BitmapCharacterSet;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
+import com.jme3.font.LineWrapMode;
 import com.jme3.font.Rectangle;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -354,6 +355,9 @@ public class MiscJmeI implements IReflexFillCfg{
 //		return getAllChildrenFrom(nodeParent, strChildName, false);
 //	}
 	
+	public ArrayList<Spatial> getAllChildrenRecursiveFrom(Node nodeParent) {
+		return getAllChildrenRecursiveFrom(nodeParent, ".*", EStringMatchMode.Regex, true);
+	}
 	public ArrayList<Spatial> getAllChildrenRecursiveFrom(Node nodeParent, String strMatchChildName, EStringMatchMode eMode, boolean bIgnoreCase) {
 		ArrayList<Spatial> asptList = new ArrayList<Spatial>();
 		
@@ -776,5 +780,14 @@ public class MiscJmeI implements IReflexFillCfg{
 			GlobalAppRefI.i().getContext().getSettings().getWidth(),
 			GlobalAppRefI.i().getContext().getSettings().getHeight(),
 			0);
+	}
+
+	/**
+	 * TODO why this does not work??? create test case jme hub...
+	 * @param node
+	 */
+	public void lineWrapDisableFor(Node node){
+		GlobalMainThreadI.assertEqualsCurrentThread();
+		MiscJmeI.i().retrieveBitmapTextFor(node).setLineWrapMode(LineWrapMode.Clip); //LineWrapMode.NoWrap);
 	}
 }

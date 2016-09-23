@@ -74,7 +74,7 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 	private String strDebugErrorHelper = "ERROR: "+this.getClass().getName()+" not yet properly initialized!!!";
 	
 	private IReflexFillCfg	rfcfgOwner;
-	private ConsoleVariable	vivo;
+	private ConsoleVariable	cvar;
 	private String strHelp=null;
 	private CommandData	cmdd;
 	private O	objRawValueLazy = null;
@@ -156,13 +156,13 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 		}
 		
 //		if(this.vivo!=null)throw new PrerequisitesNotMetException("already set", this, this.vivo, vivo);
-		if(this.vivo != vivo){
+		if(this.cvar != vivo){
 			// so, np if was null...
-			PrerequisitesNotMetException.assertNotAlreadySet("VarLink", this.vivo, vivo, this);
+			PrerequisitesNotMetException.assertNotAlreadySet("VarLink", this.cvar, vivo, this);
 		}
 		
-		this.vivo.setOwnerForRestrictedVar(this);
-		this.vivo = vivo; //after setting console var owner!
+		this.cvar.setOwnerForRestrictedVar(this);
+		this.cvar = vivo; //after setting console var owner!
 		
 		/**
 		 * vivo will already come with an updated value, because this method is called
@@ -188,14 +188,14 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 	
 	public ConsoleVariable getConsoleVarLink(CommandsDelegator.CompositeControl cc){
 		cc.assertSelfNotNull();
-		return this.vivo;
+		return this.cvar;
 	}
 	/**
 	 * DEV: do not expose this one, let only subclasses use it, to avoid messing the field.
 	 * @return
 	 */
 	protected ConsoleVariable getConsoleVarLink() {
-		return vivo;
+		return cvar;
 	}
 	
 	/**
@@ -398,8 +398,8 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 	
 	public Object getRawValue(){ //this is safe to be public because it is a base access to the concrete class simple value ex.: will return a primitive Long on the concrete class
 		Object val = null;
-		if(vivo!=null){
-			val = vivo.getRawValue();
+		if(cvar!=null){
+			val = cvar.getRawValue();
 		}else{
 			val = objRawValueLazy;
 		}
@@ -447,15 +447,15 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 		}
 		
 		Object objCurrentValue = null;
-		if(vivo!=null){
-			objCurrentValue = vivo.getRawValue();
+		if(cvar!=null){
+			objCurrentValue = cvar.getRawValue();
 //			if(vivo.getRawValue()!=objValue)prepareCallerAssigned(false);
 			
 			/**
 			 * this cast is IMPORTANT!!!
 			 * to grant the setup is in the right type!
 			 */
-			vivo.setRawValue((O)objValueNew);
+			cvar.setRawValue((O)objValueNew);
 		}else{
 			bLazyValueWasSet=true; //as such value can be actually null
 			
@@ -662,6 +662,6 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 	}
 	
 	public boolean isConsoleVarLinkSet(){
-		return vivo!=null;
+		return cvar!=null;
 	}
 }
