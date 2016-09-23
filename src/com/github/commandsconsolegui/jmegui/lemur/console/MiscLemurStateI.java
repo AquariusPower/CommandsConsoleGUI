@@ -945,34 +945,43 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 	 * this only works without crashing because of {@link DialogMainContainer#updateLogicalState()}
 	 * 
 	 * @param pnl
-	 * @param v3fSize x,y,z use -1 to let it be automatic = preferred
+	 * @param v3fSizeNew x,y,z use -1 to let it be automatic = preferred
 	 * @param bForceSpecificSize
 	 * @return
 	 */
 	public Vector3f setSizeSafely(
 		final Panel pnl, 
-		final Vector3f v3fSize, 
+		final Vector3f v3fSizeNew, 
 		final boolean bForceSpecificSize 
 	){
 		GlobalMainThreadI.assertEqualsCurrentThread();
 		
-		if(v3fSize.x<v3fMinSize.x)v3fSize.x=v3fMinSize.x;
-		if(v3fSize.y<v3fMinSize.y)v3fSize.y=v3fMinSize.y;
-		if(v3fSize.z<v3fMinSize.z)v3fSize.z=v3fMinSize.z; //actually gets overriden
+		if(v3fSizeNew.x<v3fMinSize.x)v3fSizeNew.x=v3fMinSize.x;
+		if(v3fSizeNew.y<v3fMinSize.y)v3fSizeNew.y=v3fMinSize.y;
+		if(v3fSizeNew.z<v3fMinSize.z)v3fSizeNew.z=v3fMinSize.z; //actually gets overriden
 		
 		Vector3f v3fPreferredBkp = pnl.getPreferredSize().clone();
 		
 		if(!bForceSpecificSize){
-			if(v3fSize.x<v3fPreferredBkp.x)v3fSize.x=v3fPreferredBkp.x;
-			if(v3fSize.y<v3fPreferredBkp.y)v3fSize.y=v3fPreferredBkp.y;
+			if(v3fSizeNew.x<v3fPreferredBkp.x)v3fSizeNew.x=v3fPreferredBkp.x;
+			if(v3fSizeNew.y<v3fPreferredBkp.y)v3fSizeNew.y=v3fPreferredBkp.y;
 		}
 		
-		v3fSize.z=v3fPreferredBkp.z; // do not mess with Z !!! //if(v3fSize.z<v3fP.z)v3fSize.z=v3fP.z;
+		v3fSizeNew.z=v3fPreferredBkp.z; // do not mess with Z !!! //if(v3fSize.z<v3fP.z)v3fSize.z=v3fP.z;
 		
-		pnl.setPreferredSize(v3fSize);
-		pnl.setSize(v3fSize);
+		Vector3f v3fSizeBkp = pnl.getSize().clone();
+		/**
+		 * setSize() will not work... the panel will always be smaller than requested? why?
+		 */
+		pnl.setPreferredSize(v3fSizeNew);
 		
-		return v3fSize;
+//		try{
+//			pnl.setSize(v3fSizeNew);
+//		}catch(IllegalArgumentException e){
+//			pnl.setSize(v3fSizeBkp);
+//		}
+		
+		return v3fSizeNew;
 	}
 	
 	/**
