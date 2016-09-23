@@ -36,9 +36,9 @@ import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
-import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
+import com.github.commandsconsolegui.jmegui.DialogStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.MaintenanceListDialogState;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.MaintenanceListLemurDialogState;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.VarCmdUId;
@@ -48,12 +48,12 @@ import com.simsilica.lemur.Command;
 /**
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/><https://sourceforge.net/u/teike/profile/>
  */
-public class ConsoleVarsDialogStateI<T extends Command<Button>> extends MaintenanceListDialogState<T> {
+public class ConsoleVarsDialogStateI<T extends Command<Button>> extends MaintenanceListLemurDialogState<T> {
 	private static ConsoleVarsDialogStateI<Command<Button>>	instance=new ConsoleVarsDialogStateI<Command<Button>>();
 	public static ConsoleVarsDialogStateI<Command<Button>> i(){return instance;}
 
 	@Override
-	protected boolean modifyEntry(BaseDialogStateAbs<T, ?> diagModal,	DialogListEntryData<T> dledAtModal,	ArrayList<DialogListEntryData<T>> adledAtThisToApplyResultsList) {
+	protected boolean modifyEntry(DialogStateAbs<T, ?> diagModal,	DialogListEntryData<T> dledAtModal,	ArrayList<DialogListEntryData<T>> adledAtThisToApplyResultsList) {
 		String strUserTypedValue = diagModal.getInputTextAsUserTypedValue();
 		if(strUserTypedValue==null)return false; //was a filter
 		
@@ -77,7 +77,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	
 	private ChoiceVarDialogState chd = new ChoiceVarDialogState();
 	
-	public static class CfgParm extends MaintenanceListDialogState.CfgParm{
+	public static class CfgParm extends MaintenanceListLemurDialogState.CfgParm{
 		public CfgParm(Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow,
 				Float fInfoHeightPercentOfDialog, Float fEntryHeightMultiplier) {
@@ -196,7 +196,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 				// will set the package entry as the rootEntry's parent
 				String strVarConcrPkg = vcfVarEntry.getIdTmpCopy().getConcreteClass().getPackage().getName();
 				boolean bConsProj = strVarConcrPkg.startsWith(PkgTopRef.class.getPackage().getName());
-				if (vcfVarEntry.getOwner() instanceof BaseDialogStateAbs) {
+				if (vcfVarEntry.getOwner() instanceof DialogStateAbs) {
 					setParentestParent(dledVarEntry, bConsProj ? dledDiagsCons : dledDiags);
 				}else{
 					if(bConsProj)setParentestParent(dledVarEntry, dledConsProjPackage);
@@ -260,17 +260,17 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		
 		DialogListEntryData<T> dledVarEntryParent = null;
 		
-		if(vidCopy.getConcreteClassSName().equals(vidCopy.getDeclaringClassSName())){
+		if(vidCopy.getConcreteClassSimpleName().equals(vidCopy.getDeclaringClassSimpleName())){
 			dledVarEntryParent = createParentEntry(
-					vidCopy.getDeclaringClassSName(),
+					vidCopy.getDeclaringClassSimpleName(),
 					EGroupKeys.ParentDeclaringClass);
 		}else{
 			DialogListEntryData<T> dledDeclaringClassParent = createParentEntry(
-				vidCopy.getConcreteClassSName()+vidCopy.getDeclaringClassSName(),
+				vidCopy.getConcreteClassSimpleName()+vidCopy.getDeclaringClassSimpleName(),
 				EGroupKeys.ParentDeclaringClass);
 			
 			DialogListEntryData<T> dledConcreteClassParent = createParentEntry(
-				vidCopy.getConcreteClassSName(),
+				vidCopy.getConcreteClassSimpleName(),
 				EGroupKeys.ParentConcreteClass);
 			
 			if(dledDeclaringClassParent.getParent()==null){
@@ -286,8 +286,8 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		
 		// prepare var linked one
 		String strVarId = vcf.getUniqueVarId(true);
-		strVarId=strVarId.replaceFirst(vidCopy.getDeclaringClassSName(), "");
-		strVarId=strVarId.replaceFirst(vidCopy.getConcreteClassSName(), "");
+		strVarId=strVarId.replaceFirst(vidCopy.getDeclaringClassSimpleName(), "");
+		strVarId=strVarId.replaceFirst(vidCopy.getConcreteClassSimpleName(), "");
 		
 		DialogListEntryData<T> dledVar = new DialogListEntryData<T>(this);
 		dledVar.setText(strVarId, vcf);

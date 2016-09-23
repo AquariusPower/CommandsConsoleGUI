@@ -27,17 +27,17 @@
 
 package com.github.commandsconsolegui.cmd;
 
-import java.util.Arrays;
-
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 
 /**
+ * can have no owner (field), it can be a simple console user variable.
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class VarIdValueOwnerData {
+public class ConsoleVariable {
 //	public static interface IVarIdValueOwner{
 //		public abstract void setObjectValue(Object objValue);
 //		public abstract String getReport();
@@ -48,44 +48,80 @@ public class VarIdValueOwnerData {
 //		public abstract String getSimpleCmdId();
 //	}
 	
-	private String strId;
-	private Object objValue = null;
+	private String strUniqueId;
+	private Object objRawValue = null;
 //	private IVarIdValueOwner owner;
-	private VarCmdFieldAbs owner;
+	private VarCmdFieldAbs vcfOwnerForRestrictedVars;
 	private IReflexFillCfg rfcfgClassHoldingTheOwner;
 	private String	strHelp;
 	private StackTraceElement[] asteDbgLastSetOriginAt;
+	private Class clValueInitialType;
 	
-	public VarIdValueOwnerData(String strId, Object objValue,	VarCmdFieldAbs vivoOwner, IReflexFillCfg rfcfgClassHoldingTheOwner, String strHelp) {
+	public ConsoleVariable(String strUniqueVarId, Object objValue,	VarCmdFieldAbs vcfOwner, IReflexFillCfg rfcfgClassHoldingTheOwner, String strHelp) {
 		super();
-		this.strId = strId;
-		this.objValue = objValue;
-		this.owner = vivoOwner;
+		this.strUniqueId = strUniqueVarId;
+		setRawValue(objValue);
+//		this.objValue = objValue;
+		this.vcfOwnerForRestrictedVars = vcfOwner;
 		this.rfcfgClassHoldingTheOwner = rfcfgClassHoldingTheOwner;
 		if(strHelp!=null)this.strHelp = strHelp; //to avoid removing it
 	}
-
-	public void setObjectValue(Object objValue) {
-		this.objValue=objValue;
-		this.asteDbgLastSetOriginAt=Thread.currentThread().getStackTrace();
+	
+	public ConsoleVariable setOwnerForRestrictedVar(VarCmdFieldAbs vcfOwner){
+		if(vcfOwner.isConsoleVarLinkSet())throw new PrerequisitesNotMetException("owner already has a console var link", this, vcfOwner);
+		PrerequisitesNotMetException.assertNotAlreadySet("owner", this.vcfOwnerForRestrictedVars, vcfOwner, this);
+		this.vcfOwnerForRestrictedVars=vcfOwner;
+		return this;
 	}
 	
-	public Object getObjectValue(){
-		return this.objValue;
+	public ConsoleVariable setValFixType(CommandsDelegator.CompositeControl cc, Object objValue) {
+		cc.assertSelfNotNull();
+		clValueInitialType=null;
+		setRawValue(objValue);
+		return this;
+	}
+	
+	public ConsoleVariable setRawValue(Object objValue) {
+		if(objValue!=null && clValueInitialType!=null){
+//			if(this.objValue!=null && this.objValue.getClass()!=objValue.getClass()){
+			if(objValue.getClass()!=clValueInitialType){
+				throw new PrerequisitesNotMetException("type change is forbidden", this, clValueInitialType, objValue.getClass(), this.objRawValue, objValue);
+			}
+		}
+		
+		this.objRawValue=objValue;
+		
+		if(this.objRawValue!=null){
+			if(clValueInitialType==null){
+				clValueInitialType=this.objRawValue.getClass();
+			}
+		}
+		
+		this.asteDbgLastSetOriginAt=Thread.currentThread().getStackTrace();
+		
+		return this;
+	}
+	
+	public Object getRawValue(){
+		return this.objRawValue;
 	}
 	
 	public String getHelp(){
 		return strHelp==null?"":strHelp;
 	}
 
-	public String getId() {
-		return strId;
+	public String getUniqueVarId() {
+		return strUniqueId;
 	}
 
-	public VarCmdFieldAbs getOwner() {
-		return owner;
+	public VarCmdFieldAbs getRestrictedOwner() {
+		return vcfOwnerForRestrictedVars;
 	}
-
+	
+	/**
+	 * TODO rename to getInstanceHoldingRestrictedOwner()
+	 * @return
+	 */
 	public IReflexFillCfg getRfcfgClassHoldingTheOwner() {
 		return rfcfgClassHoldingTheOwner;
 	}

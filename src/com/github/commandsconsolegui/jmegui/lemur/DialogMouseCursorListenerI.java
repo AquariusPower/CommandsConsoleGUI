@@ -30,7 +30,7 @@ package com.github.commandsconsolegui.jmegui.lemur;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
+import com.github.commandsconsolegui.jmegui.DialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.MouseCursorButtonData;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
@@ -38,9 +38,9 @@ import com.github.commandsconsolegui.jmegui.MultiClickCondStateI;
 import com.github.commandsconsolegui.jmegui.MultiClickCondStateI.ECallMode;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurStateI;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserData;
-import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableWeak;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
@@ -66,13 +66,13 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 		
 		// missing ones are ignored so each element can consume it properly
 		boolean bConsumed = false;
-		final LemurDialogGUIStateAbs<?,?> diag = 
-				(LemurDialogGUIStateAbs)LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
+		final LemurDialogStateAbs<?,?> diag = 
+				(LemurDialogStateAbs)LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
 		EMouseCursorButton e = buttonData.getActivatorType();
 		switch(e){
 			case Action1Click:
 //				if(iClickCount==1){
-					final CellDialogEntry cell = (CellDialogEntry<?>)capture.getUserData(EUserData.cellClassRef.toString());
+					final CellDialogEntry cell = (CellDialogEntry<?>)capture.getUserData(EUserData.classCellRef.s());
 					if(cell!=null){
 //						if(cell.isCfgButton(capture)){
 //							diag.openCfgDataDialog(cell.getData());
@@ -161,7 +161,7 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 					Vector3f v3fNewPos = MiscLemurStateI.i().eventToV3f(eventMotion);
 					Vector3f v3fDisplacement = buttonData.updateDragPosAndGetDisplacement(eventMotion, v3fNewPos);
 					
-					BaseDialogStateAbs diag = MiscJmeI.i().getUserDataPSH(sptDialogMain,BaseDialogStateAbs.class);
+					DialogStateAbs diag = MiscJmeI.i().getUserDataPSH(sptDialogMain,DialogStateAbs.class);
 					diag.move(capture, v3fDisplacement);
 //					sptDialogMain.move(v3fDisplacement);
 					return true;
@@ -175,10 +175,19 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 	public boolean dragEnd(MouseCursorButtonData buttonData, CursorButtonEvent eventButton, Spatial target, Spatial capture) {
 		switch(buttonData.getActivatorType()){
 			case Action1Click:
+				/**
+				 * https://hub.jmonkeyengine.org/t/lemur-cursorlistener-it-is-ok-to-use-target-if-capture-is-null/36936/2
+				 * 
+				 * If you don't have a capture then that just means the button down event never happened over 
+				 * another spatial... or if it did, that spatial never consumed the event. So there is no capture.
+				 * 
+				 * Target is the spatial that is currently receiving the event. The one to which this listener is 
+				 * attached in some way.
+				 */
 				if(capture!=null){
 					Spatial sptDialogMain = MiscJmeI.i().getParentestFrom(capture);
 					
-					BaseDialogStateAbs diag = MiscJmeI.i().getUserDataPSH(sptDialogMain,BaseDialogStateAbs.class);
+					DialogStateAbs diag = MiscJmeI.i().getUserDataPSH(sptDialogMain,DialogStateAbs.class);
 					
 					diag.save();
 	//				diag.requestSaveDialog();

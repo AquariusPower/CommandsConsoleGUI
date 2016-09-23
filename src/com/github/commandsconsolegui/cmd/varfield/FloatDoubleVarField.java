@@ -64,12 +64,12 @@ public class FloatDoubleVarField extends NumberVarFieldAbs<Double,FloatDoubleVar
 	 * @param rfcfgOwnerUseThis use null if this is not a class field, but a local variable
 	 * @param dInitialValue if null, the variable will be removed from console vars.
 	 */
-	public FloatDoubleVarField(IReflexFillCfg rfcfgOwnerUseThis, Double dInitialValue, String strHelp) {
+	public FloatDoubleVarField(IReflexFillCfg rfcfgOwnerUseThis, Double dDefaultValue, String strHelp) {
 //		if(rfcfgOwnerUseThis!=null)afdvList.add(this); //only fields allowed
 //		super(rfcfgOwnerUseThis!=null); //only fields allowed
-		super(rfcfgOwnerUseThis); //only fields allowed
+		super(rfcfgOwnerUseThis, dDefaultValue); //only fields allowed
 //		setOwner(rfcfgOwnerUseThis);
-		setObjectRawValue(dInitialValue);
+//		setObjectRawValue(dInitialValue);
 //		this.dValue=dInitialValue;
 		setHelp(strHelp);
 //		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
@@ -96,28 +96,28 @@ public class FloatDoubleVarField extends NumberVarFieldAbs<Double,FloatDoubleVar
 //	public FloatDoubleVarField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
 	public FloatDoubleVarField setObjectRawValue(Object objValue) {
 		if(objValue == null){
-			setValue( null );
+			objValue=( null );
 		}else
 		if(objValue instanceof Float){
-			setValue( ((Float)objValue).doubleValue() );
+			objValue=( ((Float)objValue).doubleValue() );
 		}else
 		if(objValue instanceof Double){
-			setValue( ((Double)objValue) );
+			objValue=( ((Double)objValue) );
 		}else
 		if(objValue instanceof FloatDoubleVarField){
-			setValue( ((FloatDoubleVarField)objValue).getValue() );
+			objValue=( ((FloatDoubleVarField)objValue).getValue() );
 		}else
 		if(objValue instanceof Integer){
-			setValue( ((Integer)objValue).doubleValue() );
+			objValue=( ((Integer)objValue).doubleValue() );
 		}else
 		if(objValue instanceof Long){
-			setValue( ((Long)objValue).doubleValue() );
+			objValue=( ((Long)objValue).doubleValue() );
 		}else
 		if(objValue instanceof IntLongVarField){
-			setValue( ((IntLongVarField)objValue).getLong().doubleValue() );
+			objValue=( ((IntLongVarField)objValue).getLong().doubleValue() );
 		}else
 		if(objValue instanceof String){
-			setValue( Double.parseDouble((String)objValue) );
+			objValue=( Double.parseDouble((String)objValue) );
 		}else{
 			throw new PrerequisitesNotMetException("unsupported class type", objValue.getClass());
 		}
@@ -173,15 +173,17 @@ public class FloatDoubleVarField extends NumberVarFieldAbs<Double,FloatDoubleVar
 //		return strVarId;
 //	}
 
-	@Override
-	public String getReport() {
-		return getUniqueVarId()+" = "+MiscI.i().fmtFloat(getDouble(),3);
-	}
-
-	@Override
-	public Object getRawValue() {
-		return getDouble();
-	}
+//	@Override
+//	public String getReport() {
+//		return getUniqueVarId()+" = "+MiscI.i().fmtFloat(getDouble(),3);
+//	}
+	
+//	
+//	
+//	@Override
+//	public Object getRawValue() {
+//		return getDouble();
+//	}
 
 //	@Override
 //	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
@@ -195,12 +197,12 @@ public class FloatDoubleVarField extends NumberVarFieldAbs<Double,FloatDoubleVar
 //	}
 	@Override
 	public String getValueAsString() {
-		return getValueAsString(3);
+		return super.getValueAsString(3);
 	}
-	@Override
-	public String getValueAsString(int iIfFloatPrecision) {
-		return MiscI.i().fmtFloat(getDouble(),iIfFloatPrecision);
-	}
+//	@Override
+//	public String getValueAsString(int iIfFloatPrecision) {
+//		return MiscI.i().fmtFloat(getDouble(),iIfFloatPrecision);
+//	}
 
 //	@Override
 //	public String getHelp() {

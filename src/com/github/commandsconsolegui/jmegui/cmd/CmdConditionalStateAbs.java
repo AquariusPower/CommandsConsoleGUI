@@ -52,7 +52,15 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 	
 	StringCmdField scfRestart = new StringCmdField(this,null);
 //	private StringCmdField cmdState = null;
-	protected final BoolTogglerCmdField btgEnabled = new BoolTogglerCmdField(this, true, "toggles the state (enabled/disabled)");
+	protected final BoolTogglerCmdField btgEnabled = new BoolTogglerCmdField(this, true, "toggles the state (enabled/disabled)")
+		.setCallerAssigned(new CallableX(this) {
+			@Override
+			public Boolean call() {
+				setEnabledRequest(btgEnabled.b());
+				return true;
+			}
+		});
+	
 //	private String	strCmdIdentifier;
 //	private String strCmdPrefix="toggle";
 //	private String strCmdSuffix="State";
@@ -73,7 +81,7 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 		return GlobalCommandsDelegatorI.i();
 	}
 	
-	public String getCmd(){
+	public String getStateEnableCommandId(){
 		return btgEnabled.getUniqueCmdId();
 //		return cmdState.toString();
 //		return strCmdIdentifier;
@@ -233,13 +241,13 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 	@Override
 	protected void enableSuccess() {
 		btgEnabled.setObjectRawValue(true);
-		cd().dumpInfoEntry(getCmd()+" enable");
+		cd().dumpInfoEntry(getStateEnableCommandId()+" enable");
 	}
 	
 	@Override
 	protected void disableSuccess() {
 		btgEnabled.setObjectRawValue(false);
-		cd().dumpInfoEntry(getCmd()+" disable");
+		cd().dumpInfoEntry(getStateEnableCommandId()+" disable");
 	}
 	
 	@Override

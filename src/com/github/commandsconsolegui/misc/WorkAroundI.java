@@ -76,7 +76,7 @@ public class WorkAroundI {
 	) {
 		if(!btgBugFixId.b())return objRetIfBugFixBoolDisabled;
 		
-		if(btgBugFixId.getRawValueDefault()){
+		if(btgBugFixId.getValueDefault()){
 			throw new PrerequisitesNotMetException("default bugfix value must be 'false', let end user decide to enable it!", btgBugFixId);
 		}
 		
@@ -110,7 +110,7 @@ public class WorkAroundI {
 //		btgBugFix.getCallerAssignedForMaintenance(ccSelf).setQueueDenied();
 //	}
 	
-	public static class BugFixBoolTogglerCmdField extends BoolTogglerCmdField{
+	public static class BugFixBoolTogglerCmdField extends BoolTogglerCmdField<BugFixBoolTogglerCmdField>{
 
 		public BugFixBoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis,
 				boolean bInitialValue, String strHelp) {
@@ -133,6 +133,12 @@ public class WorkAroundI {
 			
 			return getThis();
 		}
+		
+//		@Override
+//		public BoolTogglerCmdField setHelp(String strHelp) {
+//			super.setHelp(strHelp);
+//			return getThis();
+//		}
 		
 		@Override
 		protected BugFixBoolTogglerCmdField getThis() {

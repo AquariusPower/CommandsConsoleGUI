@@ -46,6 +46,7 @@ import truetypefont.TrueTypeLoader;
 
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.globals.GlobalMainThreadI;
 import com.github.commandsconsolegui.globals.GlobalOperationalSystemI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
@@ -227,6 +228,7 @@ public class MiscJmeI implements IReflexFillCfg{
 	BoolTogglerCmdField btgFixBitmapTextLimits = new BoolTogglerCmdField(this,false);
 	
 	public void fixBitmapTextLimitsFor(Node node,Vector3f v3fSizeLimits){
+		GlobalMainThreadI.assertEqualsCurrentThread();
 		if(!btgFixBitmapTextLimits.b())return;
 		
 		BitmapText bmt = MiscJmeI.i().retrieveBitmapTextFor(node);
@@ -462,6 +464,7 @@ public class MiscJmeI implements IReflexFillCfg{
 		}
 	}
 	public void setUserDataPSH(Spatial spt, String strKey, Object obj) {
+		GlobalMainThreadI.assertEqualsCurrentThread();
 		spt.setUserData(strKey, new PseudoSavableHolder(obj));
 	}
 	
@@ -716,6 +719,8 @@ public class MiscJmeI implements IReflexFillCfg{
 			strFileName+=".j3o";
 		}
 		
+		String strFullPathAndFileName=strPathFull+strFileName;
+		
 		/**
 		 * it does not check if the path is absolute and uses it as relative...
 		 */
@@ -729,15 +734,27 @@ public class MiscJmeI implements IReflexFillCfg{
 				svMain,
 				esft);
 		}else{
-			str="loading";
-			svLoaded = SaveGame.loadGame(
-				strPathRelative,
-				strFileName,
-				null,//GlobalAppRefI.i().getAssetManager(),
-				esft);
+			File fl = new File(strFullPathAndFileName);
+			if(fl.exists()){
+				try{
+					svLoaded = SaveGame.loadGame(
+						strPathRelative,
+						strFileName,
+						null,//GlobalAppRefI.i().getAssetManager(),
+						esft);
+					str="loading";
+				}catch(NullPointerException|ClassCastException e){
+					GlobalCommandsDelegatorI.i().dumpWarnEntry("invalid save file", strPathFull, strFileName, e);
+					fl.renameTo(new File(strFullPathAndFileName+"."+MiscI.i().getDateTimeForFilename()+".broken"));
+//					svLoaded=null;
+				}
 			
-			if(svLoaded==null){
-				GlobalCommandsDelegatorI.i().dumpWarnEntry("failed to load", strPathFull, strFileName);
+				if(svLoaded==null){
+					GlobalCommandsDelegatorI.i().dumpWarnEntry("failed to load", strPathFull, strFileName);
+					str="when loading";
+				}
+			}else{
+				str="not found";
 			}
 		}
 		

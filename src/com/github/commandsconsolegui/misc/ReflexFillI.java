@@ -89,7 +89,8 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 //		private String	strPrefixDeclaringClass="";
 		private boolean bUsePrefixInstancedClass=true;
 //		private String	strPrefixInstancedClass="";
-		private Class clInstancedClass;
+		private Class clConcreteClass;
+		private Class clConcreteClassOverride;
 		
 		/**
 		 * to validate and also be removed from the identifier string
@@ -186,15 +187,23 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		}
 
 		public String getPrefixInstancedConcreteClass() {
-			return clInstancedClass.getSimpleName();
+			if(clConcreteClassOverride!=null){
+				return clConcreteClassOverride.getSimpleName();
+			}
+			
+			return clConcreteClass.getSimpleName();
+		}
+		
+		public void setConcreteClassOverride(Class clConcreteClassOverride) {
+			this.clConcreteClassOverride = clConcreteClassOverride;
 		}
 		
 		public Class getInstancedConcreteClass(){
-			return clInstancedClass;
+			return clConcreteClass;
 		}
 		
 		public void setInstancedConcreteClass(Class clInstancedClass) {
-			this.clInstancedClass = clInstancedClass;
+			this.clConcreteClass = clInstancedClass;
 		}
 
 		public String getPrefixCustomId() {
@@ -247,17 +256,22 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	 * and so its class owner does not have yet such field set to 'this'... 
 	 * self is still null at constructor.
 	 * 
-	 * @param objClassOwningField
+	 * TODO check for more than one field pointing to the same value
+	 * 
+	 * @param objInstanceOwningField
 	 * @param objFieldValue if null, will validate if fields of type {@link IReflexFillCfgVariant#} are owned by the specified owner
 	 * @return
 	 */
-	public Field assertAndGetField(Object objClassOwningField, Object objFieldValue){
+	public Field assertAndGetField(IReflexFillCfg objInstanceOwningField, IReflexFillCfgVariant objFieldValue){
 //		Class<?> clFound = null;
 		Field fldFound = null;
-		Class<?> cl = objClassOwningField.getClass();
+		Class<?> cl = objInstanceOwningField.getClass();
 		String strExceptionLog="Field object not found at: ";
-		while(true){
-			strExceptionLog+=cl.getName();
+		/**
+		 * will show the Object class name too
+		 */
+		labelWhile:while(true){ //!cl.equals(Object.class)){
+			strExceptionLog+=cl.getName(); 
 			if(cl.getName().equals(Object.class.getName())){
 				strExceptionLog+="";
 				break;
@@ -266,11 +280,11 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 			}
 			
 			for(Field fld:cl.getDeclaredFields()){
+				boolean bWasAccessible = fld.isAccessible();
 				try{
-					boolean bWasAccessible = fld.isAccessible();
 					if(!bWasAccessible)fld.setAccessible(true);
 					
-					Object objExistingFieldValue = fld.get(objClassOwningField);
+					Object objExistingFieldValue = fld.get(objInstanceOwningField);
 					if(objFieldValue!=null){
 						if(objExistingFieldValue==objFieldValue)fldFound=fld; //clFound=cl;
 					}else{
@@ -281,26 +295,40 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 							IReflexFillCfgVariant rfcv = (IReflexFillCfgVariant)objExistingFieldValue;
 							if(rfcv.isReflexing()){
 								IReflexFillCfg configuredOwner = rfcv.getOwner();
-								if(configuredOwner != objClassOwningField){
-									throwExceptionAboutMissConfiguration(cl, fld, configuredOwner, objClassOwningField);
+								if(configuredOwner != objInstanceOwningField){
+									throwExceptionAboutMissConfiguration(cl, fld, configuredOwner, objInstanceOwningField);
 								} 
 							}
 						}
 					}
 					
-					if(!bWasAccessible)fld.setAccessible(false);
-					if(fldFound!=null)return fldFound;
 				} catch (IllegalArgumentException | IllegalAccessException e) {
 					e.printStackTrace();
+				} finally {
+					if(!bWasAccessible)fld.setAccessible(false);
 				}
+				
+				if(fldFound!=null)break labelWhile;
 			}
 			
 			cl=cl.getSuperclass();
 		}
 		
+		if(fldFound!=null){
+			/**
+			 * Field is at owner instance.
+			 */
+			return fldFound;
+		}
+		
+		/**
+		 * Inconsistency:
+		 * field is not at specified owner
+		 */
 		if(objFieldValue!=null){
-			throw new NullPointerException("Failed to automatically set command id. "
-				+"Was "+objFieldValue.getClass()+" object owner properly set to the class where it is instantiated? "
+//			throw new NullPointerException("Failed to automatically set command id? "
+			throw new PrerequisitesNotMetException("Inconsistency found: "
+				+"Was "+objFieldValue.getClass()+"'s owner properly set to the class where it is instantiated (using 'this')? "
 				+strExceptionLog);
 		}
 		
@@ -344,7 +372,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	 */
 	public VarCmdUId createIdentifierWithFieldName(IReflexFillCfg rfcfgOwnerOfField, IReflexFillCfgVariant rfcvFieldAtTheOwner){//, boolean bIsVariable){
 		if(rfcfgOwnerOfField==null){
-			throw new NullPointerException("Invalid usage, "
+			throw new PrerequisitesNotMetException("Invalid usage, "
 				+IReflexFillCfg.class.getName()+" owner is null, is this a local (non field) variable?");
 		}
 		
@@ -353,7 +381,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 			if(bUseDefaultCfgIfMissing){
 				rfcfg = new ReflexFillCfg(rfcvFieldAtTheOwner);
 			}else{
-				throw new NullPointerException("Configuration is missing for "
+				throw new PrerequisitesNotMetException("Configuration is missing for "
 					+rfcfgOwnerOfField.getClass().getName()
 					+" -> "
 					+rfcvFieldAtTheOwner.getClass().getName()
@@ -450,7 +478,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 			
 			vcuid.setConcreteClass(rfcfg.getInstancedConcreteClass(), preparePart(rfcfg.getPrefixInstancedConcreteClass()));
 			if(!rfcfg.getPrefixDeclaringClass().equalsIgnoreCase(rfcfg.getPrefixInstancedConcreteClass())){
-				strInstancedConcrete=vcuid.getConcreteClassSName();
+				strInstancedConcrete=vcuid.getConcreteClassSimpleName();
 				
 				if(rfcfg.getPrefixCustomId().equalsIgnoreCase(rfcfg.getPrefixInstancedConcreteClass())){
 					bUseCustomId=false;
@@ -520,8 +548,8 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	 * @param objFieldValue
 	 * @return the (super) class that contains a field storing the specified value 
 	 */
-	public Class<?> getDeclaringClass(Object objClassOwningField, Object objFieldValue){
-		Field field = assertAndGetField(objClassOwningField,objFieldValue);
+	public Class<?> getDeclaringClass(IReflexFillCfg objClassOwningField, IReflexFillCfgVariant objFieldValue){
+		Field field = assertAndGetField(objClassOwningField, objFieldValue);
 		Class<?> clWhereFieldIsActuallyDeclared = field.getDeclaringClass();
 		return clWhereFieldIsActuallyDeclared;
 	}
@@ -534,4 +562,5 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		this.strCommandPartSeparator = strCommandPartSeparator;
 		if(this.strCommandPartSeparator==null)throw new PrerequisitesNotMetException("use empty intead of null separator!");
 	}
+	
 }

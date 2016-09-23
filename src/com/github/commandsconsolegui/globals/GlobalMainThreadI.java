@@ -25,29 +25,24 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.globals.jmegui.lemur;
+package com.github.commandsconsolegui.globals;
 
-import com.github.commandsconsolegui.globals.GlobalHolderAbs;
-import com.github.commandsconsolegui.globals.jmegui.GlobalDialogHelperI;
-import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
-import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleUII;
-import com.github.commandsconsolegui.jmegui.console.ConsoleStateAbs;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurDialogHelperI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+
 
 /**
-* As you may not be using {@link SimpleApplication#}.
-*  
-* @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
-*/
-public class GlobalLemurDialogHelperI extends GlobalHolderAbs<LemurDialogHelperI> {
-	private static GlobalLemurDialogHelperI instance = new GlobalLemurDialogHelperI();
-	public static GlobalLemurDialogHelperI iGlobal(){return instance;}
-	public static LemurDialogHelperI i(){return iGlobal().get();}
+ * 
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
+ *
+ */
+public class GlobalMainThreadI extends GlobalHolderAbs<Thread>{
+	private static GlobalMainThreadI instance = new GlobalMainThreadI();
+	public static GlobalMainThreadI iGlobal(){return instance;}
+	public static Thread i(){return iGlobal().get();}
 	
-	@Override
-	public LemurDialogHelperI set(LemurDialogHelperI obj) {
-		GlobalDialogHelperI.iGlobal().set(obj);
-		return super.set(obj);
+	public static void assertEqualsCurrentThread(){
+		if(!i().equals(Thread.currentThread())){
+			throw new PrerequisitesNotMetException("not at main thread!!!", i(), Thread.currentThread());
+		}
 	}
 }
-

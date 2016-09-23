@@ -38,8 +38,10 @@ public class VarCmdUId implements Cloneable{
 	private String strPrefixCmd=null;
 	private String strVarType=null;
 	// other parts
-	private String strConcreteClassSName=null;
-	private String strDeclaringClassSName=null;
+	private String strConcreteClassSimpleName=null;
+	private String strDeclaringClassSimpleName=null;
+	private String strConcreteClassSimpleNameOverride=null;
+	private String strDeclaringClassSimpleNameOverride=null;
 	private String strPrefix=null;
 	private String strSimpleId=null;
 	private String strSuffix=null;
@@ -118,22 +120,24 @@ public class VarCmdUId implements Cloneable{
 		return clDeclaring;
 	}
 	
-	public String getConcreteClassSName() {
-		return strConcreteClassSName;
+	public String getConcreteClassSimpleName() {
+		if(strConcreteClassSimpleNameOverride!=null)return strConcreteClassSimpleNameOverride;
+		return strConcreteClassSimpleName;
 	}
 	public VarCmdUId setConcreteClass(Class clConcrete, String strConcreteClass) {
-		PrerequisitesNotMetException.assertNotAlreadySet("strConcreteClassSName", this.strConcreteClassSName, strConcreteClassSName, this);
+		PrerequisitesNotMetException.assertNotAlreadySet("strConcreteClassSName", this.strConcreteClassSimpleName, strConcreteClassSimpleName, this);
 		this.clConcrete=clConcrete;
-		this.strConcreteClassSName = strConcreteClass;
+		this.strConcreteClassSimpleName = strConcreteClass;
 		return this;
 	}
-	public String getDeclaringClassSName() {
-		return strDeclaringClassSName;
+	public String getDeclaringClassSimpleName() {
+		if(strDeclaringClassSimpleNameOverride!=null)return strDeclaringClassSimpleNameOverride;
+		return strDeclaringClassSimpleName;
 	}
 	public VarCmdUId setDeclaringClass(Class clDeclaring, String strDeclaringClass) {
-		PrerequisitesNotMetException.assertNotAlreadySet("strDeclaringClassSName", this.strDeclaringClassSName, strDeclaringClassSName, this);
+		PrerequisitesNotMetException.assertNotAlreadySet("strDeclaringClassSName", this.strDeclaringClassSimpleName, strDeclaringClassSimpleName, this);
 		this.clDeclaring=clDeclaring;
-		this.strDeclaringClassSName = strDeclaringClass;
+		this.strDeclaringClassSimpleName = strDeclaringClass;
 		return this;
 	}
 	public String getPrefix() {
@@ -184,6 +188,20 @@ public class VarCmdUId implements Cloneable{
 	
 	public VarCmdUId setPartSeparator(String strCommandPartSeparator) {
 		this.strPartSeparator=strCommandPartSeparator;
+		return this;
+	}
+	public String getConcreteClassSimpleNameOverride() {
+		return strConcreteClassSimpleNameOverride;
+	}
+	public VarCmdUId setConcreteClassSimpleNameOverride(String strConcreteClassSimpleNameOverride) {
+		this.strConcreteClassSimpleNameOverride = strConcreteClassSimpleNameOverride;
+		return this;
+	}
+	public String getDeclaringClassSimpleNameOverride() {
+		return strDeclaringClassSimpleNameOverride;
+	}
+	public VarCmdUId setDeclaringClassSimpleNameOverride(String strDeclaringClassSimpleNameOverride) {
+		this.strDeclaringClassSimpleNameOverride = strDeclaringClassSimpleNameOverride;
 		return this;
 	}
 }

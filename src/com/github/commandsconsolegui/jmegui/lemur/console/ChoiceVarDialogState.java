@@ -27,12 +27,15 @@
 
 package com.github.commandsconsolegui.jmegui.lemur.console;
 
+import java.util.ArrayList;
+
 import com.github.commandsconsolegui.cmd.varfield.NumberVarFieldAbs;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData.SliderValueData.ESliderKey;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceDialogState;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceLemurDialogState;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
@@ -46,8 +49,8 @@ import com.simsilica.lemur.Command;
  *
  * @param <T>
  */
-public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceDialogState<T>{
-	public static class CfgParm extends ChoiceDialogState.CfgParm{
+public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceLemurDialogState<T>{
+	public static class CfgParm extends ChoiceLemurDialogState.CfgParm{
 		public CfgParm(Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow,
 				Float fInfoHeightPercentOfDialog, Float fEntryHeightMultiplier) {
@@ -72,7 +75,13 @@ public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceDialo
 	protected boolean enableAttempt() {
 		if(!super.enableAttempt())return false;
 		
-		dledAtParent = getParentReferencedDledListCopy().get(0);
+		ArrayList<DialogListEntryData<T>> adledAtParentList = getParentReferencedDledListCopy();
+		if(adledAtParentList.size()==0){
+			GlobalCommandsDelegatorI.i().dumpWarnEntry("no entry selected at parente dialog", this, getParentDialog());
+			return false;
+		}
+		
+		dledAtParent = adledAtParentList.get(0);
 		Object objUser = dledAtParent.getUserObj();
 		if(objUser instanceof VarCmdFieldAbs){
 			vcf = (VarCmdFieldAbs)objUser;

@@ -38,6 +38,7 @@ import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData.SliderValueData;
 import com.github.commandsconsolegui.jmegui.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurStateI;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurDialogStateAbs;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -74,10 +75,10 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 	
 	private float fCellHeightMult = 1f;
 	private String	strStyle;
-	private LemurDialogGUIStateAbs<T,?>	diagParent;
+	private LemurDialogStateAbs<T,?>	diagParent;
 //	private boolean	bOptionChoiceMode;
 	
-	public CellRendererDialogEntry(String strStyle, LemurDialogGUIStateAbs<T,?> diag){//, boolean bOptionChoiceMode) {
+	public CellRendererDialogEntry(String strStyle, LemurDialogStateAbs<T,?> diag){//, boolean bOptionChoiceMode) {
 		this.strStyle=strStyle;
 		this.diagParent=diag;
 //		this.bOptionChoiceMode=bOptionChoiceMode;
@@ -100,8 +101,10 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 	public static class CellDialogEntry<T> extends Container implements IReflexFillCfg {
 		public static enum EUserData{
 			colorFgBkp,
-			cellClassRef,
+			classCellRef,
+			bHoverOverIsWorking,
 			;
+			public String s(){return this.toString();}
 		}
 		
 		private static BugFixBoolTogglerCmdField btgNOTWORKINGBugFixGapForListBoxSelectorArea;
@@ -177,7 +180,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			
 			String strTreeAction = dled.isParent() ? 
 				(dled.isTreeExpanded()?"-":"+") :
-				assignedCellRenderer.svfTreeDepthToken.getStringValue();
+				assignedCellRenderer.svfTreeDepthToken.getValueAsString();
 			
 			String strDepthSeparator = "/";
 			
@@ -188,7 +191,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 					strDepth = dledParent.getUId()+strDepthSeparator
 						+strDepth;
 				}else{
-					strDepth = assignedCellRenderer.svfTreeDepthToken.getStringValue()
+					strDepth = assignedCellRenderer.svfTreeDepthToken.getValueAsString()
 						+strDepth;
 				}
 				dledParent = dledParent.getParent();
@@ -214,7 +217,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			btnTree.setText(str); //it seems to auto trim the string...
 			btnTree.setInsets(new Insets3f(0, 0, 0, 10));
 			
-			btnTree.setColor((ColorRGBA) btnTree.getUserData(EUserData.colorFgBkp.toString()));
+			btnTree.setColor((ColorRGBA) btnTree.getUserData(EUserData.colorFgBkp.s()));
 			if(!assignedCellRenderer.diagParent.isOptionSelectionMode()){
 				if(!dled.isParent())btnTree.setColor(btnTree.getShadowColor());
 			}
@@ -280,7 +283,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			btnTree = createButton("Tree", "?", cntrBase, Position.West);
 			btnTree.addCommands(ButtonAction.Click, ctt);
 			btnTree.setUserData(CellDialogEntry.class.getName(), this);
-			btnTree.setUserData(EUserData.colorFgBkp.toString(), btnTree.getColor());
+			btnTree.setUserData(EUserData.colorFgBkp.s(), btnTree.getColor());
 			
 			btnText = createButton("Text", this.dled.getVisibleText(), cntrBase, Position.Center);
 			
@@ -403,7 +406,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			Button btn = new Button(strLabel,assignedCellRenderer.strStyle);
 			MiscJmeI.i().retrieveBitmapTextFor(btn).setLineWrapMode(LineWrapMode.NoWrap);
 			btn.setName(strPrefix+"Button"+strId);
-			btn.setUserData(EUserData.cellClassRef.toString(),this);
+			btn.setUserData(EUserData.classCellRef.s(),this);
 			btn.setUserData(dled.getClass().getName(), dled);
 			CursorEventControl.addListenersToSpatial(btn, DialogMouseCursorListenerI.i());
 			

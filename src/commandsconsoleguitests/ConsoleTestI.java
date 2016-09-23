@@ -37,9 +37,9 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.jmegui.console.SimpleConsoleAppAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceDialogState;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.MaintenanceListDialogState;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.QuestionDialogState;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceLemurDialogState;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.MaintenanceListLemurDialogState;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.QuestionLemurDialogState;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -81,11 +81,11 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 //	private StringVarField svfOptionSelectedDialog2 = new StringVarField(this,"");
 	
 	// generic dialog
-	private ChoiceDialogState<T>	diagChoice;
+	private ChoiceLemurDialogState<T>	diagChoice;
 
-	private MaintenanceListDialogState<T>	diagList;
+	private MaintenanceListLemurDialogState<T>	diagList;
 
-	private QuestionDialogState<T>	diagQuestion;
+	private QuestionLemurDialogState<T>	diagQuestion;
 
 //	private String	strOptionSelected;
 	
@@ -145,19 +145,19 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		// test dialogs
 //		diagChoice = new BasicDialogStateAbs<T>(BasicDialogStateAbs.EDiag.Choice).configure(
 //			new BasicDialogStateAbs.CfgParm(true, 0.6f, 0.5f, null, null));
-		diagChoice = new ChoiceDialogState<T>().configure(new ChoiceDialogState.CfgParm(
+		diagChoice = new ChoiceLemurDialogState<T>().configure(new ChoiceLemurDialogState.CfgParm(
 			0.6f, 0.5f, null, null));
 		
 //		diagQuestion = new BasicDialogStateAbs<T>(BasicDialogStateAbs.EDiag.Question).configure(
 //			new BasicDialogStateAbs.CfgParm(true, 500f, 300f, null, null));
-		diagQuestion = new QuestionDialogState<T>().configure(new QuestionDialogState.CfgParm(
+		diagQuestion = new QuestionLemurDialogState<T>().configure(new QuestionLemurDialogState.CfgParm(
 			500f, 300f, null, null));
 		
 //		diagList = new BasicDialogStateAbs<T>(BasicDialogStateAbs.EDiag.BrowseManagementList).configure(
 //			new BasicDialogStateAbs.CfgParm(false, null, null, null, null))
 //			.addModalDialog(diagChoice)
 //			.addModalDialog(diagQuestion);
-		diagList = new MaintenanceListDialogState<T>().configure(new MaintenanceListDialogState.CfgParm<T>(
+		diagList = new MaintenanceListLemurDialogState<T>().configure(new MaintenanceListLemurDialogState.CfgParm<T>(
 			null, null, null, null, diagChoice, diagQuestion));
 		
 		prepareTestData();

@@ -35,11 +35,11 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
+import com.github.commandsconsolegui.jmegui.DialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.MouseCursorListenerAbs;
-import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurDialogStateAbs;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -214,7 +214,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	}
 	ClickFocusMouseCursorListener focusMouseCursorListener = new ClickFocusMouseCursorListener();
 	
-	public void prepareDialogToBeFocused(LemurDialogGUIStateAbs diag){
+	public void prepareDialogToBeFocused(LemurDialogStateAbs diag){
 		MiscJmeI.i().setUserDataPSH(diag.getInputFieldForManagement(ccSelf), diag);
 //		diag.getContainerMain().setUserData(LemurDialogGUIStateAbs.class.getName(), diag);
 		
@@ -227,9 +227,9 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	 * @param sptAny
 	 * @return
 	 */
-	public BaseDialogStateAbs retrieveDialogFromSpatial(Spatial sptAny){
+	public DialogStateAbs retrieveDialogFromSpatial(Spatial sptAny){
 		Spatial sptParentest = MiscJmeI.i().getParentestFrom(sptAny);
-		BaseDialogStateAbs diag = MiscJmeI.i().getUserDataPSH(sptParentest, BaseDialogStateAbs.class);
+		DialogStateAbs diag = MiscJmeI.i().getUserDataPSH(sptParentest, DialogStateAbs.class);
 //		LemurDialogGUIStateAbs diag = (LemurDialogGUIStateAbs)MiscJmeI.i().getParentestFrom(sptAny)
 //				.getUserData(LemurDialogGUIStateAbs.class.getName());
 		
@@ -239,7 +239,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	}
 	
 	public boolean lowerDialogFocusPriority(Spatial sptAny){
-		BaseDialogStateAbs diag = retrieveDialogFromSpatial(sptAny);
+		DialogStateAbs diag = retrieveDialogFromSpatial(sptAny);
 		Spatial sptFocusable = diag.getInputFieldForManagement(ccSelf);
 		
 		if(asptFocusRequestList.contains(sptFocusable)){
@@ -255,12 +255,12 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	}
 	
 	public void requestDialogFocus(Spatial sptChild) {
-		BaseDialogStateAbs diag = retrieveDialogFromSpatial(sptChild);
+		DialogStateAbs diag = retrieveDialogFromSpatial(sptChild);
 		if(!diag.isLayoutValid())return; //TODO return false? or queue this request?
 		
-		BaseDialogStateAbs diagFocus = diag;
+		DialogStateAbs diagFocus = diag;
 		for(Object objDiagModal:diag.getModalChildListCopy()){
-			BaseDialogStateAbs diagModal = (BaseDialogStateAbs) objDiagModal;
+			DialogStateAbs diagModal = (DialogStateAbs) objDiagModal;
 			diagFocus = diagModal;
 			break;
 		}
@@ -292,12 +292,12 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 			}
 		}
 		
-		BaseDialogStateAbs diag = retrieveDialogFromSpatial(spt);
+		DialogStateAbs diag = retrieveDialogFromSpatial(spt);
 		if(!diag.isLayoutValid())return; //TODO return false? or queue this request?
 		
-		ArrayList<BaseDialogStateAbs> adiag = new ArrayList<BaseDialogStateAbs>();
-		if (diag instanceof LemurDialogGUIStateAbs) {
-			LemurDialogGUIStateAbs diagLemur = (LemurDialogGUIStateAbs) diag;
+		ArrayList<DialogStateAbs> adiag = new ArrayList<DialogStateAbs>();
+		if (diag instanceof LemurDialogStateAbs) {
+			LemurDialogStateAbs diagLemur = (LemurDialogStateAbs) diag;
 			
 			/**
 			 * TODO bring all parents up when focusing a modal child
@@ -309,7 +309,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 		}
 		adiag.add(diag);
 		
-		for(BaseDialogStateAbs diagWork:adiag){
+		for(DialogStateAbs diagWork:adiag){
 			spt = diagWork.getInputFieldForManagement(ccSelf);
 			
 			assertIsAtRenderingNode(spt);
@@ -371,7 +371,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 				GuiControl gcTarget = (GuiControl)ft;
 				Spatial spt = MiscJmeI.i().getParentestFrom(gcTarget.getSpatial());
 				
-				BaseDialogStateAbs diag = MiscJmeI.i().getUserDataPSH(spt, BaseDialogStateAbs.class.getName());
+				DialogStateAbs diag = MiscJmeI.i().getUserDataPSH(spt, DialogStateAbs.class.getName());
 //				BaseDialogStateAbs diag = (BaseDialogStateAbs)spt.getUserData(BaseDialogStateAbs.class.getName());
 				if(diag!=null){
 					if(ft==ftLatest){

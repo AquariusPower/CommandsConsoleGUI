@@ -126,7 +126,7 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 		public AudioCfg(String strUId) {
 			this.strId=strUId;
 		}
-		public String getFile(){return svfFile.getStringValue();}
+		public String getFile(){return svfFile.getValueAsString();}
 		public void setFile(String strFile){this.svfFile.setObjectRawValue(strFile);}
 		
 		@Override

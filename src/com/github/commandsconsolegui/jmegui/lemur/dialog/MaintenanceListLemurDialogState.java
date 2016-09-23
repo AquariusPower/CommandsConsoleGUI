@@ -32,9 +32,8 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
-import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
+import com.github.commandsconsolegui.jmegui.DialogStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
-import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
@@ -45,17 +44,17 @@ import com.simsilica.lemur.Command;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class MaintenanceListDialogState<T extends Command<Button>> extends LemurBasicDialogStateAbs<T,MaintenanceListDialogState<T>> {
-	public static class CfgParm<T> extends LemurBasicDialogStateAbs.CfgParm{
-		private LemurDialogGUIStateAbs<T,?>	diagChoice;
-		private LemurDialogGUIStateAbs<T,?>	diagQuestion;
+public class MaintenanceListLemurDialogState<T extends Command<Button>> extends BasicLemurDialogStateAbs<T,MaintenanceListLemurDialogState<T>> {
+	public static class CfgParm<T> extends BasicLemurDialogStateAbs.CfgParm{
+		private LemurDialogStateAbs<T,?>	diagChoice;
+		private LemurDialogStateAbs<T,?>	diagQuestion;
 
 		public CfgParm(
 				Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow,
 				Float fInfoHeightPercentOfDialog, Float fEntryHeightMultiplier,
-				LemurDialogGUIStateAbs<T,?> diagChoice,
-				LemurDialogGUIStateAbs<T,?> diagQuestion) {
+				LemurDialogStateAbs<T,?> diagChoice,
+				LemurDialogStateAbs<T,?> diagQuestion) {
 			super(fDialogWidthPercentOfAppWindow,
 					fDialogHeightPercentOfAppWindow, fInfoHeightPercentOfDialog,
 					fEntryHeightMultiplier);
@@ -64,25 +63,25 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 //			super.setUIId(MaintenanceListDialogStateAbs.class.getSimpleName());
 		}
 
-		public LemurDialogGUIStateAbs<T,?> getDiagChoice() {
+		public LemurDialogStateAbs<T,?> getDiagChoice() {
 			return diagChoice;
 		}
 
-		public void setDiagChoice(LemurDialogGUIStateAbs<T,?> diagChoice) {
+		public void setDiagChoice(LemurDialogStateAbs<T,?> diagChoice) {
 			this.diagChoice = diagChoice;
 		}
 
-		public LemurDialogGUIStateAbs<T,?> getDiagQuestion() {
+		public LemurDialogStateAbs<T,?> getDiagQuestion() {
 			return diagQuestion;
 		}
 
-		public void setDiagQuestion(LemurDialogGUIStateAbs<T,?> diagQuestion) {
+		public void setDiagQuestion(LemurDialogStateAbs<T,?> diagQuestion) {
 			this.diagQuestion = diagQuestion;
 		}
 	}
 	private CfgParm<T>	cfg;
 	@Override
-	public MaintenanceListDialogState<T> configure(ICfgParm icfg) {
+	public MaintenanceListLemurDialogState<T> configure(ICfgParm icfg) {
 		cfg = (CfgParm<T>)icfg;
 		
 		if(cfg.getDiagChoice()!=null)addModalDialog(cfg.getDiagChoice());
@@ -121,15 +120,15 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 
 	@Override
 	public void applyResultsFromModalDialog() {
-		BaseDialogStateAbs<T,?> diagModal = getChildDiagModalInfoCurrent().getDiagModal();
+		DialogStateAbs<T,?> diagModal = getChildDiagModalInfoCurrent().getDiagModal();
 		T cmdRequestedAtThisDiag = getChildDiagModalInfoCurrent().getCmdAtParent();
 		ArrayList<DialogListEntryData<T>> adledToApplyResultsList = getChildDiagModalInfoCurrent().getParentReferencedDledListCopy();
 		
 		boolean bChangesMade = false;
 		for(DialogListEntryData<T> dledAtModal:diagModal.getDataSelectionListCopy()){
 				if(cmdRequestedAtThisDiag.equals(cmdDel)){
-					if(diagModal instanceof QuestionDialogState){
-						QuestionDialogState<T> qds = (QuestionDialogState<T>)diagModal;
+					if(diagModal instanceof QuestionLemurDialogState){
+						QuestionLemurDialogState<T> qds = (QuestionLemurDialogState<T>)diagModal;
 						if(qds.isYes(dledAtModal)){
 							bChangesMade = deleteEntry(adledToApplyResultsList);
 							
@@ -144,7 +143,7 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 							AudioUII.i().play(EAudio.ReturnNothing);
 						}
 					}else{
-						throw new PrerequisitesNotMetException("unexpected diag", diagModal, QuestionDialogState.class);
+						throw new PrerequisitesNotMetException("unexpected diag", diagModal, QuestionLemurDialogState.class);
 					}
 				}else
 				if(cmdRequestedAtThisDiag.equals(cmdCfg)){
@@ -167,7 +166,7 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 	 * @param adledToApplyResultsList
 	 * @return
 	 */
-	protected boolean modifyEntry(BaseDialogStateAbs<T,?> diagModal, DialogListEntryData<T> dledAtModal, ArrayList<DialogListEntryData<T>> adledToApplyResultsList) {
+	protected boolean modifyEntry(DialogStateAbs<T,?> diagModal, DialogListEntryData<T> dledAtModal, ArrayList<DialogListEntryData<T>> adledToApplyResultsList) {
 		boolean bChangesMade=false;
 		for(DialogListEntryData<T> dledToCfg:adledToApplyResultsList){
 			dledToCfg.updateTextTo(dledAtModal.getTextValue());
@@ -206,14 +205,14 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 			if(dled.isParent()){
 //				CustomDialogGUIState.this.setDataToApplyModalChoice(data);
 				if(cfg.getDiagQuestion()!=null){
-					MaintenanceListDialogState.this.openModalDialog(cfg.getDiagQuestion().getId(), dled, (T)this);
+					MaintenanceListLemurDialogState.this.openModalDialog(cfg.getDiagQuestion().getId(), dled, (T)this);
 					AudioUII.i().play(EAudio.Question);
 				}else{
 					AudioUII.i().playOnUserAction(AudioUII.EAudio.Failure);
 					GlobalCommandsDelegatorI.i().dumpDevWarnEntry("no question dialog configured for "+this, btn, dled);
 				}
 			}else{
-				MaintenanceListDialogState.this.removeEntry(dled);
+				MaintenanceListLemurDialogState.this.removeEntry(dled);
 			}
 		}
 	}
@@ -242,7 +241,7 @@ public class MaintenanceListDialogState<T extends Command<Button>> extends Lemur
 	CommandCfg cmdCfg = new CommandCfg();
 	
 	@Override
-	protected MaintenanceListDialogState<T> getThis() {
+	protected MaintenanceListLemurDialogState<T> getThis() {
 		return this;
 	}
 

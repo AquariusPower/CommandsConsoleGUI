@@ -32,9 +32,7 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
-import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
@@ -43,15 +41,15 @@ import com.simsilica.lemur.GuiGlobals;
 /**
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public abstract class LemurBasicDialogStateAbs<T,R extends LemurBasicDialogStateAbs<T,R>> extends LemurDialogGUIStateAbs<T,R>{
+public abstract class BasicLemurDialogStateAbs<T,R extends BasicLemurDialogStateAbs<T,R>> extends LemurDialogStateAbs<T,R>{
 	StringCmdField scfAddEntry = new StringCmdField(this);
 	private CfgParm	cfg;
 	
-	public LemurBasicDialogStateAbs() {
+	public BasicLemurDialogStateAbs() {
 		setPrefixCmdWithIdToo(true);
 	}
 	
-	public static class CfgParm extends LemurDialogGUIStateAbs.CfgParm{
+	public static class CfgParm extends LemurDialogStateAbs.CfgParm{
 //		boolean bPrepareTestData;
 //		public CfgParm doPrepareTestData(){
 //			bPrepareTestData=true;
@@ -117,7 +115,7 @@ public abstract class LemurBasicDialogStateAbs<T,R extends LemurBasicDialogState
 	protected class CommandSel implements Command<Button>{
 		@Override
 		public void execute(Button btn) {
-			LemurBasicDialogStateAbs.this.selectAndChoseOption(getDledFrom(btn));
+			BasicLemurDialogStateAbs.this.selectAndChoseOption(getDledFrom(btn));
 		}
 	}
 	CommandSel cmdSel = new CommandSel();

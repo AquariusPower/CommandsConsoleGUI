@@ -38,7 +38,7 @@ import java.util.Comparator;
 public class ImportantMsgData {
 	String strMsg;
 	Exception ex;
-	StackTraceElement[] asteInstancedAt;
+	StackTraceElement[] asteExceptionHappenedAt;
 	DumpEntryData de;
 	Long lBufferedTimeNano;
 	Long lFirstOcurrenceCreationTimeNano;
@@ -80,14 +80,14 @@ public class ImportantMsgData {
 //		ex.setStackTrace(aste);
 //	}
 		this.ex=de.getException();
-		this.asteInstancedAt=de.getException().getStackTrace();
+		this.asteExceptionHappenedAt=de.getException().getStackTrace();
 		
 		lFirstOcurrenceCreationTimeNano=System.nanoTime();
 	}
 	
 	public boolean identicalTo(ImportantMsgData imdOther){
-		if (!strMsg.equals(imdOther.strMsg))return false; //equals() is faster, and such messages will not have case difference...
-		if (!Arrays.equals(asteInstancedAt, imdOther.asteInstancedAt))return false;
+		if (!strMsg.equals(imdOther.strMsg))return false; //equals() is faster, and such messages will not have string letter case difference...
+		if (!Arrays.equals(asteExceptionHappenedAt, imdOther.asteExceptionHappenedAt))return false;
 		
 		return true;
 	}

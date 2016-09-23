@@ -45,16 +45,9 @@ import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurStateI;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelperI;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBasicDialogStateAbs;
 import com.github.commandsconsolegui.jmegui.lemur.extras.ISpatialValidator;
 import com.github.commandsconsolegui.jmegui.savablevalues.CompositeSavableAbs;
-import com.github.commandsconsolegui.jmegui.savablevalues.SaveFloat;
-import com.github.commandsconsolegui.jmegui.savablevalues.SaveString;
-import com.github.commandsconsolegui.jmegui.savablevalues.SaveValueAbs;
-import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
-import com.github.commandsconsolegui.misc.HashChangeHolder;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 //import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
@@ -62,11 +55,8 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.jme3.export.InputCapsule;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
-import com.jme3.export.OutputCapsule;
-import com.jme3.export.Savable;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -76,14 +66,15 @@ import com.simsilica.lemur.Container;
  * This class would be useful to a non Lemur dialog too.
  * 
  * A console command will be automatically created based on the configured {@link #strUIId}.<br>
- * See it at {@link BaseDialogStateAbs}.
+ * See it at {@link DialogStateAbs}.
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
- * @param <T> see {@link DialogListEntryData}
- * @param <R> is for getThis() concrete auto class type inherited trick
+ * @param <DIAG> see {@link DialogListEntryData}
+ * @param <THIS> is for getThis() concrete auto class type inherited trick
  */
-public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> extends CmdConditionalStateAbs implements IReflexFillCfg {
+//public abstract class BaseDialogStateAbs<DIAG,CS extends BaseDialogStateAbs.DialogCS<THIS>,THIS extends BaseDialogStateAbs<DIAG,CS,THIS>> extends CmdConditionalStateAbs implements IReflexFillCfg {
+public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>> extends CmdConditionalStateAbs implements IReflexFillCfg {
 	private ISpatialValidator	sptvDialogMainContainer;
 	private Spatial	sptIntputField;
 	private Spatial sptMainList;
@@ -96,8 +87,8 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	private String	strUserEnterCustomValueToken = "=";
 	
 	private boolean	bUserEnterCustomValueMode;
-	private BaseDialogStateAbs<T,?> diagParent;
-	private ArrayList<BaseDialogStateAbs<T,?>> aModalChildList = new ArrayList<BaseDialogStateAbs<T,?>>();
+	private DialogStateAbs<DIAG,?> diagParent;
+	private ArrayList<DialogStateAbs<DIAG,?>> aModalChildList = new ArrayList<DialogStateAbs<DIAG,?>>();
 //	private DialogListEntryData<T>	dataToCfgReference;
 //	private DialogListEntryData<T> dataFromModal;
 	private boolean	bRequestedActionSubmit;
@@ -107,18 +98,18 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	private String	strLastFilter = "";
 //	private ArrayList<DialogListEntry> aEntryList = new ArrayList<DialogListEntry>();
 //	private String	strLastSelectedKey;
-	private ArrayList<DialogListEntryData<T>>	adleCompleteEntriesList = new ArrayList<DialogListEntryData<T>>();
-	private ArrayList<DialogListEntryData<T>>	adleTmp;
-	private DialogListEntryData<T>	dleLastSelected;
+	private ArrayList<DialogListEntryData<DIAG>>	adleCompleteEntriesList = new ArrayList<DialogListEntryData<DIAG>>();
+	private ArrayList<DialogListEntryData<DIAG>>	adleTmp;
+	private DialogListEntryData<DIAG>	dleLastSelected;
 //	private V	valueOptionSelected;
 	private boolean	bRequestedRefreshList;
 //	private DialogListEntryData<T>	dataReferenceAtParent;
 //	private T	cmdAtParent;
-	private DiagModalInfo<T> dmi = null;
+	private DiagModalInfo<DIAG> dmi = null;
 	
 	private boolean bOptionChoiceSelectionMode = false;
 //	private Long	lChoiceMadeAtMilis = null;
-	private ArrayList<DialogListEntryData<T>> adataChosenEntriesList = new ArrayList<DialogListEntryData<T>>();
+	private ArrayList<DialogListEntryData<DIAG>> adataChosenEntriesList = new ArrayList<DialogListEntryData<DIAG>>();
 	
 	private BoolTogglerCmdField btgRestoreIniPosSizeOnce = new BoolTogglerCmdField(this, false);
 	
@@ -129,27 +120,27 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	
 	protected abstract <N extends Node> void lineWrapDisableForChildrenOf(N node);
 	
-	private Comparator<DialogListEntryData<T>> cmpTextAtoZ = new Comparator<DialogListEntryData<T>>() {
+	private Comparator<DialogListEntryData<DIAG>> cmpTextAtoZ = new Comparator<DialogListEntryData<DIAG>>() {
 		@Override
-		public int compare(DialogListEntryData<T> o1, DialogListEntryData<T> o2) {
+		public int compare(DialogListEntryData<DIAG> o1, DialogListEntryData<DIAG> o2) {
 			return o1.getVisibleText().compareTo(o2.getVisibleText());
 		}
 	};
-	private Comparator<DialogListEntryData<T>> cmpTextZtoA = new Comparator<DialogListEntryData<T>>() {
+	private Comparator<DialogListEntryData<DIAG>> cmpTextZtoA = new Comparator<DialogListEntryData<DIAG>>() {
 		@Override
-		public int compare(DialogListEntryData<T> o1, DialogListEntryData<T> o2) {
+		public int compare(DialogListEntryData<DIAG> o1, DialogListEntryData<DIAG> o2) {
 			return o2.getVisibleText().compareTo(o1.getVisibleText());
 		}
 	};
-	private Comparator<DialogListEntryData<T>> getComparatorText(boolean bAtoZ){
+	private Comparator<DialogListEntryData<DIAG>> getComparatorText(boolean bAtoZ){
 		return bAtoZ ? cmpTextAtoZ : cmpTextZtoA;
 	}
 	
-	protected DiagModalInfo<T> getChildDiagModalInfoCurrent(){
+	protected DiagModalInfo<DIAG> getChildDiagModalInfoCurrent(){
 		return dmi;
 	}
 	
-	protected R setDiagModalInfoCurrent(DiagModalInfo<T> dmi){
+	protected THIS setDiagModalInfoCurrent(DiagModalInfo<DIAG> dmi){
 		this.dmi=dmi;
 		return getThis();
 	}
@@ -162,7 +153,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return ((ISpatialValidator)sptvDialogMainContainer).isLayoutValid();
 	}
 	
-	protected R setDialogMainContainer(ISpatialValidator spt){
+	protected THIS setDialogMainContainer(ISpatialValidator spt){
 		this.sptvDialogMainContainer=spt;
 		
 //		for(Class<?> cl:MiscI.i().getSuperClassesOf(this)){
@@ -253,7 +244,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	private boolean	bSaveDialog = true;
 	private Vector3f	v3fApplicationWindowSize;
 	@Override
-	public R configure(ICfgParm icfg) {
+	public THIS configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
 		
 //		if(isSaveDialog()){
@@ -341,7 +332,9 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	 */
 	@Override
 	protected boolean initAttempt() {
-		if(getDiagStyle()==null)setStyle(GlobalDialogHelperI.i().STYLE_CONSOLE);
+		if(getDiagStyle()==null){
+			setStyle(GlobalDialogHelperI.i().STYLE_CONSOLE);
+		}
 		if(!super.initAttempt())return false;
 		
 		if(!initGUI())return false;
@@ -360,6 +353,8 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		
 		tdUpdateRefreshList.updateTime();
 		
+		if(!isCompositeSavableSet())setCompositeSavable(new DialogCS(this));
+		
 		return true;
 	}
 	
@@ -376,7 +371,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	
 	protected abstract boolean initKeyMappings();
 	
-	protected R setInputTextAsUserTypedValue(String str){
+	protected THIS setInputTextAsUserTypedValue(String str){
 		if(!isInputToUserEnterCustomValueMode())throw new PrerequisitesNotMetException("not user typing value mode", this);
 		
 		setInputText(getUserEnterCustomValueToken()+str);
@@ -421,7 +416,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	protected boolean updateAttempt(float tpf) {
 		if(!super.updateAttempt(tpf))return false;
 		
-		DialogListEntryData<T> dle = getSelectedEntryData();
+		DialogListEntryData<DIAG> dle = getSelectedEntryData();
 		if(dle!=dleLastSelected)AudioUII.i().play(AudioUII.EAudio.SelectEntry);
 //		if(dle!=null)
 		dleLastSelected = dle;
@@ -505,6 +500,10 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	
 	protected float getEffectPerc(){
 		return tdDialogEffect.getCurrentDelayPercentual(false);
+	}
+	
+	protected int getEffectMaxTimeMilis(){
+		return (int)tdDialogEffect.getDelayLimitMilis();
 	}
 	
 	@Override
@@ -591,12 +590,12 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	 * vanishing with (grabbing) the mouse cursor.
 	 * @param b
 	 */
-	protected R setMouseCursorKeepUngrabbed(boolean b) {
+	protected THIS setMouseCursorKeepUngrabbed(boolean b) {
 		UngrabMouseStateI.i().setKeepUngrabbedRequester(this,b);
 		return getThis();
 	}
 	
-	protected R setTitle(String str){
+	protected THIS setTitle(String str){
 		this.strTitle = str;
 		return getThis();
 	}
@@ -619,7 +618,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return MiscJmeI.i().retrieveBitmapTextFor((Node)sptIntputField).getLineHeight();
 	}
 	
-	protected R setInputField(Spatial sptIntputField) {
+	protected THIS setInputField(Spatial sptIntputField) {
 		this.sptIntputField = sptIntputField;
 		return getThis();
 	}
@@ -627,22 +626,22 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	public boolean isInputToUserEnterCustomValueMode(){
 		return bUserEnterCustomValueMode;
 	}
-	public R setInputToUserEnterCustomValueMode(boolean bEnable){
+	public THIS setInputToUserEnterCustomValueMode(boolean bEnable){
 		this.bUserEnterCustomValueMode=bEnable;
 		return getThis();
 	}
 	
 //	protected abstract R setInputText(String str);
-	protected R setInputText(String str){
+	protected THIS setInputText(String str){
 		bdh().setTextAt(getInputField(),str);
 		return getThis();
 	}
 	
-	protected BaseDialogStateAbs<T,?> getParentDialog(){
+	protected DialogStateAbs<DIAG,?> getParentDialog(){
 		return this.diagParent;
 	}
 	
-	protected R setDiagParent(BaseDialogStateAbs<T,?> diagParent) {
+	protected THIS setDiagParent(DialogStateAbs<DIAG,?> diagParent) {
 //		if(this.diagParent!=null)throw new PrerequisitesNotMetException("modal parent already set",this.diagParent,diagParent);
 		PrerequisitesNotMetException.assertNotAlreadySet("modal parent", this.diagParent, diagParent, this);
 		this.diagParent = diagParent;
@@ -651,10 +650,10 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	
 //	public abstract void setAnswerFromModalChild(Object... aobj);
 	
-	public ArrayList<BaseDialogStateAbs<T,?>> getModalChildListCopy() {
-		return new ArrayList<BaseDialogStateAbs<T,?>>(aModalChildList);
+	public ArrayList<DialogStateAbs<DIAG,?>> getModalChildListCopy() {
+		return new ArrayList<DialogStateAbs<DIAG,?>>(aModalChildList);
 	}
-	protected void updateModalChild(boolean bAdd, BaseDialogStateAbs<T,?> baseDialogStateAbs) {
+	protected void updateModalChild(boolean bAdd, DialogStateAbs<DIAG,?> baseDialogStateAbs) {
 //		if(this.modalParent==null)return;
 			
 		if(bAdd){
@@ -674,7 +673,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	
 	protected abstract void updateList();
 	protected abstract void updateTextInfo();
-	protected abstract DialogListEntryData<T> getSelectedEntryData();
+	protected abstract DialogListEntryData<DIAG> getSelectedEntryData();
 	
 	/**
 	 * when dialog is enabled,
@@ -706,14 +705,14 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	protected String getTextInfo(){
 		String str="";
 		
-		str+="Help("+BaseDialogStateAbs.class.getSimpleName()+"):\n";
+		str+="Help("+DialogStateAbs.class.getSimpleName()+"):\n";
 		str+="\tType a list filter at input text area and hit Enter.\n";
 		
 		if(isOptionChoiceSelectionMode()){
 			str+="\tOption Mode: when hitting Enter, if an entry is selected, it's value will be chosen.\n";
 			str+="\tBut if the input begins with '"+getUserEnterCustomValueToken()+"', when hitting Enter, that specific value will be returned to the parent.\n";
 			
-			for(DialogListEntryData<T> dled:getParentReferencedDledListCopy()){
+			for(DialogListEntryData<DIAG> dled:getParentReferencedDledListCopy()){
 				str+="\tRefAtParent: "+dled.getVisibleText()+"\n";
 			}
 			
@@ -727,7 +726,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	 * @return
 	 */
 	@Deprecated
-	protected DialogListEntryData<T> getDledReferenceAtParent(){
+	protected DialogListEntryData<DIAG> getDledReferenceAtParent(){
 		throw new PrerequisitesNotMetException("NO! see this method documentation...");
 	}
 	/**
@@ -738,16 +737,16 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		throw new PrerequisitesNotMetException("NO! see this method documentation...");
 	}
 	
-	protected ArrayList<DialogListEntryData<T>> getParentReferencedDledListCopy() {
-		ArrayList<DialogListEntryData<T>> adled = new ArrayList<DialogListEntryData<T>>();
+	protected ArrayList<DialogListEntryData<DIAG>> getParentReferencedDledListCopy() {
+		ArrayList<DialogListEntryData<DIAG>> adled = new ArrayList<DialogListEntryData<DIAG>>();
 		if(getParentDialog()!=null){
-			BaseDialogStateAbs<T,?>.DiagModalInfo<T> dmiSonsOfPapa = getParentDialog().getChildDiagModalInfoCurrent();
+			DialogStateAbs<DIAG,?>.DiagModalInfo<DIAG> dmiSonsOfPapa = getParentDialog().getChildDiagModalInfoCurrent();
 			if(dmiSonsOfPapa!=null){
 				if(dmiSonsOfPapa.getDiagModal()!=this){
 					throw new PrerequisitesNotMetException("current parent's modal dialog should be 'this'",dmiSonsOfPapa,dmiSonsOfPapa.getDiagModal(),this);
 				}
 				
-				for(DialogListEntryData<T> dled:dmiSonsOfPapa.getParentReferencedDledListCopy()){
+				for(DialogListEntryData<DIAG> dled:dmiSonsOfPapa.getParentReferencedDledListCopy()){
 					adled.add(dled);
 				}
 			}
@@ -781,7 +780,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		applyListKeyFilter();
 		updateAllPartsNow();
 		
-		DialogListEntryData<T> dataSelected = getSelectedEntryData(); //this value is in this console variable now
+		DialogListEntryData<DIAG> dataSelected = getSelectedEntryData(); //this value is in this console variable now
 		
 		if(isOptionChoiceSelectionMode()){
 			adataChosenEntriesList.clear();
@@ -815,18 +814,18 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		updateInputField();
 	}
 	
-	public ArrayList<DialogListEntryData<T>> getDataSelectionListCopy() {
-		return new ArrayList<DialogListEntryData<T>>(adataChosenEntriesList);
+	public ArrayList<DialogListEntryData<DIAG>> getDataSelectionListCopy() {
+		return new ArrayList<DialogListEntryData<DIAG>>(adataChosenEntriesList);
 	}
 	
 	protected class DiagModalInfo<T>{
-		private R	diagChildModal;
+		private THIS	diagChildModal;
 		
 		private T	actionAtParent;
 		private ArrayList<DialogListEntryData<T>>	adledToPerformResultOfActionAtParentList;
 		
 		public DiagModalInfo(
-			R diagModalCurrent,
+			THIS diagModalCurrent,
 			T cmdAtParent,
 			DialogListEntryData<T>... adledReferenceAtParent 
 		) {
@@ -838,7 +837,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		}
 		
 		@SuppressWarnings("unchecked")
-		public R getDiagModal() {
+		public THIS getDiagModal() {
 			return diagChildModal;
 		}
 //		public void setDiagModal(R diagModal) {
@@ -864,7 +863,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return adataChosenEntriesList.size()>0;
 	}
 
-	protected R resetChoice() {
+	protected THIS resetChoice() {
 //		lChoiceMadeAtMilis=null;
 		adataChosenEntriesList.clear();
 		return getThis();
@@ -874,7 +873,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return bOptionChoiceSelectionMode;
 	}
 
-	protected R setOptionChoiceSelectionMode(boolean bOptionChoiceSelectionMode) {
+	protected THIS setOptionChoiceSelectionMode(boolean bOptionChoiceSelectionMode) {
 		this.bOptionChoiceSelectionMode = bOptionChoiceSelectionMode;
 		return getThis();
 	}
@@ -883,11 +882,11 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		adleCompleteEntriesList.clear();
 	}
 
-	protected ArrayList<DialogListEntryData<T>> getCompleteEntriesListCopy() {
-		return new ArrayList<DialogListEntryData<T>>(adleCompleteEntriesList);
+	protected ArrayList<DialogListEntryData<DIAG>> getCompleteEntriesListCopy() {
+		return new ArrayList<DialogListEntryData<DIAG>>(adleCompleteEntriesList);
 	}
 
-	protected DialogListEntryData<T> getAbove(DialogListEntryData<T> dled){
+	protected DialogListEntryData<DIAG> getAbove(DialogListEntryData<DIAG> dled){
 		int iDataAboveIndex = adleCompleteEntriesList.indexOf(dled)-1;
 		if(iDataAboveIndex>=0){
 			return adleCompleteEntriesList.get(iDataAboveIndex);
@@ -899,7 +898,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	 * for proper sorting
 	 * @param dled
 	 */
-	protected void recursiveAddNestedEntries(DialogListEntryData<T> dled){
+	protected void recursiveAddNestedEntries(DialogListEntryData<DIAG> dled){
 		adleTmp.remove(dled);
 		adleCompleteEntriesList.add(dled);
 		if(dled.isParent()){
@@ -907,7 +906,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 				dled.sortChildren(getComparatorText(btgSortListEntriesAtoZ.b()));
 			}
 			
-			for(DialogListEntryData<T> dledChild:dled.getChildrenCopy()){
+			for(DialogListEntryData<DIAG> dledChild:dled.getChildrenCopy()){
 				if(!dledChild.getParent().equals(dled)){
 					throw new PrerequisitesNotMetException("invalid parent", dled, dledChild);
 				}
@@ -920,7 +919,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	protected BoolTogglerCmdField btgSortListEntriesAtoZ = new BoolTogglerCmdField(this, true);
 	
 	protected void prepareTree(){
-		adleTmp = new ArrayList<DialogListEntryData<T>>(adleCompleteEntriesList);
+		adleTmp = new ArrayList<DialogListEntryData<DIAG>>(adleCompleteEntriesList);
 		
 		if(btgSortListEntries.b()){
 			// will work basically for the root entries only
@@ -930,14 +929,14 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		adleCompleteEntriesList.clear();
 		
 		// work on root ones
-		for(DialogListEntryData<T> dled:new ArrayList<DialogListEntryData<T>>(adleTmp)){
+		for(DialogListEntryData<DIAG> dled:new ArrayList<DialogListEntryData<DIAG>>(adleTmp)){
 			if(dled.getParent()==null){ 
 				recursiveAddNestedEntries(dled);
 			}
 		}
 	}
 	
-	protected DialogListEntryData<T> addEntry(DialogListEntryData<T> dled) {
+	protected DialogListEntryData<DIAG> addEntry(DialogListEntryData<DIAG> dled) {
 		if(dled==null)throw new PrerequisitesNotMetException("cant be null!");
 		if(adleCompleteEntriesList.contains(dled)){
 			GlobalCommandsDelegatorI.i().dumpDevWarnEntry("list already contains", adleCompleteEntriesList, dled, this);
@@ -947,23 +946,23 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return dled;
 	}
 
-	protected void removeEntry(DialogListEntryData<T> dled){
+	protected void removeEntry(DialogListEntryData<DIAG> dled){
 		removeEntry(dled, null);
 	}
-	private void removeEntry(DialogListEntryData<T> dled, DialogListEntryData<T> dledParent){
+	private void removeEntry(DialogListEntryData<DIAG> dled, DialogListEntryData<DIAG> dledParent){
 //		int iDataAboveIndex = -1;
-		DialogListEntryData<T> dledAboveTmp = null;
+		DialogListEntryData<DIAG> dledAboveTmp = null;
 		if(getSelectedEntryData().equals(dled)){
 //			iDataAboveIndex = adleCompleteEntriesList.indexOf(data)-1;
 //			if(iDataAboveIndex>=0)dataAboveTmp = adleCompleteEntriesList.get(iDataAboveIndex);
 			dledAboveTmp = getAbove(dled);
 		}
-		DialogListEntryData<T> dledParentTmp = dled.getParent();
+		DialogListEntryData<DIAG> dledParentTmp = dled.getParent();
 		
-		ArrayList<DialogListEntryData<T>> dledChildren = dled.getChildrenCopy();
+		ArrayList<DialogListEntryData<DIAG>> dledChildren = dled.getChildrenCopy();
 		boolean bIsParent=false;
 		if(dledChildren.size()>0)bIsParent=true;
-		for(DialogListEntryData<T> dledChild:dledChildren){
+		for(DialogListEntryData<DIAG> dledChild:dledChildren){
 			removeEntry(dledChild,dled); //recursive
 		}
 		
@@ -987,7 +986,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	}
 	
 //	protected abstract void updateSelected(DialogListEntryData<T> dledPreviouslySelected);
-	protected abstract void updateSelected(final DialogListEntryData<T> dledAbove, final DialogListEntryData<T> dledParentTmp);
+	protected abstract void updateSelected(final DialogListEntryData<DIAG> dledAbove, final DialogListEntryData<DIAG> dledParentTmp);
 
 	protected Container getNorthContainer() {
 		return (Container)cntrNorth;
@@ -997,17 +996,17 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		return (Container)cntrSouth;
 	}
 
-	protected R setContainerNorth(Node cntrNorth) {
+	protected THIS setContainerNorth(Node cntrNorth) {
 		this.cntrNorth = cntrNorth;
 		return getThis();
 	}
 
-	protected R setCntrSouth(Node cntrSouth) {
+	protected THIS setCntrSouth(Node cntrSouth) {
 		this.cntrSouth = cntrSouth;
 		return getThis();
 	}
 	
-	protected DialogListEntryData<T> getLastSelected(){
+	protected DialogListEntryData<DIAG> getLastSelected(){
 		return dleLastSelected;
 	}
 	
@@ -1028,14 +1027,14 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	 * implement this only on concrete classes
 	 * @return
 	 */
-	protected abstract R getThis();
+	protected abstract THIS getThis();
 
 	public String getTitle() {
 		return strTitle;
 	}
 
 	public String getDiagStyle() {
-		return svfStyle.getStringValue();
+		return svfStyle.getValueAsString();
 	}
 
 	protected void setStyle(String strStyle) {
@@ -1070,7 +1069,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	 * 
 	 * @param dataSelected
 	 */
-	protected void actionCustomAtEntry(DialogListEntryData<T> dataSelected){
+	protected void actionCustomAtEntry(DialogListEntryData<DIAG> dataSelected){
 		AudioUII.i().playOnUserAction(AudioUII.EAudio.SubmitSelection);
 	}
 	
@@ -1081,7 +1080,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 	/**
 	 * TODO remove after completed
 	 */
-	private static class _TMP_REMOVE_ME_ extends BaseDialogStateAbs{
+	private static class _TMP_REMOVE_ME_ extends DialogStateAbs{
 		@Override		protected DialogListEntryData getSelectedEntryData() {return null;}
 		@Override		protected void updateSelected(DialogListEntryData dledAbove,DialogListEntryData dledParentTmp) {}
 		@Override		public void focusGained() {		}
@@ -1094,7 +1093,7 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 		@Override		protected void lineWrapDisableForChildrenOf(Node node) {		}
 		@Override		public void clearSelection() {		}
 		@Override		protected void updateTextInfo() {		}
-		@Override		protected BaseDialogStateAbs getThis() {			return null;		}
+		@Override		protected DialogStateAbs getThis() {			return null;		}
 		@Override		protected void setPositionSize(Vector3f v3fPos, Vector3f v3fSize) {		}
 	}
 	
@@ -1278,20 +1277,35 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 //		return b;
 //	}
 	
-	public static class CompositeSavable extends CompositeSavableAbs<BaseDialogStateAbs,CompositeSavable> {
-		public CompositeSavable(){super();}; //required by savable
-		@Override public CompositeSavable getThis() {return this;}
+	public static class DialogCS<T extends DialogStateAbs> extends CompositeSavableAbs<T,DialogCS<T>> implements IReflexFillCfg{
+		public DialogCS(){super();}; //required by savable
+		@Override public DialogCS getThis() {return this;}
 		
-		public CompositeSavable(BaseDialogStateAbs owner) {
+		public DialogCS(T owner) {
 			super(owner);
 		}
 		
+//		@Override
+//		protected void init(boolean bLoadedTmp) {}
+		
 //		private String strId=null;
 		
-		private float fPosX=0;
-		private float fPosY=0;
-		private float fWidth=0;
-		private float fHeight=0;
+		private float fPosX;
+		private float fPosY;
+		private float fWidth;
+		private float fHeight;
+		private String strInputText;
+		
+		@Override
+		protected void initialize() {
+			super.initialize();
+			
+			this.fPosX=0;
+			this.fPosY=0;
+			this.fWidth=20;
+			this.fHeight=20;
+			this.strInputText="";
+		}
 		
 //		@Override
 //		public CompositeSavableConcrete setOwner(BaseDialogStateAbs owner) {
@@ -1313,31 +1327,118 @@ public abstract class BaseDialogStateAbs<T, R extends BaseDialogStateAbs<T,R>> e
 			fWidth=(v3fSize.x);
 			fHeight=(v3fSize.y);
 			
+			strInputText = getOwner().getInputText();
+			
+			GlobalCommandsDelegatorI.i().dumpDevInfoEntry(toString());
+			
 			super.write(ex);
+		}
+		
+		@Override
+		public void read(JmeImporter im) throws IOException {
+			super.read(im);
+			
+			GlobalCommandsDelegatorI.i().dumpDevInfoEntry(toString());
+		}
+		
+		@Override
+		public boolean applyValuesFrom(DialogCS<T> svLoaded) {
+			if(!super.applyValuesFrom(svLoaded))return false;
+			
+			getOwner().setInputText(svLoaded.strInputText);
+			
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append("CompositeSavable [fPosX=");
+			builder.append(fPosX);
+			builder.append(", fPosY=");
+			builder.append(fPosY);
+			builder.append(", fWidth=");
+			builder.append(fWidth);
+			builder.append(", fHeight=");
+			builder.append(fHeight);
+			builder.append("]");
+			return builder.toString();
 		}
 		
 //		@Override
 //		public void read(JmeImporter im) throws IOException {
 //			super.read(im);
 //		}
+		@Override
+		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField) {
+			ReflexFillCfg rfcfg = getOwner().getReflexFillCfg(rfcvField);
+			rfcfg.setConcreteClassOverride(getOwner().getClass());
+//			rfcfg.setPrefixCustomId(getOwner().getId());
+			return rfcfg;
+		}
 	}
-	private CompositeSavable sv = new CompositeSavable(this);
+	private DialogCS sv;
+	
+	public boolean isCompositeSavableSet(){
+		return this.sv!=null;
+	}
+	protected <CS extends DialogCS<?>> void setCompositeSavable(CS sv) {
+		PrerequisitesNotMetException.assertNotAlreadySet(CompositeSavableAbs.class.getSimpleName(), this.sv, sv, this);
+		this.sv = sv;
+	}
+	protected <CS extends DialogCS<?>> CS getCompositeSavable(Class<CS> clCS) {
+		return (CS)this.sv;
+	}
 	
 	private String strFilePrefix="Dialog_";
 	public void save(){
 		if(!isSaveDialog())return;
 		MiscJmeI.i().saveWriteConsoleData(strFilePrefix+getId(), sv);
 	}
-	public void load(){
-		if(!isSaveDialog())return;
-		CompositeSavable svTmp = MiscJmeI.i().loadReadConsoleData(CompositeSavable.class, strFilePrefix+getId());
-		sv.applyValuesFrom(svTmp);
-		setPositionSize(new Vector3f(sv.fPosX,sv.fPosY,0), new Vector3f(sv.fWidth,sv.fHeight,0));
+	public <T extends DialogCS> T load(Class<T> clCS){
+		if(!isSaveDialog())return null;
+		T svTmp = MiscJmeI.i().loadReadConsoleData(clCS, strFilePrefix+getId());
+		if(sv.applyValuesFrom(svTmp)){
+			setPositionSize(new Vector3f(sv.fPosX, sv.fPosY, 0), new Vector3f(sv.fWidth,sv.fHeight,0));
+		}
+		return svTmp;
 	}
 	
+	private int iSaveLoadRetryDelayMilis=100;
+//	private int saveLoadWarnAfterFailTimes(){
+//		return (getEffectMaxTimeMilis()/iSaveLoadRetryDelayMilis)+1;
+//	}
 	final public StringCmdField scfSave = new StringCmdField(this)
-		.setCallerAssigned(new CallableX(this) {@Override public Boolean call() {save();return true;}});
+		.setCallerAssigned(new CallableX(this,iSaveLoadRetryDelayMilis) {@Override public Boolean call() {
+			if(!isDialogEffectsDone()){
+				setQuietOnFail(true);
+				setRetryOnFail(true);
+				return false; //wait it end
+			}
+			
+			setQuietOnFail(false);
+			setRetryOnFail(false);
+			save();
+			
+			return true;
+//		}}.setFailWarnEveryTimes(saveLoadWarnAfterFailTimes())); //100 * 30 = 3s for the dialog effects to finish
+		}});
 	final public StringCmdField scfLoad = new StringCmdField(this)
-		.setCallerAssigned(new CallableX(this) {@Override public Boolean call() {load();return true;}});
+		.setCallerAssigned(new CallableX(this,iSaveLoadRetryDelayMilis) {@Override public Boolean call() {
+			if(!isDialogEffectsDone()){
+				setQuietOnFail(true);
+				setRetryOnFail(true);
+				return false; //wait it end
+			}
+			
+			if(sv==null)return false;
+			
+			setQuietOnFail(false);
+			setRetryOnFail(false);
+			load(sv.getClass());
+			
+			return true;
+//		}}.setFailWarnEveryTimes(saveLoadWarnAfterFailTimes()));
+		}});
 	
 }

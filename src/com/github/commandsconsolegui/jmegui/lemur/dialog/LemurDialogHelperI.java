@@ -31,8 +31,9 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
 import com.github.commandsconsolegui.jmegui.BaseDialogHelper;
-import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
+import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurStateI;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.jme3.math.ColorRGBA;
@@ -53,9 +54,9 @@ import com.simsilica.lemur.style.Styles;
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public class LemurBaseDialogHelperI extends BaseDialogHelper{
-	private static LemurBaseDialogHelperI instance = new LemurBaseDialogHelperI();
-	public static LemurBaseDialogHelperI i(){return instance;}
+public class LemurDialogHelperI extends BaseDialogHelper{
+	private static LemurDialogHelperI instance = new LemurDialogHelperI();
+	public static LemurDialogHelperI i(){return instance;}
 	
 	private ColorRGBA	colorConsoleStyleBackground;
 	StringVarField svfBackgroundHexaColorRGBA = new StringVarField(this,"","XXXXXXXX ex.: 'FF12BC4A' Red Green Blue Alpha");
@@ -99,13 +100,13 @@ public class LemurBaseDialogHelperI extends BaseDialogHelper{
 			colorConsoleStyleBackground.a=1f; //0.75f;
 		}
 		
-		if(svfBackgroundHexaColorRGBA.getStringValue().isEmpty()){
+		if(svfBackgroundHexaColorRGBA.getValueAsString().isEmpty()){
 			String strHexa = Integer.toHexString(colorConsoleStyleBackground.asIntRGBA());
 			strHexa = String.format("%8s", strHexa).replace(" ", "0").toUpperCase();
 			svfBackgroundHexaColorRGBA.setObjectRawValue(strHexa);
 		}else{
 			try{
-				int i = Integer.parseInt(svfBackgroundHexaColorRGBA.getStringValue(),16);//hexa string
+				int i = Integer.parseInt(svfBackgroundHexaColorRGBA.getValueAsString(),16);//hexa string
 				colorConsoleStyleBackground.fromIntRGBA(i);
 			}catch(IllegalArgumentException ex){
 				GlobalCommandsDelegatorI.i().dumpExceptionEntry(ex);
@@ -202,8 +203,8 @@ public class LemurBaseDialogHelperI extends BaseDialogHelper{
 ////    ex.save(data, new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(saveFile))););
 //	}
 	
-	public ArrayList<LemurDialogGUIStateAbs> getDialogListCopy() {
-		return super.getDialogListCopy(LemurDialogGUIStateAbs.class);
+	public ArrayList<LemurDialogStateAbs> getDialogListCopy() {
+		return super.getDialogListCopy(LemurDialogStateAbs.class);
 	}
 	
 //	DialogsStorage svAllDiags = new DialogsStorage();
@@ -281,7 +282,7 @@ public class LemurBaseDialogHelperI extends BaseDialogHelper{
 //			}
 //		});
 	
-	public LemurBaseDialogHelperI() {
+	public LemurDialogHelperI() {
 		super();
 //		CallQueueI.i().addCall(new CallableX(this,1000) {
 //			@Override
@@ -308,4 +309,19 @@ public class LemurBaseDialogHelperI extends BaseDialogHelper{
 //			}
 //		}
 //	}
+	@Override
+	public void update(float tpf) {
+		super.update(tpf);
+		
+		for(LemurDialogStateAbs diag:getDialogListCopy(LemurDialogStateAbs.class)){
+			fixDialogPosition(diag);
+		}
+	}
+
+	public boolean fixDialogPosition(LemurDialogStateAbs diag) {
+		Vector3f v3fPos = diag.getDialogMainContainer().getLocalTranslation();
+		Vector3f v3fSize = diag.getDialogMainContainer().getSize();
+		//TODO get current app window size
+		return false;
+	}
 }

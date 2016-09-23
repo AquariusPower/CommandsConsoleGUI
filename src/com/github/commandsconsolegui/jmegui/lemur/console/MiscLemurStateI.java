@@ -30,11 +30,13 @@ package com.github.commandsconsolegui.jmegui.lemur.console;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.CompositeControl;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.globals.GlobalMainThreadI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jmegui.GlobalGUINodeI;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
@@ -45,6 +47,7 @@ import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MiscI.EStringMatchMode;
+import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexHacks;
@@ -82,6 +85,10 @@ import com.simsilica.lemur.focus.FocusManagerState;
  *
  */
 public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleCommandListener {
+	public static final class CompositeControl extends CompositeControlAbs<MiscLemurStateI>{
+		private CompositeControl(MiscLemurStateI casm){super(casm);};
+	};private CompositeControl ccSelf = new CompositeControl(this);
+	
 	private static MiscLemurStateI instance = new MiscLemurStateI();
 	public static MiscLemurStateI i(){return instance;}
 	
@@ -325,6 +332,8 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 	 * @param tec 
 	 */
 	public void setCaratPosition(TextField tf, int iMoveCaratTo) {
+		GlobalMainThreadI.assertEqualsCurrentThread();
+		
 		// position carat properly
 		DocumentModel dm = tf.getDocumentModel();
 		dm.home(true);
@@ -945,6 +954,8 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 		final Vector3f v3fSize, 
 		final boolean bForceSpecificSize 
 	){
+		GlobalMainThreadI.assertEqualsCurrentThread();
+		
 		if(v3fSize.x<v3fMinSize.x)v3fSize.x=v3fMinSize.x;
 		if(v3fSize.y<v3fMinSize.y)v3fSize.y=v3fMinSize.y;
 		if(v3fSize.z<v3fMinSize.z)v3fSize.z=v3fMinSize.z; //actually gets overriden
@@ -982,6 +993,8 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 		final boolean bForceSpecificSize, 
 		final boolean bMustDoItNow
 	){
+		GlobalMainThreadI.assertEqualsCurrentThread();
+
 		final String strSizeKey="SizeKey";
 		
 		CallableX caller = new CallableX(this) {
@@ -1054,11 +1067,13 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 	}
 
 	public MiscLemurStateI setLocationXY(Spatial spt, Vector3f v3f) {
+		GlobalMainThreadI.assertEqualsCurrentThread();
 		spt.setLocalTranslation(v3f.x, v3f.y, spt.getLocalTranslation().z); // to not mess with Z order
 		return this;
 	}
 
 	public MiscLemurStateI setScaleXY(Spatial spt, Float fScaleX, Float fScaleY) {
+		GlobalMainThreadI.assertEqualsCurrentThread();
 		Vector3f v3fCurrentScale = spt.getLocalScale();
 		spt.setLocalScale(
 			fScaleX==null?v3fCurrentScale.x:fScaleX,
@@ -1080,6 +1095,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 		}
 	}
 	public void lineWrapDisableFor(Panel pnl){
+		GlobalMainThreadI.assertEqualsCurrentThread();
 		MiscJmeI.i().retrieveBitmapTextFor(pnl).setLineWrapMode(LineWrapMode.NoWrap);
 	}
 
@@ -1112,6 +1128,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 	 * @param bNegateCurrentColor overrides color param (least if it is null)
 	 */
 	private void overrideBackgroundColor(Panel pnl, ColorRGBA colorOverride, boolean bResetToBackup, boolean bNegateCurrentColor) {
+		GlobalMainThreadI.assertEqualsCurrentThread();
 		if(!btgHoverHighlight.b())return;
 		
 //		GuiComponent gcBkg = pnl.getBackground();
@@ -1167,10 +1184,45 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 	public Vector3f eventToV3f(AbstractCursorEvent event){
 		return new Vector3f(event.getX(),event.getY(),0);
 	}
-
-	public void setPositionSafely(Panel pnl,Vector3f v3fPos) {
+	
+//	enum E{
+//		panel,
+//		pos,
+//		;
+//		public String s(){return this.toString();}
+//	}
+	
+//	BugFixBoolTogglerCmdField btgBugFixConfirmSetPosition = new BugFixBoolTogglerCmdField(this, false)
+//		.setCallerAssigned(new CallableX(this,100) {
+//			@Override
+//			public Boolean call() {
+//				Vector3f v3fPos = (Vector3f) getCustomValue(E.pos.s());
+//				Panel pnl = (Panel) getCustomValue(E.panel.s());
+//				
+//				if(applyPositionSafely(pnl, v3fPos))return false; //had to change it, so check again
+//				
+//				return true;
+//			}
+//		});
+	private boolean applyPositionSafely(Panel pnl,Vector3f v3fPos) {
+		Vector3f v3fCurrentPos = pnl.getLocalTranslation();
+		
 		// DO NOT MESS WITH Z!!!
-		v3fPos.setZ(pnl.getLocalTranslation().getZ());
+		v3fPos.setZ(v3fCurrentPos.getZ());
+		
+		if(v3fCurrentPos.equals(v3fPos)){
+			return false; //nothing applied
+		}
+		
 		pnl.setLocalTranslation(v3fPos);
+		return true;
+	}
+	public void setPositionSafely(Panel pnl,Vector3f v3fPos) {
+		if(applyPositionSafely(pnl, v3fPos)){
+//			btgBugFixConfirmSetPosition.getCallerAssignedForMaintenance(ccSelf)
+//				.putCustomValue(E.pos.s(), v3fPos.clone())
+//				.putCustomValue(E.panel.s(), pnl);
+//			btgBugFixConfirmSetPosition.callerAssignedQueueNow();
+		}
 	}
 }

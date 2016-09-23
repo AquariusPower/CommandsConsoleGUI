@@ -36,8 +36,8 @@ import com.simsilica.lemur.Command;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class ChoiceDialogState<T extends Command<Button>> extends LemurBasicDialogStateAbs<T,ChoiceDialogState<T>> {
-	public static class CfgParm extends LemurBasicDialogStateAbs.CfgParm{
+public class ChoiceLemurDialogState<T extends Command<Button>> extends BasicLemurDialogStateAbs<T,ChoiceLemurDialogState<T>> {
+	public static class CfgParm extends BasicLemurDialogStateAbs.CfgParm{
 		public CfgParm(
 				Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow,
@@ -50,7 +50,7 @@ public class ChoiceDialogState<T extends Command<Button>> extends LemurBasicDial
 	}
 	private CfgParm	cfg;
 	@Override
-	public ChoiceDialogState<T> configure(ICfgParm icfg) {
+	public ChoiceLemurDialogState<T> configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;
 		super.configure(cfg);
 		return storeCfgAndReturnSelf(icfg);
@@ -64,7 +64,7 @@ public class ChoiceDialogState<T extends Command<Button>> extends LemurBasicDial
 	}
 	
 	@Override
-	protected ChoiceDialogState<T> getThis() {
+	protected ChoiceLemurDialogState<T> getThis() {
 		return this;
 	}
 	

@@ -45,7 +45,7 @@ import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.jmegui.GlobalDialogHelperI;
-import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
+import com.github.commandsconsolegui.jmegui.DialogStateAbs;
 import com.github.commandsconsolegui.jmegui.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurStateI;
@@ -80,12 +80,12 @@ import com.jme3.scene.Spatial.CullHint;
  * This class connects the console commands class with JMonkeyEngine.
  * It must contain the base for the GUI to work.
  * 
- * More info at {@link BaseDialogStateAbs}
+ * More info at {@link DialogStateAbs}
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *	
  */
-public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends BaseDialogStateAbs<T,R> implements IConsoleUI {
+public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends DialogStateAbs<T,R> implements IConsoleUI {
 //	private FpsLimiterState fpslState = new FpsLimiterState();
 	
 //	ReattachSafelyState rss;
@@ -453,7 +453,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 //			this.nodeGUI = nodeGUI;
 //		}
 //	}
-	public static class CfgParm extends BaseDialogStateAbs.CfgParm{
+	public static class CfgParm extends DialogStateAbs.CfgParm{
 		private int iToggleConsoleKey;
 		public CfgParm(String strUIId, int iToggleConsoleKey) {
 			super(strUIId);//, nodeGUI);//, null);

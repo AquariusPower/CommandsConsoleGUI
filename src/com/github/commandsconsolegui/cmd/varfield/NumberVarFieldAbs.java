@@ -38,12 +38,12 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  * @param <S>
  */
 public abstract class NumberVarFieldAbs<O, S extends NumberVarFieldAbs<O,S>> extends VarCmdFieldAbs<O,S> {//implements Comparable<O>{
-	private O nValue;
+//	private O nValue;
 	private O nMin;
 	private O nMax;
 	
-	public NumberVarFieldAbs(IReflexFillCfg rfcfgOwner) {
-		super(rfcfgOwner,EVarCmdMode.Var);
+	public NumberVarFieldAbs(IReflexFillCfg rfcfgOwner, O valueDefault) {
+		super(rfcfgOwner, EVarCmdMode.Var, valueDefault);
 	}
 
 	public O getMin() {
@@ -77,10 +77,17 @@ public abstract class NumberVarFieldAbs<O, S extends NumberVarFieldAbs<O,S>> ext
 	 */
 	@Override
 	public S setObjectRawValue(Object objValue) {
-		if( getMin()!=null && (nValue==null || cmpWith(getMin())<0) )nValue=getMin();
-		if( getMax()!=null && (nValue==null || cmpWith(getMax())>0) )nValue=getMax();
+		super.setObjectRawValue(objValue); //this may put a call on queue
 		
-		super.setObjectRawValue(objValue);
+		/**
+		 * these will also re-put the same call on queue, just that, whenever it is run
+		 * the value will be already fixed within limits  
+		 */
+		
+		// so if null, the preference will be the min value
+		if( getMin()!=null && (getValue()==null || cmpWith(getMin())<0) )setValue(getMin());
+		
+		if( getMax()!=null && (getValue()==null || cmpWith(getMax())>0) )setValue(getMax());
 		
 		return getThis();
 	}
@@ -91,29 +98,29 @@ public abstract class NumberVarFieldAbs<O, S extends NumberVarFieldAbs<O,S>> ext
 	}
 	
 	private int cmpWith(O nOther){
-		if(nValue instanceof Double){
-			return ((Double)nValue).compareTo((Double)nOther);
+		if(getRawValue() instanceof Double){
+			return ((Double)getRawValue()).compareTo((Double)nOther);
 		}else
-		if(nValue instanceof Float){
-			return ((Float)nValue).compareTo((Float)nOther);
+		if(getRawValue() instanceof Float){
+			return ((Float)getRawValue()).compareTo((Float)nOther);
 		}else
-		if(nValue instanceof Integer){
-			return ((Integer)nValue).compareTo((Integer)nOther);
+		if(getRawValue() instanceof Integer){
+			return ((Integer)getRawValue()).compareTo((Integer)nOther);
 		}else
-		if(nValue instanceof Long){
-			return ((Long)nValue).compareTo((Long)nOther);
+		if(getRawValue() instanceof Long){
+			return ((Long)getRawValue()).compareTo((Long)nOther);
 		}else{
-			throw new PrerequisitesNotMetException("unsupported type", nOther.getClass());
+			throw new PrerequisitesNotMetException("unsupported type", nOther.getClass(), this);
 		}
 	}
 	
-	public O getValue() {
-		return nValue;
-	}
+//	public O getValue() {
+//		return nValue;
+//	}
 
-	protected void setValue(O nValue) {
-		this.nValue = nValue;
-	}
+//	protected void setValue(O nValue) {
+//		this.nValue = nValue;
+//	}
 
 //	@Override
 //	public int compareTo(O o) {

@@ -45,14 +45,14 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdField>{
+public class BoolTogglerCmdField<S extends BoolTogglerCmdField<S>> extends VarCmdFieldAbs<Boolean,S>{
 //	public static final String strCodePrefix="btg";
 //	private static ArrayList<BoolTogglerCmdField> abtgList = new ArrayList<BoolTogglerCmdField>();
 	private static boolean	bConfigured;
 	private static IHandleExceptions	ihe = SimpleHandleExceptionsI.i();
 	
 	private boolean bPrevious;
-	private boolean bCurrent = false;
+//	private boolean bCurrent = false;
 
 //	private String	strReflexFillCfgCodePrefixVariant;
 	private boolean bDoCallOnChange = true;
@@ -92,12 +92,12 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 	/**
 	 * 
 	 * @param rfcfgOwnerUseThis always pass as "this", the very class must implement it.
-	 * @param bInitialValue
+	 * @param bDefault
 	 * @param strHelp
 	 */
 //	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitialValue, String strReflexFillCfgCodePrefixVariant, String strHelp){
-	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitialValue, String strHelp){
-		super(rfcfgOwnerUseThis,EVarCmdMode.VarCmd);
+	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bDefault, String strHelp){
+		super(rfcfgOwnerUseThis, EVarCmdMode.VarCmd, bDefault);
 		
 //		ReflexFill.assertAndGetField(rfcfgOwnerUseThis, this);
 		
@@ -115,7 +115,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 		
 //		setOwner(rfcfgOwnerUseThis);
 		setHelp(strHelp);
-		setObjectRawValue(bInitialValue);
+//		setObjectRawValue(bInitialValue);
 		
 		constructed();
 	}
@@ -161,15 +161,15 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 //	}
 	
 	/** same as {@link #b()}*/
-	public boolean get(){return bCurrent;}
+	public boolean get(){return getValue();}
 	/** same as {@link #b()} but returns in Boolean */
-	public Boolean getBoolean(){return bCurrent;}
+	public Boolean getBoolean(){return getValue();}
 	/** same as {@link #b()}*/
-	public boolean getBool(){return bCurrent;}
+	public boolean getBool(){return getValue();}
 	/** same as {@link #b()}*/
-	public boolean is(){return bCurrent;}
+	public boolean is(){return getValue();}
 	/** same as {@link #b()}*/
-	public boolean b(){return bCurrent;}
+	public boolean b(){return getValue();}
 	
 	/**
 	 * 
@@ -177,25 +177,25 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 	 */
 	private boolean isChangedAndRefresh(){
 //		DebugI.i().conditionalBreakpoint(strCommand.equals("cmd_TestDialog_CmdConditionalStateAbs_State_Toggle"));
-		if(bCurrent && bPrevious)return false;
-		if(!bCurrent && !bPrevious)return false;
+		if(getValue() && bPrevious)return false;
+		if(!getValue() && !bPrevious)return false;
 		
 //		if(Boolean.compare(bCurrent,bPrevious)!=0){
-			bPrevious=bCurrent;
+			bPrevious=getValue();
 			return true;
 //		}
 //		return false;
 	}
 	
 	
-	@Override
-	public String getValueAsString() {
-		return ""+getRawValue();
-	}
-	@Override
-	public String getValueAsString(int iIfFloatPrecision) {
-		return getValueAsString();
-	}
+//	@Override
+//	public String getValueAsString() {
+//		return ""+getRawValue();
+//	}
+//	@Override
+//	public String getValueAsString(int iIfFloatPrecision) {
+//		return getValueAsString();
+//	}
 	
 //	@Override
 //	public String toString() {
@@ -228,10 +228,10 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 //		return null;
 //	}
 
-	@Override
-	public String getReport() {
-		return getUniqueCmdId()+" = "+bCurrent;
-	}
+//	@Override
+//	public String getReport() {
+//		return getUniqueCmdId()+" = "+bCurrent;
+//	}
 
 //	public void set(boolean b){
 ////		set(b,true);
@@ -254,43 +254,29 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 //	}
 	
 	@Override
-	public BoolTogglerCmdField setObjectRawValue(Object objValue) {
+	public S setObjectRawValue(Object objValue) {
 		if(objValue==null)throw new PrerequisitesNotMetException(BoolTogglerCmdField.class.getSimpleName()+" can't be set to null!");
 		
 		if(objValue instanceof BoolTogglerCmdField){
-			this.bCurrent = ((BoolTogglerCmdField)objValue).b();
+			objValue = ((BoolTogglerCmdField)objValue).b();
 		}else
 		if(objValue instanceof String){
 			String str=(String)objValue;
 			if(str.equalsIgnoreCase("true")){
-				this.bCurrent = true;
+				objValue = true;
 			}else
 			if(str.equalsIgnoreCase("false")){
-				this.bCurrent = false;
+				objValue = false;
 			}else{
 				throw new PrerequisitesNotMetException("invalid boolean value", str);
 			}
 		}else
 		{
-			this.bCurrent = (Boolean)objValue; //default is expected type
+			objValue = (Boolean)objValue; //default is expected type
 		}
-//		if(bConstructed)
-		super.setObjectRawValue(this.bCurrent);
 		
-//		prepareCallOnChange();
-//		if(bConstructed){
-//			if(isChangedAndRefresh()){
-//				if(bDoCallOnChange){
-//					prepareCallOnChange();
-////					if(!isCallOnValueChangedSet()){
-////						MsgI.i().warn("call on value changed not set for "+this.getReport(), this);
-//////						throw new PrerequisitesNotMetException("null caller for "+this.getReport());
-////					}else{
-////						CallQueueI.i().addCall(this.caller);
-////					}
-//				}
-//			}
-//		}
+		super.setObjectRawValue(objValue);
+		
 		return getThis();
 	}
 	
@@ -346,11 +332,12 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 //		}
 //		return strVarId;
 //	}
-
-	@Override
-	public Object getRawValue() {
-		return this.bCurrent;
-	}
+	
+	
+//	@Override
+//	public Object getRawValue() {
+//		return this.bCurrent;
+//	}
 
 //	@Override
 //	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
@@ -376,7 +363,7 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 //		return getThis();
 //	}
 	@Override
-	public BoolTogglerCmdField setCallerAssigned(CallableX caller) {
+	public S setCallerAssigned(CallableX caller) {
 		if(!bDoCallOnChange){
 			// to avoid developer forgot already configured to call nothing
 			throw new PrerequisitesNotMetException("was set to call nothing already!",this,getHelp());
@@ -431,9 +418,11 @@ public class BoolTogglerCmdField extends VarCmdFieldAbs<Boolean,BoolTogglerCmdFi
 //	public static void removeFromList(BoolTogglerCmdField bt) {
 //		abtgList.remove(bt);
 //	}
+	
+//	protected BoolTogglerCmdField getThis() {
 	@Override
-	protected BoolTogglerCmdField getThis() {
-		return this;
+	protected S getThis() {
+		return (S)this;
 	}
 	
 	/**

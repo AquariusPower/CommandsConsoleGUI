@@ -44,7 +44,7 @@ public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 //	private static String	strCodePrefixVariant = "svf";
 //	private static ArrayList<StringVarField> ailvList = new ArrayList<StringVarField>();
 	
-	String strValue;
+//	String strValue;
 	
 	public static void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
@@ -53,18 +53,18 @@ public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 	}
 	
 	public StringVarField(IReflexFillCfg rfcfgOwnerUseThis, StringVarField ilv,String strHelp) {
-		this(rfcfgOwnerUseThis, ilv.strValue,strHelp);
+		this(rfcfgOwnerUseThis, ilv.getValue(),strHelp);
 	}
 	/**
 	 * @param rfcfgOwnerUseThis use null if this is not a class field, but a local variable
 	 * @param lInitialValue if null, the variable will be removed from console vars.
 	 */
-	public StringVarField(IReflexFillCfg rfcfgOwnerUseThis, String strInitialValue,String strHelp) {
+	public StringVarField(IReflexFillCfg rfcfgOwnerUseThis, String strDefault,String strHelp) {
 //		if(rfcfgOwnerUseThis!=null)ailvList.add(this); //only fields allowed
 //		super(rfcfgOwnerUseThis!=null); //only fields allowed
-		super(rfcfgOwnerUseThis,EVarCmdMode.Var);
+		super(rfcfgOwnerUseThis, EVarCmdMode.Var, strDefault);
 //		this.setOwner(rfcfgOwnerUseThis);
-		setObjectRawValue(strInitialValue);
+//		setObjectRawValue(strInitialValue);
 		this.setHelp(strHelp);
 //		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
 		constructed();
@@ -80,15 +80,15 @@ public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 //	public StringVarField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
 	public StringVarField setObjectRawValue(Object objValue) {
 		if(objValue instanceof StringVarField){
-			strValue = ((StringVarField)objValue).strValue;
+			objValue = ((StringVarField)objValue).getValue();
 		}else
 		if(objValue instanceof String){ 
-			strValue = (String)objValue; //expected type
+			objValue = (String)objValue; //expected type
 		}else
 		if(objValue!=null){ 
-			strValue = ""+objValue; //TODO too much permissive?
+			objValue = ""+objValue; //TODO too much permissive?
 		}else{
-			strValue=null;
+			objValue=null;
 		}
 		
 //		super.setObjectValue(ccCD,objValue);
@@ -115,15 +115,15 @@ public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 //		return strVarId;
 //	}
 
-	@Override
-	public String getReport() {
-		return getUniqueVarId()+" = "+(strValue==null?"null":"\""+strValue+"\"");
-	}
+//	@Override
+//	public String getReport() {
+//		return getUniqueVarId()+" = "+(strValue==null?"null":"\""+strValue+"\"");
+//	}
 
-	@Override
-	public Object getRawValue() {
-		return strValue;
-	}
+//	@Override
+//	public Object getRawValue() {
+//		return strValue;
+//	}
 
 //	@Override
 //	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
@@ -135,18 +135,18 @@ public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 //		if(strValue==null)return null;
 //		return ""+strValue;
 //	}
-	@Override
-	public String getValueAsString() {
-		return getStringValue();
-	}
-	@Override
-	public String getValueAsString(int iIfFloatPrecision) {
-		return getValueAsString();
-	}
+//	@Override
+//	public String getValueAsString() {
+//		return getStringValue();
+//	}
+//	@Override
+//	public String getValueAsString(int iIfFloatPrecision) {
+//		return getValueAsString();
+//	}
 
-	public String getStringValue() {
-		return strValue;
-	}
+//	public String getStringValue() {
+//		return strValue;
+//	}
 
 //	@Override
 //	public String getHelp() {

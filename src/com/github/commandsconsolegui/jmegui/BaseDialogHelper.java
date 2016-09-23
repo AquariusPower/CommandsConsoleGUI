@@ -70,7 +70,7 @@ public abstract class BaseDialogHelper implements IReflexFillCfg{
 		fontConsoleDefault = GlobalAppRefI.i().getAssetManager().loadFont("Interface/Fonts/Console.fnt");
 		fontConsoleExtraDefault = GlobalAppRefI.i().getAssetManager().loadFont("Interface/Fonts/DroidSansMono.fnt");
 		
-		String strFontName=svfUserFontOption.getStringValue();
+		String strFontName=svfUserFontOption.getValueAsString();
 		
 		font=null;
 		try{
@@ -111,16 +111,16 @@ public abstract class BaseDialogHelper implements IReflexFillCfg{
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 	}
 	
-	private ArrayList<BaseDialogStateAbs> adiagList = new ArrayList<BaseDialogStateAbs>();
+	private ArrayList<DialogStateAbs> adiagList = new ArrayList<DialogStateAbs>();
 
 //	private boolean	bRequestSaveDialog;
-	public void addDialog(BaseDialogStateAbs diag){
+	public void addDialog(DialogStateAbs diag){
 		adiagList.add(diag);
 	}
-	public <T extends BaseDialogStateAbs> ArrayList<T> getDialogListCopy(Class<T> clFilter) {
-		if(clFilter==null)clFilter=(Class<T>)BaseDialogStateAbs.class;
+	public <T extends DialogStateAbs> ArrayList<T> getDialogListCopy(Class<T> clFilter) {
+		if(clFilter==null)clFilter=(Class<T>)DialogStateAbs.class;
 		ArrayList<T> adiag = new ArrayList<T>();
-		for(BaseDialogStateAbs diag:adiagList){
+		for(DialogStateAbs diag:adiagList){
 			if (clFilter.isInstance(diag)) {
 				adiag.add((T)diag);
 			}

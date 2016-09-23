@@ -33,6 +33,10 @@ import java.util.Arrays;
 /**
  * Things that should be been coded in a certain way but were overlooked.
  * 
+ * This exception can be captured tho may request the application to exit gracefully.
+ * 
+ * TODO substitute all NullPointerException by this one.
+ * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */

@@ -45,7 +45,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  *
  */
 
-public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
+public class TimedDelayVarField extends VarCmdFieldAbs<Float,TimedDelayVarField>{
 	private static IHandleExceptions ihe = SimpleHandleExceptionsI.i();
 //	private static ArrayList<TimedDelayVarField> atdList = new ArrayList<TimedDelayVarField>();
 	
@@ -54,10 +54,11 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 	
 	public static final long lNanoOneSecond = 1000000000L; // 1s in nano time
 	public static final float fNanoToSeconds = 1f/lNanoOneSecond; //multiply nano by it to get in seconds
+	public static final float fSecondsToNano = lNanoOneSecond; //multiply seconds to get in nano
 	
 	private Long	lLastUpdateReferenceTimeNano;
 //	private float	fDelayLimitSeconds;
-	private long	lDelayLimitNano;
+//	private long	lDelayLimitNano;
 
 	private boolean	bOscilate;
 
@@ -99,14 +100,14 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 	 * Such variables will be stored easily accessible and configurable at console!
 	 * 
 	 * @param rfcfgOwnerUseThis use null if this is not a class field, but a local variable
-	 * @param fDelay
+	 * @param fDelayDefault
 	 */
-	public TimedDelayVarField(IReflexFillCfg rfcfgOwnerUseThis, float fDelay, String strHelp) {
+	public TimedDelayVarField(IReflexFillCfg rfcfgOwnerUseThis, float fDelayDefault, String strHelp) {
 //		if(rfcfgOwnerUseThis!=null)atdList.add(this); //only fields allowed
 //		super(rfcfgOwnerUseThis!=null); //only fields allowed
-		super(rfcfgOwnerUseThis,EVarCmdMode.Var); //only fields allowed
+		super(rfcfgOwnerUseThis, EVarCmdMode.Var, fDelayDefault); //only fields allowed
 //		this.setOwner(rfcfgOwnerUseThis);
-		setObjectRawValue(fDelay);
+//		setObjectRawValue(fDelay);
 		setHelp(strHelp);
 		constructed();
 	}
@@ -114,7 +115,8 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 	private TimedDelayVarField setDelayLimitSeconds(float fDelaySeconds){
 //		this.fDelayLimitSeconds = fDelaySeconds;
 //		this.lDelayLimitNano = (long) (this.fDelayLimitSeconds * lNanoOneSecond);;
-		this.lDelayLimitNano = (long) (fDelaySeconds * lNanoOneSecond);;
+//		setObjectRawValue( (long) (fDelaySeconds * lNanoOneSecond) );
+		setObjectRawValue(fDelaySeconds);
 //		if(isActive())updateTime(); //this is required for consistency at get percentual
 		return this;
 	}
@@ -167,19 +169,25 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 		}
 		return bReady;
 	}
+	public long getDelayLimitMilis(){
+		return getDelayLimitNano()/1000000;
+	}
 	public long getDelayLimitNano(){
-		if(bOscilate){
-			return lDelayLimitNano*2;
-		}else{
-			return lDelayLimitNano;
-		}
+		return (long) (getDelayLimitSeconds()*fSecondsToNano);
+//		if(bOscilate){
+//			return lDelayLimitNano*2;
+//		}else{
+//			return lDelayLimitNano;
+//		}
 	}
 	public float getDelayLimitSeconds(){
 		if(bOscilate){
 //			return fDelayLimitSeconds*2f;
-			return lDelayLimitNano*fNanoToSeconds*2f;
+//			return lDelayLimitNano*fNanoToSeconds*2f;
+			return getValue()*2f;
 		}else{
-			return lDelayLimitNano*fNanoToSeconds;
+//			return lDelayLimitNano*fNanoToSeconds;
+			return getValue();
 //			return fDelayLimitSeconds;
 		}
 	}
@@ -295,19 +303,19 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 		if(objValue==null)throw new PrerequisitesNotMetException(TimedDelayVarField.class.getSimpleName()+" can't be set to null!");
 		
 		if(objValue instanceof Double){
-			setDelayLimitSeconds( ((Double)objValue).floatValue() );
+			objValue=( ((Double)objValue).floatValue() );
 		}else
 		if(objValue instanceof FloatDoubleVarField){
-			setDelayLimitSeconds( ((FloatDoubleVarField)objValue).getFloat() );
+			objValue=( ((FloatDoubleVarField)objValue).getFloat() );
 		}else
 		if(objValue instanceof IntLongVarField){
-			setDelayLimitSeconds( ((IntLongVarField)objValue).getInt().floatValue() );
+			objValue=( ((IntLongVarField)objValue).getInt().floatValue() );
 		}else
 		if(objValue instanceof String){
-			setDelayLimitSeconds( Float.parseFloat((String)objValue) );
+			objValue=( Float.parseFloat((String)objValue) );
 		}else
 		{
-			setDelayLimitSeconds((Float)objValue); //default is expected type
+			objValue=((Float)objValue); //default is expected type
 		}
 		
 //		if(super.getConsoleVarLink()!=null)
@@ -322,16 +330,17 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 //		if(super.getConsoleVarLink()!=null)setObjectRawValue(this.fDelayLimitSeconds);
 //		return this;
 //	}
-//	
-	@Override
-	public String getReport() {
-		return getUniqueVarId()+" = "+getDelayLimitSeconds();
-	}
+//
+	
+//	@Override
+//	public String getReport() {
+//		return getUniqueVarId()+" = "+getDelayLimitSeconds();
+//	}
 
-	@Override
-	public Object getRawValue() {
-		return getDelayLimitSeconds();
-	}
+//	@Override
+//	public Object getRawValue() {
+//		return getDelayLimitSeconds();
+//	}
 
 //	@Override
 //	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
@@ -347,10 +356,10 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Long,TimedDelayVarField>{
 	public String getValueAsString() {
 		return getValueAsString(3);
 	}
-	@Override
-	public String getValueAsString(int iIfFloatPrecision) {
-		return MiscI.i().fmtFloat(getDelayLimitSeconds(), iIfFloatPrecision);
-	}
+//	@Override
+//	public String getValueAsString(int iIfFloatPrecision) {
+//		return MiscI.i().fmtFloat(getDelayLimitSeconds(), iIfFloatPrecision);
+//	}
 
 	@Override
 	public String getHelp() {

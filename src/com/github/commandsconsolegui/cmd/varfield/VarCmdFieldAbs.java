@@ -31,21 +31,20 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandData;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
-import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
-import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.cmd.ConsoleVariable;
+import com.github.commandsconsolegui.jmegui.savablevalues.CompositeSavableAbs.EType;
 import com.github.commandsconsolegui.misc.CallQueueI;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.DebugI;
+import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
-import com.github.commandsconsolegui.misc.MsgI;
-import com.github.commandsconsolegui.misc.VarCmdUId;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
-import com.github.commandsconsolegui.misc.WorkAroundI;
-import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
-import com.jme3.effect.shapes.EmitterBoxShape;
+import com.github.commandsconsolegui.misc.VarCmdUId;
 
 /**
  * TODO migrate most things possible to here
@@ -53,7 +52,7 @@ import com.jme3.effect.shapes.EmitterBoxShape;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 
  */
-public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implements IReflexFillCfgVariant{//, IVarIdValueOwner{
+public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements IReflexFillCfgVariant{//, IVarIdValueOwner{
 //	private boolean bReflexingIdentifier = true;
 	public static enum EVarCmdMode{
 		Var,
@@ -75,16 +74,22 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	private String strDebugErrorHelper = "ERROR: "+this.getClass().getName()+" not yet properly initialized!!!";
 	
 	private IReflexFillCfg	rfcfgOwner;
-	private VarIdValueOwnerData	vivo;
+	private ConsoleVariable	vivo;
 	private String strHelp=null;
 	private CommandData	cmdd;
 	private O	objRawValueLazy = null;
+	
+	/** this is the initial value (at construction time) */
 	private O	objRawValueDefault = null;
+	
 	private boolean	bLazyValueWasSet;
 	private VarCmdUId	vcuid;
 	private boolean	bConstructed = false;
+	private boolean bAllowNullValue = true;
 
 	private CallableX	callerAssigned;
+
+	private CompositeControlAbs	ccOwner;
 	
 	private static ArrayList<VarCmdFieldAbs> avcfList = new ArrayList<VarCmdFieldAbs>();
 	public static final HashChangeHolder hvhVarList = new HashChangeHolder(avcfList);
@@ -109,10 +114,11 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	 * @param rfcfgOwner use null if this is not a class field, but a local variable, or for any reason the related console variable creation is to be skipped.
 	 * @param evcm
 	 */
-	public VarCmdFieldAbs(IReflexFillCfg rfcfgOwner, EVarCmdMode evcm){
+	public VarCmdFieldAbs(IReflexFillCfg rfcfgOwner, EVarCmdMode evcm, O valueDefault){
 		this.evcm=evcm;
 		this.rfcfgOwner=rfcfgOwner;
 		if(isField())VarCmdFieldAbs.avcfList.add(this);
+		setObjectRawValue(valueDefault,true);
 	}
 //	public VarCmdFieldAbs(boolean bAddToList){
 //		if(bAddToList)VarCmdFieldAbs.avcfList.add(this);
@@ -142,7 +148,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	 * @param vivo if the object already set is different from it, will throw exception
 	 * @return
 	 */
-	public S setConsoleVarLink(CommandsDelegator.CompositeControl cc, VarIdValueOwnerData vivo) {
+	public S setConsoleVarLink(CommandsDelegator.CompositeControl cc, ConsoleVariable vivo) {
 		cc.assertSelfNotNull();
 		
 		if(vivo==null){
@@ -155,7 +161,8 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 			PrerequisitesNotMetException.assertNotAlreadySet("VarLink", this.vivo, vivo, this);
 		}
 		
-		this.vivo = vivo;
+		this.vivo.setOwnerForRestrictedVar(this);
+		this.vivo = vivo; //after setting console var owner!
 		
 		/**
 		 * vivo will already come with an updated value, because this method is called
@@ -179,7 +186,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		return getThis();
 	}
 	
-	public VarIdValueOwnerData getConsoleVarLink(CommandsDelegator.CompositeControl cc){
+	public ConsoleVariable getConsoleVarLink(CommandsDelegator.CompositeControl cc){
 		cc.assertSelfNotNull();
 		return this.vivo;
 	}
@@ -187,7 +194,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	 * DEV: do not expose this one, let only subclasses use it, to avoid messing the field.
 	 * @return
 	 */
-	protected VarIdValueOwnerData getConsoleVarLink() {
+	protected ConsoleVariable getConsoleVarLink() {
 		return vivo;
 	}
 	
@@ -357,10 +364,49 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		return getThis();
 	}
 	
-	public abstract String getReport(); //this is safe to be public because it is just a report string
+	public String getReport(){
+		String str="";
+		if(vcuid==null){
+			str+="(Not a class field.";
+			if(getOwner()==null)str+=" No owner.";
+			str+=")";
+		}else{
+			str+=getUniqueVarId();
+		}
+		
+		return str+" = "+getValueReport();
+	}; //this is safe to be public because it is just a report string
+	
+	private String valueReport(Object val){
+		if(val==null)return ""+null;
+		
+		if(val instanceof String){
+			return "\""+val+"\"";
+		}
+		
+		return ""+val;
+	}
+	
+	public String getValueReport(){
+		return valueReport(getRawValue())+"("+valueReport(getRawValueDefault())+")";
+	}
 	
 	/** TODO modify return to O, also on vivo? or will be too much unnecessary complexity? just casts should suffice? */ 
-	public abstract Object getRawValue(); //this is safe to be public because it is a base access to the concrete class simple value ex.: will return a primitive Long on the concrete class
+	public O getValue(){
+		return (O)getRawValue();
+	}
+	
+	public Object getRawValue(){ //this is safe to be public because it is a base access to the concrete class simple value ex.: will return a primitive Long on the concrete class
+		Object val = null;
+		if(vivo!=null){
+			val = vivo.getRawValue();
+		}else{
+			val = objRawValueLazy;
+		}
+		
+		return assertAllowNullValue(val);
+//		return vivo.getObjectValue();
+	}
 	
 	/**
 	 * implement only at concrete class (not the midlevel abstract ones)
@@ -368,33 +414,56 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	 */
 	protected abstract S getThis();
 	
+	protected Object assertAllowNullValue(Object objValue){
+		if(!bAllowNullValue && objValue==null){
+			throw new PrerequisitesNotMetException("null value not allowed",this);
+		}
+		return objValue;
+	}
+	
+	public S setValue(O value) {
+		setObjectRawValue(value);
+		return getThis();
+	}
+	
+	public S setObjectRawValue(Object objValue) { // do not use O at param here, ex.: bool toggler can be used on overriden
+		setObjectRawValue(objValue,false);
+		return getThis();
+	}
+	
 	/**
 	 * It is the unmodified/original value.
 	 * If var link is not set, the raw value will be lazily stored.
 	 *  
-	 * @param objValue
+	 * @param objValueNew
 	 * @return
 	 */
-	public S setObjectRawValue(Object objValue) { // do not use O at param here, ex.: bool toggler can be used on overriden
-//		public S setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
-//		ccCD.assertSelfNotNull();
+	private S setObjectRawValue(Object objValueNew, boolean bSetDefault) { // do not use O at param here, ex.: bool toggler can be used on overriden
+		assertAllowNullValue(objValueNew);
 		
-//	if(isField()){
-//	if(vivo==null){
-//		throw new PrerequisitesNotMetException("var link not set for field", this, objValue);
-//	}else{
-//		vivo.setObjectValue(objValue);
-//	}
-		if(objRawValueDefault==null)objRawValueDefault=(O)objValue;
+		if(bSetDefault){ //can be null the default
+//		if(objRawValueDefault==null){
+			objRawValueDefault=(O)objValueNew;
+		}
 		
+		Object objCurrentValue = null;
 		if(vivo!=null){
-			if(vivo.getObjectValue()!=objValue)prepareCallerAssigned(false);
+			objCurrentValue = vivo.getRawValue();
+//			if(vivo.getRawValue()!=objValue)prepareCallerAssigned(false);
 			
-			vivo.setObjectValue(objValue);
+			/**
+			 * this cast is IMPORTANT!!!
+			 * to grant the setup is in the right type!
+			 */
+			vivo.setRawValue((O)objValueNew);
 		}else{
 			bLazyValueWasSet=true; //as such value can be actually null
-			this.objRawValueLazy = (O)objValue;
+			
+			objCurrentValue = this.objRawValueLazy; //before setting it! :P
+			this.objRawValueLazy = (O)objValueNew;
 		}
+		
+		if(objCurrentValue!=objValueNew)prepareCallerAssigned(false);
 		
 		return getThis();
 	}
@@ -425,6 +494,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	}
 	
 	protected Object getRawValueLazy(){
+		assertAllowNullValue(objRawValueLazy);
 		return objRawValueLazy;
 	}
 	
@@ -466,8 +536,33 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		return vcuid;
 	}
 	
-	public abstract String getValueAsString();
-	public abstract String getValueAsString(int iIfFloatPrecision);
+	public String getValueAsString() {
+		O value = getValue();
+		if(value==null)return null; //value can be null
+		
+		return ""+value;
+	}
+	public String getValueAsString(int iFloatingPrecision) {
+		Object value = getValue();
+		if(value==null)return null;//value can be null
+		
+		switch(EType.forClass(value.getClass())){
+			case Double:
+				value = MiscI.i().fmtFloat((double)value, iFloatingPrecision);
+				break;
+			case Float:
+				value = MiscI.i().fmtFloat((float)value, iFloatingPrecision);
+				break;
+			case Boolean:
+			case Int:
+			case Long:
+			case String:
+				// keep empty
+				break;
+		}
+		
+		return ""+value;
+	}
 	
 	@Override
 	public String toString() {
@@ -481,15 +576,24 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 			}
 		}
 		
-		return getReport() + " (" + super.toString() + ")";
+		String str="("+this.getClass().getName()+")";
+		str+=getReport();
+		str+=" (" + super.toString() + ")";
+		
+		return str;
 	}
 
 	public VarCmdUId getIdTmpCopy() {
 		return vcuid.clone();
 	}
-
-	public O getRawValueDefault() {
-		return objRawValueDefault;
+	
+	public O getValueDefault(){
+		return (O)getRawValueDefault();
+	}
+	
+	public Object getRawValueDefault() {
+		return assertAllowNullValue(objRawValueDefault);
+//		return objRawValueDefault;
 	}
 	
 	/**
@@ -533,7 +637,7 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 	public Boolean callerAssignedRunNow(Object... aobjParams){
 		if(callerAssigned!=null){
 //			callerAssigned.putCustomValue(getCallerAssignedParamsKey(), aobjParams);
-			callerAssigned.getParamsForMaintenance().setAllParams(aobjParams);
+			callerAssigned.getParamsForMaintenance().setReplaceAllParams(aobjParams);
 		}
 		
 		return prepareCallerAssigned(true);
@@ -542,9 +646,22 @@ public abstract class VarCmdFieldAbs <O,S extends VarCmdFieldAbs<O,S>> implement
 		prepareCallerAssigned(false);
 	}
 
-	public CallableX getCallerAssignedForMaintenance(WorkAroundI.CompositeControl cc) {
-		cc.assertSelfNotNull();
+	public CallableX getCallerAssignedForMaintenance(CompositeControlAbs cc) {
+		this.ccOwner = cc.assertSelfNotNullEqualsStored(this.ccOwner);
+		
 		return callerAssigned;
 	}
 	
+	public boolean isAllowNullValue(){
+		return this.bAllowNullValue;
+	}
+	
+	public S setDenyNullValue() {
+		this.bAllowNullValue = false;
+		return getThis();
+	}
+	
+	public boolean isConsoleVarLinkSet(){
+		return vivo!=null;
+	}
 }

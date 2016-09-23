@@ -28,7 +28,6 @@
 package com.github.commandsconsolegui.jmegui;
 
 //import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ERecreateConsoleSteps;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.globals.GlobalHolderAbs.IGlobalOpt;
@@ -39,12 +38,9 @@ import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.RetryOnFailure;
-import com.github.commandsconsolegui.misc.RetryOnFailure.CompositeControl;
 import com.github.commandsconsolegui.misc.RetryOnFailure.IRetryListOwner;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppState;
-import com.jme3.export.JmeExporter;
-import com.jme3.export.JmeImporter;
 import com.jme3.export.Savable;
 import com.jme3.scene.Node;
 

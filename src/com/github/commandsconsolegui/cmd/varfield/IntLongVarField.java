@@ -70,9 +70,9 @@ public class IntLongVarField extends NumberVarFieldAbs<Long,IntLongVarField>{
 	public IntLongVarField(IReflexFillCfg rfcfgOwnerUseThis, Long lInitialValue, String strHelp) {
 //		if(rfcfgOwnerUseThis!=null)ailvList.add(this); //only fields allowed
 //		super(rfcfgOwnerUseThis!=null); //only fields allowed
-		super(rfcfgOwnerUseThis);
+		super(rfcfgOwnerUseThis, lInitialValue);
 //		this.setOwner(rfcfgOwnerUseThis);
-		setObjectRawValue(lInitialValue);
+//		setObjectRawValue(lInitialValue);
 		setHelp(strHelp);
 //		this.bReflexingIdentifier = rfcfgOwnerUseThis!=null;
 		constructed();
@@ -98,28 +98,28 @@ public class IntLongVarField extends NumberVarFieldAbs<Long,IntLongVarField>{
 //	public IntLongVarField setObjectValue(CommandsDelegator.CompositeControl cc, Object objValue) {
 	public IntLongVarField setObjectRawValue(Object objValue) {
 		if(objValue == null){
-			setValue( null );
+			objValue=( null );
 		}else
 		if(objValue instanceof Integer){
-			setValue( ((Integer)objValue).longValue() );
+			objValue=( ((Integer)objValue).longValue() );
 		}else
 		if(objValue instanceof Long){
-			setValue( ((Long)objValue) );
+			objValue=( ((Long)objValue) );
 		}else
 		if(objValue instanceof IntLongVarField){
-			setValue( ((IntLongVarField)objValue).getValue() );
+			objValue=( ((IntLongVarField)objValue).getValue() );
 		}else
 		if(objValue instanceof Float){
-			setValue( (long)Math.round(((Float)objValue).doubleValue()) );
+			objValue=( (long)Math.round(((Float)objValue).doubleValue()) );
 		}else
 		if(objValue instanceof Double){
-			setValue( (long)Math.round((Double)objValue) );
+			objValue=( (long)Math.round((Double)objValue) );
 		}else
 		if(objValue instanceof FloatDoubleVarField){
-			setValue( (long)Math.round(((FloatDoubleVarField)objValue).getDouble()) );
+			objValue=( (long)Math.round(((FloatDoubleVarField)objValue).getDouble()) );
 		}else
 		if(objValue instanceof String){
-			setValue( Long.parseLong((String)objValue) );
+			objValue=( Long.parseLong((String)objValue) );
 		}else{
 			throw new PrerequisitesNotMetException("unsupported class type", objValue.getClass());
 		}
@@ -192,15 +192,15 @@ public class IntLongVarField extends NumberVarFieldAbs<Long,IntLongVarField>{
 //		return strVarId;
 //	}
 
-	@Override
-	public String getReport() {
-		return getUniqueVarId()+" = "+getLong();
-	}
+//	@Override
+//	public String getReport() {
+//		return getUniqueVarId()+" = "+getLong();
+//	}
 
-	@Override
-	public Object getRawValue() {
-		return getLong();
-	}
+//	@Override
+//	public Object getRawValue() {
+//		return getLong();
+//	}
 
 //	@Override
 //	public void setConsoleVarLink(VarIdValueOwnerData vivo) {
@@ -212,14 +212,14 @@ public class IntLongVarField extends NumberVarFieldAbs<Long,IntLongVarField>{
 //		if(lValue==null)return null;
 //		return ""+lValue;
 //	}
-	@Override
-	public String getValueAsString() {
-		return ""+getRawValue();
-	}
-	@Override
-	public String getValueAsString(int iIfFloatPrecision) {
-		return getValueAsString();
-	}
+//	@Override
+//	public String getValueAsString() {
+//		return ""+getRawValue();
+//	}
+//	@Override
+//	public String getValueAsString(int iIfFloatPrecision) {
+//		return getValueAsString();
+//	}
 
 	@Override
 	public String getVariablePrefix() {

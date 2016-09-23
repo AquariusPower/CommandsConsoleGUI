@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import com.github.commandsconsolegui.jmegui.AudioUII;
-import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
+import com.github.commandsconsolegui.jmegui.DialogStateAbs;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData.SliderValueData.ESliderKey;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
@@ -65,7 +65,7 @@ public class DialogListEntryData<T> implements Savable{
 	private static String strLastUniqueId = "0";
 	
 	private String	strUniqueId;
-	private BaseDialogStateAbs diagOwner;
+	private DialogStateAbs diagOwner;
 	
 	private HashMap<String,T> hmCustomButtonsActions = new HashMap<String,T>();
 	private Object	objUser;
@@ -140,7 +140,7 @@ public class DialogListEntryData<T> implements Savable{
 	private String strText;
 //	T objRef;
 	
-	public DialogListEntryData(BaseDialogStateAbs diagOwner) {
+	public DialogListEntryData(DialogStateAbs diagOwner) {
 		this.diagOwner=diagOwner;
 		this.strUniqueId = DialogListEntryData.strLastUniqueId = (MiscI.i().getNextUniqueId(strLastUniqueId));
 	}

@@ -28,7 +28,7 @@
 package com.github.commandsconsolegui.cmd.varfield;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
-import com.github.commandsconsolegui.cmd.VarIdValueOwnerData;
+import com.github.commandsconsolegui.cmd.ConsoleVariable;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs.EVarCmdMode;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -90,7 +90,7 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 	 */
 	public StringCmdField(IReflexFillCfg rfcfgOwner, String strReflexFillCfgCodePrefixVariant, String strHelpComment){ // int iReflexFillCfgVariant){
 //		this((String)null,strHelpComment);
-		super(rfcfgOwner,EVarCmdMode.Cmd);
+		super(rfcfgOwner, EVarCmdMode.Cmd, null);
 		setHelp(strHelpComment);
 		
 		setCodePrefixVariant(strReflexFillCfgCodePrefixVariant);
@@ -125,16 +125,16 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 //		if(getUniqueCmdId()==null)chkAndInit();
 //		return getUniqueCmdId();
 //	}
-	@Override
-	public String getValueAsString() {
-//		if(getUniqueCmdId()==null)
-		chkAndInit();
-		return getUniqueCmdId();
-	}
-	@Override
-	public String getValueAsString(int iIfFloatPrecision) {
-		return getValueAsString();
-	}
+//	@Override
+//	public String getValueAsString() {
+////		if(getUniqueCmdId()==null)
+//		chkAndInit();
+//		return getUniqueCmdId();
+//	}
+//	@Override
+//	public String getValueAsString(int iIfFloatPrecision) {
+//		return getValueAsString();
+//	}
 	
 //	public String getHelpComment(){
 //		return strHelp;
@@ -189,13 +189,13 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 	@Override
 //	public StringCmdField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
 	public StringCmdField setObjectRawValue(Object objValue) {
-		throw new PrerequisitesNotMetException("TODO should this method do nothing here? should it be only set thru reflex?", this, objValue); //TODO
+		throw new PrerequisitesNotMetException("TODO this method could set the return value of a command?", this, objValue); //TODO
 	}
 
-	@Override
-	public String getReport() {
-		return getUniqueCmdId();
-	}
+//	@Override
+//	public String getReport() {
+//		return getUniqueCmdId();
+//	}
 
 	@Override
 	public Object getRawValue() {
@@ -216,7 +216,7 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 		return getUniqueVarId(false); 
 	}
 	@Override
-	public StringCmdField setConsoleVarLink(CommandsDelegator.CompositeControl ccCD, VarIdValueOwnerData vivo) {
+	public StringCmdField setConsoleVarLink(CommandsDelegator.CompositeControl ccCD, ConsoleVariable vivo) {
 //	public StringCmdField setConsoleVarLink(VarIdValueOwnerData vivo) {
 		throw new PrerequisitesNotMetException("TODO: Each command could have a variable storing it's possible return value!", this, vivo); //TODO
 	}

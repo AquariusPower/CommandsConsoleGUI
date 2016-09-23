@@ -79,6 +79,8 @@ public class CallQueueI {
 		private boolean bQuietOnFail = false;
 		private boolean bAllowQueue = true;
 		private int	iFailTimesWarn;
+		private boolean	bIgnoreRecursiveCallWarning;
+		private ArrayList<CallableX> acallerListRecursion = new ArrayList<CallableX>();
 		
 		public CallableX(Object objEnclosing) {
 			this(objEnclosing,0);
@@ -135,12 +137,18 @@ public class CallQueueI {
 			return bRetryOnFail ;
 		}
 		
+		public CallableX setIgnoreRecursiveCallWarning(){
+			this.bIgnoreRecursiveCallWarning=true;
+			return this;
+		}
+		
 		public CallableX setAsPrepend(){
 			bPrepend=true;
 			return this;
 		}
-		public void putCustomValue(String strKey, Object objValue){
+		public CallableX putCustomValue(String strKey, Object objValue){
 			hmCustom.put(strKey,objValue);
+			return this;
 		}
 		public Object getCustomValue(String strKey){
 			return hmCustom.get(strKey);
@@ -175,8 +183,14 @@ public class CallQueueI {
 		public long getCurrentTimeMilis() {
 			return lLastUpdateMilis;
 		}
-		public void updateTimeMilisTo(long lLastUpdateMilis) {
-			this.lLastUpdateMilis = lLastUpdateMilis;
+		
+		/**
+		 * use this also to ensure the delay between retries will also be an initial delay for the 1st attempt
+		 * @return
+		 */
+		public CallableX updateTimeMilisNow() {
+			this.lLastUpdateMilis = System.currentTimeMillis();
+			return this;
 		}
 		
 		public Object getOwner() {
@@ -213,6 +227,9 @@ public class CallQueueI {
 	}
 	
 	ArrayList<CallableX> aCallList = new ArrayList<CallableX>();
+	private boolean	bIgnoreRecursiveCallWarning;
+	private CallableX	callerQueuedCurrentlyRunning;
+	private CallableX	callerCurrentlyRunning;
 	
 	public int update(float fTPF){
 		int i=0;
@@ -220,11 +237,12 @@ public class CallQueueI {
 		for(CallableX caller:new ArrayList<CallableX>(aCallList)){
 			assertQueueAllowed(caller);
 			
-			caller.updateTimeMilisTo(System.currentTimeMillis());
+			caller.updateTimeMilisNow();
 			if(!caller.rReQueue.isReadyAndUpdate()){
 				continue;
 			}
 			
+			callerQueuedCurrentlyRunning=caller;
 			if(runCallerCode(caller))i++;
 		}
 		
@@ -240,17 +258,23 @@ public class CallQueueI {
 	private boolean runCallerCode(CallableX caller) {
 //		try {
 			caller.lDbgLastRunTimeMilis=System.currentTimeMillis();
+			callerCurrentlyRunning=caller;
 			if(caller.call().booleanValue()){
 				caller.iFailCount=0; //reset counter
 				aCallList.remove(caller);
 				return true;
 			}else{
-			//TODO tho, for each i%100 failures, should warn, but if the delay is high, this number could be lowered like warn every 10s no matter the count...
+				caller.iFailCount++;
+				
 				if(!caller.isQuietOnFail()){
-					boolean b=false;
-					if(b==false && (caller.iFailCount%caller.iFailTimesWarn)==0)b=true;
-					if(b==false && caller.iFailCount==0 && caller.iFailTimesWarn==0)b=true;
-					if(b){
+					boolean bShowMsg=false;
+					if(caller.iFailTimesWarn>0){
+						bShowMsg = (caller.iFailCount%caller.iFailTimesWarn)==0;
+					}else{
+						bShowMsg = caller.iFailCount==1; //only 1st time
+					}
+					
+					if(bShowMsg){
 						GlobalCommandsDelegatorI.i().dumpDevWarnEntry(
 							"caller failed: "+caller.getId(), 
 							caller, 
@@ -260,7 +284,6 @@ public class CallQueueI {
 						);
 					}
 				}
-				caller.iFailCount++;
 				
 				if(caller.isRetryOnFail()){
 					addCall(caller, false, false); //will retry
@@ -306,6 +329,8 @@ public class CallQueueI {
 	private synchronized Boolean addCall(CallableX caller, boolean bTryToRunNow, boolean bApplyOriginalDebugStack) {
 		if(caller==null)throw new PrerequisitesNotMetException("null caller");
 		
+		warnIfPossibleCallRecursiveness(caller);
+		
 //	if(aCallList.contains(caller))
 		while(aCallList.remove(caller)); //prevent multiplicity
 		
@@ -326,7 +351,30 @@ public class CallQueueI {
 		}
 	}
 
+	private void warnIfPossibleCallRecursiveness(CallableX callerNewAdded) {
+		if(callerCurrentlyRunning!=null && callerCurrentlyRunning.bIgnoreRecursiveCallWarning)return;
+//		if(bIgnoreRecursiveCallWarning)return;
+		if(!DebugI.i().isInIDEdebugMode())return;
+		
+		ArrayList<StackTraceElement> asteList = new ArrayList<StackTraceElement>();
+		StackTraceElement[] aste = Thread.currentThread().getStackTrace();
+		for(StackTraceElement ste:aste){
+			if(ste.getMethodName().equals("call")){
+				asteList.add(ste);
+			}
+		}
+		
+		if(asteList.size()>0){
+			if(callerNewAdded.acallerListRecursion.contains(callerCurrentlyRunning)){
+				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("possible call recursiveness", asteList, callerNewAdded.acallerListRecursion, callerNewAdded);
+			}else{
+				callerNewAdded.acallerListRecursion.add(callerCurrentlyRunning);
+			}
+		}
+	}
+
 	public int getWaitingAmount() {
 		return aCallList.size();
 	}
+	
 }

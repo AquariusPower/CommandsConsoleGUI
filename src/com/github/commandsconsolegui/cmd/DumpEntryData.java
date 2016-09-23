@@ -118,8 +118,15 @@ public class DumpEntryData{
 		return str;
 	}
 	
-	private String multilineIfArray(String strPrefix, Object obj){
+	private String multilineIfArray(String strIndexPrefix, Object obj){
+		String strOut="";
+		
 		Object[] aobj = null; //obj instanceof Object[]
+		Exception ex = null;
+		if(obj instanceof Exception){
+			ex = ((Exception)obj);
+		}
+		
 		if(obj!=null){
 			if (obj instanceof ArrayList) {
 				ArrayList aobjList = (ArrayList) obj;
@@ -131,19 +138,42 @@ public class DumpEntryData{
 			}
 		}
 		
-		if(aobj==null)return strPrefix+fmtObj(obj,true);
+		if(ex!=null){
+			strOut+=strIndexPrefix+" "+ex.getClass().getSimpleName()+": "+ex.getMessage();
+			aobj = ex.getStackTrace();
+		}else
+		if(aobj==null){
+			return strIndexPrefix+fmtObj(obj,true);
+		}
 		
-		String str="";
-		String str1stObjClass="";
+		String str1stObjClass=null;
 		for(int i=0;i<aobj.length;i++){
 			Object objInner=aobj[i]; //objInner.getClass().getName()
-			if(i==0){
-				str1stObjClass=objInner.getClass().getName();
-				str+=strPrefix+"ArrayProbablyOf:"+str1stObjClass;
+			
+			String strFmtObj=null;
+			if(objInner==null){
+				strFmtObj = fmtObj(objInner,false);
+			}else{
+				if(str1stObjClass==null){
+					str1stObjClass=objInner.getClass().getName();
+					strOut+=strIndexPrefix+"ArrayOf: "+aobj.getClass().getTypeName();
+//					strOut+=strIndexPrefix+"ArrayOf?(1stNotNullObjType):"+str1stObjClass;
+				}
+				
+				strFmtObj = fmtObj(objInner, !str1stObjClass.equals(objInner.getClass().getName()));
 			}
-			str+=strPrefix+"["+i+"] "+fmtObj(objInner,!str1stObjClass.equals(objInner.getClass().getName()));
+			
+			strOut+=strIndexPrefix+"["+i+"] "+strFmtObj;
 		}
-		return str;
+		
+		if(ex!=null){
+			Throwable exCause = ex.getCause();
+			if(exCause!=null){
+				strOut+=multilineIfArray(strIndexPrefix+"[CAUSE]", exCause);
+			}
+		}
+		
+		return strOut;
 	}
 	
 	private String fmtObj(Object obj,boolean bShowClassName){

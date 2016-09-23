@@ -198,7 +198,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 			AudioUII.i().playOnUserAction(EAudio.HoverOverActivators);
 			
 			Panel pnlApplyEffect = source;
-			CellDialogEntry<?> cell = (CellDialogEntry<?>)source.getUserData(EUserData.cellClassRef.toString());
+			CellDialogEntry<?> cell = (CellDialogEntry<?>)source.getUserData(EUserData.classCellRef.s());
 			if(cell!=null){
 //				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("activator has no cell?", source, Cell.class.getName());
 //			}else{
@@ -207,6 +207,8 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 			}
 			
 			MiscLemurStateI.i().setOverrideBackgroundColorNegatingCurrent(pnlApplyEffect);
+			
+			source.setUserData(EUserData.bHoverOverIsWorking.s(),true);
 			
 			btnLastHoverIn = source;
 		}
@@ -217,7 +219,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 			if( !LemurFocusHelperStateI.i().isDialogFocusedFor(source) )return;
 			
 			Panel pnlApplyEffect = source;
-			CellDialogEntry<?> cell = (CellDialogEntry<?>)source.getUserData(EUserData.cellClassRef.toString());
+			CellDialogEntry<?> cell = (CellDialogEntry<?>)source.getUserData(EUserData.classCellRef.s());
 			if(cell!=null){
 				pnlApplyEffect = cell;
 //				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("activator has no cell?", source, Cell.class.getName());

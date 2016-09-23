@@ -28,8 +28,9 @@
 package com.github.commandsconsolegui.jmegui.lemur.extras;
 
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
+import com.github.commandsconsolegui.jmegui.DialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
+import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurStateI;
 import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Panel;
@@ -46,14 +47,10 @@ public class DialogMainContainer extends Container implements ISpatialValidator{
 	private boolean	bLayoutValid;
 //	ISpatialValidator diag;
 //	
-//	public ContainerMain setDiagOwner(ISpatialValidator diag){
-//		this.diag=diag;
-//		return this;
-//	}
 	
-//	private Panel pnlDummy = new Panel();
-
 	private Vector3f	v3fLastValidSize;
+
+	private Vector3f	v3fLastFailedSize;
 	
 	@Override
 	public boolean isLayoutValid() {
@@ -63,43 +60,41 @@ public class DialogMainContainer extends Container implements ISpatialValidator{
 	@Override
 	public void updateLogicalState(float tpf) {
 		if(bUseCrashPrevention){
-//			if(!isLayoutValid() && v3fLastValidSize!=null){
-//				setPreferredSize(v3fLastValidSize);
-//			}
-			
-			Vector3f v3fMinSize = new Vector3f(20,20,0);
-//			Vector3f v3fMinSize = pnlImpossibleLayout.getPreferredSize(); //TODO should consider the border size too...
-//			v3fMinSize.y*=2f; //TODO do not use this trick...
-//			Vector3f v3fMinSize = getPreferredSize();
-//			float fMin=20;
-			Vector3f v3fSize = getPreferredSize().clone();
-//			if(v3fSize.x<fMin)v3fSize.x=fMin;
-//			if(v3fSize.y<fMin)v3fSize.y=fMin;
-			if(v3fSize.x<v3fMinSize.x)v3fSize.x=v3fMinSize.x;
-			if(v3fSize.y<v3fMinSize.y)v3fSize.y=v3fMinSize.y;
-			if(!v3fSize.equals(getPreferredSize())){
-				setPreferredSize(v3fSize);
+			if(v3fLastFailedSize==null || !v3fLastFailedSize.equals(getSize())){
+				Vector3f v3fMinSize = new Vector3f(20,20,0);
+				Vector3f v3fSize = getPreferredSize().clone();
+				if(v3fSize.x<v3fMinSize.x)v3fSize.x=v3fMinSize.x;
+				if(v3fSize.y<v3fMinSize.y)v3fSize.y=v3fMinSize.y;
+				if(!v3fSize.equals(getPreferredSize())){
+					setPreferredSize(v3fSize);
+				}
+				
+				try{
+					addChild(cntrCenterMain, BorderLayout.Position.Center); //actually replaces
+					super.updateLogicalState(tpf);
+					v3fLastValidSize = getPreferredSize().clone();
+					v3fLastFailedSize = null;
+					bLayoutValid=true;
+				}catch(Exception e){
+					bLayoutValid=false;
+					
+					v3fLastFailedSize = getSize().clone();
+					
+					Exception ex = new Exception(diagOwner.getId());
+					ex.setStackTrace(e.getStackTrace());
+					ex.initCause(e.getCause());
+					GlobalCommandsDelegatorI.i().dumpExceptionEntry(
+						ex, "(OriginalMessage)"+e.getMessage(),
+						cntrCenterMain, this, diagOwner, getSize(), getPreferredSize(), getLocalTranslation(), tpf);
+					
+					addChild(pnlFallbackForImpossibleLayout, BorderLayout.Position.Center); //actually replaces
+				}
 			}
 			
-//			v3fLastValidSize = null;
-			try{
-//				if(!isLayoutValid()){
-					addChild(cntrCenterMain, BorderLayout.Position.Center); //actually replaces
-//				}
-				super.updateLogicalState(tpf);
-				v3fLastValidSize = getPreferredSize().clone();
-				bLayoutValid=true;
-			}catch(Exception e){
-				bLayoutValid=false;
-				
-				GlobalCommandsDelegatorI.i().dumpExceptionEntry(e, this, tpf);
-				
-//				if(pnlImpossibleLayout.getSize().length() >= pnlImpossibleLayout.getPreferredSize().length()){
-//					addChild(pnlImpossibleLayout, BorderLayout.Position.Center); //actually replaces
-//				}else{
-					addChild(pnlImpossibleLayout, BorderLayout.Position.Center); //actually replaces
-//				}
-				try{super.updateLogicalState(tpf);}catch(Exception e2){}
+			if(!bLayoutValid){
+				try{super.updateLogicalState(tpf);}catch(Exception e){
+					GlobalCommandsDelegatorI.i().dumpExceptionEntry(e, pnlFallbackForImpossibleLayout, this, diagOwner, getSize(), getPreferredSize(), getLocalTranslation(), tpf);
+				}
 			}
 		}else{
 			super.updateLogicalState(tpf);
@@ -169,18 +164,18 @@ public class DialogMainContainer extends Container implements ISpatialValidator{
 		// TODO Auto-generated constructor stub
 	}
 
-	private Panel	pnlImpossibleLayout;
+	private Panel	pnlFallbackForImpossibleLayout;
 	private Container cntrCenterMain;
 	private boolean	bUseCrashPrevention = false;
 
-	private BaseDialogStateAbs	diagOwner;
-	public void setImpossibleLayoutIndicatorAndCenterMain(Panel pnlImpossibleLayout, Container cntrCenterMain, BaseDialogStateAbs diagOwner) {
+	private DialogStateAbs	diagOwner;
+	public void setImpossibleLayoutIndicatorAndCenterMain(Panel pnlImpossibleLayout, Container cntrCenterMain, DialogStateAbs diagOwner) {
 		bUseCrashPrevention=true;
-		this.pnlImpossibleLayout = pnlImpossibleLayout==null ? new Panel() : pnlImpossibleLayout;
+		this.pnlFallbackForImpossibleLayout = pnlImpossibleLayout==null ? new Panel() : pnlImpossibleLayout;
 		this.cntrCenterMain=cntrCenterMain;
 		this.diagOwner=diagOwner;
 		
-		MiscJmeI.i().setUserDataPSH(this.pnlImpossibleLayout, diagOwner);
+		MiscJmeI.i().setUserDataPSH(this.pnlFallbackForImpossibleLayout, diagOwner);
 	}
 	
 //	@Override

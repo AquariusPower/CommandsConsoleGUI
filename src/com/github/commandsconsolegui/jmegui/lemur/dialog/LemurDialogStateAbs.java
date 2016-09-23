@@ -25,7 +25,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.jmegui.lemur.extras;
+package com.github.commandsconsolegui.jmegui.lemur.dialog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,7 +40,7 @@ import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jmegui.AudioUII;
 import com.github.commandsconsolegui.jmegui.AudioUII.EAudio;
-import com.github.commandsconsolegui.jmegui.BaseDialogStateAbs;
+import com.github.commandsconsolegui.jmegui.DialogStateAbs;
 import com.github.commandsconsolegui.jmegui.MiscJmeI;
 import com.github.commandsconsolegui.jmegui.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
@@ -49,12 +49,18 @@ import com.github.commandsconsolegui.jmegui.lemur.console.ConsoleLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurStateI;
 import com.github.commandsconsolegui.jmegui.lemur.console.MiscLemurStateI.BindKey;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurBaseDialogHelperI.DialogStyleElementId;
+import com.github.commandsconsolegui.jmegui.lemur.dialog.LemurDialogHelperI.DialogStyleElementId;
+import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry;
 import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
+import com.github.commandsconsolegui.jmegui.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserData;
+import com.github.commandsconsolegui.jmegui.lemur.extras.DialogMainContainer;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.WorkAroundI;
 import com.github.commandsconsolegui.misc.WorkAroundI.BugFixBoolTogglerCmdField;
 import com.jme3.input.KeyInput;
@@ -84,15 +90,16 @@ import com.simsilica.lemur.style.ElementId;
 
 /**
 * 
-* More info at {@link BaseDialogStateAbs}
+* More info at {@link DialogStateAbs}
 *	TODO implement docking dialogs, a small icon will be created at app window edges
 * 
-* TODO migrate from {@link BaseDialogStateAbs} to here, everything that is not usable at {@link ConsoleLemurStateI}
+* TODO migrate from {@link DialogStateAbs} to here, everything that is not usable at {@link ConsoleLemurStateI}
 * 
 * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 *
 */
-public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<T,R>> extends BaseDialogStateAbs<T,R> {//implements IWorkAroundBugFix{
+//public abstract class LemurDialogGUIStateAbs<T,CS extends LemurDialogGUIStateAbs.CompositeSavableLemur,R extends LemurDialogGUIStateAbs<T,CS,R>> extends BaseDialogStateAbs<T,CS,R> {//implements IWorkAroundBugFix{
+public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> extends DialogStateAbs<T,R> {//implements IWorkAroundBugFix{
 	private Label	lblTitle;
 	private Label	lblTextInfo;
 //	private ListBox<DialogListEntryData<T>>	lstbxEntriesToSelect;
@@ -105,7 +112,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	private BoolTogglerCmdField btgAutoScroll = new BoolTogglerCmdField(this, true).setCallNothingOnChange();
 //	private ButtonCommand	bc;
 	private boolean	bRefreshScroll;
-	private HashMap<String, LemurDialogGUIStateAbs<T,?>> hmModals = new HashMap<String, LemurDialogGUIStateAbs<T,?>>();
+	private HashMap<String, LemurDialogStateAbs<T,?>> hmModals = new HashMap<String, LemurDialogStateAbs<T,?>>();
 	private Long	lClickActionMilis;
 //	private DialogListEntryData<T>	dataSelectRequested;
 	private Label	lblSelectedEntryStatus;
@@ -129,7 +136,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	
 	private FloatDoubleVarField fdvEntryHeightMultiplier = new FloatDoubleVarField(this,1f,"");
 	
-	public static class CfgParm extends BaseDialogStateAbs.CfgParm{
+	public static class CfgParm extends DialogStateAbs.CfgParm{
 		private Float fDialogHeightPercentOfAppWindow;
 		private Float fDialogWidthPercentOfAppWindow;
 		private Float fInfoHeightPercentOfDialog;
@@ -172,7 +179,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	private Button	btnResizeSouth;
 	private Button	btnResizeEast;
 	private Button	btnResizeWest;
-	private ArrayList<Button>	abtnResizeBorderList = new ArrayList<Button>();
+	private ArrayList<Button>	abtnBorderList = new ArrayList<Button>();
 	private Vector3f	v3fDiagWindowSize;
 	private Vector3f	v3fPosCentered;
 	@Override
@@ -193,6 +200,8 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		if(cfg.fInfoHeightPercentOfDialog==null){
 			cfg.fInfoHeightPercentOfDialog=0.25f;
 		}
+		
+//		if(isCompositeSavableSet())setCompositeSavable(new LemurDialogCS(this));
 		
 		super.configure(cfg);
 		
@@ -223,6 +232,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	
 	@Override
 	protected boolean initAttempt() {
+		if(!isCompositeSavableSet())setCompositeSavable(new LemurDialogCS(this));
 		if(!super.initAttempt())return false;
 		
 //		setRetryDelayFor(300L, EDelayMode.Update.s()); //mainly useful when resizing
@@ -268,7 +278,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		CallQueueI.i().addCall(new CallableX() {
 //			@Override
 //			public Boolean call() {
-				reinitBorders();
+				reinitBorders(true);
 //				return true;
 //			}
 //		});
@@ -381,15 +391,24 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		return true;
 	}
 	
-	private void reinitBorders() {
-		abtnResizeBorderList.clear();
+	private void reinitBorders(boolean bAppyBorderSize) {
+//		abtnResizeBorderList.clear();
 		
-		btnResizeNorth = prepareResizeBorder(BorderLayout.Position.North);
-		btnResizeSouth = prepareResizeBorder(BorderLayout.Position.South);
-		btnResizeEast = prepareResizeBorder(BorderLayout.Position.East);
-		btnResizeWest = prepareResizeBorder(BorderLayout.Position.West);
+		btnResizeNorth = prepareResizeBorder(btnResizeNorth, BorderLayout.Position.North);
+		btnResizeSouth = prepareResizeBorder(btnResizeSouth, BorderLayout.Position.South);
+		btnResizeEast = prepareResizeBorder(btnResizeEast, BorderLayout.Position.East);
+		btnResizeWest = prepareResizeBorder(btnResizeWest, BorderLayout.Position.West);
 		
-		ilvBorderSize.callerAssignedQueueNow();
+		if(bAppyBorderSize){
+			CallQueueI.i().addCall(new CallableX(this) {
+				@Override
+				public Boolean call() {
+					if(getCompositeSavable(LemurDialogCS.class)==null)return false;
+					getCompositeSavable(LemurDialogCS.class).ilvBorderThickness.callerAssignedQueueNow();
+					return true;
+				}
+			});
+		}
 //		setBordersSize(ilvBorderSize.getInt());
 	}
 
@@ -441,38 +460,52 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		requestRefreshUpdateList();
 	}
 	
-	private Button prepareResizeBorder(Position edge) {
-		final Button btnBorder = new Button(
-			"", new ElementId(DialogStyleElementId.buttonResizeBorder.s()), getDiagStyle());
-//		btnBorder.setFontSize(0.1f); //this trick will let us set it with any dot size!
-		
-		MiscJmeI.i().setUserDataPSH(btnBorder, this); //if a border is clicked, the bugfixer that recreates it will make the old border object have no parent. Its parentest would have a reference to the dialog, but now it is alone, so such reference must be on it.
-		
-		btnBorder.setName("Dialog_ResizeBorder_"+edge.toString());
-//		btn.getBackground().getGuiControl().set
-		
-//		CallQueueI.i().addCall(new CallableX() {
-//			@Override
-//			public Boolean call() {
-//				MiscLemurHelpersStateI.i().setOverrideBackgroundColor(btn,ColorRGBA.Cyan);
-//				return true;
-//			}
-//		});
-		
-//		Vector3f v3f = new Vector3f(10,10,-1);
-//		MiscLemurHelpersStateI.i().setGrantedSize(btnBorder, v3f, true, true);
-//		MiscLemurHelpersStateI.i().setGrantedSize(btnBorder, 3, 3, true);
-		CursorEventControl.addListenersToSpatial(btnBorder, DialogMouseCursorListenerI.i());
-		DialogMouseCursorListenerI.i().addDefaultCommands(btnBorder);
-		
-//		btn.setUserData("Border", p);
-//		super.addResizer(btn);
-		
-		abtnResizeBorderList.add(btnBorder);
-		
-		getDialogMainContainer().addChild(btnBorder, edge); //this actually replaces the current at that border
-		
-		return btnBorder;
+	private Button prepareResizeBorder(final Button btnExisting, final Position edge) {
+		if(btnExisting!=null){
+			if(!btgBugFixReinitBordersByRecreating.b()){
+				CursorEventControl.removeListenersFromSpatial(btnExisting, DialogMouseCursorListenerI.i());
+				CursorEventControl.addListenersToSpatial(btnExisting, DialogMouseCursorListenerI.i());
+				/**
+				 * this does not work very well...
+				 */
+				Boolean b=btnExisting.getUserData(EUserData.bHoverOverIsWorking.s());
+				if(b!=null && b){
+					return btnExisting;
+				}
+			}
+			
+			abtnBorderList.remove(btnExisting);
+		}
+			
+//			CursorEventControl.removeListenersFromSpatial(btnExisting, DialogMouseCursorListenerI.i());
+////			getDialogMainContainer().addChild(new Panel(), edge);
+//			getDialogMainContainer().removeChild(btnExisting);
+//			CallQueueI.i().addCall(new CallableX(this,100) {
+//				@Override
+//				public Boolean call() {
+//					getDialogMainContainer().addChild(btnExisting, edge);
+//					CursorEventControl.addListenersToSpatial(btnExisting, DialogMouseCursorListenerI.i());
+//					return true;
+//				}
+//			}.updateTimeMilisNow());
+//			return btnExisting;
+//		}else{
+			Button btnBorder=new Button("", new ElementId(DialogStyleElementId.buttonResizeBorder.s()), getDiagStyle());
+			//TRICK(seems not necessary?): btnBorder.setFontSize(0.1f); //this trick will let us set it with any dot size!
+			
+			MiscJmeI.i().setUserDataPSH(btnBorder, this); //if a border is clicked, the bugfixer that recreates it will make the old border object have no parent. Its parentest would have a reference to the dialog, but now it is alone, so such reference must be on it.
+			
+			btnBorder.setName("Dialog_ResizeBorder_"+edge.toString());
+			
+			CursorEventControl.addListenersToSpatial(btnBorder, DialogMouseCursorListenerI.i());
+			DialogMouseCursorListenerI.i().addDefaultCommands(btnBorder);
+			
+			abtnBorderList.add(btnBorder);
+			
+			getDialogMainContainer().addChild(btnBorder, edge); //this actually replaces the current at that border
+			
+			return btnBorder;
+//		}
 	}
 	
 	StringCmdField scfFixReinitDialogBorders = new StringCmdField(this,null,"it may require a few tries actually...")
@@ -480,29 +513,67 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 			@Override
 			public Boolean call() {
 				if(isEnabled()){
-					reinitBorders();
+					reinitBorders(false);
 					return true;
 				}
 				
-				GlobalCommandsDelegatorI.i().dumpWarnEntry("not enabled: "+LemurDialogGUIStateAbs.this.getId(), this, LemurDialogGUIStateAbs.this);
+				GlobalCommandsDelegatorI.i().dumpWarnEntry("not enabled: "+LemurDialogStateAbs.this.getId(), this, LemurDialogStateAbs.this);
 				return false;
 			}
 		});
+	private boolean	bReinitBordersAfterThicknessChange;
 	
-	IntLongVarField ilvBorderSize = new IntLongVarField(this, 3, "").setMinMax(1L, 20L)
-		.setCallerAssigned(new CallableX(this) {
-			@Override
-			public Boolean call() {
-				setBordersSize(ilvBorderSize.getInt());
-				return true;
-			}
-		});
+//	IntLongVarField ilvBorderThickness = new IntLongVarField(this, 3, "").setMinMax(1L, 20L)
+//		.setCallerAssigned(new CallableX(this) {
+//			@Override
+//			public Boolean call() {
+//				setBordersThickness(ilvBorderThickness.getInt());
+//				return true;
+//			}
+//		});
 //	private boolean	bAllowUpdateLogicalState;
 	
-	public void setBordersSize(int iPixels){
-		for(Button btn:abtnResizeBorderList){
+	public static class LemurDialogCS extends DialogCS<LemurDialogStateAbs> {
+		public LemurDialogCS() {super();}//required by savable
+		public LemurDialogCS(LemurDialogStateAbs owner) {super(owner);}
+		
+		/**
+		 * This console variable will be saved at console cfg file and also with the dialog JME savable. 
+		 */
+		private IntLongVarField ilvBorderThickness;
+		
+		@Override
+		protected void initialize(){
+			super.initialize();
+			
+			IReflexFillCfg irfcfgOwner = isThisInstanceALoadedTmp() ? null : this;
+			ilvBorderThickness = new IntLongVarField(irfcfgOwner, 3, "")
+				.setMinMax(1L, 20L)
+				.setCallerAssigned(new CallableX(this,100) {
+					@Override
+					public Boolean call() {
+						LemurDialogStateAbs diag = LemurDialogCS.this.getOwner();
+						if(diag==null)return false; //to retry
+						
+						diag.setBordersThickness(ilvBorderThickness.getInt());
+						return true;
+					}
+				});
+			
+			if(!isThisInstanceALoadedTmp()){
+				ilvBorderThickness.callerAssignedQueueNow();
+//				getOwner().setBordersThickness(ilvBorderThickness.getInt()); //apply default initially
+			}
+		}
+		
+	}
+	
+	public void setBordersThickness(int iPixels){
+		for(Button btn:abtnBorderList){
 			MiscLemurStateI.i().setSizeSafely(btn, iPixels, iPixels, true);
 		}
+//		CallQueueI.i().addCall(callerReinitBordersAfterThicknessChange.updateTimeMilisNow());
+		bReinitBordersAfterThicknessChange=true;
 	}
 
 	@Override
@@ -783,6 +854,10 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		MiscLemurStateI.i().updateBlinkListBoxSelector(getMainList());//,true);
 		
 //		bAllowUpdateLogicalState=MiscLemurHelpersStateI.i().validatePanelUpdate(getContainerMain());
+		if(bReinitBordersAfterThicknessChange){
+			reinitBorders(false); //false to avoid call queue recursion
+			bReinitBordersAfterThicknessChange=false;
+		}
 		
 		return true;
 	}
@@ -961,7 +1036,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //		return getThis();
 //	}
 	
-	public R addModalDialog(LemurDialogGUIStateAbs<T,?> diagModal){
+	public R addModalDialog(LemurDialogStateAbs<T,?> diagModal){
 		diagModal.setDiagParent(this);
 		hmModals.put(diagModal.getId(),diagModal);
 		return getThis();
@@ -973,7 +1048,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	
 //	public void openModalDialog(String strDialogId, DialogListEntryData<T> dataToAssignModalTo, T cmd){
 	public void openModalDialog(String strDialogId, DialogListEntryData<T> dledToAssignModalTo, T cmd){
-		LemurDialogGUIStateAbs<T,?> diagModalCurrent = hmModals.get(strDialogId);
+		LemurDialogStateAbs<T,?> diagModalCurrent = hmModals.get(strDialogId);
 		if(diagModalCurrent!=null){
 			setDiagModalInfoCurrent(new DiagModalInfo(diagModalCurrent,cmd,dledToAssignModalTo));
 			diagModalCurrent.requestEnable();
@@ -1280,8 +1355,15 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 		changeResizeBorderColor(ColorRGBA.Cyan);
 	}
 	
+//	CallableX callerReinitBordersAfterThicknessChange = new CallableX(this,1000) {
+//		@Override
+//		public Boolean call() {
+//			reinitBorders(true);
+//			return true;
+//		}
+//	};
 	private void changeResizeBorderColor(ColorRGBA c){
-		for(Button btn:abtnResizeBorderList){
+		for(Button btn:abtnBorderList){
 			MiscLemurStateI.i().setOverrideBackgroundColor(btn, c);
 		}
 	}
@@ -1324,17 +1406,20 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 	 * 
 	 * @return a new list of parent's dialogs
 	 */
-	public ArrayList<LemurDialogGUIStateAbs<T,?>> getParentsDialogList() {
-		ArrayList<LemurDialogGUIStateAbs<T,?>> adiag = new ArrayList<LemurDialogGUIStateAbs<T,?>>();
+	public ArrayList<LemurDialogStateAbs<T,?>> getParentsDialogList() {
+		ArrayList<LemurDialogStateAbs<T,?>> adiag = new ArrayList<LemurDialogStateAbs<T,?>>();
 		
-		LemurDialogGUIStateAbs<T,?> diag = (LemurDialogGUIStateAbs<T,?>)super.getParentDialog();
+		LemurDialogStateAbs<T,?> diag = (LemurDialogStateAbs<T,?>)super.getParentDialog();
 		while(diag!=null){
 			adiag.add(diag);
-			diag = (LemurDialogGUIStateAbs<T,?>)diag.getParentDialog();
+			diag = (LemurDialogStateAbs<T,?>)diag.getParentDialog();
 		}
 		
 		return adiag;
 	}
+	
+	BugFixBoolTogglerCmdField btgBugFixReinitBordersByRecreating = new BugFixBoolTogglerCmdField(this,false)
+		.setHelp("this can cause minor problems too concerning mouse cursor clicks on borders, but it is more granted to make the borders work better overall");
 	
 	BugFixBoolTogglerCmdField btgBugFixAutoReinitBorder = new BugFixBoolTogglerCmdField(this,false)
 		.setCallerAssigned(new CallableX(this) {
@@ -1347,7 +1432,7 @@ public abstract class LemurDialogGUIStateAbs<T,R extends LemurDialogGUIStateAbs<
 //				}
 				
 //				this.setQuietOnFail(false);
-				reinitBorders();
+				reinitBorders(false);
 				return true;
 			}
 		});

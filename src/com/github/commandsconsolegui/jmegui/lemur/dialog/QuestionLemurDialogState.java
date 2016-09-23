@@ -37,11 +37,11 @@ import com.simsilica.lemur.Command;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class QuestionDialogState<T extends Command<Button>> extends LemurBasicDialogStateAbs<T,QuestionDialogState<T>> {
+public class QuestionLemurDialogState<T extends Command<Button>> extends BasicLemurDialogStateAbs<T,QuestionLemurDialogState<T>> {
 	private DialogListEntryData<T>	dledYes;
 	private DialogListEntryData<T>	dledNo;
 	
-	public static class CfgParm extends LemurBasicDialogStateAbs.CfgParm{
+	public static class CfgParm extends BasicLemurDialogStateAbs.CfgParm{
 		public CfgParm(
 				Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow,
@@ -54,7 +54,7 @@ public class QuestionDialogState<T extends Command<Button>> extends LemurBasicDi
 	}
 	private CfgParm	cfg;
 	@Override
-	public QuestionDialogState<T> configure(ICfgParm icfg) {
+	public QuestionLemurDialogState<T> configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;
 		super.configure(cfg);
 		return storeCfgAndReturnSelf(icfg);
@@ -90,7 +90,7 @@ public class QuestionDialogState<T extends Command<Button>> extends LemurBasicDi
 	}
 
 	@Override
-	protected QuestionDialogState<T> getThis() {
+	protected QuestionLemurDialogState<T> getThis() {
 		return this;
 	}
 	

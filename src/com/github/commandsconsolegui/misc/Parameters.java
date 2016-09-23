@@ -38,7 +38,7 @@ import java.util.Arrays;
 public class Parameters {
 	private ArrayList<Object> aobj = new ArrayList<Object>();
 	
-	public void setAllParams(Object... aobj) {
+	public void setReplaceAllParams(Object... aobj) {
 		clearParams();
 		this.aobj.addAll(Arrays.asList(aobj));
 	}
