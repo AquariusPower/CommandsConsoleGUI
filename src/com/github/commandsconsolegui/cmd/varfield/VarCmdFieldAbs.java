@@ -35,6 +35,7 @@ import com.github.commandsconsolegui.cmd.ConsoleVariable;
 import com.github.commandsconsolegui.jmegui.savablevalues.CompositeSavableAbs.EType;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.CallQueueI.CallerInfo;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
@@ -474,7 +475,7 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 	protected Boolean prepareCallerAssigned(boolean bRunNow) {
 		if(isConstructed()){ 
 			if(callerAssigned!=null){
-				if(bRunNow || callerAssigned.isAllowQueue()){
+				if(bRunNow || getCallerAssignedInfo().isAllowQueue()){
 					callerAssigned.setRetryOnFail(!bRunNow);
 					return CallQueueI.i().addCall(callerAssigned,bRunNow);
 //				}else{
@@ -645,7 +646,11 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 	public void callerAssignedQueueNow(){
 		prepareCallerAssigned(false);
 	}
-
+	
+	public CallerInfo getCallerAssignedInfo(){
+		return callerAssigned.getInfo();
+	}
+	
 	public CallableX getCallerAssignedForMaintenance(CompositeControlAbs cc) {
 		this.ccOwner = cc.assertSelfNotNullEqualsStored(this.ccOwner);
 		

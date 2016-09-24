@@ -256,7 +256,7 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 		
 		//main top container
 //		setContainerMain(new ContainerMain(new BorderLayout(), getDiagStyle()).setDiagOwner(this));
-		setDialogMainContainer(new DialogMainContainer(new BorderLayout(), getDiagStyle()));
+		setDialogMainContainer(new DialogMainContainer(this, new BorderLayout(), getDiagStyle()));
 		getDialogMainContainer().setName(getId()+"_Dialog");
 		
 		Vector3f v3fAppWindowSize = MiscJmeI.i().getAppWindowSize();
@@ -299,10 +299,7 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 		// impossible layout indicator
 //		Label lbl = new Label("[X] impossible layout",getDiagStyle());
 //		lbl.setFontSize(0.5f);
-		getDialogMainContainer().setImpossibleLayoutIndicatorAndCenterMain(
-			null, //			lbl,
-			cntrCenterMain,
-			this);
+		getDialogMainContainer().setImpossibleLayoutIndicatorAndCenterMain(null, cntrCenterMain);
 		
 		///////////////////////// NORTH (title + info/help)
 		setContainerNorth(new Container(new BorderLayout(), getDiagStyle()));

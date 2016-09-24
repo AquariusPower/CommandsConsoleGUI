@@ -313,7 +313,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		
 		// main container
 //		setContainerMain(new ContainerMain(new BorderLayout(), getDiagStyle()).setDiagOwner(this));
-		setDialogMainContainer(new DialogMainContainer(new BorderLayout(), getDiagStyle()));
+		setDialogMainContainer(new DialogMainContainer(this, new BorderLayout(), getDiagStyle()));
 		MiscLemurStateI.i().setSizeSafely(getDialogMainContainer(), getConsoleSizeCopy());
 		
 		/**

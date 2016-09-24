@@ -762,7 +762,7 @@ public class MiscJmeI implements IReflexFillCfg{
 			}
 		}
 		
-		GlobalCommandsDelegatorI.i().dumpInfoEntry(str+" "+strFileName+" at "+strPathFull);
+		GlobalCommandsDelegatorI.i().dumpDevInfoEntry(str+" "+strFileName+" at "+strPathFull);
 		
 		return (T)svLoaded;
 	}

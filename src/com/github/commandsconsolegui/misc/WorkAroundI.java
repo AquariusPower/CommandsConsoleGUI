@@ -80,7 +80,7 @@ public class WorkAroundI {
 			throw new PrerequisitesNotMetException("default bugfix value must be 'false', let end user decide to enable it!", btgBugFixId);
 		}
 		
-		if(btgBugFixId.getCallerAssignedForMaintenance(ccSelf).isAllowQueue()){
+		if(btgBugFixId.getCallerAssignedInfo().isAllowQueue()){
 			throw new PrerequisitesNotMetException("bugfixer's main caller cannot be queued directly!", btgBugFixId);
 		}
 		

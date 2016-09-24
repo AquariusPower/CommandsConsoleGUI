@@ -312,16 +312,9 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 		for(DialogStateAbs diagWork:adiag){
 			spt = diagWork.getInputFieldForManagement(ccSelf);
 			
-			assertIsAtRenderingNode(spt);
+			if(diagWork.isLayoutValid())assertIsAtRenderingNode(spt);
 			asptFocusRequestList.remove(spt); //to update the priority
-			
-	//		// validate
-	//		Node node = MiscJmeI.i().getParentestFrom(spt);
-	//		if(node==null || !GlobalGUINodeI.i().get().equals(node.getParent())){
-	//			msgDbg("not at GUI node "+spt.getName(),false);
-	//			return;
-	//		}
-			asptFocusRequestList.add(spt);
+			asptFocusRequestList.add(spt); //top priority
 		}
 		
 		if(spt instanceof TextField){

@@ -164,6 +164,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	public final StringCmdField CMD_DB = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_ECHO = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField scfListFiles = new StringCmdField(this);
+	public final StringCmdField scfMessagesBufferClear = new StringCmdField(this);
 	public final StringCmdField scfChangeCommandSimpleId = new StringCmdField(this);
 	public final StringCmdField CMD_FIX_LINE_WRAP = new StringCmdField(this,strFinalCmdCodePrefix);
 	public final StringCmdField CMD_FIX_VISIBLE_ROWS_AMOUNT = new StringCmdField(this,strFinalCmdCodePrefix);
@@ -827,6 +828,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		for(StringCmdField scf:ascfCmdWithCallerList){
 			if(checkCmdValidity(icclPseudo,scf)){
 				bCmdWorked = scf.callerAssignedRunNow();
+				if(!bCmdWorked && scf.getCallerAssignedInfo().isRetryOnFail()){
+					dumpInfoEntry("First exec failed but will be retried: "+scf.getUniqueCmdId());
+					bCmdWorked=true; //the command worked as retry is an option.
+				}
 //				bCmdCallerPrepared = true;
 				break;
 			}
@@ -1043,6 +1048,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			}
 			
 		}else
+		if(checkCmdValidity(icclPseudo,scfMessagesBufferClear,"clear all warning and exceptions stored in memory")){
+			aimBufferList.clear();
+			bCmdWorked=true;
+		}else
 		if(checkCmdValidity(icclPseudo,CMD_MESSAGE_REVIEW,"[filter]|[index [stackLimit]] if filter is an index, and it has an exception, the complete exception will be dumped.")){
 			String strFilter = ccl.paramString(1);
 			Integer iIndex = ccl.paramInt(1,true);
@@ -1064,7 +1073,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				if(iIndex!=null && (imsg.ex!=null||imsg.asteExceptionHappenedAt!=null)){
 					dumpExceptionEntry(imsg, iStackLimit==null?0:iStackLimit);
 				}else{
-					dumpSubEntry(""+i+": "+imsg.getDumpEntryData().getLineFinal(false));
+					dumpSubEntry(""+i+": "+imsg.getDumpEntryData().getLineFinal(false)+" (@"+imsg.asteExceptionHappenedAt.hashCode()+")");
 				}
 			}
 			dumpSubEntry("Total: "+aimsg.size());

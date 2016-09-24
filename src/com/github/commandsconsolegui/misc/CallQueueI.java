@@ -66,7 +66,27 @@ public class CallQueueI implements IReflexFillCfg {
 		V call();
 	}
 	
+	/**
+	 * safe/readonly fields
+	 */
+	public static class CallerInfo{
+		private boolean	bRetryOnFail = true;
+		private boolean bQuietOnFail = false;
+		private boolean bAllowQueue = true;
+		
+		public boolean isAllowQueue() {
+			return bAllowQueue;
+		}
+		public boolean isQuietOnFail() {
+			return bQuietOnFail;
+		}
+		public boolean isRetryOnFail() {
+			return bRetryOnFail ;
+		}
+	}
+	
 	public static abstract class CallableX implements CallableWeak<Boolean>,IRetryListOwner{
+		private CallerInfo ci = new CallerInfo();
 		private boolean bPrepend;
 		private HashMap<String,Object> hmCustom;
 //		private int	iDelayBetweenRetriesMilis = 0;
@@ -80,9 +100,6 @@ public class CallQueueI implements IReflexFillCfg {
 		private long iFailCount=0;
 		private Object	objEnclosing;
 //		private Object[]	aobjParams;
-		private boolean	bRetryOnFail = true;
-		private boolean bQuietOnFail = false;
-		private boolean bAllowQueue = true;
 		private int	iFailTimesWarn;
 		private boolean	bIgnoreRecursiveCallWarning;
 		private ArrayList<CallableX> acallerListRecursion = new ArrayList<CallableX>();
@@ -111,35 +128,27 @@ public class CallQueueI implements IReflexFillCfg {
 //			this.iDelayBetweenRetriesMilis=i;
 		}
 		
+		public CallerInfo getInfo(){
+			return ci;
+		}
+		
 		/**
 		 * can only be run now
 		 * @return
 		 */
 		public CallableX setQueueDenied() {
-			this.bAllowQueue = false;
+			ci.bAllowQueue = false;
 			return this;
-		}
-		
-		public boolean isAllowQueue() {
-			return bAllowQueue;
 		}
 		
 		public CallableX setQuietOnFail(boolean bQuietOnFail) {
-			this.bQuietOnFail = bQuietOnFail;
+			ci.bQuietOnFail = bQuietOnFail;
 			return this;
-		}
-		
-		public boolean isQuietOnFail() {
-			return bQuietOnFail;
 		}
 		
 		public CallableX setRetryOnFail(boolean bRetryOnFail) {
-			this.bRetryOnFail = bRetryOnFail;
+			ci.bRetryOnFail = bRetryOnFail;
 			return this;
-		}
-		
-		public boolean isRetryOnFail() {
-			return bRetryOnFail ;
 		}
 		
 		public CallableX setIgnoreRecursiveCallWarning(){
@@ -254,12 +263,6 @@ public class CallQueueI implements IReflexFillCfg {
 			builder.append(iFailCount);
 			builder.append(", objEnclosing=");
 			builder.append(objEnclosing);
-			builder.append(", bRetryOnFail=");
-			builder.append(bRetryOnFail);
-			builder.append(", bQuietOnFail=");
-			builder.append(bQuietOnFail);
-			builder.append(", bAllowQueue=");
-			builder.append(bAllowQueue);
 			builder.append(", iFailTimesWarn=");
 			builder.append(iFailTimesWarn);
 			builder.append(", bIgnoreRecursiveCallWarning=");
@@ -305,7 +308,7 @@ public class CallQueueI implements IReflexFillCfg {
 	}
 	
 	private void assertQueueAllowed(CallableX caller) {
-		if(!caller.isAllowQueue()){
+		if(!caller.ci.isAllowQueue()){
 			throw new PrerequisitesNotMetException("cannot be run on queue mode", caller);
 		}
 	}
@@ -321,7 +324,7 @@ public class CallQueueI implements IReflexFillCfg {
 			}else{
 				caller.iFailCount++;
 				
-				if(!caller.isQuietOnFail()){
+				if(!caller.ci.isQuietOnFail()){
 					boolean bShowMsg=false;
 					if(caller.iFailTimesWarn>0){
 						bShowMsg = (caller.iFailCount%caller.iFailTimesWarn)==0;
@@ -340,7 +343,7 @@ public class CallQueueI implements IReflexFillCfg {
 					}
 				}
 				
-				if(caller.isRetryOnFail()){
+				if(caller.ci.isRetryOnFail()){
 					addCall(caller, false, false); //will retry
 				}
 			}

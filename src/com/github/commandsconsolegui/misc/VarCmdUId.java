@@ -204,4 +204,10 @@ public class VarCmdUId implements Cloneable{
 		this.strDeclaringClassSimpleNameOverride = strDeclaringClassSimpleNameOverride;
 		return this;
 	}
+	@Override
+	public String toString() {
+		return getUniqueId(null);
+	}
+	
+	
 }
