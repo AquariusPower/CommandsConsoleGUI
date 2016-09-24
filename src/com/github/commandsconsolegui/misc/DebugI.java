@@ -214,4 +214,86 @@ public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 	}
+
+	public static String joinMessageWithObjects(String strMessage, Object... aobjCustom){
+		if(aobjCustom!=null){
+			for(int i=0;i<aobjCustom.length;i++){
+				Object obj = aobjCustom[i];
+//				if(i==0)strMessage+=":\n";
+//				if(str.equals(strKey)){
+//				if(i<(aobjCustom.length-1)){
+//					str+="\n";
+//				}
+				
+//				str+="\t["+i+"]("+obj.getClass().getName()+":"+(obj==null?obj:obj.toString())+")\n";
+//				str+="\n\t["+i+"]("+(obj==null?null:obj.getClass().getName()+":"+obj.toString())+")";
+				strMessage+=multilineIfArray("\n\t["+i+"]",obj);
+			}
+		}
+		
+		return strMessage;
+	}
+	private static String multilineIfArray(String strIndexPrefix, Object obj){
+		String strOut="";
+		
+		Object[] aobj = null; //obj instanceof Object[]
+		Exception ex = null;
+		if(obj instanceof Exception){
+			ex = ((Exception)obj);
+		}
+		
+		if(obj!=null){
+			if (obj instanceof ArrayList) {
+				ArrayList aobjList = (ArrayList) obj;
+				aobj=aobjList.toArray();
+			}else
+			if(obj.getClass().isArray()){
+				aobj = (Object[])obj;
+	//			for(Object objInner:aobj){
+			}
+		}
+		
+		if(ex!=null){
+			strOut+=strIndexPrefix+" "+ex.getClass().getSimpleName()+": "+ex.getMessage();
+			aobj = ex.getStackTrace();
+		}else
+		if(aobj==null){
+			return strIndexPrefix+fmtObj(obj,true);
+		}
+		
+		String str1stObjClass=null;
+		for(int i=0;i<aobj.length;i++){
+			Object objInner=aobj[i]; //objInner.getClass().getName()
+			
+			String strFmtObj=null;
+			if(objInner==null){
+				strFmtObj = fmtObj(objInner,false);
+			}else{
+				if(str1stObjClass==null){
+					str1stObjClass=objInner.getClass().getName();
+					strOut+=strIndexPrefix+"ArrayOf: "+aobj.getClass().getTypeName();
+//					strOut+=strIndexPrefix+"ArrayOf?(1stNotNullObjType):"+str1stObjClass;
+				}
+				
+				strFmtObj = fmtObj(objInner, !str1stObjClass.equals(objInner.getClass().getName()));
+			}
+			
+			strOut+=strIndexPrefix+"["+i+"] "+strFmtObj;
+		}
+		
+		if(ex!=null){
+			Throwable exCause = ex.getCause();
+			if(exCause!=null){
+				strOut+=multilineIfArray(strIndexPrefix+"[CAUSE]", exCause);
+			}
+		}
+		
+		return strOut;
+	}
+	private static String fmtObj(Object obj,boolean bShowClassName){
+		String strCl = "";
+		if(obj!=null && bShowClassName)strCl=obj.getClass().getName();
+		return ""+(obj==null ? null : strCl+": "+obj.toString()); //this is better when dumping a sub-stacktrace
+	}
+
 }

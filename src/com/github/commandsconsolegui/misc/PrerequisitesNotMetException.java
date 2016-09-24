@@ -44,36 +44,37 @@ public class PrerequisitesNotMetException extends NullPointerException {
 	private static final long	serialVersionUID	= 1342052861109804737L;
 	private static boolean	bRequestExit;
 
-	public PrerequisitesNotMetException(boolean bExitApplication, String str, Object... aobj) {
-		super(join(str,aobj));
+	public PrerequisitesNotMetException(boolean bExitApplication, String strMessage, Object... aobj) {
+		super(DebugI.joinMessageWithObjects(strMessage,aobj));
 		PrerequisitesNotMetException.bRequestExit=bExitApplication;
 	}
 	public PrerequisitesNotMetException(String str, Object... aobj) {
 		this(true,str,aobj);
 	}
 	
-	private static String join(String str, Object... aobj){
-		String strRet=str;
-		if(aobj!=null){
-			for(int i=0;i<aobj.length;i++){
-				Object obj=aobj[i];
-				if(strRet.equals(str)){
-					strRet+=":\n";
-				}
-				
-				strRet+="  ["+i+"]";
-				
-				if(obj==null){
-					strRet+=""+null;
-				}else{
-					strRet+=obj.getClass().getName()+", "+"value:"+obj;
-				}
-				
-				strRet+="\n";
-			}
-		}
-		return strRet;
-	}
+//	@Deprecated
+//	private static String join(String strMessage, Object... aobj){
+//		String strRet=strMessage;
+//		if(aobj!=null){
+//			for(int i=0;i<aobj.length;i++){
+//				Object obj=aobj[i];
+//				if(strRet.equals(strMessage)){
+//					strRet+=":\n";
+//				}
+//				
+//				strRet+="  ["+i+"]";
+//				
+//				if(obj==null){
+//					strRet+=""+null;
+//				}else{
+//					strRet+=obj.getClass().getName()+", "+"value:"+obj;
+//				}
+//				
+//				strRet+="\n";
+//			}
+//		}
+//		return strRet;
+//	}
 	
 	public static boolean isExitRequested(){
 		return bRequestExit;

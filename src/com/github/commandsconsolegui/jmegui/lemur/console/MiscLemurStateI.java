@@ -770,6 +770,10 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 //		}
 //		return MiscI.i().makePretty(strFullName, true);
 //	}
+	
+	/**
+	 * TODO use this for dialogs too...
+	 */
 	public static class BindKey{
 		TextField tfInputTarget = null;
 		KeyActionListener	kalAction = null;

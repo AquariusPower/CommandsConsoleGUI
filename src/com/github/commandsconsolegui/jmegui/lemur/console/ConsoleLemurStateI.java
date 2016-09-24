@@ -641,11 +641,21 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 					case KeyInput.KEY_END:
 						if(bControl)dAdd = getDumpEntries().size();
 						break;
+					case KeyInput.KEY_UP:
+						if(bControl)dAdd = -1;
+						break;
+					case KeyInput.KEY_DOWN:
+						if(bControl)dAdd = 1;
+						break;
 				}
-				scrollDumpArea(dCurrent + dAdd);
+				double dSet = dCurrent + dAdd;
+				if(dSet<0.0)dSet=0.0;
+				scrollDumpArea(dSet);
 				scrollToBottomRequestSuspend();
 			}
 		};
+		bindKey(actDumpNavigate,"navigate dump area to previous line",KeyInput.KEY_UP, KeyAction.CONTROL_DOWN);
+		bindKey(actDumpNavigate,"navigate dump area to next line",KeyInput.KEY_DOWN, KeyAction.CONTROL_DOWN);
 		bindKey(actDumpNavigate,"navigate dump area to previous page",KeyInput.KEY_PGUP);
 		bindKey(actDumpNavigate,"navigate dump area to next page",KeyInput.KEY_PGDN);
 		bindKey(actDumpNavigate,"navigate dump area to first entry",KeyInput.KEY_HOME, KeyAction.CONTROL_DOWN);

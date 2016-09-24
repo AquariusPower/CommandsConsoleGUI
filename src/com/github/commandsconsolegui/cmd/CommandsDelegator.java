@@ -1073,7 +1073,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				if(iIndex!=null && (imsg.ex!=null||imsg.asteExceptionHappenedAt!=null)){
 					dumpExceptionEntry(imsg, iStackLimit==null?0:iStackLimit);
 				}else{
-					dumpSubEntry(""+i+": "+imsg.getDumpEntryData().getLineFinal(false)+" (@"+imsg.asteExceptionHappenedAt.hashCode()+")");
+					dumpSubEntry(""+i+": "+imsg.getDumpEntryData().getLineFinal(false)+" ST"+imsg.asteExceptionHappenedAt.hashCode()+"");
 				}
 			}
 			dumpSubEntry("Total: "+aimsg.size());
