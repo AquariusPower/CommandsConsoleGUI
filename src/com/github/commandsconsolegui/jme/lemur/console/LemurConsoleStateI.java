@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.console.GlobalConsoleGUII;
 import com.github.commandsconsolegui.jme.AudioUII;
@@ -73,20 +74,22 @@ import com.simsilica.lemur.style.BaseStyles;
 import com.simsilica.lemur.style.Styles;
 
 /**
- * Here is the specific code that links the JME console state with Lemur GUI.
+ * Here is the specific code that links the JME CommandsConsole State with Lemur GUI.
+ * 
+ * It is intentionally independent of {@link #LemurDialogStateAbs} to be more robust.
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateAbs<T,ConsoleLemurStateI<T>> {
-	private static ConsoleLemurStateI instance=null;//new ConsoleLemurStateI();
-	public static ConsoleLemurStateI i(){
-		if(instance==null)instance=new ConsoleLemurStateI();
+public class LemurConsoleStateI<T extends Command<Button>> extends ConsoleStateAbs<T,LemurConsoleStateI<T>> {
+	private static LemurConsoleStateI instance=null;//new ConsoleLemurStateI();
+	public static LemurConsoleStateI i(){
+		if(instance==null)instance=new LemurConsoleStateI();
 		return instance;
 	}
 	
-	public static final class CompositeControl extends CompositeControlAbs<ConsoleLemurStateI>{
-		private CompositeControl(ConsoleLemurStateI casm){super(casm);};
+	public static final class CompositeControl extends CompositeControlAbs<LemurConsoleStateI>{
+		private CompositeControl(LemurConsoleStateI casm){super(casm);};
 	}
 	private CompositeControl ccSelf = new CompositeControl(this);
 	
@@ -103,8 +106,10 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	
 	private TextEntryComponent	tecInputField;
 	private KeyActionListener	actSimpleActions;
+
+	private LemurConsoleStateI<T>.ButtonClick	btnclk;
 	
-	public ConsoleLemurStateI(){
+	public LemurConsoleStateI(){
 		super();
 		setDumpEntriesSlowedQueue(new VersionedList<String>());
 		setDumpEntries(new VersionedList<String>());
@@ -156,13 +161,13 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 			int iToggleConsoleKey
 		) {
 			super(
-				strUIId==null ? strUIId=ConsoleLemurStateI.class.getSimpleName() : strUIId, 
+				strUIId==null ? strUIId=LemurConsoleStateI.class.getSimpleName() : strUIId, 
 				iToggleConsoleKey);
 			super.setInitiallyEnabled(true); // the console must be initially enabled to startup properly
 		}
 	}
 	@Override
-	public ConsoleLemurStateI<T> configure(ICfgParm icfg) {
+	public LemurConsoleStateI<T> configure(ICfgParm icfg) {
 		CfgParm cfg = (CfgParm)icfg;
 		
 		// for restarting functionality
@@ -345,10 +350,11 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 		btnCut = new Button("Cut",getDiagStyle());
 		abtn.add(btnCut);
 		
+		btnclk = new ButtonClick();
 		for(Button btn:abtn){
 			btn.setTextHAlignment(HAlignment.Center);
 			//TODO why buttons do not obbey this preferred size 50,1,0?
-			btn.addClickCommands(new ButtonClick());
+			btn.addClickCommands(btnclk);
 			DialogMouseCursorListenerI.i().addDefaultCommands(btn);
 			getContainerStatsAndControls().addChild(btn,0,++iButtonIndex);
 		}
@@ -512,13 +518,13 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	}
 
 	@Override
-	public ConsoleLemurStateI setHintIndex(Integer i) {
+	public LemurConsoleStateI setHintIndex(Integer i) {
 		getHintBox().getSelectionModel().setSelection(i);
 		return this;
 	}
 	
 	@Override
-	public ConsoleLemurStateI setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines) {
+	public LemurConsoleStateI setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines) {
 		MiscLemurStateI.i().setSizeSafely(getHintBox(), v3fBoxSizeXY);
 		getHintBox().setVisibleItems(iVisibleLines);
 		return this;
@@ -867,7 +873,9 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 			if(source.equals(btnPaste)){
 				editPasteFromClipBoard();
 			}else{
-				return; //to not make sound mainly 
+				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("unsupported "+source.getName(), source, this);
+				AudioUII.i().play(EAudio.Failure);
+				return; 
 			}
 			
 			AudioUII.i().play(EAudio.ReturnChosen);
@@ -995,7 +1003,7 @@ public class ConsoleLemurStateI<T extends Command<Button>> extends ConsoleStateA
 	}
 
 	@Override
-	protected ConsoleLemurStateI<T> getThis() {
+	protected LemurConsoleStateI<T> getThis() {
 		return this;
 	}
 

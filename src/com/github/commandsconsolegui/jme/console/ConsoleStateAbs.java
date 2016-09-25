@@ -80,6 +80,8 @@ import com.jme3.scene.Spatial.CullHint;
  * This class connects the console commands class with JMonkeyEngine.
  * It must contain the base for the GUI to work.
  * 
+ * It must be more simple than normal dialogs, therefore less complex, faster and more robust.
+ * 
  * More info at {@link DialogStateAbs}
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>

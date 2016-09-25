@@ -30,6 +30,8 @@ package com.github.commandsconsolegui.jme;
 //import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ERecreateConsoleSteps;
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.GlobalSimulationTimeI;
+import com.github.commandsconsolegui.GlobalSimulationTimeI.ISimulationTime;
 import com.github.commandsconsolegui.globals.GlobalHolderAbs.IGlobalOpt;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
@@ -63,7 +65,7 @@ import com.jme3.scene.Node;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public abstract class ConditionalStateAbs implements IGlobalOpt,IConfigure<ConditionalStateAbs>,IRetryListOwner{
+public abstract class ConditionalStateAbs implements IGlobalOpt,ISimulationTime,IConfigure<ConditionalStateAbs>,IRetryListOwner{
 	private StackTraceElement[] asteDbgInstance;
 	
 	public ConditionalStateAbs(){
@@ -258,6 +260,8 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,IConfigure<Condi
 	private boolean	bTryingToEnable;
 
 	private boolean	bTryingToDisable;
+
+//	private long	lLastUpdateTimeNano;
 	
 	/**
 	 * Configure simple references assignments and variable values.<br>
@@ -434,11 +438,18 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,IConfigure<Condi
 	/** a failed attempt may be undone or it can just be gradually stepping towards success */
 	protected boolean initAttempt(){return true;}
 	/** a failed attempt may be undone or it can just be gradually stepping towards success */
-	protected boolean updateAttempt(float tpf){return true;}
+	protected boolean updateAttempt(float tpf){
+//		lLastUpdateTimeNano=System.nanoTime();
+		return true;
+	}
 	/** a failed attempt may be undone or it can just be gradually stepping towards success */
 	protected boolean enableAttempt(){return true;}
 	/** a failed attempt may be undone or it can just be gradually stepping towards success */
 	protected boolean disableAttempt(){return true;}
+	
+//	public long getLastUpdateTimeNano(){
+//		return lLastUpdateTimeNano;
+//	}
 	
 	private boolean doItInitializeProperly(float tpf){
 		if(bHoldProperInitialization)return false;
@@ -838,4 +849,10 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,IConfigure<Condi
 //	public boolean applyBoolTogglerChange(BoolTogglerCmdField btgSource) {
 //		return false;
 //	};
+	
+	
+	@Override
+	public long getCurrentNano(){
+		return GlobalSimulationTimeI.i().getNano();
+	}
 }

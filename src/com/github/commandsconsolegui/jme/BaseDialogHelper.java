@@ -64,7 +64,7 @@ public abstract class BaseDialogHelper implements IReflexFillCfg{
 	private BitmapFont	fontConsoleExtraDefault;
 	
 	protected abstract String getTextFromField(Spatial spt);
-	protected abstract Vector3f getSizeFrom(Spatial spt);
+	protected abstract Vector3f getSizeCopyFrom(Spatial spt);
 	protected abstract void setTextAt(Spatial spt,String str);
 	
 	public void prepareStyle() {

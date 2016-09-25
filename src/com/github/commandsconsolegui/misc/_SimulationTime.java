@@ -27,14 +27,18 @@
 
 package com.github.commandsconsolegui.misc;
 
+import com.github.commandsconsolegui.GlobalSimulationTimeI;
+
 /**
+ * TODO transfer some logic to {@link GlobalSimulationTimeI} ? 
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class SimulationTime {
-	private static SimulationTime instance = new SimulationTime();
-	public static SimulationTime i(){return instance;}
+@Deprecated //TODO transfer some logic to {@link GlobalSimulationTimeI} ?
+public class _SimulationTime {
+	private static _SimulationTime instance = new _SimulationTime();
+	public static _SimulationTime i(){return instance;}
 	
 	/**
 	 * This is a developer coding restriction helper.
@@ -50,7 +54,7 @@ public class SimulationTime {
 	
 	double dTimeResolution;
 	
-	public SimulationTime() {
+	public _SimulationTime() {
 		lUnsignedTime = Long.parseUnsignedLong("0");
 		dTimeResolution = 1000.0;
 	}
@@ -58,7 +62,7 @@ public class SimulationTime {
 	/**
 	 * @param dTimeResolution cannot be changed after set, used for adding floating seconds properly
 	 */
-	public SimulationTime(double dTimeResolution){
+	public _SimulationTime(double dTimeResolution){
 		this();
 		
 		this.dTimeResolution=dTimeResolution;
@@ -69,7 +73,7 @@ public class SimulationTime {
 		}else
 		if(Double.compare(this.dTimeResolution,1000000000.0)==0){ //nano
 		}else{
-			System.err.println("Warning: "+SimulationTime.class.getName()
+			System.err.println("Warning: "+_SimulationTime.class.getName()
 				+"Time resolution should be milis, micro or nano. ");
 			Thread.dumpStack();
 		}
@@ -83,11 +87,11 @@ public class SimulationTime {
 //		return lUnsignedTime / dTimeResolution;
 //	}
 	
-	public SimulationTime add(double dSeconds, ISimulationTimeKey istk){
+	public _SimulationTime add(double dSeconds, ISimulationTimeKey istk){
 		return add((long)(dSeconds*dTimeResolution), istk);
 	}
 	
-	public SimulationTime add(float fSeconds, ISimulationTimeKey istk){
+	public _SimulationTime add(float fSeconds, ISimulationTimeKey istk){
 		return add((long)(fSeconds*dTimeResolution), istk);
 	}
 	
@@ -109,7 +113,7 @@ public class SimulationTime {
 	 * @param istk the first time it is not null will ensure the restrictive access in a normal code
 	 * @return
 	 */
-	public SimulationTime add(long lTime, ISimulationTimeKey istk){
+	public _SimulationTime add(long lTime, ISimulationTimeKey istk){
 		if(this.istk==null){
 			if(istk!=null)this.istk=istk;
 		}else{
