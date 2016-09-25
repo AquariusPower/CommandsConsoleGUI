@@ -40,6 +40,7 @@ public class _SimulationTime {
 	private static _SimulationTime instance = new _SimulationTime();
 	public static _SimulationTime i(){return instance;}
 	
+	
 	/**
 	 * This is a developer coding restriction helper.
 	 * 
