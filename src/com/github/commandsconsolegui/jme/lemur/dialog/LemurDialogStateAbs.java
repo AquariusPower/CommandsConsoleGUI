@@ -724,12 +724,12 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 		
 		@Override
 		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
-			if(fld.getDeclaringClass()!=DialogCS.class)return super.getFieldValue(fld);
+			if(fld.getDeclaringClass()!=LemurDialogCS.class)return super.getFieldValue(fld);
 			return fld.get(this);
 		}
 		@Override
 		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
-			if(fld.getDeclaringClass()!=DialogCS.class){super.setFieldValue(fld,value);return;}
+			if(fld.getDeclaringClass()!=LemurDialogCS.class){super.setFieldValue(fld,value);return;}
 			fld.set(this,value);
 		}
 	}

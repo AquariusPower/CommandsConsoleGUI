@@ -530,17 +530,17 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 	}
 	
 	private void setFieldVal(Object objHoldingField, Field fld, Object val) throws IllegalArgumentException, IllegalAccessException {
-		if(this instanceof ISavableFieldAccess){
+		if(objHoldingField instanceof ISavableFieldAccess){
 			((ISavableFieldAccess)objHoldingField).setFieldValue(fld, val);
 		}else{
-			fld.set(this, val);
+			fld.set(objHoldingField, val);
 		}
 	}
 	private Object getFieldVal(Object objHoldingField, Field fld) throws IllegalArgumentException, IllegalAccessException {
-		if(this instanceof ISavableFieldAccess){
+		if(objHoldingField instanceof ISavableFieldAccess){
 			return ((ISavableFieldAccess)objHoldingField).getFieldValue(fld);
 		}else{
-			return fld.get(this);
+			return fld.get(objHoldingField);
 		}
 	}
 }

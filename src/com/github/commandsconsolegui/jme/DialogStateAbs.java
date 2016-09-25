@@ -1440,7 +1440,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
 			/**
 			 * For subclasses use this too:
-			 * if(fld.getDeclaringClass()!=DialogCS.class)return super.getFieldValue(fld);
+			 * if(fld.getDeclaringClass()!=SUB_CLASS.class)return super.getFieldValue(fld);
 			 */
 			return fld.get(this);
 		}
@@ -1448,7 +1448,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 			/**
 			 * For subclasses use this too:
-			 * if(fld.getDeclaringClass()!=DialogCS.class){super.setFieldValue(fld,value);return;}
+			 * if(fld.getDeclaringClass()!=SUB_CLASS.class){super.setFieldValue(fld,value);return;}
 			 */
 			fld.set(this,value);
 		}
