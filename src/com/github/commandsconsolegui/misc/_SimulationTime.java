@@ -81,10 +81,12 @@ public class _SimulationTime {
 	public long get(){
 		return lUnsignedTime;
 	}
-	
-//	public Double getSeconds(){
-//		return lUnsignedTime / dTimeResolution;
-//	}
+	public long get21(){
+		return lUnsignedTime;
+	}
+	public Double getSeconds2(){
+		return lUnsignedTime / dTimeResolution;
+	}
 	
 	public _SimulationTime add(double dSeconds, ISimulationTimeKey istk){
 		return add((long)(dSeconds*dTimeResolution), istk);
