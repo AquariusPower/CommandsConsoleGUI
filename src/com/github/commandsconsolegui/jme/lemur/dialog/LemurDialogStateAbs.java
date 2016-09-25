@@ -586,14 +586,14 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 	}
 	
 	private void resizeInfoAndList(Vector3f v3fDisplacement) {
-		Vector3f v3fInfoPSize = lblTextInfo.getPreferredSize().clone();
-		Vector3f v3fListPSize = getMainList().getPreferredSize().clone();
+		Vector3f v3fInfoPSizeCopy = lblTextInfo.getSize().clone();
+		Vector3f v3fListPSizeCopy = getMainList().getSize().clone();
 		
-		v3fInfoPSize.y+=v3fDisplacement.y;
-		v3fListPSize.y-=v3fDisplacement.y;
+		v3fInfoPSizeCopy.y+= -v3fDisplacement.y;
+		v3fListPSizeCopy.y+=  v3fDisplacement.y;
 		
-		MiscLemurStateI.i().setSizeSafely(lblTextInfo, v3fInfoPSize);
-		MiscLemurStateI.i().setSizeSafely(getMainList(), v3fListPSize);
+		MiscLemurStateI.i().setSizeSafely(lblTextInfo, v3fInfoPSizeCopy);
+		MiscLemurStateI.i().setSizeSafely(getMainList(), v3fListPSizeCopy);
 	}
 
 	private Button prepareResizeBorder(final Button btnExisting, final Position edge) {
@@ -642,7 +642,9 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 			
 			abtnBorderList.add(btnBorder);
 			String strName="Dialog_Resizer_";
-			if(edge!=null){
+			if(edge==null){
+				strName+=btnBorder.getName();
+			}else{
 				strName+="Border"+edge.toString();
 				getDialogMainContainer().addChild(btnBorder, edge); //this actually replaces the current at that border
 			}

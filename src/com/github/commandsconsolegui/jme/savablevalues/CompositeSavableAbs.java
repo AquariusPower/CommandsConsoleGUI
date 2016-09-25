@@ -39,11 +39,12 @@ import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.jme.SavableHelperI;
+import com.github.commandsconsolegui.misc.jme.SavableHelperI.ISavableFieldAccess;
 import com.jme3.export.InputCapsule;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.export.OutputCapsule;
-import com.jme3.export.Savable;
 
 
 /**
@@ -57,7 +58,7 @@ import com.jme3.export.Savable;
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> implements Savable {
+public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> implements ISavableFieldAccess {
 	public CompositeSavableAbs(){
 		ss.bThisInstanceIsALoadedTmp=true;
 		initAllSteps();
@@ -68,10 +69,10 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 	}
 	public abstract S getThis();
 	
-	public static interface ISavableFieldAccess{
-		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException;
-		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException;
-	}
+//	public static interface ISavableFieldAccess{
+//		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException;
+//		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException;
+//	}
 	
 	public static interface ISaveSkipper{}
 	
@@ -153,7 +154,7 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 						/**
 						 * set DEFAULT value
 						 */
-						Object val = getFieldVal(this,fld);
+						Object val = SavableHelperI.i().getFieldVal(this,fld);
 						if(val==null){
 							throw new PrerequisitesNotMetException("default (initial) value, cannot be null!", fld); 
 						}
@@ -164,7 +165,7 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 						 * it has its own internal default.
 						 * ensure consistency, Savable does not accept nulls...
 						 */
-						((VarCmdFieldAbs)getFieldVal(this,fld)).setDenyNullValue();
+						((VarCmdFieldAbs)SavableHelperI.i().getFieldVal(this,fld)).setDenyNullValue();
 						break;
 				}
 			} catch (IllegalArgumentException | IllegalAccessException e) {
@@ -198,7 +199,7 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 		if(fld.getName().startsWith("$SWITCH_TABLE$")){
 			return true; //should just be a synthetic
 		}
-		try {if(getFieldVal(this,fld)==ss.owner){ //this$0
+		try {if(SavableHelperI.i().getFieldVal(this,fld)==ss.owner){ //this$0
 				return true; //should just be a synthetic
 		}} catch (IllegalArgumentException | IllegalAccessException e) {/*wont happen as skipper is inner*/}
 		
@@ -262,7 +263,7 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 //					if(checkSkip(fld))continue;
 					
 					String strName = fld.getName();
-					Object val = getFieldVal(this,fld);
+					Object val = SavableHelperI.i().getFieldVal(this,fld);
 					Object valDef = ss.hmFieldExtraInfo.get(fld).valDefault;
 //					Object valDef = getDefaultValueFor(fld,false);
 					
@@ -419,7 +420,7 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 			case Long:		valRead=ic.readLong		(strName, (long)objValDef);		break;
 			case String:	valRead=ic.readString	(strName, (String)objValDef);	break;
 			case Var:
-				VarCmdFieldAbs var = (VarCmdFieldAbs)getFieldVal(this,fld);
+				VarCmdFieldAbs var = (VarCmdFieldAbs)SavableHelperI.i().getFieldVal(this,fld);
 				addDbgInfo(aobjDbg,var.getReport());
 				var.setObjectRawValue(
 					read(ic, var.getRawValue().getClass(), strName, null, var.getRawValueDefault(), aobjDbg));
@@ -430,7 +431,7 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 			return valRead;
 		}
 		
-		setFieldVal(this,fld,valRead);
+		SavableHelperI.i().setFieldVal(this,fld,valRead);
 		
 		return null;
 	}
@@ -484,8 +485,8 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 //				if(checkSkip(fld))continue;
 				try {
 					if(VarCmdFieldAbs.class.isAssignableFrom(fld.getType())){
-						VarCmdFieldAbs<?,?> var=(VarCmdFieldAbs<?,?>)getFieldVal(this,fld);
-						VarCmdFieldAbs<?,?> varLoaded=(VarCmdFieldAbs<?,?>)getFieldVal(svLoaded,fld);
+						VarCmdFieldAbs<?,?> var=(VarCmdFieldAbs<?,?>)SavableHelperI.i().getFieldVal(this,fld);
+						VarCmdFieldAbs<?,?> varLoaded=(VarCmdFieldAbs<?,?>)SavableHelperI.i().getFieldVal(svLoaded,fld);
 						if(var.getClass()!=varLoaded.getClass()){
 							aobjDbg.add(var.getClass());
 							aobjDbg.add(varLoaded.getClass());
@@ -501,12 +502,12 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 								+" other classes must use their specific getters and setters",aobjDbg); 
 						}
 						
-						Object valLoaded = getFieldVal(svLoaded,fld);
+						Object valLoaded = SavableHelperI.i().getFieldVal(svLoaded,fld);
 						if(valLoaded==null){
 							throw new PrerequisitesNotMetException("how can the loaded value be null?", aobjDbg);
 						}
 						
-						setFieldVal(this,fld,valLoaded);
+						SavableHelperI.i().setFieldVal(this,fld,valLoaded);
 					}
 				} catch (IllegalArgumentException | IllegalAccessException | SecurityException e) {
 					if(bRestoringSelfBackup){
@@ -517,30 +518,26 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 					}
 					
 					break;
-//					break labelClassLoop;
 				}finally{
 					restoreFieldAccessModeFor(fld, entry.getValue().bAccessible);
 				}
-//			}
 		}
-		
-		
 		
 		return true;
 	}
 	
-	private void setFieldVal(Object objHoldingField, Field fld, Object val) throws IllegalArgumentException, IllegalAccessException {
-		if(objHoldingField instanceof ISavableFieldAccess){
-			((ISavableFieldAccess)objHoldingField).setFieldValue(fld, val);
-		}else{
-			fld.set(objHoldingField, val);
-		}
-	}
-	private Object getFieldVal(Object objHoldingField, Field fld) throws IllegalArgumentException, IllegalAccessException {
-		if(objHoldingField instanceof ISavableFieldAccess){
-			return ((ISavableFieldAccess)objHoldingField).getFieldValue(fld);
-		}else{
-			return fld.get(objHoldingField);
-		}
-	}
+//	private void setFieldVal(Object objHoldingField, Field fld, Object val) throws IllegalArgumentException, IllegalAccessException {
+//		if(objHoldingField instanceof ISavableFieldAccess){
+//			((ISavableFieldAccess)objHoldingField).setFieldValue(fld, val);
+//		}else{
+//			fld.set(objHoldingField, val);
+//		}
+//	}
+//	private Object getFieldVal(Object objHoldingField, Field fld) throws IllegalArgumentException, IllegalAccessException {
+//		if(objHoldingField instanceof ISavableFieldAccess){
+//			return ((ISavableFieldAccess)objHoldingField).getFieldValue(fld);
+//		}else{
+//			return fld.get(objHoldingField);
+//		}
+//	}
 }
