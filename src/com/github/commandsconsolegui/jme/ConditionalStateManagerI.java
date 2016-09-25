@@ -82,7 +82,6 @@ public class ConditionalStateManagerI extends AbstractAppState {
 		super.update(tpf);
 		
 		GlobalSimulationTimeI.i().updateAdd(tpf);
-		
 		CallQueueI.i().update(tpf);
 		
 		ArrayList<ConditionalStateAbs> aToDiscard = null;

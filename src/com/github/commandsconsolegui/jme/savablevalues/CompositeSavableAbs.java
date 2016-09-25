@@ -68,6 +68,11 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 	}
 	public abstract S getThis();
 	
+	public static interface ISavableFieldAccess{
+		public Object getFieldValue(Field fld);
+		public Object setFieldValue(Field fld, Object value);
+	}
+	
 	public static interface ISaveSkipper{}
 	
 	public static class FieldExtraInfo{
