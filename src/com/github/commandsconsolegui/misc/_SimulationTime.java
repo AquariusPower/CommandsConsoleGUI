@@ -72,8 +72,8 @@ public class _SimulationTime {
 		}else
 		if(Double.compare(this.dTimeResolution,1000000000.0)==0){ //nano
 		}else{
-			System.err.println("Warning: "+_SimulationTime.class.getName()
-				+"Time resolution should be in milis, micro or nano. ");
+			System.err.println("WARN: "+_SimulationTime.class.getName()
+				+"The time resolution should be milis, micro or nano.");
 			Thread.dumpStack();
 		}
 	}
