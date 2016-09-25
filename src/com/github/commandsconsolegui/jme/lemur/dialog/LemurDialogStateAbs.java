@@ -738,7 +738,7 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 		for(Button btn:abtnBorderList){
 			MiscLemurStateI.i().setSizeSafely(btn, iPixels, iPixels, true);
 		}
-//		CallQueueI.i().addCall(callerReinitBordersAfterThicknessChange.updateTimeMilisNow());
+//		CallQueueI.i().addCall(callerReinitBordersAfterThicknessChange.updateTimeMilisNow()); 
 //		bReinitBordersAfterThicknessChange=true;
 	}
 
