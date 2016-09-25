@@ -49,9 +49,7 @@ public class _SimulationTime {
 	public static interface ISimulationTimeKey{}
 	
 	private ISimulationTimeKey	istk;
-	
 	long lUnsignedTime;
-	
 	double dTimeResolution;
 	
 	public _SimulationTime() {
@@ -74,7 +72,7 @@ public class _SimulationTime {
 		if(Double.compare(this.dTimeResolution,1000000000.0)==0){ //nano
 		}else{
 			System.err.println("Warning: "+_SimulationTime.class.getName()
-				+"Time resolution should be milis, micro or nano. ");
+				+"Time resolution should be in milis, micro or nano. ");
 			Thread.dumpStack();
 		}
 	}
