@@ -79,8 +79,8 @@ public class LemurDialogHelperI extends BaseDialogHelper{
 	}
 
 	@Override
-	protected Vector3f getSizeFrom(Spatial spt) {
-		return ((Container)spt).getPreferredSize();
+	protected Vector3f getSizeCopyFrom(Spatial spt) {
+		return ((Container)spt).getPreferredSize().clone();
 	}
 
 	@Override

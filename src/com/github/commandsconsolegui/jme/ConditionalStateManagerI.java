@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.jme;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
@@ -79,6 +80,8 @@ public class ConditionalStateManagerI extends AbstractAppState {
 	@Override
 	public void update(float tpf) {
 		super.update(tpf);
+		
+		GlobalSimulationTimeI.i().updateAdd(tpf);
 		
 		CallQueueI.i().update(tpf);
 		

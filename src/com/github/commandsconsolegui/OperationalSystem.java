@@ -34,12 +34,17 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.system.JmeSystem.StorageFolderType;
 
 /**
+ * Very basic configurations related to the OS goes here.
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
 public class OperationalSystem {
+//	private static OperationalSystem instance = new OperationalSystem();
+//	public static OperationalSystem i(){return instance;}
+	
 	private File	flBaseSaveDataPath;
+	
 	public OperationalSystem(String strApplicationBaseSaveDataPath, StorageFolderType esft) {
 		setApplicationBaseSaveDataPath(strApplicationBaseSaveDataPath);
 		setStorageFolderType(esft);
@@ -68,7 +73,8 @@ public class OperationalSystem {
 	private String strApplicationBaseSaveDataPath = null;
 	private StorageFolderType	esft;
 	public void setApplicationBaseSaveDataPath(String str) {
-		if(this.strApplicationBaseSaveDataPath!=null)PrerequisitesNotMetException.assertNotAlreadySet("base application folder already set", this.strApplicationBaseSaveDataPath, str);
+//		if(this.strApplicationBaseSaveDataPath!=null)PrerequisitesNotMetException.assertNotAlreadySet("base application folder already set", this.strApplicationBaseSaveDataPath, str);
+		PrerequisitesNotMetException.assertNotAlreadySet("base application folder already set", this.strApplicationBaseSaveDataPath, str);
 		this.strApplicationBaseSaveDataPath = str;
 	}
 	public String getApplicationBaseFolderName(){

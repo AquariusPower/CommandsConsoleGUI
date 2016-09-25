@@ -33,9 +33,15 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 /**
  * Global Reference Holder
  * 
- * To lower as much as possible the dependencies.
- * To easily access what can/should be globally accessible.
- * The same object may be present in more than one global, scope dependency range.
+ * 	To lower as much as possible the dependencies, so some class field's values can be globalized.
+ * 	To easily access what can/should be globally accessible.
+ * 	The same object may be present in more than one global, just being a sub-class, scope dependency range.
+ * 	Avoid unnecessarily using with already globally accessible single instance class objects, tho:
+ * - the main application class is important to be stored on a global to make it's uses depend
+ * solely on it's superclass.
+ * - Some classes that require a non empty constructor will fit well with this Global implementation.
+ * - So, single instance classes that are globally accessible and will be instanced with an empty constructor,
+ * have no need to use this.
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 

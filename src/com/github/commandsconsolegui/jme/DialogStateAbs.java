@@ -46,6 +46,7 @@ import com.github.commandsconsolegui.jme.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jme.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jme.lemur.extras.ISpatialValidator;
 import com.github.commandsconsolegui.jme.savablevalues.CompositeSavableAbs;
+import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
@@ -54,6 +55,7 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
+import com.github.commandsconsolegui.misc.Request;
 import com.github.commandsconsolegui.misc.jme.MiscJmeI;
 import com.github.commandsconsolegui.misc.jme.lemur.MiscLemurStateI;
 import com.jme3.export.JmeExporter;
@@ -103,7 +105,8 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	private ArrayList<DialogListEntryData<DIAG>>	adleTmp;
 	private DialogListEntryData<DIAG>	dleLastSelected;
 //	private V	valueOptionSelected;
-	private boolean	bRequestedRefreshList;
+//	private boolean	bRequestedRefreshList;
+	private Request reqRefreshList = new Request(this);
 //	private DialogListEntryData<T>	dataReferenceAtParent;
 //	private T	cmdAtParent;
 	private DiagModalInfo<DIAG> dmi = null;
@@ -426,12 +429,14 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //			updateAllParts();
 //		}
 		
-		if(bRequestedRefreshList){
+//		if(bRequestedRefreshList){
+		if(reqRefreshList.isReady()){
 			if(tdUpdateRefreshList.isReady(true)){
 //			if(rUpdateList.isReadyToRetry()){
 				updateList();
 				lineWrapDisableForChildrenOf((Node)sptMainList);
-				bRequestedRefreshList=false;
+//				bRequestedRefreshList=false;
+				reqRefreshList.reset();
 //			}
 			}
 		}
@@ -523,7 +528,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 			v3fScale.x=v3fScale.y=fMinEffectScale;
 			tdDialogEffect.setActive(true);
 			v3fMainLocationBkp = getDialogMainContainer().getLocalTranslation().clone();
-			v3fMainSize = getMainSize();
+			v3fMainSize = getMainSizeCopy();
 		}
 		
 		if(getInputText().isEmpty()){
@@ -545,8 +550,8 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	}
 	
 //	public abstract Vector3f getMainSize();
-	public Vector3f getMainSize(){
-		return bdh().getSizeFrom(getDialogMainContainer());
+	public Vector3f getMainSizeCopy(){
+		return bdh().getSizeCopyFrom(getDialogMainContainer());
 	}
 	
 	@Override
@@ -700,7 +705,14 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	}
 	
 	public void requestRefreshUpdateList(){
-		bRequestedRefreshList=true;
+		reqRefreshList.requestNow();
+//		CallQueueI.i().addCall(new CallableX(this) {
+//			@Override
+//			public Boolean call() {
+//				bRequestedRefreshList=true;
+//				return true;
+//			}
+//		});
 	}
 	
 	protected String getTextInfo(){
@@ -1296,6 +1308,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		private float fWidth;
 		private float fHeight;
 		private String strInputText;
+		private boolean bMaximized;
 		
 		@Override
 		protected void initialize() {
@@ -1320,19 +1333,25 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 			// basically update everything before writing, in case not done outside here
 //			strId=getOwner().getId();
 			
-			Vector3f v3fPos = getOwner().getDialogMainContainer().getLocalTranslation().clone();
-			fPosX=v3fPos.x;
-			fPosY=v3fPos.y;
-			
-			Vector3f v3fSize = getOwner().getMainSize();
-			fWidth=(v3fSize.x);
-			fHeight=(v3fSize.y);
+			if(!bMaximized){
+				setPos(getOwner().getDialogMainContainer().getLocalTranslation().clone());
+				setSize(getOwner().getMainSizeCopy());
+			}
 			
 			strInputText = getOwner().getInputText();
 			
 			GlobalCommandsDelegatorI.i().dumpDevInfoEntry(toString());
 			
 			super.write(ex);
+		}
+		
+		private void setSize(Vector3f v3fSize) {
+			setWidth(v3fSize.x);
+			setHeight(v3fSize.y);
+		}
+		private void setPos(Vector3f v3fPos) {
+			setPosX(v3fPos.x);
+			setPosY(v3fPos.y);
 		}
 		
 		@Override
@@ -1377,6 +1396,46 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //			rfcfg.setPrefixCustomId(getOwner().getId());
 			return rfcfg;
 		}
+		public float getPosX() {
+			return fPosX;
+		}
+		protected void setPosX(float fPosX) {
+			this.fPosX = fPosX;
+		}
+		public float getPosY() {
+			return fPosY;
+		}
+		protected void setPosY(float fPosY) {
+			this.fPosY = fPosY;
+		}
+		public float getWidth() {
+			return fWidth;
+		}
+		protected void setWidth(float fWidth) {
+			this.fWidth = fWidth;
+		}
+		public float getHeight() {
+			return fHeight;
+		}
+		protected void setHeight(float fHeight) {
+			this.fHeight = fHeight;
+		}
+		public String getInputText() {
+			return strInputText;
+		}
+		protected void setInputText(String strInputText) {
+			this.strInputText = strInputText;
+		}
+		public boolean isMaximized(){
+			return this.bMaximized;
+		}
+		public boolean toggleMaximized() {
+			return this.bMaximized=!this.bMaximized;
+		}
+		public void setMaximized(boolean bMaximized) {
+			this.bMaximized = bMaximized;
+		}
+		
 	}
 	private DialogCS sv;
 	

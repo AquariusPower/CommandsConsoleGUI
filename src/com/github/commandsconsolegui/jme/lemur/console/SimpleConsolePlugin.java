@@ -116,7 +116,7 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
 		 * with {@link CallQueueI}, or just put these things at initialization method.
 		 */
 		GlobalCommandsDelegatorI.i().configure();//ConsoleLemurStateI.i());
-		ConsoleLemurStateI.i().configure(new ConsoleLemurStateI.CfgParm(
+		LemurConsoleStateI.i().configure(new LemurConsoleStateI.CfgParm(
 			null, KeyInput.KEY_F10));
   	
 		MiscJmeI.i().configure(GlobalCommandsDelegatorI.i());
