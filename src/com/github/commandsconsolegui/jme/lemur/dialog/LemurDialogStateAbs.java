@@ -27,6 +27,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.github.commandsconsolegui.jme.lemur.dialog;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -721,6 +722,16 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 			return true;
 		}
 		
+		@Override
+		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+			if(fld.getDeclaringClass()!=DialogCS.class)return super.getFieldValue(fld);
+			return fld.get(this);
+		}
+		@Override
+		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+			if(fld.getDeclaringClass()!=DialogCS.class){super.setFieldValue(fld,value);return;}
+			fld.set(this,value);
+		}
 	}
 	
 	public void setBordersThickness(int iPixels){
