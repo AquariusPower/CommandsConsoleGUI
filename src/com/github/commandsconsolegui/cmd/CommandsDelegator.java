@@ -50,7 +50,8 @@ import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.GlobalOperationalSystemI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.globals.jmegui.console.GlobalConsoleUII;
+import com.github.commandsconsolegui.globals.cmd.VarCmdUId;
+import com.github.commandsconsolegui.globals.jme.console.GlobalConsoleUII;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
@@ -66,7 +67,6 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexHacks;
-import com.github.commandsconsolegui.misc.VarCmdUId;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
@@ -848,6 +848,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		if(checkCmdValidity(icclPseudo,scfAlias,getAliasHelp())){
 			bCmdWorked=cmdAlias();
 		}else
+		if(checkCmdValidity(this,"activateSelfWindow")){
+			addCmdToQueue(scfCmdOS.getUniqueCmdId()+" linux "
+				+"xdotool windowactivate $(xdotool search --name \"^"+GlobalOperationalSystemI.i().getApplicationTitle()+"$\")");
+			bCmdWorked = true;
+		}else
 		if(checkCmdValidity(icclPseudo,CMD_CLEAR_COMMANDS_HISTORY)){
 			astrCmdHistory.clear();
 			bCmdWorked=true;
@@ -880,33 +885,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				dumpWarnEntry("cmd has no conflicts: "+cmddWithSimpleConflict.getUniqueCmdId(), cmddWithSimpleConflict.asHelp());
 				bUserFail=true;
 			}
-//			else{
-//				CommandData dataFromSimple = getCmdDataFor(strNewSimpleCmdId,true);
-//				if(dataFromSimple!=null){
-//					dumpWarnEntry("cmd simple already used: "+strNewSimpleCmdId, dataFromSimple.asHelp());
-//					bFail=true;
-//				}
-//			}
 			
 			if(!bUserFail){
 				if(fixSimpleCmdConflict(cmddWithSimpleConflict,strNewSimpleCmdId,false,false)){
 					dumpSubEntry(cmddWithSimpleConflict.asHelp());
 					bCmdWorked=true;
 				}
-//				else{
-//					dumpWarnEntry("cmd simple already used: "+strNewSimpleCmdId); //TODO wild guess?
-//				}
-				
-//				CommandData dataFromNewSimple = getCmdDataFor(strNewSimpleCmdId,true);
-//				if(dataFromNewSimple==null){
-//					cmddWithSimpleConflict.applySimpleCmdIdConflictFixed(ccSelf, strNewSimpleCmdId);//, trmCmds.values());
-//					
-//					dumpSubEntry(cmddWithSimpleConflict.asHelp());
-//					
-//					bCmdWorked=true;
-//				}else{
-//					dumpWarnEntry("cmd simple already used: "+strNewSimpleCmdId, dataFromNewSimple.asHelp());
-//				}
 			}
 		}else
 		if(checkCmdValidity(getPseudoListener(),scfCmdOS,"<strOSName> <astrOSCommandAndParams> runs an OS command. Will only be executed if in the correponding OS, otherwise will be skipped, so use with the other OS alternatives nearby.")){
@@ -3680,7 +3664,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		addCmdToQueue(btgShowDeveloperWarn.getCmdIdAsCommand(false));
 		addCmdToQueue(btgShowDeveloperInfo.getCmdIdAsCommand(false));
 		
-		addCmdToQueue(scfChangeCommandSimpleId.getUniqueCmdId()+" "+CMD_HELP.getUniqueCmdId()+" help");
+		CallQueueI.i().addCall(new CallableX(this) {
+			@Override
+			public Boolean call() {
+				fixSimpleCmdConflict(CMD_HELP.getCmdData(), CMD_HELP.getSimpleId(), true, true);
+				return true;
+			}
+		});
+//		addCmdToQueue(scfChangeCommandSimpleId.getUniqueCmdId()+" "+CMD_HELP.getUniqueCmdId()+" help");
 		
 		// init DB
 		flDB = new File(fileNamePrepareCfg(strFileDatabase,false));

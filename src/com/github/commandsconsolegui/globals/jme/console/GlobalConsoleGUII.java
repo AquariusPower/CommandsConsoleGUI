@@ -25,56 +25,24 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package commandsconsoleguitests;
+package com.github.commandsconsolegui.globals.jme.console;
 
-import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
-import com.github.commandsconsolegui.jme.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.globals.GlobalHolderAbs;
+import com.github.commandsconsolegui.jme.console.ConsoleStateAbs;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
-//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
-
-	public CommandsTest(){
-		super();
-		
-		/**
-		 *  This allows test3 at endUserCustomMethod() to work.
-		 */
-		ReflexFillI.i().setUseDefaultCfgIfMissing(true);
-		
-		setAllowUserCmdOS(true);
-	}
+public class GlobalConsoleGUII extends GlobalHolderAbs<ConsoleStateAbs<?,? extends ConsoleStateAbs<?,?>>>{
+	private static GlobalConsoleGUII instance = new GlobalConsoleGUII();
+	public static GlobalConsoleGUII iGlobal(){return instance;}
+	public static ConsoleStateAbs<?,?> i(){return iGlobal().get();}
 	
 	@Override
-	public String prepareStatsFieldText() {
-		String strStatsLast = super.prepareStatsFieldText();
-		
-		if(EStats.MouseCursorPosition.isShow()){
-			strStatsLast+=
-				"xy"
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
-					+","
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
-					+";";
-		}
-		
-		if(EStats.TimePerFrame.isShow()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
-		}
-		
-		return strStatsLast; 
+	public ConsoleStateAbs<?,?> set(ConsoleStateAbs<?,?> obj) {
+		GlobalConsoleUII.iGlobal().set(obj);
+		return super.set(obj);
 	}
-	
-	@Override
-	public void cmdExit() {
-		GlobalAppRefI.i().stop();
-		super.cmdExit();
-	}
-	
 }

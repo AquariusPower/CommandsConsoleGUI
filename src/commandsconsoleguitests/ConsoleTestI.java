@@ -31,20 +31,25 @@ import java.io.File;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.extras.SingleAppInstanceI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.globals.jmegui.GlobalAppRefI;
-import com.github.commandsconsolegui.jmegui.console.SimpleConsoleAppAbs;
-import com.github.commandsconsolegui.jmegui.extras.DialogListEntryData;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.ChoiceLemurDialogState;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.MaintenanceListLemurDialogState;
-import com.github.commandsconsolegui.jmegui.lemur.dialog.QuestionLemurDialogState;
+import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
+import com.github.commandsconsolegui.globals.jme.GlobalAppSettingsI;
+import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
+import com.github.commandsconsolegui.jme.lemur.console.SimpleConsolePlugin;
+import com.github.commandsconsolegui.jme.lemur.dialog.ChoiceLemurDialogState;
+import com.github.commandsconsolegui.jme.lemur.dialog.MaintenanceListLemurDialogState;
+import com.github.commandsconsolegui.jme.lemur.dialog.QuestionLemurDialogState;
+import com.github.commandsconsolegui.misc.Configure;
+import com.github.commandsconsolegui.misc.Configure.IConfigure;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
+import com.jme3.app.SimpleApplication;
 import com.jme3.system.AppSettings;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
@@ -54,10 +59,11 @@ import com.simsilica.lemur.Command;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs implements IReflexFillCfg{
+public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication implements IReflexFillCfg,IConsoleCommandListener,IConfigure{
 	private static ConsoleTestI instance = new ConsoleTestI();
 
-	private static AppSettings	as;
+//	private static AppSettings	as;
+
 	public static ConsoleTestI i(){return instance;}
 	
 	//private final String strFinalFieldCodePrefix="CMD_";
@@ -108,14 +114,13 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		return true;
 	}
 	
-  public static class CfgParm extends SimpleConsoleAppAbs.CfgParm {
-		public CfgParm(String strApplicationBaseSaveDataPath) {
-			super(strApplicationBaseSaveDataPath);
-		}
-  }
+	private SimpleConsolePlugin	consolePlugin;
+	
+  public static class CfgParm implements ICfgParm {}
   private CfgParm cfg = null;
+	private boolean bConfigured;
   @Override
-  public ConsoleTestI configure(ICfgParm icfg) {
+	public ConsoleTestI configure(ICfgParm icfg) {
   	cfg = (CfgParm)icfg;
   	
 		/**
@@ -125,8 +130,11 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		GlobalCommandsDelegatorI.iGlobal().set(new CommandsTest());
 //		GlobalConsoleGuiI.iGlobal().set(ConsoleLemurStateI.i());
   	
-		super.configure(icfg);
+		consolePlugin = new SimpleConsolePlugin(this);
+		consolePlugin.configure(new SimpleConsolePlugin.CfgParm(
+			ConsoleTestI.class.getName().replace(".",File.separator)));
 		
+		bConfigured=true;
 		return this;
   }
 	
@@ -135,34 +143,23 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 	 */
 	@Override
 	public void simpleInitApp() {
+		Configure.assertConfigured(this);
+		
 		MsgI.bDebug=true;
 		
-		
-		//////////////////////// super init depends on globals
-		super.simpleInitApp(); // basic initializations
+		consolePlugin.init();
 		
 		//////////////////////// config this test
-		// test dialogs
-//		diagChoice = new BasicDialogStateAbs<T>(BasicDialogStateAbs.EDiag.Choice).configure(
-//			new BasicDialogStateAbs.CfgParm(true, 0.6f, 0.5f, null, null));
 		diagChoice = new ChoiceLemurDialogState<T>().configure(new ChoiceLemurDialogState.CfgParm(
 			0.6f, 0.5f, null, null));
 		
-//		diagQuestion = new BasicDialogStateAbs<T>(BasicDialogStateAbs.EDiag.Question).configure(
-//			new BasicDialogStateAbs.CfgParm(true, 500f, 300f, null, null));
 		diagQuestion = new QuestionLemurDialogState<T>().configure(new QuestionLemurDialogState.CfgParm(
 			500f, 300f, null, null));
 		
-//		diagList = new BasicDialogStateAbs<T>(BasicDialogStateAbs.EDiag.BrowseManagementList).configure(
-//			new BasicDialogStateAbs.CfgParm(false, null, null, null, null))
-//			.addModalDialog(diagChoice)
-//			.addModalDialog(diagQuestion);
 		diagList = new MaintenanceListLemurDialogState<T>().configure(new MaintenanceListLemurDialogState.CfgParm<T>(
 			null, null, null, null, diagChoice, diagQuestion));
 		
 		prepareTestData();
-//		//////////////////////// super init depends on globals
-//		super.simpleInitApp(); // basic initializations
 	}
 	
 	private void prepareTestData(){
@@ -201,26 +198,27 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 	}
 	
 	public static void main( String... args ) {
-		System.getProperties().list(System.out);
+		System.getProperties().list(System.out); //some cool info
 		
-		GlobalAppRefI.iGlobal().set(ConsoleTestI.i());
+//		GlobalAppRefI.iGlobal().set(ConsoleTestI.i());
 		
+		GlobalAppSettingsI.iGlobal().set(new AppSettings(true));
+		GlobalAppSettingsI.i().setTitle(ConsoleTestI.class.getSimpleName());
 		boolean bHideJMESettingsDialog=true; 
 		if(bHideJMESettingsDialog){
-			as = new AppSettings(true);
-			as.setTitle(ConsoleTestI.class.getSimpleName());
-			as.setResizable(true);
-			as.setWidth(1024);
-			as.setHeight(650); //768
+			GlobalAppSettingsI.i().setResizable(true);
+			GlobalAppSettingsI.i().setWidth(1024);
+			GlobalAppSettingsI.i().setHeight(650); //768
 //			as.setFullscreen(false);
 			//as.setFrameRate(30); //TODO are we unable to change this on-the-fly after starting the application?
-			ConsoleTestI.i().setSettings(as);
 			ConsoleTestI.i().setShowSettings(false);
 		}
+		ConsoleTestI.i().setSettings(GlobalAppSettingsI.i());
 		
 		SingleAppInstanceI.i().configureOptionalAtMainMethod();
 		
-		ConsoleTestI.i().configure(new ConsoleTestI.CfgParm(ConsoleTestI.class.getName().replace(".",File.separator)));
+		ConsoleTestI.i().configure(new ConsoleTestI.CfgParm());
+		
 		ConsoleTestI.i().start();
 	}
 
@@ -239,11 +237,11 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 			diagList.requestEnable();
 			bCommandWorked = true;
 		}else
-		if(cd.checkCmdValidity(this,"activateSelfWindow")){
-			cd.addCmdToQueue(cd.scfCmdOS.getUniqueCmdId()+" linux "
-				+"xdotool windowactivate $(xdotool search --name \"^"+as.getTitle()+"$\")");
-			bCommandWorked = true;
-		}else
+//		if(cd.checkCmdValidity(this,"activateSelfWindow")){
+//			cd.addCmdToQueue(cd.scfCmdOS.getUniqueCmdId()+" linux "
+//				+"xdotool windowactivate $(xdotool search --name \"^"+as.getTitle()+"$\")");
+//			bCommandWorked = true;
+//		}else
 //		if(cc.checkCmdValidity(this,"conflictTest123","")){
 //		}else
 		{
@@ -277,14 +275,35 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleConsoleAppAbs
 		 * just call it!
 		 * Remember to set the same variant!
 		 */
-		if(rfcfg==null)rfcfg = super.getReflexFillCfg(rfcv);//cd.getReflexFillCfg(rfcv);
+		if(rfcfg==null){
+			rfcfg = GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
+		}
 		
 		return rfcfg;
 	}
 
-//	@Override
-//	public void stop() {
-//		getCamera().setViewPort(0f, 1f, 0f, 1f);
-//		super.stop();
-//	}
+	/**
+	 * PUT NOTHING HERE!
+	 * Override just to tell you this: put stuff at {@link #destroy()}
+	 */
+	@Override
+	public void stop(boolean waitFor) {
+		super.stop(waitFor);
+	}
+	
+	/**
+	 * this is called when window is closed using close button too
+	 */
+	@Override
+	public void destroy() {
+		GlobalAppRefI.iGlobal().setAppExiting();
+//		if(!bStopping)stop();//		GlobalAppRefI.iGlobal().setAppExiting();
+		super.destroy();
+	}
+
+
+	@Override
+	public boolean isConfigured() {
+		return this.bConfigured;
+	}
 }	

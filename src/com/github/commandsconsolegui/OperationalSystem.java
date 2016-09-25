@@ -85,4 +85,14 @@ public class OperationalSystem {
 		PrerequisitesNotMetException.assertNotAlreadySet("storage folder type", this.esft, esft, this);
 		this.esft = esft;
 	}
+	
+	private String strApplicationTitle;
+	public void setApplicationTitle(String strApplicationTitle) {
+		PrerequisitesNotMetException.assertNotAlreadySet("app title", this.strApplicationTitle, strApplicationTitle, this);
+		this.strApplicationTitle=strApplicationTitle;
+	}
+	
+	public String getApplicationTitle() {
+		return strApplicationTitle;
+	}
 }

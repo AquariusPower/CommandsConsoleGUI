@@ -25,56 +25,66 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package commandsconsoleguitests;
+package com.github.commandsconsolegui.jme;
 
-import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
-import com.github.commandsconsolegui.jme.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.misc.ReflexFillI;
+import java.io.IOException;
+
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.jme3.export.JmeExporter;
+import com.jme3.export.JmeImporter;
+import com.jme3.export.Savable;
+import com.jme3.scene.Spatial;
 
 /**
+ * To use with {@link Spatial#setUserData()}
+ * 
+ * Useful to put objects into Spatials that dont really require being saved,
+ * for easy retrieval.
+ * 
+ * ATTENTION!: drawback is, it will not save neither load anything unless coded...
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
+ * @param <T>
  */
-public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
-//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
-
-	public CommandsTest(){
-		super();
+public class PseudoSavableHolder<T> implements Savable{
+	T objRef;
+//	private boolean	bIgnoreReadWrite=true;
+	
+	public PseudoSavableHolder(T objRef){
+		this.objRef=objRef;
+	}
+	public T getRef(){
+		return objRef;
+	}
+//	public PseudoSavableHolder ignoreReadWrite(){
+//		bIgnoreReadWrite=true;
+//		return this;
+//	}
+	
+	@Override
+	public void write(JmeExporter ex) throws IOException {
+		if (objRef instanceof Savable) {
+			Savable s = (Savable) objRef;
+			s.write(ex);
+			return;
+		}
 		
-		/**
-		 *  This allows test3 at endUserCustomMethod() to work.
-		 */
-		ReflexFillI.i().setUseDefaultCfgIfMissing(true);
-		
-		setAllowUserCmdOS(true);
+//		if(!bIgnoreReadWrite){
+//			throw new PrerequisitesNotMetException("the object holded is not a savable",this,objRef);
+//		}
 	}
 	
 	@Override
-	public String prepareStatsFieldText() {
-		String strStatsLast = super.prepareStatsFieldText();
-		
-		if(EStats.MouseCursorPosition.isShow()){
-			strStatsLast+=
-				"xy"
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
-					+","
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
-					+";";
+	public void read(JmeImporter im) throws IOException {
+		if (objRef instanceof Savable) {
+			Savable s = (Savable) objRef;
+			s.read(im);
+			return;
 		}
 		
-		if(EStats.TimePerFrame.isShow()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
-		}
-		
-		return strStatsLast; 
+//		if(!bIgnoreReadWrite){
+//			throw new PrerequisitesNotMetException("the object holded is not a savable",this,objRef);
+//		}
 	}
-	
-	@Override
-	public void cmdExit() {
-		GlobalAppRefI.i().stop();
-		super.cmdExit();
-	}
-	
 }

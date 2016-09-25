@@ -29,6 +29,8 @@ package com.github.commandsconsolegui.misc;
 
 import java.lang.reflect.Field;
 
+import com.github.commandsconsolegui.globals.cmd.VarCmdUId;
+
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>

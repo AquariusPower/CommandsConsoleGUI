@@ -25,56 +25,32 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package commandsconsoleguitests;
-
-import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
-import com.github.commandsconsolegui.jme.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.misc.ReflexFillI;
+package com.github.commandsconsolegui.misc;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
- *
+ * 
  */
-public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
-//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
-
-	public CommandsTest(){
-		super();
-		
+public class Configure{
+	public static void assertConfigured(IConfigure icfg){
+		if(!icfg.isConfigured()){
+			throw new PrerequisitesNotMetException("not configured", icfg);
+		}
+	}
+	
+	public static interface IConfigure<T extends IConfigure<T>> {
 		/**
-		 *  This allows test3 at endUserCustomMethod() to work.
+		 * Each subclass can have the same name "CfgParm".<br>
+		 * <br>
+		 * Just reference the CfgParm of the superclass directly ex.:<br> 
+		 * 	new ConditionalAppStateAbs.CfgParm()<br>
+		 * <br>
+		 * This is also very important when restarting (configuring a new and fresh robust instance)<br> 
 		 */
-		ReflexFillI.i().setUseDefaultCfgIfMissing(true);
+		public static interface ICfgParm{}
 		
-		setAllowUserCmdOS(true);
+		boolean isConfigured();
+		T configure(ICfgParm icfg);
 	}
-	
-	@Override
-	public String prepareStatsFieldText() {
-		String strStatsLast = super.prepareStatsFieldText();
-		
-		if(EStats.MouseCursorPosition.isShow()){
-			strStatsLast+=
-				"xy"
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
-					+","
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
-					+";";
-		}
-		
-		if(EStats.TimePerFrame.isShow()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
-		}
-		
-		return strStatsLast; 
-	}
-	
-	@Override
-	public void cmdExit() {
-		GlobalAppRefI.i().stop();
-		super.cmdExit();
-	}
-	
 }

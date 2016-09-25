@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.cmd.CommandData;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.ConsoleVariable;
-import com.github.commandsconsolegui.jmegui.savablevalues.CompositeSavableAbs.EType;
+import com.github.commandsconsolegui.globals.cmd.VarCmdUId;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.CallQueueI.CallerInfo;
@@ -45,7 +45,6 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.misc.VarCmdUId;
 
 /**
  * TODO migrate most things possible to here
