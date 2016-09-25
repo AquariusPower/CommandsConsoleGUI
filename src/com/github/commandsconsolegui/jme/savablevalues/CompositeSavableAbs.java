@@ -69,8 +69,8 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 	public abstract S getThis();
 	
 	public static interface ISavableFieldAccess{
-		public Object getFieldValue(Field fld);
-		public Object setFieldValue(Field fld, Object value);
+		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException;
+		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException;
 	}
 	
 	public static interface ISaveSkipper{}
@@ -153,19 +153,18 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 						/**
 						 * set DEFAULT value
 						 */
-						Object val = fld.get(this);
+						Object val = getFieldVal(this,fld);
 						if(val==null){
 							throw new PrerequisitesNotMetException("default (initial) value, cannot be null!", fld); 
 						}
 						applyFieldExtraInfo(fld, null, val);
-//						ss.hmDefaultValues.put(fld, fld.get(this));
 						break;
 					case Var:
 						/**
 						 * it has its own internal default.
 						 * ensure consistency, Savable does not accept nulls...
 						 */
-						((VarCmdFieldAbs)fld.get(this)).setDenyNullValue();
+						((VarCmdFieldAbs)getFieldVal(this,fld)).setDenyNullValue();
 						break;
 				}
 			} catch (IllegalArgumentException | IllegalAccessException e) {
@@ -188,23 +187,6 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 		return ss.owner;
 	}
 	
-//	private Object getDefaultValueFor(Field fld, boolean bIfDefaultMissingReturnCurrent) throws IllegalArgumentException, IllegalAccessException{
-//		/**
-//		 * if the default changes by the developer and it was not saved and the value is still the default,
-//		 * it will continue not being saved! 
-//		 */
-//		Field fldDefault = null;
-//		try {fldDefault = this.getClass().getDeclaredField(fld.getName()+"Default");} catch (NoSuchFieldException | SecurityException e1) {}
-//		Object valueDefault = null;
-//		if(fldDefault!=null)valueDefault=fldDefault.get(this);
-//		
-//		if(valueDefault==null && bIfDefaultMissingReturnCurrent){
-//			return fld.get(this);
-//		}
-//				
-//		return valueDefault;
-//	}
-	
 	protected boolean checkSkip(Field fld){
 		if(ISaveSkipper.class.isAssignableFrom(fld.getType()))return true;
 		
@@ -216,10 +198,9 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 		if(fld.getName().startsWith("$SWITCH_TABLE$")){
 			return true; //should just be a synthetic
 		}
-		try {if(fld.get(this)==ss.owner){ //this$0
+		try {if(getFieldVal(this,fld)==ss.owner){ //this$0
 				return true; //should just be a synthetic
 		}} catch (IllegalArgumentException | IllegalAccessException e) {/*wont happen as skipper is inner*/}
-//	try {if(fld.get(this)==this){return true;} catch (IllegalArgumentException | IllegalAccessException e) {}
 		
 		return false;
 	}
@@ -281,7 +262,7 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 //					if(checkSkip(fld))continue;
 					
 					String strName = fld.getName();
-					Object val = fld.get(this);
+					Object val = getFieldVal(this,fld);
 					Object valDef = ss.hmFieldExtraInfo.get(fld).valDefault;
 //					Object valDef = getDefaultValueFor(fld,false);
 					
@@ -438,7 +419,7 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 			case Long:		valRead=ic.readLong		(strName, (long)objValDef);		break;
 			case String:	valRead=ic.readString	(strName, (String)objValDef);	break;
 			case Var:
-				VarCmdFieldAbs var = (VarCmdFieldAbs)fld.get(this);
+				VarCmdFieldAbs var = (VarCmdFieldAbs)getFieldVal(this,fld);
 				addDbgInfo(aobjDbg,var.getReport());
 				var.setObjectRawValue(
 					read(ic, var.getRawValue().getClass(), strName, null, var.getRawValueDefault(), aobjDbg));
@@ -449,7 +430,8 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 			return valRead;
 		}
 		
-		fld.set(this, valRead);
+		setFieldVal(this,fld,valRead);
+		
 		return null;
 	}
 	
@@ -501,10 +483,9 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 				allowFieldAccess(fld);
 //				if(checkSkip(fld))continue;
 				try {
-//					fld.set(this, cl.getDeclaredField(fld.getName()).get(svLoaded));
 					if(VarCmdFieldAbs.class.isAssignableFrom(fld.getType())){
-						VarCmdFieldAbs<?,?> var=(VarCmdFieldAbs<?,?>)fld.get(this);
-						VarCmdFieldAbs<?,?> varLoaded=(VarCmdFieldAbs<?,?>)fld.get(svLoaded);
+						VarCmdFieldAbs<?,?> var=(VarCmdFieldAbs<?,?>)getFieldVal(this,fld);
+						VarCmdFieldAbs<?,?> varLoaded=(VarCmdFieldAbs<?,?>)getFieldVal(svLoaded,fld);
 						if(var.getClass()!=varLoaded.getClass()){
 							aobjDbg.add(var.getClass());
 							aobjDbg.add(varLoaded.getClass());
@@ -520,12 +501,12 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 								+" other classes must use their specific getters and setters",aobjDbg); 
 						}
 						
-						Object valLoaded = fld.get(svLoaded);
+						Object valLoaded = getFieldVal(svLoaded,fld);
 						if(valLoaded==null){
 							throw new PrerequisitesNotMetException("how can the loaded value be null?", aobjDbg);
 						}
 						
-						fld.set(this, valLoaded);
+						setFieldVal(this,fld,valLoaded);
 					}
 				} catch (IllegalArgumentException | IllegalAccessException | SecurityException e) {
 					if(bRestoringSelfBackup){
@@ -543,6 +524,23 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 //			}
 		}
 		
+		
+		
 		return true;
+	}
+	
+	private void setFieldVal(Object objHoldingField, Field fld, Object val) throws IllegalArgumentException, IllegalAccessException {
+		if(this instanceof ISavableFieldAccess){
+			((ISavableFieldAccess)objHoldingField).setFieldValue(fld, val);
+		}else{
+			fld.set(this, val);
+		}
+	}
+	private Object getFieldVal(Object objHoldingField, Field fld) throws IllegalArgumentException, IllegalAccessException {
+		if(this instanceof ISavableFieldAccess){
+			return ((ISavableFieldAccess)objHoldingField).getFieldValue(fld);
+		}else{
+			return fld.get(this);
+		}
 	}
 }

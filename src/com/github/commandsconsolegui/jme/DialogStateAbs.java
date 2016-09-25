@@ -28,6 +28,7 @@
 package com.github.commandsconsolegui.jme;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,7 +47,7 @@ import com.github.commandsconsolegui.jme.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jme.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jme.lemur.extras.ISpatialValidator;
 import com.github.commandsconsolegui.jme.savablevalues.CompositeSavableAbs;
-import com.github.commandsconsolegui.misc.CallQueueI;
+import com.github.commandsconsolegui.jme.savablevalues.CompositeSavableAbs.ISavableFieldAccess;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
@@ -1290,7 +1291,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //		return b;
 //	}
 	
-	public static class DialogCS<T extends DialogStateAbs> extends CompositeSavableAbs<T,DialogCS<T>> implements IReflexFillCfg{
+	public static class DialogCS<T extends DialogStateAbs> extends CompositeSavableAbs<T,DialogCS<T>> implements ISavableFieldAccess,IReflexFillCfg{
 		public DialogCS(){super();}; //required by savable
 		@Override public DialogCS getThis() {return this;}
 		
@@ -1434,6 +1435,22 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		}
 		public void setMaximized(boolean bMaximized) {
 			this.bMaximized = bMaximized;
+		}
+		@Override
+		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+			/**
+			 * For subclasses use this too:
+			 * if(fld.getDeclaringClass()!=DialogCS.class)return super.getFieldValue(fld);
+			 */
+			return fld.get(this);
+		}
+		@Override
+		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+			/**
+			 * For subclasses use this too:
+			 * if(fld.getDeclaringClass()!=DialogCS.class)super.setFieldValue(fld,value);
+			 */
+			fld.set(this,value);
 		}
 		
 	}
