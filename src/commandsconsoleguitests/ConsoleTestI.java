@@ -34,7 +34,8 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
-import com.github.commandsconsolegui.extras.SingleAppInstanceI;
+import com.github.commandsconsolegui.extras.SingleAppInstanceManager;
+import com.github.commandsconsolegui.globals.GlobalSingleAppInstanceI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppSettingsI;
@@ -43,21 +44,21 @@ import com.github.commandsconsolegui.jme.lemur.console.SimpleConsolePlugin;
 import com.github.commandsconsolegui.jme.lemur.dialog.ChoiceLemurDialogState;
 import com.github.commandsconsolegui.jme.lemur.dialog.MaintenanceListLemurDialogState;
 import com.github.commandsconsolegui.jme.lemur.dialog.QuestionLemurDialogState;
-import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LemurDialogCS;
 import com.github.commandsconsolegui.misc.Configure;
 import com.github.commandsconsolegui.misc.Configure.IConfigure;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
-import com.github.commandsconsolegui.misc.ReflexHacksPluginI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexHacksPluginI;
 import com.jme3.app.SimpleApplication;
 import com.jme3.system.AppSettings;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 
 /**
+ * This is a more detailed test.
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
@@ -111,7 +112,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		cd.dumpSubEntry("CommandTest0: "+CMD_TRADITIONAL_PRETTYFIED_0);
 		cd.dumpSubEntry("CommandTest1: "+sfTestCommandAutoFillVariant1);
 		cd.dumpSubEntry("CommandTest2: "+testCommandAutoFillPrefixLessVariant2);
-		if(ReflexFillI.i().isbUseDefaultCfgIfMissing()){
+		if(ReflexFillI.i().isUseDefaultCfgIfMissing()){
 			cd.dumpSubEntry("CommandTest3: "+scfCommandAutoFillPrefixLessVariantDefaulted3);
 		}
 		return true;
@@ -133,6 +134,10 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		GlobalCommandsDelegatorI.iGlobal().set(new CommandsTest());
 //		GlobalConsoleGuiI.iGlobal().set(ConsoleLemurStateI.i());
 		
+		/**
+		 * this adds otherwise impossible fixes and workarounds,
+		 * can be safely disabled.
+		 */
 		ReflexHacksPluginI.i().configure(GlobalCommandsDelegatorI.i());
 		
 		consolePlugin = new SimpleConsolePlugin(this);
@@ -152,7 +157,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		
 		MsgI.bDebug=true;
 		
-		consolePlugin.init();
+		consolePlugin.initialize();
 		
 		//////////////////////// config this test
 		diagChoice = new ChoiceLemurDialogState<T>().configure(new ChoiceLemurDialogState.CfgParm(
@@ -220,7 +225,8 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		}
 		ConsoleTestI.i().setSettings(GlobalAppSettingsI.i());
 		
-		SingleAppInstanceI.i().configureOptionalAtMainMethod();
+		GlobalSingleAppInstanceI.iGlobal().set(new SingleAppInstanceManager());
+		GlobalSingleAppInstanceI.i().configureOptionalAtMainMethod();
 		
 		ConsoleTestI.i().configure(new ConsoleTestI.CfgParm());
 		

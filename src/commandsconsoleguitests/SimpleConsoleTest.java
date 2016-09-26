@@ -25,35 +25,56 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.jme;
+package commandsconsoleguitests;
 
 import java.io.File;
 
-import com.github.commandsconsolegui.OperationalSystem;
+import com.github.commandsconsolegui.extras.SingleAppInstanceManager;
+import com.github.commandsconsolegui.globals.GlobalSingleAppInstanceI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppSettingsI;
-import com.jme3.system.JmeSystem;
-import com.jme3.system.JmeSystem.StorageFolderType;
+import com.github.commandsconsolegui.jme.lemur.console.SimpleConsolePlugin;
+import com.jme3.app.SimpleApplication;
+import com.jme3.system.AppSettings;
 
 /**
+ * This is the simplest possible usage.
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class JMEOperationalSystem extends OperationalSystem {
-	public JMEOperationalSystem(String strApplicationBaseSaveDataPath,StorageFolderType esft) {
-		super(strApplicationBaseSaveDataPath,esft);
+public class SimpleConsoleTest extends SimpleApplication {
+	@Override
+	public void simpleInitApp() {
+		// here could be only it's initialize method, but will work this way also.
+		new SimpleConsolePlugin(this)
+			.configure(new SimpleConsolePlugin.CfgParm(this.getClass().getName().replace(".",File.separator)))
+			.initialize();
+	}
+	
+	public static void main( String... args ) {
+		// if you have your own single instance code, you can safely remove these 2 lines below
+		GlobalSingleAppInstanceI.iGlobal().set(new SingleAppInstanceManager());
+		GlobalSingleAppInstanceI.i().configureOptionalAtMainMethod();
 		
-		String strAppTitle = GlobalAppRefI.i().getClass().getSimpleName();
-		if(GlobalAppSettingsI.iGlobal().isSet()){
-			strAppTitle = GlobalAppSettingsI.i().getTitle();
-		}
-		super.setApplicationTitle(strAppTitle);
+		SimpleConsoleTest test = new SimpleConsoleTest();
+		
+		/**
+		 * will will want to set at least the app title, and this global is also important to let 
+		 * some functionalities work
+		 */
+		GlobalAppSettingsI.iGlobal().set(new AppSettings(true));
+		GlobalAppSettingsI.i().setTitle(test.getClass().getSimpleName());
+		test.setSettings(GlobalAppSettingsI.i());
+		
+		test.start();
 	}
 
 	@Override
-	protected void verifyBaseSaveDataPath() {
-		File fl = JmeSystem.getStorageFolder(getStorageFolderType());
-		verifyBaseSaveDataPath(fl.getAbsolutePath()+File.separator+getApplicationBaseFolderName());
+	public void destroy() {
+		// this is important to let some other threads know the application is exiting and behave properly
+		GlobalAppRefI.iGlobal().setAppExiting();
+		
+		super.destroy();
 	}
-}
+}	

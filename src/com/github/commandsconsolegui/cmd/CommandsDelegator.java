@@ -364,6 +364,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			
 			if(rfcfg!=null)rfcfg.setAsCommandToo(true);
 		}
+//		StringVarField
+//		FloatDoubleVarField
+//		IntLongVarField
 		
 		if(rfcfg!=null){
 			if(rfcfg.isCommandToo()){
@@ -859,8 +862,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			bCmdWorked=cmdAlias();
 		}else
 		if(checkCmdValidity(this,"activateSelfWindow")){
-			addCmdToQueue(scfCmdOS.getUniqueCmdId()+" linux "
-				+"xdotool windowactivate $(xdotool search --name \"^"+GlobalOperationalSystemI.i().getApplicationTitle()+"$\")");
+			String strAppTitle=GlobalOperationalSystemI.i().getApplicationTitle();
+			if(strAppTitle.isEmpty()){
+				dumpWarnEntry("this functionality requires the application title to have been set");
+			}else{
+				addCmdToQueue(scfCmdOS.getUniqueCmdId()+" linux "
+					+"xdotool windowactivate $(xdotool search --name \"^"+strAppTitle+"$\")");
+			}
 			bCmdWorked = true;
 		}else
 		if(checkCmdValidity(icclPseudo,CMD_CLEAR_COMMANDS_HISTORY)){

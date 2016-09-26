@@ -27,12 +27,14 @@
 
 package com.github.commandsconsolegui.cmd;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.TreeMap;
 
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.google.common.collect.Lists;
 
 /**
@@ -426,11 +428,21 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 				bIfConditionExecCommands = cn.bCondition;
 			}
 		}else{
-			dumpExceptionEntry(new NullPointerException("pointless condition ending..."));
+			dumpExceptionEntry(new PrerequisitesNotMetException("pointless condition ending..."));
 			return false;
 		}
 		
 		return true;
 	}
 	
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=ScriptingCommandsDelegator.class)return super.getFieldValue(fld);
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=ScriptingCommandsDelegator.class){super.setFieldValue(fld,value);return;}
+		fld.set(this,value);
+	}
 }

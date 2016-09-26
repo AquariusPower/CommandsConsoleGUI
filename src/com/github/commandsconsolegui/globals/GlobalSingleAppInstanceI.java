@@ -25,35 +25,18 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.jme;
+package com.github.commandsconsolegui.globals;
 
-import java.io.File;
+import com.github.commandsconsolegui.extras.SingleAppInstanceManager;
 
-import com.github.commandsconsolegui.OperationalSystem;
-import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
-import com.github.commandsconsolegui.globals.jme.GlobalAppSettingsI;
-import com.jme3.system.JmeSystem;
-import com.jme3.system.JmeSystem.StorageFolderType;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class JMEOperationalSystem extends OperationalSystem {
-	public JMEOperationalSystem(String strApplicationBaseSaveDataPath,StorageFolderType esft) {
-		super(strApplicationBaseSaveDataPath,esft);
-		
-		String strAppTitle = GlobalAppRefI.i().getClass().getSimpleName();
-		if(GlobalAppSettingsI.iGlobal().isSet()){
-			strAppTitle = GlobalAppSettingsI.i().getTitle();
-		}
-		super.setApplicationTitle(strAppTitle);
-	}
-
-	@Override
-	protected void verifyBaseSaveDataPath() {
-		File fl = JmeSystem.getStorageFolder(getStorageFolderType());
-		verifyBaseSaveDataPath(fl.getAbsolutePath()+File.separator+getApplicationBaseFolderName());
-	}
+public class GlobalSingleAppInstanceI extends GlobalHolderAbs<SingleAppInstanceManager>{
+	private static GlobalSingleAppInstanceI instance = new GlobalSingleAppInstanceI();
+	public static GlobalSingleAppInstanceI iGlobal(){return instance;}
+	public static SingleAppInstanceManager i(){return iGlobal().get();}
 }

@@ -31,7 +31,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Things that should be been coded in a certain way but were overlooked.
+ * "Things that should be been coded in a certain way but were overlooked",
+ * but... is basically a buffed generic NullPointerException anyway...
  * 
  * This exception can be captured tho may request the application to exit gracefully.
  * 

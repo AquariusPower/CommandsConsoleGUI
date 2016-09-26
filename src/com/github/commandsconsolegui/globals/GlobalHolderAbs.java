@@ -33,8 +33,10 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 /**
  * Global Reference Holder
  * 
- * 	To lower as much as possible the dependencies, so some class field's values can be globalized.
- * 	To easily access what can/should be globally accessible.
+ * Useful to:
+ * 	Lower as much as possible the dependencies, so some class field's values can be globalized.
+ * 	Easily access what can/should be globally accessible.
+ * 	Allow some classes to be optionally instanced/enabled.
  * 	The same object may be present in more than one global, just being a sub-class, scope dependency range.
  * 	Avoid unnecessarily using with already globally accessible single instance class objects, tho:
  * - the main application class is important to be stored on a global to make it's uses depend

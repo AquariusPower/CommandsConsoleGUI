@@ -41,7 +41,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	public static ReflexFillI i(){return instance;}
 //	private static IHandleExceptions	ihe;
 	
-	private boolean bUseDefaultCfgIfMissing=false;
+	private boolean bUseDefaultCfgIfMissing = true;
 	private String	strCommandPartSeparator = "_";
 	
 	
@@ -378,7 +378,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		
 		ReflexFillCfg rfcfg = rfcfgOwnerOfField.getReflexFillCfg(rfcvFieldAtTheOwner);
 		if(rfcfg==null){
-			if(bUseDefaultCfgIfMissing){
+			if(isUseDefaultCfgIfMissing()){
 				rfcfg = new ReflexFillCfg(rfcvFieldAtTheOwner);
 			}else{
 				throw new PrerequisitesNotMetException("Configuration is missing for "
@@ -516,7 +516,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		}
 	}
 	
-	public boolean isbUseDefaultCfgIfMissing() {
+	public boolean isUseDefaultCfgIfMissing() {
 		return bUseDefaultCfgIfMissing;
 	}
 

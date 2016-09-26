@@ -43,7 +43,7 @@ import com.github.commandsconsolegui.misc.MiscI;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class SingleAppInstanceI { //implements IReflexFillCfg{
+public class SingleAppInstanceManager { //implements IReflexFillCfg{
 //	public final BoolTogglerCmd	btgSingleInstaceMode = new BoolTogglerCmd(this,true,BoolTogglerCmd.strTogglerCodePrefix,
 //		"better keep this enabled, other instances may conflict during files access.");
 	private boolean bDevModeExitIfThereIsANewerInstance;
@@ -68,13 +68,13 @@ public class SingleAppInstanceI { //implements IReflexFillCfg{
 	private boolean	bUseFilesystemFileAttributeModifiedTime;
 	private boolean	bRecreateLockEveryLoop;
 	
-	private static SingleAppInstanceI instance = new SingleAppInstanceI();
-	public static SingleAppInstanceI i(){return instance;}
+//	private static SingleAppInstanceI instance = new SingleAppInstanceI();
+//	public static SingleAppInstanceI i(){return instance;}
 	
-	public SingleAppInstanceI() {
+	public SingleAppInstanceManager() {
 		bDevModeExitIfThereIsANewerInstance = true; //true if in debug mode
 		lLockUpdateTargetDelayMilis=3000;
-		strPrefix=SingleAppInstanceI.class.getSimpleName()+"-";
+		strPrefix=SingleAppInstanceManager.class.getSimpleName()+"-";
 		strSuffix=".lock";
 		strExitReasonOtherInstance = "";
 		setUseFilesystemFileAttributeModifiedTime(false);
@@ -85,7 +85,7 @@ public class SingleAppInstanceI { //implements IReflexFillCfg{
 	 * @param b
 	 * @return 
 	 */
-	public SingleAppInstanceI setUseFilesystemFileAttributeModifiedTime(boolean b) {
+	public SingleAppInstanceManager setUseFilesystemFileAttributeModifiedTime(boolean b) {
 		this.bUseFilesystemFileAttributeModifiedTime = b;
 		this.bRecreateLockEveryLoop = !this.bUseFilesystemFileAttributeModifiedTime;
 		return this;
@@ -547,7 +547,7 @@ public class SingleAppInstanceI { //implements IReflexFillCfg{
 	
 	private void outputTD(String str){
 		System.err.println(""
-			+"["+SingleAppInstanceI.class.getSimpleName()+"]"
+			+"["+SingleAppInstanceManager.class.getSimpleName()+"]"
 			+MiscI.i().getSimpleTime(true)
 			+": "
 			+str.replace("\n", "\n\t"));

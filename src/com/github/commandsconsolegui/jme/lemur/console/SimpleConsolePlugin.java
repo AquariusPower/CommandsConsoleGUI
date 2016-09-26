@@ -29,12 +29,10 @@ package com.github.commandsconsolegui.jme.lemur.console;
 
 import java.lang.reflect.Field;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegator;
-import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
-import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
-import com.github.commandsconsolegui.extras.SingleAppInstanceI;
+import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegator;
 import com.github.commandsconsolegui.globals.GlobalMainThreadI;
 import com.github.commandsconsolegui.globals.GlobalOperationalSystemI;
+import com.github.commandsconsolegui.globals.GlobalSingleAppInstanceI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
@@ -100,15 +98,34 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
   public SimpleConsolePlugin configure(ICfgParm icfg) {
   	cfg = (CfgParm)icfg;
   	
+  	/**
+  	 * every global can have its defaults here, or can be customized by you before here.
+  	 */
+  	if(!GlobalCommandsDelegatorI.iGlobal().isSet()){
+  		// defaults to the more complex one
+  		GlobalCommandsDelegatorI.iGlobal().set(new ScriptingCommandsDelegator());
+  	}
+  	
   	// globals must be set as soon as possible
   	if(GlobalSimpleAppRefI.iGlobal().isSet()){
-  		GlobalGUINodeI.iGlobal().set(GlobalSimpleAppRefI.i().getGuiNode());
-  		GlobalRootNodeI.iGlobal().set(GlobalSimpleAppRefI.i().getRootNode());
+  		if(!GlobalGUINodeI.iGlobal().isSet()){
+    		GlobalGUINodeI.iGlobal().set(GlobalSimpleAppRefI.i().getGuiNode());
+  		}
+  		
+  		if(!GlobalRootNodeI.iGlobal().isSet()){
+  			GlobalRootNodeI.iGlobal().set(GlobalSimpleAppRefI.i().getRootNode());
+  		}
   	}
-		GlobalLemurDialogHelperI.iGlobal().set(LemurDialogHelperI.i());
-		GlobalOperationalSystemI.iGlobal().set(new JMEOperationalSystem(
-			cfg.strApplicationBaseSaveDataPath, StorageFolderType.Internal));
-		
+  	
+  	if(!GlobalLemurDialogHelperI.iGlobal().isSet()){
+  		GlobalLemurDialogHelperI.iGlobal().set(LemurDialogHelperI.i());
+  	}
+  	
+  	if(!GlobalOperationalSystemI.iGlobal().isSet()){
+			GlobalOperationalSystemI.iGlobal().set(new JMEOperationalSystem(
+				cfg.strApplicationBaseSaveDataPath, StorageFolderType.Internal));
+  	}
+  	
 		/**
 		 * Configs:
 		 * 
@@ -143,11 +160,13 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
   	return this;
   }
   
-	public void init() {
+	public SimpleConsolePlugin initialize() {
 		Configure.assertConfigured(this);
-//	SingleInstanceState.i().configureBeforeInitializing(this,true);
-		SingleAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);
+		if(GlobalSingleAppInstanceI.iGlobal().isSet()){
+			GlobalSingleAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);
+		}
 		GlobalMainThreadI.iGlobal().set(Thread.currentThread());
+		return this;
 	}
 	
 //	/**

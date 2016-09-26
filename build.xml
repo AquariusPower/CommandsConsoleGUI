@@ -6,7 +6,7 @@
 	</tstamp>
 	
 	<property name="projname" value="CommandsConsoleUI"/>
-	<property name="version" value="1.5.${DATE_TIME_NOW}.alpha"/>
+	<property name="version" value="1.6.${DATE_TIME_NOW}.alpha"/>
 	<property name="projv" value="${projname}-${version}"/>
 		
 	<target name="CreateAllJars" description="Create all Jar files">
