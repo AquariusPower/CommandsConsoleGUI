@@ -70,64 +70,11 @@ public class ReflexHacks implements IConsoleCommandListener, IReflexFillCfg {
 	private static ReflexHacks instance = new ReflexHacks();
 	public static ReflexHacks i(){return instance;}
 	
-//	private CommandsDelegator cc;
 	public final BoolTogglerCmdField	btgAllowHacks = new BoolTogglerCmdField(this,false,
 		"Hacks allows for otherwise impossible features, but they may break if targeted classes are updated.").setCallNothingOnChange();
 
 	private IHandleExceptions	ihe = SimpleHandleExceptionsI.i();
-//	private SimpleApplication	sapp;
-//	public void setExceptionHandler(IHandleExceptions ihe){
-//		this.ihe=ihe;
-//	}
 	private boolean	bConfigured;
-	
-//	public Object getFieldValueHK(Object objFrom, String strFieldName){
-//		if(!btgAllowHacks.b())return null;
-//		
-//		return getFieldValueHK(objFrom.getClass(), objFrom, strFieldName);
-//	}
-	
-//	/**
-//	 * We shouldnt access private fields/methods as things may break.
-//	 * Any code depending on this must ALWAYS be optional!
-//	 * 
-//	 * @param clazzOfObjectFrom what superclass of the object from is to be used?
-//	 * @param objFieldOwner
-//	 * @param strFieldName will break if changed..
-//	 * @return field value
-//	 */
-//	public Object getFieldValueHK(Object objFieldOwner, String strFieldName){
-//		if(clazz==null)clazz=objFieldOwner.getClass();
-//		return fieldWorkHK(objFieldOwner.getClass(), objFieldOwner, strFieldName, false, null);
-//////	private Object getFieldValueHK(Class<?> clazzOfObjectFrom, Object objFrom, String strFieldName){
-////		if(!btgAllowHacks.b())return null;
-////		
-////		Class<?> clazzOfObjectFrom = objFieldOwner.getClass();
-////		Object objFieldValue = null;
-////		try{
-////			Field field = clazzOfObjectFrom.getDeclaredField(strFieldName);
-////			field.setAccessible(true);
-////			objFieldValue = field.get(objFieldOwner);
-////			field.setAccessible(false);
-////		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
-////			ihe.handleExceptionThreaded(e);
-////		}
-////		
-////		return objFieldValue;
-//	}
-	
-//	/**
-//	 * 
-//	 * @param clazz if null, will use owner.class()
-//	 * @param objFieldOwner if null, clazz must be set (will be refering to a static field then)
-//	 * @param strFieldName
-//	 * @param objSetNewValue
-//	 * @return
-//	 */
-//	public Object setFieldValueHK(Class<?> clazz, Object objFieldOwner, String strFieldName, Object objSetNewValue){
-//		if(clazz==null)clazz=objFieldOwner.getClass();
-//		return fieldWorkHK(clazz, objFieldOwner, strFieldName, true, objSetNewValue);
-//	}
 	
 	/**
 	 * 
@@ -138,59 +85,29 @@ public class ReflexHacks implements IConsoleCommandListener, IReflexFillCfg {
 	 * @param objSetNewValue
 	 * @return
 	 */
-	public Object getOrSetFieldValueHK(Class<?> clazzOfObjectFrom, Object objFieldOwner, String strFieldName, boolean bSetValue, Object objSetNewValue){
+	public Object getOrSetFieldValueHK(Class<?> clazzOfObjectFrom, Object objFieldOwner, String strFieldName, Field fldOverride, boolean bSetValue, Object objSetNewValue){
 		if(!btgAllowHacks.b())return null;
 		
 		if(clazzOfObjectFrom==null)clazzOfObjectFrom=objFieldOwner.getClass();
 		
 		Object objFieldValue = null;
 		try{
-			Field field = clazzOfObjectFrom.getDeclaredField(strFieldName);
+			Field fld = fldOverride==null ? clazzOfObjectFrom.getDeclaredField(strFieldName) : fldOverride;
 			
-			boolean b = field.isAccessible();
-			if(!b)field.setAccessible(true);
+			boolean b = fld.isAccessible();
+			if(!b)fld.setAccessible(true);
 			
-			objFieldValue = field.get(objFieldOwner);
+			objFieldValue = fld.get(objFieldOwner);
 			
-			if(bSetValue)field.set(objFieldOwner, objSetNewValue);
+			if(bSetValue)fld.set(objFieldOwner, objSetNewValue);
 			
-			if(!b)field.setAccessible(false);
+			if(!b)fld.setAccessible(false);
 		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
 			ihe.handleExceptionThreaded(e);
 		}
 		
 		return objFieldValue;
 	}
-	
-//	/**
-//	 * 
-//	 * @param clazzOfObjectFrom what superclass of the object from is to be used?
-//	 * @param objFrom
-//	 * @param strFieldName will break if changed..
-//	 * @param bAccessPrivateField We shouldnt access private fields/methods as things may break. Any code depending on this must ALWAYS be optional!
-//	 * @param objValueMatch if not null, the 1st field matching this value will return it's name
-//	 * @return field value or name
-//	 */
-//	public Object reflexFieldHK(Class<?> clazzOfObjectFrom, Object objFrom, String strFieldName, boolean bAccessPrivateField, Object objValueMatch){
-//		if(!btgAllowHacks.b())return null;
-//		
-//		Object objFieldData = null;
-//		try{
-//			Field field = clazzOfObjectFrom.getDeclaredField(strFieldName);
-//			
-//			boolean bPrivate = !field.isAccessible();
-//			
-//			if(bAccessPrivateField && bPrivate)field.setAccessible(true);
-//			
-//			objFieldData = field.get(objFrom); // will throw if private, ok!
-//			
-//			if(bPrivate)field.setAccessible(false);
-//		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
-//			ihe.handleExceptionThreaded(e);
-//		}
-//		
-//		return objFieldData;
-//	}
 	
 	/**
 	 * We shouldnt access private fields/methods as things may break.
@@ -216,14 +133,8 @@ public class ReflexHacks implements IConsoleCommandListener, IReflexFillCfg {
 		return objReturn;
 	}
 	
-//	public void configure(SimpleApplication sapp, CommandsDelegatorI cc, IHandleExceptions ihe){
-//	public void configure(CommandsDelegator cc, IHandleExceptions ihe){
 	public void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-//		this.sapp = sapp;
-		
-//		if(cc==null)throw  new NullPointerException("invalid instance for "+CommandsDelegator.class.getName());
-//		this.cc=cc;
 		
 		if(ihe==null)throw  new NullPointerException("invalid instance for "+IHandleExceptions.class.getName());
 		this.ihe=ihe;
@@ -253,7 +164,7 @@ public class ReflexHacks implements IConsoleCommandListener, IReflexFillCfg {
 				)
 		){
 			// fix as upon restoring may ignore X configuration viewportin/viewportout
-			Object o = ReflexHacks.i().getOrSetFieldValueHK(XRandR.class, null, "savedConfiguration", true, null);
+			Object o = ReflexHacks.i().getOrSetFieldValueHK(XRandR.class, null, "savedConfiguration", null, true, null);
 			String str = scfHkFixXRandR.getUniqueCmdId()+", erased value: "+Arrays.toString((Screen[])o);
 			cd.dumpInfoEntry(str, o);
 			

@@ -361,7 +361,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 //	}
 	@Deprecated
 	public void resetCursorPositionHK(TextField tf){
-		TextEntryComponent tec = ((TextEntryComponent)ReflexHacks.i().getOrSetFieldValueHK(null, tf, "text", false, null));
+		TextEntryComponent tec = ((TextEntryComponent)ReflexHacks.i().getOrSetFieldValueHK(null, tf, "text", null, false, null));
 		ReflexHacks.i().callMethodHK(tec,"resetCursorPosition");
 	}
 
@@ -952,7 +952,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 	 * @param pnl
 	 * @param v3fSizeNew x,y,z use -1 to let it be automatic = preferred
 	 * @param bForceSpecificSize
-	 * @return
+	 * @return the possibly valid size after fixed (including z)
 	 */
 	public Vector3f setSizeSafely(
 		final Panel pnl, 
