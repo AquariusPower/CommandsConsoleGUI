@@ -27,12 +27,12 @@
 
 package com.github.commandsconsolegui.jme.lemur.console;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
-import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
@@ -492,4 +492,14 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 //		return MiscI.i().bugFixRet(clReturnType,bFixed, objRet, aobjCustomParams);
 //	}
 
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=LemurFocusHelperStateI.class)return super.getFieldValue(fld);
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=LemurFocusHelperStateI.class){super.setFieldValue(fld,value);return;}
+		fld.set(this,value);
+	}
 }

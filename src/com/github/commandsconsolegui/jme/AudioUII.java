@@ -27,6 +27,7 @@
 
 package com.github.commandsconsolegui.jme;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.TreeMap;
@@ -41,6 +42,7 @@ import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalRootNodeI;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LemurDialogCS;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -136,6 +138,14 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 			rfcfg.setPrefixCustomId(strId);
 			return rfcfg;
 		} 
+		@Override
+		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+			return fld.get(this);
+		}
+		@Override
+		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+			fld.set(this,value);
+		}
 	}
 	
 	public boolean isUserActionStack(){
@@ -392,5 +402,13 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 	protected void initFailed() {
 		// TODO Auto-generated method stub
 		
+	}
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		fld.set(this,value);
 	}
 }

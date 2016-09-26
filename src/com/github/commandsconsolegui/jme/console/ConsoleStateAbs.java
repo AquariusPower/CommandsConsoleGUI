@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.jme.console;
 
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
+import java.lang.reflect.Field;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
@@ -45,8 +46,8 @@ import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.jme.GlobalDialogHelperI;
-import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.jme.ConditionalStateManagerI;
+import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.misc.AutoCompleteI;
 import com.github.commandsconsolegui.misc.AutoCompleteI.AutoCompleteResult;
@@ -2817,6 +2818,17 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	
 	@Override
 	public void focusLost() {
+	}
+
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=ConsoleStateAbs.class)return super.getFieldValue(fld);
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=ConsoleStateAbs.class){super.setFieldValue(fld,value);return;}
+		fld.set(this,value);
 	}
 }
 

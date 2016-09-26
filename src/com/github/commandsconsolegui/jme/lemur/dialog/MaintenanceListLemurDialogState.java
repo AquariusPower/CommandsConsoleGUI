@@ -27,6 +27,7 @@
 
 package com.github.commandsconsolegui.jme.lemur.dialog;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
@@ -245,4 +246,14 @@ public class MaintenanceListLemurDialogState<T extends Command<Button>> extends 
 		return this;
 	}
 
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=MaintenanceListLemurDialogState.class)return super.getFieldValue(fld);
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=MaintenanceListLemurDialogState.class){super.setFieldValue(fld,value);return;}
+		fld.set(this,value);
+	}
 }

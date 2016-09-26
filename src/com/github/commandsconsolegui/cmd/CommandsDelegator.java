@@ -32,6 +32,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.ProcessBuilder.Redirect;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,6 +53,7 @@ import com.github.commandsconsolegui.globals.GlobalOperationalSystemI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.cmd.VarCmdUId;
 import com.github.commandsconsolegui.globals.jme.console.GlobalConsoleUII;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LemurDialogCS;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
@@ -520,6 +522,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}
 		@Override
 		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
+			throw new NullPointerException("This method shall never be called!");
+		}
+		@Override
+		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+			throw new NullPointerException("This method shall never be called!");
+		}
+		@Override
+		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 			throw new NullPointerException("This method shall never be called!");
 		}
 	}
@@ -4270,4 +4280,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		this.bAllowUserCmdOS = bAllowUserCmdOS;
 	}
 
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		fld.set(this,value);
+	}
 }

@@ -27,11 +27,13 @@
 
 package com.github.commandsconsolegui.jme;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 
-import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableWeak;
-import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 
 /**
  * Dispatches multi-click cmds when they are ready.
@@ -226,5 +228,18 @@ public class MultiClickCondStateI extends ConditionalStateAbs {
 	protected void initFailed() {
 		// TODO Auto-generated method stub
 		
+	}
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		fld.set(this,value);
+	}
+
+	@Override
+	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField) {
+		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcvField);
 	}
 }

@@ -27,10 +27,12 @@
 
 package com.github.commandsconsolegui.misc;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LemurDialogCS;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -141,4 +143,12 @@ public class RetryOnFailure implements IReflexFillCfg{
 		return strId;
 	}
 	
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		fld.set(this,value);
+	}
 }

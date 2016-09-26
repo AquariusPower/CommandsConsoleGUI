@@ -27,10 +27,14 @@
 
 package com.github.commandsconsolegui.jme.extras;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.jme.ConditionalStateAbs;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 
 /**
  * 
@@ -222,4 +226,19 @@ public class UngrabMouseStateI extends ConditionalStateAbs {
 		
 	}
 
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=UngrabMouseStateI.class)return super.getFieldValue(fld);
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=UngrabMouseStateI.class){super.setFieldValue(fld,value);return;}
+		fld.set(this,value);
+	}
+
+	@Override
+	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField) {
+		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcvField);
+	}
 }

@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.jme.cmd;
 
+import java.lang.reflect.Field;
+
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
@@ -35,6 +37,7 @@ import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.jme.ConditionalStateAbs;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LemurDialogCS;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -47,11 +50,8 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public abstract class CmdConditionalStateAbs extends ConditionalStateAbs implements IConsoleCommandListener, IReflexFillCfg {
-//	private CommandsDelegator cd;
-	
+public abstract class CmdConditionalStateAbs extends ConditionalStateAbs implements IConsoleCommandListener {
 	StringCmdField scfRestart = new StringCmdField(this,null);
-//	private StringCmdField cmdState = null;
 	protected final BoolTogglerCmdField btgEnabled = new BoolTogglerCmdField(this, true, "toggles the state (enabled/disabled)")
 		.setCallerAssigned(new CallableX(this) {
 			@Override
@@ -61,17 +61,10 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 			}
 		});
 	
-//	private String	strCmdIdentifier;
-//	private String strCmdPrefix="toggle";
-//	private String strCmdSuffix="State";
-	
 	public CmdConditionalStateAbs() {
 		super();
 	}
 	
-//	public CommandsDelegator getCmdDelegator(){
-//		return cd();
-//	}
 	/**
 	 * short/easy access
 	 * @return
@@ -83,26 +76,8 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 	
 	public String getStateEnableCommandId(){
 		return btgEnabled.getUniqueCmdId();
-//		return cmdState.toString();
-//		return strCmdIdentifier;
 	}
 	
-//	@Deprecated
-//	@Override
-//	private void configure(Application app) {
-//		throw new NullPointerException("deprecated!!!");
-//	}
-	
-//	public static class CfgParm implements ICfgParm{
-////		private boolean bIgnorePrefixAndSuffix;
-//		private String	strId;
-//		public String getId(){return strId;}
-//		public CfgParm(String strCmdBaseId) {
-//			super();
-//			this.strId = strCmdBaseId;
-////			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
-//		}
-//	}
 	public static class CfgParm extends ConditionalStateAbs.CfgParm{
 		public CfgParm(String strId) {
 			super(strId);
@@ -113,17 +88,7 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 	public CmdConditionalStateAbs configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
 		
-//		super.configure(new ConditionalStateAbs.CfgParm(GlobalAppRefI.i(), cfg.strId));
 		super.configure(cfg);
-		
-//		cd=GlobalCommandsDelegatorI.i();
-		
-//		if(cfg.strId==null || cfg.strId.isEmpty())throw new NullPointerException("invalid cmd id");
-//		String strCmdIdentifier = "";
-//		if(!cfg.bIgnorePrefixAndSuffix)strCmdIdentifier+=strCmdPrefix;
-//		strCmdIdentifier+=cfg.strId;
-//		if(!cfg.bIgnorePrefixAndSuffix)strCmdIdentifier+=strCmdSuffix;
-//		cmdState = new StringCmdField(strCmdIdentifier,"[bEnabledForce]");
 		
 		cd().addConsoleCommandListener(this);
 		
@@ -137,7 +102,6 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 		
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 		
-//		return isConfigured();
 		return storeCfgAndReturnSelf(icfg);
 	}
 	
@@ -146,84 +110,21 @@ public abstract class CmdConditionalStateAbs extends ConditionalStateAbs impleme
 		if(!cd().isInitialized())return false;
 		return super.initCheckPrerequisites();
 	}
-	
-//	@Override
-//	protected boolean updateOrUndo(float tpf) {
-//		if(!super.updateOrUndo(tpf))return false;
-//		
-//		updateToggles();
-//		
-//		return true;
-//	}
-	
-//	@Override
-//	protected boolean initOrUndo() {
-//		if(!super.initOrUndo())return false;
-//		
-//		return true;
-//	}
-	
-////	@Override
-//	public boolean applyBoolTogglerChange(BoolTogglerCmdField btgSource) {
-//		if(btgSource.equals(btgState)){
-//			if(btgState.isChangedAndRefresh()){
-//				setEnabledRequest(btgState.b());
-//				return true;
-//			}
-//		}else{
-//			throw new PrerequisitesNotMetException("missing code support to "+btgSource.getReport());
-//		}
-//		
-//		return false;
-//	}
-
-	
-//	@Override
-//	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
-////		if(!isConfigured())throw new PrerequisitesNotMetException("not configured yet! at the inherited of this method, you can skip with "+ECmdReturnStatus.class.getSimpleName()+"."+ECmdReturnStatus.Skip);
-////		if(!isInitializedProperly())throw new PrerequisitesNotMetException("not initialized yet!");
-//		
-//		boolean bCommandWorked = false;
-//		
-//		if(cc.checkCmdValidity(this,cmdState,null)){
-//			Boolean bEnabledForce = cc.paramBoolean(1);
-//			
-//			if(bEnabledForce!=null){
-//				setEnabledRequest(bEnabledForce);
-//			}else{
-//				toggleRequest();
-//			}
-//			
-//			bCommandWorked = true;
-//		}else
-//		{
-//			return ECmdReturnStatus.NotFound; //end of inheritance seek
-//		}
-//		
-//		return cc.cmdFoundReturnStatus(bCommandWorked);
-//	}
-@Override
-public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
-	boolean bCommandWorked = false;
-	
-	if(cd.checkCmdValidity(this,scfRestart)){
-//		Boolean bEnabledForce = cc.paramBoolean(1);
-//		
-//		if(bEnabledForce!=null){
-//			setEnabledRequest(bEnabledForce);
-//		}else{
-//			toggleRequest();
-//		}
-		requestRestart();
+	@Override
+	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
+		boolean bCommandWorked = false;
 		
-		bCommandWorked = true;
-	}else
-	{
-		return ECmdReturnStatus.NotFound; //end of inheritance seek
+		if(cd.checkCmdValidity(this,scfRestart)){
+			requestRestart();
+			
+			bCommandWorked = true;
+		}else
+		{
+			return ECmdReturnStatus.NotFound; //end of inheritance seek
+		}
+		
+		return cd.cmdFoundReturnStatus(bCommandWorked);
 	}
-	
-	return cd.cmdFoundReturnStatus(bCommandWorked);
-}
 	
 	@Override
 	protected boolean enableAttempt() {
@@ -284,22 +185,6 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 		return rfcfg;
 	}
 
-//	public String getCmdPrefix() {
-//		return strCmdPrefix;
-//	}
-//
-//	protected void setCmdPrefix(String strCmdPrefix) {
-//		this.strCmdPrefix = strCmdPrefix;
-//	}
-
-//	public String getCmdSuffix() {
-//		return strCmdSuffix;
-//	}
-//
-//	protected void setCmdSuffix(String strCmdSuffix) {
-//		this.strCmdSuffix = strCmdSuffix;
-//	}
-
 	public boolean isPrefixCmdWithIdToo() {
 		return bPrefixCmdWithIdToo;
 	}
@@ -308,4 +193,14 @@ public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 		this.bPrefixCmdWithIdToo = bPrefixCmdWithIdToo;
 	}
 
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=CmdConditionalStateAbs.class)return super.getFieldValue(fld);
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=CmdConditionalStateAbs.class){super.setFieldValue(fld,value);return;}
+		fld.set(this,value);
+	}
 }

@@ -25,59 +25,30 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.jme.lemur.dialog;
+package com.github.commandsconsolegui.misc;
 
 import java.lang.reflect.Field;
 
-import com.simsilica.lemur.Button;
-import com.simsilica.lemur.Command;
-
 /**
- * TODO CfgChoiceDialogState
+ * The class implementing it is agreeing to properly allow set and get of field values,
+ * therefore this is an expected and safe access/behavior. 
+ * So, the class implementing get and set, will ALWAYS have access to field's value management!
+ * 
+ * All classes from superest to concrete int the inheritance MUST implement these methods.
+ * If some subclass misses such implementation, the superest will simply fail to access the Field object.
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
- *
  */
-public class ChoiceLemurDialogState<T extends Command<Button>> extends BasicLemurDialogStateAbs<T,ChoiceLemurDialogState<T>> {
-	public static class CfgParm extends BasicLemurDialogStateAbs.CfgParm{
-		public CfgParm(
-				Float fDialogWidthPercentOfAppWindow,
-				Float fDialogHeightPercentOfAppWindow,
-				Float fInfoHeightPercentOfDialog, Float fEntryHeightMultiplier) {
-			super(fDialogWidthPercentOfAppWindow,
-					fDialogHeightPercentOfAppWindow, fInfoHeightPercentOfDialog,
-					fEntryHeightMultiplier);
-//			super.setUIId(ChoiceDialogStateAbs.class.getSimpleName());
-		}
-	}
-	private CfgParm	cfg;
-	@Override
-	public ChoiceLemurDialogState<T> configure(ICfgParm icfg) {
-		cfg = (CfgParm)icfg;
-		super.configure(cfg);
-		return storeCfgAndReturnSelf(icfg);
-	}
+public interface IReflexFieldSafeAccess {
+	/**
+	 * For subclasses use this too:
+	 * if(fld.getDeclaringClass()!=CURRENT_SUB_CLASS.class)return super.getFieldValue(fld);
+	 */
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException;
 	
-	@Override
-	protected boolean initAttempt() {
-		super.setOptionChoiceSelectionMode(true);
-		
-		return super.initAttempt();
-	}
-	
-	@Override
-	protected ChoiceLemurDialogState<T> getThis() {
-		return this;
-	}
-	
-	@Override
-	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
-		if(fld.getDeclaringClass()!=ChoiceLemurDialogState.class)return super.getFieldValue(fld);
-		return fld.get(this);
-	}
-	@Override
-	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
-		if(fld.getDeclaringClass()!=ChoiceLemurDialogState.class){super.setFieldValue(fld,value);return;}
-		fld.set(this,value);
-	}
+	/**
+	 * For subclasses use this too:
+	 * if(fld.getDeclaringClass()!=CURRENT_SUB_CLASS.class){super.setFieldValue(fld,value);return;}
+	 */
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException;
 }

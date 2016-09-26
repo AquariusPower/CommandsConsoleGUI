@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.jme.lemur.dialog;
 
+import java.lang.reflect.Field;
+
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
@@ -230,4 +232,14 @@ public abstract class BasicLemurDialogStateAbs<T,R extends BasicLemurDialogState
 //	public Vector3f getMainSize() {
 //		return getContainerMain().getPreferredSize();
 //	}
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=BasicLemurDialogStateAbs.class)return super.getFieldValue(fld);
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=BasicLemurDialogStateAbs.class){super.setFieldValue(fld,value);return;}
+		fld.set(this,value);
+	}
 }

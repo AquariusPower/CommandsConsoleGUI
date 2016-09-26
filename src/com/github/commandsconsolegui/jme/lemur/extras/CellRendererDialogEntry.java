@@ -27,6 +27,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.github.commandsconsolegui.jme.lemur.extras;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
@@ -37,6 +38,7 @@ import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData.SliderValueData;
 import com.github.commandsconsolegui.jme.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LemurDialogCS;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -532,6 +534,14 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 ////			}
 //			
 //		}
+		@Override
+		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+			return fld.get(this);
+		}
+		@Override
+		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+			fld.set(this,value);
+		}
 
 	}
 	
@@ -559,4 +569,12 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		this.fCellHeightMult = fCellHeightMult;
 	}
 
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		fld.set(this,value);
+	}
 }

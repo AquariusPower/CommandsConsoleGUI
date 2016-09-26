@@ -28,6 +28,7 @@
 package com.github.commandsconsolegui.jme;
 
 //import com.github.commandsconsolegui.jmegui.ReattachSafelyState.ERecreateConsoleSteps;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.GlobalSimulationTimeI;
@@ -35,11 +36,13 @@ import com.github.commandsconsolegui.GlobalSimulationTimeI.ISimulationTime;
 import com.github.commandsconsolegui.globals.GlobalHolderAbs.IGlobalOpt;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LemurDialogCS;
 import com.github.commandsconsolegui.misc.Configure;
 import com.github.commandsconsolegui.misc.Configure.IConfigure;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.RetryOnFailure;
 import com.github.commandsconsolegui.misc.RetryOnFailure.IRetryListOwner;
 import com.jme3.app.Application;
@@ -65,7 +68,7 @@ import com.jme3.scene.Node;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public abstract class ConditionalStateAbs implements IGlobalOpt,ISimulationTime,IConfigure<ConditionalStateAbs>,IRetryListOwner{
+public abstract class ConditionalStateAbs implements IGlobalOpt,ISimulationTime,IConfigure<ConditionalStateAbs>,IRetryListOwner,IReflexFillCfg{
 	private StackTraceElement[] asteDbgInstance;
 	
 	public ConditionalStateAbs(){
@@ -854,5 +857,14 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,ISimulationTime,
 	@Override
 	public long getCurrentNano(){
 		return GlobalSimulationTimeI.i().getNano();
+	}
+
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		fld.set(this,value);
 	}
 }

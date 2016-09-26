@@ -27,6 +27,7 @@
 
 package com.github.commandsconsolegui.jme.lemur.console;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
@@ -1028,5 +1029,15 @@ public class LemurConsoleStateI<T extends Command<Button>> extends ConsoleStateA
 	protected <N extends Node> void lineWrapDisableForChildrenOf(N node) {
 		MiscLemurStateI.i().lineWrapDisableForListboxEntries((ListBox<String>)node);
 	}
-
+	
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=LemurConsoleStateI.class)return super.getFieldValue(fld);
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=LemurConsoleStateI.class){super.setFieldValue(fld,value);return;}
+		fld.set(this,value);
+	}
 }

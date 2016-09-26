@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.jme.cmd;
 
+import java.lang.reflect.Field;
+
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.globals.jme.console.GlobalConsoleGUII;
 
@@ -89,4 +91,14 @@ public class CommandsBackgroundStateI extends CmdConditionalStateAbs {
 		return super.initCheckPrerequisites();
 	}
 
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=CommandsBackgroundStateI.class)return super.getFieldValue(fld);
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=CommandsBackgroundStateI.class){super.setFieldValue(fld,value);return;}
+		fld.set(this,value);
+	}
 }

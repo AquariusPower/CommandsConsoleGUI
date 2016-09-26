@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.nio.BufferUnderflowException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -790,5 +791,13 @@ public class MiscJmeI implements IReflexFillCfg{
 	public void lineWrapDisableFor(Node node){
 		GlobalMainThreadI.assertEqualsCurrentThread();
 		MiscJmeI.i().retrieveBitmapTextFor(node).setLineWrapMode(LineWrapMode.Clip); //LineWrapMode.NoWrap);
+	}
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		fld.set(this,value);
 	}
 }

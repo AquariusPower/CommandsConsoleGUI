@@ -27,6 +27,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.github.commandsconsolegui.jme.lemur.console;
 
+import java.lang.reflect.Field;
+
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
@@ -172,4 +174,12 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 	}
 
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		fld.set(this,value);
+	}
 }	

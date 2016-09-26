@@ -626,9 +626,9 @@ public class MiscI {
 	HashMap<Class,Object> hmPrimitivesDefaultValues;
 	/**
 	 * Use on constructors to prevent initializations in the class body.
-	 * @param objOwner
+	 * @param irfsa
 	 */
-	public void assertFieldsHaveDefaultValue(Object objOwner){
+	public void assertFieldsHaveDefaultValue(IReflexFieldSafeAccess irfsa){
 		if(!DebugI.i().isInIDEdebugMode()){
 			return; //spend this time only in development mode
 		}
@@ -645,17 +645,14 @@ public class MiscI {
 			hmPrimitivesDefaultValues.put(double.class, new Double(0));
 		}
 		
-		ArrayList<Class<?>> superClassesOf = MiscI.i().getSuperClassesOf(objOwner);
+		ArrayList<Class<?>> superClassesOf = MiscI.i().getSuperClassesOf(irfsa);
 		for(Class cl:superClassesOf){
 			@SuppressWarnings("unused") int iDbgBreakPoint=0;
 			for(Field fld:cl.getDeclaredFields()){
 				if(Modifier.isStatic(fld.getModifiers()))continue;
 				
-				boolean b=fld.isAccessible();
-				if(!b)fld.setAccessible(true);
-				
 				try {
-					Object objValue = fld.get(objOwner);
+					Object objValue = irfsa.getFieldValue(fld);
 					
 					boolean bIsDefault=false;
 					if(fld.getType().isPrimitive()){
@@ -677,14 +674,12 @@ public class MiscI {
 					if(!bIsDefault){
 						throw new PrerequisitesNotMetException(
 							"not default"+(fld.getType().isPrimitive() ? " (primitive)" : ""),
-							objOwner, cl, fld, objValue);
+							irfsa, cl, fld, objValue);
 					}
 				} catch (IllegalArgumentException | IllegalAccessException e) {
-					throw new PrerequisitesNotMetException("check for default values failed", objOwner, cl, fld)
+					throw new PrerequisitesNotMetException("check for default values failed", irfsa, cl, fld)
 						.initCauseAndReturnSelf(e);
 				}
-				
-				if(!b)fld.setAccessible(false);
 			}
 		}
 	}

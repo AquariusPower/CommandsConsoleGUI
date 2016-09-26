@@ -51,7 +51,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	 * field class type.
 	 *
 	 */
-	public static interface IReflexFillCfg{
+	public static interface IReflexFillCfg extends IReflexFieldSafeAccess{
 		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField);
 	}
 	
@@ -260,14 +260,14 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	 * 
 	 * TODO check for more than one field pointing to the same value
 	 * 
-	 * @param objInstanceOwningField
-	 * @param objFieldValue if null, will validate if fields of type {@link IReflexFillCfgVariant#} are owned by the specified owner
+	 * @param irfcfgInstanceOwningField
+	 * @param irfcfgvFieldValue if null, will validate if fields of type {@link IReflexFillCfgVariant#} are owned by the specified owner
 	 * @return
 	 */
-	public Field assertAndGetField(IReflexFillCfg objInstanceOwningField, IReflexFillCfgVariant objFieldValue){
+	public Field assertAndGetField(IReflexFillCfg irfcfgInstanceOwningField, IReflexFillCfgVariant irfcfgvFieldValue){
 //		Class<?> clFound = null;
 		Field fldFound = null;
-		Class<?> cl = objInstanceOwningField.getClass();
+		Class<?> cl = irfcfgInstanceOwningField.getClass();
 		String strExceptionLog="Field object not found at: ";
 		/**
 		 * will show the Object class name too
@@ -282,13 +282,14 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 			}
 			
 			for(Field fld:cl.getDeclaredFields()){
-				boolean bWasAccessible = fld.isAccessible();
+//				boolean bWasAccessible = fld.isAccessible();
 				try{
-					if(!bWasAccessible)fld.setAccessible(true);
+//					if(!bWasAccessible)fld.setAccessible(true);
 					
-					Object objExistingFieldValue = fld.get(objInstanceOwningField);
-					if(objFieldValue!=null){
-						if(objExistingFieldValue==objFieldValue)fldFound=fld; //clFound=cl;
+//					Object objExistingFieldValue = fld.get(objInstanceOwningField);
+					Object objExistingFieldValue = irfcfgInstanceOwningField.getFieldValue(fld);
+					if(irfcfgvFieldValue!=null){
+						if(objExistingFieldValue==irfcfgvFieldValue)fldFound=fld; //clFound=cl;
 					}else{
 						/**
 						 * validating all fields if parent is configured properly
@@ -297,8 +298,8 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 							IReflexFillCfgVariant rfcv = (IReflexFillCfgVariant)objExistingFieldValue;
 							if(rfcv.isReflexing()){
 								IReflexFillCfg configuredOwner = rfcv.getOwner();
-								if(configuredOwner != objInstanceOwningField){
-									throwExceptionAboutMissConfiguration(cl, fld, configuredOwner, objInstanceOwningField);
+								if(configuredOwner != irfcfgInstanceOwningField){
+									throwExceptionAboutMissConfiguration(cl, fld, configuredOwner, irfcfgInstanceOwningField);
 								} 
 							}
 						}
@@ -306,8 +307,8 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 					
 				} catch (IllegalArgumentException | IllegalAccessException e) {
 					e.printStackTrace();
-				} finally {
-					if(!bWasAccessible)fld.setAccessible(false);
+//				} finally {
+//					if(!bWasAccessible)fld.setAccessible(false);
 				}
 				
 				if(fldFound!=null)break labelWhile;
@@ -327,10 +328,13 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		 * Inconsistency:
 		 * field is not at specified owner
 		 */
-		if(objFieldValue!=null){
+		if(irfcfgvFieldValue!=null){
 //			throw new NullPointerException("Failed to automatically set command id? "
 			throw new PrerequisitesNotMetException("Inconsistency found: "
-				+"Was "+objFieldValue.getClass()+"'s owner properly set to the class where it is instantiated (using 'this')? "
+				+"(obs.: Concrete Instanced class is "+irfcfgInstanceOwningField.getClass().getName()+")"
+				+"1st check: Was "+irfcfgvFieldValue.getClass()+"'s owner properly set to the class where it is "
+				+"instantiated (using 'this' as its "+IReflexFillCfgVariant.class.getSimpleName()+" parameter)? "
+				+"2nd check: Was methods of "+IReflexFieldSafeAccess.class.getSimpleName()+" properly coded in ALL subclasses?"
 				+strExceptionLog);
 		}
 		

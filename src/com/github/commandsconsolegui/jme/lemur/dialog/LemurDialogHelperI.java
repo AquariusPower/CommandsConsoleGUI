@@ -27,15 +27,12 @@
 
 package com.github.commandsconsolegui.jme.lemur.dialog;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.jme.BaseDialogHelper;
-import com.github.commandsconsolegui.misc.CallQueueI;
-import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
-import com.github.commandsconsolegui.misc.jme.lemur.MiscLemurStateI;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
@@ -323,5 +320,15 @@ public class LemurDialogHelperI extends BaseDialogHelper{
 		Vector3f v3fSize = diag.getDialogMainContainer().getSize();
 		//TODO get current app window size
 		return false;
+	}
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=LemurDialogHelperI.class)return super.getFieldValue(fld);
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=LemurDialogHelperI.class){super.setFieldValue(fld,value);return;}
+		fld.set(this,value);
 	}
 }

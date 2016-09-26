@@ -37,6 +37,7 @@ import java.util.Set;
 import com.github.commandsconsolegui.cmd.varfield.EType;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.misc.IReflexFieldSafeAccess;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.export.InputCapsule;
@@ -52,9 +53,7 @@ public class SavableHelperI {
 	private static SavableHelperI instance = new SavableHelperI();
 	public static SavableHelperI i(){return instance;}
 	
-	public static interface ISavableFieldAccess extends Savable{
-		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException;
-		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException;
+	public static interface ISavableFieldAccess extends IReflexFieldSafeAccess,Savable{
 		public SaveSkipper<?> getSkipper();
 	}
 	
@@ -106,12 +105,7 @@ public class SavableHelperI {
 			aobjDbg.add(fld.getType());
 			aobjDbg.add(fld);
 			
-//		labelClassLoop:for(Class cl:MiscI.i().getSuperClassesOf(svTargetToStore)){
-//			if(!cl.isInstance(svLoaded))throw new PrerequisitesNotMetException("incompatible",cl,svTargetToStore,svLoaded);
-//			for(Field fld:cl.getDeclaredFields()){
-//			boolean bAccessible = allowAccess(fld);
-				allowFieldAccess(fld);
-//				if(checkSkip(fld))continue;
+//				allowFieldAccess(fld);
 				try {
 					if(VarCmdFieldAbs.class.isAssignableFrom(fld.getType())){
 						VarCmdFieldAbs<?,?> var=(VarCmdFieldAbs<?,?>)SavableHelperI.i().getFieldVal(svTargetToStore,fld);
@@ -147,8 +141,8 @@ public class SavableHelperI {
 					}
 					
 					break;
-				}finally{
-					restoreFieldAccessModeFor(fld, entry.getValue().bAccessible);
+//				}finally{
+//					restoreFieldAccessModeFor(fld, entry.getValue().bAccessible);
 				}
 		}
 		
@@ -157,65 +151,29 @@ public class SavableHelperI {
 	
 	private boolean bAllowFieldAccessHK=false;
 	
-	/**
-	 * requires {@link #restoreFieldAccessModeFor(Field, boolean)} for each field at `...finally{}`
-	 * @param fld
-	 * @return
-	 */
-	protected boolean allowFieldAccess(Field fld){
-		boolean bWasAccessible = true;
-		if(!fld.isAccessible()){
-			bWasAccessible=false;
-			if(bAllowFieldAccessHK){
-				/**
-				 * this is important to let the fields be private or protected, 
-				 * otherwise would create flaws in such code by preventing encapsulation.
-				 */
-				fld.setAccessible(true); //HK opt
-//			}else{
-//				throw new PrerequisitesNotMetException("field is not accessible", fld, fld.getDeclaringClass());
-			}
-		}
-		
-		return bWasAccessible;
-	}
-	
-	protected void restoreFieldAccessModeFor(Field fld, boolean bWasAccessible){
-		if(!bWasAccessible){
-			if(bAllowFieldAccessHK){
-				fld.setAccessible(false); //HK opt
-//			}else{
-//				throw new PrerequisitesNotMetException("field is not accessible", fld, fld.getDeclaringClass());
-			}
-		}
-	}
-	
-//	private SaveSkipper<?> getSkipper(ISavableFieldAccess isfa){
-//		return null;
-//	}
-//	
 	private Set<Entry<Field,FieldExtraInfo>> getAllFields(ISavableFieldAccess isfa){
-		if(isfa.getSkipper().hmFieldExtraInfo==null){
-			isfa.getSkipper().hmFieldExtraInfo = new HashMap<Field,FieldExtraInfo>();
+		if(isfa.getSkipper().getFieldExtraInfo()==null){
+			isfa.getSkipper().setFieldExtraInfo(new HashMap<Field,FieldExtraInfo>());
 			for(Class clOwner:MiscI.i().getSuperClassesOf(isfa)){
 				for(Field fld:clOwner.getDeclaredFields()){
-					boolean bAccessible = allowFieldAccess(fld);
+//					boolean bAccessible = allowFieldAccess(fld);
 					if(checkSkip(isfa,fld))continue;
-					applyFieldExtraInfo(isfa,fld, bAccessible, null);
+//					applyFieldExtraInfo(isfa,fld, bAccessible, null);
+					applyFieldExtraInfo(isfa,fld, null, null);
 //					getSkipper(isfa).hmFieldAccessible.put(fld,bAccessible);
 				}
 			}
 		}
 		
-		return isfa.getSkipper().hmFieldExtraInfo.entrySet();
+		return isfa.getSkipper().getFieldExtraInfo().entrySet();
 	}
 	
 	private void applyFieldExtraInfo(ISavableFieldAccess isfa, Field fld,Boolean bAccessible,Object valDef){
-		FieldExtraInfo fei = isfa.getSkipper().hmFieldExtraInfo.get(fld);
+		FieldExtraInfo fei = isfa.getSkipper().getFieldExtraInfo().get(fld);
 		
 		if(fei==null){
 			fei=new FieldExtraInfo();
-			isfa.getSkipper().hmFieldExtraInfo.put(fld,fei);
+			isfa.getSkipper().getFieldExtraInfo().put(fld,fei);
 		}
 		
 		if(valDef!=null){
@@ -282,7 +240,7 @@ public class SavableHelperI {
 			return hmFieldExtraInfo;
 		}
 //		public void setFieldExtraInfo(ISavableFieldAccess isfaOwnerCheck, HashMap<Field, FieldExtraInfo> hmFieldExtraInfo) {
-		public void setFieldExtraInfo(HashMap<Field, FieldExtraInfo> hmFieldExtraInfo) {
+		private void setFieldExtraInfo(HashMap<Field, FieldExtraInfo> hmFieldExtraInfo) {
 //			assertIsfaOwner(isfaOwnerCheck);
 			PrerequisitesNotMetException.assertNotAlreadySet("extrainfo", this.hmFieldExtraInfo, hmFieldExtraInfo, this);
 			this.hmFieldExtraInfo = hmFieldExtraInfo;
@@ -323,8 +281,7 @@ public class SavableHelperI {
 				ArrayList<Object> aobjDbg = new ArrayList<Object>();
 				addDbgInfo(aobjDbg,isfa,im,ic,fld.getDeclaringClass(),fld,clField);
 				
-				allowFieldAccess(fld);
-//				boolean bAccessible = allowAccess(fld);
+//				allowFieldAccess(fld);
 				try {
 //					if(checkSkip(fld))continue;
 					
@@ -338,8 +295,8 @@ public class SavableHelperI {
 					GlobalCommandsDelegatorI.i().dumpExceptionEntry(e,aobjDbg);
 					isfa.getSkipper().bFailedToLoad=true;
 					break;
-				}finally{
-					restoreFieldAccessModeFor(fld, entry.getValue().bAccessible);
+//				}finally{
+//					restoreFieldAccessModeFor(fld, entry.getValue().bAccessible);
 				}
 //			}
 		}
@@ -425,14 +382,13 @@ public class SavableHelperI {
 //			for(Field fld:clOwner.getDeclaredFields()){
 				ArrayList<Object> aobjDbg = new ArrayList<Object>();
 				
-				allowFieldAccess(fld);
-//				boolean bAccessible = allowAccess(fld);
+//				allowFieldAccess(fld);
 				try {
 //					if(checkSkip(fld))continue;
 					
 					String strName = fld.getName();
 					Object val = SavableHelperI.i().getFieldVal(isfa,fld);
-					Object valDef = isfa.getSkipper().hmFieldExtraInfo.get(fld).valDefault;
+					Object valDef = isfa.getSkipper().getFieldExtraInfo().get(fld).valDefault;
 //					Object valDef = getDefaultValueFor(fld,false);
 					
 					addDbgInfo(aobjDbg, oc, fld.getDeclaringClass(), fld, strName, val.getClass().getName(), val, valDef);
@@ -441,8 +397,8 @@ public class SavableHelperI {
 				} catch (IllegalArgumentException | IllegalAccessException | UnsupportedOperationException e) {
 					throw new PrerequisitesNotMetException("failed to retrieve field/default value",aobjDbg)
 						.initCauseAndReturnSelf(e);
-				}finally{
-					restoreFieldAccessModeFor(fld, entry.getValue().bAccessible);
+//				}finally{
+//					restoreFieldAccessModeFor(fld, entry.getValue().bAccessible);
 				}
 //			}
 		}
@@ -473,7 +429,7 @@ public class SavableHelperI {
 		for(Entry<Field,FieldExtraInfo> entry:getAllFields(isfa)){
 			Field fld = entry.getKey();
 			try {
-				allowFieldAccess(fld);
+//				allowFieldAccess(fld);
 				switch(EType.forClass(fld.getType())){
 					case Boolean:
 					case Double:
@@ -501,8 +457,8 @@ public class SavableHelperI {
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				throw new PrerequisitesNotMetException("failed to retrieve default value",isfa,fld.getDeclaringClass(),fld.getName(),fld)
 					.initCauseAndReturnSelf(e);
-			}finally{
-				restoreFieldAccessModeFor(fld, entry.getValue().bAccessible);
+//			}finally{
+//				restoreFieldAccessModeFor(fld, entry.getValue().bAccessible);
 			}
 		}
 	}

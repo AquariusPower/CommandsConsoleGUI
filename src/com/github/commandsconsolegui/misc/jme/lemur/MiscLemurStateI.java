@@ -27,6 +27,7 @@
 
 package com.github.commandsconsolegui.misc.jme.lemur;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
@@ -1235,5 +1236,15 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 //				.putCustomValue(E.panel.s(), pnl);
 //			btgBugFixConfirmSetPosition.callerAssignedQueueNow();
 		}
+	}
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=MiscLemurStateI.class)return super.getFieldValue(fld);
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=MiscLemurStateI.class){super.setFieldValue(fld,value);return;}
+		fld.set(this,value);
 	}
 }

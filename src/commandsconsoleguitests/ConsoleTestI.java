@@ -28,6 +28,7 @@
 package commandsconsoleguitests;
 
 import java.io.File;
+import java.lang.reflect.Field;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
@@ -42,6 +43,7 @@ import com.github.commandsconsolegui.jme.lemur.console.SimpleConsolePlugin;
 import com.github.commandsconsolegui.jme.lemur.dialog.ChoiceLemurDialogState;
 import com.github.commandsconsolegui.jme.lemur.dialog.MaintenanceListLemurDialogState;
 import com.github.commandsconsolegui.jme.lemur.dialog.QuestionLemurDialogState;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LemurDialogCS;
 import com.github.commandsconsolegui.misc.Configure;
 import com.github.commandsconsolegui.misc.Configure.IConfigure;
 import com.github.commandsconsolegui.misc.MsgI;
@@ -305,5 +307,14 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 	@Override
 	public boolean isConfigured() {
 		return this.bConfigured;
+	}
+
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		fld.set(this,value);
 	}
 }	

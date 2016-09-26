@@ -28,8 +28,8 @@
 package com.github.commandsconsolegui.misc;
 
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -39,6 +39,7 @@ import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LemurDialogCS;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -80,6 +81,14 @@ public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
 			ReflexFillCfg rfcfg = GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 			rfcfg.setPrefixCustomId(this.toString());
 			return rfcfg;
+		}
+		@Override
+		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+			return fld.get(this);
+		}
+		@Override
+		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+			fld.set(this,value);
 		}
 	}
 	
@@ -296,4 +305,12 @@ public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
 		return ""+(obj==null ? null : strCl+": "+obj.toString()); //this is better when dumping a sub-stacktrace
 	}
 
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		fld.set(this,value);
+	}
 }

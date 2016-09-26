@@ -45,6 +45,7 @@ import com.github.commandsconsolegui.jme.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jme.lemur.console.LemurFocusHelperStateI;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LemurDialogCS;
 import com.github.commandsconsolegui.jme.lemur.extras.ISpatialValidator;
 import com.github.commandsconsolegui.jme.savablevalues.CompositeSavableAbs;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
@@ -1439,18 +1440,10 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		}
 		@Override
 		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
-			/**
-			 * For subclasses use this too:
-			 * if(fld.getDeclaringClass()!=SUB_CLASS.class)return super.getFieldValue(fld);
-			 */
 			return fld.get(this);
 		}
 		@Override
 		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
-			/**
-			 * For subclasses use this too:
-			 * if(fld.getDeclaringClass()!=SUB_CLASS.class){super.setFieldValue(fld,value);return;}
-			 */
 			fld.set(this,value);
 		}
 		
@@ -1519,4 +1512,14 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //		}}.setFailWarnEveryTimes(saveLoadWarnAfterFailTimes()));
 		}});
 	
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=DialogStateAbs.class)return super.getFieldValue(fld);
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=DialogStateAbs.class){super.setFieldValue(fld,value);return;}
+		fld.set(this,value);
+	}
 }

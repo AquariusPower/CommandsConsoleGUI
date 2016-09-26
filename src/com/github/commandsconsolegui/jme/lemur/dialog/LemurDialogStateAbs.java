@@ -1647,4 +1647,14 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 //		
 //		return MiscI.i().bugFixRet(clReturnType,bFixed, objRet, aobjCustomParams);
 //	}
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=LemurDialogStateAbs.class)return super.getFieldValue(fld);
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=LemurDialogStateAbs.class){super.setFieldValue(fld,value);return;}
+		fld.set(this,value);
+	}
 }

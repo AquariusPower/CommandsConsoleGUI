@@ -27,6 +27,7 @@
 
 package com.github.commandsconsolegui.jme.lemur.extras;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
@@ -237,4 +238,12 @@ public class DialogMainContainer extends Container implements ISpatialValidator,
 //	public boolean isAllowLogicalStateUpdate() {
 //		return diag.isAllowLogicalStateUpdate();
 //	}
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		fld.set(this,value);
+	}
 }

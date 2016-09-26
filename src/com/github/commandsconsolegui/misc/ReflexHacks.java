@@ -177,4 +177,12 @@ public class ReflexHacks implements IConsoleCommandListener, IReflexFillCfg {
 		return cd.cmdFoundReturnStatus(bCommandWorked);
 	}
 	
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		fld.set(this,value);
+	}
 }

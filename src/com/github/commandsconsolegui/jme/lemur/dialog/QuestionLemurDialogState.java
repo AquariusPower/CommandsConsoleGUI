@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.jme.lemur.dialog;
 
+import java.lang.reflect.Field;
+
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
@@ -100,5 +102,15 @@ public class QuestionLemurDialogState<T extends Command<Button>> extends BasicLe
 		selectEntry(dledNo);
 	}
 	
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=QuestionLemurDialogState.class)return super.getFieldValue(fld);
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=QuestionLemurDialogState.class){super.setFieldValue(fld,value);return;}
+		fld.set(this,value);
+	}
 }
 
