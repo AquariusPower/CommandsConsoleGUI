@@ -282,11 +282,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 			}
 			
 			for(Field fld:cl.getDeclaredFields()){
-//				boolean bWasAccessible = fld.isAccessible();
 				try{
-//					if(!bWasAccessible)fld.setAccessible(true);
-					
-//					Object objExistingFieldValue = fld.get(objInstanceOwningField);
 					Object objExistingFieldValue = irfcfgInstanceOwningField.getFieldValue(fld);
 					if(irfcfgvFieldValue!=null){
 						if(objExistingFieldValue==irfcfgvFieldValue)fldFound=fld; //clFound=cl;
@@ -307,8 +303,6 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 					
 				} catch (IllegalArgumentException | IllegalAccessException e) {
 					e.printStackTrace();
-//				} finally {
-//					if(!bWasAccessible)fld.setAccessible(false);
 				}
 				
 				if(fldFound!=null)break labelWhile;

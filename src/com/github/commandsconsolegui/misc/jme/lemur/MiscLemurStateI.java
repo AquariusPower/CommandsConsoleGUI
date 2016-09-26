@@ -51,7 +51,7 @@ import com.github.commandsconsolegui.misc.MiscI.EStringMatchMode;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.misc.ReflexHacks;
+import com.github.commandsconsolegui.misc.ReflexHacksPluginI;
 import com.github.commandsconsolegui.misc.WorkAroundI;
 import com.github.commandsconsolegui.misc.WorkAroundI.BugFixBoolTogglerCmdField;
 import com.github.commandsconsolegui.misc.jme.MiscJmeI;
@@ -360,11 +360,11 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 //	public void resetCursorPosition(TextField tf){
 //		tf.setFontSize(tf.getFontSize()); //resetCursorPositionHK(tf);
 //	}
-	@Deprecated
-	public void resetCursorPositionHK(TextField tf){
-		TextEntryComponent tec = ((TextEntryComponent)ReflexHacks.i().getOrSetFieldValueHK(null, tf, "text", null, false, null));
-		ReflexHacks.i().callMethodHK(tec,"resetCursorPosition");
-	}
+//	@Deprecated
+//	public void resetCursorPositionHK(TextField tf){
+//		TextEntryComponent tec = ((TextEntryComponent)ReflexHacks.i().getOrSetFieldValueHK(null, tf, "text", null, false, null));
+//		ReflexHacks.i().callMethodHK(tec,"resetCursorPosition");
+//	}
 
 	public Float guessEntryHeight(ListBox<?> listBox){
 		if(listBox.getGridPanel().getChildren().isEmpty())return null;

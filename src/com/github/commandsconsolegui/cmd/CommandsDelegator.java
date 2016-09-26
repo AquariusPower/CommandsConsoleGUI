@@ -68,7 +68,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexHacks;
+import com.github.commandsconsolegui.misc.ReflexHacksPluginI;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
@@ -3605,7 +3605,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		DebugI.i().configure(this);
 		MiscI.i().configure(this);
 //		ReflexHacks.i().configure(this, this);
-		ReflexHacks.i().configure(this);
+//		ReflexHacks.i().configure(this);
 //		SingleInstanceState.i().initialize(sapp, this);
 		
 //		CommandsBackgroundState.i().configure(sapp, icui, this);

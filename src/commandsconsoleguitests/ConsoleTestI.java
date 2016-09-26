@@ -48,6 +48,7 @@ import com.github.commandsconsolegui.misc.Configure;
 import com.github.commandsconsolegui.misc.Configure.IConfigure;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.misc.ReflexHacksPluginI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -131,7 +132,9 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		 */
 		GlobalCommandsDelegatorI.iGlobal().set(new CommandsTest());
 //		GlobalConsoleGuiI.iGlobal().set(ConsoleLemurStateI.i());
-  	
+		
+		ReflexHacksPluginI.i().configure(GlobalCommandsDelegatorI.i());
+		
 		consolePlugin = new SimpleConsolePlugin(this);
 		consolePlugin.configure(new SimpleConsolePlugin.CfgParm(
 			ConsoleTestI.class.getName().replace(".",File.separator)));

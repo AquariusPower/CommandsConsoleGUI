@@ -46,6 +46,9 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 
 /**
+ * This class commands may contain some otherwise impossible fixes or workarounds to annoying bugs
+ *  or limitations.
+ * 
  * Use this class sparingly!
  * 
  * A - When to use this? 
@@ -66,9 +69,9 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 
  */
-public class ReflexHacks implements IConsoleCommandListener, IReflexFillCfg {
-	private static ReflexHacks instance = new ReflexHacks();
-	public static ReflexHacks i(){return instance;}
+public class ReflexHacksPluginI implements IConsoleCommandListener, IReflexFillCfg {
+	private static ReflexHacksPluginI instance = new ReflexHacksPluginI();
+	public static ReflexHacksPluginI i(){return instance;}
 	
 	public final BoolTogglerCmdField	btgAllowHacks = new BoolTogglerCmdField(this,false,
 		"Hacks allows for otherwise impossible features, but they may break if targeted classes are updated.").setCallNothingOnChange();
@@ -158,13 +161,13 @@ public class ReflexHacks implements IConsoleCommandListener, IReflexFillCfg {
 //		if(cd.checkCmdValidity(this,"linuxXrandRScreenRestoreWhileWindowedBugFix", "fixXRandR", "in linux XRandR, even if application is windowed, on exiting it may try to restore the resolution but may do it wrongly, without considering the viewport")){
 		if(
 				cd.checkCmdValidity(this, scfHkFixXRandR, 
-					"In linux XRandR, even if application is windowed, on exiting it may try to "
-					+"restore the resolution but may do it wrongly, without considering the viewport."
+					"In Linux, even if application is windowed, on exiting "+XRandR.class.getName()+" may try to "
+					+"restore the resolution but may do it wrongly, without considering the X viewport."
 					+strHacksWarning
 				)
 		){
 			// fix as upon restoring may ignore X configuration viewportin/viewportout
-			Object o = ReflexHacks.i().getOrSetFieldValueHK(XRandR.class, null, "savedConfiguration", null, true, null);
+			Object o = ReflexHacksPluginI.i().getOrSetFieldValueHK(XRandR.class, null, "savedConfiguration", null, true, null);
 			String str = scfHkFixXRandR.getUniqueCmdId()+", erased value: "+Arrays.toString((Screen[])o);
 			cd.dumpInfoEntry(str, o);
 			
