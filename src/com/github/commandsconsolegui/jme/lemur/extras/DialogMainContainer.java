@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
-import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -57,6 +56,7 @@ public class DialogMainContainer extends Container implements ISpatialValidator,
 //	
 	
 	private Vector3f	v3fLastValidPreferredSize;
+	private Vector3f	v3fLastValidNorthPSize;
 	private Vector3f	v3fLastFailedSize;
 	
 	private BoolTogglerCmdField btgAllowInvalidSize = new BoolTogglerCmdField(this,false);
@@ -108,6 +108,7 @@ public class DialogMainContainer extends Container implements ISpatialValidator,
 				
 				//after update
 				v3fLastValidPreferredSize = getPreferredSize().clone();
+				v3fLastValidNorthPSize = diagOwner.getNorthContainerSizeCopy();
 				v3fLastFailedSize = null;
 				bLayoutValid=true;
 			}catch(IllegalArgumentException e){
@@ -132,13 +133,21 @@ public class DialogMainContainer extends Container implements ISpatialValidator,
 				if(btgAllowInvalidSize.b()){
 					super.updateLogicalState(tpf); //this lets the user resize the dialog freely
 				}else{
+//					addChild(cntrCenterMain, BorderLayout.Position.Center); //actually replaces
+//					diagOwner.reLoad();
+//					diagOwner.setRequestHitBorderToContinueDragging(true);
+//					super.updateLogicalState(tpf);
+//					
+//					//after update
+//					bLayoutValid=true;
+					
 					// restore last valid
 					if(v3fLastValidPreferredSize!=null){
 						addChild(cntrCenterMain, BorderLayout.Position.Center); //actually replaces
 						setPreferredSize(v3fLastValidPreferredSize);
-						super.updateLogicalState(tpf);
-						
 						diagOwner.setRequestHitBorderToContinueDragging(true);
+						diagOwner.setNorthHeight(v3fLastValidNorthPSize.y, false); //TODO this is NOT working...
+						super.updateLogicalState(tpf);
 						
 						//after update
 						bLayoutValid=true; 

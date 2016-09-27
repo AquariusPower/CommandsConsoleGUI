@@ -39,6 +39,7 @@ import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.jme.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jme.lemur.MouseCursorListenerAbs;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs;
+import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -233,6 +234,13 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 		DialogStateAbs diag = MiscJmeI.i().getUserDataPSH(sptParentest, DialogStateAbs.class);
 //		LemurDialogGUIStateAbs diag = (LemurDialogGUIStateAbs)MiscJmeI.i().getParentestFrom(sptAny)
 //				.getUserData(LemurDialogGUIStateAbs.class.getName());
+		
+//		if(diag==null){
+//			if (sptParentest instanceof CellDialogEntry) {
+//				CellDialogEntry cde = (CellDialogEntry) sptParentest;
+//				diag = cde.getDialogOwner();
+//			}
+//		}
 		
 		if(diag==null)throw new PrerequisitesNotMetException("no dialog at: "+sptAny.getName());
 		

@@ -1040,10 +1040,4 @@ public class LemurConsoleStateI<T extends Command<Button>> extends ConsoleStateA
 		if(fld.getDeclaringClass()!=LemurConsoleStateI.class){super.setFieldValue(fld,value);return;}
 		fld.set(this,value);
 	}
-
-	@Override
-	public void applyCurrentSettings(boolean bToggleMaximized) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("method not implemented yet");
-	}
 }

@@ -144,7 +144,7 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 	public static class CfgParm extends DialogStateAbs.CfgParm{
 		private Float fDialogHeightPercentOfAppWindow;
 		private Float fDialogWidthPercentOfAppWindow;
-		private Float fInfoHeightPercentOfDialog;
+		private Float fNorthHeightPercentOfDialog;
 		
 //		private Integer iEntryHeightPixels;
 		private Float fEntryHeightMultiplier = 1.0f;
@@ -169,7 +169,7 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 			
 			this.fDialogHeightPercentOfAppWindow = fDialogHeightPercentOfAppWindow;
 			this.fDialogWidthPercentOfAppWindow = fDialogWidthPercentOfAppWindow;
-			this.fInfoHeightPercentOfDialog = fInfoHeightPercentOfDialog;
+			this.fNorthHeightPercentOfDialog = fInfoHeightPercentOfDialog;
 			if(fEntryHeightMultiplier!=null)this.fEntryHeightMultiplier = fEntryHeightMultiplier;
 		}
 	}
@@ -213,8 +213,8 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 			cfg.fDialogWidthPercentOfAppWindow=0.75f;
 		}
 		
-		if(cfg.fInfoHeightPercentOfDialog==null){
-			cfg.fInfoHeightPercentOfDialog=0.25f;
+		if(cfg.fNorthHeightPercentOfDialog==null){
+			cfg.fNorthHeightPercentOfDialog=0.25f;
 		}
 		
 //		if(isCompositeSavableSet())setCompositeSavable(new LemurDialogCS(this));
@@ -389,13 +389,15 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 		///////////////////////// NORTH (title + info/help)
 		setContainerNorth(new Container(new BorderLayout(), getDiagStyle()));
 		getNorthContainer().setName(getId()+"_NorthContainer");
-		Vector3f v3fNorthSize = v3fDiagSize.clone();
-		/**
-		 * TODO info height should be automatic. Or Info should be a list with vertical scroll bar, and constrainted to >= 1 lines.
-		 */
-		float fInfoHeightPixels = sizePercOrPixels(v3fDiagSize.y, cfg.fInfoHeightPercentOfDialog);
-		v3fNorthSize.y = fInfoHeightPixels;
-		MiscLemurStateI.i().setSizeSafely(getNorthContainer(), v3fNorthSize, true);
+		
+		setNorthHeight(v3fDiagSize.y, true);
+//		/**
+//		 * TODO info height should be automatic. Or Info should be a list with vertical scroll bar, and constrainted to >= 1 lines.
+//		 */
+//		Vector3f v3fNorthSize = v3fDiagSize.clone();
+//		float fNorthHeightPixels = sizePercOrPixels(v3fDiagSize.y, cfg.fInfoHeightPercentOfDialog);
+//		v3fNorthSize.y = fNorthHeightPixels;
+//		MiscLemurStateI.i().setSizeSafely(getNorthContainer(), v3fNorthSize, true);
 		
 		cntrTitleBox = new Container(new BorderLayout(), getDiagStyle());
 		cntrTitleBox.setName(getId()+"_TitleBox");
@@ -651,15 +653,40 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 		}
 	}
 	
+	@Override
+	public void setNorthHeight(float fHeight, boolean bUseAsDiagPerc){
+		/**
+		 * TODO info height should be automatic. Or Info should be a list with vertical scroll bar, and constrainted to >= 1 lines.
+		 */
+		Vector3f v3fNorthSize = getNorthContainerSizeCopy();
+//		if(v3fDialogSizeOverride==null)v3fDialogSizeOverride=getDialogMainContainer().getSize();
+		
+		float fNorthHeightPixels = fHeight;
+		if(bUseAsDiagPerc) fNorthHeightPixels = sizePercOrPixels(fHeight, cfg.fNorthHeightPercentOfDialog);
+		v3fNorthSize.y = fNorthHeightPixels;
+		MiscLemurStateI.i().setSizeSafely(getNorthContainer(), v3fNorthSize, false);
+	}
+	
+	@Override
+	public Vector3f getNorthContainerSizeCopy(){
+		return getNorthContainer().getSize().clone();
+	}
+	
 	private void resizeInfoAndList(Vector3f v3fDisplacement) {
-		Vector3f v3fInfoPSizeCopy = lblTextInfo.getSize().clone(); //lblTextInfo.getPreferredSize()
-		Vector3f v3fListPSizeCopy = getMainList().getSize().clone(); //getMainList().getPreferredSize()
+		Vector3f v3fNorth = getNorthContainerSizeCopy();
+		Vector3f v3fCenter = cntrCenterMain.getSize().clone();
 		
-		v3fInfoPSizeCopy.y+= -v3fDisplacement.y;
-		v3fListPSizeCopy.y+=  v3fDisplacement.y;
+		v3fNorth.y  += -v3fDisplacement.y;
+		v3fCenter.y +=  v3fDisplacement.y;
 		
-		MiscLemurStateI.i().setSizeSafely(lblTextInfo, v3fInfoPSizeCopy, true);
-		MiscLemurStateI.i().setSizeSafely(getMainList(), v3fListPSizeCopy, true);
+//		//forbid too little
+//		float fMinHeight=30; 
+//		if(v3fNorth.y<fMinHeight)return;
+//		if(v3fCenter.y<fMinHeight)return;
+		//TODO check to prevent impossible layout? use resetNorthHeight() here too?
+		
+		MiscLemurStateI.i().setSizeSafely(getNorthContainer(), v3fNorth, true);
+		MiscLemurStateI.i().setSizeSafely(cntrCenterMain, v3fCenter, true);
 		
 		requestRefreshUpdateList();
 	}
@@ -1720,5 +1747,10 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		if(fld.getDeclaringClass()!=LemurDialogStateAbs.class){super.setFieldValue(fld,value);return;}
 		fld.set(this,value);
+	}
+	
+	@Override
+	public void reLoad() {
+		load(LemurDialogCS.class);
 	}
 }

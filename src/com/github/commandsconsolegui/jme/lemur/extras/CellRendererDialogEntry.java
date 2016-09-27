@@ -280,6 +280,8 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			this.setName(strPrefix+"MainContainer");
 			
 			this.assignedCellRenderer=parentCellRenderer;
+			MiscJmeI.i().setUserDataPSH(this, getDialogOwner());
+			
 			this.dled=dledToSet;
 			
 //			cntrBase = (Container)bugFix(0);

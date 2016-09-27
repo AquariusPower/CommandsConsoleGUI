@@ -1103,7 +1103,6 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		@Override		public void focusLost() {		}
 		@Override		protected void updateInputField() {		}
 		@Override		protected void updateList() {		}
-		@Override		public void applyCurrentSettings(boolean bToggleMaximized) {}
 		
 		//TODO verify below what can go to BaseDialogHelper or LemurBaseDialogHelper  
 		@Override		protected boolean initKeyMappings() {			return false;		}
@@ -1463,12 +1462,16 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		return (CS)this.sv;
 	}
 	
-	public abstract void applyCurrentSettings(boolean bToggleMaximized);
-	
 	private String strFilePrefix="Dialog_";
 	public void save(){
 		if(!isSaveDialog())return;
 		MiscJmeI.i().saveWriteConsoleData(strFilePrefix+getId(), sv);
+	}
+	/**
+	 * override me!
+	 */
+	public void reLoad(){
+		load(DialogCS.class);
 	}
 	public <T extends DialogCS> T load(Class<T> clCS){
 		if(!isSaveDialog())return null;
@@ -1563,5 +1566,14 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	}
 	public boolean isRequestHitBorderToContinueDragging(){
 		return this.bRequestHitBorderToContinueDragging;
+	}
+	public void setNorthHeight(float fHeight, boolean bUseAsDiagPerc){
+		throw new PrerequisitesNotMetException("override or do not call", this);
+	}
+	public void applyCurrentSettings(boolean bToggleMaximized){
+		throw new PrerequisitesNotMetException("override or do not call", this);
+	}
+	public Vector3f getNorthContainerSizeCopy(){
+		throw new PrerequisitesNotMetException("override or do not call", this);
 	}
 }
