@@ -162,6 +162,7 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 					Vector3f v3fDisplacement = buttonData.updateDragPosAndGetDisplacement(eventMotion, v3fNewPos);
 					
 					DialogStateAbs diag = MiscJmeI.i().getUserDataPSH(sptDialogMain,DialogStateAbs.class);
+					diag.setBeingDragged(this,true);
 					diag.move(capture, v3fDisplacement);
 //					sptDialogMain.move(v3fDisplacement);
 					return true;
@@ -189,8 +190,20 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 					
 					DialogStateAbs diag = MiscJmeI.i().getUserDataPSH(sptDialogMain,DialogStateAbs.class);
 					
-					diag.save();
-	//				diag.requestSaveDialog();
+					if(diag==null){
+//						GlobalCommandsDelegatorI.i().dumpWarnEntry("no direct dialog for dragged: "+capture.getName(),
+//							capture, sptDialogMain);
+						if(sptDialogMain instanceof CellDialogEntry){
+							CellDialogEntry cde = (CellDialogEntry)sptDialogMain;
+							diag = cde.getDialogOwner();
+						}
+					}
+					
+//					if(diag!=null){
+						diag.setBeingDragged(this,false);
+						diag.save();
+		//				diag.requestSaveDialog();
+//					}
 					
 					return true;
 				}

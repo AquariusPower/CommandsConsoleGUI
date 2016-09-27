@@ -321,7 +321,7 @@ public class LemurConsoleStateI<T extends Command<Button>> extends ConsoleStateA
 		// main container
 //		setContainerMain(new ContainerMain(new BorderLayout(), getDiagStyle()).setDiagOwner(this));
 		setDialogMainContainer(new DialogMainContainer(this, new BorderLayout(), getDiagStyle()));
-		MiscLemurStateI.i().setSizeSafely(getDialogMainContainer(), getConsoleSizeCopy());
+		MiscLemurStateI.i().setSizeSafely(getDialogMainContainer(), getConsoleSizeCopy(), true);
 		
 		/**
 		 * TOP ELEMENT =================================================================
@@ -333,7 +333,7 @@ public class LemurConsoleStateI<T extends Command<Button>> extends ConsoleStateA
 		// console stats
 		lblStats = new Label("Console stats.",getDiagStyle());
 		lblStats.setColor(new ColorRGBA(1,1,0.5f,1));
-		MiscLemurStateI.i().setSizeSafely(lblStats, getConsoleSizeCopy().x*0.75f, 1f); //TODO y=1f so it will expand?
+		MiscLemurStateI.i().setSizeSafely(lblStats, getConsoleSizeCopy().x*0.75f, 1f, true); //TODO y=1f so it will expand?
 		getContainerStatsAndControls().addChild(lblStats,0,0);
 		
 		// buttons
@@ -526,7 +526,7 @@ public class LemurConsoleStateI<T extends Command<Button>> extends ConsoleStateA
 	
 	@Override
 	public LemurConsoleStateI setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines) {
-		MiscLemurStateI.i().setSizeSafely(getHintBox(), v3fBoxSizeXY);
+		MiscLemurStateI.i().setSizeSafely(getHintBox(), v3fBoxSizeXY, true);
 		getHintBox().setVisibleItems(iVisibleLines);
 		return this;
 	}
@@ -890,7 +890,7 @@ public class LemurConsoleStateI<T extends Command<Button>> extends ConsoleStateA
 	
 	@Override
 	public void setContainerConsolePreferredSize(Vector3f v3f) {
-		MiscLemurStateI.i().setSizeSafely(getDialogMainContainer(), v3f);
+		MiscLemurStateI.i().setSizeSafely(getDialogMainContainer(), v3f, true);
 	}
 	@Override
 	public void addRemoveContainerConsoleChild(boolean bAdd, Node pnlChild){
@@ -1039,5 +1039,11 @@ public class LemurConsoleStateI<T extends Command<Button>> extends ConsoleStateA
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		if(fld.getDeclaringClass()!=LemurConsoleStateI.class){super.setFieldValue(fld,value);return;}
 		fld.set(this,value);
+	}
+
+	@Override
+	public void applyCurrentSettings(boolean bToggleMaximized) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("method not implemented yet");
 	}
 }

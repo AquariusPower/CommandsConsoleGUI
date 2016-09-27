@@ -44,11 +44,9 @@ public class JMEOperationalSystem extends OperationalSystem {
 	public JMEOperationalSystem(String strApplicationBaseSaveDataPath,StorageFolderType esft) {
 		super(strApplicationBaseSaveDataPath,esft);
 		
-		String strAppTitle = GlobalAppRefI.i().getClass().getSimpleName();
 		if(GlobalAppSettingsI.iGlobal().isSet()){
-			strAppTitle = GlobalAppSettingsI.i().getTitle();
+			setApplicationTitle(GlobalAppSettingsI.i().getTitle());
 		}
-		super.setApplicationTitle(strAppTitle);
 	}
 
 	@Override

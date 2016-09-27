@@ -92,7 +92,7 @@ public class OperationalSystem {
 		this.esft = esft;
 	}
 	
-	private String strApplicationTitle;
+	private String strApplicationTitle = null;
 	public void setApplicationTitle(String strApplicationTitle) {
 		PrerequisitesNotMetException.assertNotAlreadySet("app title", this.strApplicationTitle, strApplicationTitle, this);
 		this.strApplicationTitle=strApplicationTitle;

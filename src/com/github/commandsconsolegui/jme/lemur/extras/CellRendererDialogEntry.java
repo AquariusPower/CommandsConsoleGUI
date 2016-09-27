@@ -126,6 +126,10 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 
 		private SliderValueData	svd;
 		
+		public LemurDialogStateAbs<T,?> getDialogOwner(){
+			return assignedCellRenderer.diagParent;
+		}
+		
 		public DialogListEntryData<T> getDialogListEntryData(){
 			return dled;
 		}
@@ -312,7 +316,8 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		private void applyEntryHeight(){
 			MiscLemurStateI.i().setSizeSafely(this, 
 					-1f, 
-					getPreferredSize().getY() * assignedCellRenderer.getCellHeightMult());
+					getPreferredSize().getY() * assignedCellRenderer.getCellHeightMult(),
+					true);
 		}
 		
 		static class CommandTreeToggle implements Command<Button>{

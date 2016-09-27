@@ -1103,6 +1103,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		@Override		public void focusLost() {		}
 		@Override		protected void updateInputField() {		}
 		@Override		protected void updateList() {		}
+		@Override		public void applyCurrentSettings(boolean bToggleMaximized) {}
 		
 		//TODO verify below what can go to BaseDialogHelper or LemurBaseDialogHelper  
 		@Override		protected boolean initKeyMappings() {			return false;		}
@@ -1369,6 +1370,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 			if(!super.applyValuesFrom(svLoaded))return false;
 			
 			getOwner().setInputText(svLoaded.strInputText);
+			getOwner().applyCurrentSettings(false);
 			
 			return true;
 		}
@@ -1461,6 +1463,8 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		return (CS)this.sv;
 	}
 	
+	public abstract void applyCurrentSettings(boolean bToggleMaximized);
+	
 	private String strFilePrefix="Dialog_";
 	public void save(){
 		if(!isSaveDialog())return;
@@ -1470,7 +1474,8 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		if(!isSaveDialog())return null;
 		T svTmp = MiscJmeI.i().loadReadConsoleData(clCS, strFilePrefix+getId());
 		if(sv.applyValuesFrom(svTmp)){
-			setPositionSize(new Vector3f(sv.fPosX, sv.fPosY, 0), new Vector3f(sv.fWidth,sv.fHeight,0));
+//			applyCurrentSettings(false);
+//			setPositionSize(new Vector3f(sv.fPosX, sv.fPosY, 0), new Vector3f(sv.fWidth,sv.fHeight,0));
 		}
 		return svTmp;
 	}
@@ -1512,6 +1517,8 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //		}}.setFailWarnEveryTimes(saveLoadWarnAfterFailTimes()));
 		}});
 	
+	private boolean	bBeingDragged;
+	
 	@Override
 	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
 		if(fld.getDeclaringClass()!=DialogStateAbs.class)return super.getFieldValue(fld);
@@ -1521,5 +1528,40 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		if(fld.getDeclaringClass()!=DialogStateAbs.class){super.setFieldValue(fld,value);return;}
 		fld.set(this,value);
+	}
+	
+	private Object objDragManagerKey = null;
+	/**
+	 * 
+	 * @param objDragManagerKey the 
+	 * @param b
+	 */
+	public void setBeingDragged(Object objDragManagerKey, boolean b) {
+		if(this.objDragManagerKey==null){
+			if(objDragManagerKey==null){
+				GlobalCommandsDelegatorI.i().dumpProblemEntry("drag manager cannot be null");
+				return;
+			}
+			this.objDragManagerKey=objDragManagerKey;
+		}else{
+			if(this.objDragManagerKey!=objDragManagerKey){
+				GlobalCommandsDelegatorI.i().dumpProblemEntry("cannot change drag manager", this.objDragManagerKey, objDragManagerKey);
+				return;
+			}
+		}
+		
+		this.bBeingDragged=b;
+	}
+	
+	public boolean isBeingDragged(){
+		return this.bBeingDragged;
+	}
+
+	private boolean bRequestHitBorderToContinueDragging = false;
+	public void setRequestHitBorderToContinueDragging(boolean b) {
+		this.bRequestHitBorderToContinueDragging = b;
+	}
+	public boolean isRequestHitBorderToContinueDragging(){
+		return this.bRequestHitBorderToContinueDragging;
 	}
 }

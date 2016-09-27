@@ -40,6 +40,7 @@ import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.AudioUII;
+import com.github.commandsconsolegui.jme.MouseCursorCentralI;
 import com.github.commandsconsolegui.jme.AudioUII.EAudio;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.jme.MouseCursorCentralI.EMouseCursorButton;
@@ -68,6 +69,7 @@ import com.jme3.input.KeyInput;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -183,7 +185,7 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 	private Button	btnResizeEast;
 	private Button	btnResizeWest;
 	private ArrayList<Button>	abtnBorderList = new ArrayList<Button>();
-	private Vector3f	v3fDiagWindowSize;
+	private Vector3f	v3fDiagSize;
 	private Vector3f	v3fPosCentered;
 	private Button	btnResizeInfoAndList;
 	private Container	cntrTitleBox;
@@ -276,20 +278,20 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 		getDialogMainContainer().setName(getId()+"_Dialog");
 		
 		Vector3f v3fAppWindowSize = MiscJmeI.i().getAppWindowSize();
-		v3fDiagWindowSize = new Vector3f(v3fAppWindowSize);
-		v3fDiagWindowSize.y = sizePercOrPixels(v3fDiagWindowSize.y,cfg.fDialogHeightPercentOfAppWindow);
-		v3fDiagWindowSize.x = sizePercOrPixels(v3fDiagWindowSize.x,cfg.fDialogWidthPercentOfAppWindow);
+		v3fDiagSize = new Vector3f(v3fAppWindowSize);
+		v3fDiagSize.y = sizePercOrPixels(v3fDiagSize.y,cfg.fDialogHeightPercentOfAppWindow);
+		v3fDiagSize.x = sizePercOrPixels(v3fDiagSize.x,cfg.fDialogWidthPercentOfAppWindow);
 		
 		v3fPosCentered = new Vector3f(
-			(v3fAppWindowSize.x-v3fDiagWindowSize.x)/2f,
-			(v3fAppWindowSize.y-v3fDiagWindowSize.y)/2f+v3fDiagWindowSize.y,
+			(v3fAppWindowSize.x-v3fDiagSize.x)/2f,
+			(v3fAppWindowSize.y-v3fDiagSize.y)/2f+v3fDiagSize.y,
 			0
 		);
 		
 		cfg.setIniPos(v3fPosCentered.clone());
-		cfg.setIniSize(v3fDiagWindowSize.clone());
+		cfg.setIniSize(v3fDiagSize.clone());
 		
-		MiscLemurStateI.i().setSizeSafely(getDialogMainContainer(), v3fDiagWindowSize);
+		MiscLemurStateI.i().setSizeSafely(getDialogMainContainer(), v3fDiagSize, true);
 		getDialogMainContainer().setLocalTranslation(v3fPosCentered);
 		
 		// resizing borders
@@ -301,8 +303,8 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 //			}
 //		});
 //		if(false){
-			v3fDiagWindowSize.x -= btnResizeEast.getSize().x + btnResizeWest.getSize().x;
-			v3fDiagWindowSize.y -= btnResizeNorth.getSize().y + btnResizeSouth.getSize().y;
+			v3fDiagSize.x -= btnResizeEast.getSize().x + btnResizeWest.getSize().x;
+			v3fDiagSize.y -= btnResizeNorth.getSize().y + btnResizeSouth.getSize().y;
 //		}
 		
 		// main center container
@@ -358,7 +360,7 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 	private void initCenterRegion() {
 		//////////////////////////// CENTER (list)
 		// list
-		v3fEntryListSizeIni = v3fDiagWindowSize.clone();
+		v3fEntryListSizeIni = v3fDiagSize.clone();
 //		float fListPerc = 1.0f - cfg.fInfoHeightPercentOfDialog;
 //		v3fEntryListSize.y *= fListPerc;
 		v3fEntryListSizeIni.y -= getNorthContainer().getPreferredSize().y;//fInfoHeightPixels;
@@ -387,13 +389,13 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 		///////////////////////// NORTH (title + info/help)
 		setContainerNorth(new Container(new BorderLayout(), getDiagStyle()));
 		getNorthContainer().setName(getId()+"_NorthContainer");
-		Vector3f v3fNorthSize = v3fDiagWindowSize.clone();
+		Vector3f v3fNorthSize = v3fDiagSize.clone();
 		/**
 		 * TODO info height should be automatic. Or Info should be a list with vertical scroll bar, and constrainted to >= 1 lines.
 		 */
-		float fInfoHeightPixels = sizePercOrPixels(v3fDiagWindowSize.y, cfg.fInfoHeightPercentOfDialog);
+		float fInfoHeightPixels = sizePercOrPixels(v3fDiagSize.y, cfg.fInfoHeightPercentOfDialog);
 		v3fNorthSize.y = fInfoHeightPixels;
-		MiscLemurStateI.i().setSizeSafely(getNorthContainer(), v3fNorthSize);
+		MiscLemurStateI.i().setSizeSafely(getNorthContainer(), v3fNorthSize, true);
 		
 		cntrTitleBox = new Container(new BorderLayout(), getDiagStyle());
 		cntrTitleBox.setName(getId()+"_TitleBox");
@@ -437,11 +439,7 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 		
 		// info (and list) resizer
 		btnResizeInfoAndList=prepareResizeBorder(btnResizeInfoAndList,null);
-//		btnResizeInfoAndList = new Button("SomeDummyText",getDiagStyle());
-//		btnResizeInfoAndList.setName(getId()+"_ResizeInfoAndList");
-		MiscLemurStateI.i().setSizeSafely(btnResizeInfoAndList, 1, 1);
-//		CursorEventControl.addListenersToSpatial(btnResizeInfoAndList, DialogMouseCursorListenerI.i());
-//		DialogMouseCursorListenerI.i().addDefaultCommands(btnResizeInfoAndList);
+		MiscLemurStateI.i().setSizeSafely(btnResizeInfoAndList, 1, 1, true);
 		getNorthContainer().addChild(btnResizeInfoAndList, BorderLayout.Position.South);
 		setBordersThickness(getCompositeSavable(LemurDialogCS.class).ilvBorderThickness.intValue());
 		
@@ -460,7 +458,7 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 				//TODO this requires some kind of window management/lister/docking etc...
 			}else
 			if(source.equals(btnMaximize)){
-				applyMaximizedStatus(true);
+				applyCurrentSettings(true);
 			}else
 			{
 				AudioUII.i().play(EAudio.Failure);
@@ -497,35 +495,20 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 //		setBordersSize(ilvBorderSize.getInt());
 	}
 
-	public void applyMaximizedStatus(boolean bToggle) {
+	@Override
+	public void applyCurrentSettings(boolean bToggleMaximized) {
 		LemurDialogCS lsv = getCompositeSavable(LemurDialogCS.class);
 	//	IntLongVarField ilv = lsv.ilvBorderThickness;
-		boolean b = bToggle ? lsv.toggleMaximized() : lsv.isMaximized();
+		boolean b = bToggleMaximized ? lsv.toggleMaximized() : lsv.isMaximized();
 		if(b){ //maximize
-	//	if(v3fUnmaximizedSize==null){
-	//	v3fUnmaximizedPos = getDialogMainContainer().getLocalTranslation();
 			Vector3f v3fAppW = MiscJmeI.i().getAppWindowSize();
 			MiscLemurStateI.i().setPositionSafely(getDialogMainContainer(), new Vector3f(0,v3fAppW.y,0));
-			
-	//				v3fUnmaximizedSize = getDialogMainContainer().getPreferredSize();
-			MiscLemurStateI.i().setSizeSafely(getDialogMainContainer(), v3fAppW);
-		
-	//	lUnmaximizedBorderThickness=ilv.getLong();
-		
-	//	ilv.setInteger(0);
+			MiscLemurStateI.i().setSizeSafely(getDialogMainContainer(), v3fAppW, true);
 		}else{ //restore
-	//	MiscLemurStateI.i().setPositionSafely(getDialogMainContainer(), v3fUnmaximizedPos);
-	//	MiscLemurStateI.i().setSizeSafely(getDialogMainContainer(), v3fUnmaximizedSize);
-	//	ilv.setLong(lUnmaximizedBorderThickness);
 			MiscLemurStateI.i().setPositionSafely(getDialogMainContainer(),
 				new Vector3f(lsv.getPosX(), lsv.getPosY(), 0));
 			MiscLemurStateI.i().setSizeSafely(getDialogMainContainer(), 
 				new Vector3f(lsv.getWidth(), lsv.getHeight(), 0), true);
-	//	ilv.setLong(lUnmaximizedBorderThickness);
-		
-	//	v3fUnmaximizedSize=null;
-	//	lUnmaximizedBorderThickness=null;
-	//	v3fUnmaximizedPos=null;
 		}
 		
 		requestRefreshUpdateList();
@@ -539,7 +522,9 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 		if(getCS().isMaximized())return;
 		
 		if(sptDraggedElement==btnResizeInfoAndList){
-			resizeInfoAndList(v3fDisplacement);
+			if(isMouseCursorWithinReach(btnResizeInfoAndList)){
+				resizeInfoAndList(v3fDisplacement);
+			}
 			return;
 		}
 		
@@ -550,22 +535,30 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 		boolean bWorkOnEastBorder = false;
 		boolean bWorkOnSouthBorder = false;
 		if(sptDraggedElement==btnResizeNorth){
-			v3fSizeAdd.y += v3fDisplacement.y;
-			v3fPosAdd.y += v3fDisplacement.y;
-			if(btgResizeBordersNorthAndSouthAlsoAffectEastBorder.b())bWorkOnEastBorder=true;
+			if(isMouseCursorWithinReach(btnResizeNorth)){
+				v3fSizeAdd.y += v3fDisplacement.y;
+				v3fPosAdd.y += v3fDisplacement.y;
+				if(btgResizeBordersNorthAndSouthAlsoAffectEastBorder.b())bWorkOnEastBorder=true;
+			}
 		}else
 		if(sptDraggedElement==btnResizeSouth){
-			bWorkOnSouthBorder = true;
-			if(btgResizeBordersNorthAndSouthAlsoAffectEastBorder.b())bWorkOnEastBorder=true;
+			if(isMouseCursorWithinReach(btnResizeSouth)){
+				bWorkOnSouthBorder = true;
+				if(btgResizeBordersNorthAndSouthAlsoAffectEastBorder.b())bWorkOnEastBorder=true;
+			}
 		}else
 		if(sptDraggedElement==btnResizeWest){
-			v3fSizeAdd.x += -v3fDisplacement.x;
-			v3fPosAdd.x += v3fDisplacement.x;
-			if(btgResizeBordersWestAndEastAlsoAffectSouthBorder.b())bWorkOnSouthBorder=true;
+			if(isMouseCursorWithinReach(btnResizeWest)){
+				v3fSizeAdd.x += -v3fDisplacement.x;
+				v3fPosAdd.x += v3fDisplacement.x;
+				if(btgResizeBordersWestAndEastAlsoAffectSouthBorder.b())bWorkOnSouthBorder=true;
+			}
 		}else
 		if(sptDraggedElement==btnResizeEast){
-			bWorkOnEastBorder=true;
-			if(btgResizeBordersWestAndEastAlsoAffectSouthBorder.b())bWorkOnSouthBorder=true;
+			if(isMouseCursorWithinReach(btnResizeEast)){
+				bWorkOnEastBorder=true;
+				if(btgResizeBordersWestAndEastAlsoAffectSouthBorder.b())bWorkOnSouthBorder=true;
+			}
 		}else
 		{
 			/**
@@ -588,15 +581,85 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 		requestRefreshUpdateList();
 	}
 	
+//	private Vector3f overrideDragDisplacement(Panel pnl){
+//		Vector2f v2fPosMCursor = MouseCursorCentralI.i().getMouseCursorPositionCopy();
+//		Vector3f v3fPosPnl = pnl.getWorldTranslation().clone();
+//		Vector3f v3fSizePnl = pnl.getSize().clone();
+//		return new Vector3f();
+//	}
+	private boolean bMouseCursorWasInsideDragMargin = false;
+	private IntLongVarField ilvDragMagnecticMarginPixels = new IntLongVarField(this,10,null).setMinMax(0L,20L);
+	private Button	btnCurrentlyActiveDraggedReziseBorder;
+//	private Vector3f adaptDragDisplacement(Panel pnl, Vector3f v3fDragDisplacement){
+//		v3fDragDisplacement=v3fDragDisplacement.clone();
+//		
+//		int iMarginPixels = ilvDragMagnecticMarginPixels.intValue();
+//		Vector2f v2fPosMCursor = MouseCursorCentralI.i().getMouseCursorPositionCopy();
+//		Vector3f v3fPosPnl = pnl.getWorldTranslation().clone();
+//		Vector3f v3fSizePnl = pnl.getSize().clone();
+//		
+//		v3fPosPnl.x-=iMarginPixels;
+//		v3fPosPnl.y-=iMarginPixels;
+//		
+//		v3fSizePnl.x+=iMarginPixels*2;
+//		v3fSizePnl.y+=iMarginPixels*2;
+//		
+//		if(v2fPosMCursor.y > v3fPosPnl.y && v2fPosMCursor.y < (v3fPosPnl.y + v3fSizePnl.y)){ 
+//			if(v2fPosMCursor.x > v3fPosPnl.x && v2fPosMCursor.x < (v3fPosPnl.x + v3fSizePnl.x)){
+//				return v3fDragDisplacement;
+//			}
+//		}
+//		
+//		return v3fDragDisplacement;
+//	}
+	private boolean isMouseCursorWithinReach(Button btn){
+		if(!isRequestHitBorderToContinueDragging())return true;
+		
+		Vector2f v2fPosMCursor = MouseCursorCentralI.i().getMouseCursorPositionCopy();
+		Vector3f v3fPosPnl = btn.getWorldTranslation().clone();
+		Vector3f v3fSizePnl = btn.getSize().clone();
+		
+		int iDMMP = ilvDragMagnecticMarginPixels.intValue();
+		if(bMouseCursorWasInsideDragMargin)iDMMP=0;
+		
+		v3fPosPnl.x-=iDMMP;
+		v3fPosPnl.y-=iDMMP;
+		
+		v3fSizePnl.x+=iDMMP*2;
+		v3fSizePnl.y+=iDMMP*2;
+		
+		if(v2fPosMCursor.y > v3fPosPnl.y && v2fPosMCursor.y < (v3fPosPnl.y + v3fSizePnl.y)){ 
+			if(v2fPosMCursor.x > v3fPosPnl.x && v2fPosMCursor.x < (v3fPosPnl.x + v3fSizePnl.x)){
+				setRequestHitBorderToContinueDragging(false); //it hits the border!
+				bMouseCursorWasInsideDragMargin=true;
+				btnCurrentlyActiveDraggedReziseBorder = btn;
+				return true;
+			}
+		}
+		
+		bMouseCursorWasInsideDragMargin=false;
+		return false;
+	}
+	
+	@Override
+	public void setBeingDragged(Object objDragManagerKey, boolean b) {
+		super.setBeingDragged(objDragManagerKey, b);
+		
+		if(!b){
+			bMouseCursorWasInsideDragMargin=false;
+			btnCurrentlyActiveDraggedReziseBorder=null;
+		}
+	}
+	
 	private void resizeInfoAndList(Vector3f v3fDisplacement) {
-		Vector3f v3fInfoPSizeCopy = lblTextInfo.getSize().clone();
-		Vector3f v3fListPSizeCopy = getMainList().getSize().clone();
+		Vector3f v3fInfoPSizeCopy = lblTextInfo.getSize().clone(); //lblTextInfo.getPreferredSize()
+		Vector3f v3fListPSizeCopy = getMainList().getSize().clone(); //getMainList().getPreferredSize()
 		
 		v3fInfoPSizeCopy.y+= -v3fDisplacement.y;
 		v3fListPSizeCopy.y+=  v3fDisplacement.y;
 		
-		MiscLemurStateI.i().setSizeSafely(lblTextInfo, v3fInfoPSizeCopy);
-		MiscLemurStateI.i().setSizeSafely(getMainList(), v3fListPSizeCopy);
+		MiscLemurStateI.i().setSizeSafely(lblTextInfo, v3fInfoPSizeCopy, true);
+		MiscLemurStateI.i().setSizeSafely(getMainList(), v3fListPSizeCopy, true);
 		
 		requestRefreshUpdateList();
 	}
@@ -720,14 +783,14 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 //			}
 		}
 		
-		@Override
-		public boolean applyValuesFrom(DialogCS<LemurDialogStateAbs> svLoaded) {
-			if(!super.applyValuesFrom(svLoaded))return false;
-			
-			getOwner().applyMaximizedStatus(false);
-			
-			return true;
-		}
+//		@Override
+//		public boolean applyValuesFrom(DialogCS<LemurDialogStateAbs> svLoaded) {
+//			if(!super.applyValuesFrom(svLoaded))return false;
+//			
+//			getOwner().applyCurrentSettings(false);
+//			
+//			return true;
+//		}
 		
 		@Override
 		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
@@ -1554,6 +1617,7 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 //	};
 	private void changeResizeBorderColor(ColorRGBA c){
 		for(Button btn:abtnBorderList){
+			if(btn==btnCurrentlyActiveDraggedReziseBorder)continue;
 			MiscLemurStateI.i().setOverrideBackgroundColor(btn, c);
 		}
 	}

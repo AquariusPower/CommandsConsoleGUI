@@ -876,7 +876,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 			if(v3fPrefSize!=null){
 				if(fNewZSize!=null && Float.compare(v3fPrefSize.z,0.0f)==0 ){
 					v3fPrefSize.z=fNewZSize;
-					setSizeSafely(panel,v3fPrefSize);
+					setSizeSafely(panel,v3fPrefSize,true);
 				}
 			}
 			
@@ -927,9 +927,6 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 
 	private boolean	bAllowMinSizeCheckAndFix = false; //MUST BE INITIALLY FALSE!
 	
-	public Vector3f setSizeSafely(Panel pnl, float fX, float fY){
-		return setSizeSafely(pnl, fX, fY, false);
-	}
 	/**
 	 * see {@link #setSizeSafely(Panel, Vector3f, boolean)}
 	 * 
@@ -943,16 +940,12 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 		return setSizeSafely(pnl, new Vector3f(fX,fY,-1), bForce); //z=-1 will be fixed
 	}
 	
-	public Vector3f setSizeSafely(Panel pnl, Vector3f v3fSize){
-		return setSizeSafely(pnl, v3fSize, false);
-	}
-	
 	/**
 	 * this only works without crashing because of {@link DialogMainContainer#updateLogicalState()}
 	 * 
 	 * @param pnl
 	 * @param v3fSizeNew x,y,z use -1 to let it be automatic = preferred
-	 * @param bForceSpecificSize
+	 * @param bForceSpecificSize otherwise the preferred values will be used as minimum
 	 * @return the possibly valid size after fixed (including z)
 	 */
 	public Vector3f setSizeSafely(

@@ -863,7 +863,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}else
 		if(checkCmdValidity(this,"activateSelfWindow")){
 			String strAppTitle=GlobalOperationalSystemI.i().getApplicationTitle();
-			if(strAppTitle.isEmpty()){
+			if(strAppTitle==null){
 				dumpWarnEntry("this functionality requires the application title to have been set");
 			}else{
 				addCmdToQueue(scfCmdOS.getUniqueCmdId()+" linux "
@@ -1594,13 +1594,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @param aobj
 	 */
 	public void dumpWarnEntry(String strMessageKey, Object... aobj){
-		String strType = "Warn";
-		
-		Exception ex = new Exception("(This is just a "+strType+" stacktrace) "+strMessageKey);
+		EMessageType e = EMessageType.Warn;
+		Exception ex = new Exception("(This is just a "+e.s()+" stacktrace) "+strMessageKey);
 		ex.setStackTrace(Thread.currentThread().getStackTrace());
-		
 		dumpEntry(new DumpEntryData()
-			.setImportant(strType,strMessageKey,ex)
+			.setImportant(e.s(),strMessageKey,ex)
 			.setApplyNewLineRequests(false)
 			.setDumpToConsole(btgShowWarn.get())
 			.setUseSlowQueue(false)
@@ -1639,6 +1637,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}
 	}
 	
+	enum EMessageType{
+		PROBLEM,
+		WARNING,
+		ERROR, DevWarn, UserInputError, Warn, Exception,
+		;
+		public String s(){return this.toString();}
+	}
+	
 	/**
 	 * A problem is something that may make other parts of the application malfunction.
 	 * It will not break the application, but will make it misbehave.
@@ -1649,11 +1655,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @param aobj
 	 */
 	public void dumpProblemEntry(String strMessageKey, Object... aobj){
-		String strType = "PROBLEM";
-		Exception ex = new Exception("(This is a "+strType+" stacktrace) "+strMessageKey);
+		EMessageType e = EMessageType.PROBLEM;
+		Exception ex = new Exception("(This is a "+e.s()+" stacktrace) "+strMessageKey);
 		ex.setStackTrace(Thread.currentThread().getStackTrace());
 		dumpEntry(new DumpEntryData()
-			.setImportant(strType,strMessageKey,ex)
+			.setImportant(e.s(),strMessageKey,ex)
 			.setPrintStream(System.err)
 			.setDumpToConsole(btgShowWarn.get())
 			.setDumpObjects(aobj)
@@ -1670,12 +1676,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @param aobj
 	 */
 	public void dumpUserErrorEntry(String strMessageKey, Object... aobj){
-		String strType = "USER_ERROR";
-		Exception ex = new Exception("(This is a "+strType+" stacktrace) "+strMessageKey);
+		EMessageType e = EMessageType.UserInputError;
+		Exception ex = new Exception("(This is a "+e.s()+" stacktrace) "+strMessageKey);
 		ex.setStackTrace(Thread.currentThread().getStackTrace());
 //		addImportantMsgToBuffer(strType,str,ex);
 		dumpEntry(new DumpEntryData()
-			.setImportant(strType,strMessageKey,ex)
+			.setImportant(e.s(),strMessageKey,ex)
 			.setPrintStream(System.err)
 			.setDumpToConsole(btgShowWarn.get())
 			.setDumpObjects(aobj)
@@ -1690,13 +1696,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @param strMessageKey
 	 */
 	public void dumpDevWarnEntry(String strMessageKey, Object... aobj){
-		String strType = "DevWarn";
-		Exception ex = new Exception("(This is just a "+strType+" stacktrace) "+strMessageKey);
+		EMessageType e = EMessageType.DevWarn;
+		Exception ex = new Exception("(This is just a "+e.s()+" stacktrace) "+strMessageKey);
 		ex.setStackTrace(Thread.currentThread().getStackTrace());
 //		addImportantMsgToBuffer(strType,str,ex);
 //		dumpEntry(false, btgShowDeveloperWarn.get(), false, 
 		dumpEntry(new DumpEntryData()
-			.setImportant(strType,strMessageKey,ex)
+			.setImportant(e.s(),strMessageKey,ex)
 			.setApplyNewLineRequests(false)
 			.setDumpToConsole(btgShowDeveloperWarn.get())
 			.setUseSlowQueue(false)
@@ -1778,7 +1784,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}
 		
 		dumpEntry(new DumpEntryData()
-			.setImportant("Exception",ex.toString(),ex)
+			.setImportant(EMessageType.Exception.s(),ex.toString(),ex)
 			.setPrintStream(psInfo) //this is good to show the time at terminal
 			.setApplyNewLineRequests(false)
 			.setDumpToConsole(btgShowException.get())

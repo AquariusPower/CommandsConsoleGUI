@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -89,8 +90,14 @@ public class DialogMainContainer extends Container implements ISpatialValidator,
 		if(v3fLastFailedSize==null || !v3fLastFailedSize.equals(getSize())){
 			Vector3f v3fMinSize = new Vector3f(20,20,0);
 			Vector3f v3fPreferredSize = getPreferredSize().clone();
-			if(v3fPreferredSize.x<v3fMinSize.x)v3fPreferredSize.x=v3fMinSize.x;
-			if(v3fPreferredSize.y<v3fMinSize.y)v3fPreferredSize.y=v3fMinSize.y;
+			if(v3fPreferredSize.x<v3fMinSize.x){
+				diagOwner.setRequestHitBorderToContinueDragging(true);
+				v3fPreferredSize.x=v3fMinSize.x;
+			}
+			if(v3fPreferredSize.y<v3fMinSize.y){
+				diagOwner.setRequestHitBorderToContinueDragging(true);
+				v3fPreferredSize.y=v3fMinSize.y;
+			}
 			if(!v3fPreferredSize.equals(getPreferredSize())){
 				setPreferredSize(v3fPreferredSize);
 			}
@@ -131,6 +138,8 @@ public class DialogMainContainer extends Container implements ISpatialValidator,
 						setPreferredSize(v3fLastValidPreferredSize);
 						super.updateLogicalState(tpf);
 						
+						diagOwner.setRequestHitBorderToContinueDragging(true);
+						
 						//after update
 						bLayoutValid=true; 
 					}
@@ -143,6 +152,10 @@ public class DialogMainContainer extends Container implements ISpatialValidator,
 		
 	}
 	
+//	private LemurDialogStateAbs getLemurDiagOwner() {
+//		return (LemurDialogStateAbs)diagOwner;
+//	}
+
 	private void messageIgnoringSafeOnes(Exception e, ArrayList<Object> aobjDbg){
 		if(e.getMessage().startsWith("Size cannot be negative:")){
 		}else
@@ -201,10 +214,14 @@ public class DialogMainContainer extends Container implements ISpatialValidator,
 	
 	public DialogMainContainer(DialogStateAbs diagOwner, GuiLayout layout, String style) {
 		super(layout, style);
-		this.diagOwner=diagOwner;
+		setDiagOwner(diagOwner);
 		this.strMessageKey = diagOwner.getId()+" update logical state failed";
 	}
 	
+	private void setDiagOwner(DialogStateAbs diagOwner) {
+		this.diagOwner=diagOwner;
+	}
+
 	public DialogMainContainer(GuiLayout layout) {
 		super(layout);
 		throw new UnsupportedOperationException("use the right constructor");
