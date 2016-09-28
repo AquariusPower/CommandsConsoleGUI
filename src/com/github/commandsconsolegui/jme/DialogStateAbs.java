@@ -302,7 +302,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //			throw new PrerequisitesNotMetException("invalid UI identifier");
 			String str=MiscI.i().getClassName(this,true);
 			cfg.setId(str);
-			MsgI.i().warn("using automatic UI id for", this);
+			MsgI.i().devInfo("using automatic UI id "+str+" for", this);
 		}
 //		this.strCaseInsensitiveId=cfg.strUIId;
 		
@@ -648,6 +648,12 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	
 	protected DialogStateAbs<DIAG,?> getParentDialog(){
 		return this.diagParent;
+	}
+	
+	protected void applyDiscardingParent() {
+		if(this.diagParent.isPreparingToBeDiscarded()){
+			this.diagParent=null;
+		}
 	}
 	
 	protected THIS setDiagParent(DialogStateAbs<DIAG,?> diagParent) {

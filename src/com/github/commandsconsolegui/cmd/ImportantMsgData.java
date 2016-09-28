@@ -32,11 +32,14 @@ import java.util.Comparator;
 
 /**
  * 
+ * TODO this is basically a DumpEntryData holder, make it be like that.
+ * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
 public class ImportantMsgData {
-	String strMsg;
+	String strMsgKey;
+//	long lKeyOcurrenceTimes=0;
 	Exception ex;
 	StackTraceElement[] asteExceptionHappenedAt;
 	DumpEntryData de;
@@ -74,7 +77,7 @@ public class ImportantMsgData {
 //		this(de.getKey(),de.getException(),de.getException().getStackTrace());
 		this.de=de;
 		
-		this.strMsg=de.getKey();
+		this.strMsgKey=de.getKey();
 //	if(ex==null){
 //		ex=new Exception("(no real exception, just the stack trace)");
 //		ex.setStackTrace(aste);
@@ -85,8 +88,8 @@ public class ImportantMsgData {
 		lFirstOcurrenceCreationTimeNano=System.nanoTime();
 	}
 	
-	public boolean identicalTo(ImportantMsgData imdOther){
-		if (!strMsg.equals(imdOther.strMsg))return false; //equals() is faster, and such messages will not have string letter case difference...
+	public boolean isIdenticalTo(ImportantMsgData imdOther){
+		if (!strMsgKey.equals(imdOther.strMsgKey))return false; //equals() is faster, and such messages will not have string letter case difference...
 		if (!Arrays.equals(asteExceptionHappenedAt, imdOther.asteExceptionHappenedAt))return false;
 		
 		return true;
@@ -125,5 +128,7 @@ public class ImportantMsgData {
 
 	public void applyFirstOcurrenceCreationTimeFrom(ImportantMsgData imsg) {
 		this.lFirstOcurrenceCreationTimeNano=imsg.lFirstOcurrenceCreationTimeNano;
+		de.incKeyOcurrenceTimes();
 	}
 }
+

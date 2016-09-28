@@ -27,50 +27,158 @@
 
 package com.github.commandsconsolegui.misc;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.ArrayList;
 
 /**
+ * This class is also a delegator. 
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class MsgI {
+public class MsgI implements IMessageListener{
 	private static MsgI instance = new MsgI();
 	public static MsgI i(){return instance;}
 	
-	public static boolean bDebug=false;
+	private boolean bDebug=false;
 	
-	/**
-	 * 
-	 * @param str
-	 * @param bSuccess
-	 * @param objOwner use "this"
-	 */
-	public void dbg(String str, boolean bSuccess, Object objOwner){
-		if(!bDebug)return;
-		
-		if(!bSuccess){
-			int i,i2=0;
-			i=i2;i2=i;
-		}
-		
-		System.err.println(MsgI.class.getName()+":DBG: "
-			+new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()))+": "
-			+(objOwner!=null ? objOwner.getClass().getName()+": " : "")
-			+(bSuccess?"ok":"FAIL")+": "
-			+str);
-		
-		if(!bSuccess){
-			Thread.dumpStack();
+	private ArrayList<IMessageListener> aimsgList = new ArrayList<IMessageListener>();
+	
+	public void addListener(IMessageListener... aimsg){
+		for(IMessageListener imsg:aimsg){
+			if(!aimsgList.contains(imsg)){
+				aimsgList.add(imsg);
+			}
 		}
 	}
 	
-	public void warn(String str, Object... aobj){
-		System.err.println(MsgI.class.getName()+":WARN: "
-			+new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()))+": "
-			+str+": "
-			+aobj);
+//	/**
+//	 * 
+//	 * @param str
+//	 * @param bSuccess
+//	 * @param objOwner use "this"
+//	 */
+//	public void dbg(String str, boolean bSuccess, Object objOwner){
+//		if(!bDebug)return;
+//		
+//		if(!bSuccess){
+//			int i,i2=0;
+//			i=i2;i2=i;
+//		}
+//		
+//		System.err.println(MsgI.class.getName()+":DBG: "
+//			+new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()))+": "
+//			+(objOwner!=null ? objOwner.getClass().getName()+": " : "")
+//			+(bSuccess?"ok":"FAIL")+": "
+//			+str);
+//		
+//		if(!bSuccess){
+//			Thread.dumpStack();
+//		}
+//	}
+	
+	@Override
+	public boolean warn(String str, Object... aobj){
+		boolean bListened=false;
+		for(IMessageListener imsg:aimsgList){
+			if(imsg.warn(str, aobj)){
+				bListened=true;
+			}
+		}
+		
+		if(!bListened){
+			System.err.println(DebugI.i().joinMessageWithObjects(true,"WARN:"+str,aobj));
+		}
+		
+		return true;
+	}
+
+	@Override
+	public boolean info(String str, Object... aobj) {
+		boolean bListened=false;
+		for(IMessageListener imsg:aimsgList){
+			if(imsg.info(str, aobj)){
+				bListened=true;
+			}
+		}
+		
+		if(!bListened){
+			System.out.println(DebugI.i().joinMessageWithObjects(true,"Info:"+str,aobj));
+		}
+		return true;
+	}
+
+	@Override
+	public boolean debug(String str, Object... aobj) {
+		if(!bDebug)return true; //"be quiet" skipper, less verbose mode like 
+		
+		boolean bListened=false;
+		for(IMessageListener imsg:aimsgList){
+			if(imsg.debug(str, aobj)){
+				bListened=true;
+			}
+		}
+		
+		if(!bListened){
+			System.err.println(DebugI.i().joinMessageWithObjects(true,"Debug:"+str,aobj));
+		}
+		
+		return true;
+	}
+
+	@Override
+	public boolean exception(String strMsgOverride, Exception ex, Object... aobj) {
+		boolean bListened=false;
+		for(IMessageListener imsg:aimsgList){
+			if(imsg.exception(strMsgOverride, ex, aobj)){
+				bListened=true;
+			}
+		}
+		
+		if(!bListened){
+			if(strMsgOverride==null){
+				strMsgOverride=ex.getMessage();
+			}
+			
+			System.err.println(DebugI.i().joinMessageWithObjects(true,"EXCEPTION:"+strMsgOverride,aobj));
+			ex.printStackTrace();
+//			Thread.dumpStack();
+		}
+		return true;
+	}
+
+	public void setEnableDebugMessages(boolean b) {
+		this.bDebug=b;
+	}
+
+	@Override
+	public boolean devInfo(String str, Object... aobj) {
+		boolean bListened=false;
+		for(IMessageListener imsg:aimsgList){
+			if(imsg.devInfo(str, aobj)){
+				bListened=true;
+			}
+		}
+		
+		if(!bListened){
+			System.out.println(DebugI.i().joinMessageWithObjects(true,"DevInfo:"+str,aobj));
+		}
+		return true;
+	}
+
+	@Override
+	public boolean devWarn(String str, Object... aobj) {
+		boolean bListened=false;
+		for(IMessageListener imsg:aimsgList){
+			if(imsg.devWarn(str, aobj)){
+				bListened=true;
+			}
+		}
+		
+		if(!bListened){
+			System.err.println(DebugI.i().joinMessageWithObjects(true,"DEVWARN:"+str,aobj));
+		}
+		
+		return true;
 	}
 	
 }

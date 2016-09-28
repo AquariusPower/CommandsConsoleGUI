@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.jme.lemur.dialog;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
@@ -42,6 +43,7 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.AudioUII;
 import com.github.commandsconsolegui.jme.MouseCursorCentralI;
 import com.github.commandsconsolegui.jme.AudioUII.EAudio;
+import com.github.commandsconsolegui.jme.ConditionalStateManagerI.CompositeControl;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.jme.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
@@ -117,7 +119,7 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 	private BoolTogglerCmdField btgAutoScroll = new BoolTogglerCmdField(this, true).setCallNothingOnChange();
 //	private ButtonCommand	bc;
 	private boolean	bRefreshScroll;
-	private HashMap<String, LemurDialogStateAbs<T,?>> hmModals = new HashMap<String, LemurDialogStateAbs<T,?>>();
+	private HashMap<String, LemurDialogStateAbs<T,?>> hmChildDiagModals = new HashMap<String, LemurDialogStateAbs<T,?>>();
 	private Long	lClickActionMilis;
 //	private DialogListEntryData<T>	dataSelectRequested;
 	private Label	lblSelectedEntryStatus;
@@ -196,6 +198,7 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 //	public Vector3f	v3fUnmaximizedSize;
 //	public Long	lUnmaximizedBorderThickness;
 	private ButtonClick	btnclk;
+private Button	btnRestart;
 //	private boolean	bMaximized;
 	
 	@Override
@@ -414,18 +417,22 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 		cntrTitleButtons.setName(getId()+"_TitleButtons");
 		
 		//buttons 
+		btnRestart = new Button("[Restart]",getDiagStyle());
 		btnMinimize = new Button("[m]",getDiagStyle());
 		btnMaximize = new Button("[M]",getDiagStyle());
 		btnClose = new Button("[X]",getDiagStyle());
 		
 		btnclk = new ButtonClick();
+		btnRestart.addClickCommands(btnclk);
 		btnMinimize.addClickCommands(btnclk);
 		btnClose.addClickCommands(btnclk);
 		btnMaximize.addClickCommands(btnclk);
 		
-		cntrTitleButtons.addChild(btnMinimize,0);
-		cntrTitleButtons.addChild(btnMaximize,1);
-		cntrTitleButtons.addChild(btnClose,2);
+		int i=0;
+		cntrTitleButtons.addChild(btnRestart,i++);
+		cntrTitleButtons.addChild(btnMinimize,i++);
+		cntrTitleButtons.addChild(btnMaximize,i++);
+		cntrTitleButtons.addChild(btnClose,i++);
 		
 		cntrTitleBox.addChild(cntrTitleButtons, BorderLayout.Position.East);
 		
@@ -453,6 +460,9 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 
 		@Override
 		public void execute(Button source) {
+			if(source.equals(btnRestart)){
+				requestRestart();
+			}else
 			if(source.equals(btnClose)){
 				requestDisable();
 			}else
@@ -686,7 +696,7 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 		//TODO check to prevent impossible layout? use resetNorthHeight() here too?
 		
 		MiscLemurStateI.i().setSizeSafely(getNorthContainer(), v3fNorth, true);
-		MiscLemurStateI.i().setSizeSafely(cntrCenterMain, v3fCenter, true);
+		MiscLemurStateI.i().setSizeSafely(cntrCenterMain, v3fCenter, true); //TODO can be ignored this one
 		
 		requestRefreshUpdateList();
 	}
@@ -1318,17 +1328,28 @@ public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> 
 	
 	public R addModalDialog(LemurDialogStateAbs<T,?> diagModal){
 		diagModal.setDiagParent(this);
-		hmModals.put(diagModal.getId(),diagModal);
+		hmChildDiagModals.put(diagModal.getId(),diagModal);
 		return getThis();
+	}
+	
+	@Override
+	public boolean prepareToDiscard(CompositeControl cc) {
+		if(!super.prepareToDiscard(cc))return false;
+		
+		for(Entry<String, LemurDialogStateAbs<T, ?>> entry:hmChildDiagModals.entrySet()){
+			entry.getValue().applyDiscardingParent();
+		}
+		
+		return true;
 	}
 	
 //	public DiagModalInfo<T> getDiagModalCurrent(){
 //		return dmi;
 //	}
-	
-//	public void openModalDialog(String strDialogId, DialogListEntryData<T> dataToAssignModalTo, T cmd){
+
+	//	public void openModalDialog(String strDialogId, DialogListEntryData<T> dataToAssignModalTo, T cmd){
 	public void openModalDialog(String strDialogId, DialogListEntryData<T> dledToAssignModalTo, T cmd){
-		LemurDialogStateAbs<T,?> diagModalCurrent = hmModals.get(strDialogId);
+		LemurDialogStateAbs<T,?> diagModalCurrent = hmChildDiagModals.get(strDialogId);
 		if(diagModalCurrent!=null){
 			setDiagModalInfoCurrent(new DiagModalInfo(diagModalCurrent,cmd,dledToAssignModalTo));
 			diagModalCurrent.requestEnable();

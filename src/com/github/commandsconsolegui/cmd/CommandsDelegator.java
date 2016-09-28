@@ -62,6 +62,7 @@ import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MiscI.EStringMatchMode;
+import com.github.commandsconsolegui.misc.IMessageListener;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -84,7 +85,7 @@ import com.google.common.io.Files;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
+public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMessageListener{
 	public static final class CompositeControl extends CompositeControlAbs<CommandsDelegator>{
 		private CompositeControl(CommandsDelegator casm){super(casm);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
@@ -623,7 +624,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			return false;
 		}
 		
-		if(RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(ccl.getCmdLinePrepared()))return false;
+		if(RESTRICTED_CMD_SKIP_CURRENT_COMMAND.isUniqueCmdIdEqualTo(ccl.getCmdLinePrepared()))return false;
 		if(ccl.isCommentedLine())return false;
 		if(ccl.getCmdLinePrepared().trim().isEmpty())return false;
 		
@@ -695,12 +696,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		removeAllCmdsFor(iccl);
 		
-		//remove all fields from the list
-		for(VarCmdFieldAbs vcf:VarCmdFieldAbs.getListFullCopy()){
-			if(vcf.getOwner()==iccl){
-				vcf.discardSelf(ccSelf);
-			}
-		}
+//		//remove all of it's owned fields from the list
+//		for(VarCmdFieldAbs vcf:VarCmdFieldAbs.getListFullCopy()){
+//			if(vcf.getOwner()==iccl){
+//				vcf.discardSelf(ccSelf);
+//			}
+//		}
 		
 		hmDebugListenerAddedStack.remove(iccl);
 		aConsoleCommandListenerList.remove(iccl);
@@ -825,7 +826,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @return
 	 */
 	protected ECmdReturnStatus execCmdFromConsoleRequestRoot(){
-		if(RESTRICTED_CMD_SKIP_CURRENT_COMMAND.equals(ccl.getCmdLinePrepared())){
+		if(!bFillCommandList && RESTRICTED_CMD_SKIP_CURRENT_COMMAND.isUniqueCmdIdEqualTo(ccl.getCmdLinePrepared())){
 			return ECmdReturnStatus.Skip;
 		}
 		
@@ -1069,7 +1070,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				if(iIndex!=null && iIndex.intValue()!=i)continue;
 				
 				ImportantMsgData imsg = aimsg.get(i);
-				if(iIndex==null && !containsFilterString(imsg.strMsg,strFilter))continue;
+				if(iIndex==null && !containsFilterString(imsg.strMsgKey,strFilter))continue;
 				
 //				dumpSubEntry(""+i+": "+imsg.strMsg);
 				if(iIndex!=null && (imsg.ex!=null||imsg.asteExceptionHappenedAt!=null)){
@@ -1620,9 +1621,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //	}
 	public final IntLongVarField ilvImportantMessagesBufferMaxSize = new IntLongVarField(this, 1000, "");
 	private void addImportantMsgToBuffer(String strMsgType,ImportantMsgData imsgNew){
-		String str="["+strMsgType+"] "+imsgNew.strMsg;
+		String str="["+strMsgType+"] "+imsgNew.strMsgKey;
 		for(ImportantMsgData imsg:aimBufferList.toArray(new ImportantMsgData[0])){
-			if(imsgNew.identicalTo(imsg)){
+			if(imsgNew.isIdenticalTo(imsg)){
 				imsgNew.applyFirstOcurrenceCreationTimeFrom(imsg);
 				aimBufferList.remove(imsg);
 				break;
@@ -1748,7 +1749,16 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		/**
 		 * it is coming from the message buffer, so will not read it...
 		 */
-		dumpExceptionEntry(imsg.ex, imsg.asteExceptionHappenedAt, iShowStackElementsCount, false, imsg.getDumpEntryData().getCustomObjects());
+		dumpExceptionEntryWork(null, imsg.ex, imsg.asteExceptionHappenedAt, iShowStackElementsCount, false, imsg.getDumpEntryData().getCustomObjects());
+	}
+	public void dumpExceptionEntry(String strMsgOverride, Exception ex, Object... aobj){
+//		Exception exOverride=ex;
+//		if(strMsgOverride!=null){
+//			exOverride = new Exception(strMsgOverride+"; "+ex.getMessage());
+//			exOverride.setStackTrace(ex.getStackTrace());
+//			exOverride.initCause(ex.getCause());
+//		}
+		dumpExceptionEntryWork(strMsgOverride, ex, null, null, true, aobj);
 	}
 	/**
 	 * see {@link #dumpEntry(DumpEntryData)}
@@ -1756,7 +1766,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @param aobj
 	 */
 	public void dumpExceptionEntry(Exception ex, Object... aobj){
-		dumpExceptionEntry(ex, null, null, true, aobj);
+		dumpExceptionEntryWork(null, ex, null, null, true, aobj);
 	}
 	/**
 	 * see {@link #dumpEntry(DumpEntryData)}
@@ -1766,7 +1776,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @param iShowStackElementsCount if null, will show nothing. If 0, will show all.
 	 * @param bAddToMsgBuffer
 	 */
-	private void dumpExceptionEntry(Exception ex, StackTraceElement[] asteStackOverride, Integer iShowStackElementsCount, boolean bAddToMsgBuffer, Object... aobj){
+	private void dumpExceptionEntryWork(String strMsgOverride, Exception ex, StackTraceElement[] asteStackOverride, Integer iShowStackElementsCount, boolean bAddToMsgBuffer, Object... aobj){
+		if(strMsgOverride!=null){
+			Exception exOverride = new Exception(strMsgOverride+"; "+ex.getMessage());
+			exOverride.setStackTrace(ex.getStackTrace());
+			exOverride.initCause(ex.getCause());
+			ex=exOverride;
+		}
+		
 //		String strTime="";
 		PrintStream psStack = System.err;
 		PrintStream psInfo = System.err;
@@ -1784,7 +1801,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		}
 		
 		dumpEntry(new DumpEntryData()
-			.setImportant(EMessageType.Exception.s(),ex.toString(),ex)
+			.setImportant(EMessageType.Exception.s(),strMsgOverride!=null ? strMsgOverride : ex.toString(),ex)
 			.setPrintStream(psInfo) //this is good to show the time at terminal
 			.setApplyNewLineRequests(false)
 			.setDumpToConsole(btgShowException.get())
@@ -1837,7 +1854,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	 * @param iccl
 	 */
 	private void removeAllCmdsFor(IConsoleCommandListener iccl){
-		MsgI.i().dbg("WARNING: Removing all registered commands for: "+iccl.getClass().getName(), true, this);
+		MsgI.i().debug("WARNING: Removing all registered commands for: "+iccl.getClass().getName(), true, this);
 //		System.err.println("WARNING: Removing all registered commands for: "+iccl.getClass().getName());
 		
 //		for(CommandData cmdd:trmCmds.values().toArray(new CommandData[0])){
@@ -1851,7 +1868,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 //		}
 		
 		ArrayList<String> astr = getAllCommandFor(iccl);
-		MsgI.i().dbg("WARNING: removing: "+astr.toString(), true, this);
+		MsgI.i().debug("WARNING: removing: "+astr.toString(), true, this);
 //		System.err.println("WARNING: removing: "+astr.toString());
 		
 		for(String strUCmd:astr){
@@ -1933,12 +1950,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 			}
 			
 			/**
-			 * link data with var
+			 * link command data with var
 			 */
 			ArrayList<VarCmdFieldAbs> avcf = new ArrayList<VarCmdFieldAbs>();
 			ArrayList<VarCmdFieldAbs> avcfLinkList = new ArrayList<VarCmdFieldAbs>();
 			avcf.addAll(VarCmdFieldAbs.getListCopy(BoolTogglerCmdField.class));
-			avcf.addAll(BoolTogglerCmdField.getListCopy(StringCmdField.class));
+			avcf.addAll(VarCmdFieldAbs.getListCopy(StringCmdField.class));
 //			int iCount=0;
 			for(VarCmdFieldAbs vcf:avcf){
 				if(vcf.getUniqueCmdId().equalsIgnoreCase(cmddNew.getUniqueCmdId())){
@@ -1949,13 +1966,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 				}
 			}
 			if(avcfLinkList.size()>1){
-				throw new PrerequisitesNotMetException("there should have only one var data link", cmddNew, avcf);
+				throw new PrerequisitesNotMetException("there should have only one var link to one cmd data",
+					cmddNew, avcf);
 			}
 			
 //			acmdList.add(cmddNew);
 			trmCmddList.put(cmddNew.getUniqueCmdId(), cmddNew);
 			cmddLastAdded = cmddNew;
-			MsgI.i().dbg(cmddNew.getOwner().getClass().getSimpleName()+":"+cmddNew.getUniqueCmdId(), true, this);
+			MsgI.i().debug(cmddNew.getOwner().getClass().getSimpleName()+":"+cmddNew.getUniqueCmdId(), true, this);
 			
 			/**
 			 * coded sorting check (unnecessary actually), just useful for developers
@@ -3618,6 +3636,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 		
 		DebugI.i().configure(this);
 		MiscI.i().configure(this);
+		MsgI.i().addListener(this);
 //		ReflexHacks.i().configure(this, this);
 //		ReflexHacks.i().configure(this);
 //		SingleInstanceState.i().initialize(sapp, this);
@@ -4167,13 +4186,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	}
 
 	public boolean isConfigured() {
-		if(!bConfigured)MsgI.i().dbg("is cfg", false, this);
+		if(!bConfigured)MsgI.i().debug("is cfg", false, this);
 		return bConfigured;
 	}
 
 	public boolean isInitialized() {
 		if(!bInitialized){
-			MsgI.i().dbg("is ini", false, this);
+			MsgI.i().debug("is ini", false, this);
 //			if(isConfigured()){
 //				initialize();
 //			}
@@ -4301,5 +4320,41 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions{
 	@Override
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		fld.set(this,value);
+	}
+
+	@Override
+	public boolean info(String str, Object... aobj) {
+		dumpInfoEntry(str, aobj);
+		return true;
+	}
+
+	@Override
+	public boolean warn(String str, Object... aobj) {
+		dumpWarnEntry(str, aobj);
+		return true;
+	}
+
+	@Override
+	public boolean debug(String str, Object... aobj) {
+		dumpDebugEntry(str, aobj);
+		return true;
+	}
+
+	@Override
+	public boolean exception(String strMsgOverride, Exception ex, Object... aobj) {
+		dumpExceptionEntry(strMsgOverride, ex, aobj);
+		return true;
+	}
+
+	@Override
+	public boolean devInfo(String str, Object... aobj) {
+		dumpDevInfoEntry(str, aobj);
+		return true;
+	}
+
+	@Override
+	public boolean devWarn(String str, Object... aobj) {
+		dumpDevWarnEntry(str, aobj);
+		return true;
 	}
 }

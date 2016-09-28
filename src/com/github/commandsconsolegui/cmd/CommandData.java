@@ -166,6 +166,7 @@ public class CommandData implements Comparable<CommandData>{
 	}
 
 	public CommandData setVar(VarCmdFieldAbs vcf) {
+		PrerequisitesNotMetException.assertNotAlreadySet("var link to this cmd data", this.vcf, vcf, this);
 		this.vcf=vcf;
 		return this;
 	}

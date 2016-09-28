@@ -116,7 +116,7 @@ public class DialogMainContainer extends Container implements ISpatialValidator,
 				
 				v3fLastFailedSize = getSize().clone();
 				
-				messageIgnoringSafeOnes(e,aobjDbg);
+				messageIgnoringSafeOnes(true,e,aobjDbg);
 				
 //				if(btgAllowInvalidSize.b()){
 //					GlobalCommandsDelegatorI.i().dumpDevInfoEntry(strMessageKey, aobjDbg);
@@ -124,13 +124,13 @@ public class DialogMainContainer extends Container implements ISpatialValidator,
 //					GlobalCommandsDelegatorI.i().dumpDevWarnEntry(strMessageKey, aobjDbg);
 //				}
 				
-				addChild(pnlFallbackForImpossibleLayout, BorderLayout.Position.Center); //actually replaces
 			}
 		}
 		
 		if(!bLayoutValid){
 			try{
 				if(btgAllowInvalidSize.b()){
+					addChild(pnlFallbackForImpossibleLayout, BorderLayout.Position.Center); //actually replaces
 					super.updateLogicalState(tpf); //this lets the user resize the dialog freely
 				}else{
 //					addChild(cntrCenterMain, BorderLayout.Position.Center); //actually replaces
@@ -155,7 +155,7 @@ public class DialogMainContainer extends Container implements ISpatialValidator,
 				}
 			}catch(IllegalArgumentException e){
 				aobjDbg.add(e);
-				messageIgnoringSafeOnes(e,aobjDbg);
+				messageIgnoringSafeOnes(false,e,aobjDbg);
 			}
 		}
 		
@@ -165,8 +165,8 @@ public class DialogMainContainer extends Container implements ISpatialValidator,
 //		return (LemurDialogStateAbs)diagOwner;
 //	}
 
-	private void messageIgnoringSafeOnes(Exception e, ArrayList<Object> aobjDbg){
-		if(e.getMessage().startsWith("Size cannot be negative:")){
+	private void messageIgnoringSafeOnes(boolean bDoIgnore, Exception e, ArrayList<Object> aobjDbg){
+		if(bDoIgnore && e.getMessage().startsWith("Size cannot be negative:")){
 		}else
 		{
 			Exception ex = new Exception(strMessageKey);

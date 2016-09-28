@@ -28,73 +28,20 @@
 package com.github.commandsconsolegui.misc;
 
 /**
- * To easily detect if an object has changed.
- * 
- * TODO what about hash clash? could make this method useless if abs precision is required?
- * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
- *
  */
-public class HashChangeHolder<T> {
-	public static interface IHolded{
-//		public <H> HashChangeHolder<H> getHolder(Class<H> cl);
-		public HashChangeHolder<?> getHolder();
-		public void setHolder(HashChangeHolder<?> hch);
-	}
+public interface IMessageListener{
+	public boolean info(String str, Object... aobj);
+	public boolean devInfo(String str, Object... aobj);
+	public boolean warn(String str, Object... aobj);
+	public boolean devWarn(String str, Object... aobj);
+	public boolean debug(String str, Object... aobj);
 	
-	private T holded;
-	private int	iHash;
-	private long lCount;
-	private long	lLastChangeTime;
-	private StackTraceElement[] ste;
-
-	public HashChangeHolder(T objRef){
-		setHolded(objRef);
-//		this.objRef=objRef;
-	}
-	
-	public T getHolded(){
-		return holded;
-	}
-	
-	public boolean isChangedAndUpdateHash(){
-		return isChangedAndUpdateHash(holded);
-	}
-	public boolean isChangedAndUpdateHash(T holdedNew){
-		setHolded(holdedNew);
-//		this.objRef = objRefNew;
-		
-		int iHashTmp = getHolded().hashCode();
-		if(iHashTmp!=iHash){
-			iHash=iHashTmp;
-			lCount++;
-			ste=Thread.currentThread().getStackTrace();
-			lLastChangeTime=System.nanoTime();
-			return true;
-		}
-		
-		return false;
-	}
-	public void setHolded(Object holdedNew){
-		if(this.holded!=null){
-			if(this.holded.getClass()!=holdedNew.getClass()){
-				throw new PrerequisitesNotMetException("cannot change the object type", this.holded, this.holded.getClass(), holdedNew, holdedNew.getClass());
-			}
-		}
-		
-//		isChangedAndUpdateHash((T)objRef);
-		this.holded = (T)holdedNew;
-		
-		if(this.holded instanceof IHolded){
-			((IHolded)this.holded).setHolder(this);
-		}
-	}
-	
-	public long getChangedCount(){
-		return lCount;
-	}
-	
-	public long getLastChangeTimeNano(){
-		return lLastChangeTime;
-	}
+	/**
+	 * @param strMsgOverride the exception one may contain variations like changing numbers, but this message may be used as a key/identifier of exception type/kind so the message spam can be countered and counted!
+	 * @param ex
+	 * @param aobj
+	 * @return
+	 */
+	public boolean exception(String strMsgOverride, Exception ex, Object... aobj);
 }

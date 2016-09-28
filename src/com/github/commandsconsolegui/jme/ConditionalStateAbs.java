@@ -33,12 +33,15 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.GlobalSimulationTimeI.ISimulationTime;
+import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.GlobalHolderAbs.IGlobalOpt;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
-import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LemurDialogCS;
 import com.github.commandsconsolegui.misc.Configure;
 import com.github.commandsconsolegui.misc.Configure.IConfigure;
+import com.github.commandsconsolegui.misc.DiscardableInstanceI.IDiscardableInstance;
+import com.github.commandsconsolegui.misc.HashChangeHolder;
+import com.github.commandsconsolegui.misc.HashChangeHolder.IHolded;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -68,7 +71,11 @@ import com.jme3.scene.Node;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public abstract class ConditionalStateAbs implements IGlobalOpt,ISimulationTime,IConfigure<ConditionalStateAbs>,IRetryListOwner,IReflexFillCfg{
+public abstract class ConditionalStateAbs implements IGlobalOpt,IHolded,IDiscardableInstance,ISimulationTime,IConfigure<ConditionalStateAbs>,IRetryListOwner,IReflexFillCfg{
+//	public static final class CompositeControl extends CompositeControlAbs<ConditionalStateAbs>{
+//		private CompositeControl(ConditionalStateAbs casm){super(casm);};
+//	};private CompositeControl ccSelf = new CompositeControl(this);
+	
 	private StackTraceElement[] asteDbgInstance;
 	
 	public ConditionalStateAbs(){
@@ -264,6 +271,8 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,ISimulationTime,
 
 	private boolean	bTryingToDisable;
 
+	private HashChangeHolder<? extends ConditionalStateAbs>	hchHolder;
+
 //	private long	lLastUpdateTimeNano;
 	
 	/**
@@ -309,7 +318,7 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,ISimulationTime,
 		
 		// configs above
 		this.bConfigured=true;
-		MsgI.i().dbg("cfg",this.bConfigured,this);
+		MsgI.i().debug("cfg",this.bConfigured,this);
 		
 		return storeCfgAndReturnSelf(icfg);
 	}
@@ -462,14 +471,14 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,ISimulationTime,
 		if(!initCheckPrerequisites() || !initAttempt()){
 			initFailed();
 			rInit.updateStartTime();
-			MsgI.i().dbg("init",false,this);
+			MsgI.i().debug("init",false,this);
 			return false;
 		}else{
 			initSuccess();
 		}
 		
 		bProperlyInitialized=true;
-		MsgI.i().dbg("init",bProperlyInitialized,this);
+		MsgI.i().debug("init",bProperlyInitialized,this);
 		
 		return true;
 	}
@@ -555,7 +564,7 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,ISimulationTime,
 				updateFailed();
 				rUpdate.updateStartTime();
 				
-				MsgI.i().dbg("update",false,this); //only on fail to avoid too much log!
+				MsgI.i().debug("update",false,this); //only on fail to avoid too much log!
 				return false;
 			}
 			/**
@@ -586,6 +595,7 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,ISimulationTime,
 	 * @param bEnabledRequested if false, will be a Disable Request.
 	 */
 	public void setEnabledRequest(boolean bEnabledRequested) {
+		assertNotDiscarded();
 //		assertIsPreInitialized();
 		
 		if(bEnabledRequested){
@@ -603,6 +613,10 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,ISimulationTime,
 		}
 //		lEnableDisableRequestTimeMilis=updateTime();
 	};
+	
+	private void assertNotDiscarded(){
+		if(isDiscarded())throw new PrerequisitesNotMetException("cannot use a discarded state", this);
+	}
 	
 	/**
 	 * this will simply avoid initially enabling under request
@@ -623,27 +637,39 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,ISimulationTime,
 		return bEnabled;
 	}
 	
-	public boolean isDiscarding() {
+	@Override
+	public boolean isPreparingToBeDiscarded() {
 		return bDiscardRequested;
 	}
+	
+//	private void removeAllOwnedVarCmdFieldsFromMainList(){
+//		//remove all of it's owned fields from the list
+//		for(VarCmdFieldAbs vcf:VarCmdFieldAbs.getListFullCopy()){
+//			if(vcf.getOwner()==this){
+//				vcf.discardSelf(ccSelf);
+//			}
+//		}
+//	}
 	
 	/**
 	 * By discarding, it will be easier to setup a fresh, consistent and robust state.
 	 * If you need values from the discarded state, just copy/move/clone them to the new one.
 	 */
-	public boolean prepareAndCheckIfReadyToDiscard(ConditionalStateManagerI.CompositeControl cc) {
+	public boolean prepareToDiscard(ConditionalStateManagerI.CompositeControl cc) {
 		cc.assertSelfNotNull();
 		if(!bProperlyInitialized)return false; //TODO log warn
-		if(!isDiscarding())throw new PrerequisitesNotMetException("not discarding");
+		if(!isPreparingToBeDiscarded())throw new PrerequisitesNotMetException("not discarding");
 		
-		if(bEnabled){
+		VarCmdFieldAbs.removeAllWhoseOwnerIsBeingDiscarded();
+		
+		if(isEnabled()){
 			boolean bRetry=false;
 			
 			if(!rDiscard.isReady()){
 //			if(getUpdatedTime() < (lCleanupRequestMilis+lCleanupRetryDelayMilis)){
 				bRetry=true;
 			}else{
-				bRetry = !disableAttempt();
+				bRetry = !disableAttempt(); //TODO request disable instead?
 				if(bRetry){ //failed, retry
 					rDiscard.updateStartTime();
 //					lCleanupRequestMilis=getUpdatedTime();
@@ -651,14 +677,14 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,ISimulationTime,
 			}
 			
 			if(bRetry){
-				MsgI.i().dbg(""+ELogAction.discard,false,this);
+				MsgI.i().debug(""+ELogAction.discard,false,this);
 				return false;
 			}
 		}
 		
 		asmParent=null;
 		
-		MsgI.i().dbg(""+ELogAction.discard,true,this);
+		MsgI.i().debug(""+ELogAction.discard,true,this);
 		
 		return true;
 	}
@@ -717,6 +743,8 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,ISimulationTime,
 	 * @return
 	 */
 	public ConditionalStateAbs copyCurrentValuesFrom(ConditionalStateAbs cas){
+//		cas.getHolder(this.getClass()).isChangedAndUpdateHash(this);
+		cas.getHolder().setHolded(this);
 		return this;
 	}
 	
@@ -866,5 +894,22 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,ISimulationTime,
 	@Override
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		fld.set(this,value);
+	}
+	
+//	@Override
+//	public <H> HashChangeHolder<H> getHolder(Class<H> cl) {
+//		return (HashChangeHolder<H>) hchHolder;
+//	}
+	
+	@Override
+	public HashChangeHolder<?> getHolder() {
+		if(this.hchHolder==null)throw new PrerequisitesNotMetException("holder should have been set!",this);
+		return hchHolder;
+	}
+	
+	@Override
+	public void setHolder(HashChangeHolder<?> hch) {
+		PrerequisitesNotMetException.assertNotAlreadySet("holder", this.hchHolder, hch, this);
+		this.hchHolder=(HashChangeHolder<? extends ConditionalStateAbs>) hch;
 	}
 }

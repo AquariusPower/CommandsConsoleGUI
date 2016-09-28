@@ -34,6 +34,7 @@ import java.util.HashMap;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  * TODO validate enable/disable too? can only enable if disabled; can only disable if enabled.
+ * TODO cant this class be removed? is it that useful? is it duplicating some other algorithm?
  */
 public class CheckInitAndCleanupI {
 	public static interface ICheckInitAndCleanupI{

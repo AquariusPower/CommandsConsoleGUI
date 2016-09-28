@@ -65,7 +65,7 @@ public class OperationalSystem {
 		flBaseSaveDataPath = new File(strPath+File.separator);
 		if(!flBaseSaveDataPath.exists()){
 			if(flBaseSaveDataPath.mkdirs()){
-				MsgI.i().dbg("created path: "+flBaseSaveDataPath.getAbsolutePath(), true, this);
+				MsgI.i().debug("created path: "+flBaseSaveDataPath.getAbsolutePath(), true, this);
 			}
 		}
 	}

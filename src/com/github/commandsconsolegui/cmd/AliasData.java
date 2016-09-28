@@ -27,6 +27,11 @@
 
 package com.github.commandsconsolegui.cmd;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
@@ -51,6 +56,11 @@ public class AliasData{
 	
 	@Override
 	public boolean equals(Object obj) {
+		/**
+		 * TODO if you need to comprare something, do an specific method to compare, isIdEqual() etc... do not mess with default object equals() !!
+		 */
+		GlobalCommandsDelegatorI.i().dumpDevWarnEntry("this method is really necessary? or can be removed?",this);
+		
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -60,6 +70,11 @@ public class AliasData{
 		AliasData other = (AliasData) obj;
 		if (bBlocked != other.bBlocked)
 			return false;
+//		if (cc == null) {
+//			if (other.cc != null)
+//				return false;
+//		} else if (!cc.equals(other.cc))
+//			return false;
 		if (strAliasId == null) {
 			if (other.strAliasId != null)
 				return false;
@@ -73,15 +88,30 @@ public class AliasData{
 		return true;
 	}
 	
+	/**
+	 * This hashcode is useful to detect if any alias on the list has changed its internal fields,
+	 * and therefore, made the list different itself.
+	 * TODO verify why the list really needs this?
+	 * TODO make an alias list change checker (that does exactly what this code does) and do not touch default hash() and equals()?
+	 */
 	@Override
 	public int hashCode() {
+		GlobalCommandsDelegatorI.i().dumpDevWarnEntry("can this method not be overriden? or is it that useful?",this);
+//		try {
+//			GlobalCommandsDelegatorI.i().dumpDevWarnEntry("usages ST"+
+//				MessageDigest.getInstance("MD5").digest(
+//					Thread.currentThread().getStackTrace().toString().getBytes()),this);
+//		} catch (NoSuchAlgorithmException e) {}
+		
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (bBlocked ? 1231 : 1237);
+//		result = prime * result + ((cc == null) ? 0 : cc.hashCode());
 		result = prime * result
 				+ ((strAliasId == null) ? 0 : strAliasId.hashCode());
 		result = prime * result
 				+ ((strCmdLine == null) ? 0 : strCmdLine.hashCode());
 		return result;
 	}
+
 }

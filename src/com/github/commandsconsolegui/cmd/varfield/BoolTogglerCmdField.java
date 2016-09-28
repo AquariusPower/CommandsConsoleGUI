@@ -288,7 +288,7 @@ public class BoolTogglerCmdField<S extends BoolTogglerCmdField<S>> extends VarCm
 					if(isCallerAssigned()){
 						super.prepareCallerAssigned();
 					}else{
-						MsgI.i().warn("call on value changed not set for "+this.getReport(), this);
+						MsgI.i().devWarn("caller not set "+this.getReport(), this);
 					}
 				}
 			}

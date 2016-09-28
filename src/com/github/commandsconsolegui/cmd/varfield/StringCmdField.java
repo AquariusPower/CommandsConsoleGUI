@@ -27,12 +27,14 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
+import java.util.AbstractList;
+import java.util.ArrayList;
+
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.ConsoleVariable;
-import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs.EVarCmdMode;
-import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.MsgI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 
 /**
@@ -155,25 +157,40 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 //		return "ERROR: "+StringCmdField.class.getName()+" not yet properly initialized!";
 //	}
 	
-	@Override
-	public boolean equals(Object obj) {
-//		if(strCmdId==null)throw new NullPointerException(errorMessage());
-//		if(getUniqueCmdId()==null)chkAndInit();//initialize();
+	public boolean isUniqueCmdIdEqualTo(String strCmdChk){
 		chkAndInit();
 		
+		strCmdChk=strCmdChk.trim();
+		
 		if(bIgnoreCaseOnComparison){
-			return getUniqueCmdId().equalsIgnoreCase(""+obj);
+			return getUniqueCmdId().equalsIgnoreCase(strCmdChk);
 		}else{
-			return getUniqueCmdId().equals(""+obj);
+			return getUniqueCmdId().equals(strCmdChk);
 		}
 	}
 	
+	/**
+	 * TODO one day, remove this override and try to not do this mess again!!! being verified since 20160928
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(!Thread.currentThread().getStackTrace()[2].getClassName().equals(ArrayList.class.getName())){
+			MsgI.i().devWarn("do not use this method if not an object instance comparison!!!", this, obj);
+		}
+		
+		return super.equals(obj);
+	}
+	/**
+	 * TODO one day, remove this override and try to not do this mess again!!! being verified since 20160928
+	 */
 	@Override
 	public int hashCode() {
-//		if(strCmdId==null)throw new NullPointerException(errorMessage());
-//		if(getUniqueCmdId()==null)chkAndInit();//initialize();
-		chkAndInit();
-		return getUniqueCmdId().hashCode();
+		if(!Thread.currentThread().getStackTrace()[2].getClassName().equals(AbstractList.class.getName())){
+			MsgI.i().devWarn("do not use this method!!!", this);
+		}
+//		chkAndInit();
+//		return getUniqueCmdId().hashCode();
+		return super.hashCode();
 	}
 	
 //	@Override

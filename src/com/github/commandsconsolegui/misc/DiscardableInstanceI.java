@@ -27,74 +27,28 @@
 
 package com.github.commandsconsolegui.misc;
 
+
 /**
- * To easily detect if an object has changed.
- * 
- * TODO what about hash clash? could make this method useless if abs precision is required?
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class HashChangeHolder<T> {
-	public static interface IHolded{
-//		public <H> HashChangeHolder<H> getHolder(Class<H> cl);
-		public HashChangeHolder<?> getHolder();
-		public void setHolder(HashChangeHolder<?> hch);
-	}
+public class DiscardableInstanceI{
+	private static DiscardableInstanceI instance = new DiscardableInstanceI();
+	public static DiscardableInstanceI i(){return instance;}
 	
-	private T holded;
-	private int	iHash;
-	private long lCount;
-	private long	lLastChangeTime;
-	private StackTraceElement[] ste;
-
-	public HashChangeHolder(T objRef){
-		setHolded(objRef);
-//		this.objRef=objRef;
-	}
-	
-	public T getHolded(){
-		return holded;
-	}
-	
-	public boolean isChangedAndUpdateHash(){
-		return isChangedAndUpdateHash(holded);
-	}
-	public boolean isChangedAndUpdateHash(T holdedNew){
-		setHolded(holdedNew);
-//		this.objRef = objRefNew;
-		
-		int iHashTmp = getHolded().hashCode();
-		if(iHashTmp!=iHash){
-			iHash=iHashTmp;
-			lCount++;
-			ste=Thread.currentThread().getStackTrace();
-			lLastChangeTime=System.nanoTime();
-			return true;
+	public boolean isDiscarding(Object obj){
+		if(obj instanceof IDiscardableInstance){
+			return ((IDiscardableInstance)obj).isPreparingToBeDiscarded();
+//		}else{
+//			MsgI.i().devWarn("shouldnt be called as obj type is not "+IDiscardableInstance.class, obj);
 		}
 		
 		return false;
 	}
-	public void setHolded(Object holdedNew){
-		if(this.holded!=null){
-			if(this.holded.getClass()!=holdedNew.getClass()){
-				throw new PrerequisitesNotMetException("cannot change the object type", this.holded, this.holded.getClass(), holdedNew, holdedNew.getClass());
-			}
-		}
-		
-//		isChangedAndUpdateHash((T)objRef);
-		this.holded = (T)holdedNew;
-		
-		if(this.holded instanceof IHolded){
-			((IHolded)this.holded).setHolder(this);
-		}
-	}
 	
-	public long getChangedCount(){
-		return lCount;
-	}
-	
-	public long getLastChangeTimeNano(){
-		return lLastChangeTime;
+	public static interface IDiscardableInstance {
+		public boolean isPreparingToBeDiscarded();
+//		public <T> HashChangeHolder<T> getHolder(Class<T> cl);
 	}
 }

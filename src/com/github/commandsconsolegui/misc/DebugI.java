@@ -29,8 +29,10 @@ package com.github.commandsconsolegui.misc;
 
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
@@ -224,7 +226,14 @@ public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 	}
 
-	public static String joinMessageWithObjects(String strMessage, Object... aobjCustom){
+	public String joinMessageWithObjects(boolean bPrependCurrentTime, String strMessage, Object... aobjCustom){
+		String strTime=new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()));
+		if(bPrependCurrentTime){
+			strMessage=strTime+strMessage;
+		}
+		return joinMessageWithObjects(strMessage,aobjCustom);
+	}
+	public String joinMessageWithObjects(String strMessage, Object... aobjCustom){
 		if(aobjCustom!=null){
 			for(int i=0;i<aobjCustom.length;i++){
 				Object obj = aobjCustom[i];
@@ -242,7 +251,7 @@ public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
 		
 		return strMessage;
 	}
-	private static String multilineIfArray(String strIndexPrefix, Object obj){
+	private String multilineIfArray(String strIndexPrefix, Object obj){
 		String strOut="";
 		
 		Object[] aobj = null; //obj instanceof Object[]
@@ -299,7 +308,7 @@ public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
 		
 		return strOut;
 	}
-	private static String fmtObj(Object obj,boolean bShowClassName){
+	private String fmtObj(Object obj,boolean bShowClassName){
 		String strCl = "";
 		if(obj!=null && bShowClassName)strCl=obj.getClass().getName();
 		return ""+(obj==null ? null : strCl+": "+obj.toString()); //this is better when dumping a sub-stacktrace

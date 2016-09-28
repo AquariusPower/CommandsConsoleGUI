@@ -60,6 +60,7 @@ public class DumpEntryData{
 	private long	lMilis;
 	private boolean	bShowTime = true;
 	private boolean	bShowDumpObjects;
+	private long lKeyOcurrenceTimes=1;
 	
 	public DumpEntryData() {
 		lMilis = System.currentTimeMillis();
@@ -101,8 +102,11 @@ public class DumpEntryData{
 		}
 		
 		str+=strKey;
+		if(lKeyOcurrenceTimes>1){
+			str+=" (x"+lKeyOcurrenceTimes+")";
+		}
 		
-		str=DebugI.joinMessageWithObjects(str, bShowObjects ? aobjCustom : null);
+		str=DebugI.i().joinMessageWithObjects(str, bShowObjects ? aobjCustom : null);
 //		if(aobjCustom!=null && bShowObjects){
 //			for(int i=0;i<aobjCustom.length;i++){
 //				Object obj = aobjCustom[i];
@@ -261,6 +265,14 @@ public class DumpEntryData{
 	
 	public boolean isShowDumpObjects(){
 		return bShowDumpObjects;
+	}
+
+	public long getKeyOcurrenceTimes() {
+		return lKeyOcurrenceTimes;
+	}
+
+	public void incKeyOcurrenceTimes() {
+		this.lKeyOcurrenceTimes++;
 	}
 }
 

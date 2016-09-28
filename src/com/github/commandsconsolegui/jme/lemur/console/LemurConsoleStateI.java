@@ -953,9 +953,9 @@ public class LemurConsoleStateI<T extends Command<Button>> extends ConsoleStateA
 	}
 	
 	@Override
-	public boolean prepareAndCheckIfReadyToDiscard(ConditionalStateManagerI.CompositeControl cc) {
+	public boolean prepareToDiscard(ConditionalStateManagerI.CompositeControl cc) {
 		getDialogMainContainer().clearChildren();
-		return super.prepareAndCheckIfReadyToDiscard(cc);
+		return super.prepareToDiscard(cc);
 	}
 
 	@Override

@@ -39,6 +39,7 @@ import com.github.commandsconsolegui.misc.CallQueueI.CallerInfo;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
+import com.github.commandsconsolegui.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -109,6 +110,19 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 		return a;
 	}
 	
+	public static ArrayList<VarCmdFieldAbs> removeAllWhoseOwnerIsBeingDiscarded(){
+		ArrayList<VarCmdFieldAbs> avcfDiscarded = new ArrayList<VarCmdFieldAbs>();
+		
+		for(VarCmdFieldAbs vcf:getListFullCopy()){
+			if(DiscardableInstanceI.i().isDiscarding(vcf.getOwner())){
+				vcf.discardSelf();
+				avcfDiscarded.add(vcf);
+			}
+		}
+		
+		return avcfDiscarded;
+	}
+	
 	/**
 	 * 
 	 * @param rfcfgOwner use null if this is not a class field, but a local variable, or for any reason the related console variable creation is to be skipped.
@@ -124,12 +138,23 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 //		if(bAddToList)VarCmdFieldAbs.avcfList.add(this);
 //	}
 	
+//	public void discardSelf(CommandsDelegator.CompositeControl ccSelf) {
+//		ccSelf.assertSelfNotNull();
+//		discardSelf();
+//	}
 	/**
 	 * When discarding a class object that has fields of this class,
 	 * the global fields list {@link #avcfList} must also be updated/synchronized.
-	 * @param ccSelf
 	 */
-	public void discardSelf(CommandsDelegator.CompositeControl ccSelf) {
+	private void discardSelf() {
+		if(!VarCmdFieldAbs.avcfList.contains(this)){
+			/**
+			 * if owner is set, it should be on the main list,
+			 * shall not try to remove if not on the main list...
+			 */
+			throw new PrerequisitesNotMetException("inconsistency", this, getOwner(), VarCmdFieldAbs.avcfList);
+		}
+		
 		VarCmdFieldAbs.avcfList.remove(this);
 	}
 	
@@ -138,6 +163,7 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 	}
 	
 	public S setCmdData(CommandData cmdd){
+		PrerequisitesNotMetException.assertNotAlreadySet("cmd data link to this var", this.cmdd, cmdd, this);
 		this.cmdd=cmdd;
 		return getThis();
 	}
@@ -371,7 +397,11 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 			if(getOwner()==null)str+=" No owner.";
 			str+=")";
 		}else{
-			str+=getUniqueVarId();
+			if(isCmd()){
+				str+=getUniqueCmdId();
+			}else{
+				str+=getUniqueVarId();
+			}
 		}
 		
 		return str+" = "+getValueReport();

@@ -882,7 +882,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 				alConsoleToggle = new ActionListener() {
 					@Override
 					public void onAction(String name, boolean isPressed, float tpf) {
-						if(isPressed && INPUT_MAPPING_CONSOLE_TOGGLE.getUniqueCmdId().equals(name)){
+						if(isPressed && INPUT_MAPPING_CONSOLE_TOGGLE.isUniqueCmdIdEqualTo(name)){
 //							if(!isInitialized()){
 //								initialize();
 //							}
@@ -937,7 +937,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
     	@Override
     	public void onAnalog(String name, float value, float tpf) {
 	      if (isEnabled()) {
-	      	boolean bUp = INPUT_MAPPING_CONSOLE_SCROLL_UP.equals(name);
+	      	boolean bUp = INPUT_MAPPING_CONSOLE_SCROLL_UP.isUniqueCmdIdEqualTo(name);
 	      	
 	      	if(sptScrollTarget==null)return;
 	      	
@@ -1837,7 +1837,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	 * see how flow starting with {@link #requestRestart()} works
 	 */
 	@Override
-	public boolean prepareAndCheckIfReadyToDiscard(ConditionalStateManagerI.CompositeControl cc) {
+	public boolean prepareToDiscard(ConditionalStateManagerI.CompositeControl cc) {
 //		tdLetCpuRest.reset();
 //		tdScrollToBottomRequestAndSuspend.reset();
 //		tdScrollToBottomRetry.reset();
@@ -1868,7 +1868,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
     bInitializeOnlyTheUI=false;
 //    bInitialized=false;
     
-		return super.prepareAndCheckIfReadyToDiscard(cc);
+		return super.prepareToDiscard(cc);
 	}
 	
 //	private boolean isInitiallyClosed() {

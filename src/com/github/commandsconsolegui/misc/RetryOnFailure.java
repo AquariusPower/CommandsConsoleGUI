@@ -32,7 +32,7 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LemurDialogCS;
+import com.github.commandsconsolegui.misc.DiscardableInstanceI.IDiscardableInstance;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -42,7 +42,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class RetryOnFailure implements IReflexFillCfg{
+public class RetryOnFailure implements IReflexFillCfg,IDiscardableInstance{
 	public static final class CompositeControl extends CompositeControlAbs<RetryOnFailure>{
 		private CompositeControl(RetryOnFailure casm){super(casm);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
@@ -151,4 +151,10 @@ public class RetryOnFailure implements IReflexFillCfg{
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		fld.set(this,value);
 	}
+
+	@Override
+	public boolean isPreparingToBeDiscarded() {
+		return DiscardableInstanceI.i().isDiscarding(irlo);
+	}
+
 }

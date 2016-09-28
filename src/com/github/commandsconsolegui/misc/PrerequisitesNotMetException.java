@@ -46,7 +46,7 @@ public class PrerequisitesNotMetException extends NullPointerException {
 	private static boolean	bRequestExit;
 
 	public PrerequisitesNotMetException(boolean bExitApplication, String strMessage, Object... aobj) {
-		super(DebugI.joinMessageWithObjects(strMessage,aobj));
+		super(DebugI.i().joinMessageWithObjects(strMessage,aobj));
 		PrerequisitesNotMetException.bRequestExit=bExitApplication;
 	}
 	public PrerequisitesNotMetException(String str, Object... aobj) {
@@ -81,7 +81,7 @@ public class PrerequisitesNotMetException extends NullPointerException {
 		return bRequestExit;
 	}
 	
-		public static void assertNotAlreadySet(String strDescWhat, Object objCurrent, Object objNew, Object... aobjMoreObjectsForDebugInfo){
+	public static void assertNotAlreadySet(String strDescWhat, Object objCurrent, Object objNew, Object... aobjMoreObjectsForDebugInfo){
 		ArrayList<Object> aobjAll = new ArrayList<Object>();
 		aobjAll.add(objCurrent);
 		aobjAll.add(objNew);

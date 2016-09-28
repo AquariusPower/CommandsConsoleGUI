@@ -88,7 +88,7 @@ public class ConditionalStateManagerI extends AbstractAppState {
 		for(ConditionalStateAbs cas:aCondStateList){
 			if(!cas.doItAllProperly(ccSelf,tpf))continue;
 			
-			if(cas.isDiscarding()){
+			if(cas.isPreparingToBeDiscarded()){
 				if(aToDiscard==null)aToDiscard=new ArrayList<ConditionalStateAbs>();
 				aToDiscard.add(cas);
 			}else{
@@ -104,7 +104,7 @@ public class ConditionalStateManagerI extends AbstractAppState {
 		
 		if(aToDiscard!=null){
 			for(ConditionalStateAbs cas:aToDiscard){
-				if(cas.prepareAndCheckIfReadyToDiscard(ccSelf)){
+				if(cas.prepareToDiscard(ccSelf)){
 					if(cas instanceof IConsoleCommandListener){
 						GlobalCommandsDelegatorI.i().removeListener((IConsoleCommandListener)cas);
 					}

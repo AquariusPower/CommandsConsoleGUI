@@ -46,6 +46,7 @@ import com.github.commandsconsolegui.jme.lemur.dialog.MaintenanceListLemurDialog
 import com.github.commandsconsolegui.jme.lemur.dialog.QuestionLemurDialogState;
 import com.github.commandsconsolegui.misc.Configure;
 import com.github.commandsconsolegui.misc.Configure.IConfigure;
+import com.github.commandsconsolegui.misc.HashChangeHolder;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -93,7 +94,8 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 	// generic dialog
 	private ChoiceLemurDialogState<T>	diagChoice;
 
-	private MaintenanceListLemurDialogState<T>	diagList;
+//	private MaintenanceListLemurDialogState<T>	diagList;
+	private HashChangeHolder<MaintenanceListLemurDialogState<T>>	hchdiagList = new HashChangeHolder<MaintenanceListLemurDialogState<T>>(null);
 
 	private QuestionLemurDialogState<T>	diagQuestion;
 
@@ -144,6 +146,8 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		consolePlugin.configure(new SimpleConsolePlugin.CfgParm(
 			ConsoleTestI.class.getName().replace(".",File.separator)));
 		
+		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
+		
 		bConfigured=true;
 		return this;
   }
@@ -155,7 +159,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 	public void simpleInitApp() {
 		Configure.assertConfigured(this);
 		
-		MsgI.bDebug=true;
+		MsgI.i().setEnableDebugMessages(true);
 		
 		consolePlugin.initialize();
 		
@@ -166,8 +170,9 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		diagQuestion = new QuestionLemurDialogState<T>().configure(new QuestionLemurDialogState.CfgParm(
 			500f, 300f, null, null));
 		
-		diagList = new MaintenanceListLemurDialogState<T>().configure(new MaintenanceListLemurDialogState.CfgParm<T>(
-			null, null, null, null, diagChoice, diagQuestion));
+//		diagList = 
+		hchdiagList.setHolded(new MaintenanceListLemurDialogState<T>().configure(new MaintenanceListLemurDialogState.CfgParm<T>(
+			null, null, null, null, diagChoice, diagQuestion)));
 		
 		prepareTestData();
 	}
@@ -177,6 +182,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 			diagChoice.addEntryQuick(null); 
 		}
 		
+		MaintenanceListLemurDialogState<T> diagList = hchdiagList.getHolded();
 		diagList.addEntryQuick(null);
 		diagList.addEntryQuick(null);
 		
@@ -245,7 +251,8 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 			bCommandWorked = true;
 		}else
 		if(cd.checkCmdValidity(this,"testDialog")){
-			diagList.requestEnable();
+//			diagList.requestEnable();
+			hchdiagList.getHolded().requestEnable();
 			bCommandWorked = true;
 		}else
 //		if(cd.checkCmdValidity(this,"activateSelfWindow")){

@@ -1044,7 +1044,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 				throw new PrerequisitesNotMetException("not going to be rendered", pnl, v3fSizeF, bForceSpecificSize);
 			}else{
 				CallQueueI.i().addCall(caller);
-				MsgI.i().dbg("postponed resize "+pnl+", "+v3fSizeF, true, this);
+				MsgI.i().debug("postponed resize "+pnl+", "+v3fSizeF, true, this);
 			}
 		}
 		
