@@ -112,7 +112,12 @@ public class ConditionalStateManagerI extends AbstractAppState {
 					aCondStateList.remove(cas);
 					cas.applyDiscardedStatus(ccSelf);
 					
-					cas.createAndConfigureSelfCopy(); //this will add the new one to manager too
+					ConditionalStateAbs casNew = cas.createAndConfigureSelfCopy(); //this will add the new one to manager too
+					if(cas.isRestartRequested()){
+						if(cas.isWasEnabledBeforeRestarting()){
+							casNew.requestEnable(); //TODO use Request class so this have a chance to work properly (at next frame or later)
+						}
+					}
 				}
 			}
 		}

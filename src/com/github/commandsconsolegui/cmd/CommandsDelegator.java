@@ -59,6 +59,7 @@ import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
+import com.github.commandsconsolegui.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MiscI.EStringMatchMode;
@@ -694,7 +695,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			throw new PrerequisitesNotMetException("listener already removed?", iccl);
 		}
 		
-		removeAllCmdsFor(iccl);
+//		removeAllCmdsFor(iccl);
+		removeAllCmdsOfOwnersBeingDiscarded();
 		
 //		//remove all of it's owned fields from the list
 //		for(VarCmdFieldAbs vcf:VarCmdFieldAbs.getListFullCopy()){
@@ -1852,8 +1854,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	 * use with caution!
 	 * TODO remove all BoolTogglers, and other field CMDs
 	 * @param iccl
+	 * @return 
 	 */
-	private void removeAllCmdsFor(IConsoleCommandListener iccl){
+	@Deprecated
+	private ArrayList<CommandData> removeAllCmdsFor(IConsoleCommandListener iccl){
 		MsgI.i().debug("WARNING: Removing all registered commands for: "+iccl.getClass().getName(), true, this);
 //		System.err.println("WARNING: Removing all registered commands for: "+iccl.getClass().getName());
 		
@@ -1871,9 +1875,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		MsgI.i().debug("WARNING: removing: "+astr.toString(), true, this);
 //		System.err.println("WARNING: removing: "+astr.toString());
 		
+		ArrayList<CommandData> acmdRm = new ArrayList<CommandData>();
+		
 		for(String strUCmd:astr){
-			if(trmCmddList.remove(strUCmd) == null){
-				throw new PrerequisitesNotMetException("Inconsistent tree");
+			CommandData cmd = trmCmddList.remove(strUCmd);
+			if(cmd == null){
+				throw new PrerequisitesNotMetException("Inconsistent");
+			}else{
+				acmdRm.add(cmd);
 			}
 		}
 		
@@ -1884,6 +1893,31 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		}
 		
 		Thread.dumpStack();
+		
+		return acmdRm;
+	}
+	
+	public ArrayList<CommandData> removeAllCmdsOfOwnersBeingDiscarded(){
+		ArrayList<CommandData> acmdRm = new ArrayList<CommandData>();
+		
+		for(Entry<String, CommandData> entry:trmCmddList.entrySet().toArray(new Entry[0])){
+			CommandData cmd = entry.getValue();
+			if(DiscardableInstanceI.i().isDiscarding(cmd.getOwner())){
+				if(trmCmddList.remove(entry.getKey())==null){
+					throw new PrerequisitesNotMetException("Inconsistent");
+				}
+				MsgI.i().debug("removing: "+entry.getKey());
+				acmdRm.add(cmd);
+			}
+		}
+		
+		if(trmCmddList.get(cmddLastAdded.getUniqueCmdId())==null){
+			cmddLastAdded=null;
+		}
+		
+		Thread.dumpStack();
+		
+		return acmdRm;
 	}
 	
 	public ArrayList<String> getAllCommandFor(IConsoleCommandListener iccl){

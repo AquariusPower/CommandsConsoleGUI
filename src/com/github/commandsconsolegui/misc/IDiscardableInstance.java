@@ -27,28 +27,12 @@
 
 package com.github.commandsconsolegui.misc;
 
-
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class DiscardableInstanceI{
-	private static DiscardableInstanceI instance = new DiscardableInstanceI();
-	public static DiscardableInstanceI i(){return instance;}
-	
-	public boolean isDiscarding(Object obj){
-		if(obj instanceof IDiscardableInstance){
-			return ((IDiscardableInstance)obj).isPreparingToBeDiscarded();
-//		}else{
-//			MsgI.i().devWarn("shouldnt be called as obj type is not "+IDiscardableInstance.class, obj);
-		}
-		
-		return false;
-	}
-	
-//	public static interface IDiscardableInstance {
-//		public boolean isPreparingToBeDiscarded();
-////		public <T> HashChangeHolder<T> getHolder(Class<T> cl);
-//	}
+public interface IDiscardableInstance {
+	public boolean isPreparingToBeDiscarded();
+//	public <T> HashChangeHolder<T> getHolder(Class<T> cl);
 }

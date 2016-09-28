@@ -27,28 +27,50 @@
 
 package com.github.commandsconsolegui.misc;
 
+import java.util.ArrayList;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
+ * @param <T>
  */
-public class DiscardableInstanceI{
-	private static DiscardableInstanceI instance = new DiscardableInstanceI();
-	public static DiscardableInstanceI i(){return instance;}
-	
-	public boolean isDiscarding(Object obj){
-		if(obj instanceof IDiscardableInstance){
-			return ((IDiscardableInstance)obj).isPreparingToBeDiscarded();
-//		}else{
-//			MsgI.i().devWarn("shouldnt be called as obj type is not "+IDiscardableInstance.class, obj);
+public class HoldRestartable<T extends IRestartable> {
+	private static ArrayList<HoldRestartable> ahrList=new ArrayList<HoldRestartable>();
+	public static void updateAllRestartableHolders(IRestartable irDiscarding, IRestartable irNew){
+		for(HoldRestartable hr:ahrList){
+			if(hr.ir==irDiscarding){
+				hr.set(irNew);
+			}
 		}
-		
-		return false;
 	}
 	
-//	public static interface IDiscardableInstance {
-//		public boolean isPreparingToBeDiscarded();
-////		public <T> HashChangeHolder<T> getHolder(Class<T> cl);
-//	}
+	private IRestartable	ir;
+
+	public HoldRestartable(){
+		ahrList.add(this);
+	}
+	public HoldRestartable(IRestartable ir){
+		this();
+		set(ir);
+	}
+	
+	public void set(IRestartable ir){
+		if(this.ir!=null){
+			if(!this.ir.isPreparingToBeDiscarded()){
+				throw new PrerequisitesNotMetException("cannot update the holded if it is not being discarded", this.ir, ir, this);
+			}
+			
+			if(this.ir.getClass()!=ir.getClass()){
+				throw new PrerequisitesNotMetException("old and new must be of the same concrete class", this.ir, ir, this);
+			}
+		}
+		
+		this.ir=ir;
+	}
+	
+	public T get(){
+		return (T)ir;
+	}
 }
+

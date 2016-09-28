@@ -36,11 +36,6 @@ package com.github.commandsconsolegui.misc;
  *
  */
 public class HashChangeHolder<T> {
-	public static interface IHolded{
-//		public <H> HashChangeHolder<H> getHolder(Class<H> cl);
-		public HashChangeHolder<?> getHolder();
-		public void setHolder(HashChangeHolder<?> hch);
-	}
 	
 	private T holded;
 	private int	iHash;
@@ -78,16 +73,16 @@ public class HashChangeHolder<T> {
 	public void setHolded(Object holdedNew){
 		if(this.holded!=null){
 			if(this.holded.getClass()!=holdedNew.getClass()){
-				throw new PrerequisitesNotMetException("cannot change the object type", this.holded, this.holded.getClass(), holdedNew, holdedNew.getClass());
+				throw new PrerequisitesNotMetException("must be of the same concrete class", this.holded, this.holded.getClass(), holdedNew, holdedNew.getClass());
 			}
 		}
 		
 //		isChangedAndUpdateHash((T)objRef);
 		this.holded = (T)holdedNew;
 		
-		if(this.holded instanceof IHolded){
-			((IHolded)this.holded).setHolder(this);
-		}
+//		if(this.holded instanceof IHolded){
+//			((IHolded)this.holded).setHolder(this);
+//		}
 	}
 	
 	public long getChangedCount(){

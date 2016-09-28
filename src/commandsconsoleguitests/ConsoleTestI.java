@@ -47,6 +47,7 @@ import com.github.commandsconsolegui.jme.lemur.dialog.QuestionLemurDialogState;
 import com.github.commandsconsolegui.misc.Configure;
 import com.github.commandsconsolegui.misc.Configure.IConfigure;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
+import com.github.commandsconsolegui.misc.HoldRestartable;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -95,7 +96,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 	private ChoiceLemurDialogState<T>	diagChoice;
 
 //	private MaintenanceListLemurDialogState<T>	diagList;
-	private HashChangeHolder<MaintenanceListLemurDialogState<T>>	hchdiagList = new HashChangeHolder<MaintenanceListLemurDialogState<T>>(null);
+	private HoldRestartable<MaintenanceListLemurDialogState<T>>	hchdiagList = new HoldRestartable<MaintenanceListLemurDialogState<T>>(null);
 
 	private QuestionLemurDialogState<T>	diagQuestion;
 
@@ -171,7 +172,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 			500f, 300f, null, null));
 		
 //		diagList = 
-		hchdiagList.setHolded(new MaintenanceListLemurDialogState<T>().configure(new MaintenanceListLemurDialogState.CfgParm<T>(
+		hchdiagList.set(new MaintenanceListLemurDialogState<T>().configure(new MaintenanceListLemurDialogState.CfgParm<T>(
 			null, null, null, null, diagChoice, diagQuestion)));
 		
 		prepareTestData();
@@ -182,7 +183,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 			diagChoice.addEntryQuick(null); 
 		}
 		
-		MaintenanceListLemurDialogState<T> diagList = hchdiagList.getHolded();
+		MaintenanceListLemurDialogState<T> diagList = hchdiagList.get();
 		diagList.addEntryQuick(null);
 		diagList.addEntryQuick(null);
 		
@@ -252,7 +253,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		}else
 		if(cd.checkCmdValidity(this,"testDialog")){
 //			diagList.requestEnable();
-			hchdiagList.getHolded().requestEnable();
+			hchdiagList.get().requestEnable();
 			bCommandWorked = true;
 		}else
 //		if(cd.checkCmdValidity(this,"activateSelfWindow")){

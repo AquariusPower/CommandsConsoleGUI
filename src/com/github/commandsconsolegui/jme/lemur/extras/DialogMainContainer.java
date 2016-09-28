@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
+import com.github.commandsconsolegui.misc.DiscardableInstanceI;
+import com.github.commandsconsolegui.misc.IDiscardableInstance;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -49,7 +51,7 @@ import com.simsilica.lemur.style.ElementId;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class DialogMainContainer extends Container implements ISpatialValidator, IReflexFillCfg{
+public class DialogMainContainer extends Container implements ISpatialValidator, IDiscardableInstance, IReflexFillCfg{
 	private DialogStateAbs	diagOwner;
 	private boolean	bLayoutValid;
 //	ISpatialValidator diag;
@@ -271,5 +273,10 @@ public class DialogMainContainer extends Container implements ISpatialValidator,
 	@Override
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		fld.set(this,value);
+	}
+
+	@Override
+	public boolean isPreparingToBeDiscarded() {
+		return DiscardableInstanceI.i().isDiscarding(diagOwner);
 	}
 }

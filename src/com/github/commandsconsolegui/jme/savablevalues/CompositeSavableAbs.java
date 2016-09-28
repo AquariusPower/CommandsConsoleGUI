@@ -30,6 +30,8 @@ package com.github.commandsconsolegui.jme.savablevalues;
 import java.io.IOException;
 
 import com.github.commandsconsolegui.jme.DialogStateAbs.DialogCS;
+import com.github.commandsconsolegui.misc.DiscardableInstanceI;
+import com.github.commandsconsolegui.misc.IDiscardableInstance;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.jme.SavableHelperI;
 import com.github.commandsconsolegui.misc.jme.SavableHelperI.ISavableFieldAccess;
@@ -46,7 +48,7 @@ import com.jme3.export.JmeImporter;
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> implements ISavableFieldAccess {
+public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> implements ISavableFieldAccess,IDiscardableInstance {
 	public static class SaveSkipperCS<O> extends SaveSkipper<O>{
 		public SaveSkipperCS(ISavableFieldAccess isfa) {
 			super(isfa);
@@ -127,4 +129,8 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 		SavableHelperI.i().read(this,im);
 	}
 	
+	@Override
+	public boolean isPreparingToBeDiscarded(){
+		return DiscardableInstanceI.i().isDiscarding(getOwner());
+	}
 }

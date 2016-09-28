@@ -39,9 +39,9 @@ import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
 import com.github.commandsconsolegui.misc.Configure;
 import com.github.commandsconsolegui.misc.Configure.IConfigure;
-import com.github.commandsconsolegui.misc.DiscardableInstanceI.IDiscardableInstance;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
-import com.github.commandsconsolegui.misc.HashChangeHolder.IHolded;
+import com.github.commandsconsolegui.misc.HoldRestartable;
+import com.github.commandsconsolegui.misc.IRestartable;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -71,7 +71,7 @@ import com.jme3.scene.Node;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public abstract class ConditionalStateAbs implements IGlobalOpt,IHolded,IDiscardableInstance,ISimulationTime,IConfigure<ConditionalStateAbs>,IRetryListOwner,IReflexFillCfg{
+public abstract class ConditionalStateAbs implements IGlobalOpt,IRestartable,ISimulationTime,IConfigure<ConditionalStateAbs>,IRetryListOwner,IReflexFillCfg{
 //	public static final class CompositeControl extends CompositeControlAbs<ConditionalStateAbs>{
 //		private CompositeControl(ConditionalStateAbs casm){super(casm);};
 //	};private CompositeControl ccSelf = new CompositeControl(this);
@@ -271,7 +271,13 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,IHolded,IDiscard
 
 	private boolean	bTryingToDisable;
 
-	private HashChangeHolder<? extends ConditionalStateAbs>	hchHolder;
+	private HoldRestartable<IRestartable>	hchHolder;
+
+	private boolean	bWasEnabled;
+	
+	public boolean isWasEnabledBeforeRestarting(){
+		return bWasEnabled;
+	}
 
 //	private long	lLastUpdateTimeNano;
 	
@@ -739,12 +745,13 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,IHolded,IDiscard
 	 * Everything that is not initially configured can be copied thru this method,
 	 * like the current state/value of anything.
 	 * 
-	 * @param cas
+	 * @param casDiscarding
 	 * @return
 	 */
-	public ConditionalStateAbs copyCurrentValuesFrom(ConditionalStateAbs cas){
+	public ConditionalStateAbs copyCurrentValuesFrom(ConditionalStateAbs casDiscarding){
 //		cas.getHolder(this.getClass()).isChangedAndUpdateHash(this);
-		cas.getHolder().setHolded(this);
+		HoldRestartable.updateAllRestartableHolders(casDiscarding, this);
+//		cas.getHolder().setHolded(this);
 		return this;
 	}
 	
@@ -767,6 +774,7 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,IHolded,IDiscard
 	
 	public void requestRestart(){
 		bRestartRequested = true;
+		bWasEnabled=isEnabled();
 	}
 	
 	public boolean isRestartRequested() {
@@ -902,14 +910,14 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,IHolded,IDiscard
 //	}
 	
 	@Override
-	public HashChangeHolder<?> getHolder() {
+	public HoldRestartable<IRestartable> getHolder() {
 		if(this.hchHolder==null)throw new PrerequisitesNotMetException("holder should have been set!",this);
 		return hchHolder;
 	}
 	
 	@Override
-	public void setHolder(HashChangeHolder<?> hch) {
+	public void setHolder(HoldRestartable<IRestartable> hch) {
 		PrerequisitesNotMetException.assertNotAlreadySet("holder", this.hchHolder, hch, this);
-		this.hchHolder=(HashChangeHolder<? extends ConditionalStateAbs>) hch;
+		this.hchHolder=hch;
 	}
 }
