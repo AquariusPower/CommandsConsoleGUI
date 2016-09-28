@@ -43,7 +43,7 @@ import com.simsilica.lemur.GuiGlobals;
 /**
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public abstract class BasicLemurDialogStateAbs<T,R extends BasicLemurDialogStateAbs<T,R>> extends LemurDialogStateAbs<T,R>{
+public abstract class BasicLemurDialogStateAbs<T,THIS extends BasicLemurDialogStateAbs<T,THIS>> extends LemurDialogStateAbs<T,THIS>{
 	StringCmdField scfAddEntry = new StringCmdField(this);
 	private CfgParm	cfg;
 	
@@ -67,7 +67,7 @@ public abstract class BasicLemurDialogStateAbs<T,R extends BasicLemurDialogState
 		}
 	}
 	@Override
-	public R configure(ICfgParm icfg) {
+	public THIS configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg; //this also validates if icfg is the CfgParam of this class
 		
 		super.configure(cfg); //params are identical

@@ -86,7 +86,7 @@ import com.simsilica.lemur.focus.FocusManagerState;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleCommandListener {
+public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> implements IConsoleCommandListener {
 	public static final class CompositeControl extends CompositeControlAbs<MiscLemurStateI>{
 		private CompositeControl(MiscLemurStateI casm){super(casm);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
@@ -1239,5 +1239,10 @@ public class MiscLemurStateI extends CmdConditionalStateAbs implements IConsoleC
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		if(fld.getDeclaringClass()!=MiscLemurStateI.class){super.setFieldValue(fld,value);return;}
 		fld.set(this,value);
+	}
+
+	@Override
+	protected MiscLemurStateI getThis() {
+		return this;
 	}
 }

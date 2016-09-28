@@ -106,7 +106,7 @@ import com.simsilica.lemur.style.ElementId;
 *
 */
 //public abstract class LemurDialogGUIStateAbs<T,CS extends LemurDialogGUIStateAbs.CompositeSavableLemur,R extends LemurDialogGUIStateAbs<T,CS,R>> extends BaseDialogStateAbs<T,CS,R> {//implements IWorkAroundBugFix{
-public abstract class LemurDialogStateAbs<T,R extends LemurDialogStateAbs<T,R>> extends DialogStateAbs<T,R> {//implements IWorkAroundBugFix{
+public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,THIS>> extends DialogStateAbs<T,THIS> {//implements IWorkAroundBugFix{
 	private Label	lblTitle;
 	private Label	lblTextInfo;
 //	private ListBox<DialogListEntryData<T>>	lstbxEntriesToSelect;
@@ -202,7 +202,7 @@ private Button	btnRestart;
 //	private boolean	bMaximized;
 	
 	@Override
-	public R configure(ICfgParm icfg) {
+	public THIS configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
 		
 		fdvEntryHeightMultiplier.setObjectRawValue(cfg.fEntryHeightMultiplier);
@@ -1164,7 +1164,7 @@ private Button	btnRestart;
 	}
 	
 	@Override
-	public R setTitle(String str) {
+	public THIS setTitle(String str) {
 		super.setTitle(str);
 		lblTitle.setText(str);
 		return getThis();
@@ -1326,7 +1326,7 @@ private Button	btnRestart;
 //		return getThis();
 //	}
 	
-	public R addModalDialog(LemurDialogStateAbs<T,?> diagModal){
+	public THIS addModalDialog(LemurDialogStateAbs<T,?> diagModal){
 		diagModal.setDiagParent(this);
 		hmChildDiagModals.put(diagModal.getId(),diagModal);
 		return getThis();
@@ -1336,9 +1336,9 @@ private Button	btnRestart;
 	public boolean prepareToDiscard(CompositeControl cc) {
 		if(!super.prepareToDiscard(cc))return false;
 		
-		for(Entry<String, LemurDialogStateAbs<T, ?>> entry:hmChildDiagModals.entrySet()){
-			entry.getValue().applyDiscardingParent();
-		}
+//		for(Entry<String, LemurDialogStateAbs<T, ?>> entry:hmChildDiagModals.entrySet()){
+//			entry.getValue().applyDiscardingParent();
+//		}
 		
 		return true;
 	}

@@ -64,7 +64,7 @@ import com.simsilica.lemur.focus.FocusTarget;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 
  */
-public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements FocusChangeListener {
+public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHelperStateI> implements FocusChangeListener {
 	public static final class CompositeControl extends CompositeControlAbs<LemurFocusHelperStateI>{
 		private CompositeControl(LemurFocusHelperStateI casm){super(casm);}; }
 	private CompositeControl ccSelf = new CompositeControl(this);
@@ -509,5 +509,10 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs implements Fo
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		if(fld.getDeclaringClass()!=LemurFocusHelperStateI.class){super.setFieldValue(fld,value);return;}
 		fld.set(this,value);
+	}
+
+	@Override
+	protected LemurFocusHelperStateI getThis() {
+		return this;
 	}
 }

@@ -38,39 +38,71 @@ import java.util.ArrayList;
 public class HoldRestartable<T extends IRestartable> {
 	private static ArrayList<HoldRestartable> ahrList=new ArrayList<HoldRestartable>();
 	public static void updateAllRestartableHolders(IRestartable irDiscarding, IRestartable irNew){
-		for(HoldRestartable hr:ahrList){
-			if(hr.ir==irDiscarding){
-				hr.set(irNew);
+		for(HoldRestartable hr:new ArrayList<HoldRestartable>(ahrList)){
+			if(hr.bDiscardSelf || DiscardableInstanceI.i().isDiscarding(hr.objOwner)){
+				ahrList.remove(hr);
+			}else{
+				if(hr.irRef==irDiscarding){
+					hr.setRef(irNew);
+				}
 			}
 		}
 	}
 	
-	private IRestartable	ir;
+	private IRestartable	irRef;
+	private Object	objOwner;
+	private boolean	bDiscardSelf;
 
-	public HoldRestartable(){
+	public HoldRestartable(Object objOwner){
+		if(objOwner==null)throw new PrerequisitesNotMetException("invalid owner, use 'this'",this);
+		this.objOwner = objOwner;
 		ahrList.add(this);
 	}
-	public HoldRestartable(IRestartable ir){
-		this();
-		set(ir);
+	public HoldRestartable(Object objOwner, IRestartable ir){
+		this(objOwner);
+		setRef(ir);
 	}
 	
-	public void set(IRestartable ir){
-		if(this.ir!=null){
-			if(!this.ir.isPreparingToBeDiscarded()){
-				throw new PrerequisitesNotMetException("cannot update the holded if it is not being discarded", this.ir, ir, this);
+//	public void requestDiscardSelf(Object objOwner, IRestartable ir){
+	public void discardSelf(HoldRestartable<? extends IRestartable> hrReplacer){
+		if(this.objOwner==null)throw new PrerequisitesNotMetException("owner is null", this, hrReplacer);
+		if(this.irRef==null)throw new PrerequisitesNotMetException("holded is null", this, hrReplacer);
+		
+		if(DiscardableInstanceI.i().isDiscarding(this.objOwner)){
+			MsgI.i().devInfo("was already going to be discarded, this call is redundant", this, hrReplacer);
+		}
+		
+		if(
+				this.objOwner==hrReplacer.objOwner && 
+				this.irRef==hrReplacer.irRef &&
+				!DiscardableInstanceI.i().isDiscarding(hrReplacer.objOwner)
+		){
+			this.bDiscardSelf=true;
+//			this.objOwner=null;
+		}else{
+			throw new PrerequisitesNotMetException("cannot discard without a valid replacer",this,hrReplacer);
+		}
+	}
+	
+	public void setRef(IRestartable irRef){
+		if(this.irRef!=null){
+			if(!this.irRef.isPreparingToBeDiscarded()){
+				throw new PrerequisitesNotMetException("cannot update the holded if it is not being discarded", this.irRef, irRef, this);
 			}
 			
-			if(this.ir.getClass()!=ir.getClass()){
-				throw new PrerequisitesNotMetException("old and new must be of the same concrete class", this.ir, ir, this);
+			if(this.irRef.getClass()!=irRef.getClass()){
+				throw new PrerequisitesNotMetException("old and new must be of the same concrete class", this.irRef, irRef, this);
 			}
 		}
 		
-		this.ir=ir;
+		this.irRef=irRef;
 	}
 	
-	public T get(){
-		return (T)ir;
+	public T getRef(){
+		return (T)irRef;
+	}
+	public boolean isSet() {
+		return irRef!=null;
 	}
 }
 

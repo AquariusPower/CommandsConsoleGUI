@@ -40,7 +40,7 @@ import com.github.commandsconsolegui.globals.jme.console.GlobalConsoleGUII;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CommandsBackgroundStateI extends CmdConditionalStateAbs {
+public class CommandsBackgroundStateI extends CmdConditionalStateAbs<CommandsBackgroundStateI> {
 	private static CommandsBackgroundStateI instance = new CommandsBackgroundStateI();
 	public static CommandsBackgroundStateI i(){return instance;}
 	
@@ -100,5 +100,10 @@ public class CommandsBackgroundStateI extends CmdConditionalStateAbs {
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		if(fld.getDeclaringClass()!=CommandsBackgroundStateI.class){super.setFieldValue(fld,value);return;}
 		fld.set(this,value);
+	}
+
+	@Override
+	protected CommandsBackgroundStateI getThis() {
+		return this;
 	}
 }

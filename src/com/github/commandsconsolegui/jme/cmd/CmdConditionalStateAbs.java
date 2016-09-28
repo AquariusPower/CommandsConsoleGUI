@@ -52,7 +52,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public abstract class CmdConditionalStateAbs extends ConditionalStateAbs implements IConsoleCommandListener {
+public abstract class CmdConditionalStateAbs<THIS extends CmdConditionalStateAbs<THIS>> extends ConditionalStateAbs<THIS> implements IConsoleCommandListener {
 	StringCmdField scfRestart = new StringCmdField(this,null);
 	protected final BoolTogglerCmdField btgEnabled = new BoolTogglerCmdField(this, true, "toggles the state (enabled/disabled)")
 		.setCallerAssigned(new CallableX(this) {

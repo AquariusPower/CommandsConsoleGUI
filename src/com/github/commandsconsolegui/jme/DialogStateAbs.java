@@ -49,6 +49,7 @@ import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LemurD
 import com.github.commandsconsolegui.jme.lemur.extras.ISpatialValidator;
 import com.github.commandsconsolegui.jme.savablevalues.CompositeSavableAbs;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.HoldRestartable;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 //import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
@@ -80,7 +81,7 @@ import com.simsilica.lemur.Container;
  * @param <THIS> is for getThis() concrete auto class type inherited trick
  */
 //public abstract class BaseDialogStateAbs<DIAG,CS extends BaseDialogStateAbs.DialogCS<THIS>,THIS extends BaseDialogStateAbs<DIAG,CS,THIS>> extends CmdConditionalStateAbs implements IReflexFillCfg {
-public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>> extends CmdConditionalStateAbs implements IReflexFillCfg {
+public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>> extends CmdConditionalStateAbs<THIS> implements IReflexFillCfg {
 	private ISpatialValidator	sptvDialogMainContainer;
 	private Spatial	sptIntputField;
 	private Spatial sptMainList;
@@ -93,7 +94,8 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	private String	strUserEnterCustomValueToken = "=";
 	
 	private boolean	bUserEnterCustomValueMode;
-	private DialogStateAbs<DIAG,?> diagParent;
+//	private DialogStateAbs<DIAG,?> diagParent;
+	private HoldRestartable<DialogStateAbs<DIAG,?>> hrdiagParent = new HoldRestartable<DialogStateAbs<DIAG,?>>(this);
 	private ArrayList<DialogStateAbs<DIAG,?>> aModalChildList = new ArrayList<DialogStateAbs<DIAG,?>>();
 //	private DialogListEntryData<T>	dataToCfgReference;
 //	private DialogListEntryData<T> dataFromModal;
@@ -523,7 +525,8 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		getNodeGUI().attachChild(getDialogMainContainer());
 		
 		setMouseCursorKeepUngrabbed(true);
-		if(diagParent!=null)diagParent.updateModalChild(true,this);
+//		if(diagParent!=null)diagParent.updateModalChild(true,this);
+		if(hrdiagParent.isSet())hrdiagParent.getRef().updateModalChild(true,this);
 //		updateModalParent(true);
 		
 		if(btgEffect.b()){
@@ -582,7 +585,8 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		}
 		
 		setMouseCursorKeepUngrabbed(false);
-		if(diagParent!=null)diagParent.updateModalChild(false,this);
+		if(hrdiagParent.isSet())hrdiagParent.getRef().updateModalChild(false,this);
+//		if(diagParent!=null)diagParent.updateModalChild(false,this);
 //		updateModalParent(false);
 		
 		return true;
@@ -647,19 +651,21 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	}
 	
 	protected DialogStateAbs<DIAG,?> getParentDialog(){
-		return this.diagParent;
+//		return this.diagParent;
+		return hrdiagParent.getRef();
 	}
 	
-	protected void applyDiscardingParent() {
-		if(this.diagParent.isPreparingToBeDiscarded()){
-			this.diagParent=null;
-		}
-	}
+//	protected void applyDiscardingParent() {
+//		if(this.diagParent.isPreparingToBeDiscarded()){
+//			this.diagParent=null;
+//		}
+//	}
 	
 	protected THIS setDiagParent(DialogStateAbs<DIAG,?> diagParent) {
 //		if(this.diagParent!=null)throw new PrerequisitesNotMetException("modal parent already set",this.diagParent,diagParent);
-		PrerequisitesNotMetException.assertNotAlreadySet("modal parent", this.diagParent, diagParent, this);
-		this.diagParent = diagParent;
+//		PrerequisitesNotMetException.assertNotAlreadySet("modal parent", this.diagParent, diagParent, this);
+		hrdiagParent.setRef(diagParent);
+//		this.diagParent = diagParent;
 		return getThis();
 	}
 	
@@ -960,6 +966,15 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	
 	protected DialogListEntryData<DIAG> addEntry(DialogListEntryData<DIAG> dled) {
 		if(dled==null)throw new PrerequisitesNotMetException("cant be null!");
+		
+		if(dled.getDiagOwner()==null){
+			dled.setDiagOwner(this);
+		}else{
+			if(dled.getDiagOwner()!=this){
+				throw new PrerequisitesNotMetException("inconsistency", this, dled.getDiagOwner(), dled);
+			}
+		}
+		
 		if(adleCompleteEntriesList.contains(dled)){
 			GlobalCommandsDelegatorI.i().dumpDevWarnEntry("list already contains", adleCompleteEntriesList, dled, this);
 		}else{
@@ -1045,12 +1060,6 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //		return getThis();
 //	}
 	
-	/**
-	 * implement this only on concrete classes
-	 * @return
-	 */
-	protected abstract THIS getThis();
-
 	public String getTitle() {
 		return strTitle;
 	}
@@ -1582,4 +1591,17 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	public Vector3f getNorthContainerSizeCopy(){
 		throw new PrerequisitesNotMetException("override or do not call", this);
 	}
+	
+	@Override
+	public THIS copyCurrentValuesFrom(THIS casDiscarding) {
+		super.copyCurrentValuesFrom(casDiscarding);
+		
+		adleCompleteEntriesList.addAll(casDiscarding.getCompleteEntriesListCopy());
+		
+		return getThis();
+	}
+	
+//	public ArrayList<DialogListEntryData<DIAG>> getCompleteEntriesListCopy(){
+//		return new ArrayList<DialogListEntryData<DIAG>>(adleCompleteEntriesList);
+//	}
 }

@@ -41,7 +41,11 @@ import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData.SliderValueData.ESliderKey;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.DiscardableInstanceI;
+import com.github.commandsconsolegui.misc.HoldRestartable;
+import com.github.commandsconsolegui.misc.IDiscardableInstance;
 import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
@@ -61,11 +65,11 @@ import com.simsilica.lemur.RangedValueModel;
  *
  * @param <T> is the action class for buttons
  */
-public class DialogListEntryData<T> implements Savable{
+public class DialogListEntryData<T> implements Savable,IDiscardableInstance{
 	private static String strLastUniqueId = "0";
 	
 	private String	strUniqueId;
-	private DialogStateAbs diagOwner;
+	private HoldRestartable<DialogStateAbs> hrdiagOwner = null; //new HoldRestartable<DialogStateAbs>();
 	
 	private HashMap<String,T> hmCustomButtonsActions = new HashMap<String,T>();
 	private Object	objUser;
@@ -140,9 +144,14 @@ public class DialogListEntryData<T> implements Savable{
 	private String strText;
 //	T objRef;
 	
-	public DialogListEntryData(DialogStateAbs diagOwner) {
-		this.diagOwner=diagOwner;
+	public DialogListEntryData() {
 		this.strUniqueId = DialogListEntryData.strLastUniqueId = (MiscI.i().getNextUniqueId(strLastUniqueId));
+	}
+	public DialogListEntryData(DialogStateAbs diagOwner) {
+		this();
+		setDiagOwner(diagOwner);
+//		hrdiagOwner.setRef(diagOwner);
+//		this.diagOwner=diagOwner;
 	}
 	
 //	public DialogListEntryData<T> renameCustomButtonAction(T action, String strLabelTextIdNew){
@@ -420,7 +429,8 @@ private RangedValueModel	modelSliderValue;
 			}
 		}
 		
-		diagOwner.requestRefreshUpdateList();
+		hrdiagOwner.getRef().requestRefreshUpdateList();
+//		diagOwner.requestRefreshUpdateList();
 //		cell.assignedCellRenderer.diagParent.requestRefreshList();
 		
 		AudioUII.i().playOnUserAction(isTreeExpanded() ?
@@ -428,7 +438,47 @@ private RangedValueModel	modelSliderValue;
 		
 		return this.bTreeExpanded; 
 	}
-
+	
+	public void setDiagOwner(DialogStateAbs diag){
+		if(getParent()==null){ // this is root
+			if(this.hrdiagOwner==null)this.hrdiagOwner=new HoldRestartable<DialogStateAbs>(this);
+			
+			DialogStateAbs diagOwner = this.hrdiagOwner.getRef();
+			if(diagOwner==null){
+				this.hrdiagOwner.setRef(diag);
+			}else
+			if(diagOwner==diag){
+				// just ignore
+			}else
+			{
+				throw new PrerequisitesNotMetException("cannot change the diag owner this way, see "+HoldRestartable.class);
+			}
+		}else{
+			/**
+			 * this way will lower the holders amount!
+			 */
+			getParentest().setDiagOwner(diag); //mainly to let it be validated, but can happen to be actually setting also
+			if(this.hrdiagOwner!=null){
+				this.hrdiagOwner.discardSelf(getParentest().hrdiagOwner);
+				this.hrdiagOwner=null;
+//				this.hrdiagOwner.requestDiscardSelf(this,diag);
+			}
+		}
+	}
+	public DialogStateAbs getDiagOwner(){
+		if(getParent()==null){ //root one
+			return hrdiagOwner.getRef();
+		}
+		
+		if(hrdiagOwner!=null){
+			MsgI.i().warn("inconsistent, only root one should have owner", this, hrdiagOwner);
+		}
+		
+		return getParent().getDiagOwner();
+//		return getParentest().hrdiagOwner.get();
+//		return hrdiagOwner.get();
+	}
+	
 	public boolean isParent() {
 		return aChildList.size()>0;
 	}
@@ -476,6 +526,10 @@ private RangedValueModel	modelSliderValue;
 
 	public RangedValueModel getSliderValueModel() {
 		return modelSliderValue;
+	}
+	@Override
+	public boolean isPreparingToBeDiscarded() {
+		return DiscardableInstanceI.i().isDiscarding(getDiagOwner());
 	}
 
 }

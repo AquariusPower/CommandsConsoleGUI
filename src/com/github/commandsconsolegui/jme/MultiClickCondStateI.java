@@ -242,4 +242,9 @@ public class MultiClickCondStateI extends ConditionalStateAbs {
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField) {
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcvField);
 	}
+
+	@Override
+	protected ConditionalStateAbs getThis() {
+		return this;
+	}
 }

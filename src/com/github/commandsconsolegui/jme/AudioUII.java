@@ -411,4 +411,10 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		fld.set(this,value);
 	}
+
+	@Override
+	protected AudioUII getThis() {
+		return this;
+	}
+
 }

@@ -71,7 +71,7 @@ import com.jme3.scene.Node;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public abstract class ConditionalStateAbs implements IGlobalOpt,IRestartable,ISimulationTime,IConfigure<ConditionalStateAbs>,IRetryListOwner,IReflexFillCfg{
+public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>> implements IGlobalOpt,IRestartable,ISimulationTime,IConfigure<ConditionalStateAbs<THIS>>,IRetryListOwner,IReflexFillCfg{
 //	public static final class CompositeControl extends CompositeControlAbs<ConditionalStateAbs>{
 //		private CompositeControl(ConditionalStateAbs casm){super(casm);};
 //	};private CompositeControl ccSelf = new CompositeControl(this);
@@ -748,16 +748,16 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,IRestartable,ISi
 	 * @param casDiscarding
 	 * @return
 	 */
-	public ConditionalStateAbs copyCurrentValuesFrom(ConditionalStateAbs casDiscarding){
+	public THIS copyCurrentValuesFrom(THIS casDiscarding){
 //		cas.getHolder(this.getClass()).isChangedAndUpdateHash(this);
 		HoldRestartable.updateAllRestartableHolders(casDiscarding, this);
 //		cas.getHolder().setHolded(this);
-		return this;
+		return getThis();
 	}
 	
-	public ConditionalStateAbs createAndConfigureSelfCopy() {
+	public THIS createAndConfigureSelfCopy() {
 		try {
-			return this.getClass().newInstance().configure(icfgOfInstance).copyCurrentValuesFrom(this);
+			return (THIS)this.getClass().newInstance().configure(icfgOfInstance).copyCurrentValuesFrom(this);
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new PrerequisitesNotMetException("new instance configuration failed", this)
 				.initCauseAndReturnSelf(e);
@@ -920,4 +920,10 @@ public abstract class ConditionalStateAbs implements IGlobalOpt,IRestartable,ISi
 		PrerequisitesNotMetException.assertNotAlreadySet("holder", this.hchHolder, hch, this);
 		this.hchHolder=hch;
 	}
+
+	/**
+	 * implement this only on concrete classes
+	 * @return
+	 */
+	protected abstract THIS getThis();
 }

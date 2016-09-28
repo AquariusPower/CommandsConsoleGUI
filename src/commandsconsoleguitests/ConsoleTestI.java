@@ -93,12 +93,12 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 //	private StringVarField svfOptionSelectedDialog2 = new StringVarField(this,"");
 	
 	// generic dialog
-	private ChoiceLemurDialogState<T>	diagChoice;
+//	private ChoiceLemurDialogState<T>	diagChoice;
 
 //	private MaintenanceListLemurDialogState<T>	diagList;
-	private HoldRestartable<MaintenanceListLemurDialogState<T>>	hchdiagList = new HoldRestartable<MaintenanceListLemurDialogState<T>>(null);
+	private HoldRestartable<MaintenanceListLemurDialogState<T>>	hchdiagList = new HoldRestartable<MaintenanceListLemurDialogState<T>>(this);
 
-	private QuestionLemurDialogState<T>	diagQuestion;
+//	private QuestionLemurDialogState<T>	diagQuestion;
 
 //	private String	strOptionSelected;
 	
@@ -165,25 +165,25 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		consolePlugin.initialize();
 		
 		//////////////////////// config this test
-		diagChoice = new ChoiceLemurDialogState<T>().configure(new ChoiceLemurDialogState.CfgParm(
+		ChoiceLemurDialogState<T> diagChoice = new ChoiceLemurDialogState<T>().configure(new ChoiceLemurDialogState.CfgParm(
 			0.6f, 0.5f, null, null));
 		
-		diagQuestion = new QuestionLemurDialogState<T>().configure(new QuestionLemurDialogState.CfgParm(
+		QuestionLemurDialogState<T> diagQuestion = new QuestionLemurDialogState<T>().configure(new QuestionLemurDialogState.CfgParm(
 			500f, 300f, null, null));
 		
 //		diagList = 
-		hchdiagList.set(new MaintenanceListLemurDialogState<T>().configure(new MaintenanceListLemurDialogState.CfgParm<T>(
+		hchdiagList.setRef(new MaintenanceListLemurDialogState<T>().configure(new MaintenanceListLemurDialogState.CfgParm<T>(
 			null, null, null, null, diagChoice, diagQuestion)));
 		
-		prepareTestData();
+		prepareTestData(diagChoice);
 	}
 	
-	private void prepareTestData(){
+	private void prepareTestData(ChoiceLemurDialogState<T> diagChoice){
 		for(int i=0;i<10;i++){
 			diagChoice.addEntryQuick(null); 
 		}
 		
-		MaintenanceListLemurDialogState<T> diagList = hchdiagList.get();
+		MaintenanceListLemurDialogState<T> diagList = hchdiagList.getRef();
 		diagList.addEntryQuick(null);
 		diagList.addEntryQuick(null);
 		
@@ -253,7 +253,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		}else
 		if(cd.checkCmdValidity(this,"testDialog")){
 //			diagList.requestEnable();
-			hchdiagList.get().requestEnable();
+			hchdiagList.getRef().requestEnable();
 			bCommandWorked = true;
 		}else
 //		if(cd.checkCmdValidity(this,"activateSelfWindow")){

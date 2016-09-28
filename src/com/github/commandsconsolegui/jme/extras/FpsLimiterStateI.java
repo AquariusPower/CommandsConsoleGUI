@@ -38,7 +38,7 @@ import com.github.commandsconsolegui.misc.MiscI;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 
  */
-public class FpsLimiterStateI extends CmdConditionalStateAbs{
+public class FpsLimiterStateI extends CmdConditionalStateAbs<FpsLimiterStateI>{
 	private static FpsLimiterStateI instance = new FpsLimiterStateI();
 	public static FpsLimiterStateI i(){return instance;}
 	
@@ -160,5 +160,10 @@ public class FpsLimiterStateI extends CmdConditionalStateAbs{
 			+(FpsLimiterStateI.i().isEnabled() ? 
 				"="+FpsLimiterStateI.i().getFrameDelayByCpuUsageMilis()+"+"+FpsLimiterStateI.i().getThreadSleepTimeMilis()+"ms" :
 				"");
+	}
+
+	@Override
+	protected FpsLimiterStateI getThis() {
+		return this;
 	}
 }

@@ -28,6 +28,7 @@
 package com.github.commandsconsolegui.misc;
 
 /**
+ * var fields require the owner to implement at least this interface, if the owner's owner is a restartable.
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *

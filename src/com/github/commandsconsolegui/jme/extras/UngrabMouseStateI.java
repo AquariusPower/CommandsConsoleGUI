@@ -41,7 +41,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class UngrabMouseStateI extends ConditionalStateAbs {
+public class UngrabMouseStateI extends ConditionalStateAbs<UngrabMouseStateI> {
 	private static UngrabMouseStateI instance = new UngrabMouseStateI();
 	public static UngrabMouseStateI i(){return instance;}
 	
@@ -240,5 +240,10 @@ public class UngrabMouseStateI extends ConditionalStateAbs {
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField) {
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcvField);
+	}
+
+	@Override
+	protected UngrabMouseStateI getThis() {
+		return this;
 	}
 }
