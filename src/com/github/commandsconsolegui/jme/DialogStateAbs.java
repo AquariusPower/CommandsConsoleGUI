@@ -967,11 +967,11 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	protected DialogListEntryData<DIAG> addEntry(DialogListEntryData<DIAG> dled) {
 		if(dled==null)throw new PrerequisitesNotMetException("cant be null!");
 		
-		if(dled.getDiagOwner()==null){
-			dled.setDiagOwner(this);
+		if(dled.getOwner()==null){
+			dled.setOwner(this);
 		}else{
-			if(dled.getDiagOwner()!=this){
-				throw new PrerequisitesNotMetException("inconsistency", this, dled.getDiagOwner(), dled);
+			if(dled.getOwner()!=this){
+				throw new PrerequisitesNotMetException("inconsistency", this, dled.getOwner(), dled);
 			}
 		}
 		

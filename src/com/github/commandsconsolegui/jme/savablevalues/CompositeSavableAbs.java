@@ -32,6 +32,7 @@ import java.io.IOException;
 import com.github.commandsconsolegui.jme.DialogStateAbs.DialogCS;
 import com.github.commandsconsolegui.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.misc.IDiscardableInstance;
+import com.github.commandsconsolegui.misc.IHasOwnerInstance;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.jme.SavableHelperI;
 import com.github.commandsconsolegui.misc.jme.SavableHelperI.ISavableFieldAccess;
@@ -48,7 +49,7 @@ import com.jme3.export.JmeImporter;
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> implements ISavableFieldAccess,IDiscardableInstance {
+public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> implements ISavableFieldAccess,IDiscardableInstance,IHasOwnerInstance<O> {
 	public static class SaveSkipperCS<O> extends SaveSkipper<O>{
 		public SaveSkipperCS(ISavableFieldAccess isfa) {
 			super(isfa);
@@ -100,6 +101,7 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 		return getThis();
 	}
 	
+	@Override
 	public O getOwner() {
 		return ss.getOwner(this);
 	}
@@ -130,7 +132,7 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 	}
 	
 	@Override
-	public boolean isPreparingToBeDiscarded(){
-		return DiscardableInstanceI.i().isDiscarding(getOwner());
+	public boolean isBeingDiscarded(){
+		return DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(getOwner());
 	}
 }

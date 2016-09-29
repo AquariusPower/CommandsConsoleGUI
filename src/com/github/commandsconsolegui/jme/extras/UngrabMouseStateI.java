@@ -114,7 +114,7 @@ public class UngrabMouseStateI extends ConditionalStateAbs<UngrabMouseStateI> {
 			@Override
 			public void run() {
 //				while(!isCleaningUp()){ //mainly during application close
-				while(!isPreparingToBeDiscarded() && !GlobalAppRefI.iGlobal().isApplicationExiting()){ //mainly during application close
+				while(!isBeingDiscarded() && !GlobalAppRefI.iGlobal().isApplicationExiting()){ //mainly during application close
 					updateAtNewThread();
 					try {
 						Thread.sleep(lDelayToUngrabMilis);

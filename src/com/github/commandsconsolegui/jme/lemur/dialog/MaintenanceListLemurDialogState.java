@@ -35,6 +35,8 @@ import com.github.commandsconsolegui.jme.AudioUII;
 import com.github.commandsconsolegui.jme.AudioUII.EAudio;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
+import com.github.commandsconsolegui.jme.lemur.console.ChoiceVarDialogState;
+import com.github.commandsconsolegui.misc.HoldRestartable;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
@@ -47,8 +49,10 @@ import com.simsilica.lemur.Command;
  */
 public class MaintenanceListLemurDialogState<T extends Command<Button>> extends BasicLemurDialogStateAbs<T,MaintenanceListLemurDialogState<T>> {
 	public static class CfgParm<T> extends BasicLemurDialogStateAbs.CfgParm{
-		private LemurDialogStateAbs<T,?>	diagChoice;
-		private LemurDialogStateAbs<T,?>	diagQuestion;
+		private HoldRestartable<LemurDialogStateAbs<T,?>> hrdiagChoice = new HoldRestartable<LemurDialogStateAbs<T,?>>(this);
+		private HoldRestartable<LemurDialogStateAbs<T,?>> hrdiagQuestion = new HoldRestartable<LemurDialogStateAbs<T,?>>(this);
+//		private LemurDialogStateAbs<T,?>	diagChoice;
+//		private LemurDialogStateAbs<T,?>	diagQuestion;
 
 		public CfgParm(
 				Float fDialogWidthPercentOfAppWindow,
@@ -65,19 +69,19 @@ public class MaintenanceListLemurDialogState<T extends Command<Button>> extends 
 		}
 
 		public LemurDialogStateAbs<T,?> getDiagChoice() {
-			return diagChoice;
+			return hrdiagChoice.getRef();
 		}
 
 		public void setDiagChoice(LemurDialogStateAbs<T,?> diagChoice) {
-			this.diagChoice = diagChoice;
+			this.hrdiagChoice.setRef(diagChoice);
 		}
 
 		public LemurDialogStateAbs<T,?> getDiagQuestion() {
-			return diagQuestion;
+			return hrdiagQuestion.getRef();
 		}
 
 		public void setDiagQuestion(LemurDialogStateAbs<T,?> diagQuestion) {
-			this.diagQuestion = diagQuestion;
+			this.hrdiagQuestion.setRef(diagQuestion);
 		}
 	}
 	private CfgParm<T>	cfg;

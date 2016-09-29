@@ -37,11 +37,15 @@ public class DiscardableInstanceI{
 	private static DiscardableInstanceI instance = new DiscardableInstanceI();
 	public static DiscardableInstanceI i(){return instance;}
 	
-	public boolean isDiscarding(Object obj){
+	public boolean isSelfOrRecursiveOwnerBeingDiscarded(Object obj){
+		if(obj instanceof IHasOwnerInstance){
+			if(isSelfOrRecursiveOwnerBeingDiscarded(((IHasOwnerInstance)obj).getOwner())){
+				return true;
+			}
+		}
+		
 		if(obj instanceof IDiscardableInstance){
-			return ((IDiscardableInstance)obj).isPreparingToBeDiscarded();
-//		}else{
-//			MsgI.i().devWarn("shouldnt be called as obj type is not "+IDiscardableInstance.class, obj);
+			return ((IDiscardableInstance)obj).isBeingDiscarded();
 		}
 		
 		return false;

@@ -34,6 +34,6 @@ package com.github.commandsconsolegui.misc;
  *
  */
 public interface IDiscardableInstance {
-	public boolean isPreparingToBeDiscarded();
+	public boolean isBeingDiscarded();
 //	public <T> HashChangeHolder<T> getHolder(Class<T> cl);
 }

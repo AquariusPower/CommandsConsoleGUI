@@ -89,7 +89,7 @@ public class ConditionalStateManagerI extends AbstractAppState {
 		for(ConditionalStateAbs cas:aCondStateList){
 			if(!cas.doItAllProperly(ccSelf,tpf))continue;
 			
-			if(cas.isPreparingToBeDiscarded()){
+			if(cas.isBeingDiscarded()){
 				if(aToDiscard==null)aToDiscard=new ArrayList<ConditionalStateAbs>();
 				aToDiscard.add(cas);
 			}else{
@@ -107,25 +107,35 @@ public class ConditionalStateManagerI extends AbstractAppState {
 		
 		if(aToDiscard!=null){
 			for(ConditionalStateAbs cas:aToDiscard){
-				if(cas.prepareToDiscard(ccSelf)){
-					if(cas instanceof IConsoleCommandListener){
-						GlobalCommandsDelegatorI.i().removeListener((IConsoleCommandListener)cas);
-					}
-					
-					aCondStateList.remove(cas);
-					cas.applyDiscardedStatus(ccSelf);
-					
-					ConditionalStateAbs casNew = cas.createAndConfigureSelfCopy(); //this will add the new one to manager too
-					HoldRestartable.updateAllRestartableHolders(cas,casNew);
-					if(cas.isRestartRequested()){
-						casNew.setInstancedFromRestart(ccSelf);
-						if(cas.isWasEnabledBeforeRestarting()){
-//							casNew.requestRetryUntilEnabled();
-							casNew.requestEnable();
-						}
-					}
+				discardState(cas);
+			}
+		}
+	}
+	
+	private void discardState(ConditionalStateAbs cas){
+		if(cas.prepareToDiscard(ccSelf)){
+			cas.applyDiscardedStatus(ccSelf); //this flag is required to everything else work...
+			
+			aCondStateList.remove(cas);
+			
+			if(cas instanceof IConsoleCommandListener){
+				GlobalCommandsDelegatorI.i().removeListenerAndCmds((IConsoleCommandListener)cas);
+			}
+			
+			ConditionalStateAbs casNew = null;
+			if(cas.isRestartRequested()){
+				casNew = cas.createAndConfigureSelfCopy(); //this will add the new one to manager too
+				
+				casNew.setInstancedFromRestart(ccSelf);
+				
+				if(cas.isWasEnabledBeforeRestarting()){
+//					casNew.requestRetryUntilEnabled();
+					casNew.requestEnable();
 				}
 			}
+			
+			HoldRestartable.revalidateAndUpdateAllRestartableHoldersFor(cas,casNew);
+			
 		}
 	}
 	

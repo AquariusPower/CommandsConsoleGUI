@@ -35,6 +35,7 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.misc.IDiscardableInstance;
+import com.github.commandsconsolegui.misc.IHasOwnerInstance;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -51,7 +52,7 @@ import com.simsilica.lemur.style.ElementId;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class DialogMainContainer extends Container implements ISpatialValidator, IDiscardableInstance, IReflexFillCfg{
+public class DialogMainContainer extends Container implements ISpatialValidator, IDiscardableInstance, IReflexFillCfg, IHasOwnerInstance<DialogStateAbs>{
 	private DialogStateAbs	diagOwner;
 	private boolean	bLayoutValid;
 //	ISpatialValidator diag;
@@ -225,14 +226,14 @@ public class DialogMainContainer extends Container implements ISpatialValidator,
 	
 	public DialogMainContainer(DialogStateAbs diagOwner, GuiLayout layout, String style) {
 		super(layout, style);
-		setDiagOwner(diagOwner);
+		setOwner(diagOwner);
 		this.strMessageKey = diagOwner.getId()+" update logical state failed";
 	}
 	
-	private void setDiagOwner(DialogStateAbs diagOwner) {
+	private void setOwner(DialogStateAbs diagOwner) {
 		this.diagOwner=diagOwner;
 	}
-
+	
 	public DialogMainContainer(GuiLayout layout) {
 		super(layout);
 		throw new UnsupportedOperationException("use the right constructor");
@@ -276,7 +277,12 @@ public class DialogMainContainer extends Container implements ISpatialValidator,
 	}
 
 	@Override
-	public boolean isPreparingToBeDiscarded() {
-		return DiscardableInstanceI.i().isDiscarding(diagOwner);
+	public boolean isBeingDiscarded() {
+		return DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(getOwner());
+	}
+
+	@Override
+	public DialogStateAbs getOwner() {
+		return diagOwner;
 	}
 }

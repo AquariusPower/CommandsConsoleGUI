@@ -671,7 +671,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	}
 	
 	@Override
-	public boolean isPreparingToBeDiscarded() {
+	public boolean isBeingDiscarded() {
 		return bDiscardRequested;
 	}
 	
@@ -691,7 +691,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	public boolean prepareToDiscard(ConditionalStateManagerI.CompositeControl cc) {
 		cc.assertSelfNotNull();
 		if(!bProperlyInitialized)return false; //TODO log warn
-		if(!isPreparingToBeDiscarded())throw new PrerequisitesNotMetException("not discarding");
+		if(!isBeingDiscarded())throw new PrerequisitesNotMetException("not discarding");
 		
 		VarCmdFieldAbs.removeAllWhoseOwnerIsBeingDiscarded();
 		

@@ -114,7 +114,7 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 		ArrayList<VarCmdFieldAbs> avcfDiscarded = new ArrayList<VarCmdFieldAbs>();
 		
 		for(VarCmdFieldAbs vcf:getListFullCopy()){
-			if(DiscardableInstanceI.i().isDiscarding(vcf.getOwner())){
+			if(DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(vcf.getOwner())){
 				vcf.discardSelf();
 				avcfDiscarded.add(vcf);
 			}

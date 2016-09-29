@@ -31,6 +31,9 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.misc.DiscardableInstanceI;
+import com.github.commandsconsolegui.misc.IDiscardableInstance;
+import com.github.commandsconsolegui.misc.IHasOwnerInstance;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 
@@ -39,7 +42,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CommandData implements Comparable<CommandData>{
+public class CommandData implements Comparable<CommandData>,IHasOwnerInstance<IReflexFillCfg>{//,IDiscardableInstance{
 	/** 
 	 * Core IDs are simple short commands.
 	 * They may conflict, but it is not critical as the full command is what matters. 
@@ -70,9 +73,12 @@ public class CommandData implements Comparable<CommandData>{
 	public String getComment() {
 		return strComment;
 	}
+	
+	@Override
 	public IReflexFillCfg getOwner() {
 		return irfcOwner;
 	}
+	
 	public VarCmdFieldAbs getVar() {
 		return vcf;
 	}
@@ -170,5 +176,10 @@ public class CommandData implements Comparable<CommandData>{
 		this.vcf=vcf;
 		return this;
 	}
+
+//	@Override
+//	public boolean isBeingDiscarded() {
+//		return DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(getOwner());
+//	}
 	
 }

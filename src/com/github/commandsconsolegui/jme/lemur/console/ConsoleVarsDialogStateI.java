@@ -40,6 +40,7 @@ import com.github.commandsconsolegui.jme.AudioUII.EAudio;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.lemur.dialog.MaintenanceListLemurDialogState;
+import com.github.commandsconsolegui.misc.HoldRestartable;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.simsilica.lemur.Button;
@@ -75,7 +76,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		return bChangesMade;
 	}
 	
-	private ChoiceVarDialogState chd = new ChoiceVarDialogState();
+	private HoldRestartable<ChoiceVarDialogState> hrdiagChoice = new HoldRestartable<ChoiceVarDialogState>(this);
 	
 	public static class CfgParm extends MaintenanceListLemurDialogState.CfgParm{
 		public CfgParm(Float fDialogWidthPercentOfAppWindow,
@@ -90,9 +91,13 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	public ConsoleVarsDialogStateI<T> configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;
 		
-		chd.configure(new ChoiceVarDialogState.CfgParm(0.9f, 0.5f, 0.5f, null));//.setId(strId));
-		chd.setInputToUserEnterCustomValueMode(true);
-		cfg.setDiagChoice(chd);
+		if(hrdiagChoice.getRef()==null){
+			hrdiagChoice.setRef(new ChoiceVarDialogState());
+			hrdiagChoice.getRef().configure(new ChoiceVarDialogState.CfgParm(0.9f, 0.5f, 0.5f, null));//.setId(strId));
+			hrdiagChoice.getRef().setInputToUserEnterCustomValueMode(true);
+		}
+		
+		cfg.setDiagChoice(hrdiagChoice.getRef());
 		
 		cfg.setDiagQuestion(null);
 		

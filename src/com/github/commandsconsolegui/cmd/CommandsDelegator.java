@@ -690,7 +690,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		throw new NullPointerException(CommandsDelegator.class.getName()+" was not configured!");
 	}
 	
-	public void removeListener(IConsoleCommandListener iccl){
+	public void removeListenerAndCmds(IConsoleCommandListener iccl){
 		if(!aConsoleCommandListenerList.contains(iccl)){
 			throw new PrerequisitesNotMetException("listener already removed?", iccl);
 		}
@@ -1902,11 +1902,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		
 		for(Entry<String, CommandData> entry:trmCmddList.entrySet().toArray(new Entry[0])){
 			CommandData cmd = entry.getValue();
-			if(DiscardableInstanceI.i().isDiscarding(cmd.getOwner())){
+			if(DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(cmd)){
+//				DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(cmd);
+//			if(DiscardableInstanceI.i().isDiscarding(cmd.getOwner())){
+//			if(cmd.isBeingDiscarded()){
 				if(trmCmddList.remove(entry.getKey())==null){
 					throw new PrerequisitesNotMetException("Inconsistent");
 				}
-				MsgI.i().debug("removing: "+entry.getKey());
+				MsgI.i().debug("RemovingCmd: "+entry.getKey());
 				acmdRm.add(cmd);
 			}
 		}

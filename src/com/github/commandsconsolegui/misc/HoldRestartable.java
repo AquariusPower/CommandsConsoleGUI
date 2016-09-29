@@ -37,9 +37,9 @@ import java.util.ArrayList;
  */
 public class HoldRestartable<T extends IRestartable> {
 	private static ArrayList<HoldRestartable> ahrList=new ArrayList<HoldRestartable>();
-	public static void updateAllRestartableHolders(IRestartable irDiscarding, IRestartable irNew){
+	public static void revalidateAndUpdateAllRestartableHoldersFor(IRestartable irDiscarding, IRestartable irNew){
 		for(HoldRestartable hr:new ArrayList<HoldRestartable>(ahrList)){
-			if(hr.bDiscardSelf || DiscardableInstanceI.i().isDiscarding(hr.objOwner)){
+			if(hr.bDiscardSelf || DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(hr.objOwner)){
 				ahrList.remove(hr);
 			}else{
 				if(hr.irRef==irDiscarding){
@@ -68,14 +68,14 @@ public class HoldRestartable<T extends IRestartable> {
 		if(this.objOwner==null)throw new PrerequisitesNotMetException("owner is null", this, hrReplacer);
 		if(this.irRef==null)throw new PrerequisitesNotMetException("holded is null", this, hrReplacer);
 		
-		if(DiscardableInstanceI.i().isDiscarding(this.objOwner)){
+		if(DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(this.objOwner)){
 			MsgI.i().devInfo("was already going to be discarded, this call is redundant", this, hrReplacer);
 		}
 		
 		if(
 				this.objOwner==hrReplacer.objOwner && 
 				this.irRef==hrReplacer.irRef &&
-				!DiscardableInstanceI.i().isDiscarding(hrReplacer.objOwner)
+				!DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(hrReplacer.objOwner)
 		){
 			this.bDiscardSelf=true;
 //			this.objOwner=null;
@@ -86,7 +86,7 @@ public class HoldRestartable<T extends IRestartable> {
 	
 	public void setRef(IRestartable irRef){
 		if(this.irRef!=null){
-			if(!this.irRef.isPreparingToBeDiscarded()){
+			if(!this.irRef.isBeingDiscarded()){
 				throw new PrerequisitesNotMetException("cannot update the holded if it is not being discarded", this.irRef, irRef, this);
 			}
 			
@@ -95,7 +95,7 @@ public class HoldRestartable<T extends IRestartable> {
 			}
 		}
 		
-		this.irRef=irRef;
+		this.irRef=irRef; //there is no problem if it is the same object, help on making restarting logics less complex a bit
 	}
 	
 	public T getRef(){

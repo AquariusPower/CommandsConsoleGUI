@@ -33,7 +33,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map.Entry;
 
 import com.github.commandsconsolegui.jme.AudioUII;
@@ -44,6 +43,7 @@ import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.misc.HoldRestartable;
 import com.github.commandsconsolegui.misc.IDiscardableInstance;
+import com.github.commandsconsolegui.misc.IHasOwnerInstance;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -65,7 +65,7 @@ import com.simsilica.lemur.RangedValueModel;
  *
  * @param <T> is the action class for buttons
  */
-public class DialogListEntryData<T> implements Savable,IDiscardableInstance{
+public class DialogListEntryData<T> implements Savable,IDiscardableInstance,IHasOwnerInstance<DialogStateAbs>{
 	private static String strLastUniqueId = "0";
 	
 	private String	strUniqueId;
@@ -149,7 +149,7 @@ public class DialogListEntryData<T> implements Savable,IDiscardableInstance{
 	}
 	public DialogListEntryData(DialogStateAbs diagOwner) {
 		this();
-		setDiagOwner(diagOwner);
+		setOwner(diagOwner);
 //		hrdiagOwner.setRef(diagOwner);
 //		this.diagOwner=diagOwner;
 	}
@@ -439,7 +439,7 @@ private RangedValueModel	modelSliderValue;
 		return this.bTreeExpanded; 
 	}
 	
-	public void setDiagOwner(DialogStateAbs diag){
+	public void setOwner(DialogStateAbs diag){
 		if(getParent()==null){ // this is root
 			if(this.hrdiagOwner==null)this.hrdiagOwner=new HoldRestartable<DialogStateAbs>(this);
 			
@@ -457,7 +457,7 @@ private RangedValueModel	modelSliderValue;
 			/**
 			 * this way will lower the holders amount!
 			 */
-			getParentest().setDiagOwner(diag); //mainly to let it be validated, but can happen to be actually setting also
+			getParentest().setOwner(diag); //mainly to let it be validated, but can happen to be actually setting also
 			if(this.hrdiagOwner!=null){
 				this.hrdiagOwner.discardSelf(getParentest().hrdiagOwner);
 				this.hrdiagOwner=null;
@@ -465,7 +465,8 @@ private RangedValueModel	modelSliderValue;
 			}
 		}
 	}
-	public DialogStateAbs getDiagOwner(){
+	@Override
+	public DialogStateAbs getOwner(){
 		if(getParent()==null){ //root one
 			return hrdiagOwner.getRef();
 		}
@@ -474,7 +475,7 @@ private RangedValueModel	modelSliderValue;
 			MsgI.i().warn("inconsistent, only root one should have owner", this, hrdiagOwner);
 		}
 		
-		return getParent().getDiagOwner();
+		return getParent().getOwner();
 //		return getParentest().hrdiagOwner.get();
 //		return hrdiagOwner.get();
 	}
@@ -527,9 +528,10 @@ private RangedValueModel	modelSliderValue;
 	public RangedValueModel getSliderValueModel() {
 		return modelSliderValue;
 	}
+	
 	@Override
-	public boolean isPreparingToBeDiscarded() {
-		return DiscardableInstanceI.i().isDiscarding(getDiagOwner());
+	public boolean isBeingDiscarded() {
+		return DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(getOwner());
 	}
 
 }

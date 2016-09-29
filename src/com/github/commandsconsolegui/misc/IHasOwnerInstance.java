@@ -28,11 +28,14 @@
 package com.github.commandsconsolegui.misc;
 
 /**
+ * The class implementing this will also be catch in the {@link IDiscardableInstance} check,
+ * so such class does not need to implement that interface, as it's owner (ownerest) is the only one
+ * required to. Tho it will cause no problem if it is used.
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  * @param <T>
  */
-public interface IOwner<T> {
+public interface IHasOwnerInstance<T> {
 	public T getOwner();
 }

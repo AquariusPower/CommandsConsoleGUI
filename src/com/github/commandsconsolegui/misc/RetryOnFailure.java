@@ -35,13 +35,14 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
+import com.github.commandsconsolegui.misc.RetryOnFailure.IRetryListOwner;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class RetryOnFailure implements IReflexFillCfg,IDiscardableInstance{
+public class RetryOnFailure implements IReflexFillCfg,IDiscardableInstance,IHasOwnerInstance<IRetryListOwner>{
 	public static final class CompositeControl extends CompositeControlAbs<RetryOnFailure>{
 		private CompositeControl(RetryOnFailure casm){super(casm);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
@@ -152,8 +153,13 @@ public class RetryOnFailure implements IReflexFillCfg,IDiscardableInstance{
 	}
 
 	@Override
-	public boolean isPreparingToBeDiscarded() {
-		return DiscardableInstanceI.i().isDiscarding(irlo);
+	public boolean isBeingDiscarded() {
+		return DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(getOwner());
+	}
+
+	@Override
+	public IRetryListOwner getOwner() {
+		return irlo;
 	}
 
 }
