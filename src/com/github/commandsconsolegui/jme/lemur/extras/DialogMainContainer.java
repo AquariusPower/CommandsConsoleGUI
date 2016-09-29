@@ -52,7 +52,7 @@ import com.simsilica.lemur.style.ElementId;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class DialogMainContainer extends Container implements ISpatialValidator, IDiscardableInstance, IReflexFillCfg, IHasOwnerInstance<DialogStateAbs>{
+public class DialogMainContainer extends Container implements ISpatialValidator, IReflexFillCfg, IHasOwnerInstance<DialogStateAbs>{ //IDiscardableInstance
 	private DialogStateAbs	diagOwner;
 	private boolean	bLayoutValid;
 //	ISpatialValidator diag;
@@ -276,10 +276,10 @@ public class DialogMainContainer extends Container implements ISpatialValidator,
 		fld.set(this,value);
 	}
 
-	@Override
-	public boolean isBeingDiscarded() {
-		return DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(getOwner());
-	}
+//	@Override
+//	public boolean isBeingDiscarded() {
+//		return DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(getOwner());
+//	}
 
 	@Override
 	public DialogStateAbs getOwner() {

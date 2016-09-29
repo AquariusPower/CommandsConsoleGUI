@@ -315,9 +315,10 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 			cfg.strId = MiscI.i().getClassName(this,true);
 		}
 		
-		@SuppressWarnings("unchecked") //so obvious...
-		ConditionalStateAbs csa = ConditionalStateManagerI.i().getConditionalState(
-			(Class<ConditionalStateAbs>)this.getClass(), cfg.strId);
+//		@SuppressWarnings("unchecked") //so obvious...
+//		ConditionalStateAbs csa = ConditionalStateManagerI.i().getConditionalState(
+//			(Class<ConditionalStateAbs>)this.getClass(), cfg.strId);
+		ConditionalStateAbs csa = ConditionalStateManagerI.i().getConditionalState(this.getClass(), cfg.strId);
 		if(csa!=null)throw new PrerequisitesNotMetException("conflicting state Id "+cfg.strId);
 		this.strCaseInsensitiveId = cfg.strId;
 		

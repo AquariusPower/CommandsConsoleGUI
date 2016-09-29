@@ -36,6 +36,8 @@ import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.cmd.VarCmdUId;
 import com.github.commandsconsolegui.jme.AudioUII;
+import com.github.commandsconsolegui.jme.ConditionalStateAbs;
+import com.github.commandsconsolegui.jme.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jme.AudioUII.EAudio;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
@@ -91,11 +93,17 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	public ConsoleVarsDialogStateI<T> configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;
 		
-		if(hrdiagChoice.getRef()==null){
-			hrdiagChoice.setRef(new ChoiceVarDialogState());
-			hrdiagChoice.getRef().configure(new ChoiceVarDialogState.CfgParm(0.9f, 0.5f, 0.5f, null));//.setId(strId));
-			hrdiagChoice.getRef().setInputToUserEnterCustomValueMode(true);
-		}
+//		if(hrdiagChoice.getRef()==null){ 
+			//when restarting this, it's child may be already/still there TODO restart child too?
+			ChoiceVarDialogState diagChoice = ConditionalStateManagerI.i().getConditionalState(
+				ChoiceVarDialogState.class, null);
+			if(diagChoice==null){
+				diagChoice=new ChoiceVarDialogState();
+				diagChoice.configure(new ChoiceVarDialogState.CfgParm(0.9f, 0.5f, 0.5f, null));//.setId(strId));
+				diagChoice.setInputToUserEnterCustomValueMode(true);
+			}
+			hrdiagChoice.setRef(diagChoice);
+//		}
 		
 		cfg.setDiagChoice(hrdiagChoice.getRef());
 		

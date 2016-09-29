@@ -35,16 +35,19 @@ import java.util.ArrayList;
  *
  * @param <T>
  */
-public class HoldRestartable<T extends IRestartable> {
+public class HoldRestartable<T extends IRestartable> implements IHasOwnerInstance<Object> {
 	private static ArrayList<HoldRestartable> ahrList=new ArrayList<HoldRestartable>();
 	public static void revalidateAndUpdateAllRestartableHoldersFor(IRestartable irDiscarding, IRestartable irNew){
 		for(HoldRestartable hr:new ArrayList<HoldRestartable>(ahrList)){
-			if(hr.bDiscardSelf || DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(hr.objOwner)){
+			// discard
+			if(hr.bDiscardSelf || DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(hr)){
 				ahrList.remove(hr);
-			}else{
-				if(hr.irRef==irDiscarding){
-					hr.setRef(irNew);
-				}
+				continue;
+			}
+			
+			// update ref
+			if(hr.getRef()==irDiscarding){
+				hr.setRef(irNew);
 			}
 		}
 	}
@@ -84,14 +87,31 @@ public class HoldRestartable<T extends IRestartable> {
 		}
 	}
 	
+	private boolean bAllowAnyClass=false;
+	
+	/**
+	 * This may break your code.
+	 */
+	public void setAllowAnyClass() {
+		this.bAllowAnyClass = true;
+	}
+	
 	public void setRef(IRestartable irRef){
 		if(this.irRef!=null){
 			if(!this.irRef.isBeingDiscarded()){
 				throw new PrerequisitesNotMetException("cannot update the holded if it is not being discarded", this.irRef, irRef, this);
 			}
 			
-			if(this.irRef.getClass()!=irRef.getClass()){
-				throw new PrerequisitesNotMetException("old and new must be of the same concrete class", this.irRef, irRef, this);
+			if(!bAllowAnyClass){
+				String strOtherwise=", otherwise re-assigning an equivalent to old one would be impossible";
+				if(this.irRef.getClass()!=irRef.getClass()){
+	//				throw new PrerequisitesNotMetException("old and new must be of the same concrete class", this.irRef, irRef, this);
+					MsgI.i().devWarn("old and new should be of the same concrete class"+strOtherwise, this.irRef, irRef, this);
+				}
+				
+				if(!this.irRef.getClass().isAssignableFrom(irRef.getClass())){
+					throw new PrerequisitesNotMetException("old must at least be assignable from new class"+strOtherwise, this.irRef, irRef, this);
+				}
 			}
 		}
 		
@@ -103,6 +123,10 @@ public class HoldRestartable<T extends IRestartable> {
 	}
 	public boolean isSet() {
 		return irRef!=null;
+	}
+	@Override
+	public Object getOwner() {
+		return objOwner;
 	}
 }
 

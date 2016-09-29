@@ -49,7 +49,7 @@ import com.jme3.export.JmeImporter;
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> implements ISavableFieldAccess,IDiscardableInstance,IHasOwnerInstance<O> {
+public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> implements ISavableFieldAccess,IHasOwnerInstance<O> { //IDiscardableInstance
 	public static class SaveSkipperCS<O> extends SaveSkipper<O>{
 		public SaveSkipperCS(ISavableFieldAccess isfa) {
 			super(isfa);
@@ -131,8 +131,8 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 		SavableHelperI.i().read(this,im);
 	}
 	
-	@Override
-	public boolean isBeingDiscarded(){
-		return DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(getOwner());
-	}
+//	@Override
+//	public boolean isBeingDiscarded(){
+//		return DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(getOwner());
+//	}
 }

@@ -65,7 +65,7 @@ import com.simsilica.lemur.RangedValueModel;
  *
  * @param <T> is the action class for buttons
  */
-public class DialogListEntryData<T> implements Savable,IDiscardableInstance,IHasOwnerInstance<DialogStateAbs>{
+public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogStateAbs>{ //IDiscardableInstance
 	private static String strLastUniqueId = "0";
 	
 	private String	strUniqueId;
@@ -529,9 +529,9 @@ private RangedValueModel	modelSliderValue;
 		return modelSliderValue;
 	}
 	
-	@Override
-	public boolean isBeingDiscarded() {
-		return DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(getOwner());
-	}
+//	@Override
+//	public boolean isBeingDiscarded() {
+//		return DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(getOwner());
+//	}
 
 }
