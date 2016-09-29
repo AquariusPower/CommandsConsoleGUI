@@ -29,12 +29,13 @@ package com.github.commandsconsolegui.jme;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
+import com.github.commandsconsolegui.misc.HoldRestartable;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
@@ -94,7 +95,9 @@ public class ConditionalStateManagerI extends AbstractAppState {
 			}else{
 				if(cas.isRestartRequested()){
 					if(cas.isEnabled()){
-						cas.requestDisable();
+						if(!cas.isDisabling()){
+							cas.requestDisable();
+						}
 					}else{
 						cas.requestDiscard();
 					}
@@ -113,9 +116,12 @@ public class ConditionalStateManagerI extends AbstractAppState {
 					cas.applyDiscardedStatus(ccSelf);
 					
 					ConditionalStateAbs casNew = cas.createAndConfigureSelfCopy(); //this will add the new one to manager too
+					HoldRestartable.updateAllRestartableHolders(cas,casNew);
 					if(cas.isRestartRequested()){
+						casNew.setInstancedFromRestart(ccSelf);
 						if(cas.isWasEnabledBeforeRestarting()){
-							casNew.requestEnable(); //TODO use Request class so this have a chance to work properly (at next frame or later)
+//							casNew.requestRetryUntilEnabled();
+							casNew.requestEnable();
 						}
 					}
 				}

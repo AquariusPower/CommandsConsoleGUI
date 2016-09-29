@@ -27,10 +27,10 @@
 
 package com.github.commandsconsolegui.misc;
 
-import com.github.commandsconsolegui.GlobalSimulationTimeI;
+import com.github.commandsconsolegui.SimulationTime;
 
 /**
- * TODO transfer some logic to {@link GlobalSimulationTimeI} ? 
+ * TODO transfer some logic to {@link SimulationTime} ? 
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *

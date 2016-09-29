@@ -27,8 +27,8 @@
 
 package com.github.commandsconsolegui.misc;
 
-import com.github.commandsconsolegui.GlobalSimulationTimeI;
-import com.github.commandsconsolegui.GlobalSimulationTimeI.ISimulationTime;
+import com.github.commandsconsolegui.SimulationTime.ISimulationTime;
+import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
 
 
 /**
@@ -38,6 +38,7 @@ public class Request {
 	long lRequestNano = 0;
 	private boolean	bUseGlobalSimulationTime = false;
 	private ISimulationTime	owner = null;
+	private long	lDelayNano = 0;
 	
 	/**
 	 * this one will use real time
@@ -73,20 +74,36 @@ public class Request {
 		}
 	}
 	
-	public void requestNow() {
+	/**
+	 * requests will always be processed at least on the next frame!
+	 * @return 
+	 */
+	public Request requestNow() {
+		requestNow(0f);
+		return this;
+	}
+	public Request requestNow(float fDelaySeconds) {
+		if(fDelaySeconds<0f)throw new PrerequisitesNotMetException("invalid negative delay", fDelaySeconds, this);
+		this.lDelayNano  = TimeHelperI.i().secondsToNano(fDelaySeconds);
 		this.lRequestNano = currentTime();
+		return this;
 	}
 	
 	public boolean isReady(){
 		return isReady(false);
 	}
 	
-	public void reset(){
+	public Request reset(){
 		lRequestNano=0;
+		return this;
 	}
 	
 	public boolean isReady(boolean bReset){
-		if(lRequestNano!=0 && lRequestNano<currentTime()){
+		/**
+		 * keep as LESS THAN, so the request can only be ready on the NEXT frame
+		 * this prevents many problems... TODO exemplify.
+		 */
+		if(isRequestActive() && (lRequestNano+lDelayNano)<currentTime()){
 			if(bReset)reset();
 			return true;
 		}
@@ -96,6 +113,10 @@ public class Request {
 	
 	public boolean isReadyAndReset(){
 		return isReady(true);
+	}
+
+	public boolean isRequestActive() {
+		return lRequestNano!=0;
 	}
 	
 //	public boolean isReadyAndReset(){

@@ -98,7 +98,13 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		
 		super.configure(cfg);
 		
-		return storeCfgAndReturnSelf(cfg);
+		storeCfgAndReturnSelf(cfg);
+		return getThis();
+	}
+	
+	@Override
+	protected ConsoleVarsDialogStateI<T> getThis() {
+		return this;
 	}
 	
 	protected class CmdBtnChangeValue implements Command<Button>{

@@ -29,9 +29,11 @@ package com.github.commandsconsolegui.jme.lemur.console;
 
 import java.lang.reflect.Field;
 
+import com.github.commandsconsolegui.SimulationTime;
 import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegator;
 import com.github.commandsconsolegui.globals.GlobalMainThreadI;
 import com.github.commandsconsolegui.globals.GlobalOperationalSystemI;
+import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.globals.GlobalSingleAppInstanceI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
@@ -101,6 +103,10 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
   	/**
   	 * every global can have its defaults here, or can be customized by you before here.
   	 */
+  	if(!GlobalSimulationTimeI.iGlobal().isSet()){
+  		GlobalSimulationTimeI.iGlobal().set(new SimulationTime(System.nanoTime()));
+  	}
+  	
   	if(!GlobalCommandsDelegatorI.iGlobal().isSet()){
   		// defaults to the more complex one
   		GlobalCommandsDelegatorI.iGlobal().set(new ScriptingCommandsDelegator());

@@ -28,16 +28,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.github.commandsconsolegui;
 
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.Request;
+import com.github.commandsconsolegui.misc.TimeHelperI;
 
 /**
  * Updates to the same time also indicates that there is something malfunctioning on the application.
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public class GlobalSimulationTimeI {
-	private static GlobalSimulationTimeI instance = new GlobalSimulationTimeI();
-	public static GlobalSimulationTimeI i(){return instance;}
-	
+public class SimulationTime {
 	public static interface ISimulationTime{
 		/**
 		 * if overriden can move faster or slower than global simulation or real time
@@ -46,6 +45,20 @@ public class GlobalSimulationTimeI {
 		public long getCurrentNano();
 	}
 	
+	/**
+	 * {@link Request} uses 0 as reference to a resetted request.
+	 * 1L makes no difference at all, so lets init with it.
+	 * The simulation could be actually initialized with any valid time too.
+	 */
+	public SimulationTime(long lStartNano){
+		if(lStartNano<1L)throw new PrerequisitesNotMetException("must be >= 1L",this);
+		this.lSimulationNano=lStartNano;
+	}
+	
+	public SimulationTime(){
+		this(1L);
+	}	
+	
 	long lSimulationNano;
 	
 	public long getNano() {
@@ -53,7 +66,8 @@ public class GlobalSimulationTimeI {
 	}
 	
 	public long getMilis(){
-		return lSimulationNano/1000000L;
+//		return lSimulationNano/1000000L;
+		return TimeHelperI.i().nanoToMilis(lSimulationNano);
 	}
 	
 	public void setToNano(long lNano){
@@ -62,11 +76,12 @@ public class GlobalSimulationTimeI {
 	}
 	
 	public void setToMilis(long lMilis){
-		setToNano(lMilis*1000000L);
+//		setToNano(lMilis*1000000L);
+		setToNano(TimeHelperI.i().milisToNano(lMilis));
 	}
 	
 	public void updateAdd(float fTPF){
 		if(fTPF<=0.0f)throw new PrerequisitesNotMetException("cannot update to same or older time", fTPF, lSimulationNano);
-		this.lSimulationNano+=(fTPF*1000000000L);
+		this.lSimulationNano+=TimeHelperI.i().secondsToNano(fTPF);//(fTPF*1000000000L);
 	}
 }

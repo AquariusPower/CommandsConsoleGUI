@@ -59,6 +59,7 @@ import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
+import com.github.commandsconsolegui.misc.HoldRestartable;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -119,7 +120,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 	private BoolTogglerCmdField btgAutoScroll = new BoolTogglerCmdField(this, true).setCallNothingOnChange();
 //	private ButtonCommand	bc;
 	private boolean	bRefreshScroll;
-	private HashMap<String, LemurDialogStateAbs<T,?>> hmChildDiagModals = new HashMap<String, LemurDialogStateAbs<T,?>>();
+	private HashMap<String, HoldRestartable<LemurDialogStateAbs<T,?>>> hmhrChildDiagModals = new HashMap<String, HoldRestartable<LemurDialogStateAbs<T,?>>>();
 	private Long	lClickActionMilis;
 //	private DialogListEntryData<T>	dataSelectRequested;
 	private Label	lblSelectedEntryStatus;
@@ -1328,7 +1329,7 @@ private Button	btnRestart;
 	
 	public THIS addModalDialog(LemurDialogStateAbs<T,?> diagModal){
 		diagModal.setDiagParent(this);
-		hmChildDiagModals.put(diagModal.getId(),diagModal);
+		hmhrChildDiagModals.put(diagModal.getId(), new HoldRestartable(this,diagModal));
 		return getThis();
 	}
 	
@@ -1349,7 +1350,7 @@ private Button	btnRestart;
 
 	//	public void openModalDialog(String strDialogId, DialogListEntryData<T> dataToAssignModalTo, T cmd){
 	public void openModalDialog(String strDialogId, DialogListEntryData<T> dledToAssignModalTo, T cmd){
-		LemurDialogStateAbs<T,?> diagModalCurrent = hmChildDiagModals.get(strDialogId);
+		LemurDialogStateAbs<T,?> diagModalCurrent = hmhrChildDiagModals.get(strDialogId).getRef();
 		if(diagModalCurrent!=null){
 			setDiagModalInfoCurrent(new DiagModalInfo(diagModalCurrent,cmd,dledToAssignModalTo));
 			diagModalCurrent.requestEnable();

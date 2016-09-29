@@ -31,21 +31,23 @@ package com.github.commandsconsolegui.jme;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.GlobalSimulationTimeI;
-import com.github.commandsconsolegui.GlobalSimulationTimeI.ISimulationTime;
+import com.github.commandsconsolegui.SimulationTime.ISimulationTime;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.GlobalHolderAbs.IGlobalOpt;
+import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
+import com.github.commandsconsolegui.misc.CallQueueI;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.Configure;
 import com.github.commandsconsolegui.misc.Configure.IConfigure;
-import com.github.commandsconsolegui.misc.HashChangeHolder;
 import com.github.commandsconsolegui.misc.HoldRestartable;
 import com.github.commandsconsolegui.misc.IRestartable;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.Request;
 import com.github.commandsconsolegui.misc.RetryOnFailure;
 import com.github.commandsconsolegui.misc.RetryOnFailure.IRetryListOwner;
 import com.jme3.app.Application;
@@ -100,7 +102,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 			rDiscard = new RetryOnFailure(this,ERetryDelayMode.Discard.s());
 //			this.bProperlyInitialized = bProperlyInitialized;
 			this.bEnabled = false;
-			this.bEnabledRequested = true;
+//			this.bEnabledRequested = true;
 //			this.bDisabledRequested = bDisabledRequested;
 			this.bHoldProperInitialization = false;
 //			this.bLastUpdateSuccessful = bLastUpdateSuccessful;
@@ -218,8 +220,10 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	private boolean	bEnabled;
 	
 	/** initially all will be wanted as enabled by default */
-	private boolean	bEnabledRequested;
-	private boolean	bDisabledRequested;
+//	private boolean	bEnabledRequested;
+	private Request reqEnable = new Request(this).requestNow();
+	private Request reqDisable = new Request(this);
+//	private boolean	bDisabledRequested;
 	
 	/** set to true to allow instant configuration but wait before properly initializing*/
 	private boolean bHoldProperInitialization;
@@ -274,6 +278,8 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	private HoldRestartable<IRestartable>	hchHolder;
 
 	private boolean	bWasEnabled;
+
+	private boolean	bInstancedFromRestart;
 	
 	public boolean isWasEnabledBeforeRestarting(){
 		return bWasEnabled;
@@ -292,7 +298,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	 * @param cp
 	 */
 	@Override
-	public ConditionalStateAbs configure(ICfgParm icfg){
+	public THIS configure(ICfgParm icfg){
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
 		
 		if(isDiscarded())throw new PrerequisitesNotMetException("cannot re-use after discarded");
@@ -326,7 +332,8 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 		this.bConfigured=true;
 		MsgI.i().debug("cfg",this.bConfigured,this);
 		
-		return storeCfgAndReturnSelf(icfg);
+		storeCfgAndReturnSelf(icfg);
+		return getThis();
 	}
 	
 	/**
@@ -340,7 +347,8 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	 * @param icfg
 	 * @return
 	 */
-	protected <T extends ConditionalStateAbs> T storeCfgAndReturnSelf(ICfgParm icfg){
+//	protected <T extends ConditionalStateAbs> T storeCfgAndReturnSelf(ICfgParm icfg){
+	protected THIS storeCfgAndReturnSelf(ICfgParm icfg){
 		if(this.icfgOfInstance!=null && this.icfgOfInstance!=icfg){
 			throw new PrerequisitesNotMetException(
 				"cfg already set", this, this.icfgOfInstance, icfg);
@@ -353,7 +361,9 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 		}
 		
 		this.icfgOfInstance=icfg;
-		return (T)this;
+		
+		return getThis();
+//		return (T)this;
 	}
 	
 	private ICfgParm getCfg(){
@@ -507,7 +517,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 //		if(bDiscardRequested)return false;
 		
 		if(!bProperlyInitialized){
-			if(bEnabledRequested){
+			if(reqEnable.isReady()){
 				if(!doItInitializeProperly(tpf))return false;
 			}
 		}else{
@@ -522,7 +532,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	 * @return
 	 */
 	private boolean doUpdateEnableDisableProperly(float tpf) {
-		if(bEnabledRequested && !bEnabled){
+		if(reqEnable.isReady() && !bEnabled){
 			bTryingToEnable=true;
 			bTryingToDisable=false;
 			if(bHoldEnable)return false;
@@ -534,13 +544,13 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 			
 			if(bEnableSuccessful){
 				enableSuccess();
-				bEnabledRequested=false; //otherwise will keep trying
+				reqEnable.reset(); //otherwise will keep trying
 			}else{
 				enableFailed();
 				rEnable.updateStartTime();
 			}
 		}else
-		if(bDisabledRequested && bEnabled){
+		if(reqDisable.isReady() && bEnabled){
 			bTryingToDisable=true;
 			bTryingToEnable=false;
 			if(bHoldDisable)return false;
@@ -552,7 +562,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 			
 			if(bDisableSuccessful){
 				disableSuccess();
-				bDisabledRequested=false; //otherwise will keep trying
+				reqDisable.reset(); //otherwise will keep trying
 			}else{
 				disableFailed();
 				rDisable.updateStartTime();
@@ -611,14 +621,26 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 			 */
 			if(!this.bConfigured)throw new PrerequisitesNotMetException("not configured yet: "+this);
 			
-			this.bEnabledRequested = true;
-			this.bDisabledRequested = false;
+			reqEnable.requestNow();
+			reqDisable.reset();
+//			this.bEnabledRequested = true;
+//			this.bDisabledRequested = false;
 		}else{
-			this.bDisabledRequested = true;
-			this.bEnabledRequested = false;
+			reqEnable.reset();
+			reqDisable.requestNow();
+//			this.bDisabledRequested = true;
+//			this.bEnabledRequested = false;
 		}
 //		lEnableDisableRequestTimeMilis=updateTime();
 	};
+	
+	public boolean isDisabling(){
+		return reqDisable.isRequestActive();
+	}
+	
+	public boolean isEnabling(){
+		return reqEnable.isRequestActive();
+	}
 	
 	private void assertNotDiscarded(){
 		if(isDiscarded())throw new PrerequisitesNotMetException("cannot use a discarded state", this);
@@ -628,7 +650,12 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	 * this will simply avoid initially enabling under request
 	 */
 	protected void initiallyDisabled(){
-		this.bEnabledRequested = false;
+		reqEnable.reset();
+//		this.bEnabledRequested = false;
+	}
+	
+	public boolean isInstancedFromRestart(){
+		return this.bInstancedFromRestart;
 	}
 	
 	public void requestEnable(){
@@ -750,8 +777,15 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	 */
 	public THIS copyCurrentValuesFrom(THIS casDiscarding){
 //		cas.getHolder(this.getClass()).isChangedAndUpdateHash(this);
-		HoldRestartable.updateAllRestartableHolders(casDiscarding, this);
+//		bInstancedFromRestart=true;
+//		HoldRestartable.updateAllRestartableHolders(casDiscarding, this);
 //		cas.getHolder().setHolded(this);
+		return getThis();
+	}
+	
+	public THIS setInstancedFromRestart(ConditionalStateManagerI.CompositeControl cc){
+		cc.assertSelfNotNull();
+		bInstancedFromRestart=true;
 		return getThis();
 	}
 	
@@ -926,4 +960,18 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	 * @return
 	 */
 	protected abstract THIS getThis();
+	
+//	CallableX callerRequestRetryUntilEnabled = new CallableX(this) {
+//		@Override
+//		public Boolean call() {
+//			if(isEnabled())return true;
+//			
+//			requestEnable();
+//			
+//			return false;
+//		}
+//	};
+//	public void requestRetryUntilEnabled() {
+//		CallQueueI.i().addCall(callerRequestRetryUntilEnabled);
+//	}
 }

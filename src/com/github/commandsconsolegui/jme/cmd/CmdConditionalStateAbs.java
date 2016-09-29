@@ -87,7 +87,7 @@ public abstract class CmdConditionalStateAbs<THIS extends CmdConditionalStateAbs
 	}
 	private CfgParm	cfg;
 	@Override
-	public CmdConditionalStateAbs configure(ICfgParm icfg) {
+	public THIS configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
 		
 		super.configure(cfg);
@@ -104,7 +104,8 @@ public abstract class CmdConditionalStateAbs<THIS extends CmdConditionalStateAbs
 		
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 		
-		return storeCfgAndReturnSelf(icfg);
+		storeCfgAndReturnSelf(icfg);
+		return getThis();
 	}
 	
 	@Override

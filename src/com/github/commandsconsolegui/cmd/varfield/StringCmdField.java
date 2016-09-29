@@ -185,7 +185,11 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 	 */
 	@Override
 	public int hashCode() {
-		if(!Thread.currentThread().getStackTrace()[2].getClassName().equals(AbstractList.class.getName())){
+		if(
+			!Thread.currentThread().getStackTrace()[2].getClassName().equals(AbstractList.class.getName()) //AbstractList.hashCode()
+			&&
+			!Thread.currentThread().getStackTrace()[2].getClassName().equals(Object.class.getName()) //Object.toString()
+		){
 			MsgI.i().devWarn("do not use this method!!!", this);
 		}
 //		chkAndInit();

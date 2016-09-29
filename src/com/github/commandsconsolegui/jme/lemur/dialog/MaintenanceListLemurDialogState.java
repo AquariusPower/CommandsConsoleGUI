@@ -90,7 +90,8 @@ public class MaintenanceListLemurDialogState<T extends Command<Button>> extends 
 		
 		super.configure(cfg);
 		
-		return storeCfgAndReturnSelf(icfg);
+		storeCfgAndReturnSelf(icfg);
+		return getThis();
 	}
 	
 //	@Override

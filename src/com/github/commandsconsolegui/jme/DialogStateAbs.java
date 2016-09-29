@@ -283,7 +283,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		 * Dialogs must be initially disabled because they are enabled 
 		 * on user demand. 
 		 */
-		if(!cfg.isInitiallyEnabled()){
+		if(!cfg.isInitiallyEnabled() && !isInstancedFromRestart()){
 			initiallyDisabled();
 			btgEnabled.setObjectRawValue(false);//,false);
 		}
@@ -1517,7 +1517,25 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 			return true;
 //		}}.setFailWarnEveryTimes(saveLoadWarnAfterFailTimes())); //100 * 30 = 3s for the dialog effects to finish
 		}});
+	
+//	CallableX callerLoad = new CallableX(this,iSaveLoadRetryDelayMilis) {@Override public Boolean call() {
+//		if(!isDialogEffectsDone()){
+//			setQuietOnFail(true);
+//			setRetryOnFail(true);
+//			return false; //wait it end
+//		}
+//		
+//		if(sv==null)return false;
+//		
+//		setQuietOnFail(false);
+//		setRetryOnFail(false);
+//		load(sv.getClass());
+//		
+//		return true;
+////	}}.setFailWarnEveryTimes(saveLoadWarnAfterFailTimes()));
+//	}};
 	final public StringCmdField scfLoad = new StringCmdField(this)
+//		.setCallerAssigned(callerLoad);
 		.setCallerAssigned(new CallableX(this,iSaveLoadRetryDelayMilis) {@Override public Boolean call() {
 			if(!isDialogEffectsDone()){
 				setQuietOnFail(true);

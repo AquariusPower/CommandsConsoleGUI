@@ -91,6 +91,9 @@ public class AliasData{
 	/**
 	 * This hashcode is useful to detect if any alias on the list has changed its internal fields,
 	 * and therefore, made the list different itself.
+	 * So, the hash of the list should be based on the hash of the aliase's field's values, and not 
+	 * on the Object hash that varies.
+	 * TODO tho, the list and this alias could be checked by ex.: a report md5sum or something like that...
 	 * TODO verify why the list really needs this?
 	 * TODO make an alias list change checker (that does exactly what this code does) and do not touch default hash() and equals()?
 	 */
