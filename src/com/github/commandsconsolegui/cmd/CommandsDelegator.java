@@ -1902,7 +1902,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		
 		for(Entry<String, CommandData> entry:trmCmddList.entrySet().toArray(new Entry[0])){
 			CommandData cmd = entry.getValue();
-			if(DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(cmd)){
+			if(DiscardableInstanceI.i().isBeingDiscardedRecursiveOwner(cmd)){
 //				DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(cmd);
 //			if(DiscardableInstanceI.i().isDiscarding(cmd.getOwner())){
 //			if(cmd.isBeingDiscarded()){

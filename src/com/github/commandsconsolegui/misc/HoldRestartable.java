@@ -40,7 +40,7 @@ public class HoldRestartable<T extends IRestartable> implements IHasOwnerInstanc
 	public static void revalidateAndUpdateAllRestartableHoldersFor(IRestartable irDiscarding, IRestartable irNew){
 		for(HoldRestartable hr:new ArrayList<HoldRestartable>(ahrList)){
 			// discard
-			if(hr.bDiscardSelf || DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(hr)){
+			if(hr.bDiscardSelf || DiscardableInstanceI.i().isBeingDiscardedRecursiveOwner(hr)){
 				ahrList.remove(hr);
 				continue;
 			}
@@ -71,14 +71,14 @@ public class HoldRestartable<T extends IRestartable> implements IHasOwnerInstanc
 		if(this.objOwner==null)throw new PrerequisitesNotMetException("owner is null", this, hrReplacer);
 		if(this.irRef==null)throw new PrerequisitesNotMetException("holded is null", this, hrReplacer);
 		
-		if(DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(this.objOwner)){
+		if(DiscardableInstanceI.i().isBeingDiscardedRecursiveOwner(this.objOwner)){
 			MsgI.i().devInfo("was already going to be discarded, this call is redundant", this, hrReplacer);
 		}
 		
 		if(
 				this.objOwner==hrReplacer.objOwner && 
 				this.irRef==hrReplacer.irRef &&
-				!DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(hrReplacer.objOwner)
+				!DiscardableInstanceI.i().isBeingDiscardedRecursiveOwner(hrReplacer.objOwner)
 		){
 			this.bDiscardSelf=true;
 //			this.objOwner=null;

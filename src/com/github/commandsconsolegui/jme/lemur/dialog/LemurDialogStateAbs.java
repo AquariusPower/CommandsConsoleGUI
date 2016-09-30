@@ -30,7 +30,6 @@ package com.github.commandsconsolegui.jme.lemur.dialog;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map.Entry;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
@@ -41,10 +40,10 @@ import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.AudioUII;
-import com.github.commandsconsolegui.jme.MouseCursorCentralI;
 import com.github.commandsconsolegui.jme.AudioUII.EAudio;
 import com.github.commandsconsolegui.jme.ConditionalStateManagerI.CompositeControl;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
+import com.github.commandsconsolegui.jme.MouseCursorCentralI;
 import com.github.commandsconsolegui.jme.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.lemur.DialogMouseCursorListenerI;
@@ -1774,5 +1773,18 @@ private Button	btnRestart;
 	@Override
 	public void reLoad() {
 		load(LemurDialogCS.class);
+	}
+	
+	@Override
+	public void requestRestart() {
+		// do not allow restart with childs enabled, this also grants many consistencies
+		for(HoldRestartable<LemurDialogStateAbs<T, ?>> hr:hmhrChildDiagModals.values()){
+			if(hr.getRef().isEnabled()){
+				AudioUII.i().play(EAudio.Failure);
+				return;
+			}
+		}
+		
+		super.requestRestart();
 	}
 }

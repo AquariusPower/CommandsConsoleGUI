@@ -1611,10 +1611,10 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	}
 	
 	@Override
-	public THIS copyCurrentValuesFrom(THIS casDiscarding) {
-		super.copyCurrentValuesFrom(casDiscarding);
+	public THIS copyCurrentValuesFrom(THIS diagDiscarding) {
+		super.copyCurrentValuesFrom(diagDiscarding);
 		
-		adleCompleteEntriesList.addAll(casDiscarding.getCompleteEntriesListCopy());
+		adleCompleteEntriesList.addAll(diagDiscarding.getCompleteEntriesListCopy());
 		
 		return getThis();
 	}

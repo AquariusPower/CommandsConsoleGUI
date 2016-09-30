@@ -37,9 +37,9 @@ public class DiscardableInstanceI{
 	private static DiscardableInstanceI instance = new DiscardableInstanceI();
 	public static DiscardableInstanceI i(){return instance;}
 	
-	public boolean isSelfOrRecursiveOwnerBeingDiscarded(Object obj){
+	public boolean isBeingDiscardedRecursiveOwner(Object obj){
 		if(obj instanceof IHasOwnerInstance){
-			if(isSelfOrRecursiveOwnerBeingDiscarded(((IHasOwnerInstance)obj).getOwner())){
+			if(isBeingDiscardedRecursiveOwner(((IHasOwnerInstance)obj).getOwner())){
 				return true;
 			}
 		}

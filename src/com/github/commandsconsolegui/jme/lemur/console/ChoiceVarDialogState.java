@@ -118,6 +118,15 @@ public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceLemur
 	}
 	
 	@Override
+	public ChoiceVarDialogState<T> copyCurrentValuesFrom(ChoiceVarDialogState<T> discarding) {
+		super.copyCurrentValuesFrom(discarding);
+		
+		this.vcf=discarding.vcf;
+		
+		return getThis();
+	}
+	
+	@Override
 	protected void actionSubmit() { //just to help on debug...
 		super.actionSubmit();
 	}

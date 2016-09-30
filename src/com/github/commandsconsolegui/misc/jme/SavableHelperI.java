@@ -37,8 +37,10 @@ import java.util.Set;
 import com.github.commandsconsolegui.cmd.varfield.EType;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.IReflexFieldSafeAccess;
 import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.export.InputCapsule;
 import com.jme3.export.JmeExporter;
@@ -55,6 +57,11 @@ public class SavableHelperI {
 	
 	public static interface ISavableFieldAccess extends IReflexFieldSafeAccess,Savable{
 		public SaveSkipper<?> getSkipper();
+	}
+	
+	public SavableHelperI(){
+		aclGlobalSkip.add(ISaveSkipper.class);
+		aclGlobalSkip.add(CompositeControlAbs.class);
 	}
 	
 	public void setFieldVal(ISavableFieldAccess isfa, Field fld, Object val) throws IllegalArgumentException, IllegalAccessException {
@@ -195,14 +202,17 @@ public class SavableHelperI {
 //		private HashMap<Field,Boolean>	hmFieldAccessible;
 		private HashMap<Field,FieldExtraInfo> hmFieldExtraInfo;// = new HashMap<Field,FieldExtraInfo>();
 		private ISavableFieldAccess	isfaOwner;
+		private CompositeControlAbs	ccAccessKey;
 		
-		public SaveSkipper(ISavableFieldAccess isfa) {
+		public SaveSkipper(CompositeControlAbs cc, ISavableFieldAccess isfa) {
+			cc.assertSelfNotNull();
+			this.ccAccessKey = cc;
 			this.isfaOwner=isfa;
 		}
 		
-		private void assertIsfaOwner(ISavableFieldAccess isfaOwnerCheck){
-			if(this.isfaOwner!=isfaOwnerCheck)throw new PrerequisitesNotMetException("invalid owner", this, this.isfaOwner, isfaOwnerCheck, ISavableFieldAccess.class);
-		}
+//		private void assertIsfaOwner(ISavableFieldAccess isfaOwnerCheck){
+//			if(this.isfaOwner!=isfaOwnerCheck)throw new PrerequisitesNotMetException("invalid owner", this, this.isfaOwner, isfaOwnerCheck, ISavableFieldAccess.class);
+//		}
 		
 		public boolean isThisInstanceIsALoadedTmp() {
 			return bThisInstanceIsALoadedTmp;
@@ -213,8 +223,10 @@ public class SavableHelperI {
 //			assertIsfaOwner(isfaOwnerCheck);
 			this.bThisInstanceIsALoadedTmp = true;
 		}
-		public O getOwner(ISavableFieldAccess isfaOwnerCheck) {
-			assertIsfaOwner(isfaOwnerCheck);
+//		public O getOwner(ISavableFieldAccess isfaOwnerCheck) {
+		public O getOwner(CompositeControlAbs cc) {
+			cc.assertSelfNotNullEqualsStored(ccAccessKey);
+//			assertIsfaOwner(isfaOwnerCheck);
 //		protected O getOwner() {
 			return this.owner;
 		}
@@ -245,19 +257,54 @@ public class SavableHelperI {
 			PrerequisitesNotMetException.assertNotAlreadySet("extrainfo", this.hmFieldExtraInfo, hmFieldExtraInfo, this);
 			this.hmFieldExtraInfo = hmFieldExtraInfo;
 		}
+		
+		private ArrayList<Class<?>> aclSkip = new ArrayList<Class<?>>();
+		public void addSkipClassType(Class<?> cl){
+			if(cl==null)throw new PrerequisitesNotMetException("class is null", this);
+			
+			if(!aclSkip.contains(cl)){
+				aclSkip.add(cl);
+			}else{
+				MsgI.i().devWarn("already set", cl);
+			}
+		}
+//		private ArrayList<Class<?>> getSkipClassTypeListCopy() {
+//			return null;
+//		}
+	}
+	
+	private ArrayList<Class<?>> aclGlobalSkip = new ArrayList<Class<?>>();
+	public void addGlobalSkipClassType(Class<?> cl){
+		if(cl==null)throw new PrerequisitesNotMetException("class is null", this);
+		
+		if(!aclGlobalSkip.contains(cl)){
+			aclGlobalSkip.add(cl);
+		}else{
+			MsgI.i().devWarn("already set", cl);
+		}
 	}
 	
 	protected boolean checkSkip(ISavableFieldAccess isfa, Field fld){
-		if(ISaveSkipper.class.isAssignableFrom(fld.getType()))return true;
+//		if(ISaveSkipper.class.isAssignableFrom(fld.getType()))return true;
+//		if(CompositeControlAbs.class.isAssignableFrom(fld.getType()))return true;
+		for(Class<?> cl:aclGlobalSkip){
+			if(cl.isAssignableFrom(fld.getType()))return true;
+		}
+		
+		for(Class<?> cl:isfa.getSkipper().aclSkip){
+			if(cl.isAssignableFrom(fld.getType()))return true;
+		}
 		
 		/**
 		 * table switch for enum, dynamically generated for each switch(){} you code... 
 		 * switch( ($SWITCH_TABLE$com$...())[this.ENUM_ID.ordinal] )
 		 */
 		if(fld.isSynthetic())return true; //this$0, $SWITCH_TABLE$, ...
+		
 		if(fld.getName().startsWith("$SWITCH_TABLE$")){
 			return true; //should just be a synthetic
 		}
+		
 		try {if(SavableHelperI.i().getFieldVal(isfa,fld)==isfa.getSkipper().owner){ //this$0
 			return true; //should just be a synthetic
 		}} catch (IllegalArgumentException | IllegalAccessException e) {/*wont happen as skipper is inner*/}
