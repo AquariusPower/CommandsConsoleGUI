@@ -1915,13 +1915,13 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator	cd){
 		boolean bCommandWorked = false;
 		
-		if(cd.checkCmdValidity(this,CMD_CLOSE_CONSOLE,"like the bound key to do it")){
+		if(cd.checkCmdValidity(CMD_CLOSE_CONSOLE,"like the bound key to do it")){
 			setEnabledRequest(false);
 //			bKeepInitiallyInvisibleUntilFirstClosed=false; //"first close" is the hint
 //			bFullyInitialized=true; //it will only be completely initialized after the 1st close...
 			bCommandWorked=true;
 		}else
-		if(cd.checkCmdValidity(this,CMD_CONSOLE_HEIGHT,"[fPercent] of the application window")){
+		if(cd.checkCmdValidity(CMD_CONSOLE_HEIGHT,"[fPercent] of the application window")){
 			Float f = cd.getCurrentCommandLine().paramFloat(1);
 			modifyConsoleHeight(f);
 			bCommandWorked=true;
@@ -1930,17 +1930,17 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 //			scrollToBottomRequest();
 //			bCommandWorked=true;
 //		}else
-		if(cd.checkCmdValidity(this,CMD_CONSOLE_STYLE,"[strStyleName] changes the style of the console on the fly, empty for a list")){
+		if(cd.checkCmdValidity(CMD_CONSOLE_STYLE,"[strStyleName] changes the style of the console on the fly, empty for a list")){
 			String strStyle = cd.getCurrentCommandLine().paramString(1);
 			if(strStyle==null)strStyle="";
 			bCommandWorked=cmdStyleApply(strStyle);
 		}else
-		if(cd.checkCmdValidity(this,CMD_DEFAULT,"will revert to default values/config/setup (use if something goes wrong)")){
+		if(cd.checkCmdValidity(CMD_DEFAULT,"will revert to default values/config/setup (use if something goes wrong)")){
 			//TODO apply all basic settings here, like font size etc
 			GlobalDialogHelperI.i().setDefault();
 			bCommandWorked=cmdStyleApply(GlobalDialogHelperI.i().STYLE_CONSOLE);
 		}else
-		if(cd.checkCmdValidity(this,CMD_FONT_LIST,"[strFilter] use 'all' as filter to show all, otherwise only monospaced will be the default filter")){
+		if(cd.checkCmdValidity(CMD_FONT_LIST,"[strFilter] use 'all' as filter to show all, otherwise only monospaced will be the default filter")){
 			String strFilter = cd.getCurrentCommandLine().paramString(1);
 			if(strFilter==null){
 				strFilter="mono";

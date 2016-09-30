@@ -565,7 +565,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	public boolean checkCmdValidity(IReflexFillCfg irfc, String strUniqueCmdId){
 		return checkCmdValidity(irfc, strUniqueCmdId, null, null);
 	}
-	public boolean checkCmdValidity(IReflexFillCfg irfc, StringCmdField scf, String strHelp){
+//	public boolean checkCmdValidity(IReflexFillCfg irfc, StringCmdField scf, String strHelp){
+	public boolean checkCmdValidity(StringCmdField scf, String strHelp){
 		if(bFillCommandList){
 			if(strHelp==null || strHelp.isEmpty())throw new PrerequisitesNotMetException("use the no help method...", scf);
 			
@@ -579,10 +580,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			}
 		}
 		
-		return checkCmdValidity(irfc, scf);
+		return checkCmdValidity(scf);
 	}
-	public boolean checkCmdValidity(IReflexFillCfg irfc, StringCmdField scf){
-		return checkCmdValidity(irfc, scf.getUniqueCmdId(), scf.getSimpleId(), scf.getHelp());
+//	public boolean checkCmdValidity(IReflexFillCfg irfc, StringCmdField scf){
+	public boolean checkCmdValidity(StringCmdField scf){
+		return checkCmdValidity(scf.getOwner(), scf.getUniqueCmdId(), scf.getSimpleId(), scf.getHelp());
 	}
 //	public boolean checkCmdValidity(IReflexFillCfg irfc, StringCmdField scf, String strComment){
 //		if(strComment==null){
@@ -842,7 +844,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 //		boolean bCmdCallerPrepared = false;
 		
 		for(StringCmdField scf:ascfCmdWithCallerList){
-			if(checkCmdValidity(icclPseudo,scf)){
+//			if(checkCmdValidity(icclPseudo,scf)){
+			if(checkCmdValidity(scf)){
 				bCmdWorked = scf.callerAssignedRunNow();
 				if(!bCmdWorked && scf.getCallerAssignedInfo().isRetryOnFail()){
 					dumpInfoEntry("First exec failed but will be retried: "+scf.getUniqueCmdId());
@@ -861,7 +864,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		if(checkCmdValidityBoolTogglers()){
 			bCmdWorked=toggle(btgReferenceMatched);
 		}else
-		if(checkCmdValidity(icclPseudo,scfAlias,getAliasHelp())){
+		if(checkCmdValidity(scfAlias,getAliasHelp())){
 			bCmdWorked=cmdAlias();
 		}else
 		if(checkCmdValidity(this,"activateSelfWindow")){
@@ -874,25 +877,25 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			}
 			bCmdWorked = true;
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_CLEAR_COMMANDS_HISTORY)){
+		if(checkCmdValidity(CMD_CLEAR_COMMANDS_HISTORY)){
 			astrCmdHistory.clear();
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,scfClearDumpArea)){
+		if(checkCmdValidity(scfClearDumpArea)){
 			icui().getDumpEntriesForManagement(ccSelf).clear();
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_CONSOLE_SCROLL_BOTTOM)){
+		if(checkCmdValidity(CMD_CONSOLE_SCROLL_BOTTOM)){
 			icui().scrollToBottomRequest();
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_DB,EDataBaseOperations.help())){
+		if(checkCmdValidity(CMD_DB,EDataBaseOperations.help())){
 			bCmdWorked=cmdDb();
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_ECHO," simply echo something")){
+		if(checkCmdValidity(CMD_ECHO," simply echo something")){
 			bCmdWorked=cmdEcho();
 		}else
-		if(checkCmdValidity(icclPseudo,scfChangeCommandSimpleId,"<strUniqueCmdIdWithSimpleConflict> <strNewSimpleCmdId>")){
+		if(checkCmdValidity(scfChangeCommandSimpleId,"<strUniqueCmdIdWithSimpleConflict> <strNewSimpleCmdId>")){
 			String strUniqueCmdIdWithSimpleConflict = ccl.paramString(1);
 			String strNewSimpleCmdId = ccl.paramString(2);
 			
@@ -914,7 +917,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 				}
 			}
 		}else
-		if(checkCmdValidity(getPseudoListener(),scfCmdOS,"<strOSName> <astrOSCommandAndParams> runs an OS command. Will only be executed if in the correponding OS, otherwise will be skipped, so use with the other OS alternatives nearby.")){
+		if(checkCmdValidity(scfCmdOS,"<strOSName> <astrOSCommandAndParams> runs an OS command. Will only be executed if in the correponding OS, otherwise will be skipped, so use with the other OS alternatives nearby.")){
 			if(bAllowUserCmdOS){
 				bCmdWorked=cmdOS(getCurrentCommandLine());
 			}else{
@@ -922,7 +925,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 				bCmdWorked=false;
 			}
 		}else
-		if(checkCmdValidity(icclPseudo,scfEditShowClipboad,"--noNL")){
+		if(checkCmdValidity(scfEditShowClipboad,"--noNL")){
 			String strParam1 = ccl.paramString(1);
 			boolean bShowNL=true;
 			if(strParam1!=null){
@@ -933,13 +936,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			showClipboard(bShowNL);
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,scfEditCopy,"-d end lines with command delimiter instead of NL;")){
+		if(checkCmdValidity(scfEditCopy,"-d end lines with command delimiter instead of NL;")){
 			bCmdWorked=icui().cmdEditCopyOrCut(false);
 		}else
-		if(checkCmdValidity(icclPseudo,scfEditCut,"like copy, but cut :)")){
+		if(checkCmdValidity(scfEditCut,"like copy, but cut :)")){
 			bCmdWorked=icui().cmdEditCopyOrCut(true);
 		}else
-		if(checkCmdValidity(icclPseudo,scfExecBatchCmdsFromFile,"<strFileName>")){
+		if(checkCmdValidity(scfExecBatchCmdsFromFile,"<strFileName>")){
 			String strFile = ccl.paramString(1);
 			if(strFile!=null){
 				addCmdListOneByOneToQueue(MiscI.i().fileLoad(strFile),false,false);
@@ -947,11 +950,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 				bCmdWorked=true;
 			}
 		}else
-		if(checkCmdValidity(icclPseudo,scfExit,"the application")){
+		if(checkCmdValidity(scfExit,"the application")){
 			cmdExit();
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,scfFileShowData,"<ini|setup|CompleteFileName> show contents of file at dump area")){
+		if(checkCmdValidity(scfFileShowData,"<ini|setup|CompleteFileName> show contents of file at dump area")){
 			String strOpt = ccl.paramString(1);
 			
 			if(strOpt!=null){
@@ -980,21 +983,21 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_FIX_LINE_WRAP ,"in case words are overlapping")){
+		if(checkCmdValidity(CMD_FIX_LINE_WRAP ,"in case words are overlapping")){
 			icui().cmdLineWrapDisableDumpArea();
 			bCmdWorked = true;
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_FIX_VISIBLE_ROWS_AMOUNT,"[iAmount] in case it is not showing as many rows as it should")){
+		if(checkCmdValidity(CMD_FIX_VISIBLE_ROWS_AMOUNT,"[iAmount] in case it is not showing as many rows as it should")){
 			icui().setVisibleRowsAdjustRequest(ccl.paramInt(1));
 			if(!icui().isVisibleRowsAdjustRequested())icui().setVisibleRowsAdjustRequest(0);
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,scfFixAllCmdsConflictsAutomatically,"[strSimpleCmdFilter]")){
+		if(checkCmdValidity(scfFixAllCmdsConflictsAutomatically,"[strSimpleCmdFilter]")){
 			String strSimpleCmdFilter = ccl.paramString(1);
 
 			bCmdWorked=fixSimpleCmdConflictForAll(strSimpleCmdFilter);
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_HELP,"[strFilter...] show (filtered) available commands")){
+		if(checkCmdValidity(CMD_HELP,"[strFilter...] show (filtered) available commands")){
 			String strFilter=null;
 			int iParamIndex=1;
 			boolean bFiltered=false;
@@ -1010,17 +1013,17 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			 */
 			bCmdWorked=true; 
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_HISTORY,"[strFilter] of issued commands (the filter results in sorted uniques)")){
+		if(checkCmdValidity(CMD_HISTORY,"[strFilter] of issued commands (the filter results in sorted uniques)")){
 			bCmdWorked=cmdShowHistory();
 		}else
-//		if(checkCmdValidity(icclPseudo,CMD_HK_TOGGLE ,"[bEnable] allow hacks to provide workarounds")){
+//		if(checkCmdValidity(CMD_HK_TOGGLE ,"[bEnable] allow hacks to provide workarounds")){
 //			if(paramBooleanCheckForToggle(1)){
 //				Boolean bEnable = paramBoolean(1);
 //				icui().setHKenabled(bEnable);
 //				bCmdEndedGracefully=true;
 //			}
 //		}else
-		if(checkCmdValidity(icclPseudo,CMD_LINE_WRAP_AT,"[iMaxChars] 0 = wrap will be automatic")){
+		if(checkCmdValidity(CMD_LINE_WRAP_AT,"[iMaxChars] 0 = wrap will be automatic")){
 			Integer i = ccl.paramInt(1);
 			if(i!=null && i>=0){ // a value was supplied
 //				ilvConsoleMaxWidthInCharsForLineWrap.setObjectValue(ccSelf,i);
@@ -1037,7 +1040,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 //			csaTmp.updateFontStuff();
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,scfListFiles,"<strPath> list files on directory")){
+		if(checkCmdValidity(scfListFiles,"<strPath> list files on directory")){
 			String strPath = ccl.paramString(1);
 			
 			try {
@@ -1053,11 +1056,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			}
 			
 		}else
-		if(checkCmdValidity(icclPseudo,scfMessagesBufferClear,"clear all warning and exceptions stored in memory")){
+		if(checkCmdValidity(scfMessagesBufferClear,"clear all warning and exceptions stored in memory")){
 			aimBufferList.clear();
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_MESSAGE_REVIEW,"[filter]|[index [stackLimit]] if filter is an index, and it has an exception, the complete exception will be dumped.")){
+		if(checkCmdValidity(CMD_MESSAGE_REVIEW,"[filter]|[index [stackLimit]] if filter is an index, and it has an exception, the complete exception will be dumped.")){
 			String strFilter = ccl.paramString(1);
 			Integer iIndex = ccl.paramInt(1,true);
 			
@@ -1084,11 +1087,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			dumpSubEntry("Total: "+aimsg.size());
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,scfQuit,"the application")){
+		if(checkCmdValidity(scfQuit,"the application")){
 			cmdExit();
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_REPEAT,"<iTimes> <strOtherCommand> will repeat other command iTimes")){
+		if(checkCmdValidity(CMD_REPEAT,"<iTimes> <strOtherCommand> will repeat other command iTimes")){
 			Integer iTimes = ccl.paramInt(1);
 			if(iTimes!=null && iTimes>=0){ // 0 or 1 is accepted in case iTimes is the result of some variable.
 				String strOtherCmd = ccl.paramStringConcatenateAllFrom(2);
@@ -1098,17 +1101,17 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 				}
 			}
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_RESET,"will reset the console (restart it)")){
+		if(checkCmdValidity(CMD_RESET,"will reset the console (restart it)")){
 			cmdResetConsole();
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_SHOW_SETUP,"show restricted variables")){
+		if(checkCmdValidity(CMD_SHOW_SETUP,"show restricted variables")){
 			for(String str:MiscI.i().fileLoad(flSetup)){
 				dumpSubEntry(str);
 			}
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,scfShowCommandsSimpleIdConflicts)){
+		if(checkCmdValidity(scfShowCommandsSimpleIdConflicts)){
 			ArrayList<CommandData> aC = new ArrayList<CommandData>();
 			for(CommandData cmdd:trmCmddList.values()){
 //				aC.addAll(cmdd.getCoreIdConflictListClone());
@@ -1153,7 +1156,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_SLEEP,"<fDelay> [singleCmd] will wait before executing next command in the command block; alternatively will wait before executing command in-line, but then it will not sleep the block it is in!")){
+		if(checkCmdValidity(CMD_SLEEP,"<fDelay> [singleCmd] will wait before executing next command in the command block; alternatively will wait before executing command in-line, but then it will not sleep the block it is in!")){
 			Float fSleep = ccl.paramFloat(1);
 			String strCmds = ccl.paramStringConcatenateAllFrom(2);
 			
@@ -1174,7 +1177,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			}
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_STATS_ENABLE,"[idToEnable [bEnable]] empty for a list. bEnable empty to toggle.")){
+		if(checkCmdValidity(CMD_STATS_ENABLE,"[idToEnable [bEnable]] empty for a list. bEnable empty to toggle.")){
 			bCmdWorked=true;
 			String strId=ccl.paramString(1);
 			Boolean bValue=ccl.paramBoolean(2);
@@ -1194,22 +1197,22 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 				}
 			}
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_STATS_FIELD_TOGGLE,"[bEnable] toggle simple stats field visibility")){
+		if(checkCmdValidity(CMD_STATS_FIELD_TOGGLE,"[bEnable] toggle simple stats field visibility")){
 			bCmdWorked=icui().statsFieldToggle();
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_STATS_SHOW_ALL,"show all console stats")){
+		if(checkCmdValidity(CMD_STATS_SHOW_ALL,"show all console stats")){
 			dumpAllStats();
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_TEST,"[...] temporary developer tests")){
+		if(checkCmdValidity(CMD_TEST,"[...] temporary developer tests")){
 			cmdTest();
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_VAR_ADD,"<varId> <[+|-]value>")){
+		if(checkCmdValidity(CMD_VAR_ADD,"<varId> <[+|-]value>")){
 			bCmdWorked=cmdVarAdd(ccl.paramString(1), ccl.paramString(2),true);
 		}else
 		if(
-				checkCmdValidity(icclPseudo,CMD_VAR_SET,
+				checkCmdValidity(CMD_VAR_SET,
 				"<[<varId> <value>] | [-varId]> "
 					+"Can be boolean(true/false, and after set accepts 1/0), number(integer/floating) or string; "
 					+"-varId will delete it; "
@@ -1219,10 +1222,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		){
 			bCmdWorked=cmdVarSet();
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_VAR_SET_CMP,"<varIdBool> <value> <cmp> <value>")){
+		if(checkCmdValidity(CMD_VAR_SET_CMP,"<varIdBool> <value> <cmp> <value>")){
 			bCmdWorked=cmdVarSetCmp();
 		}else
-		if(checkCmdValidity(icclPseudo,CMD_VAR_SHOW,"[["+RESTRICTED_TOKEN+"]filter] list user or restricted variables.")){
+		if(checkCmdValidity(CMD_VAR_SHOW,"[["+RESTRICTED_TOKEN+"]filter] list user or restricted variables.")){
 			bCmdWorked=cmdVarShow();
 		}else
 		if(checkCmdValidity(icclPseudo,TOKEN_CMD_NOT_WORKING_YET+"zDisabledCommand",null," just to show how to use it")){
@@ -1903,16 +1906,29 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		for(Entry<String, CommandData> entry:trmCmddList.entrySet().toArray(new Entry[0])){
 			CommandData cmd = entry.getValue();
 			if(DiscardableInstanceI.i().isBeingDiscardedRecursiveOwner(cmd)){
-//				DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(cmd);
-//			if(DiscardableInstanceI.i().isDiscarding(cmd.getOwner())){
-//			if(cmd.isBeingDiscarded()){
 				if(trmCmddList.remove(entry.getKey())==null){
-					throw new PrerequisitesNotMetException("Inconsistent");
+					throw new PrerequisitesNotMetException("Inconsistent"); //will never happen? should also not contain null values, wel.. 
 				}
+				
 				MsgI.i().debug("RemovingCmd: "+entry.getKey());
 				acmdRm.add(cmd);
+				
+				/**
+				 * cmd and var owners are granted to be the same the moment such link is created.
+				 */
+				VarCmdFieldAbs vcf = cmd.getVar();
+				if(ascfCmdWithCallerList.contains(vcf)){
+					ascfCmdWithCallerList.remove(vcf);
+				}
+				
 			}
 		}
+		
+//		for(StringCmdField scf:new ArrayList<StringCmdField>(ascfCmdWithCallerList)){
+//			if(DiscardableInstanceI.i().isBeingDiscardedRecursiveOwner(scf)){
+//				ascfCmdWithCallerList.remove(scf);
+//			}
+//		}
 		
 		if(trmCmddList.get(cmddLastAdded.getUniqueCmdId())==null){
 			cmddLastAdded=null;
@@ -1933,8 +1949,20 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		return astr;
 	}
 	
+	/**
+	 * The var {@link VarCmdFieldAbs} will be searched and assigned, no need to bring it as parameter.
+	 * 
+	 * @param irfcOwner
+	 * @param strUniqueCmdIdNew
+	 * @param strSimpleCmdIdNew
+	 * @param bSkipSortCheck
+	 */
 	private void addCmdToValidList(IReflexFillCfg irfcOwner, String strUniqueCmdIdNew, String strSimpleCmdIdNew, boolean bSkipSortCheck){
+//	private void addCmdToValidList(IReflexFillCfg irfcOwner, VarCmdFieldAbs vcfInitLink, String strUniqueCmdIdNew, String strSimpleCmdIdNew, boolean bSkipSortCheck){
 //		String strConflict=null;
+//		if(vcfInitLink!=null && vcfInitLink.getOwner()!=irfcOwner){
+//			throw new PrerequisitesNotMetException("inconsistent",vcfInitLink, vcfInitLink.getOwner(), irfcOwner);
+//		}
 		
 		if(irfcOwner==null){
 			throw new PrerequisitesNotMetException("listener reference cannot be null");
@@ -1950,6 +1978,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 				strComment=strUniqueCmdIdNew.substring(strBaseCmdNew.length()).trim();
 			}
 			
+//			CommandData cmddNew = new CommandData(irfcOwner, vcfInitLink, strBaseCmdNew, strSimpleCmdIdNew, strComment);
 			CommandData cmddNew = new CommandData(irfcOwner, strBaseCmdNew, strSimpleCmdIdNew, strComment);
 			
 			/**
@@ -3238,7 +3267,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		for(StringCmdField scf:VarCmdFieldAbs.getListCopy(StringCmdField.class)){
 			if(scf.isCallerAssigned()){
 				if(!ascfCmdWithCallerList.contains(scf)){
-					checkCmdValidity(icclPseudo, scf);
+					checkCmdValidity(scf);
 					
 					ascfCmdWithCallerList.add(scf);
 				}

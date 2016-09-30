@@ -41,6 +41,7 @@ import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
+import com.github.commandsconsolegui.misc.IHasOwnerInstance;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;

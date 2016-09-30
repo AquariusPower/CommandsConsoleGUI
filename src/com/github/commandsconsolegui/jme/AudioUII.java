@@ -289,7 +289,7 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 		boolean bCommandWorked = false;
 		
-		if(cd.checkCmdValidity(this,scfSoundRefreshCache,"mainly to let developer dinamically update sound files")){
+		if(cd.checkCmdValidity(scfSoundRefreshCache,"mainly to let developer dinamically update sound files")){
 			/**
 			 * TODO this is not working because of the jme assets cache right?
 			 */
@@ -299,7 +299,7 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 			
 			bCommandWorked=true;
 		}else
-		if(cd.checkCmdValidity(this,scfSoundList)){
+		if(cd.checkCmdValidity(scfSoundList)){
 			for(String strKey:tmAudio.keySet().toArray(new String[]{})){
 				AudioNode an = tmAudio.get(strKey);
 				String strMute=isMute(an)?"(Mute)":"";
@@ -308,20 +308,20 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 			
 			bCommandWorked=true;
 		}else
-		if(cd.checkCmdValidity(this,scfSoundSet,"<strAudioId> <strFile>")){
+		if(cd.checkCmdValidity(scfSoundSet,"<strAudioId> <strFile>")){
 			String strAudioId = cd.getCurrentCommandLine().paramString(1);
 			String strFile 		= cd.getCurrentCommandLine().paramString(2);
 			if(strAudioId!=null && strFile!=null){
 				bCommandWorked=setAudio(strAudioId, strFile)!=null;
 			}
 		}else
-		if(cd.checkCmdValidity(this,scfSoundMuteToggle,"<strAudioId>")){
+		if(cd.checkCmdValidity(scfSoundMuteToggle,"<strAudioId>")){
 			String strAudioId = cd.getCurrentCommandLine().paramString(1);
 			if(strAudioId!=null){
 				bCommandWorked=muteAudioToggle(strAudioId);
 			}
 		}else
-		if(cd.checkCmdValidity(this,scfSoundPlayFile,"<strSoundFile>")){
+		if(cd.checkCmdValidity(scfSoundPlayFile,"<strSoundFile>")){
 			String strSoundFile = cd.getCurrentCommandLine().paramString(1);
 			if(strSoundFile!=null){
 				setAudio("temp", strSoundFile);

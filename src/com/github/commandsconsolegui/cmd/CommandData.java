@@ -84,6 +84,7 @@ public class CommandData implements Comparable<CommandData>,IHasOwnerInstance<IR
 	}
 	
 //	public CommandData(IReflexFillCfg irfcOwner, VarCmdFieldAbs vcf, String strBaseCmd, String strSimpleCmdId, String strComment) {
+//	public CommandData(IReflexFillCfg irfcOwner, VarCmdFieldAbs vcf, String strBaseCmd, String strSimpleCmdId, String strComment) {
 	public CommandData(IReflexFillCfg irfcOwner, String strBaseCmd, String strSimpleCmdId, String strComment) {
 		super();
 		this.irfcOwner = irfcOwner;
@@ -92,6 +93,7 @@ public class CommandData implements Comparable<CommandData>,IHasOwnerInstance<IR
 		this.strSimpleCmdId=strSimpleCmdId;
 		this.strComment = strComment;
 		this.asteCodeTrackUniqueId = Thread.currentThread().getStackTrace();
+//		setVar(vcf);
 		
 		if(this.irfcOwner==null)throw new PrerequisitesNotMetException("listener cannot be null");
 	}
@@ -173,6 +175,9 @@ public class CommandData implements Comparable<CommandData>,IHasOwnerInstance<IR
 
 	public CommandData setVar(VarCmdFieldAbs vcf) {
 		PrerequisitesNotMetException.assertNotAlreadySet("var link to this cmd data", this.vcf, vcf, this);
+		if(vcf.getOwner()!=getOwner()){
+			throw new PrerequisitesNotMetException("should be the same owner", this, getOwner(), vcf, vcf.getOwner());
+		}
 		this.vcf=vcf;
 		return this;
 	}

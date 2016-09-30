@@ -168,7 +168,7 @@ public abstract class BasicLemurDialogStateAbs<T,THIS extends BasicLemurDialogSt
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cd) {
 		boolean bCommandWorked = false;
 		
-		if(cd.checkCmdValidity(this,scfAddEntry,"[strText] [strParenUId]")){
+		if(cd.checkCmdValidity(scfAddEntry,"[strText] [strParenUId]")){
 			String strText = cd.getCurrentCommandLine().paramString(1);
 			String strParentUId = cd.getCurrentCommandLine().paramString(2);
 			

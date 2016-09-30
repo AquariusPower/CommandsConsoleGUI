@@ -244,10 +244,10 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator	cd) {
 		boolean bCommandWorked = false;
 		
-		if(cd.checkCmdValidity(this,scfEndDeveloperCommandTest,"[iHowMany] users working?")){
+		if(cd.checkCmdValidity(scfEndDeveloperCommandTest,"[iHowMany] users working?")){
 			bCommandWorked = customCommand(cd.getCurrentCommandLine().paramInt(1));
 		}else
-		if(cd.checkCmdValidity(this,scfHelp,"specific custom help")){
+		if(cd.checkCmdValidity(scfHelp,"specific custom help")){
 			cd.dumpSubEntry("custom help");
 			bCommandWorked = true;
 		}else

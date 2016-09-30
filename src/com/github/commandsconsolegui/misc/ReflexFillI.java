@@ -59,13 +59,14 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	 * for the same owner class, there may have user preferred prefix/suffix
 	 * for each class type implementing this interface.
 	 */
-	public static interface IReflexFillCfgVariant{
+	public static interface IReflexFillCfgVariant extends IHasOwnerInstance<IReflexFillCfg>{
 		/** used at the specific owner field type coding name prefix style */
 		public String getCodePrefixVariant();
 		
 		/** for the class used as the field instance */
 		public String getCodePrefixDefault();
 		
+		@Override
 		public IReflexFillCfg getOwner();
 		
 		/** TODO remove? use owner!=null */

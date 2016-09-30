@@ -193,16 +193,16 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 		if(ecrs.compareTo(ECmdReturnStatus.NotFound)!=0)return ecrs;
 		
 		if(!bCommandWorked){
-			if(checkCmdValidity(getPseudoListener(),CMD_FUNCTION,"<id> begins a function block")){
+			if(checkCmdValidity(CMD_FUNCTION,"<id> begins a function block")){
 				bCommandWorked=cmdFunctionBegin();
 			}else
-			if(checkCmdValidity(getPseudoListener(),CMD_FUNCTION_CALL,"<id> [parameters...] retrieve parameters values with ex.: ${id_1} ${id_2} ...")){
+			if(checkCmdValidity(CMD_FUNCTION_CALL,"<id> [parameters...] retrieve parameters values with ex.: ${id_1} ${id_2} ...")){
 				bCommandWorked=cmdFunctionCall();
 			}else
-			if(checkCmdValidity(getPseudoListener(),CMD_FUNCTION_END,"ends a function block")){
+			if(checkCmdValidity(CMD_FUNCTION_END,"ends a function block")){
 				bCommandWorked=cmdFunctionEnd();
 			}else
-			if(checkCmdValidity(getPseudoListener(),scfFunctionList,"[filter]")){
+			if(checkCmdValidity(scfFunctionList,"[filter]")){
 				String strFilter = ccl.paramString(1);
 				ArrayList<String> astr = Lists.newArrayList(tmFunctions.keySet().iterator());
 				for(String str:astr){
@@ -211,7 +211,7 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 				}
 				bCommandWorked=true;
 			}else
-			if(checkCmdValidity(getPseudoListener(),scfFunctionShow,"<functionId>")){
+			if(checkCmdValidity(scfFunctionShow,"<functionId>")){
 				String strFuncId = ccl.paramString(1);
 				if(strFuncId!=null){
 					ArrayList<String> astr = tmFunctions.get(strFuncId);
@@ -227,16 +227,16 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 					}
 				}
 			}else
-			if(checkCmdValidity(getPseudoListener(),CMD_ELSE,"conditinal block")){
+			if(checkCmdValidity(CMD_ELSE,"conditinal block")){
 				bCommandWorked=cmdElse();
 			}else
-			if(checkCmdValidity(getPseudoListener(),CMD_ELSE_IF,"<[!]<true|false>> conditional block")){
+			if(checkCmdValidity(CMD_ELSE_IF,"<[!]<true|false>> conditional block")){
 				bCommandWorked=cmdElseIf();
 			}else
-			if(checkCmdValidity(getPseudoListener(),CMD_IF,"<[!]<true|false>> [cmd|alias] if cmd|alias is not present, this will be a multiline block start!")){
+			if(checkCmdValidity(CMD_IF,"<[!]<true|false>> [cmd|alias] if cmd|alias is not present, this will be a multiline block start!")){
 				bCommandWorked=cmdIf();
 			}else
-			if(checkCmdValidity(getPseudoListener(),CMD_IF_END,"ends conditional block")){
+			if(checkCmdValidity(CMD_IF_END,"ends conditional block")){
 				bCommandWorked=cmdIfEnd();
 			}else
 			{

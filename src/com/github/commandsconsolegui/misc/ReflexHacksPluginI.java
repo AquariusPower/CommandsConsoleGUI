@@ -160,7 +160,7 @@ public class ReflexHacksPluginI implements IConsoleCommandListener, IReflexFillC
 		
 //		if(cd.checkCmdValidity(this,"linuxXrandRScreenRestoreWhileWindowedBugFix", "fixXRandR", "in linux XRandR, even if application is windowed, on exiting it may try to restore the resolution but may do it wrongly, without considering the viewport")){
 		if(
-				cd.checkCmdValidity(this, scfHkFixXRandR, 
+				cd.checkCmdValidity(scfHkFixXRandR, 
 					"In Linux, even if application is windowed, on exiting "+XRandR.class.getName()+" may try to "
 					+"restore the resolution but may do it wrongly, without considering the X viewport."
 					+strHacksWarning

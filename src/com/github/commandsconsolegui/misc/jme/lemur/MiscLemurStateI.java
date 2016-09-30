@@ -797,7 +797,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 		boolean bCommandWorked = false;
 		
 		if(
-			cc.checkCmdValidity(this,scfDebugCheckLemur, 
+			cc.checkCmdValidity(scfDebugCheckLemur, 
 				"[strName] if name is provided, check only the spatials matching it. Only works for active/visible/attached GUI elements."
 //				"[fNewZSize] go thru all lemur elemets active on the GUI node to check if they are "
 //				+"all properly configured."
