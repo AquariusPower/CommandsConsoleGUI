@@ -98,6 +98,12 @@ public class HoldRestartable<T extends IRestartable> implements IHasOwnerInstanc
 	
 	public void setRef(IRestartable irRef){
 		if(this.irRef!=null){
+			/**
+			 * There is no problem if it is the same object, help on making restarting logics less complex a bit.
+			 * TODO could this lead to some flawed code?
+			 */
+			if(this.irRef==irRef)return;
+			
 			if(!this.irRef.isBeingDiscarded()){
 				throw new PrerequisitesNotMetException("cannot update the holded if it is not being discarded", this.irRef, irRef, this);
 			}
@@ -115,7 +121,7 @@ public class HoldRestartable<T extends IRestartable> implements IHasOwnerInstanc
 			}
 		}
 		
-		this.irRef=irRef; //there is no problem if it is the same object, help on making restarting logics less complex a bit
+		this.irRef=irRef; 
 	}
 	
 	public T getRef(){

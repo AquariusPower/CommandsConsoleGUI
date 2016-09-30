@@ -40,6 +40,7 @@ import com.github.commandsconsolegui.jme.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jme.lemur.MouseCursorListenerAbs;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs;
 import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
+import com.github.commandsconsolegui.jme.lemur.extras.DialogMainContainer;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -51,6 +52,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.TextField;
+import com.simsilica.lemur.component.TextEntryComponent;
 import com.simsilica.lemur.core.GuiControl;
 import com.simsilica.lemur.event.CursorButtonEvent;
 import com.simsilica.lemur.event.CursorEventControl;
@@ -184,7 +186,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHel
 		assertAtRenderingNode(false,spt);
 	}
 	private void assertAtRenderingNode(boolean bIs, Spatial spt){
-		Node parent = MiscJmeI.i().getParentestFrom(spt).getParent();
+//		Node parent = MiscJmeI.i().getParentestFrom(spt).getParent();
 //		boolean bIsAtGuiNode = GlobalGUINodeI.i().equals(parent);
 		boolean b = MiscJmeI.i().isGoingToBeRenderedNow(spt);
 		if(bIs){
@@ -307,23 +309,25 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHel
 		ArrayList<DialogStateAbs> adiag = new ArrayList<DialogStateAbs>();
 		if (diag instanceof LemurDialogStateAbs) {
 			LemurDialogStateAbs diagLemur = (LemurDialogStateAbs) diag;
-			
-			/**
-			 * TODO bring all parents up when focusing a modal child
-	//		Node nodeParentest = MiscJmeI.i().getParentestFrom(spt);
-	//		LemurDialogGUIStateAbs diag = MiscJmeI.i().getUserDataPSH(nodeParentest, LemurDialogGUIStateAbs.class);
-	//		ArrayList adiagList = diag.getParentsDialogList(ccSelf);
-			 */
 			adiag.addAll(diagLemur.getParentsDialogList());
 		}
 		adiag.add(diag);
 		
+		/**
+		 * bring all parents up when focusing a modal child
+		 */
 		for(DialogStateAbs diagWork:adiag){
-			spt = diagWork.getInputFieldForManagement(ccSelf);
-			
-			if(diagWork.isLayoutValid())assertIsAtRenderingNode(spt);
-			asptFocusRequestList.remove(spt); //to update the priority
-			asptFocusRequestList.add(spt); //top priority
+			if(!diagWork.isRestartRequested()){
+				Spatial sptDeNest = diagWork.getInputFieldForManagement(ccSelf);
+				
+				if(diagWork.isLayoutValid())assertIsAtRenderingNode(sptDeNest);
+				asptFocusRequestList.remove(sptDeNest); //to update the priority
+				asptFocusRequestList.add(sptDeNest); //top priority
+				
+				if(sptDeNest instanceof TextField){
+					zSortLatest(((TextField)sptDeNest).getControl(GuiControl.class), false);
+				}
+			}
 		}
 		
 		if(spt instanceof TextField){
@@ -346,12 +350,21 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHel
 		aftZOrderList.remove(ftLatest); //remove to update priority
 		if(!bJustRemove)aftZOrderList.add(ftLatest);
 		
+//		if(ftLatest instanceof TextEntryComponent){
+//			TextEntryComponent tec = (TextEntryComponent)ftLatest;
+//		if(ftLatest instanceof GuiControl){
+//			GuiControl gc = (GuiControl)ftLatest;
+//			gc.getNode();
+//		}
+		
 		/**
 		 * fix list from any inconsistency
 		 */
 		for(FocusTarget ft:new ArrayList<FocusTarget>(aftZOrderList)){
-			GuiControl gct = (GuiControl)ft;
-			if(MiscJmeI.i().getParentestFrom(gct.getSpatial()).getParent()==null){
+			GuiControl gc = (GuiControl)ft;
+			// remove ones that are attached to nothing
+			//TODO check concerning the workaround to invalid layouts? where it may have no parent but the dialog is still there (just invalid but active) 
+			if(MiscJmeI.i().getParentestFrom(gc.getSpatial()).getParent()==null){
 				aftZOrderList.remove(ft);
 			}
 		}

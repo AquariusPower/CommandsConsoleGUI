@@ -39,7 +39,7 @@ import com.simsilica.lemur.Command;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class QuestionLemurDialogState<T extends Command<Button>> extends BasicLemurDialogStateAbs<T,QuestionLemurDialogState<T>> {
+public class QuestionLemurDialogState<T extends Command<Button>, THIS extends QuestionLemurDialogState<T,THIS>> extends BasicLemurDialogStateAbs<T,THIS> {
 	private DialogListEntryData<T>	dledYes;
 	private DialogListEntryData<T>	dledNo;
 	
@@ -56,10 +56,11 @@ public class QuestionLemurDialogState<T extends Command<Button>> extends BasicLe
 	}
 	private CfgParm	cfg;
 	@Override
-	public QuestionLemurDialogState<T> configure(ICfgParm icfg) {
+	public THIS configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;
 		super.configure(cfg);
-		return storeCfgAndReturnSelf(icfg);
+		storeCfgAndReturnSelf(icfg);
+		return getThis();
 	}
 	
 	@Override
@@ -92,8 +93,8 @@ public class QuestionLemurDialogState<T extends Command<Button>> extends BasicLe
 	}
 
 	@Override
-	protected QuestionLemurDialogState<T> getThis() {
-		return this;
+	protected THIS getThis() {
+		return (THIS)this;
 	}
 	
 	@Override

@@ -96,7 +96,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 //	private ChoiceLemurDialogState<T>	diagChoice;
 
 //	private MaintenanceListLemurDialogState<T>	diagList;
-	private HoldRestartable<MaintenanceListLemurDialogState<T>>	hchdiagList = new HoldRestartable<MaintenanceListLemurDialogState<T>>(this);
+	private HoldRestartable<MaintenanceListLemurDialogState<T,?>>	hchdiagList = new HoldRestartable<MaintenanceListLemurDialogState<T,?>>(this);
 
 //	private QuestionLemurDialogState<T>	diagQuestion;
 
@@ -165,25 +165,25 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		consolePlugin.initialize();
 		
 		//////////////////////// config this test
-		ChoiceLemurDialogState<T> diagChoice = new ChoiceLemurDialogState<T>().configure(new ChoiceLemurDialogState.CfgParm(
+		ChoiceLemurDialogState diagChoice = new ChoiceLemurDialogState().configure(new ChoiceLemurDialogState.CfgParm(
 			0.6f, 0.5f, null, null));
 		
-		QuestionLemurDialogState<T> diagQuestion = new QuestionLemurDialogState<T>().configure(new QuestionLemurDialogState.CfgParm(
+		QuestionLemurDialogState diagQuestion = new QuestionLemurDialogState().configure(new QuestionLemurDialogState.CfgParm(
 			500f, 300f, null, null));
 		
 //		diagList = 
-		hchdiagList.setRef(new MaintenanceListLemurDialogState<T>().configure(new MaintenanceListLemurDialogState.CfgParm<T>(
+		hchdiagList.setRef(new MaintenanceListLemurDialogState().configure(new MaintenanceListLemurDialogState.CfgParm<T>(
 			null, null, null, null, diagChoice, diagQuestion)));
 		
 		prepareTestData(diagChoice);
 	}
 	
-	private void prepareTestData(ChoiceLemurDialogState<T> diagChoice){
+	private void prepareTestData(ChoiceLemurDialogState<T,?> diagChoice){
 		for(int i=0;i<10;i++){
 			diagChoice.addEntryQuick(null); 
 		}
 		
-		MaintenanceListLemurDialogState<T> diagList = hchdiagList.getRef();
+		MaintenanceListLemurDialogState<T,?> diagList = hchdiagList.getRef();
 		diagList.addEntryQuick(null);
 		diagList.addEntryQuick(null);
 		

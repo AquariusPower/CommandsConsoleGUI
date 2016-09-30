@@ -49,7 +49,7 @@ import com.simsilica.lemur.Command;
  *
  * @param <T>
  */
-public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceLemurDialogState<T>{
+public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceLemurDialogState<T,ChoiceVarDialogState<T>>{
 	public static class CfgParm extends ChoiceLemurDialogState.CfgParm{
 		public CfgParm(Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow,

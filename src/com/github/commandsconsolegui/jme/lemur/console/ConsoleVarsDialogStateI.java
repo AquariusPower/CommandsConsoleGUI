@@ -51,7 +51,7 @@ import com.simsilica.lemur.Command;
 /**
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/><https://sourceforge.net/u/teike/profile/>
  */
-public class ConsoleVarsDialogStateI<T extends Command<Button>> extends MaintenanceListLemurDialogState<T> {
+public class ConsoleVarsDialogStateI<T extends Command<Button>> extends MaintenanceListLemurDialogState<T,ConsoleVarsDialogStateI<T>> {
 	private static ConsoleVarsDialogStateI<Command<Button>>	instance=new ConsoleVarsDialogStateI<Command<Button>>();
 	public static ConsoleVarsDialogStateI<Command<Button>> i(){return instance;}
 
@@ -350,6 +350,12 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		dledDiags.setText("(Dialogs)",EGroupKeys.Dialogs);
 		
 		return true;
+	}
+	
+	@Override
+	public ConsoleVarsDialogStateI<T> copyCurrentValuesFrom(ConsoleVarsDialogStateI<T> casDiscarding) {
+		//supresses the default blind copy: return super.copyCurrentValuesFrom(casDiscarding);
+		return getThis();
 	}
 	
 	@Override

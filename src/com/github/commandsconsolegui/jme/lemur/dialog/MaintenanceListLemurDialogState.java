@@ -47,7 +47,7 @@ import com.simsilica.lemur.Command;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class MaintenanceListLemurDialogState<T extends Command<Button>> extends BasicLemurDialogStateAbs<T,MaintenanceListLemurDialogState<T>> {
+public class MaintenanceListLemurDialogState<T extends Command<Button>, THIS extends MaintenanceListLemurDialogState<T,THIS>> extends BasicLemurDialogStateAbs<T,THIS> {
 	public static class CfgParm<T> extends BasicLemurDialogStateAbs.CfgParm{
 		private HoldRestartable<LemurDialogStateAbs<T,?>> hrdiagChoice = new HoldRestartable<LemurDialogStateAbs<T,?>>(this);
 		private HoldRestartable<LemurDialogStateAbs<T,?>> hrdiagQuestion = new HoldRestartable<LemurDialogStateAbs<T,?>>(this);
@@ -86,7 +86,7 @@ public class MaintenanceListLemurDialogState<T extends Command<Button>> extends 
 	}
 	private CfgParm<T>	cfg;
 	@Override
-	public MaintenanceListLemurDialogState<T> configure(ICfgParm icfg) {
+	public THIS configure(ICfgParm icfg) {
 		cfg = (CfgParm<T>)icfg;
 		
 		if(cfg.getDiagChoice()!=null)addModalDialog(cfg.getDiagChoice());
@@ -134,7 +134,7 @@ public class MaintenanceListLemurDialogState<T extends Command<Button>> extends 
 		for(DialogListEntryData<T> dledAtModal:diagModal.getDataSelectionListCopy()){
 				if(cmdRequestedAtThisDiag.equals(cmdDel)){
 					if(diagModal instanceof QuestionLemurDialogState){
-						QuestionLemurDialogState<T> qds = (QuestionLemurDialogState<T>)diagModal;
+						QuestionLemurDialogState<T,?> qds = (QuestionLemurDialogState<T,?>)diagModal;
 						if(qds.isYes(dledAtModal)){
 							bChangesMade = deleteEntry(adledToApplyResultsList);
 							
@@ -246,9 +246,13 @@ public class MaintenanceListLemurDialogState<T extends Command<Button>> extends 
 	}
 	CommandCfg cmdCfg = new CommandCfg();
 	
+//	@Override
+//	protected MaintenanceListLemurDialogState<T> getThis() {
+//		return this;
+//	}
 	@Override
-	protected MaintenanceListLemurDialogState<T> getThis() {
-		return this;
+	protected THIS getThis() {
+		return (THIS)this;
 	}
 
 	@Override
@@ -261,4 +265,5 @@ public class MaintenanceListLemurDialogState<T extends Command<Button>> extends 
 		if(fld.getDeclaringClass()!=MaintenanceListLemurDialogState.class){super.setFieldValue(fld,value);return;}
 		fld.set(this,value);
 	}
+
 }
