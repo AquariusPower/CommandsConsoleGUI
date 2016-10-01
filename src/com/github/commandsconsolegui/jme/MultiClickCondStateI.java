@@ -195,41 +195,6 @@ public class MultiClickCondStateI extends ConditionalStateAbs {
 	}
 
 	@Override
-	protected void enableFailed() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void disableFailed() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void enableSuccess() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void disableSuccess() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void initSuccess() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void initFailed() {
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
 	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
 		return fld.get(this);
 	}

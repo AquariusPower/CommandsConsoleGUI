@@ -58,7 +58,13 @@ public abstract class CmdConditionalStateAbs<THIS extends CmdConditionalStateAbs
 		.setCallerAssigned(new CallableX(this) {
 			@Override
 			public Boolean call() {
-				setEnabledRequest(btgEnabled.b());
+				if(
+						( isEnabled() && !btgEnabled.b()) ||
+						(!isEnabled() &&  btgEnabled.b())
+				){
+					setEnabledRequest(btgEnabled.b());
+				}
+				
 				return true;
 			}
 		});
@@ -130,20 +136,8 @@ public abstract class CmdConditionalStateAbs<THIS extends CmdConditionalStateAbs
 	}
 	
 	@Override
-	protected boolean enableAttempt() {
-		if(!super.enableAttempt())return false;
-		return true;
-	}
-	
-	@Override
-	protected boolean disableAttempt() {
-		if(!super.disableAttempt())return false;
-		
-		return true;
-	}
-	
-	@Override
 	protected void enableSuccess() {
+		super.enableSuccess();
 		btgEnabled.setObjectRawValue(true);
 		cd().dumpInfoEntry(getStateEnableCommandId()+" enable");
 	}
@@ -154,18 +148,6 @@ public abstract class CmdConditionalStateAbs<THIS extends CmdConditionalStateAbs
 		cd().dumpInfoEntry(getStateEnableCommandId()+" disable");
 	}
 	
-	@Override
-	protected void enableFailed() {};
-	@Override
-	protected void disableFailed() {};
-	@Override
-	protected void initSuccess() {};
-	@Override
-	protected void initFailed() {
-		// TODO Auto-generated method stub
-		
-	}
-
 	private boolean bPrefixCmdWithIdToo=false;
 	
 	@Override
@@ -207,19 +189,4 @@ public abstract class CmdConditionalStateAbs<THIS extends CmdConditionalStateAbs
 		fld.set(this,value);
 	}
 	
-	@Override
-	public boolean prepareToDiscard(CompositeControl cc) {
-		if(!super.prepareToDiscard(cc))return false;
-		
-//		GlobalCommandsDelegatorI.i().removeAllCmdsFor(this);
-//		
-//		//remove all fields from the list
-//		for(VarCmdFieldAbs vcf:VarCmdFieldAbs.getListFullCopy()){
-//			if(vcf.getOwner()==this){
-//				vcf.discardSelf(ccSelf);
-//			}
-//		}
-		
-		return true;
-	}
 }

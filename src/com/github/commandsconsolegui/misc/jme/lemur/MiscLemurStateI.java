@@ -1115,69 +1115,46 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 	}
 
 
-	public void setOverrideBackgroundColorNegatingCurrent(Panel pnl) {
-		overrideBackgroundColor(pnl,null,false,true);
-	}
-	public void resetOverrideBackgroundColor(Panel pnl){
-		overrideBackgroundColor(pnl,null,true,false);
-	}
-	public void setOverrideBackgroundColor(Panel pnl, ColorRGBA colorApply) {
-		overrideBackgroundColor(pnl,colorApply,false,false);
-	}
-	/**
-	 * TODO use the lemur style instead?
-	 * @param colorOverride if null, will reset (restore current normal bkg color)
-	 * @param bNegateCurrentColor overrides color param (least if it is null)
-	 */
-	private void overrideBackgroundColor(Panel pnl, ColorRGBA colorOverride, boolean bResetToBackup, boolean bNegateCurrentColor) {
-		GlobalMainThreadI.assertEqualsCurrentThread();
-		if(!btgHoverHighlight.b())return;
-		
-//		GuiComponent gcBkg = pnl.getBackground();
-//		if(gcBkg==null){
-//			GlobalCommandsDelegatorI.i().dumpDevWarnEntry("background is null", this);
-//			return;
+//	public void setOverrideBackgroundColorNegatingCurrent(Panel pnl) {
+//		overrideBackgroundColor(pnl,null,false,true);
+//	}
+//	public void resetOverrideBackgroundColor(Panel pnl){
+//		overrideBackgroundColor(pnl,null,true,false);
+//	}
+//	public void setOverrideBackgroundColor(Panel pnl, ColorRGBA colorApply) {
+//		overrideBackgroundColor(pnl,colorApply,false,false);
+//	}
+//	/**
+//	 * TODO use the lemur style instead?
+//	 * @param colorOverride if null, will reset (restore current normal bkg color)
+//	 * @param bNegateCurrentColor overrides color param (least if it is null)
+//	 */
+//	private void overrideBackgroundColor(Panel pnl, ColorRGBA colorOverride, boolean bResetToBackup, boolean bNegateCurrentColor) {
+//		GlobalMainThreadI.assertEqualsCurrentThread();
+//		if(!btgHoverHighlight.b())return;
+//		
+//		ColoredComponent cc = (ColoredComponent)pnl.getBackground();
+//		
+//		String strKey="BkgColorBkp";
+//		ColorRGBA colorBkp=pnl.getUserData(strKey);
+//		if(colorBkp==null){
+//			colorBkp = cc.getColor();
+//			pnl.setUserData(strKey, colorBkp);
 //		}
 //		
-//		QuadBackgroundComponent qbc = (QuadBackgroundComponent)
-//				gcBkg.getGuiControl().getComponent("background");
-		
-		ColoredComponent cc = (ColoredComponent)pnl.getBackground();
-		
-		String strKey="BkgColorBkp";
-		ColorRGBA colorBkp=pnl.getUserData(strKey);
-		if(colorBkp==null){
-			colorBkp = cc.getColor();
-			pnl.setUserData(strKey, colorBkp);
-		}
-		
-		if(bResetToBackup){
-			cc.setColor(colorBkp);
-			pnl.setUserData(strKey, null); //clear to not leave useless value there
-		}else{
-			if(bNegateCurrentColor){
-				colorOverride = MiscJmeI.i().negateColor(colorBkp);
-			}else{
-				if(colorOverride==null)throw new PrerequisitesNotMetException("invalid null color override", this);
-			}
-			
-			cc.setColor(colorOverride.clone());
-		}
-		
-//		if(colorApply!=null){
-//			if(!qbc.getColor().equals(colorApply)){
-//				
+//		if(bResetToBackup){
+//			cc.setColor(colorBkp);
+//			pnl.setUserData(strKey, null); //clear to not leave useless value there
+//		}else{
+//			if(bNegateCurrentColor){
+//				colorOverride = MiscJmeI.i().negateColor(colorBkp);
+//			}else{
+//				if(colorOverride==null)throw new PrerequisitesNotMetException("invalid null color override", this);
 //			}
 //			
-//			qbc.setColor(colorApply);
-//		}else{
-//			if(colorBkp!=null){
-//				qbc.setColor(colorBkp);
-//				setUserData(strKey, null); //clear to not leave useless value there
-//			}
+//			cc.setColor(colorOverride.clone());
 //		}
-		
-	}
+//	}
 
 	public void fixBitmapTextLimitsFor(Panel pnl) {
 		MiscJmeI.i().fixBitmapTextLimitsFor(pnl, pnl.getSize());

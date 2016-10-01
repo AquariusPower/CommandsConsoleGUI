@@ -29,24 +29,26 @@ package com.github.commandsconsolegui.jme.lemur;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.jme.AudioUII;
-import com.github.commandsconsolegui.jme.AudioUII.EAudio;
 import com.github.commandsconsolegui.jme.MouseCursorButtonData;
 import com.github.commandsconsolegui.jme.MouseCursorButtonsControl;
 import com.github.commandsconsolegui.jme.MouseCursorCentralI;
 import com.github.commandsconsolegui.jme.MouseCursorCentralI.EMouseCursorButton;
-import com.github.commandsconsolegui.jme.lemur.console.LemurFocusHelperStateI;
-import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogHelperI;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogHelperI.DummyEffect;
 import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserData;
+import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.jme.MiscJmeI;
 import com.github.commandsconsolegui.misc.jme.lemur.MiscLemurStateI;
+import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
-import com.simsilica.lemur.Button.ButtonAction;
-import com.simsilica.lemur.Command;
-import com.simsilica.lemur.Panel;
+import com.simsilica.lemur.anim.Animation;
+import com.simsilica.lemur.component.QuadBackgroundComponent;
+import com.simsilica.lemur.core.GuiComponent;
+import com.simsilica.lemur.effect.AbstractEffect;
+import com.simsilica.lemur.effect.Effect;
+import com.simsilica.lemur.effect.EffectInfo;
 import com.simsilica.lemur.event.CursorButtonEvent;
 import com.simsilica.lemur.event.CursorListener;
 import com.simsilica.lemur.event.CursorMotionEvent;
@@ -58,7 +60,7 @@ import com.simsilica.lemur.event.CursorMotionEvent;
  *
  */
 public abstract class MouseCursorListenerAbs implements CursorListener {
-	private Button	btnLastHoverIn;
+//	private Button	btnLastHoverIn;
 	
 	private MouseCursorButtonsControl mcab;
 	private boolean	bCancelNextMouseReleased;
@@ -190,62 +192,114 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 		
 	}
 
-	Command<Button> cmdbtnHoverOver = new Command<Button>(){
-		@Override
-		public void execute(Button source) {
-			if( !LemurFocusHelperStateI.i().isDialogFocusedFor(source) )return;
-			
-			AudioUII.i().playOnUserAction(EAudio.HoverOverActivators);
-			
-			Panel pnlApplyEffect = source;
-			CellDialogEntry<?> cell = (CellDialogEntry<?>)source.getUserData(EUserData.classCellRef.s());
-			if(cell!=null){
-//				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("activator has no cell?", source, Cell.class.getName());
-//			}else{
-//				source=cell;
-				pnlApplyEffect = cell;
-			}
-			
-			MiscLemurStateI.i().setOverrideBackgroundColorNegatingCurrent(pnlApplyEffect);
-			
-			source.setUserData(EUserData.bHoverOverIsWorking.s(),true);
-			
-			btnLastHoverIn = source;
-		}
-	};
-	Command<Button> cmdbtnHoverOut = new Command<Button>(){
-		@Override
-		public void execute(Button source) {
-			if( !LemurFocusHelperStateI.i().isDialogFocusedFor(source) )return;
-			
-			Panel pnlApplyEffect = source;
-			CellDialogEntry<?> cell = (CellDialogEntry<?>)source.getUserData(EUserData.classCellRef.s());
-			if(cell!=null){
-				pnlApplyEffect = cell;
-//				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("activator has no cell?", source, Cell.class.getName());
-//			}else{
-			}
-			
-			MiscLemurStateI.i().resetOverrideBackgroundColor(pnlApplyEffect);
-			
-			if(btnLastHoverIn!=null){
-				if(btnLastHoverIn==source){
-					btnLastHoverIn=null;
-				}else{
-					//TODO also reset all like in app lost focus etc?
-					GlobalCommandsDelegatorI.i().dumpDevWarnEntry("inconsistency, why is not last hover in?", btnLastHoverIn, source, this);
-				}
-			}
-		}
-	};
+//	Command<Button> cmdbtnHoverOver = new Command<Button>(){
+//		@Override
+//		public void execute(Button source) {
+//			if( !LemurFocusHelperStateI.i().isDialogFocusedFor(source) )return;
+//			
+//			AudioUII.i().playOnUserAction(EAudio.HoverOverActivators);
+//			
+//			Panel pnlApplyEffect = source;
+//			CellDialogEntry<?> cell = (CellDialogEntry<?>)source.getUserData(EUserData.classCellRef.s());
+//			if(cell!=null){
+////				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("activator has no cell?", source, Cell.class.getName());
+////			}else{
+////				source=cell;
+//				pnlApplyEffect = cell;
+//			}
+//			
+//			MiscLemurStateI.i().setOverrideBackgroundColorNegatingCurrent(pnlApplyEffect);
+//			
+//			source.setUserData(EUserData.bHoverOverIsWorking.s(),true);
+//			
+//			btnLastHoverIn = source;
+//		}
+//	};
+//	Command<Button> cmdbtnHoverOut = new Command<Button>(){
+//		@Override
+//		public void execute(Button source) {
+//			if( !LemurFocusHelperStateI.i().isDialogFocusedFor(source) )return;
+//			
+//			Panel pnlApplyEffect = source;
+//			CellDialogEntry<?> cell = (CellDialogEntry<?>)source.getUserData(EUserData.classCellRef.s());
+//			if(cell!=null){
+//				pnlApplyEffect = cell;
+////				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("activator has no cell?", source, Cell.class.getName());
+////			}else{
+//			}
+//			
+//			MiscLemurStateI.i().resetOverrideBackgroundColor(pnlApplyEffect);
+//			
+//			if(btnLastHoverIn!=null){
+//				if(btnLastHoverIn==source){
+//					btnLastHoverIn=null;
+//				}else{
+//					//TODO also reset all like in app lost focus etc?
+//					GlobalCommandsDelegatorI.i().dumpDevWarnEntry("inconsistency, why is not last hover in?", btnLastHoverIn, source, this);
+//				}
+//			}
+//		}
+//	};
 	
-	public void clearLastButtonHoverIn(){
-		if(btnLastHoverIn!=null)cmdbtnHoverOut.execute(btnLastHoverIn);
-	}
+//	public void clearLastButtonHoverIn(){
+//		if(btnLastHoverIn!=null)cmdbtnHoverOut.execute(btnLastHoverIn);
+//	}
 	
 	public void addDefaultCommands(Button btn){
-		btn.addCommands(ButtonAction.HighlightOn, cmdbtnHoverOver);
-		btn.addCommands(ButtonAction.HighlightOff, cmdbtnHoverOut);
+//		btn.addCommands(ButtonAction.HighlightOn, cmdbtnHoverOver);
+//		btn.addCommands(ButtonAction.HighlightOff, cmdbtnHoverOut);
+//		if(!efDummy.getChannel().equals(LemurDialogHelperI.i().getEffectHighLightBkg().getChannel())){
+//			throw new PrerequisitesNotMetException("both should be on the same channel", efDummy, LemurDialogHelperI.i().getEffectHighLightBkg(), this);
+//		}
+//		btn.addEffect(Button.EFFECT_ACTIVATE, (Effect)LemurDialogHelperI.i().getEffectHighLightBkg());
+//		btn.addEffect(Button.EFFECT_DEACTIVATE, efDummy);
+		
+		efDummy = LemurDialogHelperI.i().setupSimpleEffect(btn, Button.EFFECT_ACTIVATE, efHighLightBkg, efDummy);
+		btn.addEffect(Button.EFFECT_DEACTIVATE,efDummy);
 	}
+	
+	DummyEffect efDummy;// = new LemurDialogHelperI.DummyEffect(LemurDialogHelperI.i().getEffectHighLightBkg().getChannel());
+	
+	private Effect<Button> efHighLightBkg = new AbstractEffect<Button>("ChannelHighLight") {
+		@Override
+		public Animation create(final Button target, final EffectInfo existing) {
+			final GuiComponent gcBgChk = target.getBackground();
+			if(!QuadBackgroundComponent.class.isInstance(gcBgChk)){
+				MsgI.i().devWarn("background type not supported for this effect", gcBgChk, target, existing, this);
+				return null;
+			}
+			
+			return new Animation() {
+				QuadBackgroundComponent gcBg = (QuadBackgroundComponent)gcBgChk;
+				ColorRGBA colorBkp = gcBg.getColor();
+				boolean bApplied=false;
+				@Override	public void cancel() {
+					gcBg.setColor(colorBkp);
+				}
+				@Override	public boolean animate(double tpf) {
+					if(!bApplied){
+	//					if(existing!=null && existing.getAnimation()==this)return true;
+						gcBg.setColor(MiscJmeI.i().negateColor(colorBkp));
+						target.setUserData(EUserData.bHoverOverIsWorking.s(),true);
+						bApplied=true;
+					}
+					return true;
+				}
+			};
+		}
+	};
+	
+//	/**
+//	 * this is just to let actual effects to end themselves with their cancel()
+//	 */
+//	Effect efDummy = new AbstractEffect("HighLight") {
+//		@Override
+//		public Animation create(Object target, EffectInfo existing) {
+//			return new Animation() {
+//				@Override	public void cancel() {}
+//				@Override	public boolean animate(double tpf) {return true;}
+//			};
+//		}
+//	};
 
 }

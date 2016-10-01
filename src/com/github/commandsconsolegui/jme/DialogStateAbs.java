@@ -89,8 +89,8 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //	private String strStyle;
 	private StringVarField svfStyle = new StringVarField(this, (String)null, null);
 	
-	private Vector3f	v3fMainLocationBkp;
-	private Vector3f	v3fMainSize;
+	private Vector3f	v3fBkpDiagPosB4Effect;
+	private Vector3f	v3fBkpDiagSizeB4Effect;
 	private String	strUserEnterCustomValueToken = "=";
 	
 	private boolean	bUserEnterCustomValueMode;
@@ -487,12 +487,14 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		
 		getDialogMainContainer().setLocalScale(v3fScaleCopy);
 		
+		prepareForEffect();
+		
 		// LOCATION
 		if(btgEffectLocation.b()){
-			Vector3f v3f = new Vector3f(v3fMainLocationBkp);
+			Vector3f v3f = new Vector3f(v3fBkpDiagPosB4Effect);
 			float fPerc = getEffectPerc();
-			float fHalfWidth = (v3fMainSize.x/2f);
-			float fHalfHeight = (v3fMainSize.y/2f);
+			float fHalfWidth = (v3fBkpDiagSizeB4Effect.x/2f);
+			float fHalfHeight = (v3fBkpDiagSizeB4Effect.y/2f);
 			if(!bGrow)fPerc = 1.0f - fPerc;
 			v3f.x = v3f.x + fHalfWidth - (fHalfWidth*fPerc);
 			v3f.y = v3f.y - fHalfHeight + (fHalfHeight*fPerc);
@@ -502,13 +504,23 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		if(bCompleted){
 			tdDialogEffect.setActive(false);
 			
-			MiscLemurStateI.i().setLocationXY(getDialogMainContainer(),v3fMainLocationBkp);
-			v3fMainLocationBkp=null;
+			MiscLemurStateI.i().setLocationXY(getDialogMainContainer(),v3fBkpDiagPosB4Effect);
+			v3fBkpDiagPosB4Effect=null;
 		}
 		
 		return bCompleted;
 	}
 	
+	private void prepareForEffect() {
+		if(v3fBkpDiagPosB4Effect==null){
+			v3fBkpDiagPosB4Effect = getDialogMainContainer().getLocalTranslation().clone();
+		}
+		
+		if(v3fBkpDiagSizeB4Effect==null){
+			v3fBkpDiagSizeB4Effect = getMainSizeCopy();
+		}
+	}
+
 	protected float getEffectPerc(){
 		return tdDialogEffect.getCurrentDelayPercentual(false);
 	}
@@ -529,12 +541,16 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		if(hrdiagParent.isSet())hrdiagParent.getRef().updateModalChild(true,this);
 //		updateModalParent(true);
 		
-		if(btgEffect.b()){
+		
+//		// here to let the disable effect work
+//		v3fBkpDiagPosB4Effect = getDialogMainContainer().getLocalTranslation().clone();
+//		v3fBkpDiagSizeB4Effect = getMainSizeCopy();
+		
+		if(btgEffect.b() && ( !isInstancedFromRestart() || isFirstEnableDone() ) ){
 			Vector3f v3fScale = getDialogMainContainer().getLocalScale();
 			v3fScale.x=v3fScale.y=fMinEffectScale;
 			tdDialogEffect.setActive(true);
-			v3fMainLocationBkp = getDialogMainContainer().getLocalTranslation().clone();
-			v3fMainSize = getMainSizeCopy();
+			prepareForEffect();
 		}
 		
 		if(getInputText().isEmpty()){
@@ -564,12 +580,12 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	protected boolean disableAttempt() {
 		if(!super.disableAttempt())return false;
 		
-		if(btgEffect.b()){
+		if(btgEffect.b() && !isRestartRequested()){
 			Vector3f v3fScaleCopy = getDialogMainContainer().getLocalScale().clone();
 			
 			if(Float.compare(v3fScaleCopy.x,1f)==0){
 				tdDialogEffect.setActive(true);
-				v3fMainLocationBkp = getDialogMainContainer().getLocalTranslation().clone();
+				v3fBkpDiagPosB4Effect = getDialogMainContainer().getLocalTranslation().clone();
 				return false;
 			}else{
 				if(Float.compare(v3fScaleCopy.x,fMinEffectScale)>0){
@@ -580,7 +596,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		
 		getDialogMainContainer().removeFromParent();
 		
-		if(btgEffect.b()){ //reset scale to normal
+		if(btgEffect.b()){ //ensure scale is reset to normal
 			getDialogMainContainer().setLocalScale(1f);
 		}
 		

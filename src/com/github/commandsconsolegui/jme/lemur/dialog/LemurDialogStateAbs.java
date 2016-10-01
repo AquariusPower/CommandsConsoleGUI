@@ -50,6 +50,7 @@ import com.github.commandsconsolegui.jme.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jme.lemur.console.LemurConsoleStateI;
 import com.github.commandsconsolegui.jme.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogHelperI.DialogStyleElementId;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogHelperI.DummyEffect;
 import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry;
 import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
 import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserData;
@@ -60,6 +61,7 @@ import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.HoldRestartable;
 import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.WorkAroundI;
@@ -83,11 +85,17 @@ import com.simsilica.lemur.Label;
 import com.simsilica.lemur.ListBox;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.TextField;
+import com.simsilica.lemur.anim.Animation;
 import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.BorderLayout.Position;
+import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.component.SpringGridLayout;
 import com.simsilica.lemur.component.TextEntryComponent;
+import com.simsilica.lemur.core.GuiComponent;
 import com.simsilica.lemur.core.VersionedList;
+import com.simsilica.lemur.effect.AbstractEffect;
+import com.simsilica.lemur.effect.Effect;
+import com.simsilica.lemur.effect.EffectInfo;
 import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.event.KeyAction;
 import com.simsilica.lemur.event.KeyActionListener;
@@ -735,12 +743,19 @@ private Button	btnRestart;
 //			}.updateTimeMilisNow());
 //			return btnExisting;
 //		}else{
-			Button btnBorder=new Button("", new ElementId(DialogStyleElementId.buttonResizeBorder.s()), getDiagStyle());
+			Button btnBorder=new Button("", new ElementId(DialogStyleElementId.ResizeBorder.s()), getDiagStyle());
 			//Font TRICK(seems not necessary?): 
 //			btnBorder.setFontSize(0.1f); //this trick will let us set it with any dot size!
 			//btnBorder.getFontSize()
 			
 			MiscJmeI.i().setUserDataPSH(btnBorder, this); //if a border is clicked, the bugfixer that recreates it will make the old border object have no parent. Its parentest would have a reference to the dialog, but now it is alone, so such reference must be on it.
+			
+			EffectFocusData efd=new EffectFocusData();
+			efd.colorOriginal=((QuadBackgroundComponent)btnBorder.getBackground()).getColor().clone();
+			efd.colorDim = efd.colorOriginal.clone().mult(0.5f);
+			efd.colorDim.a=efd.colorOriginal.a;
+			MiscJmeI.i().setUserDataPSH(btnBorder, efd);
+//			btnBorder.setUserData(EffectFocusData.class.getName(), efd);
 			
 			CursorEventControl.addListenersToSpatial(btnBorder, DialogMouseCursorListenerI.i());
 			DialogMouseCursorListenerI.i().addDefaultCommands(btnBorder);
@@ -755,8 +770,20 @@ private Button	btnRestart;
 			}
 			btnBorder.setName(strName);
 			
+			efDummy = LemurDialogHelperI.i().setupSimpleEffect(btnBorder, EEffectId.FocusLost.s(), efFocusLost, efDummy);
+//			if(!efDummy.getChannel().equals(efFocusLost.getChannel())){
+//				throw new PrerequisitesNotMetException("both should be on the same channel", efDummy, efFocusLost, btnBorder, this);
+//			}
+//			btnBorder.addEffect(EEffectId.FocusLost.s(), (Effect)efFocusLost);
+//			btnBorder.addEffect(EEffectId.Dummy.s(), efDummy);
+			
 			return btnBorder;
 //		}
+	}
+	
+	public static class EffectFocusData{
+		ColorRGBA	colorDim;
+		ColorRGBA colorOriginal;
 	}
 	
 	StringCmdField scfFixReinitDialogBorders = new StringCmdField(this,null,"it may require a few tries actually...")
@@ -1454,7 +1481,7 @@ private Button	btnRestart;
 //		selectionModel.setSelection(iSel);
 		bRefreshScroll=true;
 		
-		DialogMouseCursorListenerI.i().clearLastButtonHoverIn();
+//		DialogMouseCursorListenerI.i().clearLastButtonHoverIn();
 		
 //		iSel = selectionModel.getSelection();
 		cd().dumpDebugEntry(getId()+":"
@@ -1644,6 +1671,55 @@ private Button	btnRestart;
 	public T getCmdDummy() {
 		return (T) MiscLemurStateI.i().getCmdDummy();
 	}
+	
+	enum EEffectId{
+		FocusLost,
+		Dummy,
+		;
+		public String s(){return this.toString();}
+	}
+	enum EEffectChannel{
+		ChannelFocusIndicator,
+		;
+		public String s(){return this.toString();}
+	}
+	
+	Effect<Button> efFocusLost = new AbstractEffect<Button>(EEffectChannel.ChannelFocusIndicator.s()) {
+		@Override
+		public Animation create(final Button target, final EffectInfo existing) {
+			final GuiComponent gcBgChk = target.getBackground();
+			if(!QuadBackgroundComponent.class.isInstance(gcBgChk)){
+				MsgI.i().devWarn("background type not supported for this effect", gcBgChk, target, existing, this);
+				return null;
+			}
+			
+			return new Animation() {
+				QuadBackgroundComponent gcBg = (QuadBackgroundComponent)gcBgChk;
+				EffectFocusData efd = MiscJmeI.i().getUserDataPSH(target, EffectFocusData.class);
+//				ColorRGBA colorBkp = gcBg.getColor();
+				boolean bApplied=false;
+				@Override	public void cancel() {
+//					gcBg.setColor(colorBkp);
+					gcBg.setColor(efd.colorOriginal);
+				}
+				@Override	public boolean animate(double tpf) {
+					if(!bApplied){
+	//					if(existing!=null && existing.getAnimation()==this)return true;
+//						ColorRGBA colorDim = colorBkp.clone();
+//						float fA=colorDim.a;
+//						colorDim.multLocal(0.5f);
+//						colorDim.a=fA; //keep alpha
+//						
+//						gcBg.setColor(colorDim);
+						gcBg.setColor(efd.colorDim);
+						bApplied=true;
+					}
+					return true;
+				}
+			};
+		}
+	};
+	DummyEffect efDummy; // = new DummyEffect(efFocusLost.getChannel());
 
 	@Override
 	public void focusGained() {
@@ -1653,7 +1729,8 @@ private Button	btnRestart;
 //		}
 //		bugFix(null, null, btgBugFixAutoReinitBorderOnFocusGained);
 		WorkAroundI.i().bugFix(btgBugFixOnFocusAutoReinitBorder);
-		changeResizeBorderColor(ColorRGBA.Cyan);
+		applyBorderFocusEffect(true);
+//		changeResizeBorderColor(ColorRGBA.Cyan);
 	}
 	
 //	CallableX callerReinitBordersAfterThicknessChange = new CallableX(this,1000) {
@@ -1663,16 +1740,31 @@ private Button	btnRestart;
 //			return true;
 //		}
 //	};
-	private void changeResizeBorderColor(ColorRGBA c){
+//	private void changeResizeBorderColor(ColorRGBA c){
+////		if(true)return; //TODO temporary, trying lemur effects!
+//		for(Button btn:abtnBorderList){
+//			if(btn==btnCurrentlyActiveDraggedReziseBorder)continue;
+//			MiscLemurStateI.i().setOverrideBackgroundColor(btn, c);
+//		}
+//	}
+	
+	private void applyBorderFocusEffect(boolean bGained){
 		for(Button btn:abtnBorderList){
 			if(btn==btnCurrentlyActiveDraggedReziseBorder)continue;
-			MiscLemurStateI.i().setOverrideBackgroundColor(btn, c);
+			if(bGained){
+//				if(btn.hasEffect("FocusGained"))
+//				btn.runEffect(EEffectId.Dummy.s()); //to just cancel the lost and restore original
+				btn.runEffect(efDummy.getId()); //to just cancel the lost and restore original
+			}else{
+				btn.runEffect(EEffectId.FocusLost.s());
+			}
 		}
 	}
 	
 	@Override
 	public void focusLost() {
-		changeResizeBorderColor(ColorRGBA.Blue);
+		applyBorderFocusEffect(false);
+//		changeResizeBorderColor(ColorRGBA.Blue);
 //		getContainerMain().getLocalRotation().lookAt(new Vector3f(0,1,1), new Vector3f(1,1,0));
 //		getContainerMain().getLocalRotation().lookAt(new Vector3f(1,0,1), new Vector3f(0,1,0));
 //		getContainerMain().getLocalRotation().lookAt(new Vector3f(0,1f,1f), new Vector3f(1,0,0));
@@ -1759,7 +1851,8 @@ private Button	btnRestart;
 //		
 //		return MiscI.i().bugFixRet(clReturnType,bFixed, objRet, aobjCustomParams);
 //	}
-	@Override
+//	@Override		public String s(){return this.toString();}
+
 	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
 		if(fld.getDeclaringClass()!=LemurDialogStateAbs.class)return super.getFieldValue(fld);
 		return fld.get(this);

@@ -191,42 +191,6 @@ public class UngrabMouseStateI extends ConditionalStateAbs<UngrabMouseStateI> {
 	}
 
 	@Override
-	protected void enableFailed() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void disableFailed() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void enableSuccess() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void disableSuccess() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void initSuccess() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void initFailed() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
 		if(fld.getDeclaringClass()!=UngrabMouseStateI.class)return super.getFieldValue(fld);
 		return fld.get(this);

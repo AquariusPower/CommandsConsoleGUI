@@ -1042,11 +1042,6 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		updateVisibleRowsAmount();
 	}
 	
-	@Override
-	protected void updateSuccess() {
-		super.updateSuccess();
-	}
-	
 	protected abstract void updateOverrideInputFocus();
 //	{
 //		if(isEnabled()){

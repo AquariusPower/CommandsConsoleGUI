@@ -280,6 +280,8 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	private boolean	bWasEnabled;
 
 	private boolean	bInstancedFromRestart;
+
+	private boolean	bFirstEnableDone;
 	
 	public boolean isWasEnabledBeforeRestarting(){
 		return bWasEnabled;
@@ -592,15 +594,21 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 		return true;
 	}
 
-	protected abstract void enableFailed();
-	protected abstract void disableFailed();
-	protected abstract void enableSuccess();
-	protected abstract void disableSuccess();
-	protected abstract void initSuccess();
-	protected abstract void initFailed();
+	protected void enableFailed(){}
+	protected void disableFailed(){}
+	protected void enableSuccess(){
+		bFirstEnableDone=true;
+	}
+	protected void disableSuccess(){}
+	protected void initSuccess(){}
+	protected void initFailed(){}
 	protected void updateSuccess(){}
 	protected void updateFailed(){}
-
+	
+	public boolean isFirstEnableDone(){
+		return this.bFirstEnableDone;
+	}
+	
 	public void requestToggleEnabled(){
 //		assertIsPreInitialized();
 		setEnabledRequest(!isEnabled());

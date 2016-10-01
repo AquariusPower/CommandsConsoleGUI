@@ -426,6 +426,8 @@ public class MiscJmeI implements IReflexFillCfg{
 //	}
 	
 	/**
+	 * This is a getter (if exists) and a setter (if doesnt exist)
+	 * 
 	 * Uses {@link PseudoSavableHolder}
 	 * 
 	 * @param clReturn

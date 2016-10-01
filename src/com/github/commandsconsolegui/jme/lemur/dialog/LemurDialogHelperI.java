@@ -33,6 +33,11 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.BaseDialogHelper;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.EEffectId;
+import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserData;
+import com.github.commandsconsolegui.misc.MsgI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.jme.MiscJmeI;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
@@ -40,9 +45,20 @@ import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.ListBox;
+import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.Slider;
 import com.simsilica.lemur.TextField;
+import com.simsilica.lemur.anim.Animation;
+import com.simsilica.lemur.anim.SpatialTweens;
+import com.simsilica.lemur.anim.Tween;
+import com.simsilica.lemur.anim.TweenAnimation;
+import com.simsilica.lemur.anim.Tweens;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
+import com.simsilica.lemur.core.GuiComponent;
+import com.simsilica.lemur.core.GuiControl;
+import com.simsilica.lemur.effect.AbstractEffect;
+import com.simsilica.lemur.effect.Effect;
+import com.simsilica.lemur.effect.EffectInfo;
 import com.simsilica.lemur.style.Attributes;
 import com.simsilica.lemur.style.Styles;
 
@@ -60,7 +76,7 @@ public class LemurDialogHelperI extends BaseDialogHelper{
 
 	public static enum DialogStyleElementId{
 		
-		buttonResizeBorder,
+		ResizeBorder,
 		
 		/** TODO not working yet */
 		SliderForValueChange,
@@ -132,9 +148,28 @@ public class LemurDialogHelperI extends BaseDialogHelper{
 		clBg = new ColorRGBA(0,0.25f,0,0.75f);
 		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
-		attrs = styles.getSelector(DialogStyleElementId.buttonResizeBorder.s(), STYLE_CONSOLE);
+		attrs = styles.getSelector(DialogStyleElementId.ResizeBorder.s(), STYLE_CONSOLE);
 		clBg = ColorRGBA.Cyan.clone();
 		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
+//		Effect<Button> efHighLightBkgNeg = new AbstractEffect<Button>("HighLight") {
+//			@Override
+//			public Animation create(final Button target, final EffectInfo existing) {
+//				final QuadBackgroundComponent gcBg = (QuadBackgroundComponent)target.getBackground();
+//				final ColorRGBA colorBkp = gcBg.getColor();
+//				return new Animation() {
+//					@Override	public void cancel() {
+//						gcBg.setColor(colorBkp);
+//					}
+//					@Override	public boolean animate(double tpf) {
+//						if(existing.getAnimation()==this)return true;
+//						gcBg.setColor(MiscJmeI.i().negateColor(colorBkp));
+//						return true;
+//					}
+//				};
+//			}
+//		};
+//		attrs.set(Button.EFFECT_ACTIVATE, efHighLightBkgNeg);
+////		attrs.set(Button.EFFECT_DEACTIVATE, efHighLightBkgNeg);
 		
 		//TODO the slider style is not working yet... copy from another style temporarily?
 		attrs = styles.getSelector(DialogStyleElementId.SliderForValueChange.s(), STYLE_CONSOLE);
@@ -330,5 +365,100 @@ public class LemurDialogHelperI extends BaseDialogHelper{
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		if(fld.getDeclaringClass()!=LemurDialogHelperI.class){super.setFieldValue(fld,value);return;}
 		fld.set(this,value);
+	}
+	
+//	private Effect<Button> efHighLightBkg = new AbstractEffect<Button>("HighLight") {
+//		@Override
+//		public Animation create(final Button target, final EffectInfo existing) {
+//			final GuiComponent gcBgChk = target.getBackground();
+//			if(!QuadBackgroundComponent.class.isInstance(gcBgChk)){
+//				MsgI.i().devWarn("background type not supported for this effect", gcBgChk, target, existing, this);
+//				return null;
+//			}
+//			
+//			return new Animation() {
+//				QuadBackgroundComponent gcBg = (QuadBackgroundComponent)gcBgChk;
+//				ColorRGBA colorBkp = gcBg.getColor();
+//				boolean bApplied=false;
+//				@Override	public void cancel() {
+//					gcBg.setColor(colorBkp);
+//				}
+//				@Override	public boolean animate(double tpf) {
+//					if(!bApplied){
+//	//					if(existing!=null && existing.getAnimation()==this)return true;
+//						gcBg.setColor(MiscJmeI.i().negateColor(colorBkp));
+//						target.setUserData(EUserData.bHoverOverIsWorking.s(),true);
+//						bApplied=true;
+//					}
+//					return true;
+//				}
+//			};
+//		}
+//	};
+	
+//	public Effect<Button> getEffectHighLightBkg() {
+//		return efHighLightBkg;
+//	}
+	
+	/**
+	 * this is just to let actual effects to end themselves with their own cancel()
+	 */
+	public static class DummyEffect extends AbstractEffect{
+		private String	strId;
+		public DummyEffect(String strId, String channel){
+			super(channel);
+			this.strId=strId;
+		}
+		
+		public String getId(){
+			return this.strId;
+		}
+		
+		@Override
+		public Animation create(Object target, EffectInfo existing) {
+			return new Animation() {
+				@Override	public void cancel() {}
+				@Override	public boolean animate(double tpf) {return true;}
+			};
+		}
+	}
+//	private Effect efDummy = new AbstractEffect("HighLight") {
+//		@Override
+//		public Animation create(Object target, EffectInfo existing) {
+//			return new Animation() {
+//				@Override	public void cancel() {}
+//				@Override	public boolean animate(double tpf) {return true;}
+//			};
+//		}
+//	};
+	
+//	public Effect getEffectDummy() {
+//		return efDummy;
+//	}
+	
+	/**
+	 * 
+	 * @param pnl
+	 * @param strEffectId
+	 * @param ef
+	 * @param efDummy can be null initially, use a field variable
+	 * @return dummy effect for re-use
+	 */
+	public DummyEffect setupSimpleEffect(Panel pnl, String strEffectId, Effect ef, DummyEffect efDummy){
+		String strDummyId="DummyEffectUniqueId";
+		if(efDummy==null)efDummy=new DummyEffect(strDummyId,ef.getChannel());
+		
+		if(!efDummy.getChannel().equals(ef.getChannel())){
+			throw new PrerequisitesNotMetException("both should be on the same channel", efDummy, strEffectId, ef, pnl, this);
+		}
+		
+		if(strEffectId.equals(strDummyId)){
+			throw new PrerequisitesNotMetException("ids should differ", strDummyId, efDummy, strEffectId, ef, pnl, this);
+		}
+		
+		pnl.addEffect(strEffectId, (Effect)ef);
+		pnl.addEffect(strDummyId, efDummy);
+		
+		return efDummy;
 	}
 }
