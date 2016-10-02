@@ -245,15 +245,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 //		if(btnLastHoverIn!=null)cmdbtnHoverOut.execute(btnLastHoverIn);
 //	}
 	
-	public void addDefaultCommands(Button btn){
-//		btn.addCommands(ButtonAction.HighlightOn, cmdbtnHoverOver);
-//		btn.addCommands(ButtonAction.HighlightOff, cmdbtnHoverOut);
-//		if(!efDummy.getChannel().equals(LemurDialogHelperI.i().getEffectHighLightBkg().getChannel())){
-//			throw new PrerequisitesNotMetException("both should be on the same channel", efDummy, LemurDialogHelperI.i().getEffectHighLightBkg(), this);
-//		}
-//		btn.addEffect(Button.EFFECT_ACTIVATE, (Effect)LemurDialogHelperI.i().getEffectHighLightBkg());
-//		btn.addEffect(Button.EFFECT_DEACTIVATE, efDummy);
-		
+	public void addMouseCursorHighlightEffects(Button btn){
 		efDummy = LemurDialogHelperI.i().setupSimpleEffect(btn, Button.EFFECT_ACTIVATE, efHighLightBkg, efDummy);
 		btn.addEffect(Button.EFFECT_DEACTIVATE,efDummy);
 	}
@@ -279,7 +271,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 				@Override	public boolean animate(double tpf) {
 					if(!bApplied){
 	//					if(existing!=null && existing.getAnimation()==this)return true;
-						gcBg.setColor(MiscJmeI.i().negateColor(colorBkp));
+						gcBg.setColor(MiscJmeI.i().neglightColor(colorBkp));
 						target.setUserData(EUserData.bHoverOverIsWorking.s(),true);
 						bApplied=true;
 					}

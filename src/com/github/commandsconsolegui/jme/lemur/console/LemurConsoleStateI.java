@@ -356,7 +356,7 @@ public class LemurConsoleStateI<T extends Command<Button>> extends ConsoleStateA
 			btn.setTextHAlignment(HAlignment.Center);
 			//TODO why buttons do not obbey this preferred size 50,1,0?
 			btn.addClickCommands(btnclk);
-			DialogMouseCursorListenerI.i().addDefaultCommands(btn);
+			DialogMouseCursorListenerI.i().addMouseCursorHighlightEffects(btn);
 			getContainerStatsAndControls().addChild(btn,0,++iButtonIndex);
 		}
 		

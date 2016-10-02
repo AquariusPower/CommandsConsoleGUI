@@ -452,12 +452,40 @@ public class MiscJmeI implements IReflexFillCfg{
 		return (R)objUser;
 	}
 	
-	public ColorRGBA negateColor(ColorRGBA clr){
+	/**
+	 * highlight color half negating components
+	 * @param color
+	 * @return
+	 */
+	public ColorRGBA neglightColor(ColorRGBA color){
+		color=color.clone();
+		
+		color.r=neglightColorComponent(color.r);
+		color.g=neglightColorComponent(color.g);
+		color.b=neglightColorComponent(color.b);
+		
+		return color;
+	}
+	
+	private float neglightColorComponent(float f){
+		if(f>0.5f){
+			f-=0.5f;
+		}else{
+			f+=0.5f;
+		}
+		
+		if(f<0)f=0;
+		if(f>1)f=1;
+		
+		return f;
+	}
+	
+	public ColorRGBA negateColor(ColorRGBA color){
 		return new ColorRGBA(
-				FastMath.abs(1f-clr.r),
-				FastMath.abs(1f-clr.g),
-				FastMath.abs(1f-clr.b),
-				clr.a
+				FastMath.abs(1f-color.r),
+				FastMath.abs(1f-color.g),
+				FastMath.abs(1f-color.b),
+				color.a
 			);
 	}
 

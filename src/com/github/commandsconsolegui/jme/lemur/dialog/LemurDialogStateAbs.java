@@ -758,7 +758,7 @@ private Button	btnRestart;
 //			btnBorder.setUserData(EffectFocusData.class.getName(), efd);
 			
 			CursorEventControl.addListenersToSpatial(btnBorder, DialogMouseCursorListenerI.i());
-			DialogMouseCursorListenerI.i().addDefaultCommands(btnBorder);
+			DialogMouseCursorListenerI.i().addMouseCursorHighlightEffects(btnBorder);
 			
 			abtnBorderList.add(btnBorder);
 			String strName="Dialog_Resizer_";

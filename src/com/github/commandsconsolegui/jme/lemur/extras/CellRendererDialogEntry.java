@@ -421,7 +421,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			
 			cntrParent.addChild(btn,aobjConstraints);
 			
-			DialogMouseCursorListenerI.i().addDefaultCommands(btn);
+			DialogMouseCursorListenerI.i().addMouseCursorHighlightEffects(btn);
 			
 			return btn;
 		}
