@@ -195,9 +195,9 @@ public class SavableHelperI {
 	}
 	
 	public static interface ISaveSkipper{}
-	public static class SaveSkipper<O> implements ISaveSkipper{
+	public static class SaveSkipper<OWNER> implements ISaveSkipper{
 		private boolean bThisInstanceIsALoadedTmp = false;
-		private O owner=null;
+		private OWNER owner=null;
 		private boolean	bFailedToLoad = false;
 //		private HashMap<Field,Boolean>	hmFieldAccessible;
 		private HashMap<Field,FieldExtraInfo> hmFieldExtraInfo;// = new HashMap<Field,FieldExtraInfo>();
@@ -224,7 +224,7 @@ public class SavableHelperI {
 			this.bThisInstanceIsALoadedTmp = true;
 		}
 //		public O getOwner(ISavableFieldAccess isfaOwnerCheck) {
-		public O getOwner(CompositeControlAbs cc) {
+		public OWNER getOwner(CompositeControlAbs cc) {
 			cc.assertSelfNotNullEqualsStored(ccAccessKey);
 //			assertIsfaOwner(isfaOwnerCheck);
 //		protected O getOwner() {
@@ -234,7 +234,7 @@ public class SavableHelperI {
 			return owner!=null;
 		}
 //		protected void setOwner(ISavableFieldAccess isfaOwnerCheck, O owner) {
-		public void setOwner(O owner) {
+		public void setOwner(OWNER owner) {
 //			assertIsfaOwner(isfaOwnerCheck);
 			if(owner==null)throw new PrerequisitesNotMetException("cannot erase (nullify) the owner", this.owner, this);
 			PrerequisitesNotMetException.assertNotAlreadySet("owner", this.owner, owner, this);

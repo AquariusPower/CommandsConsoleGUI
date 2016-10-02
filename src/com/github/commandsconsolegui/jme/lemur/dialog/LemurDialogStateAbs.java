@@ -49,8 +49,8 @@ import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jme.lemur.console.LemurConsoleStateI;
 import com.github.commandsconsolegui.jme.lemur.console.LemurFocusHelperStateI;
-import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogHelperI.DialogStyleElementId;
-import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogHelperI.DummyEffect;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI.DialogStyleElementId;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI.DummyEffect;
 import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry;
 import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
 import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserData;
@@ -770,7 +770,7 @@ private Button	btnRestart;
 			}
 			btnBorder.setName(strName);
 			
-			efDummy = LemurDialogHelperI.i().setupSimpleEffect(btnBorder, EEffectId.FocusLost.s(), efFocusLost, efDummy);
+			efDummy = LemurDialogManagerI.i().setupSimpleEffect(btnBorder, EEffectId.FocusLost.s(), efFocusLost, efDummy);
 //			if(!efDummy.getChannel().equals(efFocusLost.getChannel())){
 //				throw new PrerequisitesNotMetException("both should be on the same channel", efDummy, efFocusLost, btnBorder, this);
 //			}
@@ -812,6 +812,19 @@ private Button	btnRestart;
 //		});
 //	private boolean	bAllowUpdateLogicalState;
 	
+//	private static IntLongVarField ilvGlobalBorderThickness = new IntLongVarField(LemurDialogStateAbs.class, 3, "")
+//		.setMinMax(1L, 20L)
+//		.setCallerAssigned(new CallableX(LemurDialogStateAbs.class,100) {
+//			@Override
+//			public Boolean call() {
+//				LemurDialogStateAbs diag = LemurDialogCS.this.getOwner();
+//				if(diag==null)return false; //to retry until the dialog is found
+//				
+//				diag.setBordersThickness(ilvGlobalBorderThickness.getInt());
+//				return true;
+//			}
+//		});
+	
 	public static class LemurDialogCS extends DialogCS<LemurDialogStateAbs> {
 		public LemurDialogCS() {super();}//required by savable
 		public LemurDialogCS(LemurDialogStateAbs owner) {super(owner);}
@@ -841,20 +854,7 @@ private Button	btnRestart;
 					}
 				});
 			
-//			if(!isThisInstanceALoadedTmp()){
-//				ilvBorderThickness.callerAssignedQueueNow();
-////				getOwner().setBordersThickness(ilvBorderThickness.getInt()); //apply default initially
-//			}
 		}
-		
-//		@Override
-//		public boolean applyValuesFrom(DialogCS<LemurDialogStateAbs> svLoaded) {
-//			if(!super.applyValuesFrom(svLoaded))return false;
-//			
-//			getOwner().applyCurrentSettings(false);
-//			
-//			return true;
-//		}
 		
 		@Override
 		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {

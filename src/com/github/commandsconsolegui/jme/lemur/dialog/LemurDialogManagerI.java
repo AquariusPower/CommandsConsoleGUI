@@ -30,14 +30,13 @@ package com.github.commandsconsolegui.jme.lemur.dialog;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.jme.BaseDialogHelper;
-import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.EEffectId;
-import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserData;
-import com.github.commandsconsolegui.misc.MsgI;
+import com.github.commandsconsolegui.jme.DialogManagerAbs;
+import com.github.commandsconsolegui.jme.savablevalues.CompositeSavableAbs;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.misc.jme.MiscJmeI;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
@@ -49,13 +48,7 @@ import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.Slider;
 import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.anim.Animation;
-import com.simsilica.lemur.anim.SpatialTweens;
-import com.simsilica.lemur.anim.Tween;
-import com.simsilica.lemur.anim.TweenAnimation;
-import com.simsilica.lemur.anim.Tweens;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
-import com.simsilica.lemur.core.GuiComponent;
-import com.simsilica.lemur.core.GuiControl;
 import com.simsilica.lemur.effect.AbstractEffect;
 import com.simsilica.lemur.effect.Effect;
 import com.simsilica.lemur.effect.EffectInfo;
@@ -67,12 +60,12 @@ import com.simsilica.lemur.style.Styles;
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public class LemurDialogHelperI extends BaseDialogHelper{
-	private static LemurDialogHelperI instance = new LemurDialogHelperI();
-	public static LemurDialogHelperI i(){return instance;}
+public class LemurDialogManagerI extends DialogManagerAbs{
+	private static LemurDialogManagerI instance = new LemurDialogManagerI();
+	public static LemurDialogManagerI i(){return instance;}
 	
 	private ColorRGBA	colorConsoleStyleBackground;
-	StringVarField svfBackgroundHexaColorRGBA = new StringVarField(this,"","XXXXXXXX ex.: 'FF12BC4A' Red Green Blue Alpha");
+	private StringVarField svfBackgroundHexaColorRGBA = new StringVarField(this,"","XXXXXXXX ex.: 'FF12BC4A' Red Green Blue Alpha");
 
 	public static enum DialogStyleElementId{
 		
@@ -85,6 +78,46 @@ public class LemurDialogHelperI extends BaseDialogHelper{
 		public String s(){return this.toString();}
 		public String str(){return this.toString();}
 	}
+	
+//	public static class LemurDiagHelperCS<T extends LemurDiagHelperCS> extends CompositeSavableAbs<LemurDialogHelperI<T>> {
+//		public LemurDiagHelperCS() {super();}//required by savable
+//		public LemurDiagHelperCS(LemurDialogHelperI owner) {super(owner);}
+//		
+//		/**
+//		 * This console variable will be saved at console cfg file and also with the dialog JME savable. 
+//		 */
+//		private IntLongVarField ilvBorderThickness;
+//		
+//		@Override
+//		protected void initialize(){
+//			super.initialize();
+//			
+//			ilvBorderThickness = new IntLongVarField(getOwner(), 3, "")
+//				.setMinMax(1L, 20L)
+//				.setCallerAssigned(new CallableX(this,100) {
+//					@Override
+//					public Boolean call() {
+//						for(LemurDialogStateAbs diag:getOwner().getDialogListCopy()){
+//							diag.setBordersThickness(ilvBorderThickness.getInt());
+//						}
+//						
+//						return true;
+//					}
+//				});
+//			
+//		}
+//		
+//		@Override
+//		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+//			if(fld.getDeclaringClass()!=LemurDiagHelperCS.class)return super.getFieldValue(fld);
+//			return fld.get(this);
+//		}
+//		@Override
+//		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+//			if(fld.getDeclaringClass()!=LemurDiagHelperCS.class){super.setFieldValue(fld,value);return;}
+//			fld.set(this,value);
+//		}
+//	}
 	
 	@Override
 	protected String getTextFromField(Spatial spt) {
@@ -210,137 +243,14 @@ public class LemurDialogHelperI extends BaseDialogHelper{
 //		updateFontStuff();
 	}
 	
-//	Savable svAllDiags = new Savable(){
-//		@Override
-//		public void write(JmeExporter ex) throws IOException {
-//			OutputCapsule oc = ex.getCapsule(this);
-//			for(BaseDialogStateAbs diag:getDialogListCopy()){
-//				oc.write(diag, diag.getId(), null);
-//			}
-//		}
-//		@Override
-//		public void read(JmeImporter im) throws IOException {
-//			InputCapsule ic = im.getCapsule(this);
-//			for(BaseDialogStateAbs diag:getDialogListCopy()){
-//				Savable svDiag = ic.readSavable(diag.getId(), diag);
-//				diag.read(im);
-//			}
-//		}
-//	};
-//	
-//	@Override
-//	public void saveAllDialogs() {
-//		SaveGame.saveGame("ConsoleConfig", "Dialogs", svAllDiags);
-////		BinaryExporter ex; 
-////    ex.save(data, new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(saveFile))););
-//	}
-	
 	public ArrayList<LemurDialogStateAbs> getDialogListCopy() {
 		return super.getDialogListCopy(LemurDialogStateAbs.class);
 	}
 	
-//	DialogsStorage svAllDiags = new DialogsStorage();
-//	public static class DialogsStorage implements Savable{
-//		enum E{
-//			DialogList,
-//			;
-//			public String s(){return this.toString();}
-//		}
-//		
-//		public DialogsStorage(){} //required when loading
-//		
-//		@Override
-//		public void write(JmeExporter ex) throws IOException {
-//			OutputCapsule oc = ex.getCapsule(this);
-//			oc.writeSavableArrayList(LemurBaseDialogHelperI.i().getDialogsSavableObjectListCopy(LemurBasicDialogStateAbs.class), 
-//				E.DialogList.s(), null);
-////			for(LemurDialogGUIStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy()){
-////				oc.write(diag, diag.getId(), null);
-////			}
-//		}
-//		@Override
-//		public void read(JmeImporter im) throws IOException {
-////			try {
-////				DialogSavable.class.newInstance();
-////			} catch (InstantiationException | IllegalAccessException e) {
-////				// TODO Auto-generated catch block
-////				e.printStackTrace();
-////			}
-//			InputCapsule ic = im.getCapsule(this);
-//			ArrayList asvList = ic.readSavableArrayList(E.DialogList.s(),null); //this will instance new objects with empty constructors
-//			boolean bHasSomething=false;for(Object obj:asvList){if(obj!=null){bHasSomething=true;break;}}
-//			if(!bHasSomething){ 
-//				GlobalCommandsDelegatorI.i().dumpWarnEntry("failed to load dialogs", this, im, ic);
-//			}
-////			for(LemurDialogGUIStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy()){
-//////				Savable svDiag = ic.readSavable(diag.getId(), diag);
-////				diag.read(im);
-////			}
-//		}
-//		
-//	};
-	
-//	private String strFilePrefix="Dialog_";
-	
-//	private StringCmdField scfSaveDialogs = new StringCmdField(this)
-//		.setCallerAssigned(new CallableX(this) {
-//			@Override
-//			public Boolean call() {
-//				for(LemurBasicDialogStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy(LemurBasicDialogStateAbs.class)){
-//					diag.save();
-//				}
-//				
-////				ArrayList<DialogSavable> asvDiagList = LemurBaseDialogHelperI.i().getDialogsSavableObjectListCopy(LemurBasicDialogStateAbs.class);
-////				for(DialogSavable dsv:asvDiagList){
-////					MiscJmeI.i().saveWriteConsoleData(strFilePrefix+dsv.getOwner().getId(), dsv);
-////				}
-//				return true;
-//			}
-//		});
-	
-//	private StringCmdField scfLoadDialogs = new StringCmdField(this)
-//		.setCallerAssigned(new CallableX(this) {
-//			@Override
-//			public Boolean call() {
-//				for(LemurBasicDialogStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy(LemurBasicDialogStateAbs.class)){
-//					diag.load();
-//				}
-//				
-////				ArrayList<DialogSavable> asvDiagList = LemurBaseDialogHelperI.i().getDialogsSavableObjectListCopy(LemurBasicDialogStateAbs.class);
-////				for(DialogSavable dsv:asvDiagList){
-////					MiscJmeI.i().loadReadConsoleData(strFilePrefix+dsv.getOwner().getId());
-////				}
-//				return true;
-//			}
-//		});
-	
-	public LemurDialogHelperI() {
+	public LemurDialogManagerI() {
 		super();
-//		CallQueueI.i().addCall(new CallableX(this,1000) {
-//			@Override
-//			public Boolean call() {
-//				for(LemurBasicDialogStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy(LemurBasicDialogStateAbs.class)){
-//					GlobalCommandsDelegatorI.i().addCmdToQueue(diag.scfLoad);
-//				}
-//				return true;
-//			}
-//		});
 	}
 	
-//	@Override
-//	public void update(float tpf){
-//		super.update(tpf);
-//		
-//		if(isDialogSaveRequested()){
-//			for(LemurBasicDialogStateAbs diag:LemurBaseDialogHelperI.i().getDialogListCopy(LemurBasicDialogStateAbs.class)){
-//				if(super.isDialogSaveRequestedAndReset(diag)){
-//					GlobalCommandsDelegatorI.i().addCmdToQueue(scfSaveDialogs);
-//					resetDialogSaveRequest();
-//					break;
-//				}
-//			}
-//		}
-//	}
 	@Override
 	public void update(float tpf) {
 		super.update(tpf);
@@ -358,12 +268,12 @@ public class LemurDialogHelperI extends BaseDialogHelper{
 	}
 	@Override
 	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
-		if(fld.getDeclaringClass()!=LemurDialogHelperI.class)return super.getFieldValue(fld);
+		if(fld.getDeclaringClass()!=LemurDialogManagerI.class)return super.getFieldValue(fld);
 		return fld.get(this);
 	}
 	@Override
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
-		if(fld.getDeclaringClass()!=LemurDialogHelperI.class){super.setFieldValue(fld,value);return;}
+		if(fld.getDeclaringClass()!=LemurDialogManagerI.class){super.setFieldValue(fld,value);return;}
 		fld.set(this,value);
 	}
 	

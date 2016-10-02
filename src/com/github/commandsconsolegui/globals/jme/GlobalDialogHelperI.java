@@ -28,15 +28,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.github.commandsconsolegui.globals.jme;
 
 import com.github.commandsconsolegui.globals.GlobalHolderAbs;
-import com.github.commandsconsolegui.jme.BaseDialogHelper;
+import com.github.commandsconsolegui.jme.DialogManagerAbs;
 
 /**
 * As you may not be using {@link SimpleApplication#}.
 *  
 * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 */
-public class GlobalDialogHelperI extends GlobalHolderAbs<BaseDialogHelper> {
+public class GlobalDialogHelperI extends GlobalHolderAbs<DialogManagerAbs> {
 	private static GlobalDialogHelperI instance = new GlobalDialogHelperI();
 	public static GlobalDialogHelperI iGlobal(){return instance;}
-	public static BaseDialogHelper i(){return iGlobal().get();}
+	public static DialogManagerAbs i(){return iGlobal().get();}
 }

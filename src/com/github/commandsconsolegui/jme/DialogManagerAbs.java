@@ -50,9 +50,9 @@ import com.jme3.scene.Spatial;
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public abstract class BaseDialogHelper implements IReflexFillCfg{
-	public static final class CompositeControl extends CompositeControlAbs<BaseDialogHelper>{
-		private CompositeControl(BaseDialogHelper casm){super(casm);};
+public abstract class DialogManagerAbs implements IReflexFillCfg{
+	public static final class CompositeControl extends CompositeControlAbs<DialogManagerAbs>{
+		private CompositeControl(DialogManagerAbs casm){super(casm);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
 	
 	public final String STYLE_CONSOLE="console";

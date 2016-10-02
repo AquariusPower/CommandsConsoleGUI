@@ -331,7 +331,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	public String getInputText(){
 		return bdh().getTextFromField(getInputField());
 	}
-	private BaseDialogHelper bdh(){
+	private DialogManagerAbs bdh(){
 		return GlobalDialogHelperI.i();
 	}
 	

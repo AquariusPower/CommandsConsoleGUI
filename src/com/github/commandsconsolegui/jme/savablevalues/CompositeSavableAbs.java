@@ -46,28 +46,28 @@ import com.jme3.export.JmeImporter;
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> implements ISavableFieldAccess,IHasOwnerInstance<O> { //IDiscardableInstance
+public abstract class CompositeSavableAbs<OWNER,THIS extends CompositeSavableAbs<OWNER,THIS>> implements ISavableFieldAccess,IHasOwnerInstance<OWNER> { //IDiscardableInstance
 	public static final class CompositeControl extends CompositeControlAbs<CompositeSavableAbs>{
 		private CompositeControl(CompositeSavableAbs casm){super(casm);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
 	
-	public static class SaveSkipperCS<O> extends SaveSkipper<O>{
+	public static class SaveSkipperCS<OWNER> extends SaveSkipper<OWNER>{
 //	public SaveSkipperCS(ISavableFieldAccess isfa) {
 		public SaveSkipperCS(CompositeControlAbs cc, ISavableFieldAccess isfa) {
 			super(cc, isfa);
 		}
 	}
-	private SaveSkipperCS<O> ss = new SaveSkipperCS<O>(ccSelf,this);
+	private SaveSkipperCS<OWNER> ss = new SaveSkipperCS<OWNER>(ccSelf,this);
 	
 	public CompositeSavableAbs(){
 		ss.setThisInstanceIsALoadedTmp();
 		initAllSteps();
 	} //required by savable
-	public CompositeSavableAbs(O owner){
+	public CompositeSavableAbs(OWNER owner){
 		setOwner(owner);
 		initAllSteps();
 	}
-	public abstract S getThis();
+	public abstract THIS getThis();
 	
 	/**
 	 * this way, super methods can come on the beggining of the current class method
@@ -98,17 +98,17 @@ public abstract class CompositeSavableAbs<O,S extends CompositeSavableAbs<O,S>> 
 		SavableHelperI.i().prepareFields(this);
 	}
 	
-	private S setOwner(O owner){
+	private THIS setOwner(OWNER owner){
 		ss.setOwner(owner);
 		return getThis();
 	}
 	
 	@Override
-	public O getOwner() {
+	public OWNER getOwner() {
 		return ss.getOwner(ccSelf);
 	}
 	
-	public boolean applyValuesFrom(S svLoadedSource) {
+	public boolean applyValuesFrom(THIS svLoadedSource) {
 		return SavableHelperI.i().applyValuesFrom(this, svLoadedSource);
 	}	
 	

@@ -33,8 +33,8 @@ import com.github.commandsconsolegui.jme.MouseCursorButtonData;
 import com.github.commandsconsolegui.jme.MouseCursorButtonsControl;
 import com.github.commandsconsolegui.jme.MouseCursorCentralI;
 import com.github.commandsconsolegui.jme.MouseCursorCentralI.EMouseCursorButton;
-import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogHelperI;
-import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogHelperI.DummyEffect;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI.DummyEffect;
 import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserData;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -246,7 +246,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 //	}
 	
 	public void addMouseCursorHighlightEffects(Button btn){
-		efDummy = LemurDialogHelperI.i().setupSimpleEffect(btn, Button.EFFECT_ACTIVATE, efHighLightBkg, efDummy);
+		efDummy = LemurDialogManagerI.i().setupSimpleEffect(btn, Button.EFFECT_ACTIVATE, efHighLightBkg, efDummy);
 		btn.addEffect(Button.EFFECT_DEACTIVATE,efDummy);
 	}
 	

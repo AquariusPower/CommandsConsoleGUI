@@ -48,7 +48,7 @@ import com.github.commandsconsolegui.jme.extras.FpsLimiterStateI;
 import com.github.commandsconsolegui.jme.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jme.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jme.lemur.MouseCursorListenerAbs;
-import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogHelperI;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI;
 import com.github.commandsconsolegui.misc.Configure;
 import com.github.commandsconsolegui.misc.Configure.IConfigure;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -124,7 +124,7 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
   	}
   	
   	if(!GlobalLemurDialogHelperI.iGlobal().isSet()){
-  		GlobalLemurDialogHelperI.iGlobal().set(LemurDialogHelperI.i());
+  		GlobalLemurDialogHelperI.iGlobal().set(LemurDialogManagerI.i());
   	}
   	
   	if(!GlobalOperationalSystemI.iGlobal().isSet()){
