@@ -27,7 +27,6 @@
 
 package com.github.commandsconsolegui.misc;
 
-import java.util.ArrayList;
 
 /**
  * 
@@ -36,21 +35,6 @@ import java.util.ArrayList;
  * @param <T>
  */
 public class HoldRestartable<T extends IRestartable> implements IHasOwnerInstance<Object> {
-	private static ArrayList<HoldRestartable> ahrList=new ArrayList<HoldRestartable>();
-	public static void revalidateAndUpdateAllRestartableHoldersFor(IRestartable irDiscarding, IRestartable irNew){
-		for(HoldRestartable hr:new ArrayList<HoldRestartable>(ahrList)){
-			// discard
-			if(hr.bDiscardSelf || DiscardableInstanceI.i().isBeingDiscardedRecursiveOwner(hr)){
-				ahrList.remove(hr);
-				continue;
-			}
-			
-			// update ref
-			if(hr.getRef()==irDiscarding){
-				hr.setRef(irNew);
-			}
-		}
-	}
 	
 	private IRestartable	irRef;
 	private Object	objOwner;
@@ -59,7 +43,7 @@ public class HoldRestartable<T extends IRestartable> implements IHasOwnerInstanc
 	public HoldRestartable(Object objOwner){
 		if(objOwner==null)throw new PrerequisitesNotMetException("invalid owner, use 'this'",this);
 		this.objOwner = objOwner;
-		ahrList.add(this);
+		HoldRestartableManagerI.i().add(this);
 	}
 	public HoldRestartable(Object objOwner, IRestartable ir){
 		this(objOwner);
@@ -133,6 +117,9 @@ public class HoldRestartable<T extends IRestartable> implements IHasOwnerInstanc
 	@Override
 	public Object getOwner() {
 		return objOwner;
+	}
+	public boolean isDiscardSelf() {
+		return bDiscardSelf;
 	}
 }
 

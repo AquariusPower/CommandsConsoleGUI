@@ -36,6 +36,7 @@ import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.HoldRestartable;
+import com.github.commandsconsolegui.misc.HoldRestartableManagerI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
@@ -134,7 +135,7 @@ public class ConditionalStateManagerI extends AbstractAppState {
 				}
 			}
 			
-			HoldRestartable.revalidateAndUpdateAllRestartableHoldersFor(cas,casNew);
+			HoldRestartableManagerI.i().revalidateAndUpdateAllRestartableHoldersFor(cas,casNew);
 			
 		}
 	}

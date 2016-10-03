@@ -49,11 +49,12 @@ import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
+import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldManagerI;
 import com.github.commandsconsolegui.globals.GlobalOperationalSystemI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.cmd.VarCmdUId;
 import com.github.commandsconsolegui.globals.jme.console.GlobalConsoleUII;
-import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LemurDialogCS;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LmrDiagCS;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
@@ -506,7 +507,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	
 	private boolean checkCmdValidityBoolTogglers(){
 		btgReferenceMatched=null;
-		for(BoolTogglerCmdField btg : VarCmdFieldAbs.getListCopy(BoolTogglerCmdField.class)){
+		for(BoolTogglerCmdField btg : VarCmdFieldManagerI.i().getListCopy(BoolTogglerCmdField.class)){
 			String strSimpleCmdId = btg.getSimpleId();
 			if(!strSimpleCmdId.endsWith("Toggle"))strSimpleCmdId+="Toggle";
 			if(checkCmdValidity(btg.getOwner(), btg.getUniqueCmdId(), strSimpleCmdId, "[bEnable] "+btg.getHelp(), true)){
@@ -701,7 +702,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		removeAllCmdsOfOwnersBeingDiscarded();
 		
 //		//remove all of it's owned fields from the list
-//		for(VarCmdFieldAbs vcf:VarCmdFieldAbs.getListFullCopy()){
+//		for(VarCmdFieldAbs vcf:VarCmdFieldManagerI.i().getListFullCopy()){
 //			if(vcf.getOwner()==iccl){
 //				vcf.discardSelf(ccSelf);
 //			}
@@ -2020,8 +2021,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			 */
 			ArrayList<VarCmdFieldAbs> avcf = new ArrayList<VarCmdFieldAbs>();
 			ArrayList<VarCmdFieldAbs> avcfLinkList = new ArrayList<VarCmdFieldAbs>();
-			avcf.addAll(VarCmdFieldAbs.getListCopy(BoolTogglerCmdField.class));
-			avcf.addAll(VarCmdFieldAbs.getListCopy(StringCmdField.class));
+			avcf.addAll(VarCmdFieldManagerI.i().getListCopy(BoolTogglerCmdField.class));
+			avcf.addAll(VarCmdFieldManagerI.i().getListCopy(StringCmdField.class));
 //			int iCount=0;
 			for(VarCmdFieldAbs vcf:avcf){
 				if(vcf.getUniqueCmdId().equalsIgnoreCase(cmddNew.getUniqueCmdId())){
@@ -2772,7 +2773,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 //}
 		if(tmSrc==tmRestrictedVariables){
 			if(cvar.getRestrictedOwner()==null){
-				for(VarCmdFieldAbs vcfTmp:VarCmdFieldAbs.getListFullCopy()){
+				for(VarCmdFieldAbs vcfTmp:VarCmdFieldManagerI.i().getListFullCopy()){
 					if(!vcfTmp.isVar())continue;
 					if(vcfTmp.getUniqueVarId().equals(cvar.getUniqueVarId())){
 						vcfTmp.setConsoleVarLink(ccSelf,cvar);
@@ -2970,7 +2971,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	public boolean varSet(String strVarId, String strValue, boolean bSave) {
 //		VarIdValueOwnerData vivo = getVar(strVarId);
 //		if(vivo==null){
-//			VarCmdFieldAbs.getListFullCopy()
+//			VarCmdFieldManagerI.i().getListFullCopy()
 //			
 //			vivo = new VarIdValueOwnerData(strVarId, strValue, null, null, null);
 //		}
@@ -3246,9 +3247,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	 * if there are new commands, booltogglers, variables available, prepare them.
 	 */
 	private void updateCheckNewVarCmdAndToggleFields() {
-//		int iBoolTogglersListHashCodeTmp = VarCmdFieldAbs.getListHash();
+//		int iBoolTogglersListHashCodeTmp = VarCmdFieldManagerI.i().getListHash();
 //		if(iBoolTogglersListHashCodeTmp!=iBoolTogglersListHashCode){
-		if(VarCmdFieldAbs.hvhVarList.isChangedAndUpdateHash()){
+		if(VarCmdFieldManagerI.i().isListChanged()){
 			bFillCommandList=true;
 			updateCmdWithCallerList();
 			checkCmdValidityBoolTogglers(); //update cmd list with new booltoggler commands
@@ -3264,7 +3265,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	ArrayList<StringCmdField> ascfCmdWithCallerList = new ArrayList<StringCmdField>();
 	private File	flConsDataPath;
 	private void updateCmdWithCallerList() {
-		for(StringCmdField scf:VarCmdFieldAbs.getListCopy(StringCmdField.class)){
+		for(StringCmdField scf:VarCmdFieldManagerI.i().getListCopy(StringCmdField.class)){
 			if(scf.isCallerAssigned()){
 				if(!ascfCmdWithCallerList.contains(scf)){
 					checkCmdValidity(scf);
@@ -3526,11 +3527,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			false);
 		
 		ArrayList<VarCmdFieldAbs> acvarAllVarsList = new ArrayList<VarCmdFieldAbs>();
-		acvarAllVarsList.addAll(VarCmdFieldAbs.getListCopy(BoolTogglerCmdField.class));
-		acvarAllVarsList.addAll(VarCmdFieldAbs.getListCopy(TimedDelayVarField.class));
-		acvarAllVarsList.addAll(VarCmdFieldAbs.getListCopy(FloatDoubleVarField.class));
-		acvarAllVarsList.addAll(VarCmdFieldAbs.getListCopy(IntLongVarField.class));
-		acvarAllVarsList.addAll(VarCmdFieldAbs.getListCopy(StringVarField.class));
+		acvarAllVarsList.addAll(VarCmdFieldManagerI.i().getListCopy(BoolTogglerCmdField.class));
+		acvarAllVarsList.addAll(VarCmdFieldManagerI.i().getListCopy(TimedDelayVarField.class));
+		acvarAllVarsList.addAll(VarCmdFieldManagerI.i().getListCopy(FloatDoubleVarField.class));
+		acvarAllVarsList.addAll(VarCmdFieldManagerI.i().getListCopy(IntLongVarField.class));
+		acvarAllVarsList.addAll(VarCmdFieldManagerI.i().getListCopy(StringVarField.class));
 		setupVarsAllFrom(acvarAllVarsList);
 		
 		if(bSave)varSaveSetupFile();
@@ -3575,7 +3576,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		
 //		dumpSubEntry("Previous Second FPS  = "+lPreviousSecondFPS);
 		
-		for(BoolTogglerCmdField btg : VarCmdFieldAbs.getListCopy(BoolTogglerCmdField.class)){
+		for(BoolTogglerCmdField btg : VarCmdFieldManagerI.i().getListCopy(BoolTogglerCmdField.class)){
 			dumpSubEntry(btg.getReport());
 		}
 		

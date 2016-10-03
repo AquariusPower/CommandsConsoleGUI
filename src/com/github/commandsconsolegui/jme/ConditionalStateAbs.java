@@ -33,6 +33,7 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.SimulationTime.ISimulationTime;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
+import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldManagerI;
 import com.github.commandsconsolegui.globals.GlobalHolderAbs.IGlobalOpt;
 import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
@@ -702,7 +703,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 		if(!bProperlyInitialized)return false; //TODO log warn
 		if(!isBeingDiscarded())throw new PrerequisitesNotMetException("not discarding");
 		
-		VarCmdFieldAbs.removeAllWhoseOwnerIsBeingDiscarded();
+		VarCmdFieldManagerI.i().removeAllWhoseOwnerIsBeingDiscarded();
 		
 		if(isEnabled()){
 			boolean bRetry=false;

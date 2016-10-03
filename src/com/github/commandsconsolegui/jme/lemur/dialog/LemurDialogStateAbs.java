@@ -257,13 +257,13 @@ private Button	btnRestart;
 		return fSizeBase;
 	}
 	
-	protected LemurDialogCS getCS() {
-		return super.getCompositeSavable(LemurDialogCS.class);
+	protected LmrDiagCS getCS() {
+		return super.getCompositeSavable(LmrDiagCS.class);
 	}
 	
 	@Override
 	protected boolean initAttempt() {
-		if(!isCompositeSavableSet())setCompositeSavable(new LemurDialogCS(this));
+		if(!isCompositeSavableSet())setCompositeSavable(new LmrDiagCS(this));
 		if(!super.initAttempt())return false;
 		
 //		setRetryDelayFor(300L, EDelayMode.Update.s()); //mainly useful when resizing
@@ -458,7 +458,7 @@ private Button	btnRestart;
 		btnResizeInfoAndList=prepareResizeBorder(btnResizeInfoAndList,null);
 		MiscLemurStateI.i().setSizeSafely(btnResizeInfoAndList, 1, 1, true);
 		getNorthContainer().addChild(btnResizeInfoAndList, BorderLayout.Position.South);
-		setBordersThickness(getCompositeSavable(LemurDialogCS.class).ilvBorderThickness.intValue());
+		setBordersThickness(getCompositeSavable(LmrDiagCS.class).ilvBorderThickness.intValue());
 		
 		cntrCenterMain.addChild(getNorthContainer(), BorderLayout.Position.North);
 	}
@@ -499,7 +499,7 @@ private Button	btnRestart;
 		btnResizeEast		= prepareResizeBorder(btnResizeEast	, BorderLayout.Position.East);
 		btnResizeWest		= prepareResizeBorder(btnResizeWest	, BorderLayout.Position.West);
 		
-		setBordersThickness(getCompositeSavable(LemurDialogCS.class).ilvBorderThickness.intValue());
+		setBordersThickness(getCompositeSavable(LmrDiagCS.class).ilvBorderThickness.intValue());
 //		getCompositeSavable(LemurDialogCS.class).ilvBorderThickness.callerAssignedRunNow();
 		
 //		if(bAppyBorderSize){
@@ -517,7 +517,7 @@ private Button	btnRestart;
 
 	@Override
 	public void applyCurrentSettings(boolean bToggleMaximized) {
-		LemurDialogCS lsv = getCompositeSavable(LemurDialogCS.class);
+		LmrDiagCS lsv = getCompositeSavable(LmrDiagCS.class);
 	//	IntLongVarField ilv = lsv.ilvBorderThickness;
 		boolean b = bToggleMaximized ? lsv.toggleMaximized() : lsv.isMaximized();
 		if(b){ //maximize
@@ -825,9 +825,9 @@ private Button	btnRestart;
 //			}
 //		});
 	
-	public static class LemurDialogCS extends DialogCS<LemurDialogStateAbs> {
-		public LemurDialogCS() {super();}//required by savable
-		public LemurDialogCS(LemurDialogStateAbs owner) {super(owner);}
+	public static class LmrDiagCS extends DiagCS<LemurDialogStateAbs> {
+		public LmrDiagCS() {super();}//required by savable
+		public LmrDiagCS(LemurDialogStateAbs owner) {super(owner);}
 		
 		/**
 		 * This console variable will be saved at console cfg file and also with the dialog JME savable. 
@@ -844,9 +844,9 @@ private Button	btnRestart;
 				.setCallerAssigned(new CallableX(this,100) {
 					@Override
 					public Boolean call() {
-						if(LemurDialogCS.this.isThisInstanceALoadedTmp())return true; //skipper
+						if(LmrDiagCS.this.isThisInstanceALoadedTmp())return true; //skipper
 						
-						LemurDialogStateAbs diag = LemurDialogCS.this.getOwner();
+						LemurDialogStateAbs diag = LmrDiagCS.this.getOwner();
 						if(diag==null)return false; //to retry until the dialog is found
 						
 						diag.setBordersThickness(ilvBorderThickness.getInt());
@@ -858,12 +858,12 @@ private Button	btnRestart;
 		
 		@Override
 		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
-			if(fld.getDeclaringClass()!=LemurDialogCS.class)return super.getFieldValue(fld);
+			if(fld.getDeclaringClass()!=LmrDiagCS.class)return super.getFieldValue(fld);
 			return fld.get(this);
 		}
 		@Override
 		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
-			if(fld.getDeclaringClass()!=LemurDialogCS.class){super.setFieldValue(fld,value);return;}
+			if(fld.getDeclaringClass()!=LmrDiagCS.class){super.setFieldValue(fld,value);return;}
 			fld.set(this,value);
 		}
 	}
@@ -1865,7 +1865,7 @@ private Button	btnRestart;
 	
 	@Override
 	public void reLoad() {
-		load(LemurDialogCS.class);
+		load(LmrDiagCS.class);
 	}
 	
 	@Override

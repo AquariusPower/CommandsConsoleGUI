@@ -34,7 +34,7 @@ import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
-import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LemurDialogCS;
+import com.github.commandsconsolegui.jme.savablevalues.CompositeSavableAbs;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -68,6 +68,20 @@ public abstract class DialogManagerAbs implements IReflexFillCfg{
 	protected abstract String getTextFromField(Spatial spt);
 	protected abstract Vector3f getSizeCopyFrom(Spatial spt);
 	protected abstract void setTextAt(Spatial spt,String str);
+	
+	public static class DiagMgrCS<T extends DialogManagerAbs> extends CompositeSavableAbs<T,DiagMgrCS<T>> {
+		public DiagMgrCS() {super();}//required by savable
+		public DiagMgrCS(T owner) {super(owner);}
+		@Override
+		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+			return fld.get(this);
+		}
+		@Override
+		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+			fld.set(this,value);
+		}
+		@Override public DiagMgrCS<T> getThis() { return this; }
+	}
 	
 	public void prepareStyle() {
 		fontConsoleDefault = GlobalAppRefI.i().getAssetManager().loadFont("Interface/Fonts/Console.fnt");

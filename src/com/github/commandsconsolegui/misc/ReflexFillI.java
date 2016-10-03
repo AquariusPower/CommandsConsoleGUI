@@ -39,7 +39,6 @@ import com.github.commandsconsolegui.globals.cmd.VarCmdUId;
 public class ReflexFillI{ //implements IConsoleCommandListener{
 	private static ReflexFillI instance = new ReflexFillI();
 	public static ReflexFillI i(){return instance;}
-//	private static IHandleExceptions	ihe;
 	
 	private boolean bUseDefaultCfgIfMissing = true;
 	private String	strCommandPartSeparator = "_";
@@ -237,11 +236,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		
 	}
 
-	private static boolean	bAllowHK = true;
-	
-//	public static void assertReflexFillFields(IReflexFillCfg owner){
-//		assertAndGetField(owner);
-//	}
+	private boolean	bAllowHK = true;
 	
 	/**
 	 * Use this at the class constructor that instantiates fields of classes 
@@ -524,24 +519,6 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	public void setUseDefaultCfgIfMissing(boolean bUseDefaultCfgIfMissing) {
 		this.bUseDefaultCfgIfMissing = bUseDefaultCfgIfMissing;
 	}
-	
-//	private static IHandleExceptions	ihe;
-//	public static void setExceptionHandler(IHandleExceptions ihe){
-//		ReflexFill.ihe=ihe;
-//	}
-	
-//	@Override
-//	public boolean executePreparedCommand(ConsoleCommands	cc) {
-//		boolean bCommandWorked = false;
-//		
-//		if(cc.checkCmdValidity(this,btgHacks,"[iHowMany] users working")){
-//			bAllowHK=cc.paramBoolean(1);
-//			bCommandWorked = true;
-//		}else
-//		{}
-//			
-//		return bCommandWorked;
-//	}
 	
 	/**
 	 * 

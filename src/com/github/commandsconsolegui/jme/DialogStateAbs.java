@@ -45,7 +45,7 @@ import com.github.commandsconsolegui.jme.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jme.lemur.console.LemurFocusHelperStateI;
-import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LemurDialogCS;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LmrDiagCS;
 import com.github.commandsconsolegui.jme.lemur.extras.ISpatialValidator;
 import com.github.commandsconsolegui.jme.savablevalues.CompositeSavableAbs;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
@@ -362,7 +362,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		
 		tdUpdateRefreshList.updateTime();
 		
-		if(!isCompositeSavableSet())setCompositeSavable(new DialogCS(this));
+		if(!isCompositeSavableSet())setCompositeSavable(new DiagCS(this));
 		
 		return true;
 	}
@@ -1324,11 +1324,11 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //		return b;
 //	}
 	
-	public static class DialogCS<T extends DialogStateAbs> extends CompositeSavableAbs<T,DialogCS<T>> implements ISavableFieldAccess,IReflexFillCfg{
-		public DialogCS(){super();}; //required by savable
-		@Override public DialogCS getThis() {return this;}
+	public static class DiagCS<T extends DialogStateAbs> extends CompositeSavableAbs<T,DiagCS<T>> implements ISavableFieldAccess,IReflexFillCfg{
+		public DiagCS(){super();}; //required by savable
+		@Override public DiagCS getThis() {return this;}
 		
-		public DialogCS(T owner) {
+		public DiagCS(T owner) {
 			super(owner);
 		}
 		
@@ -1396,7 +1396,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		}
 		
 		@Override
-		public boolean applyValuesFrom(DialogCS<T> svLoaded) {
+		public boolean applyValuesFrom(DiagCS<T> svLoaded) {
 			if(!super.applyValuesFrom(svLoaded))return false;
 			
 			getOwner().setInputText(svLoaded.strInputText);
@@ -1480,16 +1480,16 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		}
 		
 	}
-	private DialogCS sv;
+	private DiagCS sv;
 	
 	public boolean isCompositeSavableSet(){
 		return this.sv!=null;
 	}
-	protected <CS extends DialogCS<?>> void setCompositeSavable(CS sv) {
+	protected <CS extends DiagCS<?>> void setCompositeSavable(CS sv) {
 		PrerequisitesNotMetException.assertNotAlreadySet(CompositeSavableAbs.class.getSimpleName(), this.sv, sv, this);
 		this.sv = sv;
 	}
-	protected <CS extends DialogCS<?>> CS getCompositeSavable(Class<CS> clCS) {
+	protected <CS extends DiagCS<?>> CS getCompositeSavable(Class<CS> clCS) {
 		return (CS)this.sv;
 	}
 	
@@ -1502,9 +1502,9 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	 * override me!
 	 */
 	public void reLoad(){
-		load(DialogCS.class);
+		load(DiagCS.class);
 	}
-	public <T extends DialogCS> T load(Class<T> clCS){
+	public <T extends DiagCS> T load(Class<T> clCS){
 		if(!isSaveDialog())return null;
 		T svTmp = MiscJmeI.i().loadReadConsoleData(clCS, strFilePrefix+getId());
 		if(sv.applyValuesFrom(svTmp)){

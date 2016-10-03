@@ -93,36 +93,36 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 
 	private CompositeControlAbs	ccOwner;
 	
-	private static ArrayList<VarCmdFieldAbs> avcfList = new ArrayList<VarCmdFieldAbs>();
-	public static final HashChangeHolder hvhVarList = new HashChangeHolder(avcfList);
-	
-	public static ArrayList<VarCmdFieldAbs> getListFullCopy(){
-		return new ArrayList<VarCmdFieldAbs>(VarCmdFieldAbs.avcfList);
-	}
-	
-	public static <T extends VarCmdFieldAbs> ArrayList<T> getListCopy(Class<T> clFilter){
-		ArrayList<T> a = new ArrayList<T>();
-		for(VarCmdFieldAbs vcf:VarCmdFieldAbs.avcfList){
-			if(clFilter.isInstance(vcf)){
-				a.add((T)vcf);
-			}
-		}
-		
-		return a;
-	}
-	
-	public static ArrayList<VarCmdFieldAbs> removeAllWhoseOwnerIsBeingDiscarded(){
-		ArrayList<VarCmdFieldAbs> avcfDiscarded = new ArrayList<VarCmdFieldAbs>();
-		
-		for(VarCmdFieldAbs vcf:getListFullCopy()){
-			if(DiscardableInstanceI.i().isBeingDiscardedRecursiveOwner(vcf.getOwner())){
-				vcf.discardSelf();
-				avcfDiscarded.add(vcf);
-			}
-		}
-		
-		return avcfDiscarded;
-	}
+//	private static ArrayList<VarCmdFieldAbs> avcfList = new ArrayList<VarCmdFieldAbs>();
+//	public static final HashChangeHolder hvhVarList = new HashChangeHolder(avcfList);
+//	
+//	public static ArrayList<VarCmdFieldAbs> getListFullCopy(){
+//		return new ArrayList<VarCmdFieldAbs>(VarCmdFieldAbs.avcfList);
+//	}
+//	
+//	public static <T extends VarCmdFieldAbs> ArrayList<T> getListCopy(Class<T> clFilter){
+//		ArrayList<T> a = new ArrayList<T>();
+//		for(VarCmdFieldAbs vcf:VarCmdFieldAbs.avcfList){
+//			if(clFilter.isInstance(vcf)){
+//				a.add((T)vcf);
+//			}
+//		}
+//		
+//		return a;
+//	}
+//	
+//	public static ArrayList<VarCmdFieldAbs> removeAllWhoseOwnerIsBeingDiscarded(){
+//		ArrayList<VarCmdFieldAbs> avcfDiscarded = new ArrayList<VarCmdFieldAbs>();
+//		
+//		for(VarCmdFieldAbs vcf:getListFullCopy()){
+//			if(DiscardableInstanceI.i().isBeingDiscardedRecursiveOwner(vcf.getOwner())){
+//				vcf.discardSelf();
+//				avcfDiscarded.add(vcf);
+//			}
+//		}
+//		
+//		return avcfDiscarded;
+//	}
 	
 	/**
 	 * 
@@ -132,7 +132,7 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 	public VarCmdFieldAbs(IReflexFillCfg rfcfgOwner, EVarCmdMode evcm, O valueDefault){
 		this.evcm=evcm;
 		this.rfcfgOwner=rfcfgOwner;
-		if(isField())VarCmdFieldAbs.avcfList.add(this);
+		if(isField())VarCmdFieldManagerI.i().add(this);
 		setObjectRawValue(valueDefault,true);
 	}
 //	public VarCmdFieldAbs(boolean bAddToList){
@@ -143,21 +143,23 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 //		ccSelf.assertSelfNotNull();
 //		discardSelf();
 //	}
-	/**
-	 * When discarding a class object that has fields of this class,
-	 * the global fields list {@link #avcfList} must also be updated/synchronized.
-	 */
-	private void discardSelf() {
-		if(!VarCmdFieldAbs.avcfList.contains(this)){
-			/**
-			 * if owner is set, it should be on the main list,
-			 * shall not try to remove if not on the main list...
-			 */
-			throw new PrerequisitesNotMetException("inconsistency", this, getOwner(), VarCmdFieldAbs.avcfList);
-		}
-		
-		VarCmdFieldAbs.avcfList.remove(this);
-	}
+//	/**
+//	 * When discarding a class object that has fields of this class,
+//	 * the global fields list {@link #avcfList} must also be updated/synchronized.
+//	 */
+//	public void discardSelf(VarCmdFieldManagerI.CompositeControl cc) {
+//		cc.assertSelfNotNull();
+//		
+//		if(!VarCmdFieldAbs.avcfList.contains(this)){
+//			/**
+//			 * if owner is set, it should be on the main list,
+//			 * shall not try to remove if not on the main list...
+//			 */
+//			throw new PrerequisitesNotMetException("inconsistency", this, getOwner(), VarCmdFieldAbs.avcfList);
+//		}
+//		
+//		VarCmdFieldAbs.avcfList.remove(this);
+//	}
 	
 	public CommandData getCmdData(){
 		return this.cmdd;

@@ -81,6 +81,21 @@ public class PrerequisitesNotMetException extends NullPointerException {
 		return bRequestExit;
 	}
 	
+	public static <T> void assertNotAlreadyAdded(ArrayList<T> aList, T objNew, Object... aobj){
+		ArrayList<Object> aobjAll = new ArrayList<Object>();
+		aobjAll.add(aList);
+		aobjAll.add(objNew);
+		aobjAll.addAll(Arrays.asList(aobj));
+		
+		if(objNew==null){
+			throw new PrerequisitesNotMetException("cant be null", aobjAll);
+		}
+		
+		if(aList.contains(objNew)){
+			throw new PrerequisitesNotMetException("already added", aobjAll);
+		}
+	}
+	
 	public static void assertNotAlreadySet(String strDescWhat, Object objCurrent, Object objNew, Object... aobjMoreObjectsForDebugInfo){
 		ArrayList<Object> aobjAll = new ArrayList<Object>();
 		aobjAll.add(objCurrent);

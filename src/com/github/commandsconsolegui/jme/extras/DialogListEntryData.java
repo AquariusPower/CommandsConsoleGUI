@@ -472,7 +472,9 @@ private RangedValueModel	modelSliderValue;
 		}
 		
 		if(hrdiagOwner!=null){
-			MsgI.i().warn("inconsistent, only root one should have owner", this, hrdiagOwner);
+//			MsgI.i().warn("inconsistent, only root one should have owner", this, hrdiagOwner);
+			MsgI.i().devInfo("cleaning child ("+getUId()+":"+getVisibleText()+") diagOwner ref ("+hrdiagOwner.getRef().getId()+"), only root one needs it", this, hrdiagOwner);
+			hrdiagOwner=null;
 		}
 		
 		return getParent().getOwner();

@@ -33,6 +33,7 @@ import com.github.commandsconsolegui.PkgTopRef;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
+import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldManagerI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.cmd.VarCmdUId;
 import com.github.commandsconsolegui.jme.AudioUII;
@@ -181,7 +182,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	@Override
 	protected void updateList() {
 		//clearList()
-		ArrayList<VarCmdFieldAbs> avcf = VarCmdFieldAbs.getListFullCopy();
+		ArrayList<VarCmdFieldAbs> avcf = VarCmdFieldManagerI.i().getListFullCopy();
 		
 		for(VarCmdFieldAbs vcfVarEntry:avcf){
 			if(vcfVarEntry.getUniqueVarId()==null)continue;
