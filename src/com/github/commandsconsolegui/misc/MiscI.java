@@ -721,4 +721,29 @@ public class MiscI {
 	public String getValidCmdCharsRegex() {
 		return strValidCmdCharsRegex;
 	}
+	
+	public <T extends IUniqueId> T findByUniqueId(ArrayList<T> aList, String strId){
+		return findByUniqueId(aList, strId, true,true);
+	}
+	public <T extends IUniqueId> T findByUniqueId(ArrayList<T> aList, String strId, boolean bIgnoreCase, boolean bTrim){
+		if(bTrim){
+			strId=strId.trim();
+		}		
+		
+		for(T objWithUId:aList){
+			String strObjId = objWithUId.getUniqueId();
+			if(bTrim){
+				strObjId=strObjId.trim();
+			}
+			
+			if(bIgnoreCase){
+				if(strObjId.equalsIgnoreCase(strId))return objWithUId;
+			}else{
+				if(strObjId.equals(strId))return objWithUId;
+//				if(objWithUId.isUniqueId(strId))return objWithUId;
+			}
+		}
+		
+		return null;
+	}
 }

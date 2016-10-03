@@ -42,7 +42,7 @@ import com.github.commandsconsolegui.misc.RetryOnFailure.IRetryListOwner;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class RetryOnFailure implements IReflexFillCfg,IHasOwnerInstance<IRetryListOwner>{ //IDiscardableInstance
+public class RetryOnFailure implements IReflexFillCfg,IHasOwnerInstance<IRetryListOwner>,IUniqueId{ //IDiscardableInstance
 	public static final class CompositeControl extends CompositeControlAbs<RetryOnFailure>{
 		private CompositeControl(RetryOnFailure casm){super(casm);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
@@ -89,17 +89,17 @@ public class RetryOnFailure implements IReflexFillCfg,IHasOwnerInstance<IRetryLi
 			MiscI.i().isAnonymousClass(irlo) ? null : this, 
 			0L, "retry delay between failed state mode attempts");
 		
-		if(findRetryModeById(irlo.getRetryListForManagement(ccSelf), strId)!=null)throw new PrerequisitesNotMetException("conflicting retry id", strId); 
+		if(MiscI.i().findByUniqueId(irlo.getRetryListForManagement(ccSelf), strId)!=null)throw new PrerequisitesNotMetException("conflicting retry id", strId); 
 		irlo.getRetryListForManagement(ccSelf).add(this);
 	}
 	
-	public static RetryOnFailure findRetryModeById(ArrayList<RetryOnFailure> arList, String strId){
-	//	for(RetryOnFailure r:irlo.getRetryList(ccSelf)){
-		for(RetryOnFailure r:arList){
-			if(r.isId(strId))return r;
-		}
-		return null;
-	}
+//	public static RetryOnFailure findRetryModeById(ArrayList<RetryOnFailure> arList, String strId){
+//	//	for(RetryOnFailure r:irlo.getRetryList(ccSelf)){
+//		for(RetryOnFailure r:arList){
+//			if(r.isId(strId))return r;
+//		}
+//		return null;
+//	}
 	
 	public boolean isId(String strId){
 		return (this.strId.equals(strId));
@@ -139,7 +139,8 @@ public class RetryOnFailure implements IReflexFillCfg,IHasOwnerInstance<IRetryLi
 		return rfcfg;
 	}
 
-	public String getId() {
+	@Override
+	public String getUniqueId() {
 		return strId;
 	}
 	

@@ -75,7 +75,7 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 		;
 	}
 	
-	private static String strBasePath="Sounds/Effects/UI/13940__gameaudio__game-audio-ui-sfx/";
+	private static String strBasePath="Sounds/Effects/UI/13940__gameaudio__game-audio-ui-sfx/"; //@STATIC_OK there is no way because the enum constructors needs it!
 	public static enum EAudio{
 		SubmitSelection			(strBasePath+"220183__gameaudio__click-casual.mono.ogg"),
 		

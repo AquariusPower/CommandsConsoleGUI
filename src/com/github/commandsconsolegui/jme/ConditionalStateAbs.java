@@ -156,7 +156,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	public ArrayList<String> getRetryIdListCopy() {
 		ArrayList<String> astr = new ArrayList<String>();
 		for(RetryOnFailure r:arList){
-			astr.add(r.getId());
+			astr.add(r.getUniqueId());
 		}
 		return astr;
 	}
@@ -875,7 +875,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 		}
 		
 		for(String strId:astrId){
-			RetryOnFailure.findRetryModeById(arList,strId).setRetryDelay(lMilis);
+			MiscI.i().findByUniqueId(arList,strId).setRetryDelay(lMilis);
 		}
 	}
 //	protected Long prepareRetryDelay(EDelayMode e, Long lMilis){

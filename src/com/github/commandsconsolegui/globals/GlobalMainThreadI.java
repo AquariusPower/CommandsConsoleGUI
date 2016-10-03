@@ -40,9 +40,9 @@ public class GlobalMainThreadI extends GlobalHolderAbs<Thread>{
 	public static GlobalMainThreadI iGlobal(){return instance;}
 	public static Thread i(){return iGlobal().get();}
 	
-	public static void assertEqualsCurrentThread(){
+	public static void assertEqualsCurrentThread(){ //@STATIC_OK
 		if(!i().equals(Thread.currentThread())){
-			throw new PrerequisitesNotMetException("not at main thread!!!", i(), Thread.currentThread());
+			throw new PrerequisitesNotMetException("should be the main thread!!!", i(), Thread.currentThread());
 		}
 	}
 }
