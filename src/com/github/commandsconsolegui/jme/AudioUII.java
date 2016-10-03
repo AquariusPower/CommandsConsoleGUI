@@ -42,7 +42,6 @@ import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalRootNodeI;
-import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LmrDiagCS;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -76,7 +75,7 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 		;
 	}
 	
-	static String strBasePath="Sounds/Effects/UI/13940__gameaudio__game-audio-ui-sfx/";
+	private static String strBasePath="Sounds/Effects/UI/13940__gameaudio__game-audio-ui-sfx/";
 	public static enum EAudio{
 		SubmitSelection			(strBasePath+"220183__gameaudio__click-casual.mono.ogg"),
 		
@@ -103,7 +102,7 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 		Failure							(strBasePath+"220167__gameaudio__button-deny-spacey.mono.ogg"),
 		;
 		
-		AudioCfg cfga;
+		private AudioCfg cfga;
 		
 		EAudio(String strFile){
 			cfga = new AudioCfg(this.toString());

@@ -48,19 +48,19 @@ import com.google.common.collect.Lists;
  *
  */
 public class ScriptingCommandsDelegator extends CommandsDelegator {
-	public final StringCmdField CMD_FUNCTION = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField CMD_FUNCTION_CALL = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField CMD_FUNCTION_END = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_FUNCTION = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_FUNCTION_CALL = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_FUNCTION_END = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField scfFunctionList = new StringCmdField(this);
 	public final StringCmdField scfFunctionShow = new StringCmdField(this);
 	
 	/**
 	 * conditional user coding
 	 */
-	public final StringCmdField CMD_IF = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField CMD_ELSE_IF = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField CMD_ELSE = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField CMD_IF_END = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_IF = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_ELSE_IF = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_ELSE = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_IF_END = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 
 	public String	strPrepareFunctionBlockForId;
 	public boolean	bFuncCmdLineRunning;

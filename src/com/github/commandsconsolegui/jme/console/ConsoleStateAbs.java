@@ -39,6 +39,7 @@ import truetypefont.TrueTypeFont;
 import com.github.commandsconsolegui.cmd.CommandData;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.CommandsHelperI;
 import com.github.commandsconsolegui.cmd.DumpEntryData;
 import com.github.commandsconsolegui.cmd.EDataBaseOperations;
 import com.github.commandsconsolegui.cmd.IConsoleUI;
@@ -108,11 +109,11 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	/**
 	 * commands user can type
 	 */
-	public final StringCmdField CMD_CLOSE_CONSOLE = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
-	public final StringCmdField CMD_CONSOLE_HEIGHT = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
-	public final StringCmdField CMD_CONSOLE_STYLE = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
-	public final StringCmdField CMD_DEFAULT = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
-	public final StringCmdField CMD_FONT_LIST = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
+	public final StringCmdField CMD_CLOSE_CONSOLE = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_CONSOLE_HEIGHT = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_CONSOLE_STYLE = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_DEFAULT = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_FONT_LIST = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	
 //	private String strDefaultFont = "DroidSansMono";
 //	private StringVarField	svfUserFontOption = new StringVarField(this, strDefaultFont, null);
@@ -1589,7 +1590,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 				 * complete for variables ids when retrieving variable value 
 				 */
 				String strRegexVarOpen=Pattern.quote(""+cd().getVariableExpandPrefix()+"{");
-				String strRegex=".*"+strRegexVarOpen+"["+MiscI.strValidCmdCharsRegex+cd().RESTRICTED_TOKEN+"]*$";
+				String strRegex=".*"+strRegexVarOpen+"["+MiscI.strValidCmdCharsRegex+CommandsHelperI.i().getRestrictedToken()+"]*$";
 				if(strCompletedCmd.matches(strRegex)){
 					strCmd=strCompletedCmd.trim().substring(1); //removes command prefix
 					astrOptList=cd().getVariablesIdentifiers(true);
@@ -1883,9 +1884,9 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 				rfcfg.setPrefixCmd("CONSOLEGUISTATE_");
 				rfcfg.setFirstLetterUpperCase(true);
 			}else
-			if(CommandsDelegator.strFinalFieldRestrictedCmdCodePrefix.equals(rfcv.getCodePrefixVariant())){
+			if(CommandsHelperI.i().getRestrictedCmdCodePrefix().equals(rfcv.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg(rfcv);
-				rfcfg.setPrefixCmd(""+CommandsDelegator.RESTRICTED_TOKEN);
+				rfcfg.setPrefixCmd(""+CommandsHelperI.i().getRestrictedToken());
 				rfcfg.setFirstLetterUpperCase(true);
 			}
 			

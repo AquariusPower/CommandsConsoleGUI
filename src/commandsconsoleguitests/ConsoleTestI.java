@@ -31,6 +31,7 @@ import java.io.File;
 import java.lang.reflect.Field;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsHelperI;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
@@ -88,7 +89,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 	private StringCmdField sfTestCommandAutoFillVariant1 = new StringCmdField(this,strFieldCodePrefix);
 	private StringCmdField testCommandAutoFillPrefixLessVariant2 = new StringCmdField(this,strFieldCodePrefixLess);
 	private StringCmdField scfCommandAutoFillPrefixLessVariantDefaulted3 = new StringCmdField(this,null);
-	private StringCmdField CMD_TRADITIONAL_PRETTYFIED_0 = new StringCmdField(this,CommandsTest.strFinalCmdCodePrefix);
+	private StringCmdField CMD_TRADITIONAL_PRETTYFIED_0 = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	
 //	private StringVarField svfOptionSelectedDialog2 = new StringVarField(this,"");
 	

@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.jme;
 import java.lang.reflect.Field;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsHelperI;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
@@ -54,10 +55,9 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 	
 	public static final class CompositeControl extends CompositeControlAbs<MouseCursorCentralI>{
 		private CompositeControl(MouseCursorCentralI casm){super(casm);};
-	}
-	private CompositeControl ccSelf = new CompositeControl(this);
+	};private CompositeControl ccSelf = new CompositeControl(this);
 	
-	public final StringCmdField CMD_FIX_RESETING_MOUSE_CURSOR = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
+	public final StringCmdField CMD_FIX_RESETING_MOUSE_CURSOR = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField scfMouseCursorReport = new StringCmdField(this);
 	
 	IntLongVarField ilvClickMaxDelayMilis = new IntLongVarField(this,300,"the delay between button pressed and button released");
@@ -105,12 +105,13 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 		public Vector3f v3fDragDisplacementStep = null;
 	}
 	
-	public static void invertButtons(){
+	public void invertButtons(){
+		int i = EMouseCursorButton.Action1Click.getIndex();
+		
 		EMouseCursorButton.Action1Click.setIndex(
 			EMouseCursorButton.ContextPropertiesClick.getIndex());
 		
-		EMouseCursorButton.ContextPropertiesClick.setIndex(
-			EMouseCursorButton.Action1Click.getIndex());
+		EMouseCursorButton.ContextPropertiesClick.setIndex(i);
 	}
 	
 	public static enum EMouseCursorButton{
@@ -143,7 +144,7 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 			return this.iIndex==iIndex;
 		}
 		
-		public static EMouseCursorButton get(int iIndex){
+		public static EMouseCursorButton get(int iIndex){ //@STATIC_OK
 			for(EMouseCursorButton e:EMouseCursorButton.values()){
 				if(e.isIndex(iIndex))return e;
 			}

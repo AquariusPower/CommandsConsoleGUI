@@ -27,9 +27,6 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import com.github.commandsconsolegui.misc.SimpleHandleExceptionsI;
-import com.github.commandsconsolegui.misc.IHandleExceptions;
-import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 
@@ -40,19 +37,19 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
 public class FloatDoubleVarField extends NumberVarFieldAbs<Double,FloatDoubleVarField>{
-	private static boolean	bConfigured;
-	private static IHandleExceptions	ihe = SimpleHandleExceptionsI.i();
+//	private static boolean	bConfigured;
+//	private static IHandleExceptions	ihe = SimpleHandleExceptionsI.i();
 //	private static String	strCodePrefix = "fdv";
 //	private static ArrayList<FloatDoubleVarField> afdvList = new ArrayList<FloatDoubleVarField>();
 //	private Double dValue = null;
 //	private Double dMin = null;
 //	private Double dMax = null;
 	
-	public static void configure(IHandleExceptions ihe){
-		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		FloatDoubleVarField.ihe=ihe;
-		bConfigured=true;
-	}
+//	public static void configure(IHandleExceptions ihe){
+//		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
+//		FloatDoubleVarField.ihe=ihe;
+//		bConfigured=true;
+//	}
 	
 	public FloatDoubleVarField(IReflexFillCfg rfcfgOwnerUseThis, FloatDoubleVarField fdv, String strHelp) {
 		this(rfcfgOwnerUseThis, fdv.getValue(), strHelp);
@@ -242,7 +239,7 @@ public class FloatDoubleVarField extends NumberVarFieldAbs<Double,FloatDoubleVar
 //	public static String getCodePrefixDefault() {
 //		return "fdv";
 //	}
-	private static String strCodePrefixDefault="fdv";
+	private String strCodePrefixDefault="fdv";
 	@Override
 	public String getCodePrefixDefault() {
 		return strCodePrefixDefault;

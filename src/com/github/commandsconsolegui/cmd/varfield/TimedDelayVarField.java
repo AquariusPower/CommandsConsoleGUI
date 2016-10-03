@@ -27,12 +27,11 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs.EVarCmdMode;
-import com.github.commandsconsolegui.misc.SimpleHandleExceptionsI;
+import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
-import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.TimeHelperI;
 
 /**
  * Use this class to avoid running code on every loop.
@@ -46,15 +45,15 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  */
 
 public class TimedDelayVarField extends VarCmdFieldAbs<Float,TimedDelayVarField>{
-	private static IHandleExceptions ihe = SimpleHandleExceptionsI.i();
+//	private static IHandleExceptions ihe = SimpleHandleExceptionsI.i();
 //	private static ArrayList<TimedDelayVarField> atdList = new ArrayList<TimedDelayVarField>();
 	
-	private static Long lCurrentTimeNano;
-	private static boolean	bConfigured;
+//	private static Long lCurrentTimeNano;
+//	private static boolean	bConfigured;
 	
-	public static final long lNanoOneSecond = 1000000000L; // 1s in nano time
-	public static final float fNanoToSeconds = 1f/lNanoOneSecond; //multiply nano by it to get in seconds
-	public static final float fSecondsToNano = lNanoOneSecond; //multiply seconds to get in nano
+//	public static final long lNanoOneSecond = 1000000000L; // 1s in nano time
+//	public static final float fNanoToSeconds = 1f/lNanoOneSecond; //multiply nano by it to get in seconds
+//	public static final float fSecondsToNano = lNanoOneSecond; //multiply seconds to get in nano
 	
 	private Long	lLastUpdateReferenceTimeNano;
 //	private float	fDelayLimitSeconds;
@@ -64,25 +63,25 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Float,TimedDelayVarField>
 
 //	public static final String	strCodePrefix = "td";
 	
-	public static void configure(IHandleExceptions ihe){
-		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		if(ihe==null)throw new NullPointerException("invalid instance for "+IHandleExceptions.class.getName()); // KEEP ON TOP
-		TimedDelayVarField.ihe=ihe;
-		bConfigured=true;
-	}
+//	public static void configure(){//IHandleExceptions ihe){
+//		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
+////		if(ihe==null)throw new NullPointerException("invalid instance for "+IHandleExceptions.class.getName()); // KEEP ON TOP
+////		TimedDelayVarField.ihe=ihe;
+//		bConfigured=true;
+//	}
 	
-	/**
-	 * use this to prevent current time to read from realtime
-	 * @param lCurrentTimeNano if null, will use realtime
-	 */
-	public static void setCurrentTimeNano(Long lCurrentTimeNano){
-		TimedDelayVarField.lCurrentTimeNano = lCurrentTimeNano;
-	}
+//	/**
+//	 * use this to prevent current time to read from realtime
+//	 * @param lCurrentTimeNano if null, will use realtime
+//	 */
+//	public static void setCurrentTimeNano(Long lCurrentTimeNano){
+//		TimedDelayVarField.lCurrentTimeNano = lCurrentTimeNano;
+//	}
 	
-	public static long getCurrentTimeNano(){
-		if(lCurrentTimeNano==null)return System.nanoTime();
-		return lCurrentTimeNano;
-	}
+//	public static long getCurrentTimeNano(){
+//		if(lCurrentTimeNano==null)return System.nanoTime();
+//		return lCurrentTimeNano;
+//	}
 	
 	/**
 	 * This constructor is exclusively for methods local variables.
@@ -140,7 +139,7 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Float,TimedDelayVarField>
 		long lCurrentDelay = 0;
 		
 		if(bOverlapLimit){
-			long lCurrentTimeNano = getCurrentTimeNano();
+			long lCurrentTimeNano = GlobalSimulationTimeI.i().getNano();//getCurrentTimeNano();
 			
 			long lTotalDelayNano = lCurrentTimeNano - lLastUpdateReferenceTimeNano;
 			
@@ -150,14 +149,15 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Float,TimedDelayVarField>
 				lLastUpdateReferenceTimeNano = lCurrentTimeNano;
 			}
 		}else{
-			lCurrentDelay = getCurrentTimeNano()-lLastUpdateReferenceTimeNano;
+//			lCurrentDelay = getCurrentTimeNano()-lLastUpdateReferenceTimeNano;
+			lCurrentDelay = GlobalSimulationTimeI.i().getNano() -lLastUpdateReferenceTimeNano;
 		}
 		
 		return lCurrentDelay;
 	}
 	
 	public void updateTime() {
-		lLastUpdateReferenceTimeNano = getCurrentTimeNano();
+		lLastUpdateReferenceTimeNano = GlobalSimulationTimeI.i().getNano();//getCurrentTimeNano();
 	}
 	public boolean isReady() {
 		return isReady(false);
@@ -173,7 +173,8 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Float,TimedDelayVarField>
 		return getDelayLimitNano()/1000000;
 	}
 	public long getDelayLimitNano(){
-		return (long) (getDelayLimitSeconds()*fSecondsToNano);
+		return TimeHelperI.i().secondsToNano(getDelayLimitSeconds());
+//		return (long) (getDelayLimitSeconds()*fSecondsToNano);
 //		if(bOscilate){
 //			return lDelayLimitNano*2;
 //		}else{
@@ -376,7 +377,7 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Float,TimedDelayVarField>
 		return this;
 	}
 
-	private static String strCodePrefixDefault="td";
+	private String strCodePrefixDefault="td";
 	@Override
 	public String getCodePrefixDefault() {
 		return strCodePrefixDefault;

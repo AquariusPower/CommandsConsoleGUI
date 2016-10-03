@@ -36,20 +36,24 @@ public class TimeHelperI {
 	private static TimeHelperI instance = new TimeHelperI();
 	public static TimeHelperI i(){return instance;}
 	
-	private long lNano  = 1000000000L;
+	private long lNanoOneSecond  = 1000000000L;
 	private long lMilisToNano = 1000000L;
+	private double dNanoToSeconds = 1.0/lNanoOneSecond;
 	
 	public long secondsToNano(double dSeconds){
-		return (long) (dSeconds*lNano);
+		return (long) (dSeconds*lNanoOneSecond);
 	}
 	public long secondsToNano(float fSeconds){
-		return (long) (fSeconds*lNano);
+		return (long) (fSeconds*lNanoOneSecond);
 	}
 	public long nanoToMilis(long lTimeNano){
 		return lTimeNano/lMilisToNano;
 	}
 	public long milisToNano(long lTimeMilis){
 		return lTimeMilis*lMilisToNano;
+	}
+	public double nanoToSeconds(long lNano) {
+		return lNano*dNanoToSeconds;
 	}
 	
 //	public double convertDelayNanoToSeconds(long lDelayNano){

@@ -50,7 +50,7 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 //	private int	iReflexFillCfgVariant;
 //	private String	strReflexFillCfgCodePrefixVariant;
 //	private String	strHelpComment;
-	private static boolean bIgnoreCaseOnComparison = true;
+//	private static boolean bIgnoreCaseOnComparison = true;
 //	public static final String strCodePrefix="scf"; //ex.: scfTestCommand
 //	private static ArrayList<StringCmdField> ascfList = new ArrayList<StringCmdField>();
 	
@@ -59,13 +59,13 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 //	}
 	
 	
-	/**
-	 * default is true, useful for easy lowercase user typed commands comparison
-	 * @param b
-	 */
-	public static void setIgnoreCaseComparison(boolean b){
-		bIgnoreCaseOnComparison=b;
-	}
+//	/**
+//	 * default is true, useful for easy lowercase user typed commands comparison
+//	 * @param b
+//	 */
+//	public static void setIgnoreCaseComparison(boolean b){
+//		bIgnoreCaseOnComparison=b;
+//	}
 	
 //	public StringField(IReflexFillCfg rfcfgOwner){
 //		this(rfcfgOwner,0);
@@ -162,11 +162,11 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 		
 		strCmdChk=strCmdChk.trim();
 		
-		if(bIgnoreCaseOnComparison){
-			return getUniqueCmdId().equalsIgnoreCase(strCmdChk);
-		}else{
-			return getUniqueCmdId().equals(strCmdChk);
-		}
+//		if(bIgnoreCaseOnComparison){
+			return getUniqueCmdId().equalsIgnoreCase(strCmdChk); //useful for user typed commands
+//		}else{
+//			return getUniqueCmdId().equals(strCmdChk);
+//		}
 	}
 	
 	/**
@@ -255,7 +255,7 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 //	public static String getCodePrefixDefault() {
 //		return "scf";
 //	}
-	private static String strCodePrefixDefault="scf";
+	private String strCodePrefixDefault="scf";
 	@Override
 	public String getCodePrefixDefault() {
 		return strCodePrefixDefault;

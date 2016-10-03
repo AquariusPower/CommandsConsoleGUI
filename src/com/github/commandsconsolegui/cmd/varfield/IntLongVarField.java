@@ -43,8 +43,8 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  *
  */
 public class IntLongVarField extends NumberVarFieldAbs<Long,IntLongVarField>{
-	private static boolean	bConfigured;
-	private static IHandleExceptions	ihe = SimpleHandleExceptionsI.i();
+//	private static boolean	bConfigured;
+//	private static IHandleExceptions	ihe = SimpleHandleExceptionsI.i();
 //	private static String	strCodePrefix = "ilv";
 //	private static ArrayList<IntLongVarField> ailvList = new ArrayList<IntLongVarField>();
 	
@@ -52,11 +52,11 @@ public class IntLongVarField extends NumberVarFieldAbs<Long,IntLongVarField>{
 //	private Long	lMin;
 //	private Long	lMax;
 	
-	public static void configure(IHandleExceptions ihe){
-		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		IntLongVarField.ihe=ihe;
-		bConfigured=true;
-	}
+//	public static void configure(IHandleExceptions ihe){
+//		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
+//		IntLongVarField.ihe=ihe;
+//		bConfigured=true;
+//	}
 	
 	public IntLongVarField(IReflexFillCfg rfcfgOwnerUseThis, IntLongVarField ilv) {
 		this(rfcfgOwnerUseThis, ilv.getValue(),null);
@@ -234,7 +234,7 @@ public class IntLongVarField extends NumberVarFieldAbs<Long,IntLongVarField>{
 //	public static String getCodePrefixDefault() {
 //		return "ilv";
 //	}
-	private static String strCodePrefixDefault="ilv";
+	private String strCodePrefixDefault="ilv";
 	@Override
 	public String getCodePrefixDefault() {
 		return strCodePrefixDefault;

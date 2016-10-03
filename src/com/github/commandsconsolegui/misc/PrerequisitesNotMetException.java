@@ -41,7 +41,7 @@ import java.util.Arrays;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class PrerequisitesNotMetException extends NullPointerException {
+public class PrerequisitesNotMetException extends NullPointerException { //@STATIC_OK
 	private static final long	serialVersionUID	= 1342052861109804737L;
 	private static boolean	bRequestExit;
 
@@ -52,30 +52,6 @@ public class PrerequisitesNotMetException extends NullPointerException {
 	public PrerequisitesNotMetException(String str, Object... aobj) {
 		this(true,str,aobj);
 	}
-	
-//	@Deprecated
-//	private static String join(String strMessage, Object... aobj){
-//		String strRet=strMessage;
-//		if(aobj!=null){
-//			for(int i=0;i<aobj.length;i++){
-//				Object obj=aobj[i];
-//				if(strRet.equals(strMessage)){
-//					strRet+=":\n";
-//				}
-//				
-//				strRet+="  ["+i+"]";
-//				
-//				if(obj==null){
-//					strRet+=""+null;
-//				}else{
-//					strRet+=obj.getClass().getName()+", "+"value:"+obj;
-//				}
-//				
-//				strRet+="\n";
-//			}
-//		}
-//		return strRet;
-//	}
 	
 	public static boolean isExitRequested(){
 		return bRequestExit;
@@ -133,9 +109,9 @@ public class PrerequisitesNotMetException extends NullPointerException {
 		return this;
 	}
 	
-//	@Override
-//	public synchronized Throwable initCause(Throwable cause) {
-//		// TODO Auto-generated method stub
-//		return super.initCause(cause);
-//	}
+	@Deprecated
+	@Override
+	public synchronized Throwable initCause(Throwable cause) {
+		throw new NullPointerException("do not use, just to avoid ignoring the more useful ones");
+	}
 }

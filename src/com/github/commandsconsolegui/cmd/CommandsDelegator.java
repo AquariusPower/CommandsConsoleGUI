@@ -159,37 +159,36 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	/**
 	 * user can type these below at console (the actual commands are prepared by reflex)
 	 */
-	public static final String strFinalCmdCodePrefix="CMD_";
-//	public final StringField CMD_CLOSE_CONSOLE = new StringField(this,strFinalCmdCodePrefix);
-//	public final StringField CMD_CONSOLE_HEIGHT = new StringField(this,strFinalCmdCodePrefix);
-//	public final StringField CMD_CONSOLE_SCROLL_BOTTOM = new StringField(this,strFinalCmdCodePrefix);
-//	public final StringField CMD_CONSOLE_STYLE = new StringField(this,strFinalCmdCodePrefix);
-	public final StringCmdField CMD_CONSOLE_SCROLL_BOTTOM = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField CMD_CLEAR_COMMANDS_HISTORY = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField CMD_DB = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField CMD_ECHO = new StringCmdField(this,strFinalCmdCodePrefix);
+//	public final StringField CMD_CLOSE_CONSOLE = new StringField(this,CommandsHelperI.i().getCmdCodePrefix());
+//	public final StringField CMD_CONSOLE_HEIGHT = new StringField(this,CommandsHelperI.i().getCmdCodePrefix());
+//	public final StringField CMD_CONSOLE_SCROLL_BOTTOM = new StringField(this,CommandsHelperI.i().getCmdCodePrefix());
+//	public final StringField CMD_CONSOLE_STYLE = new StringField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_CONSOLE_SCROLL_BOTTOM = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_CLEAR_COMMANDS_HISTORY = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_DB = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_ECHO = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField scfListFiles = new StringCmdField(this);
 	public final StringCmdField scfMessagesBufferClear = new StringCmdField(this);
 	public final StringCmdField scfChangeCommandSimpleId = new StringCmdField(this);
-	public final StringCmdField CMD_FIX_LINE_WRAP = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField CMD_FIX_VISIBLE_ROWS_AMOUNT = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField CMD_HELP = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField CMD_HISTORY = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField CMD_HK_TOGGLE = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField CMD_LINE_WRAP_AT = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField CMD_MESSAGE_REVIEW = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField CMD_VAR_SET = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField CMD_SLEEP = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField CMD_STATS_ENABLE = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField CMD_REPEAT = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField	CMD_STATS_FIELD_TOGGLE  = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField	CMD_STATS_SHOW_ALL = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField	CMD_TEST = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField	CMD_VAR_ADD = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField	CMD_VAR_SET_CMP = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField	CMD_VAR_SHOW = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField	CMD_RESET = new StringCmdField(this,strFinalCmdCodePrefix);
-	public final StringCmdField	CMD_SHOW_SETUP = new StringCmdField(this,strFinalCmdCodePrefix);
+	public final StringCmdField CMD_FIX_LINE_WRAP = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_FIX_VISIBLE_ROWS_AMOUNT = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_HELP = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_HISTORY = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_HK_TOGGLE = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_LINE_WRAP_AT = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_MESSAGE_REVIEW = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_VAR_SET = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_SLEEP = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_STATS_ENABLE = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField CMD_REPEAT = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField	CMD_STATS_FIELD_TOGGLE  = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField	CMD_STATS_SHOW_ALL = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField	CMD_TEST = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField	CMD_VAR_ADD = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField	CMD_VAR_SET_CMP = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField	CMD_VAR_SHOW = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField	CMD_RESET = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField	CMD_SHOW_SETUP = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField scfClearDumpArea = new StringCmdField(this);
 	public final StringCmdField scfAlias = new StringCmdField(this);
 	public final StringCmdField scfCmdOS = new StringCmdField(this);
@@ -207,12 +206,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	 * this char indicates something that users (non developers) 
 	 * should not have direct access.
 	 */
-	public static final Character	RESTRICTED_TOKEN	= '&';
-	public static final String strFinalFieldRestrictedCmdCodePrefix="RESTRICTED_CMD_";
-	public final StringCmdField	RESTRICTED_CMD_SKIP_CURRENT_COMMAND	= new StringCmdField(this,strFinalFieldRestrictedCmdCodePrefix);
-	public final StringCmdField	RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE	= new StringCmdField(this,strFinalFieldRestrictedCmdCodePrefix);
-	public final StringCmdField	RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS	= new StringCmdField(this,strFinalFieldRestrictedCmdCodePrefix);
-	public final StringCmdField	RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS	= new StringCmdField(this,strFinalFieldRestrictedCmdCodePrefix);
+	public final StringCmdField	RESTRICTED_CMD_SKIP_CURRENT_COMMAND	= new StringCmdField(this,CommandsHelperI.i().getRestrictedCmdCodePrefix());
+	public final StringCmdField	RESTRICTED_CMD_END_OF_STARTUP_CMDQUEUE	= new StringCmdField(this,CommandsHelperI.i().getRestrictedCmdCodePrefix());
+	public final StringCmdField	RESTRICTED_CMD_FUNCTION_EXECUTION_STARTS	= new StringCmdField(this,CommandsHelperI.i().getRestrictedCmdCodePrefix());
+	public final StringCmdField	RESTRICTED_CMD_FUNCTION_EXECUTION_ENDS	= new StringCmdField(this,CommandsHelperI.i().getRestrictedCmdCodePrefix());
 	
 	/**
 	 * more tokens
@@ -354,12 +351,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			if(rfcfg!=null)rfcfg.setAsCommandToo(true);
 		}else
 		if(rfcvField.getClass().isAssignableFrom(StringCmdField.class)){
-			if(strFinalCmdCodePrefix.equals(rfcvField.getCodePrefixVariant())){
+			if(CommandsHelperI.i().getCmdCodePrefix().equals(rfcvField.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg(rfcvField);
 			}else
-			if(strFinalFieldRestrictedCmdCodePrefix.equals(rfcvField.getCodePrefixVariant())){
+			if(CommandsHelperI.i().getRestrictedCmdCodePrefix().equals(rfcvField.getCodePrefixVariant())){
 				rfcfg = new ReflexFillCfg(rfcvField);
-				rfcfg.setPrefixCmd(""+RESTRICTED_TOKEN);
+				rfcfg.setPrefixCmd(""+CommandsHelperI.i().getRestrictedToken());
 			}else
 			if(bCodePrefixIsDefault){
 				rfcfg = new ReflexFillCfg(rfcvField);
@@ -1226,7 +1223,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		if(checkCmdValidity(CMD_VAR_SET_CMP,"<varIdBool> <value> <cmp> <value>")){
 			bCmdWorked=cmdVarSetCmp();
 		}else
-		if(checkCmdValidity(CMD_VAR_SHOW,"[["+RESTRICTED_TOKEN+"]filter] list user or restricted variables.")){
+		if(checkCmdValidity(CMD_VAR_SHOW,"[["+CommandsHelperI.i().getRestrictedToken()+"]filter] list user or restricted variables.")){
 			bCmdWorked=cmdVarShow();
 		}else
 		if(checkCmdValidity(icclPseudo,TOKEN_CMD_NOT_WORKING_YET+"zDisabledCommand",null," just to show how to use it")){
@@ -2073,7 +2070,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		 */
 		dumpInfoEntry("Variables list:");
 		boolean bRestrictedOnly=false;
-		if(strFilter.startsWith(""+RESTRICTED_TOKEN)){
+		if(strFilter.startsWith(""+CommandsHelperI.i().getRestrictedToken())){
 			bRestrictedOnly=true;
 			strFilter=strFilter.substring(1);
 		}
@@ -2265,7 +2262,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	}
 	
 	private boolean hasChanged(ERestrictedSetupLoadableVars rv){
-		String strValue = varGetValueString(""+RESTRICTED_TOKEN+rv);
+		String strValue = varGetValueString(""+CommandsHelperI.i().getRestrictedToken()+rv);
 		switch(rv){
 			case userAliasListHashcode:
 				return !(""+aAliasList.hashCode()).equals(strValue);
@@ -2698,7 +2695,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	}
 	
 	private boolean isRestricted(String strId){
-		return strId.startsWith(""+RESTRICTED_TOKEN);
+		return strId.startsWith(""+CommandsHelperI.i().getRestrictedToken());
 	}
 	
 	/**
@@ -2863,13 +2860,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	
 	public boolean varSet(StringCmdField scfId, String strValue, boolean bSave) {
 		return varSet(
-			RESTRICTED_TOKEN+scfId.getUniqueCmdId(),
+			CommandsHelperI.i().getRestrictedToken()+scfId.getUniqueCmdId(),
 			strValue,
 			bSave);
 	}
 	
 //	private boolean varRestoreTo(BoolTogglerCmd btgOwner){
-//		VarIdValueOwner vivo = getVar(RESTRICTED_TOKEN+btgOwner.getCmdId());
+//		VarIdValueOwner vivo = getVar(CommandsHelperI.i().getRestrictedToken()+btgOwner.getCmdId());
 //		if(vivo==null)return false;
 //		btgOwner.setObjectValue(vivo.getObjectValue());
 //		dumpSubEntry(btgOwner.getReport());
@@ -2877,7 +2874,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 //	}
 //	
 //	private boolean varRestoreTo(TimedDelayVar tdOwner){
-//		VarIdValueOwner vivo = getVar(RESTRICTED_TOKEN+tdOwner.getVarId());
+//		VarIdValueOwner vivo = getVar(CommandsHelperI.i().getRestrictedToken()+tdOwner.getVarId());
 //		if(vivo==null)return false;
 //		tdOwner.setObjectValue(vivo.getObjectValue());
 //		dumpSubEntry(tdOwner.getReport());
@@ -2890,56 +2887,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	 * @return
 	 */
 	private boolean varApplyAtRestrictedOwner(VarCmdFieldAbs owner, String strValue){
-		ConsoleVariable cvar = getVarFromRightSource(RESTRICTED_TOKEN+owner.getUniqueVarId());
+		ConsoleVariable cvar = getVarFromRightSource(CommandsHelperI.i().getRestrictedToken()+owner.getUniqueVarId());
 		if(cvar==null)return false;
 		owner.setObjectRawValue(strValue);
 		dumpSubEntry(owner.getReport());
 		return true;
 	}
-	
-//	public boolean varSet(BoolTogglerCmd btgOwner, boolean bSave) {
-//		if(btgOwner.getOwner()==null)return false; //check if it is configured as a field should be
-//		
-//		return varSet(
-//			new VarIdValueOwner(
-//				RESTRICTED_TOKEN+btgOwner.getCmdId(),
-//				""+btgOwner.getBoolean(),
-//				btgOwner),
-//			bSave);
-//	}
-//	/**
-//	 * 
-//	 * @param tdOwner only the ones configured as class field variables 
-//	 * @param bSave
-//	 * @return
-//	 */
-//	public boolean varSet(TimedDelayVar tdOwner, boolean bSave) {
-//		if(tdOwner.getOwner()==null)return false; //check if it is configured as a field should be
-//		
-//		return varSet(
-//			new VarIdValueOwner(
-//				RESTRICTED_TOKEN+tdOwner.getVarId(),
-//				Misc.i().fmtFloat(tdOwner.getDelayLimitSeconds(),3), //store with milis precision
-//				tdOwner),
-//			bSave);
-//	}
-	
-//	public boolean varSet(FloatingDoubleVar fdvOwner, boolean bSave) {
-//		return varSet(
-//			new VarIdValueOwner(
-//				RESTRICTED_TOKEN+fdvOwner.getVarId(),
-//				Misc.i().fmtFloat(fdvOwner.getDouble(),3), //store with milis precision
-//				fdvOwner),
-//			bSave);
-//	}
-//	public boolean varSet(IntegerLongVar ilvOwner, boolean bSave) {
-//		return varSet(
-//			new VarIdValueOwner(
-//				RESTRICTED_TOKEN+ilvOwner.getVarId(),
-//				ilvOwner.getLong(),
-//				ilvOwner),
-//			bSave);
-//	}
 	
 	public boolean varSet(VarCmdFieldAbs owner, boolean bSave) {
 		IReflexFillCfg rfcfg=null;
@@ -2953,7 +2906,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		
 		return varSetFixingType(
 			new ConsoleVariable(
-				RESTRICTED_TOKEN+owner.getUniqueVarId(),
+				CommandsHelperI.i().getRestrictedToken()+owner.getUniqueVarId(),
 				owner.getRawValue(),
 				owner,
 				rfcfg,
@@ -3403,7 +3356,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		if(strFullCmdLine.isEmpty())return;
 		if(strFullCmdLine.equals(""+getCommandPrefix()))return; //the token alone, is like empty
 		
-		if(!strFullCmdLine.startsWith(""+RESTRICTED_TOKEN)){
+		if(!strFullCmdLine.startsWith(""+CommandsHelperI.i().getRestrictedToken())){
 			if(!strFullCmdLine.startsWith(""+getCommandPrefix())){
 				strFullCmdLine=getCommandPrefix()+strFullCmdLine;
 			}
@@ -3518,11 +3471,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	}
 	
 	private void setupVars(boolean bSave){
-		varSet(""+RESTRICTED_TOKEN+ERestrictedSetupLoadableVars.userVariableListHashcode,
+		varSet(""+CommandsHelperI.i().getRestrictedToken()+ERestrictedSetupLoadableVars.userVariableListHashcode,
 			""+tmUserVariables.hashCode(),
 			false);
 		
-		varSet(""+RESTRICTED_TOKEN+ERestrictedSetupLoadableVars.userAliasListHashcode,
+		varSet(""+CommandsHelperI.i().getRestrictedToken()+ERestrictedSetupLoadableVars.userAliasListHashcode,
 			""+aAliasList.hashCode(),
 			false);
 		
@@ -3697,8 +3650,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		if(bConfigured)throw new NullPointerException("already configured.");		// KEEP ON TOP
 		
 //		Init.i().initialize(sapp, this);
-		TimedDelayVarField.configure(this);
-		BoolTogglerCmdField.configure(this);
+//		TimedDelayVarField.configure(this);
+//		BoolTogglerCmdField.configure(this);
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 		
 		DebugI.i().configure(this);

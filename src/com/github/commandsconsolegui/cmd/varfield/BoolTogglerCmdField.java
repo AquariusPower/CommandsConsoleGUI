@@ -28,11 +28,8 @@
 package com.github.commandsconsolegui.cmd.varfield;
 
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
-import com.github.commandsconsolegui.misc.SimpleHandleExceptionsI;
-import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.misc.WorkAroundI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 
 /**
@@ -48,8 +45,8 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 public class BoolTogglerCmdField<S extends BoolTogglerCmdField<S>> extends VarCmdFieldAbs<Boolean,S>{
 //	public static final String strCodePrefix="btg";
 //	private static ArrayList<BoolTogglerCmdField> abtgList = new ArrayList<BoolTogglerCmdField>();
-	private static boolean	bConfigured;
-	private static IHandleExceptions	ihe = SimpleHandleExceptionsI.i();
+//	private static boolean	bConfigured;
+//	private static IHandleExceptions	ihe = SimpleHandleExceptionsI.i();
 	
 	private boolean bPrevious;
 //	private boolean bCurrent = false;
@@ -60,12 +57,12 @@ public class BoolTogglerCmdField<S extends BoolTogglerCmdField<S>> extends VarCm
 //	private boolean	bConstructed;
 //	private boolean	bBugFixerMode;
 	
-	public static void configure(IHandleExceptions ihe){
-		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		if(ihe==null)throw new NullPointerException("invalid instance for "+IHandleExceptions.class.getName()); // KEEP ON TOP
-		BoolTogglerCmdField.ihe=ihe;
-		bConfigured=true;
-	}
+//	public static void configure(IHandleExceptions ihe){
+//		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
+//		if(ihe==null)throw new NullPointerException("invalid instance for "+IHandleExceptions.class.getName()); // KEEP ON TOP
+//		BoolTogglerCmdField.ihe=ihe;
+//		bConfigured=true;
+//	}
 	
 //	public static ArrayList<BoolTogglerCmdField> getListCopy(){
 //		ArrayList<BoolTogglerCmdField> a = VarCmdFieldAbs.getListCopy(BoolTogglerCmdField.class);
@@ -434,7 +431,7 @@ public class BoolTogglerCmdField<S extends BoolTogglerCmdField<S>> extends VarCm
 		return getBoolean();
 	}
 	
-	private static String strCodePrefixDefault="btg";
+	private String strCodePrefixDefault="btg";
 	@Override
 	public String getCodePrefixDefault() {
 		return strCodePrefixDefault;

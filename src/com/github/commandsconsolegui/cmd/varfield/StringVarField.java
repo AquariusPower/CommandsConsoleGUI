@@ -27,8 +27,6 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import com.github.commandsconsolegui.misc.SimpleHandleExceptionsI;
-import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 
 /**
@@ -39,18 +37,18 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  *
  */
 public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
-	private static boolean	bConfigured;
-	private static IHandleExceptions	ihe = SimpleHandleExceptionsI.i();
+//	private static boolean	bConfigured;
+//	private static IHandleExceptions	ihe = SimpleHandleExceptionsI.i();
 //	private static String	strCodePrefixVariant = "svf";
 //	private static ArrayList<StringVarField> ailvList = new ArrayList<StringVarField>();
 	
 //	String strValue;
 	
-	public static void configure(IHandleExceptions ihe){
-		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		StringVarField.ihe=ihe;
-		bConfigured=true;
-	}
+//	public static void configure(IHandleExceptions ihe){
+//		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
+//		StringVarField.ihe=ihe;
+//		bConfigured=true;
+//	}
 	
 	public StringVarField(IReflexFillCfg rfcfgOwnerUseThis, StringVarField ilv,String strHelp) {
 		this(rfcfgOwnerUseThis, ilv.getValue(),strHelp);
@@ -166,7 +164,7 @@ public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 //	public static String getCodePrefixDefault() {
 //		return "svf";
 //	}
-	private static String strCodePrefixDefault="svf";
+	private String strCodePrefixDefault="svf";
 	@Override
 	public String getCodePrefixDefault() {
 		return strCodePrefixDefault;

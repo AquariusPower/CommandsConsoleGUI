@@ -31,6 +31,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsHelperI;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
@@ -104,7 +105,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 	public final BoolTogglerCmdField	btgTextCursorOscilateFadeBlinkMode = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 	public final BoolTogglerCmdField	btgTextCursorLarge = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 	
-	public final StringCmdField CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringCmdField(this, CommandsDelegator.strFinalCmdCodePrefix);
+	public final StringCmdField CMD_FIX_INVISIBLE_TEXT_CURSOR = new StringCmdField(this, CommandsHelperI.i().getCmdCodePrefix());
 
 //	private SimpleApplication	sapp;
 	

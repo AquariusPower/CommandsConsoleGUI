@@ -31,6 +31,7 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.jme.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.TimeHelperI;
 
 /**
  * Spare GPU fan!
@@ -42,8 +43,8 @@ public class FpsLimiterStateI extends CmdConditionalStateAbs<FpsLimiterStateI>{
 	private static FpsLimiterStateI instance = new FpsLimiterStateI();
 	public static FpsLimiterStateI i(){return instance;}
 	
-	public static final long lNanoOneSecond = 1000000000L; // 1s in nano time
-	public static final float fNanoToSeconds = 1f/lNanoOneSecond; //multiply nano by it to get in seconds
+//	public final long lNanoOneSecond = 1000000000L; // 1s in nano time
+//	public final float fNanoToSeconds = 1f/lNanoOneSecond; //multiply nano by it to get in seconds
 	
 	private long	lNanoTimePrevious;
 	
@@ -74,7 +75,8 @@ public class FpsLimiterStateI extends CmdConditionalStateAbs<FpsLimiterStateI>{
 	public FpsLimiterStateI setMaxFps(int iMaxFPS){
 		this.iMaxFPS=iMaxFPS;
 		if(this.iMaxFPS<1)this.iMaxFPS=1;
-		lNanoDelayLimit = (long) ((1.0f/this.iMaxFPS)*lNanoOneSecond);
+//		lNanoDelayLimit = (long) ((1.0f/this.iMaxFPS)*lNanoOneSecond);
+		lNanoDelayLimit = (long) TimeHelperI.i().secondsToNano(((1.0f/this.iMaxFPS)));
 //		lMilisDelayLimit = lNanoDelayLimit/1000000L;
 		return this;
 	}
@@ -87,8 +89,9 @@ public class FpsLimiterStateI extends CmdConditionalStateAbs<FpsLimiterStateI>{
 		return lNanoThreadSleep/1000000L;
 	}
 	
-	public float getThreadSleepTime(){
-		return lNanoThreadSleep*fNanoToSeconds;
+	public double getThreadSleepTime(){
+		return TimeHelperI.i().nanoToSeconds(lNanoThreadSleep);
+//		return lNanoThreadSleep*fNanoToSeconds;
 	}
 	
 	/**

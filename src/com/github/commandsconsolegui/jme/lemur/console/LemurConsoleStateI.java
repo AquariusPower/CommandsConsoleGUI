@@ -31,6 +31,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.CommandsHelperI;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
@@ -103,7 +104,7 @@ public class LemurConsoleStateI<T extends Command<Button>> extends ConsoleStateA
 	private Label	lblStats;
 	private ArrayList<BindKey>	abkList = new ArrayList<BindKey>();
 	
-	public final StringCmdField CMD_SHOW_BINDS = new StringCmdField(this,CommandsDelegator.strFinalCmdCodePrefix);
+	public final StringCmdField CMD_SHOW_BINDS = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	
 	private TextEntryComponent	tecInputField;
 	private KeyActionListener	actSimpleActions;
