@@ -834,7 +834,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 				
 //			if(getParentDialog()!=null)getParentDialog().setModalChosenData(dataSelected);
 //				lChoiceMadeAtMilis=System.currentTimeMillis();
-				cd().dumpInfoEntry(this.getId()+": Option Selected: "+dataSelected.toString());
+				cd().dumpInfoEntry(this.getUniqueId()+": Option Selected: "+dataSelected.toString());
 				requestDisable(); //close if there is one entry selected
 			}
 		}else{
@@ -1492,7 +1492,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	private String strFilePrefix="Dialog_";
 	public void save(){
 		if(!isSaveDialog())return;
-		MiscJmeI.i().saveWriteConsoleData(strFilePrefix+getId(), sv);
+		MiscJmeI.i().saveWriteConsoleData(strFilePrefix+getUniqueId(), sv);
 	}
 	/**
 	 * override me!
@@ -1502,7 +1502,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	}
 	public <T extends DiagCS> T load(Class<T> clCS){
 		if(!isSaveDialog())return null;
-		T svTmp = MiscJmeI.i().loadReadConsoleData(clCS, strFilePrefix+getId());
+		T svTmp = MiscJmeI.i().loadReadConsoleData(clCS, strFilePrefix+getUniqueId());
 		if(sv.applyValuesFrom(svTmp)){
 //			applyCurrentSettings(false);
 //			setPositionSize(new Vector3f(sv.fPosX, sv.fPosY, 0), new Vector3f(sv.fWidth,sv.fHeight,0));
@@ -1632,7 +1632,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		return getThis();
 	}
 
-	public String getNextUniqueId() { //id is not index as entries can be removed will have gaps
+	public String getCreateNextEntryUniqueId() { //id is not index as entries can be removed will have gaps
 		return strLastEntryUniqueId = MiscI.i().getNextUniqueId(strLastEntryUniqueId);
 	}
 	

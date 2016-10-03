@@ -35,7 +35,9 @@ import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.DialogManagerAbs;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LmrDiagCS;
+import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.jme3.math.ColorRGBA;
@@ -223,6 +225,7 @@ public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends DialogMa
 	
 	public LemurDialogManagerI() {
 		super();
+		SingleInstanceManagerI.i().add(this);
 	}
 	
 	@Override
@@ -298,6 +301,11 @@ public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends DialogMa
 		pnl.addEffect(strDummyId, efDummy);
 		
 		return efDummy;
+	}
+
+	@Override
+	public String getUniqueId() {
+		return MiscI.i().prepareUniqueId(this);
 	}
 	
 //	public static class LmrDiagMgrCS extends DiagMgrCS<LemurDialogManagerI>{

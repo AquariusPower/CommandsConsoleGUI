@@ -55,6 +55,10 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
 //	private ConsoleCommands	cc;
 	
+	public DebugI() {
+		SingleInstanceManagerI.i().add(this);
+	}
+	
 	/**
 	 * when enabled, these keys are used to perform debug tests
 	 */
@@ -91,6 +95,11 @@ public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
 		@Override
 		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 			fld.set(this,value);
+		}
+		
+		@Override
+		public String getUniqueId() {
+			return MiscI.i().prepareUniqueId(this)+":"+this.toString();
 		}
 	}
 	
@@ -321,5 +330,10 @@ public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
 	@Override
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		fld.set(this,value);
+	}
+
+	@Override
+	public String getUniqueId() {
+		return MiscI.i().prepareUniqueId(this);
 	}
 }

@@ -746,4 +746,8 @@ public class MiscI {
 		
 		return null;
 	}
+
+	public String prepareUniqueId(ISingleInstance si) {
+		return si.getClass().getName(); //TODO dots to underscores?
+	}
 }

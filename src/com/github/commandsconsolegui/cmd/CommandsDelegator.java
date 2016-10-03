@@ -53,6 +53,7 @@ import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldManagerI;
 import com.github.commandsconsolegui.globals.GlobalOperationalSystemI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.cmd.VarCmdUId;
+import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.console.GlobalConsoleUII;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LmrDiagCS;
 import com.github.commandsconsolegui.misc.CallQueueI;
@@ -231,7 +232,6 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	/**
 	 * etc
 	 */
-	private String	strTypeCmd="Cmd";
 	
 	/** 0 is auto wrap, -1 will trunc big lines */
 	private IntLongVarField ilvConsoleMaxWidthInCharsForLineWrap = new IntLongVarField(this,0,null);
@@ -373,7 +373,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		
 		if(rfcfg!=null){
 			if(rfcfg.isCommandToo()){
-				rfcfg.setPrefixCmd("cmd");
+				rfcfg.setPrefixCmd(ReflexFillI.i().getPrefixCmdDefault());
 //				Field field = ReflexFillI.i().assertAndGetField(rfcv.getOwner(), rfcv);
 ////			rfcfg.setPrefix("cmd"+cl.getSimpleName());
 //				rfcfg.setPrefixDeclaringClass(field.getDeclaringClass().getSimpleName());
@@ -500,9 +500,27 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		return ""+chCommandPrefix;
 	}
 	
-	public void cmdExit(){
+	private boolean bExitRequested=false;
+	public void cmdRequestExit(){
+//		if(GlobalAppRefI.iGlobal().isApplicationExiting()){
+//			return true;
+//		}
+//		
+//		GlobalAppRefI.iGlobal().setAppExiting();
+//		GlobalCommandsDelegatorI.i().cmdExit();
+//		return false;
+
+		
+		if(bExitRequested)return;
+		
 		//TODO sleep or wait for application to stop outside here?
-		System.exit(0);
+		cmdDatabase(EDataBaseOperations.save);
+		
+		GlobalAppRefI.iGlobal().setAppExiting();
+		
+		bExitRequested=true;
+		
+//		System.exit(0); //TODO remove?
 	}
 	
 	private boolean checkCmdValidityBoolTogglers(){
@@ -540,6 +558,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		@Override
 		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 			throw new NullPointerException("This method shall never be called!");
+		}
+		@Override
+		public String getUniqueId() {
+			return MiscI.i().prepareUniqueId(this);
 		}
 	}
 	private PseudoSelfListener icclPseudo = new PseudoSelfListener();
@@ -955,7 +977,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			}
 		}else
 		if(checkCmdValidity(scfExit,"the application")){
-			cmdExit();
+			cmdRequestExit();
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(scfFileShowData,"<ini|setup|CompleteFileName> show contents of file at dump area")){
@@ -1092,7 +1114,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(scfQuit,"the application")){
-			cmdExit();
+			cmdRequestExit();
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(CMD_REPEAT,"<iTimes> <strOtherCommand> will repeat other command iTimes")){
@@ -2738,12 +2760,40 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	}
 	
 	private void varSaveSetupFile(){
-		for(String strVarId : getVariablesIdentifiers(true)){
-			if(isRestricted(strVarId))fileAppendVar(strVarId);
+		ArrayList<String> astr = getVariablesIdentifiers(true);
+		Collections.sort(astr);
+		for(String strVarId : astr){
+			if(isRestricted(strVarId)){
+				fileAppendVar(strVarId);
+			}
 		}
 	}
 	
 	private void fileAppendVar(String strVarId){
+		String strCommentOut="";
+		String strReadOnlyComment="";
+		if(isRestricted(strVarId)){
+//			try{ERestrictedSetupLoadableVars.valueOf(strVarId.substring(1));}catch(IllegalArgumentException e){
+//			if(isCommandPrefixVar(strVarId)){
+			if(strVarId.startsWith(""+CommandsHelperI.i().getRestrictedToken()+ReflexFillI.i().getPrefixCmdDefault())){
+				/**
+				 * TODO commands param values saved as vars? not following the right implementation? this shouldnt even exist right?
+				 * comment non loadable restricted variables, like the ones set by commands
+				 */
+				strCommentOut=getCommentPrefixStr();
+				strReadOnlyComment="(ReadOnly)";
+			}
+		}
+		
+		MiscI.i().fileAppendLine(getVarFile(strVarId), strCommentOut+varReportPrepare(strVarId)+strReadOnlyComment);
+	}
+	
+//	private boolean isCommandPrefixVar(String strVarId) {
+//		return strVarId.startsWith(""+CommandsHelperI.i().getRestrictedToken()+ReflexFillI.i().getPrefixCmdDefault());
+//	}
+
+	@Deprecated //this was preventing user changes to be loaded on next startup
+	private void _fileAppendVar(String strVarId){
 		String strCommentOut="";
 		String strReadOnlyComment="";
 		if(isRestricted(strVarId)){
@@ -3172,9 +3222,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	}
 	
 	public void update(float tpf) {
+		if(GlobalAppRefI.iGlobal().isApplicationExiting()){
+			GlobalAppRefI.i().stop();
+			return;
+		}
+		
 		if(!bConfigured)throw new NullPointerException("not configured yet");
 		if(!bInitialized)throw new NullPointerException("not initialized yet");
-		if(PrerequisitesNotMetException.isExitRequested())cmdExit();
+		if(PrerequisitesNotMetException.isExitRequested())cmdRequestExit();
 		
 		this.fTPF = tpf;
 		if(tdLetCpuRest.isActive() && !tdLetCpuRest.isReady(true))return;
@@ -3445,8 +3500,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			+" To set overrides use the user init config file.");
 		MiscI.i().fileAppendLine(flSetup, getCommentPrefix()
 			+" For command's values, the commands usage are required, the variable is just an info about their setup value.");
+//		MiscI.i().fileAppendLine(flSetup, getCommentPrefix()
+//			+" Some values will be read tho to provide restricted functionalities not accessible to users.");
 		MiscI.i().fileAppendLine(flSetup, getCommentPrefix()
-			+" Some values will be read tho to provide restricted functionalities not accessible to users.");
+				+"____________________________________");
 		
 		setupVars(true);
 	}
@@ -4104,6 +4161,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			return false;
 		}
 		
+		String strTypeCmd="Cmd";
 		String strType=strTypeCmd;
 		boolean bIsCmd=true;
 		boolean bShowInfo=true;
@@ -4383,4 +4441,19 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		dumpDevWarnEntry(str, aobj);
 		return true;
 	}
+
+	@Override
+	public String getUniqueId() {
+		return MiscI.i().prepareUniqueId(this);
+	}
+
+//	public boolean properExit(){
+//		if(GlobalAppRefI.iGlobal().isApplicationExiting()){
+//			return true;
+//		}
+//		
+//		GlobalAppRefI.iGlobal().setAppExiting();
+//		GlobalCommandsDelegatorI.i().cmdExit();
+//		return false;
+//	}
 }

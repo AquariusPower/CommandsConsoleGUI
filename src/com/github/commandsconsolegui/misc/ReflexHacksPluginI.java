@@ -73,6 +73,10 @@ public class ReflexHacksPluginI implements IConsoleCommandListener, IReflexFillC
 	private static ReflexHacksPluginI instance = new ReflexHacksPluginI();
 	public static ReflexHacksPluginI i(){return instance;}
 	
+	public ReflexHacksPluginI() {
+		SingleInstanceManagerI.i().add(this);
+	}
+	
 	public final BoolTogglerCmdField	btgAllowHacks = new BoolTogglerCmdField(this,false,
 		"Hacks allows for otherwise impossible features, but they may break if targeted classes are updated.").setCallNothingOnChange();
 
@@ -187,5 +191,10 @@ public class ReflexHacksPluginI implements IConsoleCommandListener, IReflexFillC
 	@Override
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		fld.set(this,value);
+	}
+
+	@Override
+	public String getUniqueId() {
+		return MiscI.i().prepareUniqueId(this);
 	}
 }

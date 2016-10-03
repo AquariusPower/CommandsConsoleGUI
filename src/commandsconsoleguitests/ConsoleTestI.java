@@ -49,12 +49,14 @@ import com.github.commandsconsolegui.misc.ConfigureManagerI;
 import com.github.commandsconsolegui.misc.ConfigureManagerI.IConfigure;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
 import com.github.commandsconsolegui.misc.HoldRestartable;
+import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexHacksPluginI;
+import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
 import com.jme3.app.SimpleApplication;
 import com.jme3.system.AppSettings;
 import com.simsilica.lemur.Button;
@@ -106,6 +108,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 	public ConsoleTestI() {
 		super();
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
+		SingleInstanceManagerI.i().add(this);
 	}
 	
 	
@@ -303,21 +306,19 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 	}
 
 	/**
-	 * PUT NOTHING HERE!
-	 * Override just to tell you this: put stuff at {@link #destroy()}
+	 * This is called when pressing ESC key
 	 */
 	@Override
 	public void stop(boolean waitFor) {
+		GlobalCommandsDelegatorI.i().cmdRequestExit();
 		super.stop(waitFor);
 	}
-	
 	/**
-	 * this is called when window is closed using close button too
+	 * this is directly called when window is closed using it's close button
 	 */
 	@Override
 	public void destroy() {
-		GlobalAppRefI.iGlobal().setAppExiting();
-//		if(!bStopping)stop();//		GlobalAppRefI.iGlobal().setAppExiting();
+		GlobalCommandsDelegatorI.i().cmdRequestExit();
 		super.destroy();
 	}
 
@@ -334,5 +335,10 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 	@Override
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		fld.set(this,value);
+	}
+	
+	@Override
+	public String getUniqueId() {
+		return MiscI.i().prepareUniqueId(this);
 	}
 }	

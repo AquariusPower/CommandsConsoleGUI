@@ -36,11 +36,14 @@ import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.misc.IDiscardableInstance;
 import com.github.commandsconsolegui.misc.IHasOwnerInstance;
+import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.jme.MiscJmeI;
 import com.jme3.math.Vector3f;
+import com.jogamp.nativewindow.util.Dimension;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.component.BorderLayout;
@@ -227,7 +230,7 @@ public class DialogMainContainer extends Container implements ISpatialValidator,
 	public DialogMainContainer(DialogStateAbs diagOwner, GuiLayout layout, String style) {
 		super(layout, style);
 		setOwner(diagOwner);
-		this.strMessageKey = diagOwner.getId()+" update logical state failed";
+		this.strMessageKey = diagOwner.getUniqueId()+" update logical state failed";
 	}
 	
 	private void setOwner(DialogStateAbs diagOwner) {
@@ -259,7 +262,7 @@ public class DialogMainContainer extends Container implements ISpatialValidator,
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField) {
 		ReflexFillCfg rfcfg = GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcvField);
-		rfcfg.setPrefixCustomId(diagOwner.getId());
+		rfcfg.setPrefixCustomId(diagOwner.getUniqueId());
 		return rfcfg;
 	}
 	
@@ -284,5 +287,10 @@ public class DialogMainContainer extends Container implements ISpatialValidator,
 	@Override
 	public DialogStateAbs getOwner() {
 		return diagOwner;
+	}
+
+	@Override
+	public String getUniqueId() {
+		return MiscI.i().prepareUniqueId(this)+":"+diagOwner.getUniqueId();
 	}
 }

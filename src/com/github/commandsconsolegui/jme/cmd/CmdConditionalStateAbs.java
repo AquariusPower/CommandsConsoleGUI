@@ -160,7 +160,7 @@ public abstract class CmdConditionalStateAbs<THIS extends CmdConditionalStateAbs
 			
 			if(rfcfg.isCommandToo() && bPrefixCmdWithIdToo){
 //				rfcfg.setPrefix(rfcfgBase.getPrefix()+getId());
-				rfcfg.setPrefixCustomId(getId());
+				rfcfg.setPrefixCustomId(getUniqueId());
 //				rfcfg.setFirstLetterUpperCase(true);
 			}
 		}else{

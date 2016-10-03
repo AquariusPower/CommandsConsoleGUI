@@ -31,6 +31,7 @@ import java.io.File;
 
 import com.github.commandsconsolegui.extras.SingleMandatoryAppInstanceI;
 import com.github.commandsconsolegui.globals.GlobalSingleMandatoryAppInstanceI;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppSettingsI;
 import com.github.commandsconsolegui.jme.lemur.console.SimpleConsolePlugin;
@@ -70,11 +71,16 @@ public class SimpleConsoleTest extends SimpleApplication {
 		test.start();
 	}
 
+	/** This is called when pressing ESC key */
+	@Override
+	public void stop(boolean waitFor) {
+		GlobalCommandsDelegatorI.i().cmdRequestExit();
+		super.stop(waitFor);
+	}
+	/** this is directly called when window is closed using it's close button */
 	@Override
 	public void destroy() {
-		// this is important to let some other threads know the application is exiting and behave properly
-		GlobalAppRefI.iGlobal().setAppExiting();
-		
+		GlobalCommandsDelegatorI.i().cmdRequestExit();
 		super.destroy();
 	}
 }	

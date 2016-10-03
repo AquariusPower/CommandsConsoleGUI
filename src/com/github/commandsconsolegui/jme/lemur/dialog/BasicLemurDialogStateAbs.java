@@ -131,7 +131,7 @@ public abstract class BasicLemurDialogStateAbs<T,THIS extends BasicLemurDialogSt
 	public DialogListEntryData<T> addEntryQuick(String strText){
 		DialogListEntryData<T> dle = new DialogListEntryData<T>(this);
 		if(strText==null){
-			strText=this.getId()+": Quick filler temp entry: "
+			strText=this.getUniqueId()+": Quick filler temp entry: "
 //				+MiscI.i().getDateTimeForFilename(true)
 //				+", "
 				+System.nanoTime();

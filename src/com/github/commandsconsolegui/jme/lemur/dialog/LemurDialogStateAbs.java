@@ -286,7 +286,7 @@ private Button	btnRestart;
 		//main top container
 //		setContainerMain(new ContainerMain(new BorderLayout(), getDiagStyle()).setDiagOwner(this));
 		setDialogMainContainer(new DialogMainContainer(this, new BorderLayout(), getDiagStyle()));
-		getDialogMainContainer().setName(getId()+"_Dialog");
+		getDialogMainContainer().setName(getUniqueId()+"_Dialog");
 		
 		Vector3f v3fAppWindowSize = MiscJmeI.i().getAppWindowSize();
 		v3fDiagSize = new Vector3f(v3fAppWindowSize);
@@ -322,7 +322,7 @@ private Button	btnRestart;
 		cntrCenterMain = new Container(new BorderLayout(), getDiagStyle());
 		MiscJmeI.i().setUserDataPSH(cntrCenterMain, this);
 		quaBkpMain = cntrCenterMain.getLocalRotation().clone();
-		cntrCenterMain.setName(getId()+"_CenterMain");
+		cntrCenterMain.setName(getUniqueId()+"_CenterMain");
 		getDialogMainContainer().addChild(cntrCenterMain, BorderLayout.Position.Center);
 		
 		// impossible layout indicator
@@ -347,7 +347,7 @@ private Button	btnRestart;
 	private void initSouthRegion() {
 		//////////////////////////////// SOUTH (typing/config)
 		setCntrSouth(new Container(new BorderLayout(), getDiagStyle()));
-		getSouthContainer().setName(getId()+"_SouthContainer");
+		getSouthContainer().setName(getUniqueId()+"_SouthContainer");
 		
 //		// configure an entry from the list
 //		cntrEntryCfg = new Container(new BorderLayout(), getStyle());
@@ -361,7 +361,7 @@ private Button	btnRestart;
 		
 		// mainly used as a list filter
 		setInputField(new TextField("",getDiagStyle()));
-		getInputField().setName(getId()+"_InputField");
+		getInputField().setName(getUniqueId()+"_InputField");
 		LemurFocusHelperStateI.i().addFocusChangeListener(getInputField());
 		getSouthContainer().addChild(getInputField(),BorderLayout.Position.South);
 		
@@ -380,7 +380,7 @@ private Button	btnRestart;
 			getCellRenderer(), 
 			getDiagStyle()));
 		selectionModel = getMainList().getSelectionModel();
-		getMainList().setName(getId()+"_EntriesList");
+		getMainList().setName(getUniqueId()+"_EntriesList");
 		getMainList().setSize(v3fEntryListSizeIni); //not preferred, so the input field can fit properly
 		//TODO multi was not implemented yet... lstbxVoucherListBox.getSelectionModel().setSelectionMode(SelectionMode.Multi);
 		cntrCenterMain.addChild(getMainList(), BorderLayout.Position.Center);
@@ -399,7 +399,7 @@ private Button	btnRestart;
 	private void initNorthRegion() {
 		///////////////////////// NORTH (title + info/help)
 		setContainerNorth(new Container(new BorderLayout(), getDiagStyle()));
-		getNorthContainer().setName(getId()+"_NorthContainer");
+		getNorthContainer().setName(getUniqueId()+"_NorthContainer");
 		
 		setNorthHeight(v3fDiagSize.y, true);
 //		/**
@@ -411,18 +411,18 @@ private Button	btnRestart;
 //		MiscLemurStateI.i().setSizeSafely(getNorthContainer(), v3fNorthSize, true);
 		
 		cntrTitleBox = new Container(new BorderLayout(), getDiagStyle());
-		cntrTitleBox.setName(getId()+"_TitleBox");
+		cntrTitleBox.setName(getUniqueId()+"_TitleBox");
 		
 		//title 
 		lblTitle = new Label(getTitle(),getDiagStyle());
-		lblTitle.setName(getId()+"_Title");
+		lblTitle.setName(getUniqueId()+"_Title");
 		ColorRGBA cLightGreen = new ColorRGBA(0.35f,1f,0.35f,1f);
 		lblTitle.setColor(cLightGreen); //TODO make it custom
 		
 		cntrTitleBox.addChild(lblTitle, BorderLayout.Position.Center);
 		
 		cntrTitleButtons = new Container(new SpringGridLayout(), getDiagStyle());
-		cntrTitleButtons.setName(getId()+"_TitleButtons");
+		cntrTitleButtons.setName(getUniqueId()+"_TitleButtons");
 		
 		//buttons 
 		btnRestart = new Button("[Restart]",getDiagStyle());
@@ -450,7 +450,7 @@ private Button	btnRestart;
 		
 		// simple info/help box
 		lblTextInfo = new Label("",getDiagStyle());
-		lblTextInfo.setName(getId()+"_TxtInfo");
+		lblTextInfo.setName(getUniqueId()+"_TxtInfo");
 		MiscJmeI.i().lineWrapDisableFor(lblTextInfo);
 		getNorthContainer().addChild(lblTextInfo, BorderLayout.Position.Center);
 		
@@ -793,7 +793,7 @@ private Button	btnRestart;
 			@Override
 			public Boolean call() {
 				if(!isEnabled()){
-					GlobalCommandsDelegatorI.i().dumpWarnEntry("not enabled: "+LemurDialogStateAbs.this.getId(), this, LemurDialogStateAbs.this);
+					GlobalCommandsDelegatorI.i().dumpWarnEntry("not enabled: "+LemurDialogStateAbs.this.getUniqueId(), this, LemurDialogStateAbs.this);
 					return true; //simple skipper
 				}
 				
@@ -1133,8 +1133,8 @@ private Button	btnRestart;
 		
 		if(DebugI.i().isKeyEnabled(EDebugKey.FillKeyValueHashmap)){
 			for(Button btn:abtnBorderList){
-				DebugI.i().putKeyValue(getId()+":"+btn.getName()+":size", btn.getSize());
-				DebugI.i().putKeyValue(getId()+":"+btn.getName()+":psize", btn.getPreferredSize());
+				DebugI.i().putKeyValue(getUniqueId()+":"+btn.getName()+":size", btn.getSize());
+				DebugI.i().putKeyValue(getUniqueId()+":"+btn.getName()+":psize", btn.getPreferredSize());
 			}
 		}
 		
@@ -1320,7 +1320,7 @@ private Button	btnRestart;
 	public ECmdReturnStatus execConsoleCommand(CommandsDelegator cc) {
 		boolean bCommandWorked = false;
 		
-		if(cc.checkCmdValidity(this,"showDialogKeyBinds"+getId(),null,"")){
+		if(cc.checkCmdValidity(this,"showDialogKeyBinds"+getUniqueId(),null,"")){
 //			cc.dumpSubEntry("ESC - close");
 //			cc.dumpSubEntry("Up/Down/PgUp/PgDn/Ctrl+Home|End - nav. list entry");
 //			cc.dumpSubEntry("Enter - accept selected choice at config dialog");
@@ -1357,7 +1357,7 @@ private Button	btnRestart;
 	
 	public THIS addModalDialog(LemurDialogStateAbs<T,?> diagModal){
 		diagModal.setDiagParent(this);
-		hmhrChildDiagModals.put(diagModal.getId(), new HoldRestartable(this,diagModal));
+		hmhrChildDiagModals.put(diagModal.getUniqueId(), new HoldRestartable(this,diagModal));
 		return getThis();
 	}
 	
@@ -1446,7 +1446,7 @@ private Button	btnRestart;
 			setSelectedEntryIndex(i);
 //			selectionModel.setSelection(i);
 //			dataSelectRequested=null;
-			cd().dumpDebugEntry(getId()+",SelectIndex="+i+","+dledSelectRequested.toString());
+			cd().dumpDebugEntry(getUniqueId()+",SelectIndex="+i+","+dledSelectRequested.toString());
 		}else{
 			throw new PrerequisitesNotMetException("data not present on the list", dledSelectRequested, getMainList());
 		}
@@ -1486,7 +1486,7 @@ private Button	btnRestart;
 //		DialogMouseCursorListenerI.i().clearLastButtonHoverIn();
 		
 //		iSel = selectionModel.getSelection();
-		cd().dumpDebugEntry(getId()+":"
+		cd().dumpDebugEntry(getUniqueId()+":"
 			+"SelectedEntry="+iSel+","
 			+"SliderValue="+MiscI.i().fmtFloat(getMainList().getSlider().getModel().getValue()));
 		return iSel;

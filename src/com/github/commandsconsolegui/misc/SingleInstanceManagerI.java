@@ -31,8 +31,6 @@ import java.util.HashMap;
 
 /**
  * 
- * TODO complete the other single instances with this methodology
- * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
@@ -40,24 +38,57 @@ public class SingleInstanceManagerI implements IManager<ISingleInstance>{
 	private static SingleInstanceManagerI instance = new SingleInstanceManagerI();
 	public static SingleInstanceManagerI i(){return instance;}
 	
-	HashMap<Class,StackTraceElement[]> hm = new HashMap<Class,StackTraceElement[]>();
+	HashMap<String,InstanceInfo> hm = new HashMap<String,InstanceInfo>();
 	ArrayList<ISingleInstance> aList = new ArrayList<ISingleInstance>();
 	
+	public static class InstanceInfo{
+		private StackTraceElement[] asteInstancedAt;
+//		private String strConcreteClassName;
+		private ISingleInstance siObject;
+		public String getConcreteClassName(){
+			return siObject.getClass().getName();
+		}
+	}
+	
 	/**
-	 * put on single instance constructors
+	 * Put on single instance constructors.
+	 * If some sub-class can have multiple instances, make it implement {@link IMultiInstanceOverride}
+	 * 
 	 * @param objNew
 	 * @return
 	 */
 	@Override
 	public boolean add(ISingleInstance objNew) {
-//		PrerequisitesNotMetException.assertNotAlreadyAdded(asiList, objNew);
-		StackTraceElement[] asteInstancedAt = hm.get(objNew.getClass());
-		if(asteInstancedAt!=null){
-			throw new PrerequisitesNotMetException("class already instanced", objNew.getClass(), objNew, asteInstancedAt);
-//			return false;
+		if(objNew instanceof IMultiInstanceOverride){
+			return false;
 		}
 		
-		hm.put(objNew.getClass(), Thread.currentThread().getStackTrace());
+		InstanceInfo ii = new InstanceInfo();
+//		ii.strConcreteClassName=objNew.getClass().getName();
+		ii.siObject=objNew;
+		ii.asteInstancedAt=Thread.currentThread().getStackTrace();
+		
+//		PrerequisitesNotMetException.assertNotAlreadyAdded(asiList, objNew);
+		InstanceInfo iiExisting = hm.get(ii.getConcreteClassName());
+		if(iiExisting!=null){
+			boolean bDiscarded=false;
+			if(iiExisting.siObject instanceof IDiscardableInstance){
+				IDiscardableInstance di = ((IDiscardableInstance)iiExisting.siObject);
+				if(di.isBeingDiscarded()){
+					hm.remove(ii.getConcreteClassName());
+					bDiscarded=true;
+				}
+			}
+			
+			if(!bDiscarded){
+				throw new PrerequisitesNotMetException(
+					"class already instanced, should be using "+IMultiInstanceOverride.class+"?", 
+					ii, iiExisting, iiExisting.getConcreteClassName(), iiExisting.asteInstancedAt);
+	//			return false;
+			}
+		}
+		
+		hm.put(ii.getConcreteClassName(), ii);
 		
 		return aList.add(objNew);
 	}

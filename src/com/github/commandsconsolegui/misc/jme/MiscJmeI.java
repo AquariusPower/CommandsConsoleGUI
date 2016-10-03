@@ -66,6 +66,7 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
+import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
 import com.jme3.asset.AssetNotFoundException;
 import com.jme3.asset.plugins.FileLocator;
 import com.jme3.export.Savable;
@@ -97,6 +98,10 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 //	private SimpleApplication	sapp;
 	private IHandleExceptions	ihe;
 	private boolean	bConfigured;
+	
+	public MiscJmeI() {
+		SingleInstanceManagerI.i().add(this);
+	}
 	
 	public static class CfgParm implements ICfgParm{
 //		IHandleExceptions ihe;
@@ -848,6 +853,11 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 	@Override
 	public boolean isConfigured() {
 		return bConfigured;
+	}
+
+	@Override
+	public String getUniqueId() {
+		return MiscI.i().prepareUniqueId(this);
 	}
 
 }

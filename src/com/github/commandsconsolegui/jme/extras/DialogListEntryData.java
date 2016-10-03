@@ -152,7 +152,7 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 	public DialogListEntryData(DialogStateAbs diagOwner) {
 //		this();
 //		this.strUniqueId = DialogListEntryData.strLastUniqueId = (MiscI.i().getNextUniqueId(strLastUniqueId));
-		this.strUniqueId = diagOwner.getNextUniqueId();
+		this.strUniqueId = diagOwner.getCreateNextEntryUniqueId();
 		setOwner(diagOwner);
 //		hrdiagOwner.setRef(diagOwner);
 //		this.diagOwner=diagOwner;
@@ -477,7 +477,7 @@ private RangedValueModel	modelSliderValue;
 		
 		if(hrdiagOwner!=null){
 //			MsgI.i().warn("inconsistent, only root one should have owner", this, hrdiagOwner);
-			MsgI.i().devInfo("cleaning child ("+getUId()+":"+getVisibleText()+") diagOwner ref ("+hrdiagOwner.getRef().getId()+"), only root one needs it", this, hrdiagOwner);
+			MsgI.i().devInfo("cleaning child ("+getUId()+":"+getVisibleText()+") diagOwner ref ("+hrdiagOwner.getRef().getUniqueId()+"), only root one needs it", this, hrdiagOwner);
 			hrdiagOwner=null;
 		}
 		

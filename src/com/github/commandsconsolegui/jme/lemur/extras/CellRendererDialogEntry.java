@@ -40,6 +40,7 @@ import com.github.commandsconsolegui.jme.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LmrDiagCS;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -79,6 +80,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 	private String	strStyle;
 	private LemurDialogStateAbs<T,?>	diagParent;
 //	private boolean	bOptionChoiceMode;
+	public String	strLastCellUId="0";
 	
 	public CellRendererDialogEntry(String strStyle, LemurDialogStateAbs<T,?> diag){//, boolean bOptionChoiceMode) {
 		this.strStyle=strStyle;
@@ -109,6 +111,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			public String s(){return this.toString();}
 		}
 		
+		public String	strUniqueId;
 		private Button	btnText;
 		private Button	btnTree;
 		private Slider sliderForValue;
@@ -231,54 +234,11 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		public CellDialogEntry(CellRendererDialogEntry<T> parentCellRenderer, DialogListEntryData<T> dledToSet){
 			super(new BorderLayout(), parentCellRenderer.strStyle);
 			
-//			/**
-//			 * all other can come here too, even ones related to each instance,
-//			 * just put them outside the static ones block.
-//			 */
-//			if(CellDialogEntry.btgNOTWORKINGBugFixGapForListBoxSelectorArea==null){
-//				/**
-//				 * Will be linked to the 1st instance of this class, 
-//				 * no problem as it will be a global.
-//				 */
-//				CellDialogEntry.btgNOTWORKINGBugFixGapForListBoxSelectorArea = 
-//					new BugFixBoolTogglerCmdField(this,false)
-//						.setCallerAssigned(new CallableX(this) {
-//							@Override
-//							public Boolean call() {
-//								/**
-//								 * param ex.: Geometry geomCursor = MiscI.i().getParamFromArray(Geometry.class, aobjCustomParams, 0);
-//								 */
-//								
-////								MiscI.i().assertSameClass(Container.class,clReturnType);
-//								Container cntr=null;
-////								if(btgNOTWORKINGBugFixGapForListBoxSelectorArea.b()){ //TODO the fix is not working anymore
-//									/**
-//									 * this requires that all childs (in this case buttons) have their style background
-//									 * color transparent (like alpha 0.5f) or the listbox selector will not be visible below them...
-//									 */
-//									// same layout as the cell container
-//									cntr = new Container(new BorderLayout(), assignedCellRenderer.strStyle);
-////									Vector3f v3fSize = new Vector3f(this.getPreferredSize());
-////									v3fSize.z=LemurMiscHelpersStateI.fPreferredThickness*2f;
-////									LemurMiscHelpersStateI.i().setGrantedSize(cntr, v3fSize, true);
-//									cntr.setName(btgNOTWORKINGBugFixGapForListBoxSelectorArea.getSimpleId()); //when mouse is over a cell, if the ListBox->selectorArea has the same world Z value of the button, it may be ordered before the button on the raycast collision results at PickEventSession.setCurrentHitTarget(ViewPort, Spatial, Vector2f, CollisionResult) line: 262	-> PickEventSession.cursorMoved(int, int) line: 482 
-//									addChild(cntr, Position.Center);
-////								}else{
-////									cntr = this;
-////								}
-//								
-//								this.setCallerReturnValue(cntr);
-////								objRet=cntr;
-//								
-//								return true;
-//							}
-//						});
-//			}
-			
 			this.setName(strPrefix+"MainContainer");
 			
 			this.assignedCellRenderer=parentCellRenderer;
 			MiscJmeI.i().setUserDataPSH(this, getDialogOwner());
+			strUniqueId=assignedCellRenderer.strLastCellUId=MiscI.i().getNextUniqueId(assignedCellRenderer.strLastCellUId);
 			
 			this.dled=dledToSet;
 			
@@ -573,6 +533,11 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			fld.set(this,value);
 		}
 
+		@Override
+		public String getUniqueId() {
+			return strUniqueId;
+		}
+
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -607,4 +572,11 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		fld.set(this,value);
 	}
+	
+	@Deprecated
+	@Override
+	public String getUniqueId() {
+		throw new UnsupportedOperationException("is there a point on implementing this?");
+	}
+	
 }

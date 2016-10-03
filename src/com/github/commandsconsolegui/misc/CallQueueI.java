@@ -57,6 +57,10 @@ public class CallQueueI implements IReflexFillCfg {
 	private static CallQueueI instance = new CallQueueI();
 	public static CallQueueI i(){return instance;}
 	
+	public CallQueueI() {
+		SingleInstanceManagerI.i().add(this);
+	}
+	
 	public static interface CallableWeak<V> extends Callable<V>{
 		/**
 		 * without exception thrown, the debug will stop in the exact place where the exception
@@ -185,7 +189,7 @@ public class CallQueueI implements IReflexFillCfg {
 		}
 		
 		@Override
-		public String getId() {
+		public String getUniqueId() {
 			if(strId!=null)return "CallerId="+strId;
 			return "Owner:"+getOwner();
 		}
@@ -336,7 +340,7 @@ public class CallQueueI implements IReflexFillCfg {
 					
 					if(bShowMsg){
 						GlobalCommandsDelegatorI.i().dumpDevWarnEntry(
-							"caller failed: "+caller.getId(), 
+							"caller failed: "+caller.getUniqueId(), 
 							caller, 
 							caller.getOwner(), 
 //							caller.getClass().getDeclaringClass(),
@@ -458,5 +462,10 @@ public class CallQueueI implements IReflexFillCfg {
 	@Override
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		fld.set(this,value);
+	}
+
+	@Override
+	public String getUniqueId() {
+		return MiscI.i().prepareUniqueId(this);
 	}
 }

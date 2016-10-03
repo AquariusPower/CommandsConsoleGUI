@@ -81,6 +81,17 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 //		public boolean isCodePrefixVariantEqualDefault();
 	}
 	
+	private String strPrefixCmdDefault="cmd";
+	private String strPrefixVarDefault="var";
+	
+	public String getPrefixCmdDefault() {
+		return strPrefixCmdDefault;
+	}
+	
+	public String getPrefixVarDefault() {
+		return strPrefixVarDefault;
+	}
+	
 	public static class ReflexFillCfg{
 		/**
 		 * these shall not be copied/cloned
@@ -99,8 +110,8 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		 * these can be copied/cloned
 		 */
 		private String	strCodingStyleFieldNamePrefix=null;
-		private String	strPrefixCmd="cmd";
-		private String	strPrefixVar="var";
+		private String	strPrefixCmd=ReflexFillI.i().getPrefixCmdDefault();
+		private String	strPrefixVar=ReflexFillI.i().getPrefixVarDefault();
 		private String	strPrefixCustomId="";
 		private String	strSuffix="";
 		private boolean bFirstLetterUpperCase = false;

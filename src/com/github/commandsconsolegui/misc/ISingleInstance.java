@@ -31,4 +31,4 @@ package com.github.commandsconsolegui.misc;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public interface ISingleInstance {}
+public interface ISingleInstance extends IUniqueId{}

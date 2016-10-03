@@ -42,7 +42,7 @@ import com.github.commandsconsolegui.misc.RetryOnFailure.IRetryListOwner;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class RetryOnFailure implements IReflexFillCfg,IHasOwnerInstance<IRetryListOwner>,IUniqueId{ //IDiscardableInstance
+public class RetryOnFailure implements IReflexFillCfg,IHasOwnerInstance<IRetryListOwner>{ //IDiscardableInstance
 	public static final class CompositeControl extends CompositeControlAbs<RetryOnFailure>{
 		private CompositeControl(RetryOnFailure casm){super(casm);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
@@ -63,7 +63,7 @@ public class RetryOnFailure implements IReflexFillCfg,IHasOwnerInstance<IRetryLi
 		 * at {@link RetryOnFailure}
 		 * @return
 		 */
-		String getId();
+		String getUniqueId();
 	}
 	
 	private long lStartMilis=0; // as this is only in case of failure, the 1st attempt will always be ready!
@@ -135,7 +135,7 @@ public class RetryOnFailure implements IReflexFillCfg,IHasOwnerInstance<IRetryLi
 		ReflexFillCfg rfcfg = GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 		if(rfcfg==null)rfcfg=new ReflexFillCfg(rfcv);
 //		rfcfg.setPrefixCustomId(cond.getId());
-		rfcfg.setPrefixCustomId(irlo.getId()+ReflexFillI.i().getCommandPartSeparator()+this.strId);
+		rfcfg.setPrefixCustomId(irlo.getUniqueId()+ReflexFillI.i().getCommandPartSeparator()+this.strId);
 		return rfcfg;
 	}
 

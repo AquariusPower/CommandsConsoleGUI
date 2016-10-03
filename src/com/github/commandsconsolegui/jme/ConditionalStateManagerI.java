@@ -213,8 +213,8 @@ public class ConditionalStateManagerI extends AbstractAppState implements IManag
 				if(strRequireId==null){
 					return (T)csa;
 				}else{
-					if(csa.getId()!=null){
-						if(csa.getId().equalsIgnoreCase(strRequireId)){
+					if(csa.getUniqueId()!=null){
+						if(csa.getUniqueId().equalsIgnoreCase(strRequireId)){
 							return (T)csa;
 						}
 					}

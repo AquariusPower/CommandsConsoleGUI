@@ -41,6 +41,9 @@ public class GlobalAppRefI extends GlobalHolderAbs<Application>{
 	
 	private boolean	bExiting=false;
 	
+	/**
+	 * this is important to let some other threads know the application is exiting and behave properly
+	 */
 	public void setAppExiting(){
 		System.err.println("Exiting... "+GlobalAppRefI.class.getName());
 //		Thread.dumpStack();

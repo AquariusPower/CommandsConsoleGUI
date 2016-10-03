@@ -33,9 +33,11 @@ import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.IManager;
+import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
+import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
 import com.github.commandsconsolegui.misc.WorkAroundI.BugFixBoolTogglerCmdField;
 
 /**
@@ -50,30 +52,11 @@ public class CellRendererManagerI implements IReflexFillCfg,IManager{
 	public final StringVarField svfTreeDepthToken = new StringVarField(this, " ", null);
 	public final BoolTogglerCmdField	btgShowTreeUId = new BoolTogglerCmdField(this,false).setCallNothingOnChange();
 	public final BugFixBoolTogglerCmdField btgNOTWORKINGBugFixGapForListBoxSelectorArea = new BugFixBoolTogglerCmdField(this,false);
-//		.setCallerAssigned(new CallableX(this) {
-//			@Override
-//			public Boolean call() {
-//				/**
-//				 * param ex.: Geometry geomCursor = MiscI.i().getParamFromArray(Geometry.class, aobjCustomParams, 0);
-//				 */
-//				
-//				Container cntr=null;
-//	//			if(btgNOTWORKINGBugFixGapForListBoxSelectorArea.b()){ //TODO the fix is not working anymore
-//					/**
-//					 * this requires that all childs (in this case buttons) have their style background
-//					 * color transparent (like alpha 0.5f) or the listbox selector will not be visible below them...
-//					 */
-//					// same layout as the cell container
-//					cntr = new Container(new BorderLayout(), assignedCellRenderer.strStyle);
-//					cntr.setName(btgNOTWORKINGBugFixGapForListBoxSelectorArea.getSimpleId()); //when mouse is over a cell, if the ListBox->selectorArea has the same world Z value of the button, it may be ordered before the button on the raycast collision results at PickEventSession.setCurrentHitTarget(ViewPort, Spatial, Vector2f, CollisionResult) line: 262	-> PickEventSession.cursorMoved(int, int) line: 482 
-//					addChild(cntr, Position.Center);
-//				
-//				this.setCallerReturnValue(cntr);
-//				
-//				return true;
-//			}
-//		});
-
+	
+	public CellRendererManagerI() {
+		SingleInstanceManagerI.i().add(this);
+	}
+	
 	@Override
 	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
@@ -99,5 +82,10 @@ public class CellRendererManagerI implements IReflexFillCfg,IManager{
 	@Override
 	public ArrayList getListCopy() {
 		throw new UnsupportedOperationException("method not implemented yet");
+	}
+
+	@Override
+	public String getUniqueId() {
+		return MiscI.i().prepareUniqueId(this);
 	}
 }

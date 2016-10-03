@@ -51,9 +51,11 @@ import com.github.commandsconsolegui.jme.lemur.MouseCursorListenerAbs;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI;
 import com.github.commandsconsolegui.misc.ConfigureManagerI;
 import com.github.commandsconsolegui.misc.ConfigureManagerI.IConfigure;
+import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
+import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
 import com.github.commandsconsolegui.misc.jme.MiscJmeI;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -74,7 +76,9 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
 	private boolean	bConfigured; 
 	
 	public SimpleConsolePlugin(Application app){
-  	if(app instanceof SimpleApplication){
+		SingleInstanceManagerI.i().add(this);
+		
+		if(app instanceof SimpleApplication){
   		GlobalSimpleAppRefI.iGlobal().set((SimpleApplication)app);
   	}else{
   		GlobalAppRefI.iGlobal().set(app);
@@ -225,5 +229,10 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
 	@Override
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		fld.set(this,value);
+	}
+
+	@Override
+	public String getUniqueId() {
+		return MiscI.i().prepareUniqueId(this);
 	}
 }	

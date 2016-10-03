@@ -121,12 +121,12 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 	}
 	
 	public static class AudioCfg implements IReflexFillCfg{
-		private String	strId;
+		private String	strUniqueId;
 		private StringVarField svfFile = new StringVarField(this,"","");
 		private FloatDoubleVarField fdvVolumeGain = new FloatDoubleVarField(this,1.0,"").setMin(0.0).setMax(1.0);
 		
 		public AudioCfg(String strUId) {
-			this.strId=strUId;
+			this.strUniqueId=strUId;
 		}
 		public String getFile(){return svfFile.getValueAsString();}
 		public void setFile(String strFile){this.svfFile.setObjectRawValue(strFile);}
@@ -135,7 +135,7 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
 			ReflexFillCfg rfcfg = GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 			if(rfcfg==null)rfcfg=new ReflexFillCfg(rfcv);
-			rfcfg.setPrefixCustomId(strId);
+			rfcfg.setPrefixCustomId(strUniqueId);
 			return rfcfg;
 		} 
 		@Override
@@ -145,6 +145,10 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 		@Override
 		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 			fld.set(this,value);
+		}
+		@Override
+		public String getUniqueId() {
+			return strUniqueId;
 		}
 	}
 	

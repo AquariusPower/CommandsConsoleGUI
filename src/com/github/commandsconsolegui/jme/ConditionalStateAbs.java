@@ -843,7 +843,8 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	/**
 	 * @return
 	 */
-	public String getId() {
+	@Override
+	public String getUniqueId() {
 		ConfigureManagerI.i().assertConfigured(this);
 		
 		if(strCaseInsensitiveId==null){

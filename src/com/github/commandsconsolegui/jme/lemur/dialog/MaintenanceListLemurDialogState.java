@@ -195,7 +195,7 @@ public class MaintenanceListLemurDialogState<T extends Command<Button>, THIS ext
 	protected void actionCustomAtEntry(DialogListEntryData<T> dledSelected) {
 		if(cfg.getDiagChoice()!=null){
 			super.actionCustomAtEntry(dledSelected);
-			openModalDialog(cfg.getDiagChoice().getId(), dledSelected, (T)cmdCfg);
+			openModalDialog(cfg.getDiagChoice().getUniqueId(), dledSelected, (T)cmdCfg);
 		}else{
 			AudioUII.i().playOnUserAction(AudioUII.EAudio.Failure);
 			GlobalCommandsDelegatorI.i().dumpDevWarnEntry("no choice dialog configured for "+this, dledSelected);
@@ -211,7 +211,7 @@ public class MaintenanceListLemurDialogState<T extends Command<Button>, THIS ext
 			if(dled.isParent()){
 //				CustomDialogGUIState.this.setDataToApplyModalChoice(data);
 				if(cfg.getDiagQuestion()!=null){
-					MaintenanceListLemurDialogState.this.openModalDialog(cfg.getDiagQuestion().getId(), dled, (T)this);
+					MaintenanceListLemurDialogState.this.openModalDialog(cfg.getDiagQuestion().getUniqueId(), dled, (T)this);
 					AudioUII.i().play(EAudio.Question);
 				}else{
 					AudioUII.i().playOnUserAction(AudioUII.EAudio.Failure);
