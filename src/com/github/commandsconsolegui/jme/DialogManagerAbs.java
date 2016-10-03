@@ -36,6 +36,7 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.jme.savablevalues.CompositeSavableAbs;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
+import com.github.commandsconsolegui.misc.IManager;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -50,7 +51,7 @@ import com.jme3.scene.Spatial;
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public abstract class DialogManagerAbs implements IReflexFillCfg{
+public abstract class DialogManagerAbs<T extends DialogStateAbs> implements IReflexFillCfg,IManager<T>{
 	public static final class CompositeControl extends CompositeControlAbs<DialogManagerAbs>{
 		private CompositeControl(DialogManagerAbs casm){super(casm);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
@@ -130,45 +131,6 @@ public abstract class DialogManagerAbs implements IReflexFillCfg{
 	
 	private ArrayList<DialogStateAbs> adiagList = new ArrayList<DialogStateAbs>();
 
-//	private boolean	bRequestSaveDialog;
-	public void addDialog(DialogStateAbs diag){
-		adiagList.add(diag);
-	}
-	public <T extends DialogStateAbs> ArrayList<T> getDialogListCopy(Class<T> clFilter) {
-		if(clFilter==null)clFilter=(Class<T>)DialogStateAbs.class;
-		ArrayList<T> adiag = new ArrayList<T>();
-		for(DialogStateAbs diag:adiagList){
-			if (clFilter.isInstance(diag)) {
-				adiag.add((T)diag);
-			}
-		}
-		return adiag;
-	}
-//	public <T extends BaseDialogStateAbs> ArrayList<DialogSavable> getDialogsSavableObjectListCopy(Class<T> clFilter){
-//		ArrayList<DialogSavable> asv = new ArrayList<DialogSavable>();
-//		for(BaseDialogStateAbs diag:getDialogListCopy(clFilter)){
-//			asv.add(diag.getSavable(ccSelf));
-//		}
-//		return asv;
-//	}
-	
-//	protected boolean isDialogSaveRequestedAndReset(BaseDialogStateAbs diag){
-//		return diag.isRequestSaveDialogAndReset(ccSelf);
-//	}
-	
-//	public void requestSaveDialog(BaseDialogStateAbs diag){
-//		//TODO log diag?
-//		this.bRequestSaveDialog=true;
-//	}
-//	
-//	public boolean isDialogSaveRequested(){
-//		return this.bRequestSaveDialog;
-//	}
-//	
-//	protected void resetDialogSaveRequest(){
-//		this.bRequestSaveDialog=false;
-//	}
-	
 	public void update(float tpf){
 	}
 	@Override
@@ -178,5 +140,24 @@ public abstract class DialogManagerAbs implements IReflexFillCfg{
 	@Override
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		fld.set(this,value);
+	}
+	
+	@Override
+	public boolean add(T objNew) {
+		return adiagList.add(objNew);
+	}
+	@Override
+	public ArrayList<T> getListCopy() {
+		return new ArrayList(adiagList);
+	}
+	public <S extends DialogStateAbs> ArrayList<S> getDialogListCopy(Class<S> clFilter) {
+		if(clFilter==null)clFilter=(Class<S>)DialogStateAbs.class;
+		ArrayList<S> adiag = new ArrayList<S>();
+		for(DialogStateAbs diag:adiagList){
+			if (clFilter.isInstance(diag)) {
+				adiag.add((S)diag);
+			}
+		}
+		return adiag;
 	}
 }

@@ -34,7 +34,7 @@ import java.util.ArrayList;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class HoldRestartableManagerI<T extends IRestartable> {
+public class HoldRestartableManagerI<T extends IRestartable> implements IManager<HoldRestartable<T>>{
 	private static HoldRestartableManagerI instance = new HoldRestartableManagerI();
 	public static HoldRestartableManagerI i(){return instance;}
 	
@@ -59,8 +59,15 @@ public class HoldRestartableManagerI<T extends IRestartable> {
 		}
 	}
 	
-	public void add(HoldRestartable<T> hr){
+	@Override
+	public boolean add(HoldRestartable<T> hr){
 		PrerequisitesNotMetException.assertNotAlreadyAdded(ahrList, hr, this);
-		ahrList.add(hr);
+		return ahrList.add(hr);
+	}
+	
+	@Deprecated
+	@Override
+	public ArrayList<HoldRestartable<T>> getListCopy() {
+		throw new UnsupportedOperationException("method not implemented yet");
 	}
 }

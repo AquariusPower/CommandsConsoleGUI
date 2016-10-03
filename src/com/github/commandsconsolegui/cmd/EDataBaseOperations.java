@@ -46,7 +46,7 @@ public enum EDataBaseOperations{
 	backup,
 	
 	;
-	public static String help(){
+	public static String help(){ //@STATIC_OK
 		String str = null;
 		for(EDataBaseOperations e:values()){
 			if(str!=null){
@@ -59,7 +59,7 @@ public enum EDataBaseOperations{
 		return "["+str+"] aliases and variables, plain text file";
 	}
 
-	public static ArrayList<String> getValuesAsArrayList() {
+	public static ArrayList<String> getValuesAsArrayList() { //@STATIC_OK
 		ArrayList<String> astr = new ArrayList<String>();
 		for(EDataBaseOperations e:values()){
 			astr.add(e.toString());

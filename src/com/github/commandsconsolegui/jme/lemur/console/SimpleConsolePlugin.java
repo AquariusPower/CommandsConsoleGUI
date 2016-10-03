@@ -34,7 +34,7 @@ import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegator;
 import com.github.commandsconsolegui.globals.GlobalMainThreadI;
 import com.github.commandsconsolegui.globals.GlobalOperationalSystemI;
 import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
-import com.github.commandsconsolegui.globals.GlobalSingleAppInstanceI;
+import com.github.commandsconsolegui.globals.GlobalSingleMandatoryAppInstanceI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
@@ -49,8 +49,8 @@ import com.github.commandsconsolegui.jme.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jme.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jme.lemur.MouseCursorListenerAbs;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI;
-import com.github.commandsconsolegui.misc.Configure;
-import com.github.commandsconsolegui.misc.Configure.IConfigure;
+import com.github.commandsconsolegui.misc.ConfigureManagerI;
+import com.github.commandsconsolegui.misc.ConfigureManagerI.IConfigure;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -100,6 +100,58 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
   public SimpleConsolePlugin configure(ICfgParm icfg) {
   	cfg = (CfgParm)icfg;
   	
+  	setGlobals();
+  	
+		/**
+		 * Configs:
+		 * 
+		 * Shall be simple enough to not require any exact order.
+		 * 
+		 * Anything more complex can be postponed (from withing the config itself)
+		 * with {@link CallQueueI}, or just put these things at initialization method.
+		 */
+  	if(!GlobalCommandsDelegatorI.i().isConfigured()){
+  		GlobalCommandsDelegatorI.i().configure();//ConsoleLemurStateI.i());
+  	}
+  	if(!LemurConsoleStateI.i().isConfigured()){
+			LemurConsoleStateI.i().configure(new LemurConsoleStateI.CfgParm(
+				null, KeyInput.KEY_F10));
+  	}
+  	
+  	if(!MiscJmeI.i().isConfigured()){
+//  		MiscJmeI.i().configure(GlobalCommandsDelegatorI.i());
+  		MiscJmeI.i().configure(new MiscJmeI.CfgParm());
+  	}
+		
+	//	CommandsBackgroundStateI.i().configure(new CommandsBackgroundStateI.CfgParm(GlobalConsoleGuiI.i()));
+  	if(!CommandsBackgroundStateI.i().isConfigured()){
+  		CommandsBackgroundStateI.i().configure(new CommandsBackgroundStateI.CfgParm());
+  	}
+		
+  	if(!FpsLimiterStateI.i().isConfigured()){
+  		FpsLimiterStateI.i().configure(new FpsLimiterStateI.CfgParm());
+  	}
+		
+  	if(!UngrabMouseStateI.i().isConfigured()){
+  		UngrabMouseStateI.i().configure(new UngrabMouseStateI.CfgParm(null,null));
+  	}
+		
+  	if(!AudioUII.i().isConfigured()){
+			AudioUII.i().configure(new AudioUII.CfgParm(
+				DialogMouseCursorListenerI.class,
+				MouseCursorListenerAbs.class, 
+				MouseEventControl.class,
+				KeyInterceptState.class));
+  	}
+		
+//		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
+	
+		bConfigured = true;
+		
+  	return this;
+  }
+  
+	protected void setGlobals() {
   	/**
   	 * every global can have its defaults here, or can be customized by you before here.
   	 */
@@ -131,45 +183,12 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
 			GlobalOperationalSystemI.iGlobal().set(new JMEOperationalSystem(
 				cfg.strApplicationBaseSaveDataPath, StorageFolderType.Internal));
   	}
-  	
-		/**
-		 * Configs:
-		 * 
-		 * Shall be simple enough to not require any exact order.
-		 * 
-		 * Anything more complex can be postponed (from withing the config itself)
-		 * with {@link CallQueueI}, or just put these things at initialization method.
-		 */
-		GlobalCommandsDelegatorI.i().configure();//ConsoleLemurStateI.i());
-		LemurConsoleStateI.i().configure(new LemurConsoleStateI.CfgParm(
-			null, KeyInput.KEY_F10));
-  	
-		MiscJmeI.i().configure(GlobalCommandsDelegatorI.i());
-		
-	//	CommandsBackgroundStateI.i().configure(new CommandsBackgroundStateI.CfgParm(GlobalConsoleGuiI.i()));
-		CommandsBackgroundStateI.i().configure(new CommandsBackgroundStateI.CfgParm());
-		
-		FpsLimiterStateI.i().configure(new FpsLimiterStateI.CfgParm());
-		
-		UngrabMouseStateI.i().configure(new UngrabMouseStateI.CfgParm(null,null));
-		
-		AudioUII.i().configure(new AudioUII.CfgParm(
-			DialogMouseCursorListenerI.class,
-			MouseCursorListenerAbs.class, 
-			MouseEventControl.class,
-			KeyInterceptState.class));
-		
-//		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
-	
-		bConfigured = true;
-		
-  	return this;
-  }
-  
+	}
+
 	public SimpleConsolePlugin initialize() {
-		Configure.assertConfigured(this);
-		if(GlobalSingleAppInstanceI.iGlobal().isSet()){
-			GlobalSingleAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);
+		ConfigureManagerI.i().assertConfigured(this);
+		if(GlobalSingleMandatoryAppInstanceI.iGlobal().isSet()){
+			GlobalSingleMandatoryAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);
 		}
 		GlobalMainThreadI.iGlobal().set(Thread.currentThread());
 		return this;

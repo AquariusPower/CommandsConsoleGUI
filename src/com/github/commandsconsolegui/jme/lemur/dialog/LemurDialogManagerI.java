@@ -30,12 +30,9 @@ package com.github.commandsconsolegui.jme.lemur.dialog;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.DialogManagerAbs;
-import com.github.commandsconsolegui.jme.savablevalues.CompositeSavableAbs;
-import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -60,7 +57,7 @@ import com.simsilica.lemur.style.Styles;
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public class LemurDialogManagerI extends DialogManagerAbs{
+public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends DialogManagerAbs<T>{
 	private static LemurDialogManagerI instance = new LemurDialogManagerI();
 	public static LemurDialogManagerI i(){return instance;}
 	

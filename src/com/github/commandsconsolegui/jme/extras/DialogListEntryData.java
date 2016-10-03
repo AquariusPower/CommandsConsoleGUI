@@ -35,6 +35,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import com.github.commandsconsolegui.globals.jme.GlobalDialogHelperI;
 import com.github.commandsconsolegui.jme.AudioUII;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData.SliderValueData.ESliderKey;
@@ -66,7 +67,7 @@ import com.simsilica.lemur.RangedValueModel;
  * @param <T> is the action class for buttons
  */
 public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogStateAbs>{ //IDiscardableInstance
-	private static String strLastUniqueId = "0";
+//	private static String strLastUniqueId = "0";
 	
 	private String	strUniqueId;
 	private HoldRestartable<DialogStateAbs> hrdiagOwner = null; //new HoldRestartable<DialogStateAbs>();
@@ -144,11 +145,14 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 	private String strText;
 //	T objRef;
 	
-	public DialogListEntryData() {
-		this.strUniqueId = DialogListEntryData.strLastUniqueId = (MiscI.i().getNextUniqueId(strLastUniqueId));
-	}
+//	public DialogListEntryData() {
+//		GlobalDialogHelperI.i().
+//		this.strUniqueId = DialogListEntryData.strLastUniqueId = (MiscI.i().getNextUniqueId(strLastUniqueId));
+//	}
 	public DialogListEntryData(DialogStateAbs diagOwner) {
-		this();
+//		this();
+//		this.strUniqueId = DialogListEntryData.strLastUniqueId = (MiscI.i().getNextUniqueId(strLastUniqueId));
+		this.strUniqueId = diagOwner.getNextUniqueId();
 		setOwner(diagOwner);
 //		hrdiagOwner.setRef(diagOwner);
 //		this.diagOwner=diagOwner;

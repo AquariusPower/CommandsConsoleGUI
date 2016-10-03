@@ -62,6 +62,9 @@ import javax.naming.directory.InvalidAttributeValueException;
  *
  */
 public class MiscI {
+	private static MiscI instance = new MiscI();
+	public static MiscI i(){return instance;}
+	
 //	public long lLastUniqueId = 0;
 	private IHandleExceptions	ihe = SimpleHandleExceptionsI.i();
 	private String	strLastUid = "0";
@@ -77,9 +80,6 @@ public class MiscI {
 //		this.sapp=sapp;
 		bConfigured=true;
 	}
-	
-	private static MiscI instance = new MiscI();
-	public static MiscI i(){return instance;}
 	
 	public Boolean parseBoolean(String strValue){
 		if(strValue.equalsIgnoreCase("true"	))return new Boolean(true);
@@ -287,6 +287,7 @@ public class MiscI {
 	 */
 	public String getNextUniqueId(String strLastId){
 		int iRadix=36;
+//		if(strLastId==null)strLastId="0";
 		BigInteger bi = new BigInteger(strLastId,iRadix);
 		bi=bi.add(new BigInteger("1"));
 		return bi.toString(iRadix);
@@ -518,7 +519,7 @@ public class MiscI {
 		return "  ";
 	}
 
-	public static final String	strValidCmdCharsRegex = "a-zA-Z0-9_"; // better not allow "-" as has other uses like negate number and commands functionalities
+	private String	strValidCmdCharsRegex = "a-zA-Z0-9_"; // better not allow "-" as has other uses like negate number and commands functionalities
 	public boolean isValidIdentifierCmdVarAliasFuncString(String strCmdPart) {
 		if(strCmdPart==null)return false;
 		//TODO match as "^["+strValidCmdCharsRegex+"]*$" (whole string)? necessary?
@@ -715,5 +716,9 @@ public class MiscI {
 			if(ste.getClassName().equals(cl.getName()))return true;
 		}
 		return false;
+	}
+
+	public String getValidCmdCharsRegex() {
+		return strValidCmdCharsRegex;
 	}
 }

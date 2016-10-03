@@ -35,8 +35,8 @@ import com.github.commandsconsolegui.cmd.CommandsHelperI;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
-import com.github.commandsconsolegui.extras.SingleAppInstanceManager;
-import com.github.commandsconsolegui.globals.GlobalSingleAppInstanceI;
+import com.github.commandsconsolegui.extras.SingleMandatoryAppInstanceI;
+import com.github.commandsconsolegui.globals.GlobalSingleMandatoryAppInstanceI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppSettingsI;
@@ -45,8 +45,8 @@ import com.github.commandsconsolegui.jme.lemur.console.SimpleConsolePlugin;
 import com.github.commandsconsolegui.jme.lemur.dialog.ChoiceLemurDialogState;
 import com.github.commandsconsolegui.jme.lemur.dialog.MaintenanceListLemurDialogState;
 import com.github.commandsconsolegui.jme.lemur.dialog.QuestionLemurDialogState;
-import com.github.commandsconsolegui.misc.Configure;
-import com.github.commandsconsolegui.misc.Configure.IConfigure;
+import com.github.commandsconsolegui.misc.ConfigureManagerI;
+import com.github.commandsconsolegui.misc.ConfigureManagerI.IConfigure;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
 import com.github.commandsconsolegui.misc.HoldRestartable;
 import com.github.commandsconsolegui.misc.MsgI;
@@ -159,7 +159,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 	 */
 	@Override
 	public void simpleInitApp() {
-		Configure.assertConfigured(this);
+		ConfigureManagerI.i().assertConfigured(this);
 		
 		MsgI.i().setEnableDebugMessages(true);
 		
@@ -233,8 +233,8 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		}
 		ConsoleTestI.i().setSettings(GlobalAppSettingsI.i());
 		
-		GlobalSingleAppInstanceI.iGlobal().set(new SingleAppInstanceManager());
-		GlobalSingleAppInstanceI.i().configureOptionalAtMainMethod();
+		GlobalSingleMandatoryAppInstanceI.iGlobal().set(new SingleMandatoryAppInstanceI());
+		GlobalSingleMandatoryAppInstanceI.i().configureOptionalAtMainMethod();
 		
 		ConsoleTestI.i().configure(new ConsoleTestI.CfgParm());
 		

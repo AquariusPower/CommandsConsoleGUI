@@ -38,40 +38,13 @@ import java.util.Comparator;
  *
  */
 public class ImportantMsgData {
-	String strMsgKey;
+	private String strMsgKey;
 //	long lKeyOcurrenceTimes=0;
-	Exception ex;
-	StackTraceElement[] asteExceptionHappenedAt;
-	DumpEntryData de;
-	Long lBufferedTimeNano;
-	Long lFirstOcurrenceCreationTimeNano;
-	
-//	/**
-//	 * for warnings
-//	 * @param str
-//	 * @param aste
-//	 */
-//	public ImportantMsg(String str, StackTraceElement[] aste) {
-//		this(str, null, aste);
-//	}
-//	/**
-//	 * for exceptions
-//	 * @param str
-//	 * @param ex
-//	 */
-//	public ImportantMsg(String str, Exception ex) {
-//		this(str, ex, ex.getStackTrace());
-//	}
-	
-//	public ImportantMsgData(String str, Exception ex, StackTraceElement[] aste) {
-//		this.strMsg=str;
-////		if(ex==null){
-////			ex=new Exception("(no real exception, just the stack trace)");
-////			ex.setStackTrace(aste);
-////		}
-//		this.ex=ex;
-//		this.aste=aste;
-//	}
+	private Exception ex;
+	private StackTraceElement[] asteExceptionHappenedAt;
+	private DumpEntryData de;
+	private Long lBufferedTimeNano;
+	private Long lFirstOcurrenceCreationTimeNano;
 	
 	public ImportantMsgData(DumpEntryData de) {
 //		this(de.getKey(),de.getException(),de.getException().getStackTrace());
@@ -130,5 +103,57 @@ public class ImportantMsgData {
 		this.lFirstOcurrenceCreationTimeNano=imsg.lFirstOcurrenceCreationTimeNano;
 		de.incKeyOcurrenceTimes();
 	}
+
+	public String getMsgKey() {
+		return strMsgKey;
+	}
+
+	public void setStrMsgKey(String strMsgKey) {
+		this.strMsgKey = strMsgKey;
+	}
+
+	public Exception getException() {
+		return ex;
+	}
+
+	public void setEx(Exception ex) {
+		this.ex = ex;
+	}
+
+	public StackTraceElement[] getExceptionHappenedAt() {
+		return asteExceptionHappenedAt;
+	}
+
+	public void setAsteExceptionHappenedAt(
+			StackTraceElement[] asteExceptionHappenedAt) {
+		this.asteExceptionHappenedAt = asteExceptionHappenedAt;
+	}
+
+	public DumpEntryData getDe() {
+		return de;
+	}
+
+	public void setDe(DumpEntryData de) {
+		this.de = de;
+	}
+
+	public Long getlBufferedTimeNano() {
+		return lBufferedTimeNano;
+	}
+
+	public void setlBufferedTimeNano(Long lBufferedTimeNano) {
+		this.lBufferedTimeNano = lBufferedTimeNano;
+	}
+
+	public Long getlFirstOcurrenceCreationTimeNano() {
+		return lFirstOcurrenceCreationTimeNano;
+	}
+
+	public void setlFirstOcurrenceCreationTimeNano(
+			Long lFirstOcurrenceCreationTimeNano) {
+		this.lFirstOcurrenceCreationTimeNano = lFirstOcurrenceCreationTimeNano;
+	}
+	
+	
 }
 

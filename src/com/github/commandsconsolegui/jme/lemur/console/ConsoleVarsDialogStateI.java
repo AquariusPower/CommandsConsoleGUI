@@ -182,7 +182,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	@Override
 	protected void updateList() {
 		//clearList()
-		ArrayList<VarCmdFieldAbs> avcf = VarCmdFieldManagerI.i().getListFullCopy();
+		ArrayList<VarCmdFieldAbs> avcf = VarCmdFieldManagerI.i().getListCopy();
 		
 		for(VarCmdFieldAbs vcfVarEntry:avcf){
 			if(vcfVarEntry.getUniqueVarId()==null)continue;

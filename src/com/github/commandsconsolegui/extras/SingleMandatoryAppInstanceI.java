@@ -29,13 +29,13 @@ package com.github.commandsconsolegui.extras;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 
 /**
  * Locks have a short timeout.
@@ -43,7 +43,7 @@ import com.github.commandsconsolegui.misc.MiscI;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class SingleAppInstanceManager { //implements IReflexFillCfg{
+public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 //	public final BoolTogglerCmd	btgSingleInstaceMode = new BoolTogglerCmd(this,true,BoolTogglerCmd.strTogglerCodePrefix,
 //		"better keep this enabled, other instances may conflict during files access.");
 	private boolean bDevModeExitIfThereIsANewerInstance;
@@ -68,13 +68,16 @@ public class SingleAppInstanceManager { //implements IReflexFillCfg{
 	private boolean	bUseFilesystemFileAttributeModifiedTime;
 	private boolean	bRecreateLockEveryLoop;
 	
-//	private static SingleAppInstanceI instance = new SingleAppInstanceI();
 //	public static SingleAppInstanceI i(){return instance;}
 	
-	public SingleAppInstanceManager() {
+	private static SingleMandatoryAppInstanceI instanceLock;
+	public SingleMandatoryAppInstanceI() {
+		PrerequisitesNotMetException.assertNotAlreadySet("single instance", instanceLock, this);
+		instanceLock = this;
+		
 		bDevModeExitIfThereIsANewerInstance = true; //true if in debug mode
 		lLockUpdateTargetDelayMilis=3000;
-		strPrefix=SingleAppInstanceManager.class.getSimpleName()+"-";
+		strPrefix=SingleMandatoryAppInstanceI.class.getSimpleName()+"-";
 		strSuffix=".lock";
 		strExitReasonOtherInstance = "";
 		setUseFilesystemFileAttributeModifiedTime(false);
@@ -85,7 +88,7 @@ public class SingleAppInstanceManager { //implements IReflexFillCfg{
 	 * @param b
 	 * @return 
 	 */
-	public SingleAppInstanceManager setUseFilesystemFileAttributeModifiedTime(boolean b) {
+	public SingleMandatoryAppInstanceI setUseFilesystemFileAttributeModifiedTime(boolean b) {
 		this.bUseFilesystemFileAttributeModifiedTime = b;
 		this.bRecreateLockEveryLoop = !this.bUseFilesystemFileAttributeModifiedTime;
 		return this;
@@ -547,7 +550,7 @@ public class SingleAppInstanceManager { //implements IReflexFillCfg{
 	
 	private void outputTD(String str){
 		System.err.println(""
-			+"["+SingleAppInstanceManager.class.getSimpleName()+"]"
+			+"["+SingleMandatoryAppInstanceI.class.getSimpleName()+"]"
 			+MiscI.i().getSimpleTime(true)
 			+": "
 			+str.replace("\n", "\n\t"));

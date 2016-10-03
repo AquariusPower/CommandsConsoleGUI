@@ -625,13 +625,13 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		v3fApplicationWindowSize = new Vector3f(
 				app().getContext().getSettings().getWidth(),
 				app().getContext().getSettings().getHeight(),
-				MiscLemurStateI.fPreferredThickness);
+				MiscLemurStateI.i().getPreferredThickness());
 		
 		iMargin=2;
 		v3fConsoleSize = new Vector3f(
 			v3fApplicationWindowSize.x -(iMargin*2),
 			(v3fApplicationWindowSize.y * fConsoleHeightPerc) -iMargin,
-			MiscLemurStateI.fPreferredThickness);
+			MiscLemurStateI.i().getPreferredThickness());
 	}
 	
 //	private float fPreferredThickness=10.0f;
@@ -1590,7 +1590,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 				 * complete for variables ids when retrieving variable value 
 				 */
 				String strRegexVarOpen=Pattern.quote(""+cd().getVariableExpandPrefix()+"{");
-				String strRegex=".*"+strRegexVarOpen+"["+MiscI.strValidCmdCharsRegex+CommandsHelperI.i().getRestrictedToken()+"]*$";
+				String strRegex=".*"+strRegexVarOpen+"["+MiscI.i().getValidCmdCharsRegex()+CommandsHelperI.i().getRestrictedToken()+"]*$";
 				if(strCompletedCmd.matches(strRegex)){
 					strCmd=strCompletedCmd.trim().substring(1); //removes command prefix
 					astrOptList=cd().getVariablesIdentifiers(true);

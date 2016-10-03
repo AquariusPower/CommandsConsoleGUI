@@ -40,7 +40,7 @@ public enum EType{
 	Var,
 	;
 	
-	public static EType forClass(Class clValue) throws UnsupportedOperationException{
+	public static EType forClass(Class clValue) throws UnsupportedOperationException{ //@STATIC_OK
 		EType e = null;
 		if(clValue==Float.class		|| clValue==float.class		){e=EType.Float;}else
 		if(clValue==Double.class	|| clValue==double.class	){e=EType.Double;}else

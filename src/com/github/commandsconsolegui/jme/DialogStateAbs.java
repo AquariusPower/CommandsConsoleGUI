@@ -371,7 +371,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	protected void initSuccess() {
 		super.initSuccess();
 		
-		GlobalDialogHelperI.i().addDialog(this);
+		GlobalDialogHelperI.i().add(this);
 	}
 	
 	protected boolean initGUI(){
@@ -1610,6 +1610,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	}
 
 	private boolean bRequestHitBorderToContinueDragging = false;
+	private String	strLastEntryUniqueId="0";
 	public void setRequestHitBorderToContinueDragging(boolean b) {
 		this.bRequestHitBorderToContinueDragging = b;
 	}
@@ -1633,6 +1634,10 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		adleCompleteEntriesList.addAll(diagDiscarding.getCompleteEntriesListCopy());
 		
 		return getThis();
+	}
+
+	public String getNextUniqueId() { //id is not index as entries can be removed will have gaps
+		return strLastEntryUniqueId = MiscI.i().getNextUniqueId(strLastEntryUniqueId);
 	}
 	
 //	public ArrayList<DialogListEntryData<DIAG>> getCompleteEntriesListCopy(){

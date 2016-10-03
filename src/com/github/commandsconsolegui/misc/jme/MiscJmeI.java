@@ -56,12 +56,13 @@ import com.github.commandsconsolegui.globals.jme.GlobalRootNodeI;
 import com.github.commandsconsolegui.jme.PseudoSavableHolder;
 import com.github.commandsconsolegui.jme.console.ConsoleStateAbs.TrueTypeFontFromSystem;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableWeak;
+import com.github.commandsconsolegui.misc.ConfigureManagerI.IConfigure;
 import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
-import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.MiscI.EStringMatchMode;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -89,7 +90,7 @@ import com.jme3.texture.Texture2D;
 /**
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public class MiscJmeI implements IReflexFillCfg{
+public class MiscJmeI implements IReflexFillCfg,IConfigure{
 	private static MiscJmeI instance = new MiscJmeI();
 	public static MiscJmeI i(){return instance;}
 
@@ -97,15 +98,28 @@ public class MiscJmeI implements IReflexFillCfg{
 	private IHandleExceptions	ihe;
 	private boolean	bConfigured;
 	
-	public void configure(IHandleExceptions ihe){
+	public static class CfgParm implements ICfgParm{
+//		IHandleExceptions ihe;
+//
+//		public CfgParm(IHandleExceptions ihe) {
+//			super();
+//			this.ihe = ihe;
+//		}
+//		
+	}
+	@Override
+	public IConfigure configure(ICfgParm icfg) {
+//	public void configure(IHandleExceptions ihe){
 		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-		this.ihe=ihe;
+//		this.ihe=ihe;
 //		this.sapp=GlobalSappRefI.i().get();
 		
 		cfgRenderingNode(GlobalRootNodeI.i(), true);
 		cfgRenderingNode(GlobalGUINodeI.i(), true);
 		
 		bConfigured=true;
+		
+		return this;
 	}
 	
 //	public Node getParentestFrom(Spatial sptStart){
@@ -830,4 +844,10 @@ public class MiscJmeI implements IReflexFillCfg{
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		fld.set(this,value);
 	}
+
+	@Override
+	public boolean isConfigured() {
+		return bConfigured;
+	}
+
 }

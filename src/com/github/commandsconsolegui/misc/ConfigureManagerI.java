@@ -27,13 +27,20 @@
 
 package com.github.commandsconsolegui.misc;
 
+import java.util.ArrayList;
+
+import com.github.commandsconsolegui.misc.ConfigureManagerI.IConfigure;
+
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 
  */
-public class Configure{
-	public static void assertConfigured(IConfigure icfg){
+public class ConfigureManagerI implements IManager<IConfigure>{
+	private static ConfigureManagerI instance = new ConfigureManagerI();
+	public static ConfigureManagerI i(){return instance;}
+	
+	public void assertConfigured(IConfigure icfg){
 		if(!icfg.isConfigured()){
 			throw new PrerequisitesNotMetException("not configured", icfg);
 		}
@@ -52,5 +59,15 @@ public class Configure{
 		
 		boolean isConfigured();
 		T configure(ICfgParm icfg);
+	}
+
+	@Override
+	public boolean add(IConfigure objNew) {
+		throw new UnsupportedOperationException("method not implemented yet");
+	}
+
+	@Override
+	public ArrayList<IConfigure> getListCopy() {
+		throw new UnsupportedOperationException("method not implemented yet");
 	}
 }

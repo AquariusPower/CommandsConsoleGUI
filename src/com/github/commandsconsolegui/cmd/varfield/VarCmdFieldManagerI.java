@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
+import com.github.commandsconsolegui.misc.IManager;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 
 /**
@@ -39,7 +40,7 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class VarCmdFieldManagerI {
+public class VarCmdFieldManagerI implements IManager<VarCmdFieldAbs>{
 	private static VarCmdFieldManagerI instance = new VarCmdFieldManagerI();
 	public static VarCmdFieldManagerI i(){return instance;}
 	
@@ -50,11 +51,16 @@ public class VarCmdFieldManagerI {
 	private ArrayList<VarCmdFieldAbs> avcfList = new ArrayList<VarCmdFieldAbs>();
 	public  final HashChangeHolder hvhVarList = new HashChangeHolder(avcfList);
 	
-	public ArrayList<VarCmdFieldAbs> getListFullCopy(){
+	@Override
+	public ArrayList<VarCmdFieldAbs> getListCopy() {
 		return new ArrayList<VarCmdFieldAbs>(avcfList);
 	}
+//	public ArrayList<VarCmdFieldAbs> getListFullCopy(){
+//		return new ArrayList<VarCmdFieldAbs>(avcfList);
+//	}
 	
-	public void add(VarCmdFieldAbs vcf){
+	@Override
+	public boolean add(VarCmdFieldAbs vcf){
 		PrerequisitesNotMetException.assertNotAlreadyAdded(avcfList,vcf,this);
 //		if(vcf==null){
 //			throw new PrerequisitesNotMetException("cant be null", this);
@@ -64,7 +70,7 @@ public class VarCmdFieldManagerI {
 //			throw new PrerequisitesNotMetException("already added", vcf, avcfList, this);
 //		}
 		
-		avcfList.add(vcf);
+		return avcfList.add(vcf);
 	}
 	
 	public <T extends VarCmdFieldAbs> ArrayList<T> getListCopy(Class<T> clFilter){
@@ -81,7 +87,7 @@ public class VarCmdFieldManagerI {
 	public ArrayList<VarCmdFieldAbs> removeAllWhoseOwnerIsBeingDiscarded(){
 		ArrayList<VarCmdFieldAbs> avcfDiscarded = new ArrayList<VarCmdFieldAbs>();
 		
-		for(VarCmdFieldAbs vcf:getListFullCopy()){
+		for(VarCmdFieldAbs vcf:getListCopy()){
 			if(DiscardableInstanceI.i().isBeingDiscardedRecursiveOwner(vcf.getOwner())){
 				discard(vcf);
 				avcfDiscarded.add(vcf);

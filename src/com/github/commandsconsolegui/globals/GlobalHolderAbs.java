@@ -38,12 +38,17 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
  * 	Easily access what can/should be globally accessible.
  * 	Allow some classes to be optionally instanced/enabled.
  * 	The same object may be present in more than one global, just being a sub-class, scope dependency range.
- * 	Avoid unnecessarily using with already globally accessible single instance class objects, tho:
- * - the main application class is important to be stored on a global to make it's uses depend
+ * 
+ * 	The main application class is important to be stored on a global to make it's uses depend
  * solely on it's superclass.
- * - Some classes that require a non empty constructor will fit well with this Global implementation.
- * - So, single instance classes that are globally accessible and will be instanced with an empty constructor,
- * have no need to use this.
+ * 	Some classes that require a non empty constructor will fit well with this Global implementation.
+ * 	So, single instance classes that are globally accessible and will be instanced with an empty constructor,
+ * have no real need to use this, but.. this helps on letting the class be extended easily, 
+ * therefore should be used everywhere! 
+ *
+ *	TODO make all single instances use this methodology to let them be extended easily
+ *	TODO classes ending with I should be intended to be accessible only thru the globals
+ *	TODO such classes shall also have a static field to optionally prevent new instances by assigning it's 1st, at it's constructor
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 

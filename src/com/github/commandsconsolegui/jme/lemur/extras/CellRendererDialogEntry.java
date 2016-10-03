@@ -72,8 +72,8 @@ import com.simsilica.lemur.list.CellRenderer;
  *
  */
 public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryData<T>>, IReflexFillCfg {
-	private static StringVarField svfTreeDepthToken;
-	private static BoolTogglerCmdField	btgShowTreeUId;
+//	private static StringVarField svfTreeDepthToken;
+//	private static BoolTogglerCmdField	btgShowTreeUId;
 	
 	private float fCellHeightMult = 1f;
 	private String	strStyle;
@@ -85,19 +85,19 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		this.diagParent=diag;
 //		this.bOptionChoiceMode=bOptionChoiceMode;
 		
-		/**
-		 * all other can come here too, even ones related to each instance,
-		 * just put them outside the static ones block.
-		 */
-		if(CellRendererDialogEntry.svfTreeDepthToken==null){
-			/**
-			 * Will be linked to the 1st instance of this class, 
-			 * no problem as it will be a global.
-			 */
-			CellRendererDialogEntry.svfTreeDepthToken = new StringVarField(this, " ", null);
-			CellRendererDialogEntry.btgShowTreeUId = new BoolTogglerCmdField(this,false).setCallNothingOnChange();
-//			CellRendererDialogEntry.btgHoverHighlight = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
-		}
+//		/**
+//		 * all other can come here too, even ones related to each instance,
+//		 * just put them outside the static ones block.
+//		 */
+//		if(CellRendererDialogEntry.svfTreeDepthToken==null){
+//			/**
+//			 * Will be linked to the 1st instance of this class, 
+//			 * no problem as it will be a global.
+//			 */
+//			CellRendererDialogEntry.svfTreeDepthToken = new StringVarField(this, " ", null);
+//			CellRendererDialogEntry.btgShowTreeUId = new BoolTogglerCmdField(this,false).setCallNothingOnChange();
+////			CellRendererDialogEntry.btgHoverHighlight = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
+//		}
 	}
 	
 	public static class CellDialogEntry<T> extends Container implements IReflexFillCfg {
@@ -108,8 +108,6 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			;
 			public String s(){return this.toString();}
 		}
-		
-		private static BugFixBoolTogglerCmdField btgNOTWORKINGBugFixGapForListBoxSelectorArea;
 		
 		private Button	btnText;
 		private Button	btnTree;
@@ -186,24 +184,24 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			
 			String strTreeAction = dled.isParent() ? 
 				(dled.isTreeExpanded()?"-":"+") :
-				assignedCellRenderer.svfTreeDepthToken.getValueAsString();
+				CellRendererManagerI.i().svfTreeDepthToken.getValueAsString();
 			
 			String strDepthSeparator = "/";
 			
 			// tree depth
 			DialogListEntryData<T> dledParent = dled.getParent();
 			while(dledParent!=null){
-				if(assignedCellRenderer.btgShowTreeUId.b()){
+				if(CellRendererManagerI.i().btgShowTreeUId.b()){
 					strDepth = dledParent.getUId()+strDepthSeparator
 						+strDepth;
 				}else{
-					strDepth = assignedCellRenderer.svfTreeDepthToken.getValueAsString()
+					strDepth = CellRendererManagerI.i().svfTreeDepthToken.getValueAsString()
 						+strDepth;
 				}
 				dledParent = dledParent.getParent();
 			}
 			
-			if(assignedCellRenderer.btgShowTreeUId.b()){
+			if(CellRendererManagerI.i().btgShowTreeUId.b()){
 				strDepth+=dled.getUId();//+":";
 			}
 			
@@ -233,49 +231,49 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		public CellDialogEntry(CellRendererDialogEntry<T> parentCellRenderer, DialogListEntryData<T> dledToSet){
 			super(new BorderLayout(), parentCellRenderer.strStyle);
 			
-			/**
-			 * all other can come here too, even ones related to each instance,
-			 * just put them outside the static ones block.
-			 */
-			if(CellDialogEntry.btgNOTWORKINGBugFixGapForListBoxSelectorArea==null){
-				/**
-				 * Will be linked to the 1st instance of this class, 
-				 * no problem as it will be a global.
-				 */
-				CellDialogEntry.btgNOTWORKINGBugFixGapForListBoxSelectorArea = 
-					new BugFixBoolTogglerCmdField(this,false)
-						.setCallerAssigned(new CallableX(this) {
-							@Override
-							public Boolean call() {
-								/**
-								 * param ex.: Geometry geomCursor = MiscI.i().getParamFromArray(Geometry.class, aobjCustomParams, 0);
-								 */
-								
-//								MiscI.i().assertSameClass(Container.class,clReturnType);
-								Container cntr=null;
-//								if(btgNOTWORKINGBugFixGapForListBoxSelectorArea.b()){ //TODO the fix is not working anymore
-									/**
-									 * this requires that all childs (in this case buttons) have their style background
-									 * color transparent (like alpha 0.5f) or the listbox selector will not be visible below them...
-									 */
-									// same layout as the cell container
-									cntr = new Container(new BorderLayout(), assignedCellRenderer.strStyle);
-//									Vector3f v3fSize = new Vector3f(this.getPreferredSize());
-//									v3fSize.z=LemurMiscHelpersStateI.fPreferredThickness*2f;
-//									LemurMiscHelpersStateI.i().setGrantedSize(cntr, v3fSize, true);
-									cntr.setName(btgNOTWORKINGBugFixGapForListBoxSelectorArea.getSimpleId()); //when mouse is over a cell, if the ListBox->selectorArea has the same world Z value of the button, it may be ordered before the button on the raycast collision results at PickEventSession.setCurrentHitTarget(ViewPort, Spatial, Vector2f, CollisionResult) line: 262	-> PickEventSession.cursorMoved(int, int) line: 482 
-									addChild(cntr, Position.Center);
-//								}else{
-//									cntr = this;
-//								}
-								
-								this.setCallerReturnValue(cntr);
-//								objRet=cntr;
-								
-								return true;
-							}
-						});
-			}
+//			/**
+//			 * all other can come here too, even ones related to each instance,
+//			 * just put them outside the static ones block.
+//			 */
+//			if(CellDialogEntry.btgNOTWORKINGBugFixGapForListBoxSelectorArea==null){
+//				/**
+//				 * Will be linked to the 1st instance of this class, 
+//				 * no problem as it will be a global.
+//				 */
+//				CellDialogEntry.btgNOTWORKINGBugFixGapForListBoxSelectorArea = 
+//					new BugFixBoolTogglerCmdField(this,false)
+//						.setCallerAssigned(new CallableX(this) {
+//							@Override
+//							public Boolean call() {
+//								/**
+//								 * param ex.: Geometry geomCursor = MiscI.i().getParamFromArray(Geometry.class, aobjCustomParams, 0);
+//								 */
+//								
+////								MiscI.i().assertSameClass(Container.class,clReturnType);
+//								Container cntr=null;
+////								if(btgNOTWORKINGBugFixGapForListBoxSelectorArea.b()){ //TODO the fix is not working anymore
+//									/**
+//									 * this requires that all childs (in this case buttons) have their style background
+//									 * color transparent (like alpha 0.5f) or the listbox selector will not be visible below them...
+//									 */
+//									// same layout as the cell container
+//									cntr = new Container(new BorderLayout(), assignedCellRenderer.strStyle);
+////									Vector3f v3fSize = new Vector3f(this.getPreferredSize());
+////									v3fSize.z=LemurMiscHelpersStateI.fPreferredThickness*2f;
+////									LemurMiscHelpersStateI.i().setGrantedSize(cntr, v3fSize, true);
+//									cntr.setName(btgNOTWORKINGBugFixGapForListBoxSelectorArea.getSimpleId()); //when mouse is over a cell, if the ListBox->selectorArea has the same world Z value of the button, it may be ordered before the button on the raycast collision results at PickEventSession.setCurrentHitTarget(ViewPort, Spatial, Vector2f, CollisionResult) line: 262	-> PickEventSession.cursorMoved(int, int) line: 482 
+//									addChild(cntr, Position.Center);
+////								}else{
+////									cntr = this;
+////								}
+//								
+//								this.setCallerReturnValue(cntr);
+////								objRet=cntr;
+//								
+//								return true;
+//							}
+//						});
+//			}
 			
 			this.setName(strPrefix+"MainContainer");
 			
@@ -286,7 +284,32 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			
 //			cntrBase = (Container)bugFix(0);
 //			cntrBase = bugFix(Container.class, this, btgNOTWORKINGBugFixGapForListBoxSelectorArea);
-			cntrBase = WorkAroundI.i().bugFix(btgNOTWORKINGBugFixGapForListBoxSelectorArea, Container.class, this);
+			if(!CellRendererManagerI.i().btgNOTWORKINGBugFixGapForListBoxSelectorArea.isCallerAssigned()){
+				CellRendererManagerI.i().btgNOTWORKINGBugFixGapForListBoxSelectorArea.setCallerAssigned(new CallableX(this) {
+					@Override
+					public Boolean call() {
+						/**
+						 * param ex.: Geometry geomCursor = MiscI.i().getParamFromArray(Geometry.class, aobjCustomParams, 0);
+						 */
+						
+						Container cntr=null;
+			//			if(btgNOTWORKINGBugFixGapForListBoxSelectorArea.b()){ //TODO the fix is not working anymore
+							/**
+							 * this requires that all childs (in this case buttons) have their style background
+							 * color transparent (like alpha 0.5f) or the listbox selector will not be visible below them...
+							 */
+							// same layout as the cell container
+							cntr = new Container(new BorderLayout(), assignedCellRenderer.strStyle);
+							cntr.setName(CellRendererManagerI.i().btgNOTWORKINGBugFixGapForListBoxSelectorArea.getSimpleId()); //when mouse is over a cell, if the ListBox->selectorArea has the same world Z value of the button, it may be ordered before the button on the raycast collision results at PickEventSession.setCurrentHitTarget(ViewPort, Spatial, Vector2f, CollisionResult) line: 262	-> PickEventSession.cursorMoved(int, int) line: 482 
+							addChild(cntr, Position.Center);
+						
+						this.setCallerReturnValue(cntr);
+						
+						return true;
+					}
+				});
+			}
+			cntrBase = WorkAroundI.i().bugFix(CellRendererManagerI.i().btgNOTWORKINGBugFixGapForListBoxSelectorArea, Container.class, this);
 			
 			btnTree = createButton("Tree", "?", cntrBase, Position.West);
 			btnTree.addCommands(ButtonAction.Click, ctt);

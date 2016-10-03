@@ -1073,13 +1073,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 				if(iIndex!=null && iIndex.intValue()!=i)continue;
 				
 				ImportantMsgData imsg = aimsg.get(i);
-				if(iIndex==null && !containsFilterString(imsg.strMsgKey,strFilter))continue;
+				if(iIndex==null && !containsFilterString(imsg.getMsgKey(),strFilter))continue;
 				
 //				dumpSubEntry(""+i+": "+imsg.strMsg);
-				if(iIndex!=null && (imsg.ex!=null||imsg.asteExceptionHappenedAt!=null)){
+				if(iIndex!=null && (imsg.getException()!=null||imsg.getExceptionHappenedAt()!=null)){
 					dumpExceptionEntry(imsg, iStackLimit==null?0:iStackLimit);
 				}else{
-					dumpSubEntry(""+i+": "+imsg.getDumpEntryData().getLineFinal(false)+" ST"+imsg.asteExceptionHappenedAt.hashCode()+"");
+					dumpSubEntry(""+i+": "+imsg.getDumpEntryData().getLineFinal(false)+" ST"+imsg.getExceptionHappenedAt().hashCode()+"");
 				}
 			}
 			dumpSubEntry("Total: "+aimsg.size());
@@ -1624,7 +1624,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 //	}
 	public final IntLongVarField ilvImportantMessagesBufferMaxSize = new IntLongVarField(this, 1000, "");
 	private void addImportantMsgToBuffer(String strMsgType,ImportantMsgData imsgNew){
-		String str="["+strMsgType+"] "+imsgNew.strMsgKey;
+		String str="["+strMsgType+"] "+imsgNew.getMsgKey();
 		for(ImportantMsgData imsg:aimBufferList.toArray(new ImportantMsgData[0])){
 			if(imsgNew.isIdenticalTo(imsg)){
 				imsgNew.applyFirstOcurrenceCreationTimeFrom(imsg);
@@ -1752,7 +1752,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		/**
 		 * it is coming from the message buffer, so will not read it...
 		 */
-		dumpExceptionEntryWork(null, imsg.ex, imsg.asteExceptionHappenedAt, iShowStackElementsCount, false, imsg.getDumpEntryData().getCustomObjects());
+		dumpExceptionEntryWork(null, imsg.getException(), imsg.getExceptionHappenedAt(), iShowStackElementsCount, false, imsg.getDumpEntryData().getCustomObjects());
 	}
 	public void dumpExceptionEntry(String strMsgOverride, Exception ex, Object... aobj){
 //		Exception exOverride=ex;
@@ -2770,7 +2770,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 //}
 		if(tmSrc==tmRestrictedVariables){
 			if(cvar.getRestrictedOwner()==null){
-				for(VarCmdFieldAbs vcfTmp:VarCmdFieldManagerI.i().getListFullCopy()){
+				for(VarCmdFieldAbs vcfTmp:VarCmdFieldManagerI.i().getListCopy()){
 					if(!vcfTmp.isVar())continue;
 					if(vcfTmp.getUniqueVarId().equals(cvar.getUniqueVarId())){
 						vcfTmp.setConsoleVarLink(ccSelf,cvar);

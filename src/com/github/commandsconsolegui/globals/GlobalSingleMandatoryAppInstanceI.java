@@ -27,7 +27,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.github.commandsconsolegui.globals;
 
-import com.github.commandsconsolegui.extras.SingleAppInstanceManager;
+import com.github.commandsconsolegui.extras.SingleMandatoryAppInstanceI;
 
 
 /**
@@ -35,8 +35,8 @@ import com.github.commandsconsolegui.extras.SingleAppInstanceManager;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class GlobalSingleAppInstanceI extends GlobalHolderAbs<SingleAppInstanceManager>{
-	private static GlobalSingleAppInstanceI instance = new GlobalSingleAppInstanceI();
-	public static GlobalSingleAppInstanceI iGlobal(){return instance;}
-	public static SingleAppInstanceManager i(){return iGlobal().get();}
+public class GlobalSingleMandatoryAppInstanceI extends GlobalHolderAbs<SingleMandatoryAppInstanceI>{
+	private static GlobalSingleMandatoryAppInstanceI instance = new GlobalSingleMandatoryAppInstanceI();
+	public static GlobalSingleMandatoryAppInstanceI iGlobal(){return instance;}
+	public static SingleMandatoryAppInstanceI i(){return iGlobal().get();}
 }

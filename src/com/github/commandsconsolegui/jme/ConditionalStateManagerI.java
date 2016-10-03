@@ -35,8 +35,8 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
-import com.github.commandsconsolegui.misc.HoldRestartable;
 import com.github.commandsconsolegui.misc.HoldRestartableManagerI;
+import com.github.commandsconsolegui.misc.IManager;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
@@ -48,7 +48,7 @@ import com.jme3.app.state.AbstractAppState;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class ConditionalStateManagerI extends AbstractAppState {
+public class ConditionalStateManagerI extends AbstractAppState implements IManager<ConditionalStateAbs>{
 	private static ConditionalStateManagerI instance = new ConditionalStateManagerI();
 	public static ConditionalStateManagerI i(){return instance;}
 	
@@ -73,10 +73,6 @@ public class ConditionalStateManagerI extends AbstractAppState {
 	
 	public boolean isAttached(ConditionalStateAbs cas){
 		return aCondStateList.contains(cas);
-	}
-	
-	public ArrayList<ConditionalStateAbs> getListClone(){
-		return new ArrayList<ConditionalStateAbs>(aCondStateList);
 	}
 	
 	@Override
@@ -232,5 +228,14 @@ public class ConditionalStateManagerI extends AbstractAppState {
 	public boolean isConfigured() {
 		return bConfigured;
 	}
+
+	@Override
+	public boolean add(ConditionalStateAbs objNew) {
+		throw new UnsupportedOperationException("use attach()");
+	}
 	
+	@Override
+	public ArrayList<ConditionalStateAbs> getListCopy() {
+		return new ArrayList<ConditionalStateAbs>(aCondStateList);
+	}
 }

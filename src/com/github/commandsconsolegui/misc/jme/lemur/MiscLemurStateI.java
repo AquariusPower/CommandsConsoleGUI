@@ -919,10 +919,14 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 	}
 	
 //	public static final float fPreferredThickness = 5f; //thickness z=5f to distinguish what was set by this library
-	public static final float fPreferredThickness = 1f; //thickness z=1f to match lemur one and do not mess with its calculations, TODO try to collect it from lemur...
+	public final float fPreferredThickness = 1f; //thickness z=1f to match lemur one and do not mess with its calculations, TODO try to collect it from lemur...
 //	Vector3f v3fMinSize=new Vector3f(10f,10f,fPreferredThickness); 
 	Vector3f v3fMinSize=new Vector3f(1f,1f,fPreferredThickness); //minimum is 1x1 dot!!!! 
-
+	
+	public float getPreferredThickness() {
+		return fPreferredThickness;
+	}
+	
 	private boolean	bAllowMinSizeCheckAndFix = false; //MUST BE INITIALLY FALSE!
 	
 	/**

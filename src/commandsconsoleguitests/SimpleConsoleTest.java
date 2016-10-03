@@ -29,8 +29,8 @@ package commandsconsoleguitests;
 
 import java.io.File;
 
-import com.github.commandsconsolegui.extras.SingleAppInstanceManager;
-import com.github.commandsconsolegui.globals.GlobalSingleAppInstanceI;
+import com.github.commandsconsolegui.extras.SingleMandatoryAppInstanceI;
+import com.github.commandsconsolegui.globals.GlobalSingleMandatoryAppInstanceI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppSettingsI;
 import com.github.commandsconsolegui.jme.lemur.console.SimpleConsolePlugin;
@@ -54,8 +54,8 @@ public class SimpleConsoleTest extends SimpleApplication {
 	
 	public static void main( String... args ) {
 		// if you have your own single instance code, you can safely remove these 2 lines below
-		GlobalSingleAppInstanceI.iGlobal().set(new SingleAppInstanceManager());
-		GlobalSingleAppInstanceI.i().configureOptionalAtMainMethod();
+		GlobalSingleMandatoryAppInstanceI.iGlobal().set(new SingleMandatoryAppInstanceI());
+		GlobalSingleMandatoryAppInstanceI.i().configureOptionalAtMainMethod();
 		
 		SimpleConsoleTest test = new SimpleConsoleTest();
 		

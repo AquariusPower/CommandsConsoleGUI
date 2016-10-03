@@ -40,8 +40,8 @@ import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
-import com.github.commandsconsolegui.misc.Configure;
-import com.github.commandsconsolegui.misc.Configure.IConfigure;
+import com.github.commandsconsolegui.misc.ConfigureManagerI;
+import com.github.commandsconsolegui.misc.ConfigureManagerI.IConfigure;
 import com.github.commandsconsolegui.misc.HoldRestartable;
 import com.github.commandsconsolegui.misc.IRestartable;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -513,7 +513,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	 */
 	public boolean doItAllProperly(ConditionalStateManagerI.CompositeControl cc, float tpf) {
 		cc.assertSelfNotNull();
-		Configure.assertConfigured(this);
+		ConfigureManagerI.i().assertConfigured(this);
 		
 		updateLastMainTopCoreUpdateTimeMilis();
 //		assertIsPreInitialized();
@@ -842,7 +842,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	 * @return
 	 */
 	public String getId() {
-		Configure.assertConfigured(this);
+		ConfigureManagerI.i().assertConfigured(this);
 		
 		if(strCaseInsensitiveId==null){
 			throw new PrerequisitesNotMetException("id cant be null", 

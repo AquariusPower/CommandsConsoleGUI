@@ -84,11 +84,13 @@ import com.simsilica.lemur.style.Styles;
  *
  */
 public class LemurConsoleStateI<T extends Command<Button>> extends ConsoleStateAbs<T,LemurConsoleStateI<T>> {
-	private static LemurConsoleStateI instance=null;//new ConsoleLemurStateI();
-	public static LemurConsoleStateI i(){
-		if(instance==null)instance=new LemurConsoleStateI();
-		return instance;
-	}
+	private static LemurConsoleStateI instance=new LemurConsoleStateI();
+	public static LemurConsoleStateI i(){return instance;}
+//	private static LemurConsoleStateI instance=null;//new ConsoleLemurStateI();
+//	public static LemurConsoleStateI i(){
+//		if(instance==null)instance=new LemurConsoleStateI();
+//		return instance;
+//	}
 	
 	public static final class CompositeControl extends CompositeControlAbs<LemurConsoleStateI>{
 		private CompositeControl(LemurConsoleStateI casm){super(casm);};
