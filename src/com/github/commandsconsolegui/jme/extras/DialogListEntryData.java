@@ -433,7 +433,7 @@ private RangedValueModel	modelSliderValue;
 			}
 		}
 		
-		hrdiagOwner.getRef().requestRefreshUpdateList();
+		getOwner().requestRefreshUpdateList();
 //		diagOwner.requestRefreshUpdateList();
 //		cell.assignedCellRenderer.diagParent.requestRefreshList();
 		

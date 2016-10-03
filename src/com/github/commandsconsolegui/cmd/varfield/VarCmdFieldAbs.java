@@ -27,8 +27,6 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import java.util.ArrayList;
-
 import com.github.commandsconsolegui.cmd.CommandData;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.ConsoleVariable;
@@ -39,9 +37,6 @@ import com.github.commandsconsolegui.misc.CallQueueI.CallerInfo;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
-import com.github.commandsconsolegui.misc.DiscardableInstanceI;
-import com.github.commandsconsolegui.misc.HashChangeHolder;
-import com.github.commandsconsolegui.misc.IHasOwnerInstance;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
@@ -49,7 +44,13 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 
 /**
- * TODO migrate most things possible to here
+ * Do NOT put var cmds to be saved as JME j3o.
+ * These are console variables to be used/saved only at console init file.
+ * 
+ * Objects instances should not have console variables unless they are unique: 
+ * one single instance for each concrete class.
+ *
+ * 
  *
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 

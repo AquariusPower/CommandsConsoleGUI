@@ -47,6 +47,7 @@ import com.github.commandsconsolegui.misc.IRestartable;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.Request;
 import com.github.commandsconsolegui.misc.RetryOnFailure;
@@ -84,6 +85,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	public ConditionalStateAbs(){
 		super();
 		
+		SingleInstanceManagerI.i().add(this);
 //		MiscI.i().assertFieldsHaveDefaultValue(this);
 		
 		asteDbgInstance = Thread.currentThread().getStackTrace();

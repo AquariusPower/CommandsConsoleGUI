@@ -28,9 +28,13 @@
 package com.github.commandsconsolegui.jme.savablevalues;
 
 import java.io.IOException;
+import java.nio.channels.UnsupportedAddressTypeException;
 
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.IHasOwnerInstance;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.jme.SavableHelperI;
 import com.github.commandsconsolegui.misc.jme.SavableHelperI.ISavableFieldAccess;
 import com.github.commandsconsolegui.misc.jme.SavableHelperI.SaveSkipper;
@@ -43,6 +47,8 @@ import com.jme3.export.JmeImporter;
  * float fHeightDefault=10,fHeight=fHeightDefault; 
  * 
  * if default is not declared, current value will always be saved, or used as default when reading.
+ * 
+ * 
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
@@ -137,4 +143,17 @@ public abstract class CompositeSavableAbs<OWNER,THIS extends CompositeSavableAbs
 //	public boolean isBeingDiscarded(){
 //		return DiscardableInstanceI.i().isSelfOrRecursiveOwnerBeingDiscarded(getOwner());
 //	}
+	
+	/**
+	 * 
+	 * TODO create a command to access savable fields of classes using this composite savable, so there will have no direct access like vars but they can still be accessible
+	 * 
+	 * @param rfcvField
+	 * @return
+	 */
+	@Deprecated
+	public final ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField){
+		throw new PrerequisitesNotMetException("");
+	}
+	
 }

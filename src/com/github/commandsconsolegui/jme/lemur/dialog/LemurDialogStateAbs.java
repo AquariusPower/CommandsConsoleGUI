@@ -458,7 +458,8 @@ private Button	btnRestart;
 		btnResizeInfoAndList=prepareResizeBorder(btnResizeInfoAndList,null);
 		MiscLemurStateI.i().setSizeSafely(btnResizeInfoAndList, 1, 1, true);
 		getNorthContainer().addChild(btnResizeInfoAndList, BorderLayout.Position.South);
-		setBordersThickness(getCompositeSavable(LmrDiagCS.class).ilvBorderThickness.intValue());
+//		setBordersThickness(getCompositeSavable(LmrDiagCS.class).ilvBorderThickness.intValue());
+		setBordersThickness(LemurDialogManagerI.i().ilvBorderThickness.intValue());
 		
 		cntrCenterMain.addChild(getNorthContainer(), BorderLayout.Position.North);
 	}
@@ -499,7 +500,8 @@ private Button	btnRestart;
 		btnResizeEast		= prepareResizeBorder(btnResizeEast	, BorderLayout.Position.East);
 		btnResizeWest		= prepareResizeBorder(btnResizeWest	, BorderLayout.Position.West);
 		
-		setBordersThickness(getCompositeSavable(LmrDiagCS.class).ilvBorderThickness.intValue());
+//		setBordersThickness(getCompositeSavable(LmrDiagCS.class).ilvBorderThickness.intValue());
+		setBordersThickness(LemurDialogManagerI.i().ilvBorderThickness.intValue());
 //		getCompositeSavable(LemurDialogCS.class).ilvBorderThickness.callerAssignedRunNow();
 		
 //		if(bAppyBorderSize){
@@ -829,30 +831,30 @@ private Button	btnRestart;
 		public LmrDiagCS() {super();}//required by savable
 		public LmrDiagCS(LemurDialogStateAbs owner) {super(owner);}
 		
-		/**
-		 * This console variable will be saved at console cfg file and also with the dialog JME savable. 
-		 */
-		private IntLongVarField ilvBorderThickness;
+//		/**
+//		 * This console variable will be saved at console cfg file and also with the dialog JME savable. 
+//		 */
+//		private IntLongVarField ilvBorderThickness;
 		
 		@Override
 		protected void initialize(){
 			super.initialize();
 			
-			IReflexFillCfg irfcfgOwner = isThisInstanceALoadedTmp() ? null : this;
-			ilvBorderThickness = new IntLongVarField(irfcfgOwner, 3, "")
-				.setMinMax(1L, 20L)
-				.setCallerAssigned(new CallableX(this,100) {
-					@Override
-					public Boolean call() {
-						if(LmrDiagCS.this.isThisInstanceALoadedTmp())return true; //skipper
-						
-						LemurDialogStateAbs diag = LmrDiagCS.this.getOwner();
-						if(diag==null)return false; //to retry until the dialog is found
-						
-						diag.setBordersThickness(ilvBorderThickness.getInt());
-						return true;
-					}
-				});
+//			IReflexFillCfg irfcfgOwner = isThisInstanceALoadedTmp() ? null : this;
+//			ilvBorderThickness = new IntLongVarField(irfcfgOwner, 3, "")
+//				.setMinMax(1L, 20L)
+//				.setCallerAssigned(new CallableX(this,100) {
+//					@Override
+//					public Boolean call() {
+//						if(LmrDiagCS.this.isThisInstanceALoadedTmp())return true; //skipper
+//						
+//						LemurDialogStateAbs diag = LmrDiagCS.this.getOwner();
+//						if(diag==null)return false; //to retry until the dialog is found
+//						
+//						diag.setBordersThickness(ilvBorderThickness.getInt());
+//						return true;
+//					}
+//				});
 			
 		}
 		

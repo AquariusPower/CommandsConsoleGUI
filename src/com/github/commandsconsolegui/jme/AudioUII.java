@@ -44,6 +44,7 @@ import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalRootNodeI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;

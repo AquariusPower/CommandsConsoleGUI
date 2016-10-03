@@ -50,7 +50,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	 * field class type.
 	 *
 	 */
-	public static interface IReflexFillCfg extends IReflexFieldSafeAccess{
+	public static interface IReflexFillCfg extends IReflexFieldSafeAccess,ISingleInstance{
 		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField);
 	}
 	

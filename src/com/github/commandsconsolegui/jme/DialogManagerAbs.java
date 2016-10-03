@@ -70,19 +70,20 @@ public abstract class DialogManagerAbs<T extends DialogStateAbs> implements IRef
 	protected abstract Vector3f getSizeCopyFrom(Spatial spt);
 	protected abstract void setTextAt(Spatial spt,String str);
 	
-	public static class DiagMgrCS<T extends DialogManagerAbs> extends CompositeSavableAbs<T,DiagMgrCS<T>> {
-		public DiagMgrCS() {super();}//required by savable
-		public DiagMgrCS(T owner) {super(owner);}
-		@Override
-		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
-			return fld.get(this);
-		}
-		@Override
-		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
-			fld.set(this,value);
-		}
-		@Override public DiagMgrCS<T> getThis() { return this; }
-	}
+//	public static class DiagMgrCS<T extends DialogManagerAbs> extends CompositeSavableAbs<T,DiagMgrCS<T>> {
+//		public DiagMgrCS() {super();}//required by savable
+//		public DiagMgrCS(T owner) {super(owner);}
+//		@Override
+//		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+//			return fld.get(this);
+//		}
+//		@Override
+//		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+//			fld.set(this,value);
+//		}
+//		@Override public DiagMgrCS<T> getThis() { return this; }
+//	}
+//	DiagMgrCS dmcs;
 	
 	public void prepareStyle() {
 		fontConsoleDefault = GlobalAppRefI.i().getAssetManager().loadFont("Interface/Fonts/Console.fnt");
@@ -146,10 +147,14 @@ public abstract class DialogManagerAbs<T extends DialogStateAbs> implements IRef
 	public boolean add(T objNew) {
 		return adiagList.add(objNew);
 	}
+	
+	@Deprecated
 	@Override
 	public ArrayList<T> getListCopy() {
-		return new ArrayList(adiagList);
+		//return new ArrayList(adiagList);
+		throw new UnsupportedOperationException("UNSAFE! DO NOT IMPLEMENT! use the other with filter instead!");
 	}
+	
 	public <S extends DialogStateAbs> ArrayList<S> getDialogListCopy(Class<S> clFilter) {
 		if(clFilter==null)clFilter=(Class<S>)DialogStateAbs.class;
 		ArrayList<S> adiag = new ArrayList<S>();

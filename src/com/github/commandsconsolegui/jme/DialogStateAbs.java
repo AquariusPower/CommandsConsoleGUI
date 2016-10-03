@@ -1324,7 +1324,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //		return b;
 //	}
 	
-	public static class DiagCS<T extends DialogStateAbs> extends CompositeSavableAbs<T,DiagCS<T>> implements ISavableFieldAccess,IReflexFillCfg{
+	public static class DiagCS<T extends DialogStateAbs> extends CompositeSavableAbs<T,DiagCS<T>> {//implements IReflexFillCfg{
 		public DiagCS(){super();}; //required by savable
 		@Override public DiagCS getThis() {return this;}
 		
@@ -1421,16 +1421,12 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		}
 		
 //		@Override
-//		public void read(JmeImporter im) throws IOException {
-//			super.read(im);
+//		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField) {
+//			ReflexFillCfg rfcfg = getOwner().getReflexFillCfg(rfcvField);
+//			rfcfg.setConcreteClassOverride(getOwner().getClass());
+////			rfcfg.setPrefixCustomId(getOwner().getId());
+//			return rfcfg;
 //		}
-		@Override
-		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField) {
-			ReflexFillCfg rfcfg = getOwner().getReflexFillCfg(rfcvField);
-			rfcfg.setConcreteClassOverride(getOwner().getClass());
-//			rfcfg.setPrefixCustomId(getOwner().getId());
-			return rfcfg;
-		}
 		public float getPosX() {
 			return fPosX;
 		}

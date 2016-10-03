@@ -30,10 +30,14 @@ package com.github.commandsconsolegui.jme.lemur.dialog;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.DialogManagerAbs;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LmrDiagCS;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
@@ -62,7 +66,20 @@ public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends DialogMa
 	public static LemurDialogManagerI i(){return instance;}
 	
 	private ColorRGBA	colorConsoleStyleBackground;
-	private StringVarField svfBackgroundHexaColorRGBA = new StringVarField(this,"","XXXXXXXX ex.: 'FF12BC4A' Red Green Blue Alpha");
+	
+	public final StringVarField svfBackgroundHexaColorRGBA = new StringVarField(this,"","XXXXXXXX ex.: 'FF12BC4A' Red Green Blue Alpha");
+	public final IntLongVarField ilvBorderThickness = new IntLongVarField(this, 3, "")
+		.setMinMax(1L, 20L)
+		.setCallerAssigned(new CallableX(this,100) {
+			@Override
+			public Boolean call() {
+				for(LemurDialogStateAbs diag:getDialogListCopy(LemurDialogStateAbs.class)){
+					diag.setBordersThickness(ilvBorderThickness.getInt());
+				}
+				
+				return true;
+			}
+		});
 
 	public static enum DialogStyleElementId{
 		
@@ -75,46 +92,6 @@ public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends DialogMa
 		public String s(){return this.toString();}
 		public String str(){return this.toString();}
 	}
-	
-//	public static class LemurDiagHelperCS<T extends LemurDiagHelperCS> extends CompositeSavableAbs<LemurDialogHelperI<T>> {
-//		public LemurDiagHelperCS() {super();}//required by savable
-//		public LemurDiagHelperCS(LemurDialogHelperI owner) {super(owner);}
-//		
-//		/**
-//		 * This console variable will be saved at console cfg file and also with the dialog JME savable. 
-//		 */
-//		private IntLongVarField ilvBorderThickness;
-//		
-//		@Override
-//		protected void initialize(){
-//			super.initialize();
-//			
-//			ilvBorderThickness = new IntLongVarField(getOwner(), 3, "")
-//				.setMinMax(1L, 20L)
-//				.setCallerAssigned(new CallableX(this,100) {
-//					@Override
-//					public Boolean call() {
-//						for(LemurDialogStateAbs diag:getOwner().getDialogListCopy()){
-//							diag.setBordersThickness(ilvBorderThickness.getInt());
-//						}
-//						
-//						return true;
-//					}
-//				});
-//			
-//		}
-//		
-//		@Override
-//		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
-//			if(fld.getDeclaringClass()!=LemurDiagHelperCS.class)return super.getFieldValue(fld);
-//			return fld.get(this);
-//		}
-//		@Override
-//		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
-//			if(fld.getDeclaringClass()!=LemurDiagHelperCS.class){super.setFieldValue(fld,value);return;}
-//			fld.set(this,value);
-//		}
-//	}
 	
 	@Override
 	protected String getTextFromField(Spatial spt) {
@@ -274,39 +251,6 @@ public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends DialogMa
 		fld.set(this,value);
 	}
 	
-//	private Effect<Button> efHighLightBkg = new AbstractEffect<Button>("HighLight") {
-//		@Override
-//		public Animation create(final Button target, final EffectInfo existing) {
-//			final GuiComponent gcBgChk = target.getBackground();
-//			if(!QuadBackgroundComponent.class.isInstance(gcBgChk)){
-//				MsgI.i().devWarn("background type not supported for this effect", gcBgChk, target, existing, this);
-//				return null;
-//			}
-//			
-//			return new Animation() {
-//				QuadBackgroundComponent gcBg = (QuadBackgroundComponent)gcBgChk;
-//				ColorRGBA colorBkp = gcBg.getColor();
-//				boolean bApplied=false;
-//				@Override	public void cancel() {
-//					gcBg.setColor(colorBkp);
-//				}
-//				@Override	public boolean animate(double tpf) {
-//					if(!bApplied){
-//	//					if(existing!=null && existing.getAnimation()==this)return true;
-//						gcBg.setColor(MiscJmeI.i().negateColor(colorBkp));
-//						target.setUserData(EUserData.bHoverOverIsWorking.s(),true);
-//						bApplied=true;
-//					}
-//					return true;
-//				}
-//			};
-//		}
-//	};
-	
-//	public Effect<Button> getEffectHighLightBkg() {
-//		return efHighLightBkg;
-//	}
-	
 	/**
 	 * this is just to let actual effects to end themselves with their own cancel()
 	 */
@@ -329,19 +273,6 @@ public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends DialogMa
 			};
 		}
 	}
-//	private Effect efDummy = new AbstractEffect("HighLight") {
-//		@Override
-//		public Animation create(Object target, EffectInfo existing) {
-//			return new Animation() {
-//				@Override	public void cancel() {}
-//				@Override	public boolean animate(double tpf) {return true;}
-//			};
-//		}
-//	};
-	
-//	public Effect getEffectDummy() {
-//		return efDummy;
-//	}
 	
 	/**
 	 * 
@@ -368,4 +299,7 @@ public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends DialogMa
 		
 		return efDummy;
 	}
+	
+//	public static class LmrDiagMgrCS extends DiagMgrCS<LemurDialogManagerI>{
+//	}
 }

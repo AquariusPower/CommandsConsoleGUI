@@ -68,6 +68,7 @@ import com.github.commandsconsolegui.misc.IMessageListener;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
+import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -311,6 +312,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	}
 	
 	public CommandsDelegator() {
+		SingleInstanceManagerI.i().add(this);
+		
 		setCommandDelimiter(';');
 		setAliasPrefix('$');
 		setVariableExpandPrefix(chAliasPrefix);
@@ -519,6 +522,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	 * placeholder pseudo dummy class to help pipe all commands in a single place
 	 */
 	private class PseudoSelfListener implements IReflexFillCfg,IConsoleCommandListener{
+		public PseudoSelfListener(){
+			SingleInstanceManagerI.i().add(this);
+		}
 		@Override
 		public ECmdReturnStatus execConsoleCommand(CommandsDelegator ccRequester) {
 			throw new NullPointerException("This method shall never be called!");
