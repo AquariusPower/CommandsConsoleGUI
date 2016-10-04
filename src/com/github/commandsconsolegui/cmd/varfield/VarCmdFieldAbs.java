@@ -133,7 +133,8 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 	public VarCmdFieldAbs(IReflexFillCfg rfcfgOwner, EVarCmdMode evcm, O valueDefault){
 		this.evcm=evcm;
 		this.rfcfgOwner=rfcfgOwner;
-		if(isField())VarCmdFieldManagerI.i().add(this);
+//		if(isField())
+		VarCmdFieldManagerI.i().add(this);
 		setObjectRawValue(valueDefault,true);
 	}
 //	public VarCmdFieldAbs(boolean bAddToList){
@@ -539,6 +540,10 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 	public boolean isReflexing() { // will only reflex for field name!
 		return isField();
 	}
+	/**
+	 * TODO make this precise, it is a wild guess..
+	 * @return
+	 */
 	public boolean isField(){ // will be a field if it has an owner. Must have var link!
 		return rfcfgOwner!=null;
 	}

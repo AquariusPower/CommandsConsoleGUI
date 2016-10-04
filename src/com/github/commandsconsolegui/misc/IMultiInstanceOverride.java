@@ -27,6 +27,10 @@
 package com.github.commandsconsolegui.misc;
 
 /**
+ * This indicator is mainly used to:
+ * - prevent multiple command listeners
+ * - prevent endless console variables
+ * - allow multiple instances that will not create the troubles described above.
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *

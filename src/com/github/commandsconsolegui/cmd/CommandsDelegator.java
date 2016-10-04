@@ -63,6 +63,7 @@ import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
+import com.github.commandsconsolegui.misc.IMultiInstanceOverride;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MiscI.EStringMatchMode;
 import com.github.commandsconsolegui.misc.IMessageListener;
@@ -747,15 +748,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	 */
 	public void addConsoleCommandListener(final IConsoleCommandListener icc){
 		if(icc==null)throw new NullPointerException("invalid null commands listener.");
+		if(icc instanceof IMultiInstanceOverride)return; //only single instances allowed
 		
 		if(aConsoleCommandListenerList.contains(icc)){
 			throw new PrerequisitesNotMetException("listener already added: "+icc.getClass().getName())
 				.initCauseAndReturnSelf("Listener added at:",hmDebugListenerAddedStack.get(icc));
-//			NullPointerException ex = new NullPointerException("listener already added: "+icc.getClass().getName());
-//			Throwable tw = new Throwable("Listener added at:");
-//			tw.setStackTrace(hmDebugListenerAddedStack.get(icc));
-//			ex.initCause(tw);
-//			throw ex;
 		}
 		
 		hmDebugListenerAddedStack.put(icc,Thread.currentThread().getStackTrace());
@@ -776,8 +773,6 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 				//this will let it fill the commands list for this listener
 				bFillCommandList=true;
 				icc.execConsoleCommand(CommandsDelegator.this); 
-//				checkCmdValidityBoolTogglers(); //update cmd list with new booltoggler commands
-//				setupVars(false); //update var list with all kinds of vars (booltogglers too)
 				bFillCommandList=false;
 				return true;
 			}

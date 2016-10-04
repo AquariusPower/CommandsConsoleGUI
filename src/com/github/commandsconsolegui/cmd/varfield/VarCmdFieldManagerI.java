@@ -33,6 +33,7 @@ import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
 import com.github.commandsconsolegui.misc.IManager;
+import com.github.commandsconsolegui.misc.IMultiInstanceOverride;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 
 /**
@@ -59,8 +60,14 @@ public class VarCmdFieldManagerI implements IManager<VarCmdFieldAbs>{
 //		return new ArrayList<VarCmdFieldAbs>(avcfList);
 //	}
 	
+	/**
+	 * Only fields that should have direct console access are accepted here.
+	 */
 	@Override
 	public boolean add(VarCmdFieldAbs vcf){
+		if(!vcf.isField())return false;
+		if(vcf.getOwner() instanceof IMultiInstanceOverride)return false; //only single instances allowed
+		
 		PrerequisitesNotMetException.assertNotAlreadyAdded(avcfList,vcf,this);
 //		if(vcf==null){
 //			throw new PrerequisitesNotMetException("cant be null", this);
