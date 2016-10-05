@@ -1032,6 +1032,8 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 	protected boolean initAttempt() {
 		if(!super.initAttempt())return false;
 		
+		btgEffect.setObjectRawValue(false);
+		
 		setRetryDelayFor(1000L); //just to lower the output spam of possible problems
 		
 		return true;

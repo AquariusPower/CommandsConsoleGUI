@@ -59,9 +59,7 @@ public class SingleInstanceManagerI implements IManager<ISingleInstance>{
 	 */
 	@Override
 	public boolean add(ISingleInstance objNew) {
-		if(objNew instanceof IMultiInstanceOverride){
-			return false;
-		}
+		if(objNew instanceof IMultiInstanceOverride)return false; //a simple skipper is enough
 		
 		InstanceInfo ii = new InstanceInfo();
 //		ii.strConcreteClassName=objNew.getClass().getName();

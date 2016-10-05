@@ -123,7 +123,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	private BoolTogglerCmdField btgRestoreIniPosSizeOnce = new BoolTogglerCmdField(this, false);
 	
 	private BoolTogglerCmdField btgEffectLocation = new BoolTogglerCmdField(this, true);
-	private BoolTogglerCmdField btgEffect = new BoolTogglerCmdField(this, true);
+	protected BoolTogglerCmdField btgEffect = new BoolTogglerCmdField(this, true);
 	private TimedDelayVarField tdDialogEffect = new TimedDelayVarField(this, 0.15f, "");
 	private float	fMinEffectScale=0.01f;
 	
