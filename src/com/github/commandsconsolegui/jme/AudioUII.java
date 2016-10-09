@@ -69,7 +69,7 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 
 	private ArrayList<Class<?>>	aclassUserActionStackList = new ArrayList<Class<?>>(); 
 	
-	public enum EUserData{
+	public enum EUserDataAudioCfg{
 		strAudioId,
 		strFileName,
 		bMute,
@@ -79,6 +79,8 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 	private static String strBasePath="Sounds/Effects/UI/13940__gameaudio__game-audio-ui-sfx/"; //@STATIC_OK there is no way because the enum constructors needs it!
 	public static enum EAudio{
 		SubmitSelection			(strBasePath+"220183__gameaudio__click-casual.mono.ogg"),
+		
+		TypingTextLetters		(strBasePath+"220175__gameaudio__pop-click.mono.ogg"),
 		
 		ReturnChosen				(strBasePath+"220200__gameaudio__basic-click-wooden.mono.ogg"),
 //		ReturnChosen				(strBasePath+"220172__gameaudio__flourish-spacey-2.mono.ogg"),
@@ -208,7 +210,7 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 	}
 	
 	private boolean isMute(AudioNode an) {
-		return (Boolean)an.getUserData(EUserData.bMute.toString());
+		return (Boolean)an.getUserData(EUserDataAudioCfg.bMute.toString());
 	}
 
 	public AudioNode setAudio(String strAudioId, String strFile){
@@ -228,16 +230,16 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 		labelRetry:for(int i=1;i<=2;i++){ //1st is try
 			try{
 				an = new AudioNode(GlobalAppRefI.i().getAssetManager(), strFile,	DataType.Buffer);
-				an.setUserData(EUserData.strAudioId.toString(), strAudioId);
-				an.setUserData(EUserData.strFileName.toString(), strFile);
-				an.setUserData(EUserData.bMute.toString(), false);
+				an.setUserData(EUserDataAudioCfg.strAudioId.toString(), strAudioId);
+				an.setUserData(EUserDataAudioCfg.strFileName.toString(), strFile);
+				an.setUserData(EUserDataAudioCfg.bMute.toString(), false);
 				
 				for(AudioNode anChkDupSndSrc:tmAudio.values()){
-					if(anChkDupSndSrc.getUserData(EUserData.strFileName.toString()).equals(strFile)){
+					if(anChkDupSndSrc.getUserData(EUserDataAudioCfg.strFileName.toString()).equals(strFile)){
 						GlobalCommandsDelegatorI.i().dumpDevWarnEntry(
 							"same sound file ["+strFile+"] being used with more than one event: "
 								+strAudioId+", "
-								+anChkDupSndSrc.getUserData(EUserData.strAudioId.toString())
+								+anChkDupSndSrc.getUserData(EUserDataAudioCfg.strAudioId.toString())
 						);
 					}
 				}
@@ -263,16 +265,16 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 	}
 	
 	public String getFileNameFrom(AudioNode an){
-		return an.getUserData(EUserData.strFileName.toString());
+		return an.getUserData(EUserDataAudioCfg.strFileName.toString());
 	}
 	
 	public boolean muteAudioToggle(String strAudioId) {
 		AudioNode an = tmAudio.get(strAudioId);
 		if(an==null)return false;
 		
-		Boolean bMute = an.getUserData(EUserData.bMute.toString());
+		Boolean bMute = an.getUserData(EUserDataAudioCfg.bMute.toString());
 		bMute=!bMute;
-		an.setUserData(EUserData.bMute.toString(), bMute);
+		an.setUserData(EUserDataAudioCfg.bMute.toString(), bMute);
 		GlobalCommandsDelegatorI.i().dumpInfoEntry("SounteMuted: "+strAudioId+" "+bMute);
 		
 		return true;

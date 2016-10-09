@@ -322,6 +322,11 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 			outputTD("Checked total delay (milis): "+lCheckTotalDelay);
 			outputTD("Lasted for "+MiscI.i().fmtFloat(lDelayMilis/1000f,3)+"s");
 			
+			if(PrerequisitesNotMetException.getExitRequestCause()!=null){
+				outputTD("Exit because of exception:");
+				PrerequisitesNotMetException.getExitRequestCause().printStackTrace();
+			}
+			
 			System.exit(0);
 		}
 

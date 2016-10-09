@@ -42,6 +42,7 @@ import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs;
 import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
 import com.github.commandsconsolegui.jme.lemur.extras.DialogMainContainer;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.WorkAroundI;
@@ -293,7 +294,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHel
 	 * @param spt
 	 * @param bOnlyIfAlreadyOnTheList if false, will be added to the list
 	 */
-	public void requestFocus(Spatial spt, boolean bOnlyIfAlreadyOnTheList) {
+	public void requestFocus(final Spatial spt, final boolean bOnlyIfAlreadyOnTheList) {
 		if(spt==null)throw new NullPointerException("invalid null focusable");
 		
 		if(bOnlyIfAlreadyOnTheList){
@@ -304,7 +305,17 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHel
 		}
 		
 		DialogStateAbs diag = retrieveDialogFromSpatial(spt);
-		if(!diag.isLayoutValid())return; //TODO return false? or queue this request?
+		if(!diag.isLayoutValid()){
+			CallQueueI.i().addCall(new CallableX(this,1000) {
+				@Override
+				public Boolean call() {
+					requestFocus(spt,bOnlyIfAlreadyOnTheList);
+					return true;
+				}
+			});
+			
+			return;
+		}
 		
 		ArrayList<DialogStateAbs> adiag = new ArrayList<DialogStateAbs>();
 		if (diag instanceof LemurDialogStateAbs) {

@@ -62,6 +62,7 @@ import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MiscI.EStringMatchMode;
+import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -328,7 +329,7 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 //		return emcb.getIndex()==iIndex;
 //	}
 	
-	public static enum EUserData{
+	public static enum EUserDataMiscJme{
 		matCursorBkp,
 		;
 	}
@@ -336,13 +337,13 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 	public boolean updateBlink(TimedDelayVarField td, Spatial sptUserDataHolder, Geometry geom) {
 		long lDelay = td.getCurrentDelayNano();
 		
-		Material matBkp = (Material)sptUserDataHolder.getUserData(EUserData.matCursorBkp.toString());
+		Material matBkp = (Material)sptUserDataHolder.getUserData(EUserDataMiscJme.matCursorBkp.toString());
 		
 		boolean bVisible=false;
 		
 		if(matBkp!=null){
 			geom.setMaterial(matBkp);
-			sptUserDataHolder.setUserData(EUserData.matCursorBkp.toString(),null); //clear TODO why???
+			sptUserDataHolder.setUserData(EUserDataMiscJme.matCursorBkp.toString(),null); //clear TODO why???
 		}
 		
 		if(lDelay > td.getDelayLimitNano()){
@@ -513,14 +514,16 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 	 * @param spt
 	 * @param obj each key will be one super class of it
 	 */
-	public void setUserDataPSH(Spatial spt, Object obj) {
+	public <T extends Spatial> T setUserDataPSH(T spt, Object obj) {
 		for(Class<?> cl:MiscI.i().getSuperClassesOf(obj)){
 			setUserDataPSH(spt, cl.getName(), obj);
 		}
+		return spt;
 	}
-	public void setUserDataPSH(Spatial spt, String strKey, Object obj) {
+	public <T extends Spatial> T setUserDataPSH(T spt, String strKey, Object obj) {
 		GlobalMainThreadI.assertEqualsCurrentThread();
 		spt.setUserData(strKey, new PseudoSavableHolder(obj));
+		return spt;
 	}
 	
 	public <R> R getUserDataPSH(Spatial spt, Class<R> cl){
@@ -776,6 +779,12 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 		
 		String strFullPathAndFileName=strPathFull+strFileName;
 		
+		ArrayList<Object> aobjDbg = new ArrayList<Object>();
+		aobjDbg.add(strPathRelative);
+		aobjDbg.add(strFileName);
+		aobjDbg.add(svMain);
+		aobjDbg.add(esft);
+		
 		/**
 		 * it does not check if the path is absolute and uses it as relative...
 		 */
@@ -783,11 +792,23 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 		Savable svLoaded = null;
 		if(bSave){
 			str="saving";
-			SaveGame.saveGame(
-				strPathRelative,
-				strFileName,
-				svMain,
-				esft);
+			try{
+				SaveGame.saveGame(
+					strPathRelative,
+					strFileName,
+					svMain,
+					esft);
+			}catch(IllegalStateException e){
+//			}catch(Exception e){ 
+//				/** 
+//				 * keep as catch "Exception" as application is exiting without messages if some unexpected
+//				 * exception happens here
+//				 * TODO why???
+//				 */
+				MsgI.i().exception("save failed", e, aobjDbg);
+//				throw new PrerequisitesNotMetException("save failed", aobjDbg)
+//					.initCauseAndReturnSelf(e);
+			}
 		}else{
 			File fl = new File(strFullPathAndFileName);
 			if(fl.exists()){
@@ -797,15 +818,16 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 						strFileName,
 						null,//GlobalAppRefI.i().getAssetManager(),
 						esft);
+					
 					str="loading";
 				}catch(NullPointerException|ClassCastException e){
-					GlobalCommandsDelegatorI.i().dumpWarnEntry("invalid save file", strPathFull, strFileName, e);
+					MsgI.i().warn("invalid save file", aobjDbg, e);
 					fl.renameTo(new File(strFullPathAndFileName+"."+MiscI.i().getDateTimeForFilename()+".broken"));
 //					svLoaded=null;
 				}
 			
 				if(svLoaded==null){
-					GlobalCommandsDelegatorI.i().dumpWarnEntry("failed to load", strPathFull, strFileName);
+					MsgI.i().warn("failed to load", aobjDbg);
 					str="when loading";
 				}
 			}else{
@@ -813,7 +835,7 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 			}
 		}
 		
-		GlobalCommandsDelegatorI.i().dumpDevInfoEntry(str+" "+strFileName+" at "+strPathFull);
+		MsgI.i().devInfo(str+" "+strFileName+" at "+strPathFull);
 		
 		return (T)svLoaded;
 	}

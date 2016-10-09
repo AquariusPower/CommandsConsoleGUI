@@ -27,6 +27,7 @@
 
 package com.github.commandsconsolegui.jme.lemur.console;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.varfield.NumberVarFieldAbs;
@@ -83,6 +84,7 @@ public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceLemur
 		
 		dledAtParent = adledAtParentList.get(0);
 		Object objUser = dledAtParent.getUserObj();
+		vcf=null; 
 		if(objUser instanceof VarCmdFieldAbs){
 			vcf = (VarCmdFieldAbs)objUser;
 			hchVar = new HashChangeHolder(vcf.getRawValue());
@@ -118,9 +120,10 @@ public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceLemur
 	}
 	
 	@Override
-	public ChoiceVarDialogState<T> copyCurrentValuesFrom(ChoiceVarDialogState<T> discarding) {
-		super.copyCurrentValuesFrom(discarding);
+	public ChoiceVarDialogState<T> copyToSelfValuesFrom(ChoiceVarDialogState<T> discarding) {
+		super.copyToSelfValuesFrom(discarding);
 		
+		PrerequisitesNotMetException.assertNotNull("var", discarding.vcf);
 		this.vcf=discarding.vcf;
 		
 		return getThis();
@@ -307,7 +310,6 @@ public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceLemur
 	@Override
 	protected boolean disableAttempt() {
 		if(!super.disableAttempt())return false;
-		vcf=null; 
 		clearList(); //from a previous enable
 		setInputText("");
 		return true;
@@ -319,4 +321,14 @@ public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceLemur
 		return dledRawValue.getVisibleText();
 	}
 	
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=ChoiceVarDialogState.class)return super.getFieldValue(fld);
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=ChoiceVarDialogState.class){super.setFieldValue(fld,value);return;}
+		fld.set(this,value);
+	}
 }

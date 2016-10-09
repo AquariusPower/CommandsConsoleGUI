@@ -30,6 +30,8 @@ package com.github.commandsconsolegui.misc;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
+
 /**
  * "Things that should be been coded in a certain way but were overlooked",
  * but... is basically a buffed generic NullPointerException anyway...
@@ -43,42 +45,63 @@ import java.util.Arrays;
  */
 public class PrerequisitesNotMetException extends NullPointerException { //@STATIC_OK
 	private static final long	serialVersionUID	= 1342052861109804737L;
-	private static boolean	bRequestExit;
+	private static PrerequisitesNotMetException	exRequestExit;
 
 	public PrerequisitesNotMetException(boolean bExitApplication, String strMessage, Object... aobj) {
 		super(DebugI.i().joinMessageWithObjects(strMessage,aobj));
-		PrerequisitesNotMetException.bRequestExit=bExitApplication;
+		if(bExitApplication)PrerequisitesNotMetException.exRequestExit = this;
 	}
 	public PrerequisitesNotMetException(String str, Object... aobj) {
 		this(true,str,aobj);
 	}
 	
 	public static boolean isExitRequested(){
-		return bRequestExit;
+		return exRequestExit!=null;
+	}
+	
+	public static PrerequisitesNotMetException getExitRequestCause(){
+		return exRequestExit;
+	}
+	
+	public static void assertNotNull(String strDescWhat, Object obj, Object... aobjMoreObjectsForDebugInfo){
+		if(obj==null){
+			ArrayList<Object> aobjAll = new ArrayList<Object>();
+			aobjAll.add(obj);
+			aobjAll.addAll(Arrays.asList(aobjMoreObjectsForDebugInfo));
+			
+			throw new PrerequisitesNotMetException(strDescWhat+": is null", aobjAll.toArray());
+		}
 	}
 	
 	public static <T> void assertNotAlreadyAdded(ArrayList<T> aList, T objNew, Object... aobj){
-		ArrayList<Object> aobjAll = new ArrayList<Object>();
-		aobjAll.add(aList);
-		aobjAll.add(objNew);
-		aobjAll.addAll(Arrays.asList(aobj));
-		
+		String strMsg=null;
 		if(objNew==null){
-			throw new PrerequisitesNotMetException("cant be null", aobjAll);
+			strMsg="cant be null";
 		}
 		
 		if(aList.contains(objNew)){
+			strMsg="already added";
+		}
+		
+		if(strMsg!=null){
+			ArrayList<Object> aobjAll = new ArrayList<Object>();
+			aobjAll.add(aList);
+			aobjAll.add(objNew);
+			aobjAll.addAll(Arrays.asList(aobj));
+			
 			throw new PrerequisitesNotMetException("already added", aobjAll);
 		}
 	}
 	
 	public static void assertNotAlreadySet(String strDescWhat, Object objCurrent, Object objNew, Object... aobjMoreObjectsForDebugInfo){
-		ArrayList<Object> aobjAll = new ArrayList<Object>();
-		aobjAll.add(objCurrent);
-		aobjAll.add(objNew);
-		aobjAll.addAll(Arrays.asList(aobjMoreObjectsForDebugInfo));
-		
-		if(objCurrent!=null)throw new PrerequisitesNotMetException(strDescWhat+": already set", aobjAll.toArray());
+		if(objCurrent!=null){
+			ArrayList<Object> aobjAll = new ArrayList<Object>();
+			aobjAll.add(objCurrent);
+			aobjAll.add(objNew);
+			aobjAll.addAll(Arrays.asList(aobjMoreObjectsForDebugInfo));
+			
+			throw new PrerequisitesNotMetException(strDescWhat+": already set", aobjAll.toArray());
+		}
 	}
 	
 	public PrerequisitesNotMetException setCauseAndReturnSelf(String strCauseMessage, StackTraceElement[] asteCauseStack) {
@@ -114,4 +137,5 @@ public class PrerequisitesNotMetException extends NullPointerException { //@STAT
 	public synchronized Throwable initCause(Throwable cause) {
 		throw new NullPointerException("do not use, just to avoid ignoring the more useful ones");
 	}
+	
 }

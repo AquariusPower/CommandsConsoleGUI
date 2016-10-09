@@ -45,22 +45,18 @@ import com.github.commandsconsolegui.jme.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jme.lemur.console.LemurFocusHelperStateI;
-import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LmrDiagCS;
 import com.github.commandsconsolegui.jme.lemur.extras.ISpatialValidator;
 import com.github.commandsconsolegui.jme.savablevalues.CompositeSavableAbs;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.HashChangeHolder;
 import com.github.commandsconsolegui.misc.HoldRestartable;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 //import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.Request;
 import com.github.commandsconsolegui.misc.jme.MiscJmeI;
-import com.github.commandsconsolegui.misc.jme.SavableHelperI.ISavableFieldAccess;
-import com.github.commandsconsolegui.misc.jme.SavableHelperI.SaveSkipper;
 import com.github.commandsconsolegui.misc.jme.lemur.MiscLemurStateI;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
@@ -159,6 +155,11 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	}
 	
 	public boolean isLayoutValid(){
+		if(sptvDialogMainContainer==null){
+			MsgI.i().devWarn("main container not set", this, this.isConfigured(), this.isInitializedProperly());
+			return false;
+		}
+		
 		return ((ISpatialValidator)sptvDialogMainContainer).isLayoutValid();
 	}
 	
@@ -260,6 +261,8 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 ////			dsv = new DialogSavable().setOwner(this);
 //		}
 		
+		if(!isRestartCfgSet())setRestartCfg(new RestartCfg());
+		
 		btgRestoreIniPosSizeOnce.setCallerAssigned(new CallableX(this) {
 			@Override
 			public Boolean call() {
@@ -283,7 +286,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		 * Dialogs must be initially disabled because they are enabled 
 		 * on user demand. 
 		 */
-		if(!cfg.isInitiallyEnabled() && !isInstancedFromRestart()){
+		if(!cfg.isInitiallyEnabled() && !getRestartCfg().isInstancedFromRestart()){
 			initiallyDisabled();
 			btgEnabled.setObjectRawValue(false);//,false);
 		}
@@ -362,7 +365,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		
 		tdUpdateRefreshList.updateTime();
 		
-		if(!isCompositeSavableSet())setCompositeSavable(new DiagCS(this));
+		if(!isCompositeSavableSet())setCompositeSavable(new SaveDiag(this));
 		
 		return true;
 	}
@@ -455,8 +458,13 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 			updateEffect(!isTryingToDisable());
 		}
 		
+		if(hchInputText.isChangedAndUpdateHash(getInputText())){
+			AudioUII.i().play(EAudio.TypingTextLetters);
+		}
+		
 		return true;
 	}
+	HashChangeHolder<String> hchInputText=new HashChangeHolder<String>("");
 	
 	/**
 	 * TODO try this instead: https://github.com/jMonkeyEngine-Contributions/Lemur/wiki/Effects-and-Animation#open-close-effect
@@ -546,7 +554,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //		v3fBkpDiagPosB4Effect = getDialogMainContainer().getLocalTranslation().clone();
 //		v3fBkpDiagSizeB4Effect = getMainSizeCopy();
 		
-		if(btgEffect.b() && ( !isInstancedFromRestart() || isFirstEnableDone() ) ){
+		if(btgEffect.b() && ( !getRestartCfg().isInstancedFromRestart() || isFirstEnableDone() ) ){
 			Vector3f v3fScale = getDialogMainContainer().getLocalScale();
 			v3fScale.x=v3fScale.y=fMinEffectScale;
 			tdDialogEffect.setActive(true);
@@ -564,7 +572,13 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	protected void enableSuccess() {
 		super.enableSuccess();
 		updateAllPartsNow();
-		if(isSaveDialog())GlobalCommandsDelegatorI.i().addCmdToQueue(scfLoad);
+		loadOnEnable();
+	}
+	
+	protected void loadOnEnable(){
+		if(isSaveDialog()){
+			GlobalCommandsDelegatorI.i().addCmdToQueue(scfLoad);
+		}
 	}
 	
 	public boolean isDialogEffectsDone(){
@@ -1324,11 +1338,11 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //		return b;
 //	}
 	
-	public static class DiagCS<T extends DialogStateAbs> extends CompositeSavableAbs<T,DiagCS<T>> {//implements IReflexFillCfg{
-		public DiagCS(){super();}; //required by savable
-		@Override public DiagCS getThis() {return this;}
+	public static class SaveDiag<T extends DialogStateAbs> extends CompositeSavableAbs<T,SaveDiag<T>> {//implements IReflexFillCfg{
+		public SaveDiag(){super();}; //required by savable
+		@Override public SaveDiag getThis() {return this;}
 		
-		public DiagCS(T owner) {
+		public SaveDiag(T owner) {
 			super(owner);
 		}
 		
@@ -1341,6 +1355,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		private float fPosY;
 		private float fWidth;
 		private float fHeight;
+		private float fNorthHeight;
 		private String strInputText;
 		private boolean bMaximized;
 		
@@ -1350,8 +1365,9 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 			
 			this.fPosX=0;
 			this.fPosY=0;
-			this.fWidth=20;
-			this.fHeight=20;
+			this.fWidth=20; //min on invalid 
+			this.fHeight=20; //min on invalid
+			this.fNorthHeight=0;
 			this.strInputText="";
 		}
 		
@@ -1373,6 +1389,8 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 			}
 			
 			strInputText = getOwner().getInputText();
+			
+			fNorthHeight = getOwner().getNorthHeight();
 			
 			GlobalCommandsDelegatorI.i().dumpDevInfoEntry(toString());
 			
@@ -1396,11 +1414,12 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		}
 		
 		@Override
-		public boolean applyValuesFrom(DiagCS<T> svLoaded) {
+		public boolean applyValuesFrom(SaveDiag<T> svLoaded) {
 			if(!super.applyValuesFrom(svLoaded))return false;
 			
 			getOwner().setInputText(svLoaded.strInputText);
 			getOwner().applyCurrentSettings(false);
+			getOwner().setNorthHeight(svLoaded.fNorthHeight, false);
 			
 			return true;
 		}
@@ -1476,16 +1495,16 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		}
 		
 	}
-	private DiagCS sv;
+	private SaveDiag sv;
 	
 	public boolean isCompositeSavableSet(){
 		return this.sv!=null;
 	}
-	protected <CS extends DiagCS<?>> void setCompositeSavable(CS sv) {
+	protected <CS extends SaveDiag<?>> void setCompositeSavable(CS sv) {
 		PrerequisitesNotMetException.assertNotAlreadySet(CompositeSavableAbs.class.getSimpleName(), this.sv, sv, this);
 		this.sv = sv;
 	}
-	protected <CS extends DiagCS<?>> CS getCompositeSavable(Class<CS> clCS) {
+	protected <CS extends SaveDiag<?>> CS getCompositeSavable(Class<CS> clCS) {
 		return (CS)this.sv;
 	}
 	
@@ -1498,9 +1517,9 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	 * override me!
 	 */
 	public void reLoad(){
-		load(DiagCS.class);
+		load(SaveDiag.class);
 	}
-	public <T extends DiagCS> T load(Class<T> clCS){
+	public <T extends SaveDiag> T load(Class<T> clCS){
 		if(!isSaveDialog())return null;
 		T svTmp = MiscJmeI.i().loadReadConsoleData(clCS, strFilePrefix+getUniqueId());
 		if(sv.applyValuesFrom(svTmp)){
@@ -1508,6 +1527,44 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //			setPositionSize(new Vector3f(sv.fPosX, sv.fPosY, 0), new Vector3f(sv.fWidth,sv.fHeight,0));
 		}
 		return svTmp;
+	}
+	
+	public static class RestartCfg extends ConditionalStateAbs.RestartCfg{
+		private boolean	bRestartWithoutLoadingOnce = false;
+		private boolean	bCopyToSelfAllEntries = true;
+
+//		public boolean isRestartWithoutLoadingOnce() {
+//			return bRestartWithoutLoadingOnce;
+//		}
+
+		/**
+		 * this will basically grant a first save based on the default values
+		 * @return
+		 */
+		public void setRestartWithoutLoadingOnce(boolean bRestartWithoutLoadingOnce) {
+			this.bRestartWithoutLoadingOnce = bRestartWithoutLoadingOnce;
+		}
+
+		public boolean isRestartWithoutLoadingOnceAndReset() {
+			if(isInstancedFromRestart() && bRestartWithoutLoadingOnce){
+				setRestartWithoutLoadingOnce(false);
+				return true;
+			}
+			
+			return false;
+		}
+
+		public void setCopyToSelfAllEntries(boolean bCopyToSelfAllEntries) {
+			this.bCopyToSelfAllEntries=bCopyToSelfAllEntries;
+		}
+		
+		public boolean isCopyToSelfAllEntries(){
+			return bCopyToSelfAllEntries;
+		}
+	}
+	@Override
+	protected RestartCfg getRestartCfg() {
+		return (RestartCfg) super.getRestartCfg();
 	}
 	
 	private int iSaveLoadRetryDelayMilis=100;
@@ -1616,6 +1673,9 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	public void setNorthHeight(float fHeight, boolean bUseAsDiagPerc){
 		throw new PrerequisitesNotMetException("override or do not call", this);
 	}
+	public float getNorthHeight() {
+		throw new PrerequisitesNotMetException("override or do not call", this);
+	}
 	public void applyCurrentSettings(boolean bToggleMaximized){
 		throw new PrerequisitesNotMetException("override or do not call", this);
 	}
@@ -1624,10 +1684,12 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	}
 	
 	@Override
-	public THIS copyCurrentValuesFrom(THIS diagDiscarding) {
-		super.copyCurrentValuesFrom(diagDiscarding);
+	public THIS copyToSelfValuesFrom(THIS diagDiscarding) {
+		super.copyToSelfValuesFrom(diagDiscarding);
 		
-		adleCompleteEntriesList.addAll(diagDiscarding.getCompleteEntriesListCopy());
+		if(getRestartCfg().isCopyToSelfAllEntries()){
+			adleCompleteEntriesList.addAll(diagDiscarding.getCompleteEntriesListCopy());
+		}
 		
 		return getThis();
 	}

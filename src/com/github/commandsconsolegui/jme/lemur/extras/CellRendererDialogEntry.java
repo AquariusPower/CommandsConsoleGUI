@@ -38,7 +38,7 @@ import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData.SliderValueData;
 import com.github.commandsconsolegui.jme.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs;
-import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LmrDiagCS;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.SaveLmrDiag;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -103,7 +103,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 	}
 	
 	public static class CellDialogEntry<T> extends Container implements IReflexFillCfg {
-		public static enum EUserData{
+		public static enum EUserDataCellEntry{
 			colorFgBkp,
 			classCellRef,
 			bHoverOverIsWorking,
@@ -224,7 +224,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			btnTree.setText(str); //it seems to auto trim the string...
 			btnTree.setInsets(new Insets3f(0, 0, 0, 10));
 			
-			btnTree.setColor((ColorRGBA) btnTree.getUserData(EUserData.colorFgBkp.s()));
+			btnTree.setColor((ColorRGBA) btnTree.getUserData(EUserDataCellEntry.colorFgBkp.s()));
 			if(!assignedCellRenderer.diagParent.isOptionSelectionMode()){
 				if(!dled.isParent())btnTree.setColor(btnTree.getShadowColor());
 			}
@@ -274,7 +274,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			btnTree = createButton("Tree", "?", cntrBase, Position.West);
 			btnTree.addCommands(ButtonAction.Click, ctt);
 			btnTree.setUserData(CellDialogEntry.class.getName(), this);
-			btnTree.setUserData(EUserData.colorFgBkp.s(), btnTree.getColor());
+			btnTree.setUserData(EUserDataCellEntry.colorFgBkp.s(), btnTree.getColor());
 			
 			btnText = createButton("Text", this.dled.getVisibleText(), cntrBase, Position.Center);
 			
@@ -398,7 +398,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			Button btn = new Button(strLabel,assignedCellRenderer.strStyle);
 			MiscJmeI.i().retrieveBitmapTextFor(btn).setLineWrapMode(LineWrapMode.NoWrap);
 			btn.setName(strPrefix+"Button"+strId);
-			btn.setUserData(EUserData.classCellRef.s(),this);
+			btn.setUserData(EUserDataCellEntry.classCellRef.s(),this);
 			btn.setUserData(dled.getClass().getName(), dled);
 			CursorEventControl.addListenersToSpatial(btn, DialogMouseCursorListenerI.i());
 			

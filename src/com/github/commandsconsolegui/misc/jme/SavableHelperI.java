@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.misc.jme;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -285,6 +286,8 @@ public class SavableHelperI {
 	}
 	
 	protected boolean checkSkip(ISavableFieldAccess isfa, Field fld){
+		if(Modifier.isStatic(fld.getModifiers()))return true;
+		
 //		if(ISaveSkipper.class.isAssignableFrom(fld.getType()))return true;
 //		if(CompositeControlAbs.class.isAssignableFrom(fld.getType()))return true;
 		for(Class<?> cl:aclGlobalSkip){

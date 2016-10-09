@@ -32,14 +32,12 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.SimulationTime.ISimulationTime;
-import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldManagerI;
 import com.github.commandsconsolegui.globals.GlobalHolderAbs.IGlobalOpt;
 import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
-import com.github.commandsconsolegui.misc.CallQueueI;
-import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.jme.DialogStateAbs.RestartCfg;
 import com.github.commandsconsolegui.misc.ConfigureManagerI;
 import com.github.commandsconsolegui.misc.ConfigureManagerI.IConfigure;
 import com.github.commandsconsolegui.misc.HoldRestartable;
@@ -47,11 +45,11 @@ import com.github.commandsconsolegui.misc.IRestartable;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.Request;
 import com.github.commandsconsolegui.misc.RetryOnFailure;
 import com.github.commandsconsolegui.misc.RetryOnFailure.IRetryListOwner;
+import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppState;
 import com.jme3.export.Savable;
@@ -282,7 +280,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 
 	private boolean	bWasEnabled;
 
-	private boolean	bInstancedFromRestart;
+//	private boolean	bInstancedFromRestart;
 
 	private boolean	bFirstEnableDone;
 	
@@ -311,7 +309,10 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 //	private void configure(Application app){
 		if(this.bConfigured)throw new PrerequisitesNotMetException("already configured");
 		
-		// internal configurations
+		/**
+		 * Internal Configurations
+		 */
+		if(!isRestartCfgSet())setRestartCfg(new RestartCfg());
 //		if(cfg.app==null)throw new PrerequisitesNotMetException("app is null");
 		
 		// the Unique State Id
@@ -666,9 +667,9 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 //		this.bEnabledRequested = false;
 	}
 	
-	public boolean isInstancedFromRestart(){
-		return this.bInstancedFromRestart;
-	}
+//	public boolean isInstancedFromRestart(){
+//		return this.bInstancedFromRestart;
+//	}
 	
 	public void requestEnable(){
 		setEnabledRequest(true);
@@ -787,7 +788,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	 * @param casDiscarding
 	 * @return
 	 */
-	public THIS copyCurrentValuesFrom(THIS casDiscarding){
+	public THIS copyToSelfValuesFrom(THIS casDiscarding){
 //		cas.getHolder(this.getClass()).isChangedAndUpdateHash(this);
 //		bInstancedFromRestart=true;
 //		HoldRestartable.updateAllRestartableHolders(casDiscarding, this);
@@ -795,15 +796,50 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 		return getThis();
 	}
 	
-	public THIS setInstancedFromRestart(ConditionalStateManagerI.CompositeControl cc){
+//	public THIS setInstancedFromRestart(ConditionalStateManagerI.CompositeControl cc){
+//		cc.assertSelfNotNull();
+//		rcfg.setInstancedFromRestart(true);
+////		bInstancedFromRestart=true;
+//		return getThis();
+//	}
+	
+	public static class RestartCfg{
+		private boolean bInstancedFromRestart = false;
+
+		public boolean isInstancedFromRestart() {
+			return bInstancedFromRestart;
+		}
+
+		public void setInstancedFromRestart() {
+			this.bInstancedFromRestart = true;
+		}
+	}
+	
+	private RestartCfg rcfg;
+	protected RestartCfg getRestartCfg() {
+		return rcfg;
+	}
+	public RestartCfg getRestartCfg(ConditionalStateManagerI.CompositeControl cc) {
 		cc.assertSelfNotNull();
-		bInstancedFromRestart=true;
+		return getRestartCfg();
+	}
+	public boolean isRestartCfgSet(){
+		return rcfg!=null;
+	}
+	/**
+	 * Use only on the concrete class.
+	 * @param rcfg
+	 * @return
+	 */
+	protected THIS setRestartCfg(RestartCfg rcfg){
+		PrerequisitesNotMetException.assertNotAlreadySet("Restart Cfg", this.rcfg, rcfg, this);
+		this.rcfg=rcfg;
 		return getThis();
 	}
 	
 	public THIS createAndConfigureSelfCopy() {
 		try {
-			return (THIS)this.getClass().newInstance().configure(icfgOfInstance).copyCurrentValuesFrom(this);
+			return (THIS)this.getClass().newInstance().configure(icfgOfInstance).copyToSelfValuesFrom(this);
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new PrerequisitesNotMetException("new instance configuration failed", this)
 				.initCauseAndReturnSelf(e);
@@ -948,7 +984,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	}
 	@Override
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
-		fld.set(this,value);
+		fld.set(this, value);
 	}
 	
 //	@Override
@@ -973,6 +1009,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	 * @return
 	 */
 	protected abstract THIS getThis();
+
 	
 //	CallableX callerRequestRetryUntilEnabled = new CallableX(this) {
 //		@Override

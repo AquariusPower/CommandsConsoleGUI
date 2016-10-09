@@ -627,6 +627,7 @@ public class MiscI {
 	HashMap<Class,Object> hmPrimitivesDefaultValues;
 	/**
 	 * Use on constructors to prevent initializations in the class body.
+	 * Static fields will be ignored.
 	 * @param irfsa
 	 */
 	public void assertFieldsHaveDefaultValue(IReflexFieldSafeAccess irfsa){

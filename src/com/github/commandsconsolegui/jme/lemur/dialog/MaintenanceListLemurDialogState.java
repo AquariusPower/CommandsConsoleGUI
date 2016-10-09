@@ -59,7 +59,8 @@ public class MaintenanceListLemurDialogState<T extends Command<Button>, THIS ext
 				Float fDialogHeightPercentOfAppWindow,
 				Float fInfoHeightPercentOfDialog, Float fEntryHeightMultiplier,
 				LemurDialogStateAbs<T,?> diagChoice,
-				LemurDialogStateAbs<T,?> diagQuestion) {
+				LemurDialogStateAbs<T,?> diagQuestion) 
+		{
 			super(fDialogWidthPercentOfAppWindow,
 					fDialogHeightPercentOfAppWindow, fInfoHeightPercentOfDialog,
 					fEntryHeightMultiplier);

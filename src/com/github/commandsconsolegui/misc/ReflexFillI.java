@@ -28,6 +28,7 @@
 package com.github.commandsconsolegui.misc;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 import com.github.commandsconsolegui.globals.cmd.VarCmdUId;
 
@@ -265,9 +266,11 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	 * and so its class owner does not have yet such field set to 'this'... 
 	 * self is still null at constructor.
 	 * 
-	 * TODO check for more than one field pointing to the same value
+	 * Static fields will be skipped/ignored.
 	 * 
-	 * @param irfcfgInstanceOwningField
+	 * TODO check for more than one field pointing to the same value?
+	 * 
+	 * @param irfcfgInstanceOwningField only scans (sub)class implementing {@link IReflexFillCfg}
 	 * @param irfcfgvFieldValue if null, will validate if fields of type {@link IReflexFillCfgVariant#} are owned by the specified owner
 	 * @return
 	 */
@@ -276,19 +279,23 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		Field fldFound = null;
 		Class<?> cl = irfcfgInstanceOwningField.getClass();
 		String strExceptionLog="Field object not found at: ";
+		String strClassStack="";
 		/**
 		 * will show the Object class name too
 		 */
 		labelWhile:while(true){ //!cl.equals(Object.class)){
-			strExceptionLog+=cl.getName(); 
+			strClassStack+=cl.getName(); 
 			if(cl.getName().equals(Object.class.getName())){
-				strExceptionLog+="";
+				strClassStack+="";
 				break;
 			}else{
-				strExceptionLog+=" <= ";
+				strClassStack+=" <= ";
 			}
 			
 			for(Field fld:cl.getDeclaredFields()){
+				if(Modifier.isStatic(fld.getModifiers()))continue;
+//					MsgI.i().devInfo("skipping static field", fld);
+				
 				try{
 					Object objExistingFieldValue = irfcfgInstanceOwningField.getFieldValue(fld);
 					if(irfcfgvFieldValue!=null){
@@ -309,13 +316,25 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 					}
 					
 				} catch (IllegalArgumentException | IllegalAccessException e) {
-					e.printStackTrace();
+					if(e instanceof IllegalAccessException){
+						if(e.getMessage().contains("private")){
+							throw new PrerequisitesNotMetException("did you miss some subclass implementation of "+IReflexFieldSafeAccess.class+"?",
+								fld,
+								strClassStack
+							).setCauseAndReturnSelf(e);
+						}
+					}
+					
+					throw new PrerequisitesNotMetException("problem with",fld,strClassStack).setCauseAndReturnSelf(e);
+//					e.printStackTrace();
 				}
 				
 				if(fldFound!=null)break labelWhile;
 			}
 			
 			cl=cl.getSuperclass();
+			
+			if(!IReflexFillCfg.class.isAssignableFrom(cl))break;
 		}
 		
 		if(fldFound!=null){
@@ -336,7 +355,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 				+"1st check: Was "+irfcfgvFieldValue.getClass()+"'s owner properly set to the class where it is "
 				+"instantiated (using 'this' as its "+IReflexFillCfgVariant.class.getSimpleName()+" parameter)? "
 				+"2nd check: Was methods of "+IReflexFieldSafeAccess.class.getSimpleName()+" properly coded in ALL subclasses?"
-				+strExceptionLog);
+				+strExceptionLog+", "+strClassStack);
 		}
 		
 		return null;

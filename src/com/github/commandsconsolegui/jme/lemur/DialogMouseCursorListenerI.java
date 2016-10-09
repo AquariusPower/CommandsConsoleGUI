@@ -38,7 +38,7 @@ import com.github.commandsconsolegui.jme.MultiClickCondStateI.ECallMode;
 import com.github.commandsconsolegui.jme.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs;
 import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
-import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserData;
+import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserDataCellEntry;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableWeak;
 import com.github.commandsconsolegui.misc.jme.MiscJmeI;
 import com.github.commandsconsolegui.misc.jme.lemur.MiscLemurStateI;
@@ -72,7 +72,7 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 		switch(e){
 			case Action1Click:
 //				if(iClickCount==1){
-					final CellDialogEntry cell = (CellDialogEntry<?>)capture.getUserData(EUserData.classCellRef.s());
+					final CellDialogEntry cell = (CellDialogEntry<?>)capture.getUserData(EUserDataCellEntry.classCellRef.s());
 					if(cell!=null){
 //						if(cell.isCfgButton(capture)){
 //							diag.openCfgDataDialog(cell.getData());

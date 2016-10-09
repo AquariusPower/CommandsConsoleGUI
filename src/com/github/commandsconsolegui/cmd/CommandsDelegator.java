@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.ProcessBuilder.Redirect;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,7 +56,6 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.cmd.VarCmdUId;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.console.GlobalConsoleUII;
-import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.LmrDiagCS;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
@@ -63,18 +63,17 @@ import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
+import com.github.commandsconsolegui.misc.IMessageListener;
 import com.github.commandsconsolegui.misc.IMultiInstanceOverride;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MiscI.EStringMatchMode;
-import com.github.commandsconsolegui.misc.IMessageListener;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
-import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexHacksPluginI;
+import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
@@ -4398,7 +4397,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	}
 	@Override
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
-		fld.set(this,value);
+		fld.set(this, value);
 	}
 
 	@Override

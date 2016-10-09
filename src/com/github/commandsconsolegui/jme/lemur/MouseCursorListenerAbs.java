@@ -29,13 +29,15 @@ package com.github.commandsconsolegui.jme.lemur;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.MouseCursorButtonData;
 import com.github.commandsconsolegui.jme.MouseCursorButtonsControl;
 import com.github.commandsconsolegui.jme.MouseCursorCentralI;
 import com.github.commandsconsolegui.jme.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI.DummyEffect;
-import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserData;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs;
+import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserDataCellEntry;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.jme.MiscJmeI;
@@ -150,6 +152,13 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 	@Override
 	public void cursorEntered(CursorMotionEvent event, Spatial target,Spatial capture) {
 		//hover in?
+		if(target!=null){
+			GlobalCommandsDelegatorI.i().devInfo(target.getName());
+			String str=MiscJmeI.i().getUserDataPSH(target,LemurDialogStateAbs.EUserDataLemurDialog.PopupHelp.s());
+			if(str!=null){
+				GlobalCommandsDelegatorI.i().devInfo(str);
+			}
+		}
 	}
 
 	@Override
@@ -272,7 +281,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 					if(!bApplied){
 	//					if(existing!=null && existing.getAnimation()==this)return true;
 						gcBg.setColor(MiscJmeI.i().neglightColor(colorBkp));
-						target.setUserData(EUserData.bHoverOverIsWorking.s(),true);
+						target.setUserData(EUserDataCellEntry.bHoverOverIsWorking.s(),true);
 						bApplied=true;
 					}
 					return true;

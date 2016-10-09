@@ -124,7 +124,10 @@ public class MsgI implements IMessageListener{
 		
 		return true;
 	}
-
+	
+	/**
+	 * @param strMsgOverride can be null
+	 */
 	@Override
 	public boolean exception(String strMsgOverride, Exception ex, Object... aobj) {
 		boolean bListened=false;

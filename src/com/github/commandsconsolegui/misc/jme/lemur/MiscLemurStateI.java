@@ -188,7 +188,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 			 * As the material may affect also the text, and a fading text is horrible
 			 * using a cloned material to substitute it.
 			 */
-			sptUserDataHolder.setUserData(MiscJmeI.EUserData.matCursorBkp.toString(), geomCursor.getMaterial());
+			sptUserDataHolder.setUserData(MiscJmeI.EUserDataMiscJme.matCursorBkp.toString(), geomCursor.getMaterial());
 			matCursorOnly = geomCursor.getMaterial().clone();
 			MatParam param = matCursorOnly.getParam("Color");
 			ColorRGBA colorClone = ((ColorRGBA)param.getValue()).clone();

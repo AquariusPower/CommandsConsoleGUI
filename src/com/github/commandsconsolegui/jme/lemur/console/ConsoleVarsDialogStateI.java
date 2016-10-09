@@ -27,6 +27,7 @@
 
 package com.github.commandsconsolegui.jme.lemur.console;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.PkgTopRef;
@@ -79,7 +80,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		return bChangesMade;
 	}
 	
-	private HoldRestartable<ChoiceVarDialogState> hrdiagChoice = new HoldRestartable<ChoiceVarDialogState>(this);
+//	private HoldRestartable<ChoiceVarDialogState> hrdiagChoice = new HoldRestartable<ChoiceVarDialogState>(this);
 	
 	public static class CfgParm extends MaintenanceListLemurDialogState.CfgParm{
 		public CfgParm(Float fDialogWidthPercentOfAppWindow,
@@ -103,10 +104,11 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 				diagChoice.configure(new ChoiceVarDialogState.CfgParm(0.9f, 0.5f, 0.5f, null));//.setId(strId));
 				diagChoice.setInputToUserEnterCustomValueMode(true);
 			}
-			hrdiagChoice.setRef(diagChoice);
+//			hrdiagChoice.setRef(diagChoice);
 //		}
 		
-		cfg.setDiagChoice(hrdiagChoice.getRef());
+		cfg.setDiagChoice(diagChoice);
+//		cfg.setDiagChoice(hrdiagChoice.getRef());
 		
 		cfg.setDiagQuestion(null);
 		
@@ -354,8 +356,11 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	}
 	
 	@Override
-	public ConsoleVarsDialogStateI<T> copyCurrentValuesFrom(ConsoleVarsDialogStateI<T> casDiscarding) {
-		//supresses the default blind copy: return super.copyCurrentValuesFrom(casDiscarding);
+	public ConsoleVarsDialogStateI<T> copyToSelfValuesFrom(ConsoleVarsDialogStateI<T> casDiscarding) {
+		getRestartCfg().setCopyToSelfAllEntries(false);
+		
+		super.copyToSelfValuesFrom(casDiscarding);
+		
 		return getThis();
 	}
 	
@@ -382,5 +387,16 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 //		super.focusGained();
 //		requestRefreshList();
 //	}
+	
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=ConsoleVarsDialogStateI.class)return super.getFieldValue(fld);
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=ConsoleVarsDialogStateI.class){super.setFieldValue(fld,value);return;}
+		fld.set(this,value);
+	}
 	
 }

@@ -53,7 +53,7 @@ import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI.Dialog
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI.DummyEffect;
 import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry;
 import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
-import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserData;
+import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserDataCellEntry;
 import com.github.commandsconsolegui.jme.lemur.extras.DialogMainContainer;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
@@ -63,7 +63,6 @@ import com.github.commandsconsolegui.misc.HoldRestartable;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.WorkAroundI;
 import com.github.commandsconsolegui.misc.WorkAroundI.BugFixBoolTogglerCmdField;
 import com.github.commandsconsolegui.misc.jme.MiscJmeI;
@@ -206,7 +205,8 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 //	public Vector3f	v3fUnmaximizedSize;
 //	public Long	lUnmaximizedBorderThickness;
 	private ButtonClick	btnclk;
-private Button	btnRestart;
+	private Button	btnRestart;
+	private Button	btnReset;
 //	private boolean	bMaximized;
 	
 	@Override
@@ -257,13 +257,13 @@ private Button	btnRestart;
 		return fSizeBase;
 	}
 	
-	protected LmrDiagCS getCS() {
-		return super.getCompositeSavable(LmrDiagCS.class);
+	protected SaveLmrDiag getCS() {
+		return super.getCompositeSavable(SaveLmrDiag.class);
 	}
 	
 	@Override
 	protected boolean initAttempt() {
-		if(!isCompositeSavableSet())setCompositeSavable(new LmrDiagCS(this));
+		if(!isCompositeSavableSet())setCompositeSavable(new SaveLmrDiag(this));
 		if(!super.initAttempt())return false;
 		
 //		setRetryDelayFor(300L, EDelayMode.Update.s()); //mainly useful when resizing
@@ -290,8 +290,8 @@ private Button	btnRestart;
 		
 		Vector3f v3fAppWindowSize = MiscJmeI.i().getAppWindowSize();
 		v3fDiagSize = new Vector3f(v3fAppWindowSize);
-		v3fDiagSize.y = sizePercOrPixels(v3fDiagSize.y,cfg.fDialogHeightPercentOfAppWindow);
-		v3fDiagSize.x = sizePercOrPixels(v3fDiagSize.x,cfg.fDialogWidthPercentOfAppWindow);
+		v3fDiagSize.y = sizePercOrPixels(v3fDiagSize.y, cfg.fDialogHeightPercentOfAppWindow);
+		v3fDiagSize.x = sizePercOrPixels(v3fDiagSize.x, cfg.fDialogWidthPercentOfAppWindow);
 		
 		v3fPosCentered = new Vector3f(
 			(v3fAppWindowSize.x-v3fDiagSize.x)/2f,
@@ -425,22 +425,21 @@ private Button	btnRestart;
 		cntrTitleButtons.setName(getUniqueId()+"_TitleButtons");
 		
 		//buttons 
-		btnRestart = new Button("[Restart]",getDiagStyle());
-		btnMinimize = new Button("[m]",getDiagStyle());
-		btnMaximize = new Button("[M]",getDiagStyle());
-		btnClose = new Button("[X]",getDiagStyle());
-		
-		btnclk = new ButtonClick();
-		btnRestart.addClickCommands(btnclk);
-		btnMinimize.addClickCommands(btnclk);
-		btnClose.addClickCommands(btnclk);
-		btnMaximize.addClickCommands(btnclk);
+		ArrayList<Button> abtn = new ArrayList<Button>();
+//		abtn.add(btnReset = new Button("[RestartWithoutLoading]",getDiagStyle()));
+		abtn.add(btnReset = MiscJmeI.i().setUserDataPSH(new Button("[!!]",getDiagStyle()), EUserDataLemurDialog.PopupHelp.s(), "Clean restart without loading"));
+//		abtn.add(btnRestart = new Button("[RestartAndLoad]",getDiagStyle()));
+		abtn.add(btnRestart = MiscJmeI.i().setUserDataPSH(new Button("[!]",getDiagStyle()), EUserDataLemurDialog.PopupHelp.s(), "Restart and load"));
+		abtn.add(btnMinimize = new Button("[m]",getDiagStyle()));
+		abtn.add(btnMaximize = new Button("[M]",getDiagStyle()));
+		abtn.add(btnClose = new Button("[X]",getDiagStyle()));
 		
 		int i=0;
-		cntrTitleButtons.addChild(btnRestart,i++);
-		cntrTitleButtons.addChild(btnMinimize,i++);
-		cntrTitleButtons.addChild(btnMaximize,i++);
-		cntrTitleButtons.addChild(btnClose,i++);
+		btnclk = new ButtonClick();
+		for(Button btn:abtn){
+			btn.addClickCommands(btnclk);
+			cntrTitleButtons.addChild(btn,i++);
+		}
 		
 		cntrTitleBox.addChild(cntrTitleButtons, BorderLayout.Position.East);
 		
@@ -451,7 +450,7 @@ private Button	btnRestart;
 		// simple info/help box
 		lblTextInfo = new Label("",getDiagStyle());
 		lblTextInfo.setName(getUniqueId()+"_TxtInfo");
-		MiscJmeI.i().lineWrapDisableFor(lblTextInfo);
+//		MiscJmeI.i().lineWrapDisableFor(lblTextInfo);
 		getNorthContainer().addChild(lblTextInfo, BorderLayout.Position.Center);
 		
 		// info (and list) resizer
@@ -464,12 +463,32 @@ private Button	btnRestart;
 		cntrCenterMain.addChild(getNorthContainer(), BorderLayout.Position.North);
 	}
 	
+	public static enum EUserDataLemurDialog{
+		PopupHelp,
+		;
+		public String s(){return this.toString();}
+	}
+	
 //private Vector3f	v3fUnmaximizedPos;
+//	private boolean	bRestartWithoutLoadingOnce;
+	
+//	/**
+//	 * this will basically grant a first save based on the default values
+//	 * @return
+//	 */
+//	public boolean isRestartWithoutLoadingOnce(){
+//		return bRestartWithoutLoadingOnce;
+//	}
+	
 	private class ButtonClick implements Command<Button>{
-
 		@Override
 		public void execute(Button source) {
 			if(source.equals(btnRestart)){
+				requestRestart();
+			}else
+			if(source.equals(btnReset)){
+				getRestartCfg().setRestartWithoutLoadingOnce(true);
+//				bRestartWithoutLoadingOnce=true;
 				requestRestart();
 			}else
 			if(source.equals(btnClose)){
@@ -519,7 +538,7 @@ private Button	btnRestart;
 
 	@Override
 	public void applyCurrentSettings(boolean bToggleMaximized) {
-		LmrDiagCS lsv = getCompositeSavable(LmrDiagCS.class);
+		SaveLmrDiag lsv = getCompositeSavable(SaveLmrDiag.class);
 	//	IntLongVarField ilv = lsv.ilvBorderThickness;
 		boolean b = bToggleMaximized ? lsv.toggleMaximized() : lsv.isMaximized();
 		if(b){ //maximize
@@ -674,6 +693,11 @@ private Button	btnRestart;
 	}
 	
 	@Override
+	public float getNorthHeight() {
+		return getNorthContainerSizeCopy().y;
+	}
+	
+	@Override
 	public void setNorthHeight(float fHeight, boolean bUseAsDiagPerc){
 		/**
 		 * TODO info height should be automatic. Or Info should be a list with vertical scroll bar, and constrainted to >= 1 lines.
@@ -719,7 +743,7 @@ private Button	btnRestart;
 				/**
 				 * this does not work very well...
 				 */
-				Boolean b=btnExisting.getUserData(EUserData.bHoverOverIsWorking.s());
+				Boolean b=btnExisting.getUserData(EUserDataCellEntry.bHoverOverIsWorking.s());
 				/**
 				 * will recreate anyway while hover over hasnt worked yet with this button instance.
 				 */
@@ -827,9 +851,9 @@ private Button	btnRestart;
 //			}
 //		});
 	
-	public static class LmrDiagCS extends DiagCS<LemurDialogStateAbs> {
-		public LmrDiagCS() {super();}//required by savable
-		public LmrDiagCS(LemurDialogStateAbs owner) {super(owner);}
+	public static class SaveLmrDiag extends SaveDiag<LemurDialogStateAbs> {
+		public SaveLmrDiag() {super();}//required by savable
+		public SaveLmrDiag(LemurDialogStateAbs owner) {super(owner);}
 		
 //		/**
 //		 * This console variable will be saved at console cfg file and also with the dialog JME savable. 
@@ -839,33 +863,16 @@ private Button	btnRestart;
 		@Override
 		protected void initialize(){
 			super.initialize();
-			
-//			IReflexFillCfg irfcfgOwner = isThisInstanceALoadedTmp() ? null : this;
-//			ilvBorderThickness = new IntLongVarField(irfcfgOwner, 3, "")
-//				.setMinMax(1L, 20L)
-//				.setCallerAssigned(new CallableX(this,100) {
-//					@Override
-//					public Boolean call() {
-//						if(LmrDiagCS.this.isThisInstanceALoadedTmp())return true; //skipper
-//						
-//						LemurDialogStateAbs diag = LmrDiagCS.this.getOwner();
-//						if(diag==null)return false; //to retry until the dialog is found
-//						
-//						diag.setBordersThickness(ilvBorderThickness.getInt());
-//						return true;
-//					}
-//				});
-			
 		}
 		
 		@Override
 		public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
-			if(fld.getDeclaringClass()!=LmrDiagCS.class)return super.getFieldValue(fld);
+			if(fld.getDeclaringClass()!=SaveLmrDiag.class)return super.getFieldValue(fld);
 			return fld.get(this);
 		}
 		@Override
 		public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
-			if(fld.getDeclaringClass()!=LmrDiagCS.class){super.setFieldValue(fld,value);return;}
+			if(fld.getDeclaringClass()!=SaveLmrDiag.class){super.setFieldValue(fld,value);return;}
 			fld.set(this,value);
 		}
 	}
@@ -1299,16 +1306,25 @@ private Button	btnRestart;
 		bindKey("Navigate list to previous entry", KeyInput.KEY_UP);
 		bindKey("Navigate list to next entry", KeyInput.KEY_DOWN);
 		
+		bindKey("Edit: paste", KeyInput.KEY_V, KeyAction.CONTROL_DOWN);
+		
 		bindKey("Clear the input field text", KeyInput.KEY_DELETE,KeyAction.CONTROL_DOWN);
 		
-		bindKey("Accept entry choice (on choice dialogs only)", KeyInput.KEY_RETURN);
-		bindKey("Accept entry choice (on choice dialogs only)", KeyInput.KEY_NUMPADENTER);
+		bindKey("Submit chosen entry (on choice dialogs only)", KeyInput.KEY_RETURN);
+		bindKey("Submit chosen entry (on choice dialogs only)", KeyInput.KEY_NUMPADENTER);
 		
 		bindKey("Close dialog", KeyInput.KEY_ESCAPE);
 		
 		return true;
 	}
 	
+	/**
+	 * TODO fill a dialog with all bound keys for each diag and console with tabs!
+	 * @param strActionPerformedHelp
+	 * @param iKeyCode
+	 * @param aiKeyModifiers
+	 * @return
+	 */
 	private BindKey bindKey(String strActionPerformedHelp, int iKeyCode, int... aiKeyModifiers){
 		BindKey bk = MiscLemurStateI.i().bindKey(getInputField(), actSimpleActions,
 			strActionPerformedHelp, iKeyCode, aiKeyModifiers);
@@ -1867,7 +1883,7 @@ private Button	btnRestart;
 	
 	@Override
 	public void reLoad() {
-		load(LmrDiagCS.class);
+		load(SaveLmrDiag.class);
 	}
 	
 	@Override
@@ -1881,5 +1897,26 @@ private Button	btnRestart;
 		}
 		
 		super.requestRestart();
+	}
+	
+	@Override
+	public THIS copyToSelfValuesFrom(THIS diagDiscarding) {
+		super.copyToSelfValuesFrom(diagDiscarding);
+		
+		getRestartCfg().setRestartWithoutLoadingOnce(diagDiscarding.getRestartCfg().isRestartWithoutLoadingOnceAndReset());
+//		bRestartWithoutLoadingOnce = diagDiscarding.isRestartWithoutLoadingOnce();
+		
+		return getThis();
+	}
+	
+	@Override
+	protected void loadOnEnable() {
+//		if(getRestartCfg().isInstancedFromRestart() && bRestartWithoutLoadingOnce){
+//			bRestartWithoutLoadingOnce=false;
+//			return;
+//		}
+		if(getRestartCfg().isRestartWithoutLoadingOnceAndReset())return;
+		
+		super.loadOnEnable();
 	}
 }

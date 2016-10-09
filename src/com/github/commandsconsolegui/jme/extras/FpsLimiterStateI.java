@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.jme.extras;
 
+import java.lang.reflect.Field;
+
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.jme.cmd.CmdConditionalStateAbs;
@@ -168,5 +170,16 @@ public class FpsLimiterStateI extends CmdConditionalStateAbs<FpsLimiterStateI>{
 	@Override
 	protected FpsLimiterStateI getThis() {
 		return this;
+	}
+
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=FpsLimiterStateI.class)return super.getFieldValue(fld);
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=FpsLimiterStateI.class){super.setFieldValue(fld,value);return;}
+		fld.set(this,value);
 	}
 }
