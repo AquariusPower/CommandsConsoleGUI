@@ -39,10 +39,8 @@ import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.jme.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jme.lemur.MouseCursorListenerAbs;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs;
-import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
-import com.github.commandsconsolegui.jme.lemur.extras.DialogMainContainer;
-import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.CallQueueI;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.WorkAroundI;
@@ -53,7 +51,6 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.TextField;
-import com.simsilica.lemur.component.TextEntryComponent;
 import com.simsilica.lemur.core.GuiControl;
 import com.simsilica.lemur.event.CursorButtonEvent;
 import com.simsilica.lemur.event.CursorEventControl;
@@ -120,7 +117,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHel
 		
 //		MouseCursor.i().configure(null);
 		
-		return storeCfgAndReturnSelf(icfg);
+		return storeCfgAndReturnSelf(cfg);
 	}
 	
 	public ArrayList<String> debugReport(){

@@ -29,18 +29,16 @@ package com.github.commandsconsolegui.jme.lemur;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.MouseCursorButtonData;
 import com.github.commandsconsolegui.jme.MouseCursorButtonsControl;
 import com.github.commandsconsolegui.jme.MouseCursorCentralI;
 import com.github.commandsconsolegui.jme.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI.DummyEffect;
-import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs;
 import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserDataCellEntry;
 import com.github.commandsconsolegui.misc.MsgI;
-import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.jme.MiscJmeI;
+import com.github.commandsconsolegui.misc.jme.MiscJmeI.EUserDataMiscJme;
 import com.github.commandsconsolegui.misc.jme.lemur.MiscLemurStateI;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Spatial;
@@ -66,6 +64,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 	
 	private MouseCursorButtonsControl mcab;
 	private boolean	bCancelNextMouseReleased;
+//	private String	strPopupHelp;
 	
 	public MouseCursorListenerAbs() {
 //		 mcab = MouseCursorCentralI.i().createButtonsInstance(this);
@@ -149,21 +148,35 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 		return false;
 	}
 	
+	/**
+	 * Hover in
+	 */
 	@Override
 	public void cursorEntered(CursorMotionEvent event, Spatial target,Spatial capture) {
-		//hover in?
+		String strDbg="";
+		
 		if(target!=null){
-			GlobalCommandsDelegatorI.i().devInfo(target.getName());
-			String str=MiscJmeI.i().getUserDataPSH(target,LemurDialogStateAbs.EUserDataLemurDialog.PopupHelp.s());
+			strDbg+="target="+target.getName();
+			String str=MiscJmeI.i().getPopupHelp(target);
 			if(str!=null){
-				GlobalCommandsDelegatorI.i().devInfo(str);
+				MsgI.i().debug(EUserDataMiscJme.strPopupHelp+":"+str);
+				MiscLemurStateI.i().setPopupHelpString(str);
 			}
 		}
+		
+		if(capture!=null){
+			strDbg+="capture="+capture.getName();
+		}
+		
+		if(!strDbg.isEmpty())MsgI.i().debug("HoverIn:"+strDbg);
 	}
-
+	
+	/**
+	 * Hover out
+	 */
 	@Override
 	public void cursorExited(CursorMotionEvent event, Spatial target,Spatial capture) {
-		//hover out?
+		MiscLemurStateI.i().clearPopupHelpString();
 	}
 	
 	public boolean dragging(ArrayList<MouseCursorButtonData> aButtonList, CursorMotionEvent eventMotion, Spatial target,	Spatial capture){

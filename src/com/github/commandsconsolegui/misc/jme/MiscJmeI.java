@@ -331,7 +331,9 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 	
 	public static enum EUserDataMiscJme{
 		matCursorBkp,
+		strPopupHelp,
 		;
+		public String s(){return this.toString();}
 	}
 	
 	public boolean updateBlink(TimedDelayVarField td, Spatial sptUserDataHolder, Geometry geom) {
@@ -881,5 +883,13 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 	public String getUniqueId() {
 		return MiscI.i().prepareUniqueId(this);
 	}
-
+	
+	public <T extends Spatial> T setPopupHelp(T spt, String strHelp){
+		MiscJmeI.i().setUserDataPSH(spt, EUserDataMiscJme.strPopupHelp.s(), strHelp);
+		return spt;
+	}
+	
+	public String getPopupHelp(Spatial spt){
+		return MiscJmeI.i().getUserDataPSH(spt, EUserDataMiscJme.strPopupHelp.s());
+	}
 }

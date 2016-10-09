@@ -271,10 +271,11 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	 * TODO check for more than one field pointing to the same value?
 	 * 
 	 * @param irfcfgInstanceOwningField only scans (sub)class implementing {@link IReflexFillCfg}
-	 * @param irfcfgvFieldValue if null, will validate if fields of type {@link IReflexFillCfgVariant#} are owned by the specified owner
+	 * @param objFieldValue if null, will validate if fields of type {@link IReflexFillCfgVariant#} are owned by the specified owner
 	 * @return
 	 */
-	public Field assertAndGetField(IReflexFillCfg irfcfgInstanceOwningField, IReflexFillCfgVariant irfcfgvFieldValue){
+//	public Field assertAndGetField(IReflexFillCfg irfcfgInstanceOwningField, IReflexFillCfgVariant irfcfgvFieldValue){
+	public Field assertAndGetField(IReflexFillCfg irfcfgInstanceOwningField, Object objFieldValue){
 //		Class<?> clFound = null;
 		Field fldFound = null;
 		Class<?> cl = irfcfgInstanceOwningField.getClass();
@@ -298,8 +299,8 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 				
 				try{
 					Object objExistingFieldValue = irfcfgInstanceOwningField.getFieldValue(fld);
-					if(irfcfgvFieldValue!=null){
-						if(objExistingFieldValue==irfcfgvFieldValue)fldFound=fld; //clFound=cl;
+					if(objFieldValue!=null){
+						if(objExistingFieldValue==objFieldValue)fldFound=fld; //clFound=cl;
 					}else{
 						/**
 						 * validating all fields if parent is configured properly
@@ -348,11 +349,11 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		 * Inconsistency:
 		 * field is not at specified owner
 		 */
-		if(irfcfgvFieldValue!=null){
+		if(objFieldValue!=null){
 //			throw new NullPointerException("Failed to automatically set command id? "
 			throw new PrerequisitesNotMetException("Inconsistency found: "
 				+"(obs.: Concrete Instanced class is "+irfcfgInstanceOwningField.getClass().getName()+")"
-				+"1st check: Was "+irfcfgvFieldValue.getClass()+"'s owner properly set to the class where it is "
+				+"1st check: Was "+objFieldValue.getClass()+"'s owner properly set to the class where it is "
 				+"instantiated (using 'this' as its "+IReflexFillCfgVariant.class.getSimpleName()+" parameter)? "
 				+"2nd check: Was methods of "+IReflexFieldSafeAccess.class.getSimpleName()+" properly coded in ALL subclasses?"
 				+strExceptionLog+", "+strClassStack);

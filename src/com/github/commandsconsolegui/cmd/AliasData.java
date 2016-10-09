@@ -27,9 +27,6 @@
 
 package com.github.commandsconsolegui.cmd;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 
 /**

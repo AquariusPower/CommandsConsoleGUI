@@ -31,17 +31,23 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
-import com.github.commandsconsolegui.cmd.CommandsHelperI;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.CommandsHelperI;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.GlobalMainThreadI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.jme.GlobalDialogHelperI;
 import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
+import com.github.commandsconsolegui.globals.jme.lemur.GlobalLemurDialogHelperI;
+import com.github.commandsconsolegui.jme.DialogManagerAbs;
+import com.github.commandsconsolegui.jme.MouseCursorCentralI;
 import com.github.commandsconsolegui.jme.cmd.CmdConditionalStateAbs;
+import com.github.commandsconsolegui.jme.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jme.lemur.console.LemurFocusHelperStateI;
+import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI.DialogStyleElementId;
 import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
 import com.github.commandsconsolegui.jme.lemur.extras.DialogMainContainer;
 import com.github.commandsconsolegui.misc.CallQueueI;
@@ -59,6 +65,7 @@ import com.jme3.input.dummy.DummyKeyInput;
 import com.jme3.material.MatParam;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -67,16 +74,18 @@ import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.DocumentModel;
 import com.simsilica.lemur.GridPanel;
+import com.simsilica.lemur.Label;
 import com.simsilica.lemur.ListBox;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.TextField;
-import com.simsilica.lemur.component.ColoredComponent;
 import com.simsilica.lemur.component.TextEntryComponent;
 import com.simsilica.lemur.core.GuiControl;
 import com.simsilica.lemur.event.AbstractCursorEvent;
+import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.event.KeyAction;
 import com.simsilica.lemur.event.KeyActionListener;
 import com.simsilica.lemur.focus.FocusManagerState;
+import com.simsilica.lemur.style.ElementId;
 
 /**
  * Is an app state because of the text blinking cursor.
@@ -696,8 +705,30 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 			updateLargeTextCursorMode(tfToBlinkCursor);
 		}
 		
+		if(strPopupHelp!=null){
+			if(lblPopupHelp==null){
+				lblPopupHelp = new Label("nothing yet...", new ElementId(DialogStyleElementId.PopupHelp.s()), GlobalLemurDialogHelperI.i().STYLE_CONSOLE);
+			}
+			lblPopupHelp.setText("["+strPopupHelp+"]");
+			Vector2f v2f = MouseCursorCentralI.i().getMouseCursorPositionCopy();
+			
+			Vector3f v3fSize = lblPopupHelp.getSize();
+			
+			lblPopupHelp.setLocalTranslation(v2f.x-v3fSize.x/2, v2f.y+v3fSize.y+10, 1000);
+			
+			if(lblPopupHelp.getParent()==null)GlobalGUINodeI.i().attachChild(lblPopupHelp);
+		}else{
+			if(lblPopupHelp!=null){
+				if(lblPopupHelp.getParent()!=null){
+					lblPopupHelp.removeFromParent();
+				}
+			}
+		}
+		
 		return super.updateAttempt(tpf);
 	}
+	
+	Label lblPopupHelp;
 	
 	public static class CfgParm extends CmdConditionalStateAbs.CfgParm{
 		public CfgParm() {
@@ -713,7 +744,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 //		super.configure(new CmdConditionalStateAbs.CfgParm(LemurMiscHelpersStateI.class.getSimpleName()));
 		super.configure(icfg);
 		
-		return storeCfgAndReturnSelf(icfg);
+		return storeCfgAndReturnSelf(cfg);
 	}
 
 //	public void initializeSpecialKeyListeners(TextEntryComponent source) {
@@ -1115,6 +1146,9 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 		}
 	}
 	private final CmdDummy cmdDummy = new CmdDummy();
+
+	private String	strPopupHelp;
+	
 	public CmdDummy getCmdDummy() {
 		return cmdDummy;
 	}
@@ -1223,5 +1257,19 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 	@Override
 	protected MiscLemurStateI getThis() {
 		return this;
+	}
+
+	public <T extends Panel> T setPopupHelp(T pnl, String strHelp){
+		MiscJmeI.i().setPopupHelp(pnl,strHelp);
+		CursorEventControl.addListenersToSpatial(pnl, DialogMouseCursorListenerI.i());
+		return pnl;
+	}
+
+	public void clearPopupHelpString() {
+		strPopupHelp=null;
+	}
+
+	public void setPopupHelpString(String str) {
+		this.strPopupHelp=str;
 	}
 }

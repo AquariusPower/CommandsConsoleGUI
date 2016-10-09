@@ -63,6 +63,7 @@ import com.github.commandsconsolegui.misc.HoldRestartable;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.WorkAroundI;
 import com.github.commandsconsolegui.misc.WorkAroundI.BugFixBoolTogglerCmdField;
 import com.github.commandsconsolegui.misc.jme.MiscJmeI;
@@ -193,7 +194,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 	private Button	btnResizeSouth;
 	private Button	btnResizeEast;
 	private Button	btnResizeWest;
-	private ArrayList<Button>	abtnBorderList = new ArrayList<Button>();
+	private ArrayList<Button>	abtnResizerList = new ArrayList<Button>();
 	private Vector3f	v3fDiagSize;
 	private Vector3f	v3fPosCentered;
 	private Button	btnResizeInfoAndList;
@@ -427,9 +428,10 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		//buttons 
 		ArrayList<Button> abtn = new ArrayList<Button>();
 //		abtn.add(btnReset = new Button("[RestartWithoutLoading]",getDiagStyle()));
-		abtn.add(btnReset = MiscJmeI.i().setUserDataPSH(new Button("[!!]",getDiagStyle()), EUserDataLemurDialog.PopupHelp.s(), "Clean restart without loading"));
+//		abtn.add(btnReset = MiscJmeI.i().setUserDataPSH(new Button("[!!]",getDiagStyle()), EUserDataLemurDialog.PopupHelp.s(), "Clean restart without loading"));
+		abtn.add(btnReset = MiscLemurStateI.i().setPopupHelp(new Button("[!!]",getDiagStyle()), "Clean restart without loading"));
 //		abtn.add(btnRestart = new Button("[RestartAndLoad]",getDiagStyle()));
-		abtn.add(btnRestart = MiscJmeI.i().setUserDataPSH(new Button("[!]",getDiagStyle()), EUserDataLemurDialog.PopupHelp.s(), "Restart and load"));
+		abtn.add(btnRestart = MiscLemurStateI.i().setPopupHelp(new Button("[!]",getDiagStyle()), "Restart and load"));
 		abtn.add(btnMinimize = new Button("[m]",getDiagStyle()));
 		abtn.add(btnMaximize = new Button("[M]",getDiagStyle()));
 		abtn.add(btnClose = new Button("[X]",getDiagStyle()));
@@ -454,7 +456,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		getNorthContainer().addChild(lblTextInfo, BorderLayout.Position.Center);
 		
 		// info (and list) resizer
-		btnResizeInfoAndList=prepareResizeBorder(btnResizeInfoAndList,null);
+		btnResizeInfoAndList=prepareResizer(btnResizeInfoAndList,null);
 		MiscLemurStateI.i().setSizeSafely(btnResizeInfoAndList, 1, 1, true);
 		getNorthContainer().addChild(btnResizeInfoAndList, BorderLayout.Position.South);
 //		setBordersThickness(getCompositeSavable(LmrDiagCS.class).ilvBorderThickness.intValue());
@@ -463,11 +465,11 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		cntrCenterMain.addChild(getNorthContainer(), BorderLayout.Position.North);
 	}
 	
-	public static enum EUserDataLemurDialog{
-		PopupHelp,
-		;
-		public String s(){return this.toString();}
-	}
+//	public static enum EUserDataLemurDialog{
+//		PopupHelp,
+//		;
+//		public String s(){return this.toString();}
+//	}
 	
 //private Vector3f	v3fUnmaximizedPos;
 //	private boolean	bRestartWithoutLoadingOnce;
@@ -487,7 +489,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 				requestRestart();
 			}else
 			if(source.equals(btnReset)){
-				getRestartCfg().setRestartWithoutLoadingOnce(true);
+				cfg.setRestartEnableWithoutLoadingOnce(true);
 //				bRestartWithoutLoadingOnce=true;
 				requestRestart();
 			}else
@@ -514,10 +516,10 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 	private void reinitBorders() {
 //		abtnResizeBorderList.clear();
 		
-		btnResizeNorth	= prepareResizeBorder(btnResizeNorth, BorderLayout.Position.North);
-		btnResizeSouth	= prepareResizeBorder(btnResizeSouth, BorderLayout.Position.South);
-		btnResizeEast		= prepareResizeBorder(btnResizeEast	, BorderLayout.Position.East);
-		btnResizeWest		= prepareResizeBorder(btnResizeWest	, BorderLayout.Position.West);
+		btnResizeNorth	= prepareResizer(btnResizeNorth, BorderLayout.Position.North);
+		btnResizeSouth	= prepareResizer(btnResizeSouth, BorderLayout.Position.South);
+		btnResizeEast		= prepareResizer(btnResizeEast	, BorderLayout.Position.East);
+		btnResizeWest		= prepareResizer(btnResizeWest	, BorderLayout.Position.West);
 		
 //		setBordersThickness(getCompositeSavable(LmrDiagCS.class).ilvBorderThickness.intValue());
 		setBordersThickness(LemurDialogManagerI.i().ilvBorderThickness.intValue());
@@ -735,7 +737,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		requestRefreshUpdateList();
 	}
 
-	private Button prepareResizeBorder(final Button btnExisting, final Position edge) {
+	private Button prepareResizer(final Button btnExisting, final Position edge) {
 		if(btnExisting!=null){
 			if(!btgBugFixReinitBordersByRecreatingThem.b()){
 				CursorEventControl.removeListenersFromSpatial(btnExisting, DialogMouseCursorListenerI.i());
@@ -753,7 +755,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 			}
 			
 //			if(edge!=null)
-			abtnBorderList.remove(btnExisting);
+			abtnResizerList.remove(btnExisting);
 		}
 			
 //			CursorEventControl.removeListenersFromSpatial(btnExisting, DialogMouseCursorListenerI.i());
@@ -769,41 +771,50 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 //			}.updateTimeMilisNow());
 //			return btnExisting;
 //		}else{
-			Button btnBorder=new Button("", new ElementId(DialogStyleElementId.ResizeBorder.s()), getDiagStyle());
+			final Button btnNew=new Button("", new ElementId(DialogStyleElementId.ResizeBorder.s()), getDiagStyle());
 			//Font TRICK(seems not necessary?): 
 //			btnBorder.setFontSize(0.1f); //this trick will let us set it with any dot size!
 			//btnBorder.getFontSize()
 			
-			MiscJmeI.i().setUserDataPSH(btnBorder, this); //if a border is clicked, the bugfixer that recreates it will make the old border object have no parent. Its parentest would have a reference to the dialog, but now it is alone, so such reference must be on it.
+			MiscJmeI.i().setUserDataPSH(btnNew, this); //if a border is clicked, the bugfixer that recreates it will make the old border object have no parent. Its parentest would have a reference to the dialog, but now it is alone, so such reference must be on it.
 			
 			EffectFocusData efd=new EffectFocusData();
-			efd.colorOriginal=((QuadBackgroundComponent)btnBorder.getBackground()).getColor().clone();
+			efd.colorOriginal=((QuadBackgroundComponent)btnNew.getBackground()).getColor().clone();
 			efd.colorDim = efd.colorOriginal.clone().mult(0.5f);
 			efd.colorDim.a=efd.colorOriginal.a;
-			MiscJmeI.i().setUserDataPSH(btnBorder, efd);
+			MiscJmeI.i().setUserDataPSH(btnNew, efd);
 //			btnBorder.setUserData(EffectFocusData.class.getName(), efd);
 			
-			CursorEventControl.addListenersToSpatial(btnBorder, DialogMouseCursorListenerI.i());
-			DialogMouseCursorListenerI.i().addMouseCursorHighlightEffects(btnBorder);
+			CursorEventControl.addListenersToSpatial(btnNew, DialogMouseCursorListenerI.i());
+			DialogMouseCursorListenerI.i().addMouseCursorHighlightEffects(btnNew);
 			
-			abtnBorderList.add(btnBorder);
-			String strName="Dialog_Resizer_";
+			abtnResizerList.add(btnNew);
+			final String strName="Dialog_Resizer_";
 			if(edge==null){
-				strName+=btnBorder.getName();
+//				if(btnNew.getName()!=null){
+//					strName+=btnNew.getName();
+//				}else{
+					CallQueueI.i().addCall(new CallableX(this) {
+						@Override
+						public Boolean call() {
+							btnNew.setName(strName+ReflexFillI.i().assertAndGetField(LemurDialogStateAbs.this,btnNew).getName());
+							return true;
+						}
+					});
+//				}
 			}else{
-				strName+="Border"+edge.toString();
-				getDialogMainContainer().addChild(btnBorder, edge); //this actually replaces the current at that border
+				btnNew.setName(strName+"Border"+edge.toString());
+				getDialogMainContainer().addChild(btnNew, edge); //this actually replaces the current at that border
 			}
-			btnBorder.setName(strName);
 			
-			efDummy = LemurDialogManagerI.i().setupSimpleEffect(btnBorder, EEffectId.FocusLost.s(), efFocusLost, efDummy);
+			efDummy = LemurDialogManagerI.i().setupSimpleEffect(btnNew, EEffectId.FocusLost.s(), efFocusLost, efDummy);
 //			if(!efDummy.getChannel().equals(efFocusLost.getChannel())){
 //				throw new PrerequisitesNotMetException("both should be on the same channel", efDummy, efFocusLost, btnBorder, this);
 //			}
 //			btnBorder.addEffect(EEffectId.FocusLost.s(), (Effect)efFocusLost);
 //			btnBorder.addEffect(EEffectId.Dummy.s(), efDummy);
 			
-			return btnBorder;
+			return btnNew;
 //		}
 	}
 	
@@ -878,7 +889,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 	}
 	
 	public void setBordersThickness(int iPixels){
-		for(Button btn:abtnBorderList){
+		for(Button btn:abtnResizerList){
 			MiscLemurStateI.i().setSizeSafely(btn, iPixels, iPixels, true);
 		}
 //		CallQueueI.i().addCall(callerReinitBordersAfterThicknessChange.updateTimeMilisNow()); 
@@ -1139,7 +1150,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		// MiscLemurStateI.i().setSizeSafely(abtnBorderList.get(2), 3, 3)
 		
 		if(DebugI.i().isKeyEnabled(EDebugKey.FillKeyValueHashmap)){
-			for(Button btn:abtnBorderList){
+			for(Button btn:abtnResizerList){
 				DebugI.i().putKeyValue(getUniqueId()+":"+btn.getName()+":size", btn.getSize());
 				DebugI.i().putKeyValue(getUniqueId()+":"+btn.getName()+":psize", btn.getPreferredSize());
 			}
@@ -1767,7 +1778,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 //	}
 	
 	private void applyBorderFocusEffect(boolean bGained){
-		for(Button btn:abtnBorderList){
+		for(Button btn:abtnResizerList){
 			if(btn==btnCurrentlyActiveDraggedReziseBorder)continue;
 			if(bGained){
 //				if(btn.hasEffect("FocusGained"))
@@ -1903,7 +1914,8 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 	public THIS copyToSelfValuesFrom(THIS diagDiscarding) {
 		super.copyToSelfValuesFrom(diagDiscarding);
 		
-		getRestartCfg().setRestartWithoutLoadingOnce(diagDiscarding.getRestartCfg().isRestartWithoutLoadingOnceAndReset());
+//		cfg.setRestartWithoutLoadingOnce(diagDiscarding.getcf);
+//		getRestartCfg().setRestartWithoutLoadingOnce(diagDiscarding.getRestartCfg().isRestartWithoutLoadingOnceAndReset());
 //		bRestartWithoutLoadingOnce = diagDiscarding.isRestartWithoutLoadingOnce();
 		
 		return getThis();
@@ -1915,7 +1927,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 //			bRestartWithoutLoadingOnce=false;
 //			return;
 //		}
-		if(getRestartCfg().isRestartWithoutLoadingOnceAndReset())return;
+		if(cfg.isRestartEnableWithoutLoadingOnceAndReset())return;
 		
 		super.loadOnEnable();
 	}

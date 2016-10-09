@@ -53,7 +53,8 @@ public class ConfigureManagerI implements IManager<IConfigure>{
 		 * Just reference the CfgParm of the superclass directly ex.:<br> 
 		 * 	new ConditionalAppStateAbs.CfgParm()<br>
 		 * <br>
-		 * This is also very important when restarting (configuring a new and fresh robust instance)<br> 
+		 * This is also very important when restarting (configuring a new and fresh robust instance)<br>
+		 * where the current configuration will be just passed to the new instance!<br> 
 		 */
 		public static interface ICfgParm{}
 		

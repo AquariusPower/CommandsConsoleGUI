@@ -357,7 +357,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	
 	@Override
 	public ConsoleVarsDialogStateI<T> copyToSelfValuesFrom(ConsoleVarsDialogStateI<T> casDiscarding) {
-		getRestartCfg().setCopyToSelfAllEntries(false);
+		cfg.setRestartCopyToSelfAllEntries(false);
 		
 		super.copyToSelfValuesFrom(casDiscarding);
 		

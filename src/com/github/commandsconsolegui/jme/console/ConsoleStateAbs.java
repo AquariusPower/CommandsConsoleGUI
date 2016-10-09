@@ -480,7 +480,7 @@ public abstract class ConsoleStateAbs<T,R extends ConsoleStateAbs<T,R>> extends 
 		
 //		this.iToggleConsoleKey=cfg.iToggleConsoleKey;
 		
-		return storeCfgAndReturnSelf(icfg);
+		return storeCfgAndReturnSelf(cfg);
 	}
 	
 	/**

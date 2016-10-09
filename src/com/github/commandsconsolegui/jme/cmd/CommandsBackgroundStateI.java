@@ -67,7 +67,7 @@ public class CommandsBackgroundStateI extends CmdConditionalStateAbs<CommandsBac
 //		super.configure(new CmdConditionalStateAbs.CfgParm(CommandsBackgroundStateI.class.getSimpleName()));
 		super.configure(icfg);
 		
-		return storeCfgAndReturnSelf(icfg);
+		return storeCfgAndReturnSelf(cfg);
 	}
 	
 	@Override

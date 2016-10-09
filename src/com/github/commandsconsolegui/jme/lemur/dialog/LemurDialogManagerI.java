@@ -90,6 +90,8 @@ public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends DialogMa
 		/** TODO not working yet */
 		SliderForValueChange,
 		
+		PopupHelp,
+		
 		;
 		public String s(){return this.toString();}
 		public String str(){return this.toString();}
@@ -155,6 +157,11 @@ public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends DialogMa
 		attrs.set("color", ColorRGBA.Cyan.clone());
 //		clBg = new ColorRGBA(0,0.25f,0,1);
 		clBg = new ColorRGBA(0,0.25f,0,0.75f);
+		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
+		
+		attrs = styles.getSelector(DialogStyleElementId.PopupHelp.s(), STYLE_CONSOLE);
+		attrs.set("color", ColorRGBA.Blue.clone());
+		clBg = ColorRGBA.Cyan.clone();
 		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
 		attrs = styles.getSelector(DialogStyleElementId.ResizeBorder.s(), STYLE_CONSOLE);

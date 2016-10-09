@@ -110,7 +110,7 @@ public abstract class CmdConditionalStateAbs<THIS extends CmdConditionalStateAbs
 		
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 		
-		storeCfgAndReturnSelf(icfg);
+		storeCfgAndReturnSelf(cfg);
 		return getThis();
 	}
 	

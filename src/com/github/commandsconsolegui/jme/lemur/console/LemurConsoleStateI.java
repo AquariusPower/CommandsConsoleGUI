@@ -208,7 +208,7 @@ public class LemurConsoleStateI<T extends Command<Button>> extends ConsoleStateA
 				0.9f, 0.9f, 0.1f, null));
 		}
 		
-		return storeCfgAndReturnSelf(icfg);
+		return storeCfgAndReturnSelf(cfg);
 	}
 	
 //	public void ConsoleGUILemurState(int iOpenConsoleHotKey, ConsoleCommands cc, Application app) {

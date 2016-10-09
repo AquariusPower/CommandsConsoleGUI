@@ -37,7 +37,6 @@ import com.github.commandsconsolegui.globals.GlobalHolderAbs.IGlobalOpt;
 import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
-import com.github.commandsconsolegui.jme.DialogStateAbs.RestartCfg;
 import com.github.commandsconsolegui.misc.ConfigureManagerI;
 import com.github.commandsconsolegui.misc.ConfigureManagerI.IConfigure;
 import com.github.commandsconsolegui.misc.HoldRestartable;
@@ -249,6 +248,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	public static class CfgParm implements ICfgParm{
 //		private Application app;
 		private String strId;
+		private boolean	bRestartIsNewInstance;
 //		public CfgParm(Application app, String strId) {
 		public CfgParm(String strId) {
 			super();
@@ -267,9 +267,12 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 			
 			return this;
 		}
+		public boolean isRestartNewInstance() {
+			return bRestartIsNewInstance;
+		}
 	}
 	private CfgParm	cfg;
-	private ICfgParm icfgOfInstance;
+//	private ICfgParm icfgOfInstance;
 	private boolean	bRestartRequested;
 
 	private boolean	bTryingToEnable;
@@ -339,7 +342,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 		this.bConfigured=true;
 		MsgI.i().debug("cfg",this.bConfigured,this);
 		
-		storeCfgAndReturnSelf(icfg);
+		storeCfgAndReturnSelf(cfg);
 		return getThis();
 	}
 	
@@ -355,10 +358,10 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	 * @return
 	 */
 //	protected <T extends ConditionalStateAbs> T storeCfgAndReturnSelf(ICfgParm icfg){
-	protected THIS storeCfgAndReturnSelf(ICfgParm icfg){
-		if(this.icfgOfInstance!=null && this.icfgOfInstance!=icfg){
+	protected THIS storeCfgAndReturnSelf(CfgParm icfg){
+		if(this.cfg!=null && this.cfg!=icfg){
 			throw new PrerequisitesNotMetException(
-				"cfg already set", this, this.icfgOfInstance, icfg);
+				"cfg already set", this, this.cfg, icfg);
 		}
 		
 		if(!MiscI.i().isInnerClassOfConcrete(icfg, this)){
@@ -367,15 +370,15 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 				"must be the cfg of the concrete class one", this, icfg);
 		}
 		
-		this.icfgOfInstance=icfg;
+		this.cfg=icfg;
 		
 		return getThis();
 //		return (T)this;
 	}
 	
-	private ICfgParm getCfg(){
-		return icfgOfInstance;
-	}
+//	private ICfgParm getCfg(){
+//		return icfgOfInstance;
+//	}
 	
 //	private void msgDbg(String str, boolean bSuccess) {
 //		MsgI.i().dbg(str, bSuccess, this);
@@ -457,10 +460,10 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	 * @return
 	 */
 	protected boolean initCheckPrerequisites(){
-		if(icfgOfInstance==null)throw new PrerequisitesNotMetException(
+		if(cfg==null)throw new PrerequisitesNotMetException(
 			"the instantiated class needs to set the configuration params to be used on a restart!");
 		
-		if(!MiscI.i().isInnerClassOfConcrete(icfgOfInstance, this)){
+		if(!MiscI.i().isInnerClassOfConcrete(cfg, this)){
 //		if(!icfgOfInstance.getClass().getName().startsWith(this.getClass().getName()+"$")){
 //		if(!icfgOfInstance.getClass().equals(this.getClass())){
 			throw new PrerequisitesNotMetException(
@@ -789,7 +792,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	 * @return
 	 */
 	public THIS copyToSelfValuesFrom(THIS casDiscarding){
-		casDiscarding.putRestartCfgAt(this);
+//		casDiscarding.putRestartCfgAt(this);
 //		this.putRestartCfgAt(t);
 //		setRestartCfg(casDiscarding, rcfg)
 //		cas.getHolder(this.getClass()).isChangedAndUpdateHash(this);
@@ -799,9 +802,9 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 		return getThis();
 	}
 	
-	protected void putRestartCfgAt(ConditionalStateAbs csa){
-		csa.setRestartCfg(this, rcfgForNewInstance);
-	}
+//	protected void putRestartCfgAt(ConditionalStateAbs csa){
+//		csa.setRestartCfg(this, rcfgForNewInstance);
+//	}
 	
 //	public THIS setInstancedFromRestart(ConditionalStateManagerI.CompositeControl cc){
 //		cc.assertSelfNotNull();
@@ -810,37 +813,38 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 //		return getThis();
 //	}
 	
-	public static class RestartCfg{}
-	
-	private RestartCfg rcfgForNewInstance;
-	private RestartCfg rcfgSelf;
-	protected RestartCfg getRestartCfg() {
-		return rcfgSelf;
-	}
-	public RestartCfg getRestartCfg(ConditionalStateManagerI.CompositeControl cc) {
-		cc.assertSelfNotNull();
-		return getRestartCfg();
-	}
-	public boolean isRestartCfgSet(){
-		return rcfgSelf!=null;
-	}
-	/**
-	 * Use only on the concrete class.
-	 * @param rcfg
-	 * @return
-	 */
-	protected THIS setRestartCfg(ConditionalStateAbs csaDiscarding, RestartCfg rcfg){
-		PrerequisitesNotMetException.assertIsTrue("discarding", csaDiscarding.isBeingDiscarded(), csaDiscarding, rcfg, this);
-		PrerequisitesNotMetException.assertNotAlreadySet("Restart Cfg", this.rcfgSelf, rcfg, this);
-		
-		this.rcfgSelf=rcfg;
-		
-		return getThis();
-	}
+//	public static class RestartCfg{}
+//	
+//	private RestartCfg rcfgForNewInstance;
+//	private RestartCfg rcfgSelf;
+//	protected RestartCfg getRestartCfg() {
+//		return rcfgSelf;
+//	}
+//	public RestartCfg getRestartCfg(ConditionalStateManagerI.CompositeControl cc) {
+//		cc.assertSelfNotNull();
+//		return getRestartCfg();
+//	}
+//	public boolean isRestartCfgSet(){
+//		return rcfgSelf!=null;
+//	}
+//	/**
+//	 * Use only on the concrete class.
+//	 * @param rcfg
+//	 * @return
+//	 */
+//	protected THIS setRestartCfg(ConditionalStateAbs csaDiscarding, RestartCfg rcfg){
+//		PrerequisitesNotMetException.assertIsTrue("discarding", csaDiscarding.isBeingDiscarded(), csaDiscarding, rcfg, this);
+//		PrerequisitesNotMetException.assertNotAlreadySet("Restart Cfg", this.rcfgSelf, rcfg, this);
+//		
+//		this.rcfgSelf=rcfg;
+//		
+//		return getThis();
+//	}
 	
 	public THIS createAndConfigureSelfCopy() {
 		try {
-			THIS t = (THIS)this.getClass().newInstance().configure(icfgOfInstance).copyToSelfValuesFrom(this);
+			cfg.bRestartIsNewInstance=(true);
+			THIS t = (THIS)this.getClass().newInstance().configure(cfg).copyToSelfValuesFrom(this);
 //			this.putRestartCfgAt(t);
 			return t;
 		} catch (InstantiationException | IllegalAccessException e) {

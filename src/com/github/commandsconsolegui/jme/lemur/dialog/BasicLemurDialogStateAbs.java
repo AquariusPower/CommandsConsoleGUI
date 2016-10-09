@@ -79,7 +79,7 @@ public abstract class BasicLemurDialogStateAbs<T,THIS extends BasicLemurDialogSt
 		 */
 		setRetryDelayFor(100L, ERetryDelayMode.Init.s());
 		
-		return storeCfgAndReturnSelf(icfg);
+		return storeCfgAndReturnSelf(cfg);
 	}
 	
 	@Override

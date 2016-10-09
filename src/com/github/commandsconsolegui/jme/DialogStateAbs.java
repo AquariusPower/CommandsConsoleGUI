@@ -213,6 +213,10 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //	}
 	
 	public static class CfgParm extends CmdConditionalStateAbs.CfgParm{
+		private boolean	bRestartEnableWithoutLoadingOnce = false;
+		private boolean	bRestartCopyToSelfAllEntries = true;
+//		private boolean	bRestartInstancedFrom = false;
+		
 		private Vector3f	v3fIniPos;
 		private Vector3f	v3fIniSize;
 		private boolean	bOptionSelectionMode;
@@ -249,6 +253,42 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		public void setInitiallyEnabled(boolean bInitiallyEnabled) {
 			this.bInitiallyEnabled = bInitiallyEnabled;
 		}
+
+		public boolean isRestartCopyToSelfAllEntries() {
+			return bRestartCopyToSelfAllEntries;
+		}
+
+		public void setRestartCopyToSelfAllEntries(boolean bRestartCopyToSelfAllEntries) {
+			this.bRestartCopyToSelfAllEntries = bRestartCopyToSelfAllEntries;
+		}
+
+		public boolean isRestartEnableWithoutLoadingOnceAndReset() {
+			if(bRestartEnableWithoutLoadingOnce){
+				bRestartEnableWithoutLoadingOnce=false;
+				return true;
+			}
+			return false;
+		}
+		
+		/**
+		 * this will basically grant a first save based on the default values
+		 * @return
+		 */
+		public void setRestartEnableWithoutLoadingOnce(boolean bRestartWithoutLoadingOnce) {
+			this.bRestartEnableWithoutLoadingOnce = bRestartWithoutLoadingOnce;
+		}
+
+//		/**
+//		 * TODO rename to isRestartInstance
+//		 * @return
+//		 */
+//		public boolean isRestartInstancedFrom() {
+//			return bRestartInstancedFrom;
+//		}
+//
+//		public void setRestartInstancedFrom(boolean bRestartInstancedFrom) {
+//			this.bRestartInstancedFrom = bRestartInstancedFrom;
+//		}
 	}
 	private CfgParm	cfg;
 	private boolean	bSaveDialog = true;
@@ -286,7 +326,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		 * Dialogs must be initially disabled because they are enabled 
 		 * on user demand. 
 		 */
-		if(!cfg.isInitiallyEnabled() && !isRestartCfgSet()){
+		if(!cfg.isInitiallyEnabled() && !cfg.isRestartNewInstance()){
 			initiallyDisabled();
 			btgEnabled.setObjectRawValue(false);//,false);
 		}
@@ -316,7 +356,9 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //		btgShowDialog.setCustomCmdId(this.strCmd);
 		
 		super.configure(cfg);//new CmdConditionalStateAbs.CfgParm(cfg.strUIId, cfg.bIgnorePrefixAndSuffix));
-		return storeCfgAndReturnSelf(icfg);
+		
+		storeCfgAndReturnSelf(cfg);
+		return getThis();
 	}
 	
 	protected void setSaveDialog(boolean b){
@@ -554,7 +596,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //		v3fBkpDiagPosB4Effect = getDialogMainContainer().getLocalTranslation().clone();
 //		v3fBkpDiagSizeB4Effect = getMainSizeCopy();
 		
-		if(btgEffect.b() && ( !isRestartCfgSet() || isFirstEnableDone() ) ){
+		if(btgEffect.b() && ( !cfg.isRestartNewInstance() || isFirstEnableDone() ) ){
 			Vector3f v3fScale = getDialogMainContainer().getLocalScale();
 			v3fScale.x=v3fScale.y=fMinEffectScale;
 			tdDialogEffect.setActive(true);
@@ -1529,43 +1571,43 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		return svTmp;
 	}
 	
-	public static class RestartCfg extends ConditionalStateAbs.RestartCfg{
-		private boolean	bRestartWithoutLoadingOnce = false;
-		private boolean	bCopyToSelfAllEntries = true;
-
-//		public boolean isRestartWithoutLoadingOnce() {
-//			return bRestartWithoutLoadingOnce;
+//	public static class RestartCfg extends ConditionalStateAbs.RestartCfg{
+//		private boolean	bRestartWithoutLoadingOnce = false;
+//		private boolean	bCopyToSelfAllEntries = true;
+//
+////		public boolean isRestartWithoutLoadingOnce() {
+////			return bRestartWithoutLoadingOnce;
+////		}
+//
+//		/**
+//		 * this will basically grant a first save based on the default values
+//		 * @return
+//		 */
+//		public void setRestartWithoutLoadingOnce(boolean bRestartWithoutLoadingOnce) {
+//			this.bRestartWithoutLoadingOnce = bRestartWithoutLoadingOnce;
 //		}
-
-		/**
-		 * this will basically grant a first save based on the default values
-		 * @return
-		 */
-		public void setRestartWithoutLoadingOnce(boolean bRestartWithoutLoadingOnce) {
-			this.bRestartWithoutLoadingOnce = bRestartWithoutLoadingOnce;
-		}
-
-		public boolean isRestartWithoutLoadingOnceAndReset() {
-			if(bRestartWithoutLoadingOnce){
-				setRestartWithoutLoadingOnce(false);
-				return true;
-			}
-			
-			return false;
-		}
-
-		public void setCopyToSelfAllEntries(boolean bCopyToSelfAllEntries) {
-			this.bCopyToSelfAllEntries=bCopyToSelfAllEntries;
-		}
-		
-		public boolean isCopyToSelfAllEntries(){
-			return bCopyToSelfAllEntries;
-		}
-	}
-	@Override
-	protected RestartCfg getRestartCfg() {
-		return (RestartCfg) super.getRestartCfg();
-	}
+//
+//		public boolean isRestartWithoutLoadingOnceAndReset() {
+//			if(bRestartWithoutLoadingOnce){
+//				setRestartWithoutLoadingOnce(false);
+//				return true;
+//			}
+//			
+//			return false;
+//		}
+//
+//		public void setCopyToSelfAllEntries(boolean bCopyToSelfAllEntries) {
+//			this.bCopyToSelfAllEntries=bCopyToSelfAllEntries;
+//		}
+//		
+//		public boolean isCopyToSelfAllEntries(){
+//			return bCopyToSelfAllEntries;
+//		}
+//	}
+//	@Override
+//	protected RestartCfg getRestartCfg() {
+//		return (RestartCfg) super.getRestartCfg();
+//	}
 	
 	private int iSaveLoadRetryDelayMilis=100;
 //	private int saveLoadWarnAfterFailTimes(){
@@ -1687,7 +1729,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	public THIS copyToSelfValuesFrom(THIS diagDiscarding) {
 		super.copyToSelfValuesFrom(diagDiscarding);
 		
-		if(getRestartCfg().isCopyToSelfAllEntries()){
+		if(cfg.isRestartCopyToSelfAllEntries()){
 			adleCompleteEntriesList.addAll(diagDiscarding.getCompleteEntriesListCopy());
 		}
 		

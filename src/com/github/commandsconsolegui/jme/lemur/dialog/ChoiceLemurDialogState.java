@@ -55,7 +55,7 @@ public class ChoiceLemurDialogState<T extends Command<Button>, THIS extends Choi
 	public THIS configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;
 		super.configure(cfg);
-		storeCfgAndReturnSelf(icfg);
+		storeCfgAndReturnSelf(cfg);
 		return getThis();
 	}
 	
