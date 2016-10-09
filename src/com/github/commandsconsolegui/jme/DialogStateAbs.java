@@ -261,7 +261,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 ////			dsv = new DialogSavable().setOwner(this);
 //		}
 		
-		if(!isRestartCfgSet())setRestartCfg(new RestartCfg());
+//		if(!isRestartCfgSet())setRestartCfg(new RestartCfg());
 		
 		btgRestoreIniPosSizeOnce.setCallerAssigned(new CallableX(this) {
 			@Override
@@ -286,7 +286,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		 * Dialogs must be initially disabled because they are enabled 
 		 * on user demand. 
 		 */
-		if(!cfg.isInitiallyEnabled() && !getRestartCfg().isInstancedFromRestart()){
+		if(!cfg.isInitiallyEnabled() && !isRestartCfgSet()){
 			initiallyDisabled();
 			btgEnabled.setObjectRawValue(false);//,false);
 		}
@@ -554,7 +554,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //		v3fBkpDiagPosB4Effect = getDialogMainContainer().getLocalTranslation().clone();
 //		v3fBkpDiagSizeB4Effect = getMainSizeCopy();
 		
-		if(btgEffect.b() && ( !getRestartCfg().isInstancedFromRestart() || isFirstEnableDone() ) ){
+		if(btgEffect.b() && ( !isRestartCfgSet() || isFirstEnableDone() ) ){
 			Vector3f v3fScale = getDialogMainContainer().getLocalScale();
 			v3fScale.x=v3fScale.y=fMinEffectScale;
 			tdDialogEffect.setActive(true);
@@ -1546,7 +1546,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		}
 
 		public boolean isRestartWithoutLoadingOnceAndReset() {
-			if(isInstancedFromRestart() && bRestartWithoutLoadingOnce){
+			if(bRestartWithoutLoadingOnce){
 				setRestartWithoutLoadingOnce(false);
 				return true;
 			}

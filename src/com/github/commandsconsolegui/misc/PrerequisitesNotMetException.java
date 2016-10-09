@@ -93,6 +93,12 @@ public class PrerequisitesNotMetException extends NullPointerException { //@STAT
 		}
 	}
 	
+	public static void assertIsTrue(String strDescWhat, boolean b, Object... aobjMoreObjectsForDebugInfo){
+		if(!b){
+			throw new PrerequisitesNotMetException("NOT "+strDescWhat+"!", aobjMoreObjectsForDebugInfo);
+		}
+	}
+	
 	public static void assertNotAlreadySet(String strDescWhat, Object objCurrent, Object objNew, Object... aobjMoreObjectsForDebugInfo){
 		if(objCurrent!=null){
 			ArrayList<Object> aobjAll = new ArrayList<Object>();

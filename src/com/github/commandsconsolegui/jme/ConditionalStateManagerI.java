@@ -123,8 +123,6 @@ public class ConditionalStateManagerI extends AbstractAppState implements IManag
 			if(cas.isRestartRequested()){
 				casNew = cas.createAndConfigureSelfCopy(); //this will add the new one to manager too
 				
-				casNew.getRestartCfg(ccSelf).setInstancedFromRestart();
-				
 				if(cas.isWasEnabledBeforeRestarting()){
 //					casNew.requestRetryUntilEnabled();
 					casNew.requestEnable();
