@@ -71,6 +71,8 @@ import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
 import com.jme3.asset.AssetNotFoundException;
 import com.jme3.asset.plugins.FileLocator;
 import com.jme3.export.Savable;
+import com.jme3.export.xml.XMLExporter;
+import com.jme3.export.xml.XMLImporter;
 import com.jme3.font.BitmapCharacter;
 import com.jme3.font.BitmapCharacterSet;
 import com.jme3.font.BitmapFont;
@@ -99,6 +101,8 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 //	private SimpleApplication	sapp;
 	private IHandleExceptions	ihe;
 	private boolean	bConfigured;
+	
+	private BoolTogglerCmdField btgUseXmlSaveMode = new BoolTogglerCmdField(this, false);
 	
 	public MiscJmeI() {
 		SingleInstanceManagerI.i().add(this);
@@ -754,6 +758,8 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 		}
 	}
 
+	XMLExporter xmleInstance = new XMLExporter();
+	XMLImporter xmliInstance = new XMLImporter();
 	/**
 	 * 
 	 * @param strFileName
@@ -775,11 +781,13 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 			throw new PrerequisitesNotMetException("console save data path value not expected", strPathFull, strSFT);
 		}
 		
-		if(!strFileName.endsWith(".j3o")){
-			strFileName+=".j3o";
+		String strJ3oExt=".j3o", strXmlExt=".xml";
+		
+		if(strFileName.endsWith(strJ3oExt)){
+			strFileName=strFileName.substring(0, strFileName.length()-strJ3oExt.length());
 		}
 		
-		String strFullPathAndFileName=strPathFull+strFileName;
+		String strFullPathAndFileNameNoExt=strPathFull+strFileName;
 		
 		ArrayList<Object> aobjDbg = new ArrayList<Object>();
 		aobjDbg.add(strPathRelative);
@@ -795,12 +803,16 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 		if(bSave){
 			str="saving";
 			try{
-				SaveGame.saveGame(
-					strPathRelative,
-					strFileName,
-					svMain,
-					esft);
-			}catch(IllegalStateException e){
+				if(btgUseXmlSaveMode.b()){
+					xmleInstance.save(svMain, new File(strFullPathAndFileNameNoExt+strXmlExt));
+				}else{
+					SaveGame.saveGame(
+						strPathRelative,
+						strFileName+strJ3oExt,
+						svMain,
+						esft);
+				}
+			}catch(IllegalStateException | IOException e){
 //			}catch(Exception e){ 
 //				/** 
 //				 * keep as catch "Exception" as application is exiting without messages if some unexpected
@@ -812,29 +824,42 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 //					.initCauseAndReturnSelf(e);
 			}
 		}else{
-			File fl = new File(strFullPathAndFileName);
-			if(fl.exists()){
+			File flJ3o = new File(strFullPathAndFileNameNoExt+strJ3oExt);
+			File flXml = new File(strFullPathAndFileNameNoExt+strXmlExt);
+			File flUsed = null;
+			
+			if(!flJ3o.exists() && !flXml.exists()){
+				str="not found";
+			}else{
 				try{
-					svLoaded = SaveGame.loadGame(
-						strPathRelative,
-						strFileName,
-						null,//GlobalAppRefI.i().getAssetManager(),
-						esft);
+					if(btgUseXmlSaveMode.b() && flXml.exists()){
+						flUsed = flXml;
+						svLoaded = xmliInstance.load(flXml);
+					}
 					
-					str="loading";
-				}catch(NullPointerException|ClassCastException e){
+					if(svLoaded==null){ // is also a fallback
+						flUsed = flJ3o;
+						svLoaded = SaveGame.loadGame(
+							strPathRelative,
+							strFileName+strJ3oExt,
+							null,//GlobalAppRefI.i().getAssetManager(),
+							esft);
+						
+						str="loading";
+					}
+				}catch(NullPointerException | ClassCastException | IOException e){
 					MsgI.i().warn("invalid save file", aobjDbg, e);
-					fl.renameTo(new File(strFullPathAndFileName+"."+MiscI.i().getDateTimeForFilename()+".broken"));
+					flUsed.renameTo(new File(flUsed.getAbsolutePath()+"."+MiscI.i().getDateTimeForFilename()+".broken"));
+//					fl.renameTo(new File(strFullPathAndFileNameNoExt+strJ3oExt+"."+MiscI.i().getDateTimeForFilename()+".broken"));
 //					svLoaded=null;
 				}
-			
+				
 				if(svLoaded==null){
 					MsgI.i().warn("failed to load", aobjDbg);
 					str="when loading";
 				}
-			}else{
-				str="not found";
 			}
+			
 		}
 		
 		MsgI.i().devInfo(str+" "+strFileName+" at "+strPathFull);
