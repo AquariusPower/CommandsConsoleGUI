@@ -762,36 +762,54 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 	XMLImporter xmliInstance = new XMLImporter();
 	/**
 	 * 
-	 * @param strFileName
+	 * @param strFileNameNoExt
 	 * @param svMain must gather all other required Savables
 	 */
-	private <T extends Savable> T consoleDataStoringManagement(Class<T> cl, String strFileName, Savable svMain, boolean bSave) {
-		StorageFolderType esft = GlobalOperationalSystemI.i().getStorageFolderType();
-		
+	private <T extends Savable> T consoleDataStoringManagement(Class<T> cl, String strFileNameNoExt, Savable svMain, boolean bSave) {
 		String strPathFull = GlobalCommandsDelegatorI.i().getConsoleSaveDataPath();
 		if(!strPathFull.endsWith("/ConsoleSave/")){
 			strPathFull+="/ConsoleSave/";
 		}
 		
+		return dataStoringManagement(cl, strFileNameNoExt, svMain, strPathFull, bSave);
+	}
+	
+	/**
+	 * 
+	 * @param cl
+	 * @param strFileNameNoExt
+	 * @param svMain
+	 * @param strPath can be absolute or relative (staring with '.')
+	 * @param bSave
+	 * @return
+	 */
+	public <T extends Savable> T dataStoringManagement(Class<T> cl, String strFileNameNoExt, Savable svMain, String strPath, boolean bSave) {
+		StorageFolderType esft = GlobalOperationalSystemI.i().getStorageFolderType();
 		String strPathRelative = null;
-		String strSFT = JmeSystem.getStorageFolder(esft).getAbsolutePath();
-		if(strPathFull.startsWith(strSFT)){
-			strPathRelative = strPathFull.substring(strSFT.length());
+		String strBaseStorageFolder = JmeSystem.getStorageFolder(esft).getAbsolutePath();
+		
+		if(strPath.startsWith(".")){
+			strPathRelative=strPath;
+			strPath=strBaseStorageFolder+File.separator+strPath;
 		}else{
-			throw new PrerequisitesNotMetException("console save data path value not expected", strPathFull, strSFT);
+			if(strPath.startsWith(strBaseStorageFolder)){
+				strPathRelative = strPath.substring(strBaseStorageFolder.length());
+			}else{
+				throw new PrerequisitesNotMetException("save data path value not expected", strPath, strBaseStorageFolder);
+			}
 		}
 		
 		String strJ3oExt=".j3o", strXmlExt=".xml";
 		
-		if(strFileName.endsWith(strJ3oExt)){
-			strFileName=strFileName.substring(0, strFileName.length()-strJ3oExt.length());
+		if(strFileNameNoExt.endsWith(strJ3oExt)){
+			strFileNameNoExt=strFileNameNoExt.substring(0, strFileNameNoExt.length()-strJ3oExt.length());
 		}
 		
-		String strFullPathAndFileNameNoExt=strPathFull+strFileName;
+		String strFullPathAndFileNameNoExt=strPath+strFileNameNoExt;
 		
 		ArrayList<Object> aobjDbg = new ArrayList<Object>();
 		aobjDbg.add(strPathRelative);
-		aobjDbg.add(strFileName);
+		aobjDbg.add(strFileNameNoExt);
 		aobjDbg.add(svMain);
 		aobjDbg.add(esft);
 		
@@ -808,17 +826,11 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 				}else{
 					SaveGame.saveGame(
 						strPathRelative,
-						strFileName+strJ3oExt,
+						strFileNameNoExt+strJ3oExt,
 						svMain,
 						esft);
 				}
 			}catch(IllegalStateException | IOException e){
-//			}catch(Exception e){ 
-//				/** 
-//				 * keep as catch "Exception" as application is exiting without messages if some unexpected
-//				 * exception happens here
-//				 * TODO why???
-//				 */
 				MsgI.i().exception("save failed", e, aobjDbg);
 //				throw new PrerequisitesNotMetException("save failed", aobjDbg)
 //					.initCauseAndReturnSelf(e);
@@ -841,7 +853,7 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 						flUsed = flJ3o;
 						svLoaded = SaveGame.loadGame(
 							strPathRelative,
-							strFileName+strJ3oExt,
+							strFileNameNoExt+strJ3oExt,
 							null,//GlobalAppRefI.i().getAssetManager(),
 							esft);
 						
@@ -862,7 +874,7 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 			
 		}
 		
-		MsgI.i().devInfo(str+" "+strFileName+" at "+strPathFull);
+		MsgI.i().devInfo(str+" "+strFileNameNoExt+" at "+strPath);
 		
 		return (T)svLoaded;
 	}
