@@ -331,7 +331,7 @@ public class MiscI {
 		return "";
 	}
 	
-	synchronized public BasicFileAttributes fileAttributesTS(File fl){
+	synchronized public BasicFileAttributes fileReadAttributesTS(File fl){
 //		if(fl.exists()){
 			try {
 				return Files.readAttributes(fl.toPath(), BasicFileAttributes.class);

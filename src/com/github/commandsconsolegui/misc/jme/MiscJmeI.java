@@ -818,38 +818,63 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 		 */
 		String str=null;
 		Savable svLoaded = null;
+		File flJ3o = new File(strFullPathAndFileNameNoExt+strJ3oExt);
+		File flXml = new File(strFullPathAndFileNameNoExt+strXmlExt);
 		if(bSave){
 			str="saving";
 			try{
 				if(btgUseXmlSaveMode.b()){
 					xmleInstance.save(svMain, new File(strFullPathAndFileNameNoExt+strXmlExt));
-				}else{
+				}
+//				else{
+				/**
+				 * Binary is always saved, because big binaries are faster to load than xml ones. 
+				 */
 					SaveGame.saveGame(
 						strPathRelative,
 						strFileNameNoExt+strJ3oExt,
 						svMain,
 						esft);
-				}
+//				}
+				
+				flXml.setLastModified( MiscI.i().fileReadAttributesTS(flJ3o).lastModifiedTime().toMillis() );
 			}catch(IllegalStateException | IOException e){
 				MsgI.i().exception("save failed", e, aobjDbg);
 //				throw new PrerequisitesNotMetException("save failed", aobjDbg)
 //					.initCauseAndReturnSelf(e);
 			}
 		}else{
-			File flJ3o = new File(strFullPathAndFileNameNoExt+strJ3oExt);
-			File flXml = new File(strFullPathAndFileNameNoExt+strXmlExt);
 			File flUsed = null;
 			
 			if(!flJ3o.exists() && !flXml.exists()){
 				str="not found";
 			}else{
 				try{
-					if(btgUseXmlSaveMode.b() && flXml.exists()){
+					boolean bUseXml=false;
+					if(btgUseXmlSaveMode.b()){
+						if(flJ3o.exists() && flXml.exists()){
+							long lMilisJ3o=MiscI.i().fileReadAttributesTS(flJ3o).lastModifiedTime().toMillis();
+							long lMilisXml=MiscI.i().fileReadAttributesTS(flXml).lastModifiedTime().toMillis();
+							
+							/**
+							 * binary one is faster, being expectedly identical, prefer the faster one.
+							 */
+							if(lMilisXml>lMilisJ3o){
+								bUseXml=true;
+							}
+						}else{
+							if(flXml.exists()){
+								bUseXml=true;
+							}
+						}
+					}
+					
+					if(bUseXml){
 						flUsed = flXml;
 						svLoaded = xmliInstance.load(flXml);
 					}
 					
-					if(svLoaded==null){ // is also a fallback
+					if(svLoaded==null){ // granted reason to load binary one, but is also a fallback in case xml fails
 						flUsed = flJ3o;
 						svLoaded = SaveGame.loadGame(
 							strPathRelative,
@@ -869,6 +894,8 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 				if(svLoaded==null){
 					MsgI.i().warn("failed to load", aobjDbg);
 					str="when loading";
+				}else{
+					MsgI.i().devInfo("loaded "+flUsed.getName());
 				}
 			}
 			

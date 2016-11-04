@@ -121,7 +121,7 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 		for(File fl:getAllLocksTD()){
 			if(cmpSelfWithTD(fl))continue;
 			
-			BasicFileAttributes attr = MiscI.i().fileAttributesTS(fl);
+			BasicFileAttributes attr = MiscI.i().fileReadAttributesTS(fl);
 			if(attr==null)continue;
 			
 			Long lOtherLastUpdateTimeMilis = null;
@@ -407,7 +407,7 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 			
 			flSelfLock.delete();
 			if(MiscI.i().fileAppendListTS(flSelfLock, astr)){
-				attrSelfLock = MiscI.i().fileAttributesTS(flSelfLock);
+				attrSelfLock = MiscI.i().fileReadAttributesTS(flSelfLock);
 				
 				if(bCreateLockOutputOnce){
 					outputTD("Created lock: "+flSelfLock.getName()+" "+getSelfMode(true));
