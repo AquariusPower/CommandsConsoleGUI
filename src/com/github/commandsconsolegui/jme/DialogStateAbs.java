@@ -41,9 +41,11 @@ import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalDialogHelperI;
 import com.github.commandsconsolegui.jme.AudioUII.EAudio;
+import com.github.commandsconsolegui.jme.ConditionalStateManagerI.CompositeControl;
 import com.github.commandsconsolegui.jme.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.extras.UngrabMouseStateI;
+import com.github.commandsconsolegui.jme.extras.UngrabMouseStateI.IUngrabMouse;
 import com.github.commandsconsolegui.jme.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jme.lemur.extras.ISpatialValidator;
 import com.github.commandsconsolegui.jme.savablevalues.CompositeSavableAbs;
@@ -77,7 +79,7 @@ import com.simsilica.lemur.Container;
  * @param <THIS> is for getThis() concrete auto class type inherited trick
  */
 //public abstract class BaseDialogStateAbs<DIAG,CS extends BaseDialogStateAbs.DialogCS<THIS>,THIS extends BaseDialogStateAbs<DIAG,CS,THIS>> extends CmdConditionalStateAbs implements IReflexFillCfg {
-public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>> extends CmdConditionalStateAbs<THIS> implements IReflexFillCfg {
+public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>> extends CmdConditionalStateAbs<THIS> implements IReflexFillCfg,IUngrabMouse {
 	private ISpatialValidator	sptvDialogMainContainer;
 	private Spatial	sptIntputField;
 	private Spatial sptMainList;
@@ -297,6 +299,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	public THIS configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
 		
+		UngrabMouseStateI.i().setKeepUngrabbedRequester(this,true);
 //		if(isSaveDialog()){
 ////			dsv = new DialogSavable().setOwner(this);
 //		}
@@ -586,7 +589,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		
 		getNodeGUI().attachChild(getDialogMainContainer());
 		
-		setMouseCursorKeepUngrabbed(true);
+//		setMouseCursorKeepUngrabbed(true);
 //		if(diagParent!=null)diagParent.updateModalChild(true,this);
 		if(hrdiagParent.isSet())hrdiagParent.getRef().updateModalChild(true,this);
 //		updateModalParent(true);
@@ -656,7 +659,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 			getDialogMainContainer().setLocalScale(1f);
 		}
 		
-		setMouseCursorKeepUngrabbed(false);
+//		setMouseCursorKeepUngrabbed(false);
 		if(hrdiagParent.isSet())hrdiagParent.getRef().updateModalChild(false,this);
 //		if(diagParent!=null)diagParent.updateModalChild(false,this);
 //		updateModalParent(false);
@@ -670,15 +673,15 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		if(isSaveDialog())GlobalCommandsDelegatorI.i().addCmdToQueue(scfSave);
 	}
 	
-	/**
-	 * This is important to prevent other parts of the application from 
-	 * vanishing with (grabbing) the mouse cursor.
-	 * @param b
-	 */
-	protected THIS setMouseCursorKeepUngrabbed(boolean b) {
-		UngrabMouseStateI.i().setKeepUngrabbedRequester(this,b);
-		return getThis();
-	}
+//	/**
+//	 * This is important to prevent other parts of the application from 
+//	 * vanishing with the mouse cursor (by grabbing it).
+//	 * @param b
+//	 */
+//	protected THIS setMouseCursorKeepUngrabbed(boolean b) {
+//		UngrabMouseStateI.i().setKeepUngrabbedRequester(this,b);
+//		return getThis();
+//	}
 	
 	protected THIS setTitle(String str){
 		this.strTitle = str;
@@ -1743,4 +1746,20 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //	public ArrayList<DialogListEntryData<DIAG>> getCompleteEntriesListCopy(){
 //		return new ArrayList<DialogListEntryData<DIAG>>(adleCompleteEntriesList);
 //	}
+	
+	protected void clearLastFilter(){
+		strLastFilter="";
+	}
+	
+	@Override
+	public boolean isKeepMouseUngrabbed() {
+		return isEnabled();
+	}
+	
+	@Override
+	public boolean prepareToDiscard(CompositeControl cc) {
+		if(!super.prepareToDiscard(cc))return false;
+		UngrabMouseStateI.i().setKeepUngrabbedRequester(this,false);
+		return true;
+	}
 }

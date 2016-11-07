@@ -11,7 +11,7 @@
 		
 	<target name="CreateAllJars" description="Create all Jar files">
 		<!-- binary -->
-		<jar jarfile="${projv}.jar" >
+		<jar jarfile="${projv}-main.jar" >
 			<fileset dir="./" includes="LICENSE" />
 			<!-- <fileset dir="./bin/" includes="**/*.class" /> -->
 			<fileset dir="./bin/" />
@@ -19,7 +19,7 @@
 		
 		<jar jarfile="${projv}-sources.jar" >
 			<fileset dir="./">
-				<include name=".jme3/**/Console-Init.cfg" />
+				<include name=".jme3/**/ConsoleTestI/**/Console-Init.cfg" />
 				<include name=".settings/org.eclipse.jdt.core.prefs" />
 				<include name=".project" />
 				<include name=".classpath" />

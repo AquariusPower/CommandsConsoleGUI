@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.jme.ConditionalStateAbs;
+import com.github.commandsconsolegui.misc.MsgI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 
@@ -45,7 +47,11 @@ public class UngrabMouseStateI extends ConditionalStateAbs<UngrabMouseStateI> {
 	private static UngrabMouseStateI instance = new UngrabMouseStateI();
 	public static UngrabMouseStateI i(){return instance;}
 	
-	ArrayList<Object> aobjKeepUngrabbedRequesterList = new ArrayList<Object>();
+	public static interface IUngrabMouse{
+		public boolean isKeepMouseUngrabbed();
+	}
+	
+	ArrayList<IUngrabMouse> aumKeepUngrabbedRequesterList = new ArrayList<IUngrabMouse>();
 	long lLastUpdateMilisAtMainThread;
 	long lDelayToUngrabMilis=500;
 	boolean bWasUnGrabbedDuringSlowdown=true;
@@ -92,18 +98,24 @@ public class UngrabMouseStateI extends ConditionalStateAbs<UngrabMouseStateI> {
 //	}
 	
 	/**
+	 * This is important to prevent other parts of the application from 
+	 * vanishing with the mouse cursor (by grabbing it).
 	 * this will also instantly ungrab the mouse cursor
-	 * @param objRequester
-	 * @param bKeepUngrabbed
+	 * @param umRequester
+	 * @param bAdd if false will remove from the list
 	 */
-	public synchronized void setKeepUngrabbedRequester(Object objRequester, boolean bKeepUngrabbed){
-		if(bKeepUngrabbed){
-			if(!aobjKeepUngrabbedRequesterList.contains(objRequester)){
-				aobjKeepUngrabbedRequesterList.add(objRequester);
+	public synchronized void setKeepUngrabbedRequester(IUngrabMouse umRequester, boolean bAdd){
+		if(bAdd){
+			if(!aumKeepUngrabbedRequesterList.contains(umRequester)){
+				aumKeepUngrabbedRequesterList.add(umRequester);
+			}else{
+				MsgI.i().devWarn("remove before re-adding, or configure only once", this, umRequester, bAdd);
 			}
 		}else{
-			if(aobjKeepUngrabbedRequesterList.contains(objRequester)){
-				aobjKeepUngrabbedRequesterList.remove(objRequester);
+			if(aumKeepUngrabbedRequesterList.contains(umRequester)){
+				aumKeepUngrabbedRequesterList.remove(umRequester);
+			}else{
+				MsgI.i().devWarn("not found", this, umRequester, bAdd);
 			}
 		}
 	}
@@ -145,6 +157,16 @@ public class UngrabMouseStateI extends ConditionalStateAbs<UngrabMouseStateI> {
 		lLastUpdateMilisAtMainThread=System.currentTimeMillis();
 	}
 	
+	public boolean isKeepUngrabbed(){
+		for(IUngrabMouse um:aumKeepUngrabbedRequesterList){
+			if(um.isKeepMouseUngrabbed()){
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	public void updateAtNewThread() {
 		long lCurrentTimeMilis = System.currentTimeMillis();
 		boolean bIsSlow = lCurrentTimeMilis > (lLastUpdateMilisAtMainThread+lDelayToUngrabMilis);
@@ -152,7 +174,7 @@ public class UngrabMouseStateI extends ConditionalStateAbs<UngrabMouseStateI> {
 		
 //		boolean bIsGrabbed = org.lwjgl.input.Mouse.isGrabbed();
 		boolean bIsGrabbed = !GlobalAppRefI.i().getInputManager().isCursorVisible();
-		boolean bKeepUngrabbedRequested = aobjKeepUngrabbedRequesterList.size()>0;
+		boolean bKeepUngrabbedRequested = isKeepUngrabbed(); //		aobjKeepUngrabbedRequesterList.size()>0;
 		
 		if(bIsGrabbed){
 			if(bIsSlow || bKeepUngrabbedRequested){

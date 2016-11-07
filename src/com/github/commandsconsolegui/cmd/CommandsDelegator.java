@@ -3527,7 +3527,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		}
 	}
 	
+	/**
+	 * override to allow custom external vars to be updated thru this method
+	 */
+	protected void setupVars(){}
+	
 	private void setupVars(boolean bSave){
+		setupVars();
+		
 		varSet(""+CommandsHelperI.i().getRestrictedToken()+ERestrictedSetupLoadableVars.userVariableListHashcode,
 			""+tmUserVariables.hashCode(),
 			false);
