@@ -15,6 +15,9 @@
 			<fileset dir="./" includes="LICENSE" />
 			<!-- <fileset dir="./bin/" includes="**/*.class" /> -->
 			<fileset dir="./bin/" />
+		  <manifest>
+		    <attribute name="Main-Class" value="commandsconsoleguitests.ConsoleTestI"/>
+		  </manifest>
 		</jar>
 		
 		<jar jarfile="${projv}-sources.jar" >

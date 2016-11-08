@@ -31,14 +31,13 @@ import java.io.File;
 import java.lang.reflect.Field;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
-import com.github.commandsconsolegui.cmd.CommandsHelperI;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.CommandsHelperI;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.extras.SingleMandatoryAppInstanceI;
 import com.github.commandsconsolegui.globals.GlobalSingleMandatoryAppInstanceI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppSettingsI;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.lemur.console.SimpleConsolePlugin;
@@ -47,7 +46,6 @@ import com.github.commandsconsolegui.jme.lemur.dialog.MaintenanceListLemurDialog
 import com.github.commandsconsolegui.jme.lemur.dialog.QuestionLemurDialogState;
 import com.github.commandsconsolegui.misc.ConfigureManagerI;
 import com.github.commandsconsolegui.misc.ConfigureManagerI.IConfigure;
-import com.github.commandsconsolegui.misc.HashChangeHolder;
 import com.github.commandsconsolegui.misc.HoldRestartable;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
