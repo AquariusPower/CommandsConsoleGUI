@@ -46,8 +46,6 @@ import com.github.commandsconsolegui.jme.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jme.extras.UngrabMouseStateI.IUngrabMouse;
-import com.github.commandsconsolegui.jme.lemur.console.LemurFocusHelperStateI;
-import com.github.commandsconsolegui.jme.lemur.extras.ISpatialValidator;
 import com.github.commandsconsolegui.jme.savablevalues.CompositeSavableAbs;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
@@ -59,13 +57,11 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.Request;
 import com.github.commandsconsolegui.misc.jme.MiscJmeI;
-import com.github.commandsconsolegui.misc.jme.lemur.MiscLemurStateI;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.simsilica.lemur.Container;
 
 /**
  * This class would be useful to a non Lemur dialog too.
@@ -80,7 +76,7 @@ import com.simsilica.lemur.Container;
  */
 //public abstract class BaseDialogStateAbs<DIAG,CS extends BaseDialogStateAbs.DialogCS<THIS>,THIS extends BaseDialogStateAbs<DIAG,CS,THIS>> extends CmdConditionalStateAbs implements IReflexFillCfg {
 public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>> extends CmdConditionalStateAbs<THIS> implements IReflexFillCfg,IUngrabMouse {
-	private ISpatialValidator	sptvDialogMainContainer;
+	private ISpatialLayoutValidator	sptvDialogMainContainer;
 	private Spatial	sptIntputField;
 	private Spatial sptMainList;
 	private String	strTitle;
@@ -162,10 +158,10 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 			return false;
 		}
 		
-		return ((ISpatialValidator)sptvDialogMainContainer).isLayoutValid();
+		return ((ISpatialLayoutValidator)sptvDialogMainContainer).isLayoutValid();
 	}
 	
-	protected THIS setDialogMainContainer(ISpatialValidator spt){
+	protected THIS setDialogMainContainer(ISpatialLayoutValidator spt){
 		PrerequisitesNotMetException.assertNotAlreadySet("diag main container", this.sptvDialogMainContainer, spt, this);
 		this.sptvDialogMainContainer=spt;
 		
@@ -552,13 +548,13 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 			if(!bGrow)fPerc = 1.0f - fPerc;
 			v3f.x = v3f.x + fHalfWidth - (fHalfWidth*fPerc);
 			v3f.y = v3f.y - fHalfHeight + (fHalfHeight*fPerc);
-			MiscLemurStateI.i().setLocationXY(getDialogMainContainer(),v3f);
+			MiscJmeI.i().setLocationXY(getDialogMainContainer(),v3f);
 		}
 		
 		if(bCompleted){
 			tdDialogEffect.setActive(false);
 			
-			MiscLemurStateI.i().setLocationXY(getDialogMainContainer(),v3fBkpDiagPosB4Effect);
+			MiscJmeI.i().setLocationXY(getDialogMainContainer(),v3fBkpDiagPosB4Effect);
 			v3fBkpDiagPosB4Effect=null;
 		}
 		
@@ -694,18 +690,18 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //		return cd().getReflexFillCfg(rfcv);
 //	}
 	
-	/**
-	 * @param ccSelf 
-	 * @return
-	 */
-	public Spatial getInputFieldForManagement(LemurFocusHelperStateI.CompositeControl ccSelf) {
-		ccSelf.assertSelfNotNull();
-		return sptIntputField;
-	}
+//	/**
+//	 * @param ccSelf 
+//	 * @return
+//	 */
+//	public Spatial getInputFieldForManagement(LemurFocusHelperStateI.CompositeControl ccSelf) {
+//		ccSelf.assertSelfNotNull();
+//		return sptIntputField;
+//	}
 	
-	public float getInputFieldHeight(){
-		return MiscJmeI.i().retrieveBitmapTextFor((Node)sptIntputField).getLineHeight();
-	}
+//	public float getInputFieldHeight(){
+//		return MiscJmeI.i().retrieveBitmapTextFor((Node)sptIntputField).getLineHeight();
+//	}
 	
 	protected THIS setInputField(Spatial sptIntputField) {
 		this.sptIntputField = sptIntputField;
@@ -1101,12 +1097,12 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //	protected abstract void updateSelected(DialogListEntryData<T> dledPreviouslySelected);
 	protected abstract void updateSelected(final DialogListEntryData<DIAG> dledAbove, final DialogListEntryData<DIAG> dledParentTmp);
 
-	protected Container getNorthContainer() {
-		return (Container)cntrNorth;
+	protected Node getNorthContainer() {
+		return cntrNorth;
 	}
 	
-	protected Container getSouthContainer() {
-		return (Container)cntrSouth;
+	protected Node getSouthContainer() {
+		return cntrSouth;
 	}
 
 	protected THIS setContainerNorth(Node cntrNorth) {
@@ -1762,5 +1758,9 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		if(!super.prepareToDiscard(cc))return false;
 		UngrabMouseStateI.i().setKeepUngrabbedRequester(this,false);
 		return true;
+	}
+
+	public float getInputFieldHeight(){
+		return MiscJmeI.i().retrieveBitmapTextFor((Node)getInputField()).getLineHeight();
 	}
 }

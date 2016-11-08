@@ -25,13 +25,13 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.jme.lemur.extras;
+package com.github.commandsconsolegui.jme;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public interface ISpatialValidator{
+public interface ISpatialLayoutValidator{
 	public boolean isLayoutValid();
 }

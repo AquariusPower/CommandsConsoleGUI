@@ -35,23 +35,18 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import com.github.commandsconsolegui.globals.jme.GlobalDialogHelperI;
 import com.github.commandsconsolegui.jme.AudioUII;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData.SliderValueData.ESliderKey;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
-import com.github.commandsconsolegui.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.misc.HoldRestartable;
-import com.github.commandsconsolegui.misc.IDiscardableInstance;
 import com.github.commandsconsolegui.misc.IHasOwnerInstance;
-import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.export.Savable;
-import com.simsilica.lemur.RangedValueModel;
 
 /**
  * Each list entry can show differently, they could be:
@@ -227,7 +222,7 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 //	private char chQuotesR='"';
 	private boolean bAddVisibleQuotes=false;
 
-private RangedValueModel	modelSliderValue;
+//	private RangedValueModel	modelSliderValue;
 	
 	public boolean isAddVisibleQuotes(){
 		return bAddVisibleQuotes;
@@ -531,9 +526,9 @@ private RangedValueModel	modelSliderValue;
 		Collections.sort(aChildList, cmpDled);
 	}
 
-	public RangedValueModel getSliderValueModel() {
-		return modelSliderValue;
-	}
+//	public RangedValueModel getSliderValueModel() {
+//		return modelSliderValue;
+//	}
 	
 //	@Override
 //	public boolean isBeingDiscarded() {

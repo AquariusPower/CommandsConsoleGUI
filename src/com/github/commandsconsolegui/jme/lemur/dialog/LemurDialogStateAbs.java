@@ -720,6 +720,16 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		return getNorthContainer().getSize().clone();
 	}
 	
+	@Override
+	protected Container getNorthContainer() {
+		return (Container)super.getNorthContainer();
+	}
+	
+	@Override
+	protected Container getSouthContainer() {
+		return (Container)super.getSouthContainer();
+	}
+	
 	private void resizeInfoAndList(Vector3f v3fDisplacement) {
 		Vector3f v3fNorth = getNorthContainerSizeCopy();
 		Vector3f v3fCenter = cntrCenterMain.getSize().clone();
@@ -1575,7 +1585,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 //		bRunningEffectAtAllListEntries=true;
 		
 		for(CellDialogEntry<T> cell:getVisibleCellEntries()){
-			MiscLemurStateI.i().setScaleXY(cell, fMinScale, 1f);
+			MiscJmeI.i().setScaleXY(cell, fMinScale, 1f);
 		}
 //		GridPanel gp = getMainList().getGridPanel();
 //		for(int iC=0;iC<gp.getVisibleColumns();iC++){
@@ -1659,7 +1669,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		
 		if(!bGrow)fScale=1f-fScale; //shrink
 		
-		MiscLemurStateI.i().setScaleXY(spt, fScale, 1f);
+		MiscJmeI.i().setScaleXY(spt, fScale, 1f);
 		
 		return fScale;
 	}
@@ -1916,4 +1926,14 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 	protected void setOverrideNormalDialog(boolean bOverrideNormalDialog) {
 		this.bOverrideNormalDialog = bOverrideNormalDialog;
 	}
+
+	/**
+	 * @param ccSelf 
+	 * @return
+	 */
+	public Spatial getInputFieldForManagement(LemurFocusHelperStateI.CompositeControl ccSelf) {
+		ccSelf.assertSelfNotNull();
+		return getInputField();
+	}
+
 }

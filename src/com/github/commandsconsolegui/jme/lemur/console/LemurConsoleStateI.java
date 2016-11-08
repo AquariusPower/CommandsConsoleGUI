@@ -3479,15 +3479,6 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 	//	return font;
 	//}
 	
-	/**
-	 * TODO this is probably not to be used...
-	 */
-	public static class TrueTypeFontFromSystem extends TrueTypeFont{
-		public TrueTypeFontFromSystem(AssetManager assetManager, Font font, int pointSize, int outline) {
-	  	super(assetManager, font, pointSize, outline);
-	  }
-	}
-	
 	///**
 	// * TODO this is not working
 	// * @param strFontID

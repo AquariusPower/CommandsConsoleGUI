@@ -54,7 +54,6 @@ import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jme.GlobalJmeAppOSI;
 import com.github.commandsconsolegui.globals.jme.GlobalRootNodeI;
 import com.github.commandsconsolegui.jme.PseudoSavableHolder;
-import com.github.commandsconsolegui.jme.lemur.console.LemurConsoleStateI.TrueTypeFontFromSystem;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableWeak;
 import com.github.commandsconsolegui.misc.ConfigureManagerI.IConfigure;
 import com.github.commandsconsolegui.misc.DebugI;
@@ -68,6 +67,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
+import com.jme3.asset.AssetManager;
 import com.jme3.asset.AssetNotFoundException;
 import com.jme3.asset.plugins.FileLocator;
 import com.jme3.export.Savable;
@@ -579,6 +579,15 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 			));
 	}
 	
+	/**
+	 * TODO this is probably not to be used...
+	 */
+	public static class TrueTypeFontFromSystem extends TrueTypeFont{
+		public TrueTypeFontFromSystem(AssetManager assetManager, Font font, int pointSize, int outline) {
+	  	super(assetManager, font, pointSize, outline);
+	  }
+	}
+	
 	public BitmapFont fontFromTTFFile(String strFilePath, int iFontSize){
 		File fontFile = new File(strFilePath);
 		
@@ -955,5 +964,21 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 	
 	public String getPopupHelp(Spatial spt){
 		return MiscJmeI.i().getUserDataPSH(spt, EUserDataMiscJme.strPopupHelp.s());
+	}
+
+	public MiscJmeI setLocationXY(Spatial spt, Vector3f v3f) {
+		GlobalMainThreadI.assertEqualsCurrentThread();
+		spt.setLocalTranslation(v3f.x, v3f.y, spt.getLocalTranslation().z); // to not mess with Z order
+		return this;
+	}
+
+	public MiscJmeI setScaleXY(Spatial spt, Float fScaleX, Float fScaleY) {
+		GlobalMainThreadI.assertEqualsCurrentThread();
+		Vector3f v3fCurrentScale = spt.getLocalScale();
+		spt.setLocalScale(
+			fScaleX==null?v3fCurrentScale.x:fScaleX,
+			fScaleY==null?v3fCurrentScale.y:fScaleY,
+			v3fCurrentScale.z); // to not mess with Z order
+		return this;
 	}
 }

@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
+import com.github.commandsconsolegui.jme.ISpatialLayoutValidator;
 import com.github.commandsconsolegui.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.misc.IDiscardableInstance;
 import com.github.commandsconsolegui.misc.IHasOwnerInstance;
@@ -55,7 +56,7 @@ import com.simsilica.lemur.style.ElementId;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class DialogMainContainer extends Container implements ISpatialValidator, IReflexFillCfg, IHasOwnerInstance<DialogStateAbs>{ //IDiscardableInstance
+public class DialogMainContainer extends Container implements ISpatialLayoutValidator, IReflexFillCfg, IHasOwnerInstance<DialogStateAbs>{ //IDiscardableInstance
 	private DialogStateAbs	diagOwner;
 	private boolean	bLayoutValid;
 //	ISpatialValidator diag;

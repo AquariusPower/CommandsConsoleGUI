@@ -229,9 +229,9 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHel
 	 * @param sptAny
 	 * @return
 	 */
-	public DialogStateAbs retrieveDialogFromSpatial(Spatial sptAny){
+	public LemurDialogStateAbs retrieveDialogFromSpatial(Spatial sptAny){
 		Spatial sptParentest = MiscJmeI.i().getParentestFrom(sptAny);
-		DialogStateAbs diag = MiscJmeI.i().getUserDataPSH(sptParentest, DialogStateAbs.class);
+		LemurDialogStateAbs diag = MiscJmeI.i().getUserDataPSH(sptParentest, LemurDialogStateAbs.class);
 //		LemurDialogGUIStateAbs diag = (LemurDialogGUIStateAbs)MiscJmeI.i().getParentestFrom(sptAny)
 //				.getUserData(LemurDialogGUIStateAbs.class.getName());
 		
@@ -248,7 +248,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHel
 	}
 	
 	public boolean lowerDialogFocusPriority(Spatial sptAny){
-		DialogStateAbs diag = retrieveDialogFromSpatial(sptAny);
+		LemurDialogStateAbs diag = retrieveDialogFromSpatial(sptAny);
 		Spatial sptFocusable = diag.getInputFieldForManagement(ccSelf);
 		
 		if(asptFocusRequestList.contains(sptFocusable)){
@@ -264,12 +264,12 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHel
 	}
 	
 	public void requestDialogFocus(Spatial sptChild) {
-		DialogStateAbs diag = retrieveDialogFromSpatial(sptChild);
+		LemurDialogStateAbs diag = retrieveDialogFromSpatial(sptChild);
 		if(!diag.isLayoutValid())return; //TODO return false? or queue this request?
 		
-		DialogStateAbs diagFocus = diag;
+		LemurDialogStateAbs diagFocus = diag;
 		for(Object objDiagModal:diag.getModalChildListCopy()){
-			DialogStateAbs diagModal = (DialogStateAbs) objDiagModal;
+			LemurDialogStateAbs diagModal = (LemurDialogStateAbs) objDiagModal;
 			diagFocus = diagModal;
 			break;
 		}
@@ -301,7 +301,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHel
 			}
 		}
 		
-		DialogStateAbs diag = retrieveDialogFromSpatial(spt);
+		LemurDialogStateAbs diag = retrieveDialogFromSpatial(spt);
 		if(!diag.isLayoutValid()){
 			CallQueueI.i().addCall(new CallableX(this,1000) {
 				@Override
@@ -314,17 +314,18 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHel
 			return;
 		}
 		
-		ArrayList<DialogStateAbs> adiag = new ArrayList<DialogStateAbs>();
-		if (diag instanceof LemurDialogStateAbs) {
-			LemurDialogStateAbs diagLemur = (LemurDialogStateAbs) diag;
-			adiag.addAll(diagLemur.getParentsDialogList());
-		}
+		ArrayList<LemurDialogStateAbs> adiag = new ArrayList<LemurDialogStateAbs>();
+//		if (diag instanceof LemurDialogStateAbs) {
+//			LemurDialogStateAbs diagLemur = (LemurDialogStateAbs) diag;
+//		adiag.addAll(diagLemur.getParentsDialogList());
+			adiag.addAll(diag.getParentsDialogList());
+//		}
 		adiag.add(diag);
 		
 		/**
 		 * bring all parents up when focusing a modal child
 		 */
-		for(DialogStateAbs diagWork:adiag){
+		for(LemurDialogStateAbs diagWork:adiag){
 			if(!diagWork.isRestartRequested()){
 				Spatial sptDeNest = diagWork.getInputFieldForManagement(ccSelf);
 				

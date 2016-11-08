@@ -1108,21 +1108,21 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 		return cell;
 	}
 
-	public MiscLemurStateI setLocationXY(Spatial spt, Vector3f v3f) {
-		GlobalMainThreadI.assertEqualsCurrentThread();
-		spt.setLocalTranslation(v3f.x, v3f.y, spt.getLocalTranslation().z); // to not mess with Z order
-		return this;
-	}
-
-	public MiscLemurStateI setScaleXY(Spatial spt, Float fScaleX, Float fScaleY) {
-		GlobalMainThreadI.assertEqualsCurrentThread();
-		Vector3f v3fCurrentScale = spt.getLocalScale();
-		spt.setLocalScale(
-			fScaleX==null?v3fCurrentScale.x:fScaleX,
-			fScaleY==null?v3fCurrentScale.y:fScaleY,
-			v3fCurrentScale.z); // to not mess with Z order
-		return this;
-	}
+//	public MiscLemurStateI setLocationXY(Spatial spt, Vector3f v3f) {
+//		GlobalMainThreadI.assertEqualsCurrentThread();
+//		spt.setLocalTranslation(v3f.x, v3f.y, spt.getLocalTranslation().z); // to not mess with Z order
+//		return this;
+//	}
+//
+//	public MiscLemurStateI setScaleXY(Spatial spt, Float fScaleX, Float fScaleY) {
+//		GlobalMainThreadI.assertEqualsCurrentThread();
+//		Vector3f v3fCurrentScale = spt.getLocalScale();
+//		spt.setLocalScale(
+//			fScaleX==null?v3fCurrentScale.x:fScaleX,
+//			fScaleY==null?v3fCurrentScale.y:fScaleY,
+//			v3fCurrentScale.z); // to not mess with Z order
+//		return this;
+//	}
 
 	public void lineWrapDisableForListboxEntries(ListBox<String> lstbx){
 		GridPanel gp = lstbx.getGridPanel();
