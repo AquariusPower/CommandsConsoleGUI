@@ -25,7 +25,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.globals.jme.console;
+package com.github.commandsconsolegui.globals.cmd;
 
 import com.github.commandsconsolegui.cmd.IConsoleUI;
 import com.github.commandsconsolegui.globals.GlobalHolderAbs;

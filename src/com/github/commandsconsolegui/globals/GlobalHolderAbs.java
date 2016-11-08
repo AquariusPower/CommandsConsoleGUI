@@ -38,6 +38,7 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
  * 	Easily access what can/should be globally accessible.
  * 	Allow some classes to be optionally instanced/enabled.
  * 	The same object may be present in more than one global, just being a sub-class, scope dependency range.
+ * 	Allow globally accessible overriden class/instance.
  * 
  * 	The main application class is important to be stored on a global to make it's uses depend
  * solely on it's superclass.

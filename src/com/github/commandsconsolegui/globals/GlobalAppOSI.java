@@ -25,33 +25,17 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.jme;
+package com.github.commandsconsolegui.globals;
 
-import java.io.File;
-
-import com.github.commandsconsolegui.OperationalSystem;
-import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
-import com.github.commandsconsolegui.globals.jme.GlobalAppSettingsI;
-import com.jme3.system.JmeSystem;
-import com.jme3.system.JmeSystem.StorageFolderType;
+import com.github.commandsconsolegui.AppOS;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class JMEOperationalSystem extends OperationalSystem {
-	public JMEOperationalSystem(String strApplicationBaseSaveDataPath,StorageFolderType esft) {
-		super(strApplicationBaseSaveDataPath,esft);
-		
-		if(GlobalAppSettingsI.iGlobal().isSet()){
-			setApplicationTitle(GlobalAppSettingsI.i().getTitle());
-		}
-	}
-
-	@Override
-	protected void verifyBaseSaveDataPath() {
-		File fl = JmeSystem.getStorageFolder(getStorageFolderType());
-		verifyBaseSaveDataPath(fl.getAbsolutePath()+File.separator+getApplicationBaseFolderName());
-	}
+public class GlobalAppOSI extends GlobalHolderAbs<AppOS>{
+	private static GlobalAppOSI instance = new GlobalAppOSI();
+	public static GlobalAppOSI iGlobal(){return instance;}
+	public static AppOS i(){return iGlobal().get();}
 }

@@ -31,7 +31,6 @@ import java.io.File;
 
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.jme3.system.JmeSystem.StorageFolderType;
 
 /**
  * Very basic configurations related to the OS goes here.
@@ -39,15 +38,14 @@ import com.jme3.system.JmeSystem.StorageFolderType;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class OperationalSystem {
+public class AppOS {
 //	private static OperationalSystem instance = new OperationalSystem();
 //	public static OperationalSystem i(){return instance;}
 	
 	private File	flBaseSaveDataPath;
 	
-	public OperationalSystem(String strApplicationBaseSaveDataPath, StorageFolderType esft) {
+	public AppOS(String strApplicationBaseSaveDataPath) {
 		setApplicationBaseSaveDataPath(strApplicationBaseSaveDataPath);
-		setStorageFolderType(esft);
 	}
 
 	public File getBaseSaveDataPath(){
@@ -71,7 +69,6 @@ public class OperationalSystem {
 	}
 	
 	private String strApplicationBaseSaveDataPath = null;
-	private StorageFolderType	esft;
 	public void setApplicationBaseSaveDataPath(String str) {
 //		if(this.strApplicationBaseSaveDataPath!=null)PrerequisitesNotMetException.assertNotAlreadySet("base application folder already set", this.strApplicationBaseSaveDataPath, str);
 		PrerequisitesNotMetException.assertNotAlreadySet("base application folder already set", this.strApplicationBaseSaveDataPath, str);
@@ -82,16 +79,6 @@ public class OperationalSystem {
 		return strApplicationBaseSaveDataPath;
 	}
 
-	public StorageFolderType getStorageFolderType() {
-		if(esft==null)throw new PrerequisitesNotMetException("strStorageFolderType is null",StorageFolderType.class);
-		return esft;
-	}
-	
-	public void setStorageFolderType(StorageFolderType esft) {
-		PrerequisitesNotMetException.assertNotAlreadySet("storage folder type", this.esft, esft, this);
-		this.esft = esft;
-	}
-	
 	private String strApplicationTitle = null;
 	public void setApplicationTitle(String strApplicationTitle) {
 		PrerequisitesNotMetException.assertNotAlreadySet("app title", this.strApplicationTitle, strApplicationTitle, this);
@@ -100,5 +87,19 @@ public class OperationalSystem {
 	
 	public String getApplicationTitle() {
 		return strApplicationTitle;
+	}
+
+	private boolean	bExiting=false;
+	/**
+	 * this is important to let some other threads know the application is exiting and behave properly
+	 */
+	public void setAppExiting(){
+		System.err.println("Exiting... ");
+//		Thread.dumpStack();
+		this.bExiting=true;
+	}
+	public boolean isApplicationExiting(){
+		//TODO is there some way to test if JME is exiting???
+		return bExiting;
 	}
 }

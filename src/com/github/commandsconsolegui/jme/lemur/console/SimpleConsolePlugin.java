@@ -32,17 +32,17 @@ import java.lang.reflect.Field;
 import com.github.commandsconsolegui.SimulationTime;
 import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegator;
 import com.github.commandsconsolegui.globals.GlobalMainThreadI;
-import com.github.commandsconsolegui.globals.GlobalOperationalSystemI;
 import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.globals.GlobalSingleMandatoryAppInstanceI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
+import com.github.commandsconsolegui.globals.jme.GlobalJmeAppOSI;
 import com.github.commandsconsolegui.globals.jme.GlobalRootNodeI;
 import com.github.commandsconsolegui.globals.jme.GlobalSimpleAppRefI;
 import com.github.commandsconsolegui.globals.jme.lemur.GlobalLemurDialogHelperI;
 import com.github.commandsconsolegui.jme.AudioUII;
-import com.github.commandsconsolegui.jme.JMEOperationalSystem;
+import com.github.commandsconsolegui.jme.JmeAppOS;
 import com.github.commandsconsolegui.jme.cmd.CommandsBackgroundStateI;
 import com.github.commandsconsolegui.jme.extras.FpsLimiterStateI;
 import com.github.commandsconsolegui.jme.extras.UngrabMouseStateI;
@@ -114,12 +114,12 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
 		 * Anything more complex can be postponed (from withing the config itself)
 		 * with {@link CallQueueI}, or just put these things at initialization method.
 		 */
-  	if(!GlobalCommandsDelegatorI.i().isConfigured()){
-  		GlobalCommandsDelegatorI.i().configure();//ConsoleLemurStateI.i());
-  	}
   	if(!LemurConsoleStateI.i().isConfigured()){
 			LemurConsoleStateI.i().configure(new LemurConsoleStateI.CfgParm(
 				null, KeyInput.KEY_F10));
+  	}
+  	if(!GlobalCommandsDelegatorI.i().isConfigured()){
+  		GlobalCommandsDelegatorI.i().configure();//ConsoleLemurStateI.i());
   	}
   	
   	if(!MiscJmeI.i().isConfigured()){
@@ -183,8 +183,8 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
   		GlobalLemurDialogHelperI.iGlobal().set(LemurDialogManagerI.i());
   	}
   	
-  	if(!GlobalOperationalSystemI.iGlobal().isSet()){
-			GlobalOperationalSystemI.iGlobal().set(new JMEOperationalSystem(
+  	if(!GlobalJmeAppOSI.iGlobal().isSet()){
+			GlobalJmeAppOSI.iGlobal().set(new JmeAppOS(
 				cfg.strApplicationBaseSaveDataPath, StorageFolderType.Internal));
   	}
 	}

@@ -27,8 +27,9 @@
 
 package com.github.commandsconsolegui.globals.jme.console;
 
-import com.github.commandsconsolegui.cmd.IConsoleUI;
 import com.github.commandsconsolegui.globals.GlobalHolderAbs;
+import com.github.commandsconsolegui.globals.cmd.GlobalConsoleUII;
+import com.github.commandsconsolegui.jme.IJmeConsoleUI;
 
 /**
  * 
@@ -36,13 +37,13 @@ import com.github.commandsconsolegui.globals.GlobalHolderAbs;
  *
  */
 //public class GlobalConsoleGUII extends GlobalHolderAbs<DialogStateAbs<?,? extends DialogStateAbs<?,?>>>{
-public class GlobalConsoleGUII extends GlobalHolderAbs<IConsoleUI>{
-	private static GlobalConsoleGUII instance = new GlobalConsoleGUII();
-	public static GlobalConsoleGUII iGlobal(){return instance;}
-	public static IConsoleUI i(){return iGlobal().get();}
+public class GlobalJmeConsoleUII extends GlobalHolderAbs<IJmeConsoleUI>{
+	private static GlobalJmeConsoleUII instance = new GlobalJmeConsoleUII();
+	public static GlobalJmeConsoleUII iGlobal(){return instance;}
+	public static IJmeConsoleUI i(){return iGlobal().get();}
 	
 	@Override
-	public IConsoleUI set(IConsoleUI obj) {
+	public IJmeConsoleUI set(IJmeConsoleUI obj) {
 		GlobalConsoleUII.iGlobal().set(obj);
 		return super.set(obj);
 	}

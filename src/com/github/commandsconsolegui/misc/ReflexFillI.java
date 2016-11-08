@@ -30,7 +30,7 @@ package com.github.commandsconsolegui.misc;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-import com.github.commandsconsolegui.globals.cmd.VarCmdUId;
+import com.github.commandsconsolegui.cmd.varfield.VarCmdUId;
 
 /**
  * 

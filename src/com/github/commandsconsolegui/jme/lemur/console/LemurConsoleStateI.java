@@ -42,18 +42,18 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.CommandsHelperI;
 import com.github.commandsconsolegui.cmd.DumpEntryData;
 import com.github.commandsconsolegui.cmd.EDataBaseOperations;
-import com.github.commandsconsolegui.cmd.IConsoleUI;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalDialogHelperI;
-import com.github.commandsconsolegui.globals.jme.console.GlobalConsoleGUII;
+import com.github.commandsconsolegui.globals.jme.console.GlobalJmeConsoleUII;
 import com.github.commandsconsolegui.jme.AudioUII;
 import com.github.commandsconsolegui.jme.AudioUII.EAudio;
 import com.github.commandsconsolegui.jme.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
+import com.github.commandsconsolegui.jme.IJmeConsoleUI;
 import com.github.commandsconsolegui.jme.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.lemur.DialogMouseCursorListenerI;
@@ -124,7 +124,7 @@ import com.simsilica.lemur.style.Styles;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurConsoleStateI<T,THIS>> extends LemurDialogStateAbs<T,THIS> implements IConsoleUI {
+public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurConsoleStateI<T,THIS>> extends LemurDialogStateAbs<T,THIS> implements IJmeConsoleUI {
 	private static LemurConsoleStateI instance=new LemurConsoleStateI();
 	public static LemurConsoleStateI i(){return instance;}
 //	private static LemurConsoleStateI instance=null;//new ConsoleLemurStateI();
@@ -225,7 +225,7 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 		
 		// for restarting functionality
 //		GlobalConsoleGuiI.iGlobal().validate();
-		GlobalConsoleGUII.iGlobal().set(this);
+		GlobalJmeConsoleUII.iGlobal().set(this);
 		
 		/**
 		 * The console is a special dialog.

@@ -32,7 +32,6 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.misc.CheckInitAndCleanupI.ICheckInitAndCleanupI;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
-import com.jme3.scene.Spatial;
 
 /**
  * 
@@ -95,11 +94,5 @@ public interface IConsoleUI extends ICheckInitAndCleanupI{
 
 	public abstract void requestRestart();
 
-	public abstract boolean isHintBox(Spatial target);
-
 	public abstract boolean checkAndApplyHintAtInputField();
-
-	public abstract boolean isScrollRequestTarget(Spatial target);
-
-	public abstract void setScrollRequestTarget(Spatial target);
 }

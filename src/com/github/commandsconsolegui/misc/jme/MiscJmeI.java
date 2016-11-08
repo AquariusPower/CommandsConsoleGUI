@@ -48,10 +48,10 @@ import truetypefont.TrueTypeLoader;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.GlobalMainThreadI;
-import com.github.commandsconsolegui.globals.GlobalOperationalSystemI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
+import com.github.commandsconsolegui.globals.jme.GlobalJmeAppOSI;
 import com.github.commandsconsolegui.globals.jme.GlobalRootNodeI;
 import com.github.commandsconsolegui.jme.PseudoSavableHolder;
 import com.github.commandsconsolegui.jme.lemur.console.LemurConsoleStateI.TrueTypeFontFromSystem;
@@ -784,7 +784,7 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 	 * @return
 	 */
 	public <T extends Savable> T dataStoringManagement(Class<T> cl, String strFileNameNoExt, Savable svMain, String strPath, boolean bSave) {
-		StorageFolderType esft = GlobalOperationalSystemI.i().getStorageFolderType();
+		StorageFolderType esft = GlobalJmeAppOSI.i().getStorageFolderType();
 		String strPathRelative = null;
 		String strBaseStorageFolder = JmeSystem.getStorageFolder(esft).getAbsolutePath();
 		

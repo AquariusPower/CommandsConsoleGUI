@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.jme;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.globals.GlobalAppOSI;
 import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
@@ -153,7 +154,7 @@ public class ConditionalStateManagerI extends AbstractAppState implements IManag
 	public void cleanup() {
 //		if(!bApplicationIsExiting){
 //		if(false){ //dummyfied
-			if(!GlobalAppRefI.iGlobal().isApplicationExiting()){
+			if(!GlobalAppOSI.i().isApplicationExiting()){
 				throw new PrerequisitesNotMetException("this state MUST never be terminated/cleaned! "+ConditionalStateManagerI.class.getName());
 			}
 //		}

@@ -25,17 +25,46 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.globals;
+package com.github.commandsconsolegui.jme;
 
-import com.github.commandsconsolegui.OperationalSystem;
+import java.io.File;
+
+import com.github.commandsconsolegui.AppOS;
+import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
+import com.github.commandsconsolegui.globals.jme.GlobalAppSettingsI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.jme3.system.JmeSystem;
+import com.jme3.system.JmeSystem.StorageFolderType;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class GlobalOperationalSystemI extends GlobalHolderAbs<OperationalSystem>{
-	private static GlobalOperationalSystemI instance = new GlobalOperationalSystemI();
-	public static GlobalOperationalSystemI iGlobal(){return instance;}
-	public static OperationalSystem i(){return iGlobal().get();}
+public class JmeAppOS extends AppOS {
+	public JmeAppOS(String strApplicationBaseSaveDataPath,StorageFolderType esft) {
+		super(strApplicationBaseSaveDataPath);
+		
+		setStorageFolderType(esft);
+		
+		if(GlobalAppSettingsI.iGlobal().isSet()){
+			setApplicationTitle(GlobalAppSettingsI.i().getTitle());
+		}
+	}
+
+	@Override
+	protected void verifyBaseSaveDataPath() {
+		File fl = JmeSystem.getStorageFolder(getStorageFolderType());
+		verifyBaseSaveDataPath(fl.getAbsolutePath()+File.separator+getApplicationBaseFolderName());
+	}
+
+	private StorageFolderType	esft;
+	public StorageFolderType getStorageFolderType() {
+		if(esft==null)throw new PrerequisitesNotMetException("strStorageFolderType is null",StorageFolderType.class);
+		return esft;
+	}
+	public void setStorageFolderType(StorageFolderType esft) {
+		PrerequisitesNotMetException.assertNotAlreadySet("storage folder type", this.esft, esft, this);
+		this.esft = esft;
+	}
 }

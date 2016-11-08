@@ -38,21 +38,5 @@ public class GlobalAppRefI extends GlobalHolderAbs<Application>{
 	private static GlobalAppRefI instance = new GlobalAppRefI();
 	public static GlobalAppRefI iGlobal(){return instance;}
 	public static Application i(){return iGlobal().get();}
-	
-	private boolean	bExiting=false;
-	
-	/**
-	 * this is important to let some other threads know the application is exiting and behave properly
-	 */
-	public void setAppExiting(){
-		System.err.println("Exiting... "+GlobalAppRefI.class.getName());
-//		Thread.dumpStack();
-		this.bExiting=true;
-	}
-	
-	public boolean isApplicationExiting(){
-		//TODO is there some way to test if JME is exiting???
-		return bExiting;
-	}
 }
 

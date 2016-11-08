@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.jme.extras;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.globals.GlobalAppOSI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.jme.ConditionalStateAbs;
@@ -126,7 +127,7 @@ public class UngrabMouseStateI extends ConditionalStateAbs<UngrabMouseStateI> {
 			@Override
 			public void run() {
 //				while(!isCleaningUp()){ //mainly during application close
-				while(!isBeingDiscarded() && !GlobalAppRefI.iGlobal().isApplicationExiting()){ //mainly during application close
+				while(!isBeingDiscarded() && !GlobalAppOSI.i().isApplicationExiting()){ //mainly during application close
 					updateAtNewThread();
 					try {
 						Thread.sleep(lDelayToUngrabMilis);

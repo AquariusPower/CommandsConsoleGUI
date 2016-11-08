@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.globals.cmd;
+package com.github.commandsconsolegui.cmd.varfield;
 
 import java.lang.reflect.Field;
 

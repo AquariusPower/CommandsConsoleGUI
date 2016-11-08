@@ -479,7 +479,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //		if(dle!=null)
 		dleLastSelected = dle;
 		
-//		if(isCfgDataValueSet()){
+//		if(isCfgDataValueSet()) {
 //			updateAllParts();
 //		}
 		
