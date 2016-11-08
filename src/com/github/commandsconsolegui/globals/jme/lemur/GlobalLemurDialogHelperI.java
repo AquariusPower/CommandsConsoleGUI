@@ -29,9 +29,6 @@ package com.github.commandsconsolegui.globals.jme.lemur;
 
 import com.github.commandsconsolegui.globals.GlobalHolderAbs;
 import com.github.commandsconsolegui.globals.jme.GlobalDialogHelperI;
-import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
-import com.github.commandsconsolegui.globals.jme.console.GlobalConsoleUII;
-import com.github.commandsconsolegui.jme.console.ConsoleStateAbs;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI;
 
 /**

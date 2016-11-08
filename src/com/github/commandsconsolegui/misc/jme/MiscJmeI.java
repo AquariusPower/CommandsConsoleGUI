@@ -54,7 +54,7 @@ import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jme.GlobalRootNodeI;
 import com.github.commandsconsolegui.jme.PseudoSavableHolder;
-import com.github.commandsconsolegui.jme.console.ConsoleStateAbs.TrueTypeFontFromSystem;
+import com.github.commandsconsolegui.jme.lemur.console.LemurConsoleStateI.TrueTypeFontFromSystem;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableWeak;
 import com.github.commandsconsolegui.misc.ConfigureManagerI.IConfigure;
 import com.github.commandsconsolegui.misc.DebugI;

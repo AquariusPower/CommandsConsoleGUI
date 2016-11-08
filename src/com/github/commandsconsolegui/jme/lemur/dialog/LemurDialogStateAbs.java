@@ -115,6 +115,7 @@ import com.simsilica.lemur.style.ElementId;
 */
 //public abstract class LemurDialogGUIStateAbs<T,CS extends LemurDialogGUIStateAbs.CompositeSavableLemur,R extends LemurDialogGUIStateAbs<T,CS,R>> extends BaseDialogStateAbs<T,CS,R> {//implements IWorkAroundBugFix{
 public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,THIS>> extends DialogStateAbs<T,THIS> {//implements IWorkAroundBugFix{
+	private boolean bOverrideNormalDialog = false;
 	private Label	lblTitle;
 	private Label	lblTextInfo;
 //	private ListBox<DialogListEntryData<T>>	lstbxEntriesToSelect;
@@ -280,6 +281,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 	@Override
 	protected boolean initGUI(){
 		if(!super.initGUI())return false;
+		if(isOverrideNormalDialog())return true;
 //		if(getStyle()==null){
 //			setStyle(ConsoleLemurStateI.i().STYLE_CONSOLE);
 //		}
@@ -757,65 +759,38 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 //			if(edge!=null)
 			abtnResizerList.remove(btnExisting);
 		}
-			
-//			CursorEventControl.removeListenersFromSpatial(btnExisting, DialogMouseCursorListenerI.i());
-////			getDialogMainContainer().addChild(new Panel(), edge);
-//			getDialogMainContainer().removeChild(btnExisting);
-//			CallQueueI.i().addCall(new CallableX(this,100) {
-//				@Override
-//				public Boolean call() {
-//					getDialogMainContainer().addChild(btnExisting, edge);
-//					CursorEventControl.addListenersToSpatial(btnExisting, DialogMouseCursorListenerI.i());
-//					return true;
-//				}
-//			}.updateTimeMilisNow());
-//			return btnExisting;
-//		}else{
-			final Button btnNew=new Button("", new ElementId(DialogStyleElementId.ResizeBorder.s()), getDiagStyle());
-			//Font TRICK(seems not necessary?): 
-//			btnBorder.setFontSize(0.1f); //this trick will let us set it with any dot size!
-			//btnBorder.getFontSize()
-			
-			MiscJmeI.i().setUserDataPSH(btnNew, this); //if a border is clicked, the bugfixer that recreates it will make the old border object have no parent. Its parentest would have a reference to the dialog, but now it is alone, so such reference must be on it.
-			
-			EffectFocusData efd=new EffectFocusData();
-			efd.colorOriginal=((QuadBackgroundComponent)btnNew.getBackground()).getColor().clone();
-			efd.colorDim = efd.colorOriginal.clone().mult(0.5f);
-			efd.colorDim.a=efd.colorOriginal.a;
-			MiscJmeI.i().setUserDataPSH(btnNew, efd);
-//			btnBorder.setUserData(EffectFocusData.class.getName(), efd);
-			
-			CursorEventControl.addListenersToSpatial(btnNew, DialogMouseCursorListenerI.i());
-			DialogMouseCursorListenerI.i().addMouseCursorHighlightEffects(btnNew);
-			
-			abtnResizerList.add(btnNew);
-			final String strName="Dialog_Resizer_";
-			if(edge==null){
-//				if(btnNew.getName()!=null){
-//					strName+=btnNew.getName();
-//				}else{
-					CallQueueI.i().addCall(new CallableX(this) {
-						@Override
-						public Boolean call() {
-							btnNew.setName(strName+ReflexFillI.i().assertAndGetField(LemurDialogStateAbs.this,btnNew).getName());
-							return true;
-						}
-					});
-//				}
-			}else{
-				btnNew.setName(strName+"Border"+edge.toString());
-				getDialogMainContainer().addChild(btnNew, edge); //this actually replaces the current at that border
-			}
-			
-			efDummy = LemurDialogManagerI.i().setupSimpleEffect(btnNew, EEffectId.FocusLost.s(), efFocusLost, efDummy);
-//			if(!efDummy.getChannel().equals(efFocusLost.getChannel())){
-//				throw new PrerequisitesNotMetException("both should be on the same channel", efDummy, efFocusLost, btnBorder, this);
-//			}
-//			btnBorder.addEffect(EEffectId.FocusLost.s(), (Effect)efFocusLost);
-//			btnBorder.addEffect(EEffectId.Dummy.s(), efDummy);
-			
-			return btnNew;
-//		}
+		
+		final Button btnNew=new Button("", new ElementId(DialogStyleElementId.ResizeBorder.s()), getDiagStyle());
+		
+		MiscJmeI.i().setUserDataPSH(btnNew, this); //if a border is clicked, the bugfixer that recreates it will make the old border object have no parent. Its parentest would have a reference to the dialog, but now it is alone, so such reference must be on it.
+		
+		EffectFocusData efd=new EffectFocusData();
+		efd.colorOriginal=((QuadBackgroundComponent)btnNew.getBackground()).getColor().clone();
+		efd.colorDim = efd.colorOriginal.clone().mult(0.5f);
+		efd.colorDim.a=efd.colorOriginal.a;
+		MiscJmeI.i().setUserDataPSH(btnNew, efd);
+		
+		CursorEventControl.addListenersToSpatial(btnNew, DialogMouseCursorListenerI.i());
+		DialogMouseCursorListenerI.i().addMouseCursorHighlightEffects(btnNew);
+		
+		abtnResizerList.add(btnNew);
+		final String strName="Dialog_Resizer_";
+		if(edge==null){
+			CallQueueI.i().addCall(new CallableX(this) {
+				@Override
+				public Boolean call() {
+					btnNew.setName(strName+ReflexFillI.i().assertAndGetField(LemurDialogStateAbs.this,btnNew).getName());
+					return true;
+				}
+			});
+		}else{
+			btnNew.setName(strName+"Border"+edge.toString());
+			getDialogMainContainer().addChild(btnNew, edge); //this actually replaces the current at that border
+		}
+		
+		efDummy = LemurDialogManagerI.i().setupSimpleEffect(btnNew, EEffectId.FocusLost.s(), efFocusLost, efDummy);
+		
+		return btnNew;
 	}
 	
 	public static class EffectFocusData{
@@ -1146,6 +1121,8 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 	@Override
 	protected boolean updateAttempt(float tpf) {
 		if(!super.updateAttempt(tpf))return false;
+		if(isOverrideNormalDialog())return true;
+
 		// abtnBorderList.get(0).setPreferredSize(new Vector3f(3,3,1))
 		// MiscLemurStateI.i().setSizeSafely(abtnBorderList.get(2), 3, 3)
 		
@@ -1930,5 +1907,13 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		if(cfg.isRestartEnableWithoutLoadingOnceAndReset())return;
 		
 		super.loadOnEnable();
+	}
+
+	public boolean isOverrideNormalDialog() {
+		return bOverrideNormalDialog;
+	}
+
+	protected void setOverrideNormalDialog(boolean bOverrideNormalDialog) {
+		this.bOverrideNormalDialog = bOverrideNormalDialog;
 	}
 }

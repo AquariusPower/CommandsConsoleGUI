@@ -27,21 +27,22 @@
 
 package com.github.commandsconsolegui.globals.jme.console;
 
+import com.github.commandsconsolegui.cmd.IConsoleUI;
 import com.github.commandsconsolegui.globals.GlobalHolderAbs;
-import com.github.commandsconsolegui.jme.console.ConsoleStateAbs;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class GlobalConsoleGUII extends GlobalHolderAbs<ConsoleStateAbs<?,? extends ConsoleStateAbs<?,?>>>{
+//public class GlobalConsoleGUII extends GlobalHolderAbs<DialogStateAbs<?,? extends DialogStateAbs<?,?>>>{
+public class GlobalConsoleGUII extends GlobalHolderAbs<IConsoleUI>{
 	private static GlobalConsoleGUII instance = new GlobalConsoleGUII();
 	public static GlobalConsoleGUII iGlobal(){return instance;}
-	public static ConsoleStateAbs<?,?> i(){return iGlobal().get();}
+	public static IConsoleUI i(){return iGlobal().get();}
 	
 	@Override
-	public ConsoleStateAbs<?,?> set(ConsoleStateAbs<?,?> obj) {
+	public IConsoleUI set(IConsoleUI obj) {
 		GlobalConsoleUII.iGlobal().set(obj);
 		return super.set(obj);
 	}

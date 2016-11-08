@@ -166,6 +166,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	}
 	
 	protected THIS setDialogMainContainer(ISpatialValidator spt){
+		PrerequisitesNotMetException.assertNotAlreadySet("diag main container", this.sptvDialogMainContainer, spt, this);
 		this.sptvDialogMainContainer=spt;
 		
 //		for(Class<?> cl:MiscI.i().getSuperClassesOf(this)){
