@@ -1078,7 +1078,7 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 	
 	//	private final String strInputIMCPREFIX = "CONSOLEGUISTATE_";
 	public final String strFinalFieldInputCodePrefix="INPUT_MAPPING_CONSOLE_";
-	public final StringCmdField INPUT_MAPPING_CONSOLE_TOGGLE = new StringCmdField(this,strFinalFieldInputCodePrefix);
+//	public final StringCmdField INPUT_MAPPING_CONSOLE_TOGGLE = new StringCmdField(this,strFinalFieldInputCodePrefix);
 	public final StringCmdField INPUT_MAPPING_CONSOLE_SCROLL_UP = new StringCmdField(this,strFinalFieldInputCodePrefix);
 	public final StringCmdField INPUT_MAPPING_CONSOLE_SCROLL_DOWN = new StringCmdField(this,strFinalFieldInputCodePrefix);
 	public final StringCmdField INPUT_MAPPING_CONSOLE_SHIFT_PRESSED	= new StringCmdField(this,strFinalFieldInputCodePrefix);
@@ -1855,15 +1855,15 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 		
 		// console toggle
 	//	if(iToggleConsoleKey!=null){
-			if(!app().getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_TOGGLE.getUniqueCmdId())){
-				app().getInputManager().addMapping(INPUT_MAPPING_CONSOLE_TOGGLE.getUniqueCmdId(),
+			if(!app().getInputManager().hasMapping(bindToggleConsole.getUniqueCmdId())){
+				app().getInputManager().addMapping(bindToggleConsole.getUniqueCmdId(),
 					MiscJmeI.i().asTriggerArray(bindToggleConsole));
 //					new KeyTrigger(bindToggleConsole.getValue()[0]));
 					
 				alConsoleToggle = new ActionListener() {
 					@Override
 					public void onAction(String name, boolean isPressed, float tpf) {
-						if(isPressed && INPUT_MAPPING_CONSOLE_TOGGLE.isUniqueCmdIdEqualTo(name)){
+						if(isPressed && bindToggleConsole.isUniqueCmdIdEqualTo(name)){
 	//						if(!isInitialized()){
 	//							initialize();
 	//						}
@@ -1878,7 +1878,7 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 						}
 					}
 				};
-				app().getInputManager().addListener(alConsoleToggle, INPUT_MAPPING_CONSOLE_TOGGLE.getUniqueCmdId());            
+				app().getInputManager().addListener(alConsoleToggle, bindToggleConsole.getUniqueCmdId());            
 			}
 	//	}
 		
@@ -2818,7 +2818,7 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 	//   * IMPORTANT!!!
 	//   * Toggle console must be kept! Re-initialization depends on it!
 	//   * 
-		app().getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_TOGGLE.toString());
+		app().getInputManager().deleteMapping(bindToggleConsole.toString());
 	  app().getInputManager().removeListener(alConsoleToggle);
 	//   */
 	  app().getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_SCROLL_UP+"");

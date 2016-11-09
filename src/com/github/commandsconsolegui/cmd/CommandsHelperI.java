@@ -39,6 +39,14 @@ public class CommandsHelperI {
 	private String strFinalFieldRestrictedCmdCodePrefix="RESTRICTED_CMD_";
 	private String strFinalCmdCodePrefix="CMD_";
 	
+	public String removeRestrictedToken(String str){
+		str=str.trim();
+		if(str.startsWith(""+CommandsHelperI.i().getRestrictedToken())){
+			str=str.substring(1);
+		}
+		return str;
+	}
+	
 	public Character getRestrictedToken() {
 		return RESTRICTED_TOKEN;
 	}
@@ -49,5 +57,9 @@ public class CommandsHelperI {
 	
 	public String getCmdCodePrefix() {
 		return strFinalCmdCodePrefix;
+	}
+
+	public boolean isRestricted(String strId){
+		return strId.trim().startsWith(""+getRestrictedToken());
 	}
 }

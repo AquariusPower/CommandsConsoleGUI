@@ -45,7 +45,7 @@ public class CompositeControlAbs<T>{
 	};
 	
 	public T getOwner(){
-		//TODO validate if owner really owns this object?
+		//TODO validate if owner really owns this object? humm??? o.O
 		return ref;
 	}
 	

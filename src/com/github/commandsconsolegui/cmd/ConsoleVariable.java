@@ -28,6 +28,7 @@
 package com.github.commandsconsolegui.cmd;
 
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
+import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 
@@ -37,7 +38,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class ConsoleVariable {
+public class ConsoleVariable<VAL> {
 //	public static interface IVarIdValueOwner{
 //		public abstract void setObjectValue(Object objValue);
 //		public abstract String getReport();
@@ -49,39 +50,81 @@ public class ConsoleVariable {
 //	}
 	
 	private String strUniqueId;
-	private Object objRawValue = null;
+	private VAL objRawValue = null;
 //	private IVarIdValueOwner owner;
-	private VarCmdFieldAbs vcfOwnerForRestrictedVars;
+	private VarCmdFieldAbs vcfRestrictedVarOwner;
 	private IReflexFillCfg rfcfgClassHoldingTheOwner;
 	private String	strHelp;
 	private StackTraceElement[] asteDbgLastSetOriginAt;
 	private Class clValueInitialType;
+	private boolean	bRestrictedOwnerRequested;
 	
-	public ConsoleVariable(String strUniqueVarId, Object objValue,	VarCmdFieldAbs vcfOwner, IReflexFillCfg rfcfgClassHoldingTheOwner, String strHelp) {
+//	public ConsoleVariable(String strUniqueVarId, VAL objValue,	VarCmdFieldAbs vcfOwner, IReflexFillCfg rfcfgClassHoldingTheOwner, String strHelp) {
+	public ConsoleVariable(String strUniqueVarId, VAL objValue,	IReflexFillCfg rfcfgClassHoldingTheOwner, String strHelp) {
 		super();
-		this.strUniqueId = strUniqueVarId;
+		this.bRestrictedOwnerRequested=CommandsHelperI.i().isRestricted(strUniqueVarId);
+		this.strUniqueId = CommandsHelperI.i().removeRestrictedToken(strUniqueVarId);
 		setRawValue(objValue);
 //		this.objValue = objValue;
-		this.vcfOwnerForRestrictedVars = vcfOwner;
+//		this.vcfOwnerForRestrictedVars = vcfOwner;
 		this.rfcfgClassHoldingTheOwner = rfcfgClassHoldingTheOwner;
 		if(strHelp!=null)this.strHelp = strHelp; //to avoid removing it
 	}
 	
-	public ConsoleVariable setOwnerForRestrictedVar(VarCmdFieldAbs vcfOwner){
-		if(vcfOwner.isConsoleVarLinkSet())throw new PrerequisitesNotMetException("owner already has a console var link", this, vcfOwner);
-		PrerequisitesNotMetException.assertNotAlreadySet("owner", this.vcfOwnerForRestrictedVars, vcfOwner, this);
-		this.vcfOwnerForRestrictedVars=vcfOwner;
+	public ConsoleVariable setRestrictedVarOwner(VarCmdFieldAbs vcfOwner){
+		if(vcfOwner.isConsoleVarLinkSet()){
+			if(vcfOwner.isConsoleVarLink(this)){
+				MsgI.i().devWarn("redundant varlink setup to self", this, vcfOwner);
+			}else{
+				throw new PrerequisitesNotMetException("owner already has another console var link set", this, vcfOwner);
+			}
+		}
+		
+		PrerequisitesNotMetException.assertNotAlreadySet("owner", this.vcfRestrictedVarOwner, vcfOwner, this);
+		
+		if(!bRestrictedOwnerRequested){
+			MsgI.i().devWarn("restricted var owner not requested but is being set for "+getUniqueVarId(true), this, vcfOwner);
+		}
+		
+		this.vcfRestrictedVarOwner=vcfOwner;
+		
 		return this;
 	}
 	
-	public ConsoleVariable setValFixType(CommandsDelegator.CompositeControl cc, Object objValue) {
+	public ConsoleVariable setValFixType(CommandsDelegator.CompositeControl cc, VAL objValue) {
 		cc.assertSelfNotNull();
+		
+		if(getRestrictedVarOwner()!=null){
+			throw new PrerequisitesNotMetException("can only fix type if owner is not set", this, getRestrictedVarOwner(), objValue);
+		}
+		
 		clValueInitialType=null;
+		
 		setRawValue(objValue);
+		
 		return this;
 	}
 	
-	public ConsoleVariable setRawValue(Object objValue) {
+	/**
+	 * If restricted var owner is set, this is also it's value.
+	 * @param objValue
+	 * @return
+	 */
+	public ConsoleVariable setRawValue(VAL objValue) {
+		if(getRestrictedVarOwner()!=null){
+			getRestrictedVarOwner().setObjectRawValue(objValue);
+		}else{
+			setRawValueDirectly(objValue);
+		}
+		
+		return this;
+	}
+	public ConsoleVariable setRawValue(VarCmdFieldAbs.CompositeControl cc,VAL objValue) {
+		cc.assertSelfNotNull();
+		setRawValueDirectly(objValue);
+		return this;
+	}
+	private ConsoleVariable setRawValueDirectly(VAL objValue) {
 		if(objValue!=null && clValueInitialType!=null){
 //			if(this.objValue!=null && this.objValue.getClass()!=objValue.getClass()){
 			if(objValue.getClass()!=clValueInitialType){
@@ -110,12 +153,16 @@ public class ConsoleVariable {
 		return strHelp==null?"":strHelp;
 	}
 
-	public String getUniqueVarId() {
-		return strUniqueId;
+	public String getUniqueVarId(boolean bWithRestrictedTokenIfAppliable) {
+		if(bWithRestrictedTokenIfAppliable && bRestrictedOwnerRequested){
+			return CommandsHelperI.i().getRestrictedToken()+strUniqueId;
+		}else{
+			return strUniqueId;
+		}
 	}
 
-	public VarCmdFieldAbs getRestrictedOwner() {
-		return vcfOwnerForRestrictedVars;
+	public VarCmdFieldAbs getRestrictedVarOwner() {
+		return vcfRestrictedVarOwner;
 	}
 	
 	/**
@@ -124,6 +171,18 @@ public class ConsoleVariable {
 	 */
 	public IReflexFillCfg getRfcfgClassHoldingTheOwner() {
 		return rfcfgClassHoldingTheOwner;
+	}
+
+	public boolean isRestricted() {
+		if(bRestrictedOwnerRequested && vcfRestrictedVarOwner==null){
+			MsgI.i().devWarn("restricted var owner still not set for "+getUniqueVarId(true), this);
+		}
+		
+		return bRestrictedOwnerRequested;
+	}
+
+	public boolean isRestrictedVarLinkConsistent() {
+		return (getRestrictedVarOwner()!=null && getRestrictedVarOwner().isConsoleVarLink(this));
 	}
 
 }

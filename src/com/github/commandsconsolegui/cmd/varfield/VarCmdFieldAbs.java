@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.cmd.varfield;
 import com.github.commandsconsolegui.cmd.CommandData;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.ConsoleVariable;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.CompositeControl;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.CallQueueI.CallerInfo;
@@ -55,6 +56,10 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
  * 
  */
 public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> implements IReflexFillCfgVariant{//, IVarIdValueOwner{
+	public static final class CompositeControl extends CompositeControlAbs<VarCmdFieldAbs>{
+		private CompositeControl(VarCmdFieldAbs casm){super(casm);};
+	};private CompositeControl ccSelf = new CompositeControl(this);
+	
 //	private boolean bReflexingIdentifier = true;
 	public static enum EVarCmdMode{
 		Var,
@@ -76,15 +81,15 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	private String strDebugErrorHelper = "ERROR: "+this.getClass().getName()+" not yet properly initialized!!!";
 	
 	private IReflexFillCfg	rfcfgOwner;
-	private ConsoleVariable	cvar;
+	private ConsoleVariable<VAL>	cvar;
 	private String strHelp=null;
 	private CommandData	cmdd;
-	private VAL	objRawValueLazy = null;
+	private VAL	objRawLazyValue = null;
 	
 	/** this is the initial value (at construction time) */
 	private VAL	objRawValueDefault = null;
 	
-	private boolean	bLazyValueWasSet;
+	private boolean	bRawLazyValueAvailable;
 	private VarCmdUId	vcuid;
 	private boolean	bConstructed = false;
 	private boolean bAllowNullValue = true;
@@ -175,24 +180,26 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	/**
 	 * 
 	 * @param cc
-	 * @param vivo if the object already set is different from it, will throw exception
+	 * @param cvar if the object already set is different from it, will throw exception
 	 * @return
 	 */
-	public THIS setConsoleVarLink(CommandsDelegator.CompositeControl cc, ConsoleVariable vivo) {
+	public THIS setConsoleVarLink(CommandsDelegator.CompositeControl cc, ConsoleVariable cvar) {
 		cc.assertSelfNotNull();
 		
-		if(vivo==null){
+		if(cvar==null){
 			throw new PrerequisitesNotMetException("VarLink is null", this);
 		}
 		
 //		if(this.vivo!=null)throw new PrerequisitesNotMetException("already set", this, this.vivo, vivo);
-		if(this.cvar != vivo){
-			// so, np if was null...
-			PrerequisitesNotMetException.assertNotAlreadySet("VarLink", this.cvar, vivo, this);
-		}
+//		if(this.cvar != cvar){
+//			// so, np if was null...
+//			PrerequisitesNotMetException.assertNotAlreadySet("VarLink", this.cvar, cvar, this);
+//		}
+		PrerequisitesNotMetException.assertNotAlreadySet("ConsoleVarLink", this.cvar, cvar, this);
+		PrerequisitesNotMetException.assertNotAlreadySet("ConsoleVarOwner", cvar.getRestrictedVarOwner(), this);
 		
-		this.cvar.setOwnerForRestrictedVar(this);
-		this.cvar = vivo; //after setting console var owner!
+		this.cvar = cvar;
+		this.cvar.setRestrictedVarOwner(this);
 		
 		/**
 		 * vivo will already come with an updated value, because this method is called
@@ -200,7 +207,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		 */
 //		boolean bUpdateWithInitialValue=false; //do not enable... kept as reference...
 //		if(bUpdateWithInitialValue){
-		if(isRawValueLazySet()){
+		if(isRawLazyValueSet()){
 //			if(this.vivo.getObjectValue()==null){ //nah... value can be set to null...
 //			setObjectRawValue(getValueRaw()); //update it's value with old/previous value? nah...
 			setObjectRawValue(getRawValueLazy());
@@ -208,8 +215,8 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 			/**
 			 * lazy value is not required anymore, so clean it up
 			 */
-			bLazyValueWasSet=false;
-			objRawValueLazy=null;
+			bRawLazyValueAvailable=false;
+			objRawLazyValue=null;
 //			}
 		}
 		
@@ -401,11 +408,12 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 			if(getOwner()==null)str+=" No owner.";
 			str+=")";
 		}else{
-			if(isCmd()){
-				str+=getUniqueCmdId();
-			}else{
+//			if(isCmd()){
+//				str+=getUniqueCmdId()+" ";
+//			}else{
+////			if(isVar()){
 				str+=getUniqueVarId();
-			}
+//			}
 		}
 		
 		return str+" = "+getValueReport();
@@ -435,7 +443,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		if(cvar!=null){
 			val = cvar.getRawValue();
 		}else{
-			val = objRawValueLazy;
+			val = objRawLazyValue;
 		}
 		
 		return assertAllowNullValue(val);
@@ -469,7 +477,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	 * It is the unmodified/original value.
 	 * If var link is not set, the raw value will be lazily stored.
 	 *  
-	 * @param objValueNew
+	 * @param objValueNew on its overridens, a string value should always be parseable, as it can be the by-hand user input at console!
 	 * @return
 	 */
 	private THIS setObjectRawValue(Object objValueNew, boolean bSetDefault) { // do not use O at param here, ex.: bool toggler can be used on overriden
@@ -489,12 +497,12 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 			 * this cast is IMPORTANT!!!
 			 * to grant the setup is in the right type!
 			 */
-			cvar.setRawValue((VAL)objValueNew);
+			cvar.setRawValue(ccSelf,(VAL)objValueNew);
 		}else{
-			bLazyValueWasSet=true; //as such value can be actually null
+			bRawLazyValueAvailable=true; //as such value can be actually null
 			
-			objCurrentValue = this.objRawValueLazy; //before setting it! :P
-			this.objRawValueLazy = (VAL)objValueNew;
+			objCurrentValue = this.objRawLazyValue; //before setting it! :P
+			this.objRawLazyValue = (VAL)objValueNew;
 		}
 		
 		if(objCurrentValue!=objValueNew)prepareCallerAssigned(false);
@@ -523,13 +531,13 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		return false;
 	}
 
-	protected boolean isRawValueLazySet(){
-		return bLazyValueWasSet;
+	protected boolean isRawLazyValueSet(){
+		return bRawLazyValueAvailable;
 	}
 	
 	protected Object getRawValueLazy(){
-		assertAllowNullValue(objRawValueLazy);
-		return objRawValueLazy;
+		assertAllowNullValue(objRawLazyValue);
+		return objRawLazyValue;
 	}
 	
 	/**
@@ -575,28 +583,36 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	}
 	
 	public String getValueAsString() {
-		VAL value = getValue();
-		if(value==null)return null; //value can be null
-		
-		return ""+value;
+//		VAL value = getValue();
+//		if(value==null)return null; //value can be null
+//		
+//		return ""+value;
+		return getValueAsString(-1);
 	}
+	/**
+	 * 
+	 * @param iFloatingPrecision if -1 will not apply precision restriction
+	 * @return
+	 */
 	public String getValueAsString(int iFloatingPrecision) {
 		Object value = getValue();
 		if(value==null)return null;//value can be null
 		
-		switch(EType.forClass(value.getClass())){
-			case Double:
-				value = MiscI.i().fmtFloat((double)value, iFloatingPrecision);
-				break;
-			case Float:
-				value = MiscI.i().fmtFloat((float)value, iFloatingPrecision);
-				break;
-			case Boolean:
-			case Int:
-			case Long:
-			case String:
-				// keep empty
-				break;
+		if(iFloatingPrecision>=0){
+			switch(EType.forClass(value.getClass())){
+				case Double:
+					value = MiscI.i().fmtFloat((double)value, iFloatingPrecision);
+					break;
+				case Float:
+					value = MiscI.i().fmtFloat((float)value, iFloatingPrecision);
+					break;
+				case Boolean:
+				case Int:
+				case Long:
+				case String:
+					// keep empty
+					break;
+			}
 		}
 		
 		return ""+value;
@@ -705,5 +721,21 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	
 	public boolean isConsoleVarLinkSet(){
 		return cvar!=null;
+	}
+	
+	public boolean isConsoleVarLink(ConsoleVariable<VAL> cvar){
+		return this.cvar==cvar;
+	}
+
+	public boolean isUniqueCmdIdEqualTo(String strCmdChk){
+		chkAndInit();
+		
+		strCmdChk=strCmdChk.trim();
+		
+//		if(bIgnoreCaseOnComparison){
+		return getUniqueCmdId().equalsIgnoreCase(strCmdChk); //useful for user typed commands
+//		}else{
+//			return getUniqueCmdId().equals(strCmdChk);
+//		}
 	}
 }

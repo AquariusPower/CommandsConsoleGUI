@@ -157,18 +157,6 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 //		return "ERROR: "+StringCmdField.class.getName()+" not yet properly initialized!";
 //	}
 	
-	public boolean isUniqueCmdIdEqualTo(String strCmdChk){
-		chkAndInit();
-		
-		strCmdChk=strCmdChk.trim();
-		
-//		if(bIgnoreCaseOnComparison){
-			return getUniqueCmdId().equalsIgnoreCase(strCmdChk); //useful for user typed commands
-//		}else{
-//			return getUniqueCmdId().equals(strCmdChk);
-//		}
-	}
-	
 	/**
 	 * TODO one day, remove this override and try to not do this mess again!!! being verified since 20160928
 	 */

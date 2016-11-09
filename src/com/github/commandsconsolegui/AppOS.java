@@ -29,6 +29,8 @@ package com.github.commandsconsolegui;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
@@ -105,6 +107,16 @@ public class AppOS {
 		
 		return true;
 	}
+	
+	public ArrayList<String> getAllKeyCodesReport(){
+		ArrayList<String> astr = new ArrayList<String>();
+		for(Entry<String, Integer> entry:tmIdCode.entrySet()){
+			astr.add(entry.getKey()+"="+entry.getValue());
+		}
+		Collections.sort(astr);
+		return astr;
+	}
+	
 	/**
 	 * 
 	 * @param cl

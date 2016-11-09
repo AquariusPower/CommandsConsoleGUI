@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
+import com.github.commandsconsolegui.cmd.ConsoleVariable;
+import com.github.commandsconsolegui.cmd.CommandsDelegator.CompositeControl;
 import com.github.commandsconsolegui.globals.GlobalAppOSI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -162,6 +164,9 @@ public class KeyBoundVarField extends VarCmdFieldAbs<Integer[],KeyBoundVarField>
 		if(objValue instanceof String){
 			objValue = parseToBoundCfg((String)objValue, false); //coming from user action will just warn on failure
 		}else
+		if(objValue instanceof Integer[]){
+			//expected value
+		}else
 		if(objValue instanceof Integer){
 			objValue = new Integer[]{(Integer)objValue};
 		}else{
@@ -195,4 +200,17 @@ public class KeyBoundVarField extends VarCmdFieldAbs<Integer[],KeyBoundVarField>
 		
 		return getBindCfg();
 	}
+	
+	@Override
+	public String getValueAsString(int iFloatingPrecision) {
+		return getBindCfg();
+	}
+	
+//	/**
+//	 * just to easy debugging
+//	 */
+//	@Override
+//	public KeyBoundVarField setConsoleVarLink(CompositeControl cc,ConsoleVariable cvar) {
+//		return super.setConsoleVarLink(cc, cvar);
+//	}
 }

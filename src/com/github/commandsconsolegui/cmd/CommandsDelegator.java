@@ -169,6 +169,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	public final StringCmdField CMD_DB = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField CMD_ECHO = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField scfListFiles = new StringCmdField(this);
+	public final StringCmdField scfListKeyCodes = new StringCmdField(this);
 	public final StringCmdField scfMessagesBufferClear = new StringCmdField(this);
 	public final StringCmdField scfChangeCommandSimpleId = new StringCmdField(this);
 	public final StringCmdField CMD_FIX_LINE_WRAP = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
@@ -1073,6 +1074,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 				dumpExceptionEntry(ex, strPath);
 			}
 			
+		}else
+		if(checkCmdValidity(scfListKeyCodes,"list all available key ids and codes")){
+			for(String str:GlobalAppOSI.i().getAllKeyCodesReport()){
+				dumpSubEntry(str);
+			}
 		}else
 		if(checkCmdValidity(scfMessagesBufferClear,"clear all warning and exceptions stored in memory")){
 			aimBufferList.clear();
@@ -2084,18 +2090,26 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	
 	private boolean cmdVarShow() {
 		String strFilter = ccl.paramString(1);
-		if(strFilter==null)strFilter="";
-		strFilter=strFilter.trim();
+		boolean bRestrictedOnly=false;
+		if(strFilter==null){
+			strFilter="";
+		}else{
+			if(strFilter.startsWith(""+CommandsHelperI.i().getRestrictedToken())){
+				bRestrictedOnly=true;
+			}
+			strFilter=CommandsHelperI.i().removeRestrictedToken(strFilter);
+		}
+//		strFilter=strFilter.trim();
 		
 		/**
 		 * LIST all, user and restricted
 		 */
 		dumpInfoEntry("Variables list:");
-		boolean bRestrictedOnly=false;
-		if(strFilter.startsWith(""+CommandsHelperI.i().getRestrictedToken())){
-			bRestrictedOnly=true;
-			strFilter=strFilter.substring(1);
-		}
+//		boolean bRestrictedOnly=false;
+//		if(strFilter.startsWith(""+CommandsHelperI.i().getRestrictedToken())){
+//			bRestrictedOnly=true;
+//			strFilter=strFilter.substring(1);
+//		}
 		
 //		setupVars(false); //this will refresh any pending variables
 //		databaseSave(); //this will refresh any pending variables too
@@ -2104,15 +2118,19 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 //		if(strFilter!=null)strFilter=strFilter.substring(1);
 		ArrayList<String> avar = getVariablesIdentifiers(true);
 		for(String strVarId : avar){
-			if(isRestricted(strVarId) && !bRestrictedOnly)continue;
-			if(!isRestricted(strVarId) && bRestrictedOnly)continue;
+			boolean bRestricted = isRestrictedVar(strVarId);//tmRestrictedVariables.get(strVarId)!=null;
+//			if(CommandsHelperI.i().isRestricted(strVarId) && !bRestrictedOnly)continue;
+//			if(!CommandsHelperI.i().isRestricted(strVarId) && bRestrictedOnly)continue;
+			if(bRestricted && !bRestrictedOnly)continue;
+			if(!bRestricted && bRestrictedOnly)continue;
 			
 			/**
 			 * empty filter will work too.
 			 */
-			if(strVarId.startsWith(""+CommandsHelperI.i().getRestrictedToken())){
-				strVarId=strVarId.substring(1);
-			}
+//			if(strVarId.startsWith(""+CommandsHelperI.i().getRestrictedToken())){
+//				strVarId=strVarId.substring(1);
+//			}
+//			if(containsFilterString(CommandsHelperI.i().removeRestrictedToken(strVarId),strFilter)){
 			if(containsFilterString(strVarId,strFilter)){
 				astr.add(strVarId);
 			}
@@ -2174,7 +2192,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	}
 	
 	private boolean isRestrictedAndDoesNotExist(String strVar){
-		if(isRestricted(strVar)){
+		if(CommandsHelperI.i().isRestricted(strVar)){
 			// user can only set existing restricted vars
 			if(!selectVarSource(strVar).containsKey(strVar)){
 				dumpWarnEntry("Restricted var does not exist: "+strVar);
@@ -2450,7 +2468,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		if(ccl.paramBooleanCheckForToggle(1)){
 			Boolean bEnable = ccl.paramBoolean(1);
 			btg.setObjectRawValue(bEnable==null ? !btg.get() : bEnable); //overrider
-			varSet(btg,true);
+			checkAndCreateConsoleVarLink(btg,true);
 			dumpInfoEntry("Toggle, setting "+ccl.paramString(0)+" to "+btg.get());
 			return true;
 		}
@@ -2630,11 +2648,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	}
 	
 	private ConsoleVariable getVarFromRightSource(String strId){
-		return selectVarSource(strId).get(strId);
+		return selectVarSource(strId).get(CommandsHelperI.i().removeRestrictedToken(strId));
 	}
 	
 	private boolean cmdVarAdd(String strVarId, String strValueAdd, boolean bSave){
-		return varAdd(getVarFromRightSource(strVarId), new ConsoleVariable(strVarId, strValueAdd, null, null, null), bSave);
+		return varAdd(getVarFromRightSource(strVarId), new ConsoleVariable(strVarId, strValueAdd, null, null), bSave);
 	}
 	
 	private boolean varAdd(ConsoleVariable cvarBase, ConsoleVariable cvarAdd, boolean bSave){
@@ -2657,9 +2675,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		ConsoleVariable cvarAdd, 
 		boolean bSave
 	){
-		if(isRestrictedAndDoesNotExist(cvarRequested.getUniqueVarId()))return false;
+		if(isRestrictedAndDoesNotExist(cvarRequested.getUniqueVarId(true)))return false;
 		
-		ConsoleVariable cvarFound = getVarFromRightSource(cvarRequested.getUniqueVarId());
+		ConsoleVariable cvarFound = getVarFromRightSource(cvarRequested.getUniqueVarId(true));
 		if(cvarFound!=cvarRequested){
 			dumpDevWarnEntry("shouldnt be the same object?", cvarRequested, cvarFound);
 		}
@@ -2667,7 +2685,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		Object objValueCurrent = cvarFound.getRawValue();
 		Object objValueNew = objValueCurrent;
 		if(objValueCurrent==null){
-			dumpExceptionEntry(new NullPointerException("value is null for var "+cvarRequested.getUniqueVarId()));
+			dumpExceptionEntry(new NullPointerException("value is null for var "+cvarRequested.getUniqueVarId(true)));
 			return false;
 		}
 		
@@ -2716,12 +2734,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		}
 			
 		cvarRequested.setRawValue(objValueNew);
-		return varApply(cvarRequested,bSave);
+		return varApply(cvarRequested,null,bSave);
 	}
 	
-	private boolean isRestricted(String strId){
-		return strId.startsWith(""+CommandsHelperI.i().getRestrictedToken());
-	}
+//	private boolean isRestricted(String strId){
+//		return strId.startsWith(""+CommandsHelperI.i().getRestrictedToken());
+//	}
 	
 	/**
 	 * 
@@ -2740,8 +2758,18 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 //	private void setVarValue(String strVarId, VarIdValueOwner vivo){
 //		selectVarSource(strVarId).put(strVarId,vivo);
 //	}
+	private TreeMap<String, ConsoleVariable> selectVarSource(ConsoleVariable cvar){
+		return cvar.isRestricted() ? tmRestrictedVariables : tmUserVariables;
+	}
 	private TreeMap<String, ConsoleVariable> selectVarSource(String strVarId){
-		if(isRestricted(strVarId)){
+		boolean bRestricted = CommandsHelperI.i().isRestricted(strVarId);
+		if(!bRestricted){
+			if(isRestrictedVar(strVarId)){
+				bRestricted=true;
+			}
+		}
+		
+		if(bRestricted){
 			return tmRestrictedVariables;
 		}else{
 			return tmUserVariables;
@@ -2749,7 +2777,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	}
 	
 	private File getVarFile(String strVarId){
-		if(isRestricted(strVarId)){
+		if(isRestrictedVar(strVarId)){
 			return flSetup;
 		}else{
 			return flDB;
@@ -2760,7 +2788,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		ArrayList<String> astr = getVariablesIdentifiers(true);
 		Collections.sort(astr);
 		for(String strVarId : astr){
-			if(isRestricted(strVarId)){
+//			if(CommandsHelperI.i().isRestricted(strVarId)){
+			if(isRestrictedVar(strVarId)){
 				fileAppendVar(strVarId);
 			}
 		}
@@ -2769,7 +2798,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	private void fileAppendVar(String strVarId){
 		String strCommentOut="";
 		String strReadOnlyComment="";
-		if(isRestricted(strVarId)){
+		if(isRestrictedVar(strVarId)){
 //			try{ERestrictedSetupLoadableVars.valueOf(strVarId.substring(1));}catch(IllegalArgumentException e){
 //			if(isCommandPrefixVar(strVarId)){
 			if(strVarId.startsWith(""+CommandsHelperI.i().getRestrictedToken()+ReflexFillI.i().getPrefixCmdDefault())){
@@ -2789,46 +2818,61 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 //		return strVarId.startsWith(""+CommandsHelperI.i().getRestrictedToken()+ReflexFillI.i().getPrefixCmdDefault());
 //	}
 
-	@Deprecated //this was preventing user changes to be loaded on next startup
-	private void _fileAppendVar(String strVarId){
-		String strCommentOut="";
-		String strReadOnlyComment="";
-		if(isRestricted(strVarId)){
-			try{ERestrictedSetupLoadableVars.valueOf(strVarId.substring(1));}catch(IllegalArgumentException e){
-				/**
-				 * comment non loadable restricted variables, like the ones set by commands
-				 */
-				strCommentOut=getCommentPrefixStr();
-				strReadOnlyComment="(ReadOnly)";
-			}
-		}
-		
-		MiscI.i().fileAppendLine(getVarFile(strVarId), strCommentOut+varReportPrepare(strVarId)+strReadOnlyComment);
+//	@Deprecated //this was preventing user changes to be loaded on next startup
+//	private void _fileAppendVar(String strVarId){
+//		String strCommentOut="";
+//		String strReadOnlyComment="";
+//		if(CommandsHelperI.i().isRestricted(strVarId)){
+//			try{ERestrictedSetupLoadableVars.valueOf(strVarId.substring(1));}catch(IllegalArgumentException e){
+//				/**
+//				 * comment non loadable restricted variables, like the ones set by commands
+//				 */
+//				strCommentOut=getCommentPrefixStr();
+//				strReadOnlyComment="(ReadOnly)";
+//			}
+//		}
+//		
+//		MiscI.i().fileAppendLine(getVarFile(strVarId), strCommentOut+varReportPrepare(strVarId)+strReadOnlyComment);
+//	}
+	
+	public boolean isRestrictedVar(String strId){
+		if(CommandsHelperI.i().isRestricted(strId))return true;
+		return tmRestrictedVariables.containsKey(strId);
 	}
 	
-	private boolean varApply(ConsoleVariable cvar, boolean bSave){
+	private boolean varApply(ConsoleVariable cvar, VarCmdFieldAbs vcfOwner, boolean bSave){
 		/**
 		 * creates the console variable
 		 */
-		TreeMap<String, ConsoleVariable> tmSrc = selectVarSource(cvar.getUniqueVarId());
-		ConsoleVariable cvarAtSrc = tmSrc.get(cvar.getUniqueVarId());
+		TreeMap<String, ConsoleVariable> tmSrc = selectVarSource(cvar);//.getUniqueVarId(true));
+		ConsoleVariable cvarAtSrc = tmSrc.get(cvar.getUniqueVarId(false));
 		if(cvarAtSrc!=null && cvar!=cvarAtSrc){
-			dumpDevWarnEntry("console variable is being modified", cvar.getUniqueVarId(), cvarAtSrc, cvar);
+			dumpDevWarnEntry("console variable is being modified", cvar.getUniqueVarId(true), cvarAtSrc, cvar);
 		}
-		tmSrc.put(cvar.getUniqueVarId(), cvar);
+		tmSrc.put(cvar.getUniqueVarId(false), cvar);
 		
 //	if(vivo.getOwner()!=null){ //TODO!!! PROLEM: can only set owner if it is not set!
 //	// it can have no owner (field), it can be a simple variable.
 //	vivo.getOwner().setConsoleVarLink(ccSelf,vivo);
 //}
-		if(tmSrc==tmRestrictedVariables){
-			if(cvar.getRestrictedOwner()==null){
-				for(VarCmdFieldAbs vcfTmp:VarCmdFieldManagerI.i().getListCopy()){
-					if(!vcfTmp.isVar())continue;
-					if(vcfTmp.getUniqueVarId().equals(cvar.getUniqueVarId())){
-						vcfTmp.setConsoleVarLink(ccSelf,cvar);
-						break;
+		if(tmSrc==tmRestrictedVariables){ //cvar.isRestricted()
+			if(cvar.getRestrictedVarOwner()==null){
+				if(vcfOwner==null){
+					for(VarCmdFieldAbs vcfTmp:VarCmdFieldManagerI.i().getListCopy()){
+						if(!vcfTmp.isVar())continue;
+	//					DebugI.i().conditionalBreakpoint(KeyBoundVarField.class.isInstance(vcfTmp));
+	//					if(vcfTmp.getUniqueVarId().equals(CommandsHelperI.i().removeRestrictedToken(cvar.getUniqueVarId()))){
+						if(vcfTmp.getUniqueVarId().equals(cvar.getUniqueVarId(false))){
+							vcfOwner=vcfTmp;
+							break;
+						}
 					}
+				}
+				
+				if(vcfOwner!=null){
+					vcfOwner.setConsoleVarLink(ccSelf,cvar);
+				}else{
+					MsgI.i().devWarn("has no owner", cvar); //TODO has no owner yet? will lazy set later?
 				}
 			}
 		}
@@ -2836,10 +2880,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		/**
 		 * save the console variable
 		 */
-		if(bSave)fileAppendVar(cvar.getUniqueVarId());
+		if(bSave)fileAppendVar(cvar.getUniqueVarId(true));
 		
-		if(isRestricted(cvar.getUniqueVarId()) && btgShowDeveloperInfo.b()){
-			varReport(cvar.getUniqueVarId());
+//		if(CommandsHelperI.i().isRestricted(cvar.getUniqueVarId()) && btgShowDeveloperInfo.b()){
+		if(cvar.isRestricted() && btgShowDeveloperInfo.b()){
+			varReport(cvar.getUniqueVarId(true));
 		}
 		
 		return true;
@@ -2847,6 +2892,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	
 	public String varReportPrepare(String strVarId) {
 		ConsoleVariable cvar = getVarFromRightSource(strVarId);
+		if(cvar!=null){
+			return varReportPrepare(cvar);
+		}
+		return "ERROR: Var Not found: "+strVarId;
+	}
+	public String varReportPrepare(ConsoleVariable cvar) {
 		String str="";
 		
 		// as reusable command
@@ -2863,18 +2914,30 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		}
 		
 		str+=" ";
-		str+=strVarId;
+		str+=cvar.getUniqueVarId(true);
 		str+=" ";
 		
 		Object objVal = cvar.getRawValue();
-		if(cvar!=null){
-			if(objVal==null){
-				str+=null;
+////		if(cvar!=null){
+//			if(objVal==null){
+//				str+=null;
+//			}else{
+//				str+="\""+cvar.getRawValue()+"\"";
+//			}
+		if(objVal==null){
+			str+=null;
+		}else{
+			str+="\"";
+			if(cvar.getRestrictedVarOwner()!=null){
+				str+=cvar.getRestrictedVarOwner().getValueAsString();
 			}else{
-				str+="\""+cvar.getRawValue()+"\"";
+				assertValueIsPrimitive(objVal);
+				str+=objVal;
 			}
-			str+=" ";
+			str+="\"";
 		}
+			str+=" ";
+//		}
 		
 		// comments
 		str+="#";
@@ -2886,13 +2949,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		}
 		str+=" ";
 		// scope
-		str+=(isRestricted(strVarId)?"(Restricted)":"(User)");
+		str+=(cvar.isRestricted()?"(Restricted)":"(User)");
 		// dev info
 		if(btgShowDeveloperInfo.b()){
-			if(cvar.getRestrictedOwner()!=null && cvar.getRfcfgClassHoldingTheOwner()!=null){
+			if(cvar.getRestrictedVarOwner()!=null && cvar.getRfcfgClassHoldingTheOwner()!=null){
 				str+=" ";
 //				str+="["+vivo.getRfcfgClassHoldingTheOwner().getClass().getName()+"]";
-				str+="["+ReflexFillI.i().getDeclaringClass(cvar.getRfcfgClassHoldingTheOwner(), cvar.getRestrictedOwner()).getName()+"]";
+				str+="["+ReflexFillI.i().getDeclaringClass(cvar.getRfcfgClassHoldingTheOwner(), cvar.getRestrictedVarOwner()).getName()+"]";
 			}
 		}
 		str+=" ";
@@ -2904,10 +2967,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	public void varReport(String strVarId) {
 		ConsoleVariable cvar=getVarFromRightSource(strVarId);
 		if(cvar!=null){
-			dumpSubEntry(varReportPrepare(strVarId));
+			varReport(cvar);
 		}else{
 			dumpSubEntry(strVarId+" is not set...");
+			dumpSubEntry("");//for readability
 		}
+	}
+	public void varReport(ConsoleVariable cvar) {
+		dumpSubEntry(varReportPrepare(cvar.getUniqueVarId(false)));
 		dumpSubEntry("");//for readability
 	}
 	
@@ -2939,7 +3006,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	 * @param strValue
 	 * @return
 	 */
-	private boolean varApplyAtRestrictedOwner(VarCmdFieldAbs owner, String strValue){
+	private boolean varApplyValueAtRestrictedOwner(VarCmdFieldAbs owner, String strValue){
 		ConsoleVariable cvar = getVarFromRightSource(CommandsHelperI.i().getRestrictedToken()+owner.getUniqueVarId());
 		if(cvar==null)return false;
 		owner.setObjectRawValue(strValue);
@@ -2947,24 +3014,39 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		return true;
 	}
 	
-	public boolean varSet(VarCmdFieldAbs owner, boolean bSave) {
+	public void checkAndCreateConsoleVarLink(VarCmdFieldAbs vcfOwner, boolean bSave) {
+		ConsoleVariable cvar=vcfOwner.getConsoleVarLink(ccSelf);
+//		if(bSave)fileAppendVar(cvar.getUniqueVarId(true));
+//		if(cvar!=null)return;
+		
 		IReflexFillCfg rfcfg=null;
-		if(owner instanceof IReflexFillCfgVariant){
+		if(vcfOwner instanceof IReflexFillCfgVariant){
 			/**
 			 * check if it is configured as a class field should be
 			 */
-			rfcfg = ((IReflexFillCfgVariant)owner).getOwner();
-			if(rfcfg==null)return false;
+			rfcfg = ((IReflexFillCfgVariant)vcfOwner).getOwner();
+			if(rfcfg==null){
+				MsgI.i().devWarn("is not a field", vcfOwner);
+				return;
+//				return false;
+			}
 		}
 		
-		return varSetFixingType(
-			new ConsoleVariable(
-				CommandsHelperI.i().getRestrictedToken()+owner.getUniqueVarId(),
-				owner.getRawValue(),
-				owner,
+		if(cvar==null){
+			cvar = new ConsoleVariable(
+				CommandsHelperI.i().getRestrictedToken()+vcfOwner.getUniqueVarId(),
+				vcfOwner.getRawValue(),
+	//				owner,
 				rfcfg,
-				owner.getHelp()),
-			bSave);
+				vcfOwner.getHelp());
+		}
+			
+			varApply(cvar, vcfOwner, bSave); //owner.setConsoleVarLink(ccSelf, cvar);
+			
+//			return varSetFixingType(cvar,bSave);
+//		}
+		
+//		return true;
 	}
 	
 	/**
@@ -2982,12 +3064,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 //			vivo = new VarIdValueOwnerData(strVarId, strValue, null, null, null);
 //		}
 //		
-		boolean bOk=varSetFixingType(new ConsoleVariable(strVarId, strValue, null, null, null), bSave);
+		boolean bOk=varSetFixingType(new ConsoleVariable(strVarId, strValue, null, null), bSave);
 		
 		if(bOk){
 			ConsoleVariable cvar = getVarFromRightSource(strVarId);
-			if(cvar.getRestrictedOwner()!=null){
-				varApplyAtRestrictedOwner(cvar.getRestrictedOwner(),strValue);
+			if(cvar.getRestrictedVarOwner()!=null){
+				varApplyValueAtRestrictedOwner(cvar.getRestrictedVarOwner(),strValue);
 			}
 		}
 		
@@ -3014,14 +3096,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	 * @return
 	 */
 	public boolean varSetFixingType(ConsoleVariable cvar, boolean bSave) {
-		if(getAlias(cvar.getUniqueVarId())!=null){
-			dumpUserErrorEntry("Variable identifier '"+cvar.getUniqueVarId()+"' conflicts with existing alias!");
+		if(getAlias(cvar.getUniqueVarId(false))!=null){
+			dumpUserErrorEntry("Variable identifier '"+cvar.getUniqueVarId(true)+"' conflicts with existing alias!");
 			return false;
 		}
 		
 		if(cvar.getRawValue()==null)return false; //strValue=""; //just creates the var
 		
-		ConsoleVariable cvarExisting = getVarFromRightSource(cvar.getUniqueVarId());
+		ConsoleVariable cvarExisting = getVarFromRightSource(cvar.getUniqueVarId(true));
 		if(cvarExisting!=null){
 //			if(vivoExisting.getOwner() instanceof BoolToggler){
 //				int i=0;
@@ -3035,16 +3117,46 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			 */
 			boolean bOk=false;
 			
-			String strValue = ""+cvar.getRawValue();
-			if(!bOk)try{cvar.setValFixType(ccSelf,Long  .parseLong      (strValue));bOk=varApply(cvar,bSave);}catch(NumberFormatException e){}// accepted exception!
-			if(!bOk)try{cvar.setValFixType(ccSelf,Double.parseDouble    (strValue));bOk=varApply(cvar,bSave);}catch(NumberFormatException e){}// accepted exception!
-			if(!bOk)try{cvar.setValFixType(ccSelf,MiscI.i().parseBoolean(strValue));bOk=varApply(cvar,bSave);}catch(NumberFormatException e){}// accepted exception!
-			if(!bOk){		cvar.setValFixType(ccSelf,strValue);bOk=varApply(cvar,bSave);}
+			String strValue = null;
+			if(cvar.getRestrictedVarOwner()!=null){
+				strValue=cvar.getRestrictedVarOwner().getValueAsString();
+			}else{
+				Object objVal = cvar.getRawValue();
+				assertValueIsPrimitive(objVal);
+				
+				/**
+				 * this will only work well for primitives, 
+				 * otherwise the parsing would break at VarCmdFieldAbs' subclass
+				 */
+				strValue = ""+cvar.getRawValue(); 
+			}
+//			String strValue = ""+cvar.getRawValue();
+			if(!cvar.isRestrictedVarLinkConsistent()){
+				if(!bOk)try{cvar.setValFixType(ccSelf,Long  .parseLong      (strValue));bOk=varApply(cvar,null,bSave);}catch(NumberFormatException e){}// accepted exception!
+				if(!bOk)try{cvar.setValFixType(ccSelf,Double.parseDouble    (strValue));bOk=varApply(cvar,null,bSave);}catch(NumberFormatException e){}// accepted exception!
+				if(!bOk)try{cvar.setValFixType(ccSelf,MiscI.i().parseBoolean(strValue));bOk=varApply(cvar,null,bSave);}catch(NumberFormatException e){}// accepted exception!
+				if(!bOk){		cvar.setValFixType(ccSelf,strValue);bOk=varApply(cvar,null,bSave);}
+			}else{ // already set
+//			if(cvar.getRestrictedVarOwner()!=null && cvar.getRestrictedVarOwner().isConsoleVarLink(cvar)){
+//			if(!bOk){		cvar.setValFixType(ccSelf,strValue);bOk=varApply(cvar,bSave);}
+//				DebugI.i().conditionalBreakpoint(true); //TODO remove
+			}
 			
 			return bOk;
 		}
 	}
 	
+	private void assertValueIsPrimitive(Object objVal) {
+		if(objVal instanceof String){}else
+		if(objVal instanceof Integer){}else
+		if(objVal instanceof Long){}else
+		if(objVal instanceof Float){}else
+		if(objVal instanceof Double){}else
+		if(objVal instanceof Boolean){}else{
+			throw new PrerequisitesNotMetException("not supported type "+objVal.getClass().getName(), objVal);
+		}
+	}
+
 	public boolean isVarSet(String strVarId){
 		return getVarFromRightSource(strVarId)!=null;
 	}
@@ -3529,7 +3641,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		}
 		
 		for(VarCmdFieldAbs vcf:avcf){
-			varSet(vcf,false);
+			checkAndCreateConsoleVarLink(vcf,false);
 		}
 	}
 	
