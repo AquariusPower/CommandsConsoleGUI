@@ -39,7 +39,6 @@ import com.github.commandsconsolegui.extras.SingleMandatoryAppInstanceI;
 import com.github.commandsconsolegui.globals.GlobalAppOSI;
 import com.github.commandsconsolegui.globals.GlobalSingleMandatoryAppInstanceI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppSettingsI;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.lemur.console.SimpleConsolePlugin;

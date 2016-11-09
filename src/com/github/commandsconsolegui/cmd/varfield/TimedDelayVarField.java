@@ -316,7 +316,7 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Float,TimedDelayVarField>
 			objValue=( Float.parseFloat((String)objValue) );
 		}else
 		{
-			objValue=((Float)objValue); //default is expected type
+			objValue=((Float)objValue); //default is expected type, otherwise will cast fail
 		}
 		
 //		if(super.getConsoleVarLink()!=null)

@@ -27,9 +27,6 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import com.github.commandsconsolegui.misc.SimpleHandleExceptionsI;
-import com.github.commandsconsolegui.misc.IHandleExceptions;
-import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 
@@ -98,7 +95,7 @@ public class IntLongVarField extends NumberVarFieldAbs<Long,IntLongVarField>{
 //	public IntLongVarField setObjectValue(CommandsDelegator.CompositeControl cc, Object objValue) {
 	public IntLongVarField setObjectRawValue(Object objValue) {
 		if(objValue == null){
-			objValue=( null );
+			//keep this empty skipper nullifier
 		}else
 		if(objValue instanceof Integer){
 			objValue=( ((Integer)objValue).longValue() );

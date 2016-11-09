@@ -46,6 +46,7 @@ import truetypefont.TrueTypeKey;
 import truetypefont.TrueTypeLoader;
 
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.cmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.GlobalMainThreadI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
@@ -79,6 +80,8 @@ import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
 import com.jme3.font.LineWrapMode;
 import com.jme3.font.Rectangle;
+import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.controls.Trigger;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
@@ -980,5 +983,15 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 			fScaleY==null?v3fCurrentScale.y:fScaleY,
 			v3fCurrentScale.z); // to not mess with Z order
 		return this;
+	}
+	
+	public Trigger[] asTriggerArray(KeyBoundVarField bind){
+		Integer[] ai = bind.getValue();
+		Trigger[] at = new Trigger[ai.length];
+		for(int i=0;i<ai.length;i++){
+			at[i]=new KeyTrigger(ai[i]);
+		}
+		
+		return at;
 	}
 }

@@ -34,6 +34,8 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
+import javax.swing.text.JTextComponent.KeyBinding;
+
 import truetypefont.TrueTypeFont;
 
 import com.github.commandsconsolegui.cmd.CommandData;
@@ -43,6 +45,7 @@ import com.github.commandsconsolegui.cmd.CommandsHelperI;
 import com.github.commandsconsolegui.cmd.DumpEntryData;
 import com.github.commandsconsolegui.cmd.EDataBaseOperations;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
+import com.github.commandsconsolegui.cmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
@@ -195,20 +198,8 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 		return true;
 	}
 	
-//	public static class CfgParm implements ICfgParm{
-//		String strUIId;
-//		boolean bIgnorePrefixAndSuffix;
-//		int iToggleConsoleKey;
-//		Node nodeGUI;
-//		public CfgParm(String strUIId, boolean bIgnorePrefixAndSuffix,
-//				int iToggleConsoleKey, Node nodeGUI) {
-//			super();
-//			this.strUIId = strUIId;
-//			this.bIgnorePrefixAndSuffix = bIgnorePrefixAndSuffix;
-//			this.iToggleConsoleKey = iToggleConsoleKey;
-//			this.nodeGUI = nodeGUI;
-//		}
-//	}
+	private KeyBoundVarField bindToggleConsole = new KeyBoundVarField(this);
+	
 	public static class CfgParm extends LemurDialogStateAbs.CfgParm{
 		private int iToggleConsoleKey;
 		public CfgParm(String strUIId, int iToggleConsoleKey) {
@@ -222,6 +213,8 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 	@Override
 	public THIS configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;
+		
+		bindToggleConsole.setObjectRawValue(cfg.iToggleConsoleKey);//bindToggleConsole.getUniqueCmdId()
 		
 		// for restarting functionality
 //		GlobalConsoleGuiI.iGlobal().validate();
@@ -1863,8 +1856,9 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 		// console toggle
 	//	if(iToggleConsoleKey!=null){
 			if(!app().getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_TOGGLE.getUniqueCmdId())){
-				app().getInputManager().addMapping(INPUT_MAPPING_CONSOLE_TOGGLE.getUniqueCmdId(), 
-					new KeyTrigger(cfg.iToggleConsoleKey));
+				app().getInputManager().addMapping(INPUT_MAPPING_CONSOLE_TOGGLE.getUniqueCmdId(),
+					MiscJmeI.i().asTriggerArray(bindToggleConsole));
+//					new KeyTrigger(bindToggleConsole.getValue()[0]));
 					
 				alConsoleToggle = new ActionListener() {
 					@Override

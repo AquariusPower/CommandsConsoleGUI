@@ -105,6 +105,7 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
   	cfg = (CfgParm)icfg;
   	
   	setGlobals();
+  	GlobalJmeAppOSI.i().fillKeyIdCodeFrom(KeyInput.class, "KEY_");
   	
 		/**
 		 * Configs:

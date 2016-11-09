@@ -93,7 +93,7 @@ public class FloatDoubleVarField extends NumberVarFieldAbs<Double,FloatDoubleVar
 //	public FloatDoubleVarField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
 	public FloatDoubleVarField setObjectRawValue(Object objValue) {
 		if(objValue == null){
-			objValue=( null );
+			//keep this empty skipper nullifier
 		}else
 		if(objValue instanceof Float){
 			objValue=( ((Float)objValue).doubleValue() );

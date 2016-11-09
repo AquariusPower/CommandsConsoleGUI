@@ -81,13 +81,11 @@ public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 			objValue = ((StringVarField)objValue).getValue();
 		}else
 		if(objValue instanceof String){ 
-			objValue = (String)objValue; //expected type
+			//keep empty, expected type
 		}else
 		if(objValue!=null){ 
 			objValue = ""+objValue; //TODO too much permissive?
-		}else{
-			objValue=null;
-		}
+		} // can be a nullifier!
 		
 //		super.setObjectValue(ccCD,objValue);
 		super.setObjectRawValue(objValue);

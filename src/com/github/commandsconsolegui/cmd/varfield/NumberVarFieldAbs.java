@@ -34,39 +34,39 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
- * @param <O>
- * @param <S>
+ * @param <VAL>
+ * @param <THIS>
  */
-public abstract class NumberVarFieldAbs<O, S extends NumberVarFieldAbs<O,S>> extends VarCmdFieldAbs<O,S> {//implements Comparable<O>{
+public abstract class NumberVarFieldAbs<VAL, THIS extends NumberVarFieldAbs<VAL,THIS>> extends VarCmdFieldAbs<VAL,THIS> {//implements Comparable<O>{
 //	private O nValue;
-	private O nMin;
-	private O nMax;
+	private VAL nMin;
+	private VAL nMax;
 	
-	public NumberVarFieldAbs(IReflexFillCfg rfcfgOwner, O valueDefault) {
+	public NumberVarFieldAbs(IReflexFillCfg rfcfgOwner, VAL valueDefault) {
 		super(rfcfgOwner, EVarCmdMode.Var, valueDefault);
 	}
 
-	public O getMin() {
+	public VAL getMin() {
 		return nMin;
 	}
 
-	public S setMin(O nMin) {
+	public THIS setMin(VAL nMin) {
 		PrerequisitesNotMetException.assertNotAlreadySet("min", this.nMin, nMin, this);
 		this.nMin = nMin;
 		return getThis();
 	}
 
-	public O getMax() {
+	public VAL getMax() {
 		return nMax;
 	}
 
-	public S setMax(O nMax) {
+	public THIS setMax(VAL nMax) {
 		PrerequisitesNotMetException.assertNotAlreadySet("max", this.nMax, nMax, this);
 		this.nMax = nMax;
 		return getThis();
 	}
 
-	public S setMinMax(O nMin,O nMax) {
+	public THIS setMinMax(VAL nMin,VAL nMax) {
 		setMin(nMin);
 		setMax(nMax);
 		return getThis();
@@ -76,7 +76,7 @@ public abstract class NumberVarFieldAbs<O, S extends NumberVarFieldAbs<O,S>> ext
 	 * TODO add console info message in case of under/overflow?
 	 */
 	@Override
-	public S setObjectRawValue(Object objValue) {
+	public THIS setObjectRawValue(Object objValue) {
 		super.setObjectRawValue(objValue); //this may put a call on queue
 		
 		/**
@@ -92,12 +92,12 @@ public abstract class NumberVarFieldAbs<O, S extends NumberVarFieldAbs<O,S>> ext
 		return getThis();
 	}
 	
-	public S setNumber(Number n){
+	public THIS setNumber(Number n){
 		this.setObjectRawValue(n);
 		return getThis();
 	}
 	
-	private int cmpWith(O nOther){
+	private int cmpWith(VAL nOther){
 		if(getRawValue() instanceof Double){
 			return ((Double)getRawValue()).compareTo((Double)nOther);
 		}else

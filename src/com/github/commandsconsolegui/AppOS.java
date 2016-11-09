@@ -28,6 +28,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.github.commandsconsolegui;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -44,10 +47,106 @@ public class AppOS {
 	
 	private File	flBaseSaveDataPath;
 	
+	private TreeMap<String,Integer> tmIdCode = new TreeMap<String,Integer>(String.CASE_INSENSITIVE_ORDER);
+	
 	public AppOS(String strApplicationBaseSaveDataPath) {
 		setApplicationBaseSaveDataPath(strApplicationBaseSaveDataPath);
+		
+		int iSpecialCodeStart=Integer.MAX_VALUE;
+		addKeyIdCode("ctrl"	, iSpecialCodeStart--);
+		addKeyIdCode("shift", iSpecialCodeStart--);
+		addKeyIdCode("alt"	, iSpecialCodeStart--);
+		
+		addKeyIdCode("mouseWheelUp"	, iSpecialCodeStart--);
+		addKeyIdCode("mouseWheelDown"	, iSpecialCodeStart--);
+		addKeyIdCode("mouseButton0"	, iSpecialCodeStart--);
+		addKeyIdCode("mouseButton1"	, iSpecialCodeStart--);
+		addKeyIdCode("mouseButton2"	, iSpecialCodeStart--);
+		addKeyIdCode("mouseButton3"	, iSpecialCodeStart--);
+		addKeyIdCode("mouseButton4"	, iSpecialCodeStart--);
+		addKeyIdCode("mouseButton5"	, iSpecialCodeStart--);
+		addKeyIdCode("mouseButton6"	, iSpecialCodeStart--);
+		addKeyIdCode("mouseButton7"	, iSpecialCodeStart--);
+		addKeyIdCode("mouseButton8"	, iSpecialCodeStart--);
+		addKeyIdCode("mouseButton9"	, iSpecialCodeStart--);
 	}
-
+	
+	/**
+	 * 
+	 * @param strId
+	 * @param iCode
+	 * @return true if added or already set with same code, false if already set with different code
+	 */
+	public boolean addKeyIdCode(String strId, Integer iCode){
+		Integer iCodeExisting = tmIdCode.get(strId);
+		if(iCodeExisting!=null){
+			if(iCodeExisting==iCode){
+				MsgI.i().devWarn("already set", strId, iCode);
+				return true;
+			}else{
+				MsgI.i().devWarn("cannot modify the code for", strId, iCodeExisting, iCode);
+				return false;
+			}
+		}
+		
+		if(tmIdCode.values().contains(iCode)){
+			String strExistingId=null;
+			for(Entry<String, Integer> entry:tmIdCode.entrySet()){
+				if(entry.getValue()==iCode){
+					strExistingId=entry.getKey();
+					MsgI.i().devWarn("(multiplicity) already contains code", strExistingId, iCode, strId);
+				}
+			}
+			
+//			throw new PrerequisitesNotMetException("already contains code", strExistingId, iCode, strKey);
+		}
+		
+		tmIdCode.put(strId, iCode);
+		
+		return true;
+	}
+	/**
+	 * 
+	 * @param cl
+	 * @param strKeyIdPrefixFilter can be null
+	 * @return
+	 */
+	public boolean fillKeyIdCodeFrom(Class<?> cl, String strKeyIdPrefixFilter){
+//		if(tmIdCode.size()>0){			return;		}
+		try {
+			int iMaxCode=-1;
+			for(Field fld:cl.getFields()){
+				if(strKeyIdPrefixFilter!=null && !strKeyIdPrefixFilter.isEmpty()){
+					if(!fld.getName().startsWith(strKeyIdPrefixFilter))continue;
+				}
+				
+				int iCode=(Integer)fld.get(null);
+				if(iCode>iMaxCode)iMaxCode=iCode;
+				
+				String strId=fld.getName();//.substring(4); //removes the KEY_ prefix
+				
+				if(!addKeyIdCode(strId,iCode)){
+					throw new PrerequisitesNotMetException("keycode filling failed",strId,iCode,cl,strKeyIdPrefixFilter);
+				}
+			}
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			throw new PrerequisitesNotMetException("unexpected").setCauseAndReturnSelf(e);
+		}
+		
+		return true;
+	}
+	
+	public int getKeyCode(String strId){
+		return tmIdCode.get(strId);
+	}
+	
+	public String getKeyId(int iCode){
+		for(Entry<String, Integer> entry:tmIdCode.entrySet()){
+			if(entry.getValue()==iCode)return entry.getKey();
+		}
+		return null;
+	}
+	
 	public File getBaseSaveDataPath(){
 		verifyBaseSaveDataPath();
 		return flBaseSaveDataPath;

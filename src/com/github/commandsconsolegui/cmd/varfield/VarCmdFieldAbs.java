@@ -54,7 +54,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 
  */
-public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements IReflexFillCfgVariant{//, IVarIdValueOwner{
+public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> implements IReflexFillCfgVariant{//, IVarIdValueOwner{
 //	private boolean bReflexingIdentifier = true;
 	public static enum EVarCmdMode{
 		Var,
@@ -79,10 +79,10 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 	private ConsoleVariable	cvar;
 	private String strHelp=null;
 	private CommandData	cmdd;
-	private O	objRawValueLazy = null;
+	private VAL	objRawValueLazy = null;
 	
 	/** this is the initial value (at construction time) */
-	private O	objRawValueDefault = null;
+	private VAL	objRawValueDefault = null;
 	
 	private boolean	bLazyValueWasSet;
 	private VarCmdUId	vcuid;
@@ -129,7 +129,7 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 	 * @param rfcfgOwner use null if this is not a class field, but a local variable, or for any reason the related console variable creation is to be skipped.
 	 * @param evcm
 	 */
-	public VarCmdFieldAbs(IReflexFillCfg rfcfgOwner, EVarCmdMode evcm, O valueDefault){
+	public VarCmdFieldAbs(IReflexFillCfg rfcfgOwner, EVarCmdMode evcm, VAL valueDefault){
 		this.evcm=evcm;
 		this.rfcfgOwner=rfcfgOwner;
 //		if(isField())
@@ -166,7 +166,7 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 		return this.cmdd;
 	}
 	
-	public S setCmdData(CommandData cmdd){
+	public THIS setCmdData(CommandData cmdd){
 		PrerequisitesNotMetException.assertNotAlreadySet("cmd data link to this var", this.cmdd, cmdd, this);
 		this.cmdd=cmdd;
 		return getThis();
@@ -178,7 +178,7 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 	 * @param vivo if the object already set is different from it, will throw exception
 	 * @return
 	 */
-	public S setConsoleVarLink(CommandsDelegator.CompositeControl cc, ConsoleVariable vivo) {
+	public THIS setConsoleVarLink(CommandsDelegator.CompositeControl cc, ConsoleVariable vivo) {
 		cc.assertSelfNotNull();
 		
 		if(vivo==null){
@@ -286,7 +286,7 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 //		return getThis();
 //	}
 	
-	protected S setUniqueId(VarCmdUId vcuid){
+	protected THIS setUniqueId(VarCmdUId vcuid){
 		if(this.vcuid!=null)PrerequisitesNotMetException.assertNotAlreadySet("UniqueId", this.vcuid, vcuid, vcuid.getUniqueId(null));
 		this.vcuid = vcuid;
 		
@@ -384,7 +384,7 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 	 * @param strHelp
 	 * @return
 	 */
-	public S setHelp(String strHelp) {
+	public THIS setHelp(String strHelp) {
 		PrerequisitesNotMetException.assertNotAlreadySet("help", this.strHelp, strHelp);
 		
 		if(strHelp!=null && !strHelp.isEmpty()){
@@ -411,7 +411,7 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 		return str+" = "+getValueReport();
 	}; //this is safe to be public because it is just a report string
 	
-	private String valueReport(Object val){
+	protected String valueReport(Object val){
 		if(val==null)return ""+null;
 		
 		if(val instanceof String){
@@ -426,8 +426,8 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 	}
 	
 	/** TODO modify return to O, also on vivo? or will be too much unnecessary complexity? just casts should suffice? */ 
-	public O getValue(){
-		return (O)getRawValue();
+	public VAL getValue(){
+		return (VAL)getRawValue();
 	}
 	
 	public Object getRawValue(){ //this is safe to be public because it is a base access to the concrete class simple value ex.: will return a primitive Long on the concrete class
@@ -446,7 +446,7 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 	 * implement only at concrete class (not the midlevel abstract ones)
 	 * @return
 	 */
-	protected abstract S getThis();
+	protected abstract THIS getThis();
 	
 	protected Object assertAllowNullValue(Object objValue){
 		if(!bAllowNullValue && objValue==null){
@@ -455,12 +455,12 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 		return objValue;
 	}
 	
-	public S setValue(O value) {
+	public THIS setValue(VAL value) {
 		setObjectRawValue(value);
 		return getThis();
 	}
 	
-	public S setObjectRawValue(Object objValue) { // do not use O at param here, ex.: bool toggler can be used on overriden
+	public THIS setObjectRawValue(Object objValue) { // do not use O at param here, ex.: bool toggler can be used on overriden
 		setObjectRawValue(objValue,false);
 		return getThis();
 	}
@@ -472,12 +472,12 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 	 * @param objValueNew
 	 * @return
 	 */
-	private S setObjectRawValue(Object objValueNew, boolean bSetDefault) { // do not use O at param here, ex.: bool toggler can be used on overriden
+	private THIS setObjectRawValue(Object objValueNew, boolean bSetDefault) { // do not use O at param here, ex.: bool toggler can be used on overriden
 		assertAllowNullValue(objValueNew);
 		
 		if(bSetDefault){ //can be null the default
 //		if(objRawValueDefault==null){
-			objRawValueDefault=(O)objValueNew;
+			objRawValueDefault=(VAL)objValueNew;
 		}
 		
 		Object objCurrentValue = null;
@@ -489,12 +489,12 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 			 * this cast is IMPORTANT!!!
 			 * to grant the setup is in the right type!
 			 */
-			cvar.setRawValue((O)objValueNew);
+			cvar.setRawValue((VAL)objValueNew);
 		}else{
 			bLazyValueWasSet=true; //as such value can be actually null
 			
 			objCurrentValue = this.objRawValueLazy; //before setting it! :P
-			this.objRawValueLazy = (O)objValueNew;
+			this.objRawValueLazy = (VAL)objValueNew;
 		}
 		
 		if(objCurrentValue!=objValueNew)prepareCallerAssigned(false);
@@ -556,7 +556,7 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 		return strCodePrefixVariant;
 	}
 
-	public S setCodePrefixVariant(String strCodePrefixVariant) {
+	public THIS setCodePrefixVariant(String strCodePrefixVariant) {
 		this.strCodePrefixVariant = MiscI.i().assertGetValidId(
 			strCodePrefixVariant, getCodePrefixDefault());
 		return getThis();
@@ -575,7 +575,7 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 	}
 	
 	public String getValueAsString() {
-		O value = getValue();
+		VAL value = getValue();
 		if(value==null)return null; //value can be null
 		
 		return ""+value;
@@ -625,8 +625,8 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 		return vcuid.clone();
 	}
 	
-	public O getValueDefault(){
-		return (O)getRawValueDefault();
+	public VAL getValueDefault(){
+		return (VAL)getRawValueDefault();
 	}
 	
 	public Object getRawValueDefault() {
@@ -641,7 +641,7 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 	 * @param caller
 	 * @return
 	 */
-	public S setCallerAssigned(CallableX caller){
+	public THIS setCallerAssigned(CallableX caller){
 		this.callerAssigned=caller;
 		return getThis();
 	}
@@ -698,7 +698,7 @@ public abstract class VarCmdFieldAbs<O,S extends VarCmdFieldAbs<O,S>> implements
 		return this.bAllowNullValue;
 	}
 	
-	public S setDenyNullValue() {
+	public THIS setDenyNullValue() {
 		this.bAllowNullValue = false;
 		return getThis();
 	}
