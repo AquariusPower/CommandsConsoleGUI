@@ -43,7 +43,7 @@ import com.github.commandsconsolegui.jme.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jme.AudioUII.EAudio;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
-import com.github.commandsconsolegui.jme.lemur.dialog.MaintenanceListLemurDialogState;
+import com.github.commandsconsolegui.jme.lemur.dialog.MaintenanceListLemurDialogStateAbs;
 import com.github.commandsconsolegui.misc.HoldRestartable;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -53,7 +53,7 @@ import com.simsilica.lemur.Command;
 /**
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/><https://sourceforge.net/u/teike/profile/>
  */
-public class ConsoleVarsDialogStateI<T extends Command<Button>> extends MaintenanceListLemurDialogState<T,ConsoleVarsDialogStateI<T>> {
+public class ConsoleVarsDialogStateI<T extends Command<Button>> extends MaintenanceListLemurDialogStateAbs<T,ConsoleVarsDialogStateI<T>> {
 	private static ConsoleVarsDialogStateI<Command<Button>>	instance=new ConsoleVarsDialogStateI<Command<Button>>();
 	public static ConsoleVarsDialogStateI<Command<Button>> i(){return instance;}
 
@@ -82,7 +82,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	
 //	private HoldRestartable<ChoiceVarDialogState> hrdiagChoice = new HoldRestartable<ChoiceVarDialogState>(this);
 	
-	public static class CfgParm extends MaintenanceListLemurDialogState.CfgParm{
+	public static class CfgParm extends MaintenanceListLemurDialogStateAbs.CfgParm{
 		public CfgParm(Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow,
 				Float fInfoHeightPercentOfDialog, Float fEntryHeightMultiplier) {

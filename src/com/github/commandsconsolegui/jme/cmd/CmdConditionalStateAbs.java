@@ -49,20 +49,20 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
  */
 public abstract class CmdConditionalStateAbs<THIS extends CmdConditionalStateAbs<THIS>> extends ConditionalStateAbs<THIS> implements IConsoleCommandListener {
 	StringCmdField scfRestart = new StringCmdField(this,null);
-	protected final BoolTogglerCmdField btgEnabled = new BoolTogglerCmdField(this, true, "toggles the state (enabled/disabled)")
-		.setCallerAssigned(new CallableX(this) {
-			@Override
-			public Boolean call() {
-				if(
-						( isEnabled() && !btgEnabled.b()) ||
-						(!isEnabled() &&  btgEnabled.b())
-				){
-					setEnabledRequest(btgEnabled.b());
-				}
-				
-				return true;
-			}
-		});
+	protected final BoolTogglerCmdField btgEnabled = new BoolTogglerCmdField(this, true, "toggles the state (enabled/disabled)");
+//		.setCallerAssigned(new CallableX(this) {
+//			@Override
+//			public Boolean call() {
+//				if(
+//						( isEnabled() && !btgEnabled.b()) ||
+//						(!isEnabled() &&  btgEnabled.b())
+//				){
+//					setEnabledRequest(btgEnabled.b());
+//				}
+//				
+//				return true;
+//			}
+//		});
 	
 	public CmdConditionalStateAbs() {
 		super();

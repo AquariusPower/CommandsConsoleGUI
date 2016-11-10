@@ -42,9 +42,12 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppSettingsI;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.lemur.console.SimpleConsolePlugin;
-import com.github.commandsconsolegui.jme.lemur.dialog.ChoiceLemurDialogState;
-import com.github.commandsconsolegui.jme.lemur.dialog.MaintenanceListLemurDialogState;
-import com.github.commandsconsolegui.jme.lemur.dialog.QuestionLemurDialogState;
+import com.github.commandsconsolegui.jme.lemur.dialog.ChoiceLemurDialogStateAbs;
+import com.github.commandsconsolegui.jme.lemur.dialog.MaintenanceListLemurDialogStateAbs;
+import com.github.commandsconsolegui.jme.lemur.dialog.QuestionLemurDialogStateAbs;
+import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDialogs.DiagChoice;
+import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDialogs.DiagMList;
+import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDialogs.DiagQuestion;
 import com.github.commandsconsolegui.misc.ConfigureManagerI;
 import com.github.commandsconsolegui.misc.ConfigureManagerI.IConfigure;
 import com.github.commandsconsolegui.misc.HoldRestartable;
@@ -98,7 +101,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 //	private ChoiceLemurDialogState<T>	diagChoice;
 
 //	private MaintenanceListLemurDialogState<T>	diagList;
-	private HoldRestartable<MaintenanceListLemurDialogState<T,?>>	hchdiagList = new HoldRestartable<MaintenanceListLemurDialogState<T,?>>(this);
+	private HoldRestartable<MaintenanceListLemurDialogStateAbs<T,?>>	hchdiagList = new HoldRestartable<MaintenanceListLemurDialogStateAbs<T,?>>(this);
 
 //	private QuestionLemurDialogState<T>	diagQuestion;
 
@@ -168,25 +171,25 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		consolePlugin.initialize();
 		
 		//////////////////////// config this test
-		ChoiceLemurDialogState diagChoice = new ChoiceLemurDialogState().configure(new ChoiceLemurDialogState.CfgParm(
+		DiagChoice<T> diagChoice = new DiagChoice<T>().configure(new ChoiceLemurDialogStateAbs.CfgParm(
 			0.6f, 0.5f, null, null));
 		
-		QuestionLemurDialogState diagQuestion = new QuestionLemurDialogState().configure(new QuestionLemurDialogState.CfgParm(
+		DiagQuestion<T> diagQuestion = new DiagQuestion<T>().configure(new QuestionLemurDialogStateAbs.CfgParm(
 			500f, 300f, null, null));
 		
 //		diagList = 
-		hchdiagList.setRef(new MaintenanceListLemurDialogState().configure(new MaintenanceListLemurDialogState.CfgParm<T>(
+		hchdiagList.setRef(new DiagMList<T>().configure(new MaintenanceListLemurDialogStateAbs.CfgParm<T>(
 			null, null, null, null, diagChoice, diagQuestion)));
 		
 		prepareTestData(diagChoice);
 	}
 	
-	private void prepareTestData(ChoiceLemurDialogState<T,?> diagChoice){
+	private void prepareTestData(DiagChoice<T> diagChoice){
 		for(int i=0;i<10;i++){
 			diagChoice.addEntryQuick(null); 
 		}
 		
-		MaintenanceListLemurDialogState<T,?> diagList = hchdiagList.getRef();
+		MaintenanceListLemurDialogStateAbs<T,?> diagList = hchdiagList.getRef();
 		diagList.addEntryQuick(null);
 		diagList.addEntryQuick(null);
 		

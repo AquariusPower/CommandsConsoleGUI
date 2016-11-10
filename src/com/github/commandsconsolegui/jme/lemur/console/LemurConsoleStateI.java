@@ -128,6 +128,8 @@ import com.simsilica.lemur.style.Styles;
  *
  */
 public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurConsoleStateI<T,THIS>> extends LemurDialogStateAbs<T,THIS> implements IJmeConsoleUI {
+//	private static LemurConsoleStateI instance=new LemurConsoleStateI();
+//	public static LemurConsoleStateI i(){return instance;}
 	private static LemurConsoleStateI instance=new LemurConsoleStateI();
 	public static LemurConsoleStateI i(){return instance;}
 //	private static LemurConsoleStateI instance=null;//new ConsoleLemurStateI();
@@ -198,7 +200,21 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 		return true;
 	}
 	
-	private KeyBoundVarField bindToggleConsole = new KeyBoundVarField(this);
+	private KeyBoundVarField bindToggleConsole = new KeyBoundVarField(this)
+		.setCallerAssigned(new CallableX(this) {
+			@Override
+			public Boolean call() {
+				requestToggleEnabled();
+				
+				/**
+				 * as it is initially invisible, from the 1st time user opens the console on, 
+				 * it must be visible.
+				 */
+				setInitializationVisibility(true);
+				
+				return true;
+			}
+		});
 	
 	public static class CfgParm extends LemurDialogStateAbs.CfgParm{
 		private int iToggleConsoleKey;
@@ -1863,19 +1879,7 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 				alConsoleToggle = new ActionListener() {
 					@Override
 					public void onAction(String name, boolean isPressed, float tpf) {
-						if(isPressed && bindToggleConsole.isUniqueCmdIdEqualTo(name)){
-	//						if(!isInitialized()){
-	//							initialize();
-	//						}
-							requestToggleEnabled();
-	//						setEnabledRequest(!isEnabled());
-							
-							/**
-							 * as it is initially invisible, from the 1st time user opens the console on, 
-							 * it must be visible.
-							 */
-							setInitializationVisibility(true);
-						}
+						bindToggleConsole.checkRunCallerAssigned(isPressed,name);
 					}
 				};
 				app().getInputManager().addListener(alConsoleToggle, bindToggleConsole.getUniqueCmdId());            

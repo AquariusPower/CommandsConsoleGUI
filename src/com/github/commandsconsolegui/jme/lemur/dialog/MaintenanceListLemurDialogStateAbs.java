@@ -47,7 +47,7 @@ import com.simsilica.lemur.Command;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class MaintenanceListLemurDialogState<T extends Command<Button>, THIS extends MaintenanceListLemurDialogState<T,THIS>> extends BasicLemurDialogStateAbs<T,THIS> {
+public abstract class MaintenanceListLemurDialogStateAbs<T extends Command<Button>, THIS extends MaintenanceListLemurDialogStateAbs<T,THIS>> extends BasicLemurDialogStateAbs<T,THIS> {
 	public static class CfgParm<T> extends BasicLemurDialogStateAbs.CfgParm{
 		private HoldRestartable<LemurDialogStateAbs<T,?>> hrdiagChoice = new HoldRestartable<LemurDialogStateAbs<T,?>>(this);
 		private HoldRestartable<LemurDialogStateAbs<T,?>> hrdiagQuestion = new HoldRestartable<LemurDialogStateAbs<T,?>>(this);
@@ -134,8 +134,8 @@ public class MaintenanceListLemurDialogState<T extends Command<Button>, THIS ext
 		boolean bChangesMade = false;
 		for(DialogListEntryData<T> dledAtModal:diagModal.getDataSelectionListCopy()){
 				if(cmdRequestedAtThisDiag.equals(cmdDel)){
-					if(diagModal instanceof QuestionLemurDialogState){
-						QuestionLemurDialogState<T,?> qds = (QuestionLemurDialogState<T,?>)diagModal;
+					if(diagModal instanceof QuestionLemurDialogStateAbs){
+						QuestionLemurDialogStateAbs<T,?> qds = (QuestionLemurDialogStateAbs<T,?>)diagModal;
 						if(qds.isYes(dledAtModal)){
 							bChangesMade = deleteEntry(adledToApplyResultsList);
 							
@@ -150,7 +150,7 @@ public class MaintenanceListLemurDialogState<T extends Command<Button>, THIS ext
 							AudioUII.i().play(EAudio.ReturnNothing);
 						}
 					}else{
-						throw new PrerequisitesNotMetException("unexpected diag", diagModal, QuestionLemurDialogState.class);
+						throw new PrerequisitesNotMetException("unexpected diag", diagModal, QuestionLemurDialogStateAbs.class);
 					}
 				}else
 				if(cmdRequestedAtThisDiag.equals(cmdCfg)){
@@ -212,14 +212,14 @@ public class MaintenanceListLemurDialogState<T extends Command<Button>, THIS ext
 			if(dled.isParent()){
 //				CustomDialogGUIState.this.setDataToApplyModalChoice(data);
 				if(cfg.getDiagQuestion()!=null){
-					MaintenanceListLemurDialogState.this.openModalDialog(cfg.getDiagQuestion().getUniqueId(), dled, (T)this);
+					MaintenanceListLemurDialogStateAbs.this.openModalDialog(cfg.getDiagQuestion().getUniqueId(), dled, (T)this);
 					AudioUII.i().play(EAudio.Question);
 				}else{
 					AudioUII.i().playOnUserAction(AudioUII.EAudio.Failure);
 					GlobalCommandsDelegatorI.i().dumpDevWarnEntry("no question dialog configured for "+this, btn, dled);
 				}
 			}else{
-				MaintenanceListLemurDialogState.this.removeEntry(dled);
+				MaintenanceListLemurDialogStateAbs.this.removeEntry(dled);
 			}
 		}
 	}
@@ -251,19 +251,19 @@ public class MaintenanceListLemurDialogState<T extends Command<Button>, THIS ext
 //	protected MaintenanceListLemurDialogState<T> getThis() {
 //		return this;
 //	}
-	@Override
-	protected THIS getThis() {
-		return (THIS)this;
-	}
+//	@Override
+//	protected THIS getThis() {
+//		return (THIS)this; //this class can be further extended, therefore must be this way... TODO could be better implemented?
+//	}
 
 	@Override
 	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
-		if(fld.getDeclaringClass()!=MaintenanceListLemurDialogState.class)return super.getFieldValue(fld);
+		if(fld.getDeclaringClass()!=MaintenanceListLemurDialogStateAbs.class)return super.getFieldValue(fld);
 		return fld.get(this);
 	}
 	@Override
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
-		if(fld.getDeclaringClass()!=MaintenanceListLemurDialogState.class){super.setFieldValue(fld,value);return;}
+		if(fld.getDeclaringClass()!=MaintenanceListLemurDialogStateAbs.class){super.setFieldValue(fld,value);return;}
 		fld.set(this,value);
 	}
 

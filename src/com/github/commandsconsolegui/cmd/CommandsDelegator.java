@@ -90,7 +90,7 @@ import com.google.common.io.Files;
  */
 public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMessageListener{
 	public static final class CompositeControl extends CompositeControlAbs<CommandsDelegator>{
-		private CompositeControl(CommandsDelegator casm){super(casm);};
+		private CompositeControl(CommandsDelegator cc){super(cc);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
 //	public static final T instance;
 	

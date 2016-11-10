@@ -36,7 +36,7 @@ import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData.SliderValueData.ESliderKey;
-import com.github.commandsconsolegui.jme.lemur.dialog.ChoiceLemurDialogState;
+import com.github.commandsconsolegui.jme.lemur.dialog.ChoiceLemurDialogStateAbs;
 import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.HashChangeHolder;
@@ -50,8 +50,8 @@ import com.simsilica.lemur.Command;
  *
  * @param <T>
  */
-public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceLemurDialogState<T,ChoiceVarDialogState<T>>{
-	public static class CfgParm extends ChoiceLemurDialogState.CfgParm{
+public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceLemurDialogStateAbs<T,ChoiceVarDialogState<T>>{
+	public static class CfgParm extends ChoiceLemurDialogStateAbs.CfgParm{
 		public CfgParm(Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow,
 				Float fInfoHeightPercentOfDialog, Float fEntryHeightMultiplier) {
@@ -330,5 +330,10 @@ public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceLemur
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		if(fld.getDeclaringClass()!=ChoiceVarDialogState.class){super.setFieldValue(fld,value);return;}
 		fld.set(this,value);
+	}
+
+	@Override
+	protected ChoiceVarDialogState<T> getThis() {
+		return this;
 	}
 }

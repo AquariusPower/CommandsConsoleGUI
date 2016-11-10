@@ -637,17 +637,16 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 			 */
 			if(!this.bConfigured)throw new PrerequisitesNotMetException("not configured yet: "+this);
 			
-			reqEnable.requestNow();
-			reqDisable.reset();
-//			this.bEnabledRequested = true;
-//			this.bDisabledRequested = false;
+			if(!isEnabled()){
+				reqEnable.requestNow();
+				reqDisable.reset();
+			}
 		}else{
-			reqEnable.reset();
-			reqDisable.requestNow();
-//			this.bDisabledRequested = true;
-//			this.bEnabledRequested = false;
+			if(isEnabled()){
+				reqEnable.reset();
+				reqDisable.requestNow();
+			}
 		}
-//		lEnableDisableRequestTimeMilis=updateTime();
 	};
 	
 	public boolean isDisabling(){

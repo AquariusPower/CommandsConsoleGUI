@@ -29,20 +29,16 @@ package com.github.commandsconsolegui.jme.lemur.dialog;
 
 import java.lang.reflect.Field;
 
-import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
-import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 
 /**
+ * TODO CfgChoiceDialogState
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class QuestionLemurDialogState<T extends Command<Button>, THIS extends QuestionLemurDialogState<T,THIS>> extends BasicLemurDialogStateAbs<T,THIS> {
-	private DialogListEntryData<T>	dledYes;
-	private DialogListEntryData<T>	dledNo;
-	
+public abstract class ChoiceLemurDialogStateAbs<T extends Command<Button>, THIS extends ChoiceLemurDialogStateAbs<T,THIS>> extends BasicLemurDialogStateAbs<T,THIS> {
 	public static class CfgParm extends BasicLemurDialogStateAbs.CfgParm{
 		public CfgParm(
 				Float fDialogWidthPercentOfAppWindow,
@@ -51,7 +47,7 @@ public class QuestionLemurDialogState<T extends Command<Button>, THIS extends Qu
 			super(fDialogWidthPercentOfAppWindow,
 					fDialogHeightPercentOfAppWindow, fInfoHeightPercentOfDialog,
 					fEntryHeightMultiplier);
-//			super.setUIId(QuestionDialogStateAbs.class.getSimpleName());
+//			super.setUIId(ChoiceDialogStateAbs.class.getSimpleName());
 		}
 	}
 	private CfgParm	cfg;
@@ -66,52 +62,23 @@ public class QuestionLemurDialogState<T extends Command<Button>, THIS extends Qu
 	@Override
 	protected boolean initAttempt() {
 		super.setOptionChoiceSelectionMode(true);
-		if(!super.initAttempt())return false;
 		
-		btgSortListEntries.setObjectRawValue(false);
-		
-		dledYes = addEntryQuick("[ yes    ]");
-		dledNo  = addEntryQuick("[     no ]");
-		
-		return true;
+		return super.initAttempt();
 	}
 	
-	@Override
-	protected boolean initGUI() {
-		getCellRenderer().setCellHeightMult(2f); //before super call
-		if(!super.initGUI())return false;
-		
-		return true;
-	}
-	
-	public boolean isYes(DialogListEntryData<T> dled){
-		return dled==dledYes;
-	}
-	
-	public boolean isNo(DialogListEntryData<T> dled){
-		return dled==dledNo;
-	}
-
-	@Override
-	protected THIS getThis() {
-		return (THIS)this;
-	}
-	
-	@Override
-	protected void enableSuccess() {
-		super.enableSuccess();
-		selectEntry(dledNo);
-	}
+//	@Override
+//	protected THIS getThis() {
+//		return (THIS)this;
+//	}
 	
 	@Override
 	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
-		if(fld.getDeclaringClass()!=QuestionLemurDialogState.class)return super.getFieldValue(fld);
+		if(fld.getDeclaringClass()!=ChoiceLemurDialogStateAbs.class)return super.getFieldValue(fld);
 		return fld.get(this);
 	}
 	@Override
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
-		if(fld.getDeclaringClass()!=QuestionLemurDialogState.class){super.setFieldValue(fld,value);return;}
+		if(fld.getDeclaringClass()!=ChoiceLemurDialogStateAbs.class){super.setFieldValue(fld,value);return;}
 		fld.set(this,value);
 	}
 }
-

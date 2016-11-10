@@ -31,9 +31,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import com.github.commandsconsolegui.cmd.ConsoleVariable;
-import com.github.commandsconsolegui.cmd.CommandsDelegator.CompositeControl;
 import com.github.commandsconsolegui.globals.GlobalAppOSI;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -48,7 +48,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  *
  */
 public class KeyBoundVarField extends VarCmdFieldAbs<Integer[],KeyBoundVarField>{
-	private String	strFullCommand;
+	private String	strFullUserCommand;
 	
 	public KeyBoundVarField(IReflexFillCfg rfcfgOwnerUseThis, Integer[] aiBindCfg) {
 		super(rfcfgOwnerUseThis, EVarCmdMode.VarCmd, aiBindCfg);
@@ -66,6 +66,20 @@ public class KeyBoundVarField extends VarCmdFieldAbs<Integer[],KeyBoundVarField>
 	 */
 	public KeyBoundVarField(IReflexFillCfg rfcfgOwnerUseThis, int iKeyActionCode, int... aiKeyModifierCodeList) {
 		this(rfcfgOwnerUseThis, join(iKeyActionCode,aiKeyModifierCodeList));
+	}
+	
+	public KeyBoundVarField setUserCommand(String strFullUserCommand){
+		this.strFullUserCommand=strFullUserCommand;
+		
+		setCallerAssigned(new CallableX(this) {
+			@Override
+			public Boolean call() {
+				GlobalCommandsDelegatorI.i().addCmdToQueue(KeyBoundVarField.this.strFullUserCommand);
+				return true;
+			}
+		});
+		
+		return getThis();
 	}
 	
 	private static Integer[] join(int iAct, int... aiMod){
@@ -189,6 +203,7 @@ public class KeyBoundVarField extends VarCmdFieldAbs<Integer[],KeyBoundVarField>
 	}
 
 	private String strCodePrefixDefault="bind";
+	private boolean	bUseCallQueue;
 	@Override
 	public String getCodePrefixDefault() {
 		return strCodePrefixDefault;
@@ -213,4 +228,25 @@ public class KeyBoundVarField extends VarCmdFieldAbs<Integer[],KeyBoundVarField>
 //	public KeyBoundVarField setConsoleVarLink(CompositeControl cc,ConsoleVariable cvar) {
 //		return super.setConsoleVarLink(cc, cvar);
 //	}
+	
+	@Override
+	public Integer[] getValue() {
+		return super.getValue();
+	}
+	public void checkRunCallerAssigned(boolean bRun, String strId) {
+		if(bRun && isUniqueCmdIdEqualTo(strId)){
+			if(isUseCallQueue()){
+				callerAssignedQueueNow();
+			}else{
+				callerAssignedRunNow();
+			}
+		}
+	}
+	private boolean isUseCallQueue() {
+		return bUseCallQueue;
+	}
+	public KeyBoundVarField setUseCallQueue(boolean bUseCallQueue) {
+		this.bUseCallQueue = bUseCallQueue;
+		return getThis();
+	}
 }

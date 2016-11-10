@@ -515,7 +515,8 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	}
 	protected Boolean prepareCallerAssigned(boolean bRunNow) {
 		if(isConstructed()){ 
-			if(callerAssigned!=null){
+			if(callerAssigned!=null){ 
+				//TODO seems a bit confusing... more code (even if looking redundant) could make it more clear
 				if(bRunNow || getCallerAssignedInfo().isAllowQueue()){
 					callerAssigned.setRetryOnFail(!bRunNow);
 					return CallQueueI.i().addCall(callerAssigned,bRunNow);
@@ -658,6 +659,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	 * @return
 	 */
 	public THIS setCallerAssigned(CallableX caller){
+		PrerequisitesNotMetException.assertNotAlreadySet("caller", this.callerAssigned, caller, this);
 		this.callerAssigned=caller;
 		return getThis();
 	}

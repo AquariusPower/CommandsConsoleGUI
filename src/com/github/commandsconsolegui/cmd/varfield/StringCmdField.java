@@ -41,9 +41,12 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  * Represents a class field.
  * Mainly used to define commands user can issue on the console. 
  * 
+ * DevSelfNote: Better use setCallerAssigned() alone, without the command listener code. This call may work while the cmd listener code may fail.
+ * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
+//public class StringCmdField<THIS extends StringCmdField<THIS>> extends VarCmdFieldAbs<String,THIS>{
 public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 //	String str = "ERROR: NOT SET"; // hashcode depends on it not being null
 //	private String strCmdId = null;
@@ -249,13 +252,4 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 		return strCodePrefixDefault;
 	}
 	
-	/**
-	 * Better use this alone, without the command listener code.
-	 * This call may work while the cmd listener code may fail.
-	 */
-	@Override
-	public StringCmdField setCallerAssigned(CallableX caller) {
-		// TODO Auto-generated method stub
-		return super.setCallerAssigned(caller);
-	}
 }
