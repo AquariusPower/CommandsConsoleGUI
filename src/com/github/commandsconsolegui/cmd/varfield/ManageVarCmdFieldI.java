@@ -41,12 +41,12 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class VarCmdFieldManagerI implements IManager<VarCmdFieldAbs>{
-	private static VarCmdFieldManagerI instance = new VarCmdFieldManagerI();
-	public static VarCmdFieldManagerI i(){return instance;}
+public class ManageVarCmdFieldI implements IManager<VarCmdFieldAbs>{
+	private static ManageVarCmdFieldI instance = new ManageVarCmdFieldI();
+	public static ManageVarCmdFieldI i(){return instance;}
 	
-	public static final class CompositeControl extends CompositeControlAbs<VarCmdFieldManagerI>{
-		private CompositeControl(VarCmdFieldManagerI casm){super(casm);};
+	public static final class CompositeControl extends CompositeControlAbs<ManageVarCmdFieldI>{
+		private CompositeControl(ManageVarCmdFieldI casm){super(casm);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
 	
 	private ArrayList<VarCmdFieldAbs> avcfList = new ArrayList<VarCmdFieldAbs>();

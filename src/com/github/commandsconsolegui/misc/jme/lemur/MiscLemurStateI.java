@@ -42,7 +42,7 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalDialogHelperI;
 import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jme.lemur.GlobalLemurDialogHelperI;
-import com.github.commandsconsolegui.jme.DialogManagerAbs;
+import com.github.commandsconsolegui.jme.ManageDialogAbs;
 import com.github.commandsconsolegui.jme.MouseCursorCentralI;
 import com.github.commandsconsolegui.jme.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jme.lemur.DialogMouseCursorListenerI;

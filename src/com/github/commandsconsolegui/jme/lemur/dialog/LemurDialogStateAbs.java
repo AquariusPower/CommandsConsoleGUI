@@ -41,7 +41,7 @@ import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.AudioUII;
 import com.github.commandsconsolegui.jme.AudioUII.EAudio;
-import com.github.commandsconsolegui.jme.ConditionalStateManagerI.CompositeControl;
+import com.github.commandsconsolegui.jme.ManageConditionalStateI.CompositeControl;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.jme.MouseCursorCentralI;
 import com.github.commandsconsolegui.jme.MouseCursorCentralI.EMouseCursorButton;

@@ -25,18 +25,17 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.globals.jme;
+package com.github.commandsconsolegui.globals;
 
-import com.github.commandsconsolegui.globals.GlobalHolderAbs;
-import com.github.commandsconsolegui.jme.ManageDialogAbs;
+import com.github.commandsconsolegui.cmd.ManageKeyBind;
 
 /**
-* As you may not be using {@link SimpleApplication#}.
-*  
-* @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
-*/
-public class GlobalDialogHelperI extends GlobalHolderAbs<ManageDialogAbs> {
-	private static GlobalDialogHelperI instance = new GlobalDialogHelperI();
-	public static GlobalDialogHelperI iGlobal(){return instance;}
-	public static ManageDialogAbs i(){return iGlobal().get();}
+ * 
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
+ *
+ */
+public class GlobalManageKeyBindI extends GlobalHolderAbs<ManageKeyBind>{
+	private static GlobalManageKeyBindI instance = new GlobalManageKeyBindI();
+	public static GlobalManageKeyBindI iGlobal(){return instance;}
+	public static ManageKeyBind i(){return iGlobal().get();}
 }

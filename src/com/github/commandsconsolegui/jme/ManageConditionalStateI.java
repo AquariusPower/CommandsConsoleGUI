@@ -36,7 +36,7 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
-import com.github.commandsconsolegui.misc.HoldRestartableManagerI;
+import com.github.commandsconsolegui.misc.ManageHoldRestartableI;
 import com.github.commandsconsolegui.misc.IManager;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.app.Application;
@@ -49,15 +49,15 @@ import com.jme3.app.state.AbstractAppState;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class ConditionalStateManagerI extends AbstractAppState implements IManager<ConditionalStateAbs>{
-	private static ConditionalStateManagerI instance = new ConditionalStateManagerI();
-	public static ConditionalStateManagerI i(){return instance;}
+public class ManageConditionalStateI extends AbstractAppState implements IManager<ConditionalStateAbs>{
+	private static ManageConditionalStateI instance = new ManageConditionalStateI();
+	public static ManageConditionalStateI i(){return instance;}
 	
 	/**
 	 * restricted access to public methods, helper
 	 */
-	public static final class CompositeControl extends CompositeControlAbs<ConditionalStateManagerI>{
-		private CompositeControl(ConditionalStateManagerI casm){super(casm);};
+	public static final class CompositeControl extends CompositeControlAbs<ManageConditionalStateI>{
+		private CompositeControl(ManageConditionalStateI casm){super(casm);};
 	}
 	private CompositeControl ccSelf = new CompositeControl(this);
 	
@@ -130,7 +130,7 @@ public class ConditionalStateManagerI extends AbstractAppState implements IManag
 				}
 			}
 			
-			HoldRestartableManagerI.i().revalidateAndUpdateAllRestartableHoldersFor(cas,casNew);
+			ManageHoldRestartableI.i().revalidateAndUpdateAllRestartableHoldersFor(cas,casNew);
 			
 		}
 	}
@@ -138,7 +138,7 @@ public class ConditionalStateManagerI extends AbstractAppState implements IManag
 	@Override
 	public void setEnabled(boolean enabled) {
 		if(!enabled){
-			throw new PrerequisitesNotMetException("this state MUST never be disabled! "+ConditionalStateManagerI.class.getName());
+			throw new PrerequisitesNotMetException("this state MUST never be disabled! "+ManageConditionalStateI.class.getName());
 		}
 		super.setEnabled(enabled);
 	}
@@ -155,7 +155,7 @@ public class ConditionalStateManagerI extends AbstractAppState implements IManag
 //		if(!bApplicationIsExiting){
 //		if(false){ //dummyfied
 			if(!GlobalAppOSI.i().isApplicationExiting()){
-				throw new PrerequisitesNotMetException("this state MUST never be terminated/cleaned! "+ConditionalStateManagerI.class.getName());
+				throw new PrerequisitesNotMetException("this state MUST never be terminated/cleaned! "+ManageConditionalStateI.class.getName());
 			}
 //		}
 		

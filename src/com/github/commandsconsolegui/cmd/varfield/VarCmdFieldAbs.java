@@ -138,7 +138,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		this.evcm=evcm;
 		this.rfcfgOwner=rfcfgOwner;
 //		if(isField())
-		VarCmdFieldManagerI.i().add(this);
+		ManageVarCmdFieldI.i().add(this);
 		setObjectRawValue(valueDefault,true);
 	}
 //	public VarCmdFieldAbs(boolean bAddToList){

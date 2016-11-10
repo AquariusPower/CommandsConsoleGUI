@@ -62,7 +62,7 @@ public class CurrentCommandLine {
 	public ArrayList<String> getPreparedCmdAndParamsListCopy(){
 		return new ArrayList<String>(astrCmdAndParams);
 	}
-	public ArrayList<String> getPreparedCmdAndParamsListCopy(int iFromIndexIncl){
+	public ArrayList<String> getPreparedCmdAndParamsListCopyFrom(int iFromIndexIncl){
 		return getPreparedCmdAndParamsListCopy(iFromIndexIncl, astrCmdAndParams.size());
 	}
 	public ArrayList<String> getPreparedCmdAndParamsListCopy(int iFromIndexIncl, int iToIndexExcl){

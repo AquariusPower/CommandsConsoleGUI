@@ -44,8 +44,6 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	private boolean bUseDefaultCfgIfMissing = true;
 	private String	strCommandPartSeparator = "_";
 	
-	
-	
 	/**
 	 * the owner class will have the configurations for each
 	 * field class type.

@@ -32,13 +32,13 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.SimulationTime.ISimulationTime;
-import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldManagerI;
+import com.github.commandsconsolegui.cmd.varfield.ManageVarCmdFieldI;
 import com.github.commandsconsolegui.globals.GlobalHolderAbs.IGlobalOpt;
 import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
-import com.github.commandsconsolegui.misc.ConfigureManagerI;
-import com.github.commandsconsolegui.misc.ConfigureManagerI.IConfigure;
+import com.github.commandsconsolegui.misc.ManageConfigI;
+import com.github.commandsconsolegui.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.misc.HoldRestartable;
 import com.github.commandsconsolegui.misc.IRestartable;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -48,7 +48,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.Request;
 import com.github.commandsconsolegui.misc.RetryOnFailure;
 import com.github.commandsconsolegui.misc.RetryOnFailure.IRetryListOwner;
-import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
+import com.github.commandsconsolegui.misc.ManageSingleInstanceI;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppState;
 import com.jme3.export.Savable;
@@ -82,7 +82,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	public ConditionalStateAbs(){
 		super();
 		
-		SingleInstanceManagerI.i().add(this);
+		ManageSingleInstanceI.i().add(this);
 //		MiscI.i().assertFieldsHaveDefaultValue(this);
 		
 		asteDbgInstance = Thread.currentThread().getStackTrace();
@@ -327,11 +327,11 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 //		@SuppressWarnings("unchecked") //so obvious...
 //		ConditionalStateAbs csa = ConditionalStateManagerI.i().getConditionalState(
 //			(Class<ConditionalStateAbs>)this.getClass(), cfg.strId);
-		ConditionalStateAbs csa = ConditionalStateManagerI.i().getConditionalState(this.getClass(), cfg.strId);
+		ConditionalStateAbs csa = ManageConditionalStateI.i().getConditionalState(this.getClass(), cfg.strId);
 		if(csa!=null)throw new PrerequisitesNotMetException("conflicting state Id "+cfg.strId);
 		this.strCaseInsensitiveId = cfg.strId;
 		
-		if(!ConditionalStateManagerI.i().attach(this)){
+		if(!ManageConditionalStateI.i().attach(this)){
 //		if(!app.getStateManager().attach(this)){
 			throw new PrerequisitesNotMetException("state already attached: "
 				+this.getClass()+"; "+this);
@@ -523,9 +523,9 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	 * 
 	 * Use {@link #updateAttempt(float)}<br>
 	 */
-	public boolean doItAllProperly(ConditionalStateManagerI.CompositeControl cc, float tpf) {
+	public boolean doItAllProperly(ManageConditionalStateI.CompositeControl cc, float tpf) {
 		cc.assertSelfNotNull();
-		ConfigureManagerI.i().assertConfigured(this);
+		ManageConfigI.i().assertConfigured(this);
 		
 		updateLastMainTopCoreUpdateTimeMilis();
 //		assertIsPreInitialized();
@@ -709,12 +709,12 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	 * By discarding, it will be easier to setup a fresh, consistent and robust state.
 	 * If you need values from the discarded state, just copy/move/clone them to the new one.
 	 */
-	public boolean prepareToDiscard(ConditionalStateManagerI.CompositeControl cc) {
+	public boolean prepareToDiscard(ManageConditionalStateI.CompositeControl cc) {
 		cc.assertSelfNotNull();
 		if(!bProperlyInitialized)return false; //TODO log warn
 		if(!isBeingDiscarded())throw new PrerequisitesNotMetException("not discarding");
 		
-		VarCmdFieldManagerI.i().removeAllWhoseOwnerIsBeingDiscarded();
+		ManageVarCmdFieldI.i().removeAllWhoseOwnerIsBeingDiscarded();
 		
 		if(isEnabled()){
 			boolean bRetry=false;
@@ -770,7 +770,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 //		this.nodeGUI = nodeGUI;
 //	}
 	
-	public void setAppStateManagingThis(ConditionalStateManagerI.CompositeControl cc,ConditionalStateManagerI asmParent) {
+	public void setAppStateManagingThis(ManageConditionalStateI.CompositeControl cc,ManageConditionalStateI asmParent) {
 		cc.assertSelfNotNull();
 //		assertCompositeControlNotNull(cc);
 		if(this.asmParent!=null)throw new PrerequisitesNotMetException(
@@ -861,7 +861,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 		}
 	}
 
-	public void applyDiscardedStatus(ConditionalStateManagerI.CompositeControl cc) {
+	public void applyDiscardedStatus(ManageConditionalStateI.CompositeControl cc) {
 		cc.assertSelfNotNull();
 		bDiscarded=true;
 	}
@@ -893,7 +893,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	 */
 	@Override
 	public String getUniqueId() {
-		ConfigureManagerI.i().assertConfigured(this);
+		ManageConfigI.i().assertConfigured(this);
 		
 		if(strCaseInsensitiveId==null){
 			throw new PrerequisitesNotMetException("id cant be null", 

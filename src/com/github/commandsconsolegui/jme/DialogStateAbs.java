@@ -41,7 +41,7 @@ import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalDialogHelperI;
 import com.github.commandsconsolegui.jme.AudioUII.EAudio;
-import com.github.commandsconsolegui.jme.ConditionalStateManagerI.CompositeControl;
+import com.github.commandsconsolegui.jme.ManageConditionalStateI.CompositeControl;
 import com.github.commandsconsolegui.jme.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.extras.UngrabMouseStateI;
@@ -376,7 +376,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	public String getInputText(){
 		return bdh().getTextFromField(getInputField());
 	}
-	private DialogManagerAbs bdh(){
+	private ManageDialogAbs bdh(){
 		return GlobalDialogHelperI.i();
 	}
 	

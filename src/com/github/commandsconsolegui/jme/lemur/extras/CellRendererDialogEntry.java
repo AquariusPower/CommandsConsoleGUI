@@ -187,24 +187,24 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			
 			String strTreeAction = dled.isParent() ? 
 				(dled.isTreeExpanded()?"-":"+") :
-				CellRendererManagerI.i().svfTreeDepthToken.getValueAsString();
+				ManageCellRendererI.i().svfTreeDepthToken.getValueAsString();
 			
 			String strDepthSeparator = "/";
 			
 			// tree depth
 			DialogListEntryData<T> dledParent = dled.getParent();
 			while(dledParent!=null){
-				if(CellRendererManagerI.i().btgShowTreeUId.b()){
+				if(ManageCellRendererI.i().btgShowTreeUId.b()){
 					strDepth = dledParent.getUId()+strDepthSeparator
 						+strDepth;
 				}else{
-					strDepth = CellRendererManagerI.i().svfTreeDepthToken.getValueAsString()
+					strDepth = ManageCellRendererI.i().svfTreeDepthToken.getValueAsString()
 						+strDepth;
 				}
 				dledParent = dledParent.getParent();
 			}
 			
-			if(CellRendererManagerI.i().btgShowTreeUId.b()){
+			if(ManageCellRendererI.i().btgShowTreeUId.b()){
 				strDepth+=dled.getUId();//+":";
 			}
 			
@@ -244,8 +244,8 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			
 //			cntrBase = (Container)bugFix(0);
 //			cntrBase = bugFix(Container.class, this, btgNOTWORKINGBugFixGapForListBoxSelectorArea);
-			if(!CellRendererManagerI.i().btgNOTWORKINGBugFixGapForListBoxSelectorArea.isCallerAssigned()){
-				CellRendererManagerI.i().btgNOTWORKINGBugFixGapForListBoxSelectorArea.setCallerAssigned(new CallableX(this) {
+			if(!ManageCellRendererI.i().btgNOTWORKINGBugFixGapForListBoxSelectorArea.isCallerAssigned()){
+				ManageCellRendererI.i().btgNOTWORKINGBugFixGapForListBoxSelectorArea.setCallerAssigned(new CallableX(this) {
 					@Override
 					public Boolean call() {
 						/**
@@ -260,7 +260,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 							 */
 							// same layout as the cell container
 							cntr = new Container(new BorderLayout(), assignedCellRenderer.strStyle);
-							cntr.setName(CellRendererManagerI.i().btgNOTWORKINGBugFixGapForListBoxSelectorArea.getSimpleId()); //when mouse is over a cell, if the ListBox->selectorArea has the same world Z value of the button, it may be ordered before the button on the raycast collision results at PickEventSession.setCurrentHitTarget(ViewPort, Spatial, Vector2f, CollisionResult) line: 262	-> PickEventSession.cursorMoved(int, int) line: 482 
+							cntr.setName(ManageCellRendererI.i().btgNOTWORKINGBugFixGapForListBoxSelectorArea.getSimpleId()); //when mouse is over a cell, if the ListBox->selectorArea has the same world Z value of the button, it may be ordered before the button on the raycast collision results at PickEventSession.setCurrentHitTarget(ViewPort, Spatial, Vector2f, CollisionResult) line: 262	-> PickEventSession.cursorMoved(int, int) line: 482 
 							addChild(cntr, Position.Center);
 						
 						this.setCallerReturnValue(cntr);
@@ -269,7 +269,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 					}
 				});
 			}
-			cntrBase = WorkAroundI.i().bugFix(CellRendererManagerI.i().btgNOTWORKINGBugFixGapForListBoxSelectorArea, Container.class, this);
+			cntrBase = WorkAroundI.i().bugFix(ManageCellRendererI.i().btgNOTWORKINGBugFixGapForListBoxSelectorArea, Container.class, this);
 			
 			btnTree = createButton("Tree", "?", cntrBase, Position.West);
 			btnTree.addCommands(ButtonAction.Click, ctt);

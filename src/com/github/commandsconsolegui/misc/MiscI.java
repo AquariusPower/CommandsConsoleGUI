@@ -287,9 +287,9 @@ public class MiscI {
 	 * @return
 	 */
 	public String getNextUniqueId(String strLastId){
-		int iRadix=36;
+		int iRadix=Character.MAX_RADIX;
 		/**
-		 * Do not fix if null lik in `if(strLastId==null)strLastId="0";`
+		 * Do not fix if null like in `if(strLastId==null)strLastId="0";`
 		 * because the last id must be controlled by a manager String field,
 		 * or be a static String field of the class...
 		 * 

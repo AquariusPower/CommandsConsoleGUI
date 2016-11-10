@@ -34,10 +34,6 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
-import javax.swing.text.JTextComponent.KeyBinding;
-
-import truetypefont.TrueTypeFont;
-
 import com.github.commandsconsolegui.cmd.CommandData;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
@@ -48,15 +44,16 @@ import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.cmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
+import com.github.commandsconsolegui.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalDialogHelperI;
 import com.github.commandsconsolegui.globals.jme.console.GlobalJmeConsoleUII;
 import com.github.commandsconsolegui.jme.AudioUII;
 import com.github.commandsconsolegui.jme.AudioUII.EAudio;
-import com.github.commandsconsolegui.jme.ConditionalStateManagerI;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.jme.IJmeConsoleUI;
+import com.github.commandsconsolegui.jme.ManageConditionalStateI;
 import com.github.commandsconsolegui.jme.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.lemur.DialogMouseCursorListenerI;
@@ -77,7 +74,6 @@ import com.github.commandsconsolegui.misc.jme.MiscJmeI;
 import com.github.commandsconsolegui.misc.jme.lemur.MiscLemurStateI;
 import com.github.commandsconsolegui.misc.jme.lemur.MiscLemurStateI.BindKey;
 import com.jme3.app.StatsAppState;
-import com.jme3.asset.AssetManager;
 import com.jme3.font.BitmapCharacter;
 import com.jme3.font.BitmapCharacterSet;
 import com.jme3.font.BitmapFont;
@@ -176,6 +172,9 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 		addKnownStyle(BaseStyles.GLASS);
 		addKnownStyle(Styles.ROOT_STYLE);
 		
+		bindToggleConsole.setObjectRawValue(cfg.iToggleConsoleKey);//bindToggleConsole.getUniqueCmdId()
+		GlobalManageKeyBindI.i().addKeyBind(bindToggleConsole);
+		
 //		initializationCompleted();
 		
 		return _initAttempt();
@@ -223,8 +222,6 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 	public THIS configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;
 		
-		bindToggleConsole.setObjectRawValue(cfg.iToggleConsoleKey);//bindToggleConsole.getUniqueCmdId()
-		
 		// for restarting functionality
 //		GlobalConsoleGuiI.iGlobal().validate();
 		GlobalJmeConsoleUII.iGlobal().set(this);
@@ -255,8 +252,8 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 			LemurFocusHelperStateI.i().configure(new LemurFocusHelperStateI.CfgParm(null));
 		}
 		
-		if(!ConditionalStateManagerI.i().isConfigured()){
-			ConditionalStateManagerI.i().configure(GlobalAppRefI.i());
+		if(!ManageConditionalStateI.i().isConfigured()){
+			ManageConditionalStateI.i().configure(GlobalAppRefI.i());
 		}
 		
 		if(!ConsoleMouseCursorListenerI.i().isConfigured()){
@@ -991,7 +988,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 	}
 	
 	@Override
-	public boolean prepareToDiscard(ConditionalStateManagerI.CompositeControl cc) {
+	public boolean prepareToDiscard(ManageConditionalStateI.CompositeControl cc) {
 		getDialogMainContainer().clearChildren();
 		return _prepareToDiscard(cc);
 	}
@@ -1215,7 +1212,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 	//private String strStyle = Styles.ROOT_STYLE;
 	private String	strInputTextPrevious = "";
 	private AnalogListener	alConsoleScroll;
-	private ActionListener	alGeneralJmeListener;
+//	private ActionListener	alGeneralJmeListener;
 	//private String	strValidCmdCharsRegex = "A-Za-z0-9_-"+"\\"+strCommandPrefixChar;
 	//private String	strValidCmdCharsRegex = "a-zA-Z0-9_"; // better not allow "-" as has other uses like negate number and commands functionalities
 	//private String	strStatsLast = "";
@@ -1853,18 +1850,18 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 		return vlstrAutoCompleteHint.get(i);
 	}
 	
-	@Override
-	public void addKeyBind(KeyBoundVarField bind){
-		if(!app().getInputManager().hasMapping(bind.getBindCfg())){
-//		  app().getInputManager().deleteMapping(bind.getUserCommand());
+//	@Override
+//	public void addKeyBind(KeyBoundVarField bind){
+//		if(!app().getInputManager().hasMapping(bind.getBindCfg())){
+////		  app().getInputManager().deleteMapping(bind.getUserCommand());
+////		}
+////		
+//			app().getInputManager().addMapping(bind.getBindCfg(),
+//				MiscJmeI.i().asTriggerArray(bind));
+//			
+//			app().getInputManager().addListener(alGeneralJmeListener, bind.getBindCfg());
 //		}
-//		
-			app().getInputManager().addMapping(bind.getBindCfg(),
-				MiscJmeI.i().asTriggerArray(bind));
-			
-			app().getInputManager().addListener(alGeneralJmeListener, bind.getBindCfg());
-		}
-	}
+//	}
 	
 	@Override
 	protected boolean initKeyMappings() {
@@ -1872,24 +1869,24 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 		
 		// console toggle
 	//	if(iToggleConsoleKey!=null){
-			if(!app().getInputManager().hasMapping(bindToggleConsole.getUniqueCmdId())){
-				app().getInputManager().addMapping(bindToggleConsole.getUniqueCmdId(),
-					MiscJmeI.i().asTriggerArray(bindToggleConsole));
-//					new KeyTrigger(bindToggleConsole.getValue()[0]));
-					
-				alGeneralJmeListener = new ActionListener() {
-					@Override
-					public void onAction(String name, boolean isPressed, float tpf) {
-						if(!isPressed)return;
-						
-						// all field JME binds go here
-						if(bindToggleConsole.checkRunCallerAssigned(isPressed,name))return;
-						
-						GlobalCommandsDelegatorI.i().executeUserBinds(isPressed,name);
-					}
-				};
-				app().getInputManager().addListener(alGeneralJmeListener, bindToggleConsole.getUniqueCmdId());            
-			}
+//			if(!app().getInputManager().hasMapping(bindToggleConsole.getUniqueCmdId())){
+//				app().getInputManager().addMapping(bindToggleConsole.getUniqueCmdId(),
+//					MiscJmeI.i().asTriggerArray(bindToggleConsole));
+////					new KeyTrigger(bindToggleConsole.getValue()[0]));
+//					
+//				alGeneralJmeListener = new ActionListener() {
+//					@Override
+//					public void onAction(String name, boolean isPressed, float tpf) {
+//						if(!isPressed)return;
+//						
+//						// all field JME binds go here
+//						if(bindToggleConsole.checkRunCallerAssigned(isPressed,name))return;
+//						
+//						GlobalCommandsDelegatorI.i().executeUserBinds(isPressed,name);
+//					}
+//				};
+//				app().getInputManager().addListener(alGeneralJmeListener, bindToggleConsole.getUniqueCmdId());            
+//			}
 	//	}
 		
 		if(!app().getInputManager().hasMapping(INPUT_MAPPING_CONSOLE_CONTROL_PRESSED.getUniqueCmdId())){
@@ -2808,7 +2805,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 	 * 
 	 * see how flow starting with {@link #requestRestart()} works
 	 */
-	private boolean _prepareToDiscard(ConditionalStateManagerI.CompositeControl cc) {
+	private boolean _prepareToDiscard(ManageConditionalStateI.CompositeControl cc) {
 	//	tdLetCpuRest.reset();
 	//	tdScrollToBottomRequestAndSuspend.reset();
 	//	tdScrollToBottomRetry.reset();
@@ -2828,8 +2825,9 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 	//   * IMPORTANT!!!
 	//   * Toggle console must be kept! Re-initialization depends on it!
 	//   * 
-		app().getInputManager().deleteMapping(bindToggleConsole.toString());
-	  app().getInputManager().removeListener(alGeneralJmeListener);
+		GlobalManageKeyBindI.i().removeKeyBind(bindToggleConsole);
+//		app().getInputManager().deleteMapping(bindToggleConsole.toString());
+//	  app().getInputManager().removeListener(alGeneralJmeListener);
 	//   */
 	  app().getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_SCROLL_UP+"");
 	  app().getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_SCROLL_DOWN+"");

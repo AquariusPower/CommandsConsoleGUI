@@ -32,6 +32,7 @@ import java.lang.reflect.Field;
 import com.github.commandsconsolegui.SimulationTime;
 import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegator;
 import com.github.commandsconsolegui.globals.GlobalMainThreadI;
+import com.github.commandsconsolegui.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.globals.GlobalSingleMandatoryAppInstanceI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
@@ -44,20 +45,21 @@ import com.github.commandsconsolegui.globals.jme.lemur.GlobalLemurConsoleStateI;
 import com.github.commandsconsolegui.globals.jme.lemur.GlobalLemurDialogHelperI;
 import com.github.commandsconsolegui.jme.AudioUII;
 import com.github.commandsconsolegui.jme.JmeAppOS;
+import com.github.commandsconsolegui.jme.ManageJmeKeyBind;
 import com.github.commandsconsolegui.jme.cmd.CommandsBackgroundStateI;
 import com.github.commandsconsolegui.jme.extras.FpsLimiterStateI;
 import com.github.commandsconsolegui.jme.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jme.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jme.lemur.MouseCursorListenerAbs;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI;
-import com.github.commandsconsolegui.misc.ConfigureManagerI;
-import com.github.commandsconsolegui.misc.ConfigureManagerI.IConfigure;
 import com.github.commandsconsolegui.misc.ISimpleGetThisTrickIndicator;
+import com.github.commandsconsolegui.misc.ManageConfigI;
+import com.github.commandsconsolegui.misc.ManageConfigI.IConfigure;
+import com.github.commandsconsolegui.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
 import com.github.commandsconsolegui.misc.jme.MiscJmeI;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -80,7 +82,7 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
 	private boolean	bConfigured; 
 	
 	public SimpleConsolePlugin(Application app){
-		SingleInstanceManagerI.i().add(this);
+		ManageSingleInstanceI.i().add(this);
 		
 		if(app instanceof SimpleApplication){
   		GlobalSimpleAppRefI.iGlobal().set((SimpleApplication)app);
@@ -110,6 +112,8 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
   	
   	setGlobals();
   	GlobalJmeAppOSI.i().fillKeyIdCodeFrom(KeyInput.class, "KEY_");
+  	
+  	GlobalManageKeyBindI.i().configure();
   	
 		/**
 		 * Configs:
@@ -179,8 +183,12 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
   	}
   	
   	if(!GlobalCommandsDelegatorI.iGlobal().isSet()){
-  		// defaults to the more complex one
+  		// defaults to the more complex (scripting) one
   		GlobalCommandsDelegatorI.iGlobal().set(new ScriptingCommandsDelegator());
+  	}
+  	
+  	if(!GlobalManageKeyBindI.iGlobal().isSet()){
+  		GlobalManageKeyBindI.iGlobal().set(new ManageJmeKeyBind());
   	}
   	
   	// globals must be set as soon as possible
@@ -205,7 +213,7 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
 	}
 
 	public SimpleConsolePlugin initialize() {
-		ConfigureManagerI.i().assertConfigured(this);
+		ManageConfigI.i().assertConfigured(this);
 		if(GlobalSingleMandatoryAppInstanceI.iGlobal().isSet()){
 			GlobalSingleMandatoryAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);
 		}

@@ -25,50 +25,67 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.misc;
+package com.github.commandsconsolegui.jme;
 
 import java.util.ArrayList;
+import java.util.TreeMap;
 
-import com.github.commandsconsolegui.misc.ConfigureManagerI.IConfigure;
+import com.github.commandsconsolegui.cmd.ManageKeyBind;
+import com.github.commandsconsolegui.cmd.varfield.KeyBoundVarField;
+import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
+import com.github.commandsconsolegui.misc.CompositeControlAbs;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.jme.MiscJmeI;
+import com.jme3.input.controls.ActionListener;
+
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
- * 
+ *
  */
-public class ConfigureManagerI implements IManager<IConfigure>{
-	private static ConfigureManagerI instance = new ConfigureManagerI();
-	public static ConfigureManagerI i(){return instance;}
+public class ManageJmeKeyBind extends ManageKeyBind {
+	private ActionListener	alGeneralJmeListener;
 	
-	public void assertConfigured(IConfigure icfg){
-		if(!icfg.isConfigured()){
-			throw new PrerequisitesNotMetException("not configured", icfg);
-		}
-	}
-	
-	public static interface IConfigure<T extends IConfigure<T>> {
-		/**
-		 * Each subclass can have the same name "CfgParm".<br>
-		 * <br>
-		 * Just reference the CfgParm of the superclass directly ex.:<br> 
-		 * 	new ConditionalAppStateAbs.CfgParm()<br>
-		 * <br>
-		 * This is also very important when restarting (configuring a new and fresh robust instance)<br>
-		 * where the current configuration will be just passed to the new instance!<br> 
-		 */
-		public static interface ICfgParm{}
+	@Override
+	public void configure(){
+		alGeneralJmeListener = new ActionListener() {
+			@Override
+			public void onAction(String name, boolean isPressed, float tpf) {
+				if(!isPressed)return;
+				
+//				// all field JME binds go here
+//				if(bindToggleConsole.checkRunCallerAssigned(isPressed,name))return;
+				
+				executeUserBinds(isPressed,name);
+			}
+		};
 		
-		boolean isConfigured();
-		T configure(ICfgParm icfg);
 	}
-
+	
 	@Override
-	public boolean add(IConfigure objNew) {
-		throw new UnsupportedOperationException("method not implemented yet");
+	public void removeKeyBind(String strMapping){
+		if(GlobalAppRefI.i().getInputManager().hasMapping(strMapping)){
+			GlobalAppRefI.i().getInputManager().deleteMapping(strMapping);
+		}
+		
+		super.removeKeyBind(strMapping);
 	}
-
+	
 	@Override
-	public ArrayList<IConfigure> getListCopy() {
-		throw new UnsupportedOperationException("method not implemented yet");
+	public void addKeyBind(KeyBoundVarField bind){
+		super.addKeyBind(bind);
+			
+		String strMapping=getMappingFrom(bind);
+		
+		if(GlobalAppRefI.i().getInputManager().hasMapping(strMapping)){
+			GlobalAppRefI.i().getInputManager().deleteMapping(strMapping);
+		}
+		
+		GlobalAppRefI.i().getInputManager().addMapping(strMapping,
+			MiscJmeI.i().asTriggerArray(bind));
+		
+		GlobalAppRefI.i().getInputManager().addListener(alGeneralJmeListener, strMapping);
 	}
+	
 }

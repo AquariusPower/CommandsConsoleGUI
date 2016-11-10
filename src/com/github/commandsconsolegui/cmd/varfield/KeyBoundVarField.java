@@ -262,6 +262,12 @@ public class KeyBoundVarField extends VarCmdFieldAbs<Integer[],KeyBoundVarField>
 	private boolean isUseCallQueue() {
 		return bUseCallQueue;
 	}
+	
+	/**
+	 * 
+	 * @param bUseCallQueue if false, will try to promptly run the caller
+	 * @return
+	 */
 	public KeyBoundVarField setUseCallQueue(boolean bUseCallQueue) {
 		this.bUseCallQueue = bUseCallQueue;
 		return getThis();

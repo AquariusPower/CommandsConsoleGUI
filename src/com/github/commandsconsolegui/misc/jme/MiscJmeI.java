@@ -56,7 +56,7 @@ import com.github.commandsconsolegui.globals.jme.GlobalJmeAppOSI;
 import com.github.commandsconsolegui.globals.jme.GlobalRootNodeI;
 import com.github.commandsconsolegui.jme.PseudoSavableHolder;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableWeak;
-import com.github.commandsconsolegui.misc.ConfigureManagerI.IConfigure;
+import com.github.commandsconsolegui.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
@@ -67,7 +67,7 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
+import com.github.commandsconsolegui.misc.ManageSingleInstanceI;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.AssetNotFoundException;
 import com.jme3.asset.plugins.FileLocator;
@@ -108,7 +108,7 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 	private BoolTogglerCmdField btgUseXmlSaveMode = new BoolTogglerCmdField(this, false);
 	
 	public MiscJmeI() {
-		SingleInstanceManagerI.i().add(this);
+		ManageSingleInstanceI.i().add(this);
 	}
 	
 	public static class CfgParm implements ICfgParm{

@@ -34,9 +34,9 @@ import java.util.HashMap;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class SingleInstanceManagerI implements IManager<ISingleInstance>{
-	private static SingleInstanceManagerI instance = new SingleInstanceManagerI();
-	public static SingleInstanceManagerI i(){return instance;}
+public class ManageSingleInstanceI implements IManager<ISingleInstance>{
+	private static ManageSingleInstanceI instance = new ManageSingleInstanceI();
+	public static ManageSingleInstanceI i(){return instance;}
 	
 	HashMap<String,InstanceInfo> hm = new HashMap<String,InstanceInfo>();
 	ArrayList<ISingleInstance> aList = new ArrayList<ISingleInstance>();

@@ -33,11 +33,11 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.jme.DialogManagerAbs;
+import com.github.commandsconsolegui.jme.ManageDialogAbs;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.SaveLmrDiag;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
+import com.github.commandsconsolegui.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.jme3.math.ColorRGBA;
@@ -63,7 +63,7 @@ import com.simsilica.lemur.style.Styles;
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends DialogManagerAbs<T>{
+public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends ManageDialogAbs<T>{
 	private static LemurDialogManagerI instance = new LemurDialogManagerI();
 	public static LemurDialogManagerI i(){return instance;}
 	
@@ -232,7 +232,7 @@ public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends DialogMa
 	
 	public LemurDialogManagerI() {
 		super();
-		SingleInstanceManagerI.i().add(this);
+		ManageSingleInstanceI.i().add(this);
 	}
 	
 	@Override

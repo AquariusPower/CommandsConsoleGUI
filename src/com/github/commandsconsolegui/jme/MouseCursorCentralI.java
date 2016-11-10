@@ -42,7 +42,7 @@ import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
+import com.github.commandsconsolegui.misc.ManageSingleInstanceI;
 import com.jme3.input.MouseInput;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
@@ -60,7 +60,7 @@ public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListe
 	};private CompositeControl ccSelf = new CompositeControl(this);
 	
 	public MouseCursorCentralI() {
-		SingleInstanceManagerI.i().add(this);
+		ManageSingleInstanceI.i().add(this);
 	}
 	
 	public final StringCmdField CMD_FIX_RESETING_MOUSE_CURSOR = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());

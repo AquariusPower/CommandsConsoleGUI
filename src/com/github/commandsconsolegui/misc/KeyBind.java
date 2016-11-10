@@ -24,7 +24,6 @@
 	OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN 
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
 package com.github.commandsconsolegui.misc;
 
 import java.util.ArrayList;
@@ -34,40 +33,35 @@ import java.util.ArrayList;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class HoldRestartableManagerI<T extends IRestartable> implements IManager<HoldRestartable<T>>{
-	private static HoldRestartableManagerI instance = new HoldRestartableManagerI();
-	public static HoldRestartableManagerI i(){return instance;}
+public class KeyBind {
+	public static class Key{
+		int iKeyCode = -1;
+		boolean bPressed = false;
+	}
 	
-	public static final class CompositeControl extends CompositeControlAbs<HoldRestartableManagerI>{
-		private CompositeControl(HoldRestartableManagerI casm){super(casm);};
-	};private CompositeControl ccSelf = new CompositeControl(this);
+	/** the last key to be pressed */
+	Key keyAction = new Key();
 	
-	private ArrayList<HoldRestartable<T>> ahrList=new ArrayList<HoldRestartable<T>>();
+	ArrayList<Key> aiKeyModifierList = new ArrayList<Key>();
 	
-	public void revalidateAndUpdateAllRestartableHoldersFor(IRestartable irDiscarding, IRestartable irNew){
-		for(HoldRestartable<T> hr:new ArrayList<HoldRestartable<T>>(ahrList)){
-			// discard
-			if(hr.isDiscardSelf() || DiscardableInstanceI.i().isBeingDiscardedRecursiveOwner(hr)){
-				ahrList.remove(hr);
-				continue;
-			}
-			
-			// update ref
-			if(hr.getRef()==irDiscarding){
-				hr.setRef(irNew);
-			}
+	private void applyPressedState(Key key, int iKeyCodeCheck, boolean bPressed){
+		if(key.iKeyCode==iKeyCodeCheck)key.bPressed=bPressed;
+	}
+	public void applyPressedState(int iKeyCode, boolean bPressed){
+		applyPressedState(keyAction, iKeyCode, bPressed);
+		
+		for(Key key:aiKeyModifierList){
+			applyPressedState(key, iKeyCode, bPressed);
 		}
 	}
 	
-	@Override
-	public boolean add(HoldRestartable<T> hr){
-		PrerequisitesNotMetException.assertNotAlreadyAdded(ahrList, hr, this);
-		return ahrList.add(hr);
-	}
-	
-	@Deprecated
-	@Override
-	public ArrayList<HoldRestartable<T>> getListCopy() {
-		throw new UnsupportedOperationException("method not implemented yet");
+	public boolean isActivated(){
+		if(keyAction.bPressed){
+			for(Key key:aiKeyModifierList){
+				if(!key.bPressed)return false;
+			}			
+		}
+		
+		return true;
 	}
 }

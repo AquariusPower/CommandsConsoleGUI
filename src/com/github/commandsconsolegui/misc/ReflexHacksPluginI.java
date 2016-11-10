@@ -74,7 +74,7 @@ public class ReflexHacksPluginI implements IConsoleCommandListener, IReflexFillC
 	public static ReflexHacksPluginI i(){return instance;}
 	
 	public ReflexHacksPluginI() {
-		SingleInstanceManagerI.i().add(this);
+		ManageSingleInstanceI.i().add(this);
 	}
 	
 	public final BoolTogglerCmdField	btgAllowHacks = new BoolTogglerCmdField(this,false,

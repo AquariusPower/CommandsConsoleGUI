@@ -34,12 +34,12 @@ import com.github.commandsconsolegui.PkgTopRef;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
-import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldManagerI;
+import com.github.commandsconsolegui.cmd.varfield.ManageVarCmdFieldI;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdUId;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.AudioUII;
 import com.github.commandsconsolegui.jme.ConditionalStateAbs;
-import com.github.commandsconsolegui.jme.ConditionalStateManagerI;
+import com.github.commandsconsolegui.jme.ManageConditionalStateI;
 import com.github.commandsconsolegui.jme.AudioUII.EAudio;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
@@ -97,7 +97,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		
 //		if(hrdiagChoice.getRef()==null){ 
 			//when restarting this, it's child may be already/still there TODO restart child too?
-			ChoiceVarDialogState diagChoice = ConditionalStateManagerI.i().getConditionalState(
+			ChoiceVarDialogState diagChoice = ManageConditionalStateI.i().getConditionalState(
 				ChoiceVarDialogState.class, null);
 			if(diagChoice==null){
 				diagChoice=new ChoiceVarDialogState();
@@ -184,7 +184,7 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 	@Override
 	protected void updateList() {
 		//clearList()
-		ArrayList<VarCmdFieldAbs> avcf = VarCmdFieldManagerI.i().getListCopy();
+		ArrayList<VarCmdFieldAbs> avcf = ManageVarCmdFieldI.i().getListCopy();
 		
 		for(VarCmdFieldAbs vcfVarEntry:avcf){
 			if(vcfVarEntry.getUniqueVarId()==null)continue;

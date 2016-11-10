@@ -55,7 +55,7 @@ public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
 //	private ConsoleCommands	cc;
 	
 	public DebugI() {
-		SingleInstanceManagerI.i().add(this);
+		ManageSingleInstanceI.i().add(this);
 	}
 	
 	/**

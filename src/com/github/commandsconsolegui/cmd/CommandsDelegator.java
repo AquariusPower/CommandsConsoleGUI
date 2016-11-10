@@ -46,13 +46,14 @@ import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.KeyBoundVarField;
+import com.github.commandsconsolegui.cmd.varfield.ManageVarCmdFieldI;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
-import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldManagerI;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdUId;
 import com.github.commandsconsolegui.globals.GlobalAppOSI;
+import com.github.commandsconsolegui.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.cmd.GlobalConsoleUII;
 import com.github.commandsconsolegui.misc.CallQueueI;
@@ -64,6 +65,7 @@ import com.github.commandsconsolegui.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.IMessageListener;
 import com.github.commandsconsolegui.misc.IMultiInstanceOverride;
+import com.github.commandsconsolegui.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MiscI.EStringMatchMode;
 import com.github.commandsconsolegui.misc.MsgI;
@@ -72,7 +74,6 @@ import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
@@ -165,6 +166,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 //	public final StringField CMD_CONSOLE_SCROLL_BOTTOM = new StringField(this,CommandsHelperI.i().getCmdCodePrefix());
 //	public final StringField CMD_CONSOLE_STYLE = new StringField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField scfBindKey = new StringCmdField(this);
+	public final StringCmdField scfUnBindKey = new StringCmdField(this);
 	public final StringCmdField scfBindList = new StringCmdField(this);
 	public final StringCmdField CMD_CONSOLE_SCROLL_BOTTOM = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField CMD_CLEAR_COMMANDS_HISTORY = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
@@ -180,7 +182,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	public final StringCmdField CMD_HISTORY = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField CMD_HK_TOGGLE = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField CMD_LINE_WRAP_AT = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
-	public final StringCmdField CMD_MESSAGE_REVIEW = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField scfMessageReview = new StringCmdField(this);
 	public final StringCmdField CMD_VAR_SET = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField CMD_SLEEP = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField CMD_STATS_ENABLE = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
@@ -314,7 +316,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	}
 	
 	public CommandsDelegator() {
-		SingleInstanceManagerI.i().add(this);
+		ManageSingleInstanceI.i().add(this);
 		
 		setCommandDelimiter(';');
 		setAliasPrefix('$');
@@ -526,7 +528,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	
 	private boolean checkCmdValidityBoolTogglers(){
 		btgReferenceMatched=null;
-		for(BoolTogglerCmdField btg : VarCmdFieldManagerI.i().getListCopy(BoolTogglerCmdField.class)){
+		for(BoolTogglerCmdField btg : ManageVarCmdFieldI.i().getListCopy(BoolTogglerCmdField.class)){
 			String strSimpleCmdId = btg.getSimpleId();
 			if(!strSimpleCmdId.endsWith("Toggle"))strSimpleCmdId+="Toggle";
 			if(checkCmdValidity(btg.getOwner(), btg.getUniqueCmdId(), strSimpleCmdId, "[bEnable] "+btg.getHelp(), true)){
@@ -542,7 +544,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	 */
 	private class PseudoSelfListener implements IReflexFillCfg,IConsoleCommandListener{
 		public PseudoSelfListener(){
-			SingleInstanceManagerI.i().add(this);
+			ManageSingleInstanceI.i().add(this);
 		}
 		@Override
 		public ECmdReturnStatus execConsoleCommand(CommandsDelegator ccRequester) {
@@ -708,7 +710,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 
 	private CommandData	cmddLastAdded;
 
-	private TreeMap<String,KeyBoundVarField> tmbindList = new TreeMap<String, KeyBoundVarField>(String.CASE_INSENSITIVE_ORDER);
+//	private TreeMap<String,KeyBoundVarField> tmbindList = new TreeMap<String, KeyBoundVarField>(String.CASE_INSENSITIVE_ORDER);
 
 
 //	private int	iBoolTogglersListHashCode;
@@ -821,7 +823,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			astrOSCmd.add("bash");
 			astrOSCmd.add("-c");
 		}
-		astrOSCmd.add(String.join(" ",ccl.getPreparedCmdAndParamsListCopy(2)));
+		astrOSCmd.add(String.join(" ",ccl.getPreparedCmdAndParamsListCopyFrom(2)));
 		
 		try {
 			dumpSubEntry("Running OS command: "+astrOSCmd);
@@ -890,23 +892,35 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		if(checkCmdValidity(scfAlias,getAliasHelp())){
 			bCmdWorked=cmdAlias();
 		}else
+		if(checkCmdValidity(scfUnBindKey,"<KeyMod...+KeyAction>")){
+			String strBindCfg = ccl.paramString(1);
+			GlobalManageKeyBindI.i().removeKeyBind(strBindCfg);
+		}else
 		if(checkCmdValidity(scfBindKey,"<KeyMod...+KeyAction> <full console command>")){
 			String strBindCfg = ccl.paramString(1);
 			
 			KeyBoundVarField bind = new KeyBoundVarField(null,strBindCfg);
+			bind.setUserCommand(ccl.getPreparedCmdAndParamsListCopyFrom(2));
 			
-			bind.setUserCommand(ccl.getPreparedCmdAndParamsListCopy(2));
+//			tmbindList.put(strBindCfg,bind);
+			GlobalManageKeyBindI.i().addKeyBind(bind);
 			
-			tmbindList.put(strBindCfg,bind);
-			
-			cui().addKeyBind(bind);
+//			cui().addKeyBind(bind);
 			
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(scfBindList,"show user binds list")){
-			for(KeyBoundVarField bind:tmbindList.values()){
-				dumpSubEntry(bind.getBindCfg()+" "+bind.getUserCommand());
+			for(KeyBoundVarField bind:GlobalManageKeyBindI.i().getListCopy()){
+				String strMapping = GlobalManageKeyBindI.i().getMappingFrom(bind);
+				if(strMapping.equals(bind.getBindCfg())){
+					strMapping="";
+				}else{
+					strMapping=" ("+strMapping+")";
+				}
+				
+				dumpSubEntry(bind.getBindCfg()+" "+bind.getUserCommand()+""+strMapping);
 			}
+			
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(this,"activateSelfWindow")){
@@ -1107,7 +1121,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			aimBufferList.clear();
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(CMD_MESSAGE_REVIEW,"[[regexFilter|index] [stackLimit]] can be a filter, an index or an uid. If it has an exception, it will be dumped.")){
+		if(checkCmdValidity(scfMessageReview,"[[ [-|~][simpleFilter|regexFilter] | index] [stackLimit]] can be a (negated|fuzzy) filter, an index or an uid. If it has an exception, it will be dumped.")){
 			cmdMessageReview();
 			bCmdWorked=true;
 		}else
@@ -1320,6 +1334,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			}
 		}
 		
+		if(strUId==null)dumpSubEntry("FinalRegexFilter: "+strFilter);
+		
 		ArrayList<ImportantMsgData> aimsg = new ArrayList<ImportantMsgData>(aimBufferList);
 		
 		Collections.sort(aimsg, ImportantMsgData.cmpFirstOcurrenceCreationTime());
@@ -1328,6 +1344,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			dumpImportantMessage(aimsg.get(iIndex), iStackLimit, iIndex, false);
 		}else{
 			boolean bListMode = strUId==null;
+			int iCount=0;
 			for(int i=0;i<aimsg.size();i++){
 				ImportantMsgData imsg = aimsg.get(i);
 				if(strUId!=null){
@@ -1337,12 +1354,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 				}
 				
 				dumpImportantMessage(imsg, iStackLimit, i, bListMode);
+				iCount++;
 				
 				if(strUId!=null)break;
 			}
 			
 			if(bListMode){
-				dumpSubEntry("Total: "+aimsg.size());
+				dumpSubEntry("Messages(shown="+iCount+";total="+aimsg.size()+")");
 			}
 		}
 	}
@@ -2099,9 +2117,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			 */
 			ArrayList<VarCmdFieldAbs> avcf = new ArrayList<VarCmdFieldAbs>();
 			ArrayList<VarCmdFieldAbs> avcfLinkList = new ArrayList<VarCmdFieldAbs>();
-			avcf.addAll(VarCmdFieldManagerI.i().getListCopy(BoolTogglerCmdField.class));
-			avcf.addAll(VarCmdFieldManagerI.i().getListCopy(StringCmdField.class));
-			avcf.addAll(VarCmdFieldManagerI.i().getListCopy(KeyBoundVarField.class));
+			avcf.addAll(ManageVarCmdFieldI.i().getListCopy(BoolTogglerCmdField.class));
+			avcf.addAll(ManageVarCmdFieldI.i().getListCopy(StringCmdField.class));
+			avcf.addAll(ManageVarCmdFieldI.i().getListCopy(KeyBoundVarField.class));
 //			int iCount=0;
 			for(VarCmdFieldAbs vcf:avcf){
 				if(vcf.getUniqueCmdId().equalsIgnoreCase(cmddNew.getUniqueCmdId())){
@@ -2922,7 +2940,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		if(tmSrc==tmRestrictedVariables){ //cvar.isRestricted()
 			if(cvar.getRestrictedVarOwner()==null){
 				if(vcfOwner==null){
-					for(VarCmdFieldAbs vcfTmp:VarCmdFieldManagerI.i().getListCopy()){
+					for(VarCmdFieldAbs vcfTmp:ManageVarCmdFieldI.i().getListCopy()){
 						if(!vcfTmp.isVar())continue;
 	//					DebugI.i().conditionalBreakpoint(KeyBoundVarField.class.isInstance(vcfTmp));
 	//					if(vcfTmp.getUniqueVarId().equals(CommandsHelperI.i().removeRestrictedToken(cvar.getUniqueVarId()))){
@@ -3247,12 +3265,26 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	private String improveSimpleFilter(String strFilter){
 		strFilter=strFilter.trim();
 		
+		boolean bInverseMode=false;
+		if(strFilter.startsWith("-")){
+			strFilter=strFilter.substring(1);
+			bInverseMode=true;
+		}
+		
 		if(MiscI.i().isValidIdentifierCmdVarAliasFuncString(strFilter)){
 			/**
 			 * if user typed a simple string (not a regex), 
 			 * it will match like contains mode
 			 */
-			strFilter=".*"+strFilter+".*";
+			if(strFilter.isEmpty()){
+				strFilter=".*";
+			}else{
+				strFilter=".*"+strFilter+".*";
+			}
+		}
+		
+		if(bInverseMode){
+			strFilter="^((?!"+strFilter+").)*$";
 		}
 		
 		return strFilter;
@@ -3455,7 +3487,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	private void updateCheckNewVarCmdAndToggleFields() {
 //		int iBoolTogglersListHashCodeTmp = VarCmdFieldManagerI.i().getListHash();
 //		if(iBoolTogglersListHashCodeTmp!=iBoolTogglersListHashCode){
-		if(VarCmdFieldManagerI.i().isListChanged()){
+		if(ManageVarCmdFieldI.i().isListChanged()){
 			bFillCommandList=true;
 			updateCmdWithCallerList();
 			checkCmdValidityBoolTogglers(); //update cmd list with new booltoggler commands
@@ -3471,7 +3503,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	ArrayList<StringCmdField> ascfCmdWithCallerList = new ArrayList<StringCmdField>();
 	private File	flConsDataPath;
 	private void updateCmdWithCallerList() {
-		for(StringCmdField scf:VarCmdFieldManagerI.i().getListCopy(StringCmdField.class)){
+		for(StringCmdField scf:ManageVarCmdFieldI.i().getListCopy(StringCmdField.class)){
 			if(scf.isCallerAssigned()){
 				if(!ascfCmdWithCallerList.contains(scf)){
 					checkCmdValidity(scf);
@@ -3742,12 +3774,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			false);
 		
 		ArrayList<VarCmdFieldAbs> acvarAllVarsList = new ArrayList<VarCmdFieldAbs>();
-		acvarAllVarsList.addAll(VarCmdFieldManagerI.i().getListCopy(KeyBoundVarField.class));
-		acvarAllVarsList.addAll(VarCmdFieldManagerI.i().getListCopy(BoolTogglerCmdField.class));
-		acvarAllVarsList.addAll(VarCmdFieldManagerI.i().getListCopy(TimedDelayVarField.class));
-		acvarAllVarsList.addAll(VarCmdFieldManagerI.i().getListCopy(FloatDoubleVarField.class));
-		acvarAllVarsList.addAll(VarCmdFieldManagerI.i().getListCopy(IntLongVarField.class));
-		acvarAllVarsList.addAll(VarCmdFieldManagerI.i().getListCopy(StringVarField.class));
+		acvarAllVarsList.addAll(ManageVarCmdFieldI.i().getListCopy(KeyBoundVarField.class));
+		acvarAllVarsList.addAll(ManageVarCmdFieldI.i().getListCopy(BoolTogglerCmdField.class));
+		acvarAllVarsList.addAll(ManageVarCmdFieldI.i().getListCopy(TimedDelayVarField.class));
+		acvarAllVarsList.addAll(ManageVarCmdFieldI.i().getListCopy(FloatDoubleVarField.class));
+		acvarAllVarsList.addAll(ManageVarCmdFieldI.i().getListCopy(IntLongVarField.class));
+		acvarAllVarsList.addAll(ManageVarCmdFieldI.i().getListCopy(StringVarField.class));
 		setupVarsAllFrom(acvarAllVarsList);
 		
 		if(bSave)varSaveSetupFile();
@@ -3792,7 +3824,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		
 //		dumpSubEntry("Previous Second FPS  = "+lPreviousSecondFPS);
 		
-		for(BoolTogglerCmdField btg : VarCmdFieldManagerI.i().getListCopy(BoolTogglerCmdField.class)){
+		for(BoolTogglerCmdField btg : ManageVarCmdFieldI.i().getListCopy(BoolTogglerCmdField.class)){
 			dumpSubEntry(btg.getReport());
 		}
 		
@@ -4020,7 +4052,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		}
 		
 		// for debug mode, auto show messages
-		if(DebugI.i().isInIDEdebugMode())addCmdToQueue(CMD_MESSAGE_REVIEW);
+		if(DebugI.i().isInIDEdebugMode())addCmdToQueue(scfMessageReview);
 		
 		// init valid cmd list
 		bFillCommandList=true;
@@ -4653,9 +4685,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		return MiscI.i().prepareUniqueId(this);
 	}
 	
-	public void executeUserBinds(boolean bRun, String strId){
-		for(KeyBoundVarField bind:tmbindList.values()){
-			if(bind.checkRunCallerAssigned(bRun, strId))break;
-		}
-	}
+//	public void executeUserBinds(boolean bRun, String strId){
+//		for(KeyBoundVarField bind:tmbindList.values()){
+//			if(bind.checkRunCallerAssigned(bRun, strId))break;
+//		}
+//	}
 }

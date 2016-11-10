@@ -46,8 +46,8 @@ import com.github.commandsconsolegui.jme.lemur.dialog.MaintenanceListLemurDialog
 import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDiagChoice;
 import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDiagMaintList;
 import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDiagQuestion;
-import com.github.commandsconsolegui.misc.ConfigureManagerI;
-import com.github.commandsconsolegui.misc.ConfigureManagerI.IConfigure;
+import com.github.commandsconsolegui.misc.ManageConfigI;
+import com.github.commandsconsolegui.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.misc.HoldRestartable;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
@@ -56,7 +56,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexHacksPluginI;
-import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
+import com.github.commandsconsolegui.misc.ManageSingleInstanceI;
 import com.jme3.app.SimpleApplication;
 import com.jme3.system.AppSettings;
 import com.simsilica.lemur.Button;
@@ -108,7 +108,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 	public ConsoleTestI() {
 		super();
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
-		SingleInstanceManagerI.i().add(this);
+		ManageSingleInstanceI.i().add(this);
 	}
 	
 	
@@ -162,7 +162,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 	 */
 	@Override
 	public void simpleInitApp() {
-		ConfigureManagerI.i().assertConfigured(this);
+		ManageConfigI.i().assertConfigured(this);
 		
 		MsgI.i().setEnableDebugMessages(true);
 		

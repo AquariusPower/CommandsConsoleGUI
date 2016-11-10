@@ -57,7 +57,7 @@ public class CallQueueI implements IReflexFillCfg {
 	public static CallQueueI i(){return instance;}
 	
 	public CallQueueI() {
-		SingleInstanceManagerI.i().add(this);
+		ManageSingleInstanceI.i().add(this);
 	}
 	
 	public static interface CallableWeak<V> extends Callable<V>{

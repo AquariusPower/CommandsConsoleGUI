@@ -25,23 +25,50 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.cmd;
+package com.github.commandsconsolegui.misc;
 
-import com.github.commandsconsolegui.misc.CompositeControlAbs;
+import java.util.ArrayList;
 
+import com.github.commandsconsolegui.misc.ManageConfigI.IConfigure;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
- *
+ * 
  */
-public class KeyBoundManagerI {
-	private static KeyBoundManagerI instance = new KeyBoundManagerI();
-	public static KeyBoundManagerI i(){return instance;}
+public class ManageConfigI implements IManager<IConfigure>{
+	private static ManageConfigI instance = new ManageConfigI();
+	public static ManageConfigI i(){return instance;}
 	
-	public static final class CompositeControl extends CompositeControlAbs<KeyBoundManagerI>{
-		private CompositeControl(KeyBoundManagerI cc){super(cc);};
-	};private CompositeControl ccSelf = new CompositeControl(this);
+	public void assertConfigured(IConfigure icfg){
+		if(!icfg.isConfigured()){
+			throw new PrerequisitesNotMetException("not configured", icfg);
+		}
+	}
 	
-	
+	public static interface IConfigure<T extends IConfigure<T>> {
+		/**
+		 * Each subclass can have the same name "CfgParm".<br>
+		 * <br>
+		 * Just reference the CfgParm of the superclass directly ex.:<br> 
+		 * 	new ConditionalAppStateAbs.CfgParm()<br>
+		 * <br>
+		 * This is also very important when restarting (configuring a new and fresh robust instance)<br>
+		 * where the current configuration will be just passed to the new instance!<br> 
+		 */
+		public static interface ICfgParm{}
+		
+		boolean isConfigured();
+		T configure(ICfgParm icfg);
+	}
+
+	@Override
+	public boolean add(IConfigure objNew) {
+		throw new UnsupportedOperationException("method not implemented yet");
+	}
+
+	@Override
+	public ArrayList<IConfigure> getListCopy() {
+		throw new UnsupportedOperationException("method not implemented yet");
+	}
 }

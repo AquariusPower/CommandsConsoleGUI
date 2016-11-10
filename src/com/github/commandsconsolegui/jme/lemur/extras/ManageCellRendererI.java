@@ -37,7 +37,7 @@ import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.github.commandsconsolegui.misc.SingleInstanceManagerI;
+import com.github.commandsconsolegui.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.misc.WorkAroundI.BugFixBoolTogglerCmdField;
 
 /**
@@ -45,16 +45,16 @@ import com.github.commandsconsolegui.misc.WorkAroundI.BugFixBoolTogglerCmdField;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CellRendererManagerI implements IReflexFillCfg,IManager{
-	private static CellRendererManagerI instance = new CellRendererManagerI();
-	public static CellRendererManagerI i(){return instance;}
+public class ManageCellRendererI implements IReflexFillCfg,IManager{
+	private static ManageCellRendererI instance = new ManageCellRendererI();
+	public static ManageCellRendererI i(){return instance;}
 	
 	public final StringVarField svfTreeDepthToken = new StringVarField(this, " ", null);
 	public final BoolTogglerCmdField	btgShowTreeUId = new BoolTogglerCmdField(this,false).setCallNothingOnChange();
 	public final BugFixBoolTogglerCmdField btgNOTWORKINGBugFixGapForListBoxSelectorArea = new BugFixBoolTogglerCmdField(this,false);
 	
-	public CellRendererManagerI() {
-		SingleInstanceManagerI.i().add(this);
+	public ManageCellRendererI() {
+		ManageSingleInstanceI.i().add(this);
 	}
 	
 	@Override
