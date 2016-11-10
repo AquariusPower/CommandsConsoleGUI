@@ -175,7 +175,7 @@ public class ConsoleVariable<VAL> {
 
 	public boolean isRestricted() {
 		if(bRestrictedOwnerRequested && vcfRestrictedVarOwner==null){
-			MsgI.i().devWarn("restricted var owner still not set for "+getUniqueVarId(true), this);
+			MsgI.i().devInfo("restricted var owner still not set for "+getUniqueVarId(true), this);
 		}
 		
 		return bRestrictedOwnerRequested;

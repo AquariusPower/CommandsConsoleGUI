@@ -40,6 +40,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigInteger;
 import java.nio.file.Files;
@@ -66,7 +67,7 @@ public class MiscI {
 	public static MiscI i(){return instance;}
 	
 //	public long lLastUniqueId = 0;
-	private IHandleExceptions	ihe = SimpleHandleExceptionsI.i();
+	private IHandleExceptions	ihe = SipmleHandleExceptionsI.i();
 	private String	strLastUid = "0";
 	private boolean	bConfigured;
 //	private SimpleApplication	sapp;
@@ -287,7 +288,15 @@ public class MiscI {
 	 */
 	public String getNextUniqueId(String strLastId){
 		int iRadix=36;
-//		if(strLastId==null)strLastId="0";
+		/**
+		 * Do not fix if null lik in `if(strLastId==null)strLastId="0";`
+		 * because the last id must be controlled by a manager String field,
+		 * or be a static String field of the class...
+		 * 
+		 * fixing the null would just be prone to developer coding bugs...
+		 * 
+		 * TODO better not fix if empty either!?
+		 */
 		BigInteger bi = new BigInteger(strLastId,iRadix);
 		bi=bi.add(new BigInteger("1"));
 		return bi.toString(iRadix);
@@ -750,5 +759,24 @@ public class MiscI {
 
 	public String prepareUniqueId(ISingleInstance si) {
 		return si.getClass().getName(); //TODO dots to underscores?
+	}
+	
+	public boolean isGetThisTrickImplementation(Object obj){
+		if(!ISimpleGetThisTrickIndicator.class.isInstance(obj)) return false;
+			
+		ISimpleGetThisTrickIndicator gtt = (ISimpleGetThisTrickIndicator)obj;
+		
+		String strErr=null;
+		
+		if(strErr==null && !Modifier.isFinal(gtt.getClass().getModifiers()))strErr="not final class";
+		
+//		Method[] adm = gtt.getClass().getDeclaredMethods();
+//		if(strErr==null && adm.length!=1)strErr="more than one method present";
+		
+//		if(strErr==null && !adm[0].getName().equals("getThis"))strErr="single method is not the getThis() method";
+		
+		if(strErr!=null)throw new PrerequisitesNotMetException("invalid simple implementation related to getThis() trick", strErr, gtt);
+		
+		return true;
 	}
 }

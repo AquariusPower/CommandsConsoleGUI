@@ -29,19 +29,12 @@ package com.github.commandsconsolegui.misc;
 
 /**
  * 
- * Use this class instances as place holder, until they are replaced by 
- * more user friendly class types.
- * So, when an exception happens, it can come here at least.
+ * To indicate that the concrete class is a final simple implementation containing only the overriden
+ * getThis() method.
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class SimpleHandleExceptionsI implements IHandleExceptions{
-	private static SimpleHandleExceptionsI instance = new SimpleHandleExceptionsI();
-	public static SimpleHandleExceptionsI i(){return instance;}
-	
-	@Override
-	public void handleExceptionThreaded(Exception e) {
-		throw new ExceptionInInitializerError(e);
-	}
+public interface ISimpleGetThisTrickIndicator {
+	public Object getThis();
 }

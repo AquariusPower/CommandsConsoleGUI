@@ -67,7 +67,7 @@ import com.jme3.scene.Node;
  * Most important steps will actually happen during {@link #doItAllProperly(float)},
  * where they will be properly validated and retried at specified time interval (default 0, every frame).<br>
  * <br>
- * SELFNOTE: Keep this class depending solely in JME!<br>
+ * DevSelfNote: Keep this class depending solely in JME!<br>
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
@@ -364,16 +364,21 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 				"cfg already set", this, this.cfg, icfg);
 		}
 		
-		if(!MiscI.i().isInnerClassOfConcrete(icfg, this)){
-//		if(!icfg.getClass().getTypeName().startsWith(this.getClass().getTypeName()+"$")){
-			throw new PrerequisitesNotMetException(
-				"must be the cfg of the concrete class one", this, icfg);
-		}
+		validateCfg(icfg);
 		
 		this.cfg=icfg;
 		
 		return getThis();
 //		return (T)this;
+	}
+	
+	private void validateCfg(CfgParm cfg){
+		if(!MiscI.i().isInnerClassOfConcrete(cfg, this)){
+			if(!MiscI.i().isGetThisTrickImplementation(this)){
+				throw new PrerequisitesNotMetException(
+					"The stored "+CfgParm.class.getSimpleName()+" must be the cfg of the instantiated concrete class one, so it can be used to restart it", this, cfg);
+			}
+		}
 	}
 	
 //	private ICfgParm getCfg(){
@@ -463,13 +468,14 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 		if(cfg==null)throw new PrerequisitesNotMetException(
 			"the instantiated class needs to set the configuration params to be used on a restart!");
 		
-		if(!MiscI.i().isInnerClassOfConcrete(cfg, this)){
-//		if(!icfgOfInstance.getClass().getName().startsWith(this.getClass().getName()+"$")){
-//		if(!icfgOfInstance.getClass().equals(this.getClass())){
-			throw new PrerequisitesNotMetException(
-				"The stored cfg params must be of the instantiated class to be used on restarting it. "
-				+this.getClass().getName());
-		}
+		validateCfg(cfg);
+//		if(!MiscI.i().isInnerClassOfConcrete(cfg, this)){
+////		if(!icfgOfInstance.getClass().getName().startsWith(this.getClass().getName()+"$")){
+////		if(!icfgOfInstance.getClass().equals(this.getClass())){
+//			throw new PrerequisitesNotMetException(
+//				"The stored cfg params must be of the instantiated class to be used on restarting it. "
+//				+this.getClass().getName());
+//		}
 		
 		return true;
 	}

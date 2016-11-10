@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.cmd;
 import java.util.AbstractList;
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.cmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.misc.CheckInitAndCleanupI.ICheckInitAndCleanupI;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 
@@ -95,4 +96,6 @@ public interface IConsoleUI extends ICheckInitAndCleanupI{
 	public abstract void requestRestart();
 
 	public abstract boolean checkAndApplyHintAtInputField();
+
+	public abstract void addKeyBind(KeyBoundVarField bind);
 }

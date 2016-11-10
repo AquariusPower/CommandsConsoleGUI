@@ -47,7 +47,7 @@ import com.github.commandsconsolegui.jme.MouseCursorCentralI;
 import com.github.commandsconsolegui.jme.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.lemur.DialogMouseCursorListenerI;
-import com.github.commandsconsolegui.jme.lemur.console.LemurConsoleStateI;
+import com.github.commandsconsolegui.jme.lemur.console.LemurConsoleStateAbs;
 import com.github.commandsconsolegui.jme.lemur.console.LemurFocusHelperStateI;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI.DialogStyleElementId;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI.DummyEffect;
@@ -108,7 +108,7 @@ import com.simsilica.lemur.style.ElementId;
 * More info at {@link DialogStateAbs}
 *	TODO implement docking dialogs, a small icon will be created at app window edges
 * 
-* TODO migrate from {@link DialogStateAbs} to here, everything that is not usable at {@link LemurConsoleStateI}
+* TODO migrate from {@link DialogStateAbs} to here, everything that is not usable at {@link LemurConsoleStateAbs}
 * 
 * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 *

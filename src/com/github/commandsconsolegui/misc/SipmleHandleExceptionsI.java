@@ -25,25 +25,23 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.jme.lemur.dialog;
-
-import com.simsilica.lemur.Button;
-import com.simsilica.lemur.Command;
+package com.github.commandsconsolegui.misc;
 
 /**
- * For getThis() trick to work, these simplified dialogs cannot be extended.
+ * 
+ * Use this class instances as place holder, until they are replaced by 
+ * more user friendly class types.
+ * So, when an exception happens, it can come here at least.
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class SimpleDialogs {
-	public static final class DiagChoice<T extends Command<Button>> extends ChoiceLemurDialogStateAbs<T,DiagChoice<T>>{
-		@Override protected DiagChoice<T> getThis() {return this;}
-	}
-	public static final class DiagQuestion<T extends Command<Button>> extends QuestionLemurDialogStateAbs<T,DiagQuestion<T>>{
-		@Override protected DiagQuestion<T> getThis() {return this;}
-	}
-	public static final class DiagMList<T extends Command<Button>> extends MaintenanceListLemurDialogStateAbs<T,DiagMList<T>>{
-		@Override protected DiagMList<T> getThis() {return this;}
+public class SipmleHandleExceptionsI implements IHandleExceptions{
+	private static SipmleHandleExceptionsI instance = new SipmleHandleExceptionsI();
+	public static SipmleHandleExceptionsI i(){return instance;}
+	
+	@Override
+	public void handleExceptionThreaded(Exception e) {
+		throw new ExceptionInInitializerError(e);
 	}
 }

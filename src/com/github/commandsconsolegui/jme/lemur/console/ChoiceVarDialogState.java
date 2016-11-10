@@ -45,12 +45,13 @@ import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 
 /**
+ * cannot be extended for getThis() trick to work
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  * @param <T>
  */
-public class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceLemurDialogStateAbs<T,ChoiceVarDialogState<T>>{
+public final class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceLemurDialogStateAbs<T,ChoiceVarDialogState<T>>{
 	public static class CfgParm extends ChoiceLemurDialogStateAbs.CfgParm{
 		public CfgParm(Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow,

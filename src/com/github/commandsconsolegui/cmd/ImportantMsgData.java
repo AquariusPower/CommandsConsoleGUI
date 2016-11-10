@@ -30,6 +30,8 @@ package com.github.commandsconsolegui.cmd;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import com.github.commandsconsolegui.misc.MiscI;
+
 /**
  * 
  * TODO this is basically a DumpEntryData holder, make it be like that.
@@ -45,6 +47,8 @@ public class ImportantMsgData {
 	private DumpEntryData de;
 	private Long lBufferedTimeNano;
 	private Long lFirstOcurrenceCreationTimeNano;
+	private String	strUId;
+	private static String	strLastUId="0";
 	
 	public ImportantMsgData(DumpEntryData de) {
 //		this(de.getKey(),de.getException(),de.getException().getStackTrace());
@@ -59,6 +63,8 @@ public class ImportantMsgData {
 		this.asteExceptionHappenedAt=de.getException().getStackTrace();
 		
 		lFirstOcurrenceCreationTimeNano=System.nanoTime();
+		
+		this.strUId = strLastUId = MiscI.i().getNextUniqueId(strLastUId);
 	}
 	
 	public boolean isIdenticalTo(ImportantMsgData imdOther){
@@ -120,6 +126,9 @@ public class ImportantMsgData {
 		this.ex = ex;
 	}
 
+	public String getExceptionHappenedAtInfo() {
+		return "ST="+getExceptionHappenedAt().hashCode();
+	}
 	public StackTraceElement[] getExceptionHappenedAt() {
 		return asteExceptionHappenedAt;
 	}
@@ -154,6 +163,9 @@ public class ImportantMsgData {
 		this.lFirstOcurrenceCreationTimeNano = lFirstOcurrenceCreationTimeNano;
 	}
 	
+	public String getUId() {
+		return strUId;
+	}
 	
 }
 

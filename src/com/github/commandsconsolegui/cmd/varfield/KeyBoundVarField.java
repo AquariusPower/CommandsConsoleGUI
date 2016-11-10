@@ -27,6 +27,7 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
+import java.sql.Struct;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -68,6 +69,10 @@ public class KeyBoundVarField extends VarCmdFieldAbs<Integer[],KeyBoundVarField>
 		this(rfcfgOwnerUseThis, join(iKeyActionCode,aiKeyModifierCodeList));
 	}
 	
+	public KeyBoundVarField setUserCommand(ArrayList<String> astr) {
+		setUserCommand(String.join(" ", astr.toArray(new String[0])));
+		return getThis();
+	}
 	public KeyBoundVarField setUserCommand(String strFullUserCommand){
 		this.strFullUserCommand=strFullUserCommand;
 		
@@ -203,7 +208,7 @@ public class KeyBoundVarField extends VarCmdFieldAbs<Integer[],KeyBoundVarField>
 	}
 
 	private String strCodePrefixDefault="bind";
-	private boolean	bUseCallQueue;
+	private boolean	bUseCallQueue = true;
 	@Override
 	public String getCodePrefixDefault() {
 		return strCodePrefixDefault;
@@ -233,14 +238,26 @@ public class KeyBoundVarField extends VarCmdFieldAbs<Integer[],KeyBoundVarField>
 	public Integer[] getValue() {
 		return super.getValue();
 	}
-	public void checkRunCallerAssigned(boolean bRun, String strId) {
-		if(bRun && isUniqueCmdIdEqualTo(strId)){
-			if(isUseCallQueue()){
-				callerAssignedQueueNow();
+	public boolean checkRunCallerAssigned(boolean bRun, String strId) {
+		boolean bMatch = false;
+		
+		if(bRun){
+			if(isField()){
+				bMatch=(isUniqueCmdIdEqualTo(strId));
 			}else{
-				callerAssignedRunNow();
+				bMatch=(getBindCfg().equals(strId));
+			}
+			
+			if(bMatch){
+				if(isUseCallQueue()){
+					callerAssignedQueueNow();
+				}else{
+					callerAssignedRunNow();
+				}
 			}
 		}
+		
+		return bMatch;
 	}
 	private boolean isUseCallQueue() {
 		return bUseCallQueue;
@@ -248,5 +265,8 @@ public class KeyBoundVarField extends VarCmdFieldAbs<Integer[],KeyBoundVarField>
 	public KeyBoundVarField setUseCallQueue(boolean bUseCallQueue) {
 		this.bUseCallQueue = bUseCallQueue;
 		return getThis();
+	}
+	public String getUserCommand() {
+		return strFullUserCommand;
 	}
 }

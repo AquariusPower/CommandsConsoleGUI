@@ -40,6 +40,7 @@ import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jme.GlobalJmeAppOSI;
 import com.github.commandsconsolegui.globals.jme.GlobalRootNodeI;
 import com.github.commandsconsolegui.globals.jme.GlobalSimpleAppRefI;
+import com.github.commandsconsolegui.globals.jme.lemur.GlobalLemurConsoleStateI;
 import com.github.commandsconsolegui.globals.jme.lemur.GlobalLemurDialogHelperI;
 import com.github.commandsconsolegui.jme.AudioUII;
 import com.github.commandsconsolegui.jme.JmeAppOS;
@@ -51,6 +52,7 @@ import com.github.commandsconsolegui.jme.lemur.MouseCursorListenerAbs;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI;
 import com.github.commandsconsolegui.misc.ConfigureManagerI;
 import com.github.commandsconsolegui.misc.ConfigureManagerI.IConfigure;
+import com.github.commandsconsolegui.misc.ISimpleGetThisTrickIndicator;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -61,6 +63,8 @@ import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
 import com.jme3.system.JmeSystem.StorageFolderType;
+import com.simsilica.lemur.Button;
+import com.simsilica.lemur.Command;
 import com.simsilica.lemur.event.KeyInterceptState;
 import com.simsilica.lemur.event.MouseEventControl;
 
@@ -115,8 +119,11 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
 		 * Anything more complex can be postponed (from withing the config itself)
 		 * with {@link CallQueueI}, or just put these things at initialization method.
 		 */
-  	if(!LemurConsoleStateI.i().isConfigured()){
-			LemurConsoleStateI.i().configure(new LemurConsoleStateI.CfgParm(
+  	if(!GlobalLemurConsoleStateI.iGlobal().isSet()){
+  		GlobalLemurConsoleStateI.iGlobal().set(new SimpleLemurConsoleState());
+  	}
+  	if(!GlobalLemurConsoleStateI.i().isConfigured()){
+  		GlobalLemurConsoleStateI.i().configure(new SimpleLemurConsoleState.CfgParm(
 				null, KeyInput.KEY_F10));
   	}
   	if(!GlobalCommandsDelegatorI.i().isConfigured()){
@@ -154,6 +161,13 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
 		bConfigured = true;
 		
   	return this;
+  }
+  
+	/**
+	 * cannot be extended for getThis() trick to work
+	 */
+  public static final class SimpleLemurConsoleState extends LemurConsoleStateAbs<Command<Button>, SimpleLemurConsoleState> implements ISimpleGetThisTrickIndicator{
+		@Override public SimpleLemurConsoleState getThis() {return this;}
   }
   
 	protected void setGlobals() {

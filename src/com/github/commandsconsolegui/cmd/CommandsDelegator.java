@@ -164,6 +164,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 //	public final StringField CMD_CONSOLE_HEIGHT = new StringField(this,CommandsHelperI.i().getCmdCodePrefix());
 //	public final StringField CMD_CONSOLE_SCROLL_BOTTOM = new StringField(this,CommandsHelperI.i().getCmdCodePrefix());
 //	public final StringField CMD_CONSOLE_STYLE = new StringField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField scfBindKey = new StringCmdField(this);
+	public final StringCmdField scfBindList = new StringCmdField(this);
 	public final StringCmdField CMD_CONSOLE_SCROLL_BOTTOM = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField CMD_CLEAR_COMMANDS_HISTORY = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField CMD_DB = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
@@ -188,7 +190,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	public final StringCmdField	CMD_TEST = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField	CMD_VAR_ADD = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField	CMD_VAR_SET_CMP = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
-	public final StringCmdField	CMD_VAR_SHOW = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField	scfVarShow = new StringCmdField(this);
 	public final StringCmdField	CMD_RESET = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField	CMD_SHOW_SETUP = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField scfClearDumpArea = new StringCmdField(this);
@@ -706,6 +708,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 
 	private CommandData	cmddLastAdded;
 
+	private TreeMap<String,KeyBoundVarField> tmbindList = new TreeMap<String, KeyBoundVarField>(String.CASE_INSENSITIVE_ORDER);
+
 
 //	private int	iBoolTogglersListHashCode;
 
@@ -885,6 +889,25 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		}else
 		if(checkCmdValidity(scfAlias,getAliasHelp())){
 			bCmdWorked=cmdAlias();
+		}else
+		if(checkCmdValidity(scfBindKey,"<KeyMod...+KeyAction> <full console command>")){
+			String strBindCfg = ccl.paramString(1);
+			
+			KeyBoundVarField bind = new KeyBoundVarField(null,strBindCfg);
+			
+			bind.setUserCommand(ccl.getPreparedCmdAndParamsListCopy(2));
+			
+			tmbindList.put(strBindCfg,bind);
+			
+			cui().addKeyBind(bind);
+			
+			bCmdWorked=true;
+		}else
+		if(checkCmdValidity(scfBindList,"show user binds list")){
+			for(KeyBoundVarField bind:tmbindList.values()){
+				dumpSubEntry(bind.getBindCfg()+" "+bind.getUserCommand());
+			}
+			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(this,"activateSelfWindow")){
 			String strAppTitle=GlobalAppOSI.i().getApplicationTitle();
@@ -1084,31 +1107,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			aimBufferList.clear();
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(CMD_MESSAGE_REVIEW,"[filter]|[index [stackLimit]] if filter is an index, and it has an exception, the complete exception will be dumped.")){
-			String strFilter = ccl.paramString(1);
-			Integer iIndex = ccl.paramInt(1,true);
-			
-			Integer iStackLimit = ccl.paramInt(2,true);
-			
-			ArrayList<ImportantMsgData> aimsg = new ArrayList<ImportantMsgData>(aimBufferList);
-			
-			Collections.sort(aimsg, ImportantMsgData.cmpFirstOcurrenceCreationTime());
-			
-//			for(ImportantMsg imsg:astrImportantMsgBufferList){
-			for(int i=0;i<aimsg.size();i++){
-				if(iIndex!=null && iIndex.intValue()!=i)continue;
-				
-				ImportantMsgData imsg = aimsg.get(i);
-				if(iIndex==null && !containsFilterString(imsg.getMsgKey(),strFilter))continue;
-				
-//				dumpSubEntry(""+i+": "+imsg.strMsg);
-				if(iIndex!=null && (imsg.getException()!=null||imsg.getExceptionHappenedAt()!=null)){
-					dumpExceptionEntry(imsg, iStackLimit==null?0:iStackLimit);
-				}else{
-					dumpSubEntry(""+i+": "+imsg.getDumpEntryData().getLineFinal(false)+" ST"+imsg.getExceptionHappenedAt().hashCode()+"");
-				}
-			}
-			dumpSubEntry("Total: "+aimsg.size());
+		if(checkCmdValidity(CMD_MESSAGE_REVIEW,"[[regexFilter|index] [stackLimit]] can be a filter, an index or an uid. If it has an exception, it will be dumped.")){
+			cmdMessageReview();
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(scfQuit,"the application")){
@@ -1249,7 +1249,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		if(checkCmdValidity(CMD_VAR_SET_CMP,"<varIdBool> <value> <cmp> <value>")){
 			bCmdWorked=cmdVarSetCmp();
 		}else
-		if(checkCmdValidity(CMD_VAR_SHOW,"[["+CommandsHelperI.i().getRestrictedToken()+"]filter] list user or restricted variables.")){
+		if(checkCmdValidity(scfVarShow,"[["+CommandsHelperI.i().getRestrictedToken()+"]regexFilter] list user or restricted variables.")){
 			bCmdWorked=cmdVarShow();
 		}else
 		if(checkCmdValidity(icclPseudo,TOKEN_CMD_NOT_WORKING_YET+"zDisabledCommand",null," just to show how to use it")){
@@ -1293,6 +1293,60 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 //		paramCommand()
 //	}
 	
+	private String strUIdToken="uid=";
+	private void dumpImportantMessage(ImportantMsgData imsg, Integer iStackLimit, Integer iCurrentIndex, boolean bListingMode){
+		String strCurrentIndex = iCurrentIndex==null ? "" : ""+iCurrentIndex+": ";
+		String strHeader = strCurrentIndex+"("+strUIdToken+imsg.getUId()+") ";
+		if( !bListingMode && (imsg.getException()!=null || imsg.getExceptionHappenedAt()!=null) ){
+			dumpSubEntry("MsgInfo: "+strHeader+imsg.getExceptionHappenedAtInfo());
+			dumpExceptionEntry(imsg, iStackLimit==null?0:iStackLimit);
+		}else{
+			dumpSubEntry(strHeader
+				+imsg.getDumpEntryData().getLineFinal(false)+" "
+				+imsg.getExceptionHappenedAtInfo());
+		}
+	}
+	private void cmdMessageReview() {
+		String strFilter = ccl.paramString(1);
+		Integer iIndex = ccl.paramInt(1,true);
+		
+		Integer iStackLimit = ccl.paramInt(2,true);
+		
+		String strUId=null;
+		if(strFilter!=null){
+			strFilter=improveSimpleFilter(strFilter);
+			if(strFilter.startsWith(strUIdToken)){
+				strUId=strFilter.substring(strUIdToken.length());
+			}
+		}
+		
+		ArrayList<ImportantMsgData> aimsg = new ArrayList<ImportantMsgData>(aimBufferList);
+		
+		Collections.sort(aimsg, ImportantMsgData.cmpFirstOcurrenceCreationTime());
+		
+		if(iIndex!=null){
+			dumpImportantMessage(aimsg.get(iIndex), iStackLimit, iIndex, false);
+		}else{
+			boolean bListMode = strUId==null;
+			for(int i=0;i<aimsg.size();i++){
+				ImportantMsgData imsg = aimsg.get(i);
+				if(strUId!=null){
+					if(!imsg.getUId().equals(strUId))continue;
+				}else{
+					if(!containsFilterString(imsg.getMsgKey(),strFilter))continue;
+				}
+				
+				dumpImportantMessage(imsg, iStackLimit, i, bListMode);
+				
+				if(strUId!=null)break;
+			}
+			
+			if(bListMode){
+				dumpSubEntry("Total: "+aimsg.size());
+			}
+		}
+	}
+
 	private boolean fixSimpleCmdConflictForAll(String strSimpleCmdFilter){
 //		boolean bFixedAll=true;
 		ArrayList<String> astrFailedList = new ArrayList<String>();
@@ -1464,7 +1518,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	 * @param strLineOriginal
 	 */
 	private void dumpEntry(DumpEntryData de){
-		if(!cui().isInitializationCompleted()){
+		if(!cui().isInitializedProperly()){
 			adeDumpEntryFastQueue.add(de);
 			return;
 		}
@@ -2094,11 +2148,21 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		if(strFilter==null){
 			strFilter="";
 		}else{
+			strFilter=strFilter.trim();
+			
 			if(strFilter.startsWith(""+CommandsHelperI.i().getRestrictedToken())){
 				bRestrictedOnly=true;
 			}
+			
 			strFilter=CommandsHelperI.i().removeRestrictedToken(strFilter);
 		}
+		
+		if(strFilter.isEmpty()){
+			strFilter=".*";
+		}else{
+			strFilter=improveSimpleFilter(strFilter);
+		}
+		
 //		strFilter=strFilter.trim();
 		
 		/**
@@ -2195,7 +2259,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		if(CommandsHelperI.i().isRestricted(strVar)){
 			// user can only set existing restricted vars
 			if(!selectVarSource(strVar).containsKey(strVar)){
-				dumpWarnEntry("Restricted var does not exist: "+strVar);
+				dumpDevInfoEntry("Restricted var does not exist: "+strVar);
 				return true;
 			}
 		}
@@ -2410,7 +2474,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		ArrayList<String> astrToDump = new ArrayList<String>();
 		if(strFilter!=null){
 			for(String str:astrCmdHistory){
-				if(!containsFilterString(str,strFilter))continue;
+				if(!containsFilterString(str,improveSimpleFilter(strFilter)))continue;
 				str=str.trim(); // to prevent fail of unique check by spaces presence
 				if(!astrToDump.contains(str))astrToDump.add(str);
 				Collections.sort(astrToDump);
@@ -3179,10 +3243,26 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		}
 		return false;
 	}
+	
+	private String improveSimpleFilter(String strFilter){
+		strFilter=strFilter.trim();
+		
+		if(MiscI.i().isValidIdentifierCmdVarAliasFuncString(strFilter)){
+			/**
+			 * if user typed a simple string (not a regex), 
+			 * it will match like contains mode
+			 */
+			strFilter=".*"+strFilter+".*";
+		}
+		
+		return strFilter;
+	}
+	
 	public void cmdShowHelp(String strFilter) {
 		if(strFilter==null){
 			dumpInfoEntry("Available Commands ("+trmCmddList.size()+"):");
 		}else{
+			strFilter = improveSimpleFilter(strFilter);
 			dumpInfoEntry("Help for '"+strFilter+"':");
 		}
 		
@@ -3346,7 +3426,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		this.fTPF = tpf;
 		if(tdLetCpuRest.isActive() && !tdLetCpuRest.isReady(true))return;
 		
-		if(!cui().isInitializationCompleted())return;
+		if(!cui().isInitializedProperly())return;
 		
 		updateNewDay();
 		updateCheckNewVarCmdAndToggleFields();
@@ -4572,5 +4652,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	public String getUniqueId() {
 		return MiscI.i().prepareUniqueId(this);
 	}
-
+	
+	public void executeUserBinds(boolean bRun, String strId){
+		for(KeyBoundVarField bind:tmbindList.values()){
+			if(bind.checkRunCallerAssigned(bRun, strId))break;
+		}
+	}
 }

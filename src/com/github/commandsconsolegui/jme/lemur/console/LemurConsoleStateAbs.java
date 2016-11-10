@@ -127,19 +127,9 @@ import com.simsilica.lemur.style.Styles;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurConsoleStateI<T,THIS>> extends LemurDialogStateAbs<T,THIS> implements IJmeConsoleUI {
-//	private static LemurConsoleStateI instance=new LemurConsoleStateI();
-//	public static LemurConsoleStateI i(){return instance;}
-	private static LemurConsoleStateI instance=new LemurConsoleStateI();
-	public static LemurConsoleStateI i(){return instance;}
-//	private static LemurConsoleStateI instance=null;//new ConsoleLemurStateI();
-//	public static LemurConsoleStateI i(){
-//		if(instance==null)instance=new LemurConsoleStateI();
-//		return instance;
-//	}
-	
-	public static final class CompositeControl extends CompositeControlAbs<LemurConsoleStateI>{
-		private CompositeControl(LemurConsoleStateI casm){super(casm);};
+public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS extends LemurConsoleStateAbs<T,THIS>> extends LemurDialogStateAbs<T,THIS> implements IJmeConsoleUI {
+	public static final class CompositeControl extends CompositeControlAbs<LemurConsoleStateAbs>{
+		private CompositeControl(LemurConsoleStateAbs casm){super(casm);};
 	}
 	private CompositeControl ccSelf = new CompositeControl(this);
 	
@@ -159,7 +149,7 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 
 	private ButtonClick	btnclk;
 	
-	public LemurConsoleStateI(){
+	public LemurConsoleStateAbs(){
 		super();
 		setDumpEntriesSlowedQueue(new VersionedList<String>());
 		setDumpEntries(new VersionedList<String>());
@@ -204,6 +194,9 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 		.setCallerAssigned(new CallableX(this) {
 			@Override
 			public Boolean call() {
+				if(!LemurConsoleStateAbs.this.isConfigured())return false;
+				if(!LemurConsoleStateAbs.this.isInitializedProperly())return false;
+				
 				requestToggleEnabled();
 				
 				/**
@@ -219,7 +212,7 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 	public static class CfgParm extends LemurDialogStateAbs.CfgParm{
 		private int iToggleConsoleKey;
 		public CfgParm(String strUIId, int iToggleConsoleKey) {
-			super(strUIId==null ? strUIId=LemurConsoleStateI.class.getSimpleName() : strUIId,
+			super(strUIId==null ? strUIId=LemurConsoleStateAbs.class.getSimpleName() : strUIId,
 				null,null,null,null);
 			this.iToggleConsoleKey = iToggleConsoleKey;
 			super.setInitiallyEnabled(true); // the console must be initially enabled to startup properly TODO explain better/precisely why?
@@ -584,12 +577,12 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 		return getHintBox().getSelectionModel().getSelection();
 	}
 
-	public LemurConsoleStateI setHintIndex(Integer i) {
+	public LemurConsoleStateAbs setHintIndex(Integer i) {
 		getHintBox().getSelectionModel().setSelection(i);
 		return this;
 	}
 	
-	public LemurConsoleStateI setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines) {
+	public LemurConsoleStateAbs setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines) {
 		MiscLemurStateI.i().setSizeSafely(getHintBox(), v3fBoxSizeXY, true);
 		getHintBox().setVisibleItems(iVisibleLines);
 		return this;
@@ -1003,9 +996,9 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 		return _prepareToDiscard(cc);
 	}
 
-	public boolean isInitializationCompleted() {
-		return super.isInitializedProperly();
-	}
+//	public boolean isInitializationCompleted() {
+//		return super.isInitializedProperly();
+//	}
 
 	protected void updateOverrideInputFocus() {
 		if( !LemurFocusHelperStateI.i().isDialogFocusedFor(getInputField()) ){
@@ -1046,11 +1039,6 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 		return cd.cmdFoundReturnStatus(bCommandWorked);
 	}
 
-	@Override
-	protected THIS getThis() {
-		return (THIS)this;
-	}
-
 	protected Float getStatsHeight() {
 		return MiscJmeI.i().retrieveBitmapTextFor(lblStats).getLineHeight();
 	}
@@ -1074,12 +1062,12 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 	
 	@Override
 	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
-		if(fld.getDeclaringClass()!=LemurConsoleStateI.class)return super.getFieldValue(fld);
+		if(fld.getDeclaringClass()!=LemurConsoleStateAbs.class)return super.getFieldValue(fld);
 		return fld.get(this);
 	}
 	@Override
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
-		if(fld.getDeclaringClass()!=LemurConsoleStateI.class){super.setFieldValue(fld,value);return;}
+		if(fld.getDeclaringClass()!=LemurConsoleStateAbs.class){super.setFieldValue(fld,value);return;}
 		fld.set(this,value);
 	}
 
@@ -1227,7 +1215,7 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 	//private String strStyle = Styles.ROOT_STYLE;
 	private String	strInputTextPrevious = "";
 	private AnalogListener	alConsoleScroll;
-	private ActionListener	alConsoleToggle;
+	private ActionListener	alGeneralJmeListener;
 	//private String	strValidCmdCharsRegex = "A-Za-z0-9_-"+"\\"+strCommandPrefixChar;
 	//private String	strValidCmdCharsRegex = "a-zA-Z0-9_"; // better not allow "-" as has other uses like negate number and commands functionalities
 	//private String	strStatsLast = "";
@@ -1866,6 +1854,19 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 	}
 	
 	@Override
+	public void addKeyBind(KeyBoundVarField bind){
+		if(!app().getInputManager().hasMapping(bind.getBindCfg())){
+//		  app().getInputManager().deleteMapping(bind.getUserCommand());
+//		}
+//		
+			app().getInputManager().addMapping(bind.getBindCfg(),
+				MiscJmeI.i().asTriggerArray(bind));
+			
+			app().getInputManager().addListener(alGeneralJmeListener, bind.getBindCfg());
+		}
+	}
+	
+	@Override
 	protected boolean initKeyMappings() {
 		if(!mapKeysForInputField())return false;
 		
@@ -1876,13 +1877,18 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 					MiscJmeI.i().asTriggerArray(bindToggleConsole));
 //					new KeyTrigger(bindToggleConsole.getValue()[0]));
 					
-				alConsoleToggle = new ActionListener() {
+				alGeneralJmeListener = new ActionListener() {
 					@Override
 					public void onAction(String name, boolean isPressed, float tpf) {
-						bindToggleConsole.checkRunCallerAssigned(isPressed,name);
+						if(!isPressed)return;
+						
+						// all field JME binds go here
+						if(bindToggleConsole.checkRunCallerAssigned(isPressed,name))return;
+						
+						GlobalCommandsDelegatorI.i().executeUserBinds(isPressed,name);
 					}
 				};
-				app().getInputManager().addListener(alConsoleToggle, bindToggleConsole.getUniqueCmdId());            
+				app().getInputManager().addListener(alGeneralJmeListener, bindToggleConsole.getUniqueCmdId());            
 			}
 	//	}
 		
@@ -2823,7 +2829,7 @@ public class LemurConsoleStateI<T extends Command<Button>, THIS extends LemurCon
 	//   * Toggle console must be kept! Re-initialization depends on it!
 	//   * 
 		app().getInputManager().deleteMapping(bindToggleConsole.toString());
-	  app().getInputManager().removeListener(alConsoleToggle);
+	  app().getInputManager().removeListener(alGeneralJmeListener);
 	//   */
 	  app().getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_SCROLL_UP+"");
 	  app().getInputManager().deleteMapping(INPUT_MAPPING_CONSOLE_SCROLL_DOWN+"");

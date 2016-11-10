@@ -42,12 +42,10 @@ import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppSettingsI;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.lemur.console.SimpleConsolePlugin;
-import com.github.commandsconsolegui.jme.lemur.dialog.ChoiceLemurDialogStateAbs;
 import com.github.commandsconsolegui.jme.lemur.dialog.MaintenanceListLemurDialogStateAbs;
-import com.github.commandsconsolegui.jme.lemur.dialog.QuestionLemurDialogStateAbs;
-import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDialogs.DiagChoice;
-import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDialogs.DiagMList;
-import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDialogs.DiagQuestion;
+import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDiagChoice;
+import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDiagMaintList;
+import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDiagQuestion;
 import com.github.commandsconsolegui.misc.ConfigureManagerI;
 import com.github.commandsconsolegui.misc.ConfigureManagerI.IConfigure;
 import com.github.commandsconsolegui.misc.HoldRestartable;
@@ -171,20 +169,20 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		consolePlugin.initialize();
 		
 		//////////////////////// config this test
-		DiagChoice<T> diagChoice = new DiagChoice<T>().configure(new ChoiceLemurDialogStateAbs.CfgParm(
+		SimpleDiagChoice<T> diagChoice = new SimpleDiagChoice<T>().configure(new SimpleDiagChoice.CfgParm(
 			0.6f, 0.5f, null, null));
 		
-		DiagQuestion<T> diagQuestion = new DiagQuestion<T>().configure(new QuestionLemurDialogStateAbs.CfgParm(
+		SimpleDiagQuestion<T> diagQuestion = new SimpleDiagQuestion<T>().configure(new SimpleDiagQuestion.CfgParm(
 			500f, 300f, null, null));
 		
 //		diagList = 
-		hchdiagList.setRef(new DiagMList<T>().configure(new MaintenanceListLemurDialogStateAbs.CfgParm<T>(
+		hchdiagList.setRef(new SimpleDiagMaintList<T>().configure(new SimpleDiagMaintList.CfgParm<T>(
 			null, null, null, null, diagChoice, diagQuestion)));
 		
 		prepareTestData(diagChoice);
 	}
 	
-	private void prepareTestData(DiagChoice<T> diagChoice){
+	private void prepareTestData(SimpleDiagChoice<T> diagChoice){
 		for(int i=0;i<10;i++){
 			diagChoice.addEntryQuick(null); 
 		}
