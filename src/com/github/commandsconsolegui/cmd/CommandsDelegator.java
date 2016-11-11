@@ -910,22 +910,23 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(scfBindList,"show user binds list")){
-			for(KeyBoundVarField bind:GlobalManageKeyBindI.i().getListCopy()){
-				String strMapping = GlobalManageKeyBindI.i().getMappingFrom(bind);
-				if(strMapping.equals(bind.getBindCfg())){
-					strMapping="";
-				}else{
-					strMapping="ActId("+strMapping+")";
-				}
-				
-				String strUserCmd = bind.getUserCommand();
-				if(strUserCmd==null){
-					strUserCmd="";
-				}else{
-					strUserCmd="Cmd("+strUserCmd+")";
-				}
-				dumpSubEntry(bind.getBindCfg()+":"+strUserCmd+strMapping);
-			}
+			dumpSubEntry(GlobalManageKeyBindI.i().getReportAsCommands(scfBindKey,false));
+//			for(KeyBoundVarField bind:GlobalManageKeyBindI.i().getListCopy()){
+//				String strMapping = GlobalManageKeyBindI.i().getMappingFrom(bind);
+//				if(strMapping.equals(bind.getBindCfg())){
+//					strMapping="";
+//				}else{
+//					strMapping="ActId("+strMapping+")";
+//				}
+//				
+//				String strUserCmd = bind.getUserCommand();
+//				if(strUserCmd==null){
+//					strUserCmd="";
+//				}else{
+//					strUserCmd="Cmd("+strUserCmd+")";
+//				}
+//				dumpSubEntry(bind.getBindCfg()+":"+strUserCmd+strMapping);
+//			}
 			
 			bCmdWorked=true;
 		}else
@@ -1488,7 +1489,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 				if(aliasFound!=null)aAliasList.remove(aliasFound);
 				
 				aAliasList.add(alias);
-				MiscI.i().fileAppendLine(flDB, alias.toString());
+				MiscI.i().fileAppendLineTS(flDB, alias.toString());
 				dumpSubEntry(alias.toString());
 				
 				bLastAliasCreatedSuccessfuly = true;
@@ -2355,7 +2356,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		}
 		
 		flDB.delete();
-		MiscI.i().fileAppendLine(flDB, getCommentPrefix()+" DO NOT MODIFY! auto generated. Set overrides at user init file!");
+		MiscI.i().fileAppendLineTS(flDB, getCommentPrefix()+" DO NOT MODIFY! auto generated. Set overrides at user init file!");
 		MiscI.i().fileAppendListTS(flDB, astr);
 		
 		dumpInfoEntry("Database saved: "
@@ -2888,6 +2889,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 				fileAppendVar(strVarId);
 			}
 		}
+		
+		MiscI.i().fileAppendListTS(flSetup, 
+			GlobalManageKeyBindI.i().getReportAsCommands(scfBindKey, true));
 	}
 	
 	private void fileAppendVar(String strVarId){
@@ -2906,7 +2910,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			}
 		}
 		
-		MiscI.i().fileAppendLine(getVarFile(strVarId), strCommentOut+varReportPrepare(strVarId)+strReadOnlyComment);
+		MiscI.i().fileAppendLineTS(getVarFile(strVarId), strCommentOut+varReportPrepare(strVarId)+strReadOnlyComment);
 	}
 	
 //	private boolean isCommandPrefixVar(String strVarId) {
@@ -3712,7 +3716,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	
 	private void dumpSave(DumpEntryData de) {
 //		if(de.isSavedToLogFile())return;
-		MiscI.i().fileAppendLine(flLastDump, de.getLineFinal(true));
+		MiscI.i().fileAppendLineTS(flLastDump, de.getLineFinal(true));
 	}
 	/**
 	 * These variables can be loaded from the setup file!
@@ -3730,16 +3734,16 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		/**
 		 * comments for user
 		 */
-		MiscI.i().fileAppendLine(flSetup, getCommentPrefix()+" DO NOT EDIT!");
-		MiscI.i().fileAppendLine(flSetup, getCommentPrefix()
+		MiscI.i().fileAppendLineTS(flSetup, getCommentPrefix()+" DO NOT EDIT!");
+		MiscI.i().fileAppendLineTS(flSetup, getCommentPrefix()
 			+" This file will be overwritten by the application!");
-		MiscI.i().fileAppendLine(flSetup, getCommentPrefix()
+		MiscI.i().fileAppendLineTS(flSetup, getCommentPrefix()
 			+" To set overrides use the user init config file.");
-		MiscI.i().fileAppendLine(flSetup, getCommentPrefix()
+		MiscI.i().fileAppendLineTS(flSetup, getCommentPrefix()
 			+" For command's values, the commands usage are required, the variable is just an info about their setup value.");
 //		MiscI.i().fileAppendLine(flSetup, getCommentPrefix()
 //			+" Some values will be read tho to provide restricted functionalities not accessible to users.");
-		MiscI.i().fileAppendLine(flSetup, getCommentPrefix()
+		MiscI.i().fileAppendLineTS(flSetup, getCommentPrefix()
 				+"____________________________________");
 		
 		setupVars(true);
@@ -3946,7 +3950,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	}
 	
 	private void cmdHistSave(String strCmd) {
-		MiscI.i().fileAppendLine(flCmdHist,strCmd);
+		MiscI.i().fileAppendLineTS(flCmdHist,strCmd);
 	}
 	
 	private IConsoleUI cui(){
@@ -4061,7 +4065,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		if(flInit.exists()){
 			addCmdListOneByOneToQueue(MiscI.i().fileLoad(flInit), false, false);
 		}else{
-			MiscI.i().fileAppendLine(flInit, getCommentPrefix()+" User console commands here will be executed at startup.");
+			MiscI.i().fileAppendLineTS(flInit, getCommentPrefix()+" User console commands here will be executed at startup.");
 		}
 		
 		// for debug mode, auto show messages

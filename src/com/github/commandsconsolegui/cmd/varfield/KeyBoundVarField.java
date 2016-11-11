@@ -73,6 +73,8 @@ public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 		return getThis();
 	}
 	public KeyBoundVarField setUserCommand(String strFullUserCommand){
+		if(isField())throw new PrerequisitesNotMetException("cannot set a user command to a keybound field, such field UId is the command!", this, strFullUserCommand);
+		
 		this.strFullUserCommand=strFullUserCommand;
 		
 		setCallerAssigned(new CallableX(this) {

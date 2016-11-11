@@ -273,7 +273,7 @@ public class MiscI {
 		return strCmdNew;
 	}
 	
-	synchronized public void fileAppendLine(File fl, String str) {
+	synchronized public void fileAppendLineTS(File fl, String str) {
 		ArrayList<String> astr = new ArrayList<String>();
 		astr.add(str);
 		fileAppendListTS(fl, astr);

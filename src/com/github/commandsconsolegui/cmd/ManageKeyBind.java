@@ -31,6 +31,9 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 
 import com.github.commandsconsolegui.cmd.varfield.KeyBoundVarField;
+import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
+import com.github.commandsconsolegui.globals.GlobalManageKeyBindI;
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 
@@ -106,6 +109,33 @@ public class ManageKeyBind {
 	
 	public ArrayList<KeyBoundVarField> getListCopy(){
 		return new ArrayList<KeyBoundVarField>(tmbindList.values());
+	}
+
+	public ArrayList<String> getReportAsCommands(StringCmdField scfBindKey, boolean bOnlyUserCustomOnes) {
+		ArrayList<String> astr = new ArrayList<String>();
+		for(KeyBoundVarField bind:getListCopy()){
+			if(bOnlyUserCustomOnes && bind.isField())continue;
+			
+			String strMapping = getMappingFrom(bind);
+			if(strMapping.equals(bind.getBindCfg())){
+				strMapping="";
+			}else{
+				strMapping="#ActionMappingId("+strMapping+")";
+			}
+			
+			String strUserCmd = bind.getUserCommand();
+			if(strUserCmd==null){
+				strUserCmd="";
+			}else{
+				strUserCmd+=" ";
+			}
+			
+			astr.add(GlobalCommandsDelegatorI.i().getCommandPrefixStr()+scfBindKey.getSimpleId()+" "
+				+bind.getBindCfg()+" "
+				+strUserCmd
+				+strMapping);
+		}
+		return astr;
 	}
 }
 
