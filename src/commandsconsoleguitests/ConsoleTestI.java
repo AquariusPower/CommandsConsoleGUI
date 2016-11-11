@@ -70,9 +70,6 @@ import com.simsilica.lemur.Command;
  */
 public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication implements IReflexFillCfg,IConsoleCommandListener,IConfigure{
 	private static ConsoleTestI instance = new ConsoleTestI();
-
-//	private static AppSettings	as;
-
 	public static ConsoleTestI i(){return instance;}
 	
 	//private final String strFinalFieldCodePrefix="CMD_";

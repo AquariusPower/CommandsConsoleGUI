@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.TreeMap;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
+import com.github.commandsconsolegui.cmd.UserCmdStackTrace;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
@@ -67,7 +68,7 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 	public final BoolTogglerCmdField btgMute = new BoolTogglerCmdField(this,false).setCallNothingOnChange();
 	public final FloatDoubleVarField fdvMasterVolumeGain = new FloatDoubleVarField(this,1.0,"").setMin(0.0).setMax(1.0);
 
-	private ArrayList<Class<?>>	aclassUserActionStackList = new ArrayList<Class<?>>(); 
+//	private ArrayList<Class<?>>	aclassUserActionStackList = new ArrayList<Class<?>>(); 
 	
 	public enum EUserDataAudioCfg{
 		strAudioId,
@@ -154,27 +155,27 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 		}
 	}
 	
-	public boolean isUserActionStack(){
-		for(StackTraceElement ste:Thread.currentThread().getStackTrace()){
-			for(Class<?> cl:aclassUserActionStackList){
-				if(
-						ste.getClassName().equals(cl.getName())
-						||
-						ste.getClassName().startsWith(cl.getName()+"$")
-				){
-					return true;
-				}
-			}
-		}
-		
-		return false;
-	}
+//	public boolean isUserActionStack(){
+//		for(StackTraceElement ste:Thread.currentThread().getStackTrace()){
+//			for(Class<?> cl:aclassUserActionStackList){
+//				if(
+//						ste.getClassName().equals(cl.getName())
+//						||
+//						ste.getClassName().startsWith(cl.getName()+"$")
+//				){
+//					return true;
+//				}
+//			}
+//		}
+//		
+//		return false;
+//	}
 	
 	public boolean playOnUserAction(EAudio ea) {
 		return playOnUserAction(ea.toString());
 	}
 	public boolean playOnUserAction(String strAudioId) {
-		if(isUserActionStack()){
+		if(UserCmdStackTrace.i().isUserActionStack()){
 			return play(strAudioId);
 		}
 		return false;
@@ -343,11 +344,14 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 	}
 	
 	public static class CfgParm extends ConditionalStateAbs.CfgParm{
-		Class<?>[] aclassUserActionStack;
-		public CfgParm(Class<?>... aclassUserActionStack) {
+		public CfgParm() {
 			super(null);
-			this.aclassUserActionStack=aclassUserActionStack;
 		}
+//		Class<?>[] aclassUserActionStack;
+//		public CfgParm(Class<?>... aclassUserActionStack) {
+//			super(null);
+//			this.aclassUserActionStack=aclassUserActionStack;
+//		}
 	}
 	private CfgParm cfg = null;
 	@Override
@@ -356,7 +360,7 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 		
 		super.configure(icfg);
 		
-		this.aclassUserActionStackList.addAll(Arrays.asList(cfg.aclassUserActionStack));
+//		this.aclassUserActionStackList.addAll(Arrays.asList(cfg.aclassUserActionStack));
 		
 		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
 		

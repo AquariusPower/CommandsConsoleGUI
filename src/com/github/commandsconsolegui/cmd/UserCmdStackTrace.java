@@ -25,67 +25,63 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.jme;
+package com.github.commandsconsolegui.cmd;
 
 import java.util.ArrayList;
-import java.util.TreeMap;
+import java.util.Arrays;
 
-import com.github.commandsconsolegui.cmd.ManageKeyBind;
-import com.github.commandsconsolegui.cmd.varfield.KeyBoundVarField;
-import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
-import com.github.commandsconsolegui.misc.CompositeControlAbs;
-import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.misc.jme.MiscJmeI;
-import com.jme3.input.controls.ActionListener;
-
+import com.github.commandsconsolegui.misc.ManageConfigI.IConfigure;
 
 /**
+ * User commands, like thru console, may contain invalid values.
+ * Exceptions from it must never make the application exit...
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class ManageJmeKeyBind extends ManageKeyBind {
-	private ActionListener	alGeneralJmeListener;
+public class UserCmdStackTrace implements IConfigure<UserCmdStackTrace>{
+	private static UserCmdStackTrace instance = new UserCmdStackTrace();
+	public static UserCmdStackTrace i(){return instance;}
+
+	private boolean	bConfigured;
+	private CfgParm	cfg;
+
+	@Override
+	public boolean isConfigured() {
+		return bConfigured;
+	}
+	
+	public static class CfgParm implements ICfgParm{
+		ArrayList<Class<?>> aclassUserActionStackList = new ArrayList<Class<?>>();
+		public CfgParm(Class<?>... aclassUserActionStack) {
+			this.aclassUserActionStackList.addAll(Arrays.asList(aclassUserActionStack));
+		}
+	}
 	
 	@Override
-	public void configure(){
-		alGeneralJmeListener = new ActionListener() {
-			@Override
-			public void onAction(String name, boolean isPressed, float tpf) {
-				if(!isPressed)return;
-				
-//				// all field JME binds go here
-//				if(bindToggleConsole.checkRunCallerAssigned(isPressed,name))return;
-				
-				executeUserBinds(isPressed,name);
+	public UserCmdStackTrace configure(ICfgParm icfg) {
+		this.cfg=(CfgParm)icfg;
+		bConfigured=true;
+		return this;
+	}
+	
+	/**
+	 * DevSelfNote: must not use {@link PrerequisitesNotMetException} as it calls this
+	 * @return
+	 */
+	public boolean isUserActionStack(){
+		for(StackTraceElement ste:Thread.currentThread().getStackTrace()){
+			for(Class<?> cl:cfg.aclassUserActionStackList){
+				if(
+						ste.getClassName().equals(cl.getName())
+						||
+						ste.getClassName().startsWith(cl.getName()+"$")
+				){
+					return true;
+				}
 			}
-		};
-		
-	}
-	
-	@Override
-	public void removeKeyBind(String strMapping){
-		if(GlobalAppRefI.i().getInputManager().hasMapping(strMapping)){
-			GlobalAppRefI.i().getInputManager().deleteMapping(strMapping);
 		}
 		
-		super.removeKeyBind(strMapping);
+		return false;
 	}
-	
-	@Override
-	public void addKeyBind(KeyBoundVarField bind){
-		super.addKeyBind(bind);
-			
-		String strMapping=getMappingFrom(bind);
-		
-		if(GlobalAppRefI.i().getInputManager().hasMapping(strMapping)){
-			GlobalAppRefI.i().getInputManager().deleteMapping(strMapping);
-		}
-		
-		GlobalAppRefI.i().getInputManager().addMapping(strMapping,
-			MiscJmeI.i().asTriggerArray(bind));
-		
-		GlobalAppRefI.i().getInputManager().addListener(alGeneralJmeListener, strMapping);
-	}
-	
 }

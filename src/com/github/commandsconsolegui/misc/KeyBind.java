@@ -27,6 +27,10 @@
 package com.github.commandsconsolegui.misc;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+
+import com.github.commandsconsolegui.cmd.ManageKeyCodeI;
+import com.github.commandsconsolegui.cmd.ManageKeyCodeI.Key;
 
 /**
  * 
@@ -34,34 +38,123 @@ import java.util.ArrayList;
  *
  */
 public class KeyBind {
-	public static class Key{
-		int iKeyCode = -1;
-		boolean bPressed = false;
-	}
 	
-	/** the last key to be pressed */
-	Key keyAction = new Key();
+	/** the last/main key to be pressed */
+	private Key keyAction = null;
 	
-	ArrayList<Key> aiKeyModifierList = new ArrayList<Key>();
+	private ArrayList<Key> akeyModifierList = new ArrayList<Key>();
 	
-	private void applyPressedState(Key key, int iKeyCodeCheck, boolean bPressed){
-		if(key.iKeyCode==iKeyCodeCheck)key.bPressed=bPressed;
-	}
-	public void applyPressedState(int iKeyCode, boolean bPressed){
-		applyPressedState(keyAction, iKeyCode, bPressed);
-		
-		for(Key key:aiKeyModifierList){
-			applyPressedState(key, iKeyCode, bPressed);
-		}
-	}
+//	private void applyPressedState(Key key, int iKeyCodeCheck, boolean bPressed){
+//		if(key.getKeyCode()==iKeyCodeCheck)key.bPressed=(bPressed);
+//	}
+//	public void applyPressedState(int iKeyCode, boolean bPressed){
+//		applyPressedState(keyAction, iKeyCode, bPressed);
+//		
+//		for(Key key:akeyModifierList){
+//			applyPressedState(key, iKeyCode, bPressed);
+//		}
+//	}
 	
 	public boolean isActivated(){
-		if(keyAction.bPressed){
-			for(Key key:aiKeyModifierList){
-				if(!key.bPressed)return false;
-			}			
-		}
+		if(!keyAction.isPressed())return false;
+		
+		for(Key key:akeyModifierList){
+			if(!key.isPressed())return false;
+		}			
 		
 		return true;
+	}
+	
+	public Key getActionKey(){
+		return keyAction;
+	}
+	
+	public void addModifier(String... astrKeyId){
+		for(String strId:astrKeyId){
+			addModifier(ManageKeyCodeI.i().getKeyForId(strId));
+		}
+	}
+	public void addModifier(int... aiKeyCode){
+		for(Integer iKeyCode:aiKeyCode){
+			addModifier(ManageKeyCodeI.i().getFirstKeyForCode(iKeyCode));
+		}
+	}
+	public void addModifier(Key... akey){
+//		akeyModifierList.addAll(Arrays.asList(akey));
+		for(Key key:akey){
+			PrerequisitesNotMetException.assertNotNull("mod key", key, this);
+			akeyModifierList.add(key);
+		}
+	}
+	
+	public ArrayList<Key> getModifiers(){
+		return new ArrayList<Key>(akeyModifierList);
+	}
+	
+	public void setActionKey(Key key) {
+		PrerequisitesNotMetException.assertNotAlreadySet("action key", this.keyAction, key, this);
+		PrerequisitesNotMetException.assertNotNull("action key", key, this);
+		
+		this.keyAction=key;
+	}
+	
+	public void setActionKey(String strId) {
+		setActionKey(ManageKeyCodeI.i().getKeyForId(strId));
+	}
+	public void setActionKey(int iKeyCode) {
+		setActionKey(ManageKeyCodeI.i().getFirstKeyForCode(iKeyCode));
+	}
+	
+	/**
+	 * last one is action key
+	 * @return
+	 */
+	public Integer[] getAllKeyCodes(){
+		Integer[] ai = new Integer[akeyModifierList.size()+1];
+		
+		int i=0;
+		for(Key key:akeyModifierList){
+			ai[i++]=key.getKeyCode();
+		}
+		ai[i]=keyAction.getKeyCode(); //last
+		
+		return ai;
+	}
+	
+	/**
+	 * last one is action key
+	 * @return 
+	 * @return
+	 */
+	public KeyBind setFromKeyCodes(Integer... ai){
+		setActionKey(ManageKeyCodeI.i().getFirstKeyForCode(ai[ai.length-1])); //last
+		
+		for(int i=0;i<ai.length-1;i++){ //least last
+			addModifier(ai[i]);
+		}
+		
+		return this;
+	}
+
+	public KeyBind setFromKeyIds(String[] astr) {
+		setActionKey(ManageKeyCodeI.i().getKeyForId(astr[astr.length-1])); //last
+		
+		for(int i=0;i<astr.length-1;i++){ //least last
+			addModifier(astr[i]);
+		}
+		
+		return this;
+	}
+
+	public String getBindCfg(){
+		String str="";
+		
+		for(Key key:getModifiers()){
+			str+=ManageKeyCodeI.i().getKeyId(key.getKeyCode())+"+";
+		}
+		
+		str+=ManageKeyCodeI.i().getKeyId(getActionKey().getKeyCode());
+		
+		return str;
 	}
 }

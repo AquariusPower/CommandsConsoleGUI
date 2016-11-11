@@ -94,7 +94,7 @@ public class BoolTogglerCmdField<S extends BoolTogglerCmdField<S>> extends VarCm
 	 */
 //	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitialValue, String strReflexFillCfgCodePrefixVariant, String strHelp){
 	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bDefault, String strHelp){
-		super(rfcfgOwnerUseThis, EVarCmdMode.VarCmd, bDefault);
+		super(rfcfgOwnerUseThis, EVarCmdMode.VarCmd, bDefault, Boolean.class);
 		
 //		ReflexFill.assertAndGetField(rfcfgOwnerUseThis, this);
 		

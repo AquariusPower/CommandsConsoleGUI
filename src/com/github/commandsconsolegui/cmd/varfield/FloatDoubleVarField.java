@@ -64,7 +64,7 @@ public class FloatDoubleVarField extends NumberVarFieldAbs<Double,FloatDoubleVar
 	public FloatDoubleVarField(IReflexFillCfg rfcfgOwnerUseThis, Double dDefaultValue, String strHelp) {
 //		if(rfcfgOwnerUseThis!=null)afdvList.add(this); //only fields allowed
 //		super(rfcfgOwnerUseThis!=null); //only fields allowed
-		super(rfcfgOwnerUseThis, dDefaultValue); //only fields allowed
+		super(rfcfgOwnerUseThis, dDefaultValue, Double.class); //only fields allowed
 //		setOwner(rfcfgOwnerUseThis);
 //		setObjectRawValue(dInitialValue);
 //		this.dValue=dInitialValue;

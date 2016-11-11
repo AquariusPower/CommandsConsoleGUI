@@ -61,6 +61,7 @@ public class DumpEntryData{
 	private boolean	bShowTime = true;
 	private boolean	bShowDumpObjects;
 	private long lKeyOcurrenceTimes=1;
+	private ImportantMsgData	imsg;
 	
 	public DumpEntryData() {
 		lMilis = System.currentTimeMillis();
@@ -273,6 +274,14 @@ public class DumpEntryData{
 
 	public void incKeyOcurrenceTimes() {
 		this.lKeyOcurrenceTimes++;
+	}
+
+	public ImportantMsgData getImportantMessageLink() {
+		return imsg;
+	}
+
+	public void setImportantMessageLink(ImportantMsgData imsg) {
+		this.imsg=imsg;
 	}
 }
 

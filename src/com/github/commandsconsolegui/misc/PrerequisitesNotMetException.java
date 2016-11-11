@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.misc;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import com.github.commandsconsolegui.cmd.UserCmdStackTrace;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 
 /**
@@ -49,7 +50,9 @@ public class PrerequisitesNotMetException extends NullPointerException { //@STAT
 
 	public PrerequisitesNotMetException(boolean bExitApplication, String strMessage, Object... aobj) {
 		super(DebugI.i().joinMessageWithObjects(strMessage,aobj));
-		if(bExitApplication)PrerequisitesNotMetException.exRequestExit = this;
+		if(bExitApplication && !UserCmdStackTrace.i().isUserActionStack()){
+			PrerequisitesNotMetException.exRequestExit = this;
+		}
 	}
 	public PrerequisitesNotMetException(String str, Object... aobj) {
 		this(true,str,aobj);
@@ -63,6 +66,17 @@ public class PrerequisitesNotMetException extends NullPointerException { //@STAT
 		return exRequestExit;
 	}
 	
+	public static void assertNotEmpty(String strDescWhat, String str, Object... aobjMoreObjectsForDebugInfo){
+		assertNotNull(strDescWhat, str, aobjMoreObjectsForDebugInfo);
+		
+		if(str.isEmpty()){
+			ArrayList<Object> aobjAll = new ArrayList<Object>();
+			aobjAll.add(str);
+			aobjAll.addAll(Arrays.asList(aobjMoreObjectsForDebugInfo));
+			
+			throw new PrerequisitesNotMetException(strDescWhat+": is empty", aobjAll.toArray());
+		}
+	}
 	public static void assertNotNull(String strDescWhat, Object obj, Object... aobjMoreObjectsForDebugInfo){
 		if(obj==null){
 			ArrayList<Object> aobjAll = new ArrayList<Object>();

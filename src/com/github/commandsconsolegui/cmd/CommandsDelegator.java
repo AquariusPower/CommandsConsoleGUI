@@ -915,10 +915,16 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 				if(strMapping.equals(bind.getBindCfg())){
 					strMapping="";
 				}else{
-					strMapping=" ("+strMapping+")";
+					strMapping="ActId("+strMapping+")";
 				}
 				
-				dumpSubEntry(bind.getBindCfg()+" "+bind.getUserCommand()+""+strMapping);
+				String strUserCmd = bind.getUserCommand();
+				if(strUserCmd==null){
+					strUserCmd="";
+				}else{
+					strUserCmd="Cmd("+strUserCmd+")";
+				}
+				dumpSubEntry(bind.getBindCfg()+":"+strUserCmd+strMapping);
 			}
 			
 			bCmdWorked=true;
@@ -1113,7 +1119,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			
 		}else
 		if(checkCmdValidity(scfListKeyCodes,"list all available key ids and codes")){
-			for(String str:GlobalAppOSI.i().getAllKeyCodesReport()){
+			for(String str:ManageKeyCodeI.i().getAllKeyCodesReport()){
 				dumpSubEntry(str);
 			}
 		}else
@@ -1571,6 +1577,11 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		if(!de.isDumpToConsole())return;
 		
 		ArrayList<String> astrDumpLineList = new ArrayList<String>();
+		
+		if(de.isImportant()){
+			astrDumpLineList.add("ImportantMessage(uid="+de.getImportantMessageLink().getUId()+")");
+		}
+		
 //		if(de.getLineOriginal().isEmpty()){
 		if(de.getLineFinal().isEmpty()){
 			astrDumpLineList.add("");
@@ -1711,7 +1722,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	}
 	
 	private void addImportantMsgToBuffer(DumpEntryData de){
-		addImportantMsgToBuffer(de.getType(), new ImportantMsgData(de));
+		ImportantMsgData imsg = new ImportantMsgData(de);
+		de.setImportantMessageLink(imsg);
+		addImportantMsgToBuffer(de.getType(), imsg);
 	}
 	
 //	private void addImportantMsgToBuffer(String strMsgType,String strMsgKey,Exception ex){

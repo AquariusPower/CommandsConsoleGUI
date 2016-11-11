@@ -30,11 +30,15 @@ package com.github.commandsconsolegui.jme.lemur.console;
 import java.lang.reflect.Field;
 
 import com.github.commandsconsolegui.SimulationTime;
+import com.github.commandsconsolegui.cmd.ManageKeyCodeI;
 import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegator;
+import com.github.commandsconsolegui.cmd.Updater;
+import com.github.commandsconsolegui.cmd.UserCmdStackTrace;
 import com.github.commandsconsolegui.globals.GlobalMainThreadI;
 import com.github.commandsconsolegui.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.globals.GlobalSingleMandatoryAppInstanceI;
+import com.github.commandsconsolegui.globals.GlobalUpdaterI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
@@ -45,7 +49,7 @@ import com.github.commandsconsolegui.globals.jme.lemur.GlobalLemurConsoleStateI;
 import com.github.commandsconsolegui.globals.jme.lemur.GlobalLemurDialogHelperI;
 import com.github.commandsconsolegui.jme.AudioUII;
 import com.github.commandsconsolegui.jme.JmeAppOS;
-import com.github.commandsconsolegui.jme.ManageJmeKeyBind;
+import com.github.commandsconsolegui.jme.ManageKeyBindJme;
 import com.github.commandsconsolegui.jme.cmd.CommandsBackgroundStateI;
 import com.github.commandsconsolegui.jme.extras.FpsLimiterStateI;
 import com.github.commandsconsolegui.jme.extras.UngrabMouseStateI;
@@ -111,7 +115,7 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
   	cfg = (CfgParm)icfg;
   	
   	setGlobals();
-  	GlobalJmeAppOSI.i().fillKeyIdCodeFrom(KeyInput.class, "KEY_");
+  	ManageKeyCodeI.i().fillKeyIdCodeFrom(KeyInput.class, "KEY_");
   	
   	GlobalManageKeyBindI.i().configure();
   	
@@ -152,12 +156,16 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
   		UngrabMouseStateI.i().configure(new UngrabMouseStateI.CfgParm(null,null));
   	}
 		
-  	if(!AudioUII.i().isConfigured()){
-			AudioUII.i().configure(new AudioUII.CfgParm(
+  	if(!UserCmdStackTrace.i().isConfigured()){
+  		UserCmdStackTrace.i().configure(new UserCmdStackTrace.CfgParm(
 				DialogMouseCursorListenerI.class,
 				MouseCursorListenerAbs.class, 
 				MouseEventControl.class,
 				KeyInterceptState.class));
+  	}
+  	
+  	if(!AudioUII.i().isConfigured()){
+			AudioUII.i().configure(new AudioUII.CfgParm());
   	}
 		
 //		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
@@ -178,6 +186,10 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
   	/**
   	 * every global can have its defaults here, or can be customized by you before here.
   	 */
+  	if(!GlobalUpdaterI.iGlobal().isSet()){
+  		GlobalUpdaterI.iGlobal().set(new Updater());
+  	}
+		
   	if(!GlobalSimulationTimeI.iGlobal().isSet()){
   		GlobalSimulationTimeI.iGlobal().set(new SimulationTime(System.nanoTime()));
   	}
@@ -188,7 +200,7 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
   	}
   	
   	if(!GlobalManageKeyBindI.iGlobal().isSet()){
-  		GlobalManageKeyBindI.iGlobal().set(new ManageJmeKeyBind());
+  		GlobalManageKeyBindI.iGlobal().set(new ManageKeyBindJme());
   	}
   	
   	// globals must be set as soon as possible

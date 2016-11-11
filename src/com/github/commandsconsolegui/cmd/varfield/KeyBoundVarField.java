@@ -27,15 +27,14 @@
 
 package com.github.commandsconsolegui.cmd.varfield;
 
-import java.sql.Struct;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 
-import com.github.commandsconsolegui.globals.GlobalAppOSI;
+import com.github.commandsconsolegui.cmd.ManageKeyCodeI;
+import com.github.commandsconsolegui.cmd.ManageKeyCodeI.Key;
+import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
-import com.github.commandsconsolegui.misc.MsgI;
+import com.github.commandsconsolegui.misc.KeyBind;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 
@@ -48,16 +47,16 @@ import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class KeyBoundVarField extends VarCmdFieldAbs<Integer[],KeyBoundVarField>{
+public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 	private String	strFullUserCommand;
 	
-	public KeyBoundVarField(IReflexFillCfg rfcfgOwnerUseThis, Integer[] aiBindCfg) {
-		super(rfcfgOwnerUseThis, EVarCmdMode.VarCmd, aiBindCfg);
+	public KeyBoundVarField(IReflexFillCfg rfcfgOwnerUseThis, KeyBind kb) {
+		super(rfcfgOwnerUseThis, EVarCmdMode.VarCmd, kb, KeyBind.class);
 //		this.strFullCommand=strFullCommand;
 		constructed();
 	}
 	public KeyBoundVarField(IReflexFillCfg rfcfgOwnerUseThis) {
-		this(rfcfgOwnerUseThis, (Integer[])null);
+		this(rfcfgOwnerUseThis, (KeyBind)null);
 	}
 	public KeyBoundVarField(IReflexFillCfg rfcfgOwnerUseThis, String strBindCfg) {
 		this(rfcfgOwnerUseThis, parseToBoundCfg(strBindCfg, true));
@@ -87,7 +86,15 @@ public class KeyBoundVarField extends VarCmdFieldAbs<Integer[],KeyBoundVarField>
 		return getThis();
 	}
 	
-	private static Integer[] join(int iAct, int... aiMod){
+	private static KeyBind join(int iAct, int... aiMod){
+		KeyBind kb = new KeyBind();
+		kb.setActionKey(iAct);
+		
+		kb.addModifier(aiMod);
+		
+		return kb;
+	}
+	private static Integer[] _join(int iAct, int... aiMod){
 		Integer[] aiBoundCfg = new Integer[aiMod.length+1];
 		aiBoundCfg[0]=iAct;
 		for(int iIndex=0;iAct<aiMod.length;iAct++){
@@ -139,40 +146,43 @@ public class KeyBoundVarField extends VarCmdFieldAbs<Integer[],KeyBoundVarField>
 	 * @param strBindCfg
 	 * @return the last key will be returned as the first, the activator
 	 */
-	public static Integer[] parseToBoundCfg(String strBindCfg,boolean bExceptionOnFail){
+	public static KeyBind parseToBoundCfg(String strBindCfg,boolean bExceptionOnFail){
 //		fillIdCode();
 		
 		String[] astr = strBindCfg.split("[+]");
-		Integer[] ai = new Integer[astr.length];
-		for(int i=0;i<astr.length;i++){
-			Integer iCode = GlobalAppOSI.i().getKeyCode(astr[i]);
-			if(iCode==null){
-				String strMsg="parse fail for "+astr[i]+", "+strBindCfg;
-				if(!bExceptionOnFail){
-					MsgI.i().warn(strMsg);
-				}else{
-					throw new PrerequisitesNotMetException(strMsg);
-				}
-				return null;
-			}
-			ai[i]=iCode;
-		}
 		
-		ArrayList<Integer> aiList = new ArrayList<Integer>(Arrays.asList(ai));
-		Collections.rotate(aiList, 1);
+		KeyBind kb = new KeyBind();
+		kb.setFromKeyIds(astr);
 		
-		return aiList.toArray(new Integer[0]);
+//		int[] ai = new int[astr.length];
+//		for(int i=0;i<astr.length;i++){
+//			Integer iCode = ManageKeyCodeI.i().getKeyCode(astr[i]);
+//			if(iCode==null){
+//				String strMsg="parse fail for "+astr[i]+", "+strBindCfg;
+//				if(!bExceptionOnFail){
+//					MsgI.i().warn(strMsg);
+//				}else{
+//					throw new PrerequisitesNotMetException(strMsg);
+//				}
+//				return null;
+//			}
+//			ai[i]=iCode;
+//		}
+//		
+//		KeyBind kb = new KeyBind();
+//		kb.setActionKey(new Key(ai[ai.length-1])); //last keycode
+//		
+////		ArrayList<Integer> aiList = new ArrayList<Integer>(Arrays.asList(ai));
+////		Collections.rotate(aiList, 1);
+////		return aiList.toArray(new Integer[0]);
+//		
+//		kb.addModifier(Arrays.copyOfRange(ai, 0, ai.length-1));
+		
+		return kb;
 	}
 	
 	public String getBindCfg(){
-		Integer[] ai = getValue();
-		
-		String str=GlobalAppOSI.i().getKeyId(ai[0]);
-		for(int i=1;i<ai.length;i++){
-			str+="+"+GlobalAppOSI.i().getKeyId(ai[i]);
-		}
-		
-		return str;
+		return getValue().getBindCfg();
 	}
 	
 	@Override
@@ -183,11 +193,14 @@ public class KeyBoundVarField extends VarCmdFieldAbs<Integer[],KeyBoundVarField>
 		if(objValue instanceof String){
 			objValue = parseToBoundCfg((String)objValue, false); //coming from user action will just warn on failure
 		}else
-		if(objValue instanceof Integer[]){
+		if(objValue instanceof KeyBind){
 			//expected value
 		}else
+		if(objValue instanceof Integer[]){
+			objValue = new KeyBind().setFromKeyCodes((Integer[])objValue);
+		}else
 		if(objValue instanceof Integer){
-			objValue = new Integer[]{(Integer)objValue};
+			objValue = new KeyBind().setFromKeyCodes((Integer)objValue);
 		}else{
 			throw new PrerequisitesNotMetException("unsupported class type", objValue.getClass());
 		}
@@ -234,31 +247,90 @@ public class KeyBoundVarField extends VarCmdFieldAbs<Integer[],KeyBoundVarField>
 //		return super.setConsoleVarLink(cc, cvar);
 //	}
 	
-	@Override
-	public Integer[] getValue() {
-		return super.getValue();
+//	@Override
+//	public KeyBind getValue() {
+//		return super.getValue();
+//	}
+	
+	/** consecutive activation limit*/
+	private long lActLim = 1; //run once
+	/** Consecutive Activation Interval Milis */
+	private long lActDelayMilis = 0; //every frame
+	
+	public void setRepeatedActivation(){
+		this.lActLim=0; //no limit
+		this.lActDelayMilis=0; //every frame
 	}
-	public boolean checkRunCallerAssigned(boolean bRun, String strId) {
-		boolean bMatch = false;
-		
-		if(bRun){
-			if(isField()){
-				bMatch=(isUniqueCmdIdEqualTo(strId));
-			}else{
-				bMatch=(getBindCfg().equals(strId));
+	public void setRepeatedActivation(long lDelayMilis){
+		this.lActLim=0; //no limit
+		this.lActDelayMilis=lDelayMilis;
+	}
+	public void setRepeatedActivation(long lLimit, long lDelayMilis){
+		this.lActLim=lLimit;
+		this.lActDelayMilis=lDelayMilis;
+	}
+	
+	private long lConsecutiveActivationCount = 0;
+	private long lLastActivationMilis=-1;
+	
+	public void runIfActivated() {
+		if(getValue().isActivated()){
+			boolean bRun=false;
+			
+			if(lActLim>0){
+				if(lConsecutiveActivationCount<lActLim){
+					if(lConsecutiveActivationCount==0){ //no delay for 1st time
+						bRun=true;
+					}else{
+						if(lActDelayMilis==0){ //every frame
+							bRun=true;
+						}else{
+							if(GlobalSimulationTimeI.i().getMilis() > (lLastActivationMilis+lActDelayMilis)){
+								bRun=true;
+							}
+						}
+					}
+				}
 			}
 			
-			if(bMatch){
+			if(bRun){
 				if(isUseCallQueue()){
 					callerAssignedQueueNow();
 				}else{
 					callerAssignedRunNow();
 				}
 			}
+			
+			lLastActivationMilis = GlobalSimulationTimeI.i().getMilis();
+			lConsecutiveActivationCount++;
+		}else{
+			//reset
+			lConsecutiveActivationCount=0;
+			lLastActivationMilis=-1;
 		}
-		
-		return bMatch;
 	}
+	
+//	public boolean checkRunCallerAssigned(boolean bRun, String strId) {
+//		boolean bMatch = false;
+//		
+//		if(bRun){
+//			if(isField()){
+//				bMatch=(isUniqueCmdIdEqualTo(strId));
+//			}else{
+//				bMatch=(getBindCfg().equals(strId));
+//			}
+//			
+//			if(bMatch){
+//				if(isUseCallQueue()){
+//					callerAssignedQueueNow();
+//				}else{
+//					callerAssignedRunNow();
+//				}
+//			}
+//		}
+//		
+//		return bMatch;
+//	}
 	private boolean isUseCallQueue() {
 		return bUseCallQueue;
 	}

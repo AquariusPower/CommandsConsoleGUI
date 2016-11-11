@@ -67,7 +67,7 @@ public class IntLongVarField extends NumberVarFieldAbs<Long,IntLongVarField>{
 	public IntLongVarField(IReflexFillCfg rfcfgOwnerUseThis, Long lInitialValue, String strHelp) {
 //		if(rfcfgOwnerUseThis!=null)ailvList.add(this); //only fields allowed
 //		super(rfcfgOwnerUseThis!=null); //only fields allowed
-		super(rfcfgOwnerUseThis, lInitialValue);
+		super(rfcfgOwnerUseThis, lInitialValue, Long.class);
 //		this.setOwner(rfcfgOwnerUseThis);
 //		setObjectRawValue(lInitialValue);
 		setHelp(strHelp);

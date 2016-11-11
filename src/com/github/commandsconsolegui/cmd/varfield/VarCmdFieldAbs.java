@@ -134,13 +134,18 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	 * @param rfcfgOwner use null if this is not a class field, but a local variable, or for any reason the related console variable creation is to be skipped.
 	 * @param evcm
 	 */
-	public VarCmdFieldAbs(IReflexFillCfg rfcfgOwner, EVarCmdMode evcm, VAL valueDefault){
+	public VarCmdFieldAbs(IReflexFillCfg rfcfgOwner, EVarCmdMode evcm, VAL valueDefault, Class<VAL> clValueTypeConstraint){
 		this.evcm=evcm;
 		this.rfcfgOwner=rfcfgOwner;
+		this.clValueTypeConstraint=clValueTypeConstraint;
 //		if(isField())
 		ManageVarCmdFieldI.i().add(this);
+//		Class<VAL> cl;
 		setObjectRawValue(valueDefault,true);
 	}
+	
+	private Class<VAL> clValueTypeConstraint;
+	
 //	public VarCmdFieldAbs(boolean bAddToList){
 //		if(bAddToList)VarCmdFieldAbs.avcfList.add(this);
 //	}
@@ -482,6 +487,10 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	 */
 	private THIS setObjectRawValue(Object objValueNew, boolean bSetDefault) { // do not use O at param here, ex.: bool toggler can be used on overriden
 		assertAllowNullValue(objValueNew);
+		
+		if(objValueNew!=null && !clValueTypeConstraint.isInstance(objValueNew)){
+			throw new PrerequisitesNotMetException("cannot change value type", clValueTypeConstraint, objValueNew.getClass());
+		}
 		
 		if(bSetDefault){ //can be null the default
 //		if(objRawValueDefault==null){

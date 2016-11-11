@@ -104,7 +104,7 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Float,TimedDelayVarField>
 	public TimedDelayVarField(IReflexFillCfg rfcfgOwnerUseThis, float fDelayDefault, String strHelp) {
 //		if(rfcfgOwnerUseThis!=null)atdList.add(this); //only fields allowed
 //		super(rfcfgOwnerUseThis!=null); //only fields allowed
-		super(rfcfgOwnerUseThis, EVarCmdMode.Var, fDelayDefault); //only fields allowed
+		super(rfcfgOwnerUseThis, EVarCmdMode.Var, fDelayDefault, Float.class); //only fields allowed
 //		this.setOwner(rfcfgOwnerUseThis);
 //		setObjectRawValue(fDelay);
 		setHelp(strHelp);

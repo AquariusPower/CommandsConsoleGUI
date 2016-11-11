@@ -985,8 +985,14 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 		return this;
 	}
 	
+	/**
+	 * Beware, each trigger compound will be considered individually when pressed or released,
+	 * this means the listener will be called even if only one trigger key of the compound is pressed. 
+	 * @param bind
+	 * @return
+	 */
 	public Trigger[] asTriggerArray(KeyBoundVarField bind){
-		Integer[] ai = bind.getValue();
+		Integer[] ai = bind.getValue().getAllKeyCodes();
 		Trigger[] at = new Trigger[ai.length];
 		for(int i=0;i<ai.length;i++){
 			at[i]=new KeyTrigger(ai[i]);

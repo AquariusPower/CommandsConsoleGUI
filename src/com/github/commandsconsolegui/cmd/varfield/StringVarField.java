@@ -60,7 +60,7 @@ public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 	public StringVarField(IReflexFillCfg rfcfgOwnerUseThis, String strDefault,String strHelp) {
 //		if(rfcfgOwnerUseThis!=null)ailvList.add(this); //only fields allowed
 //		super(rfcfgOwnerUseThis!=null); //only fields allowed
-		super(rfcfgOwnerUseThis, EVarCmdMode.Var, strDefault);
+		super(rfcfgOwnerUseThis, EVarCmdMode.Var, strDefault, String.class);
 //		this.setOwner(rfcfgOwnerUseThis);
 //		setObjectRawValue(strInitialValue);
 		this.setHelp(strHelp);

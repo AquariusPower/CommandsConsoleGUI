@@ -81,16 +81,28 @@ public class ManageKeyBind {
 		tmbindList.put(strMapping,bind);
 	}
 	
-	/**
-	 * TODO rename to executeKeyBindCode
-	 * @param bRun
-	 * @param strId
-	 */
-	public void executeUserBinds(boolean bRun, String strId){
+//	/**
+//	 * TODO rename to executeKeyBindCode
+//	 * @param bRun
+//	 * @param strId
+//	 */
+//	public void executeUserBinds(boolean bRun, String strId){
+//		for(KeyBoundVarField bind:tmbindList.values()){
+//			if(bind.checkRunCallerAssigned(bRun, strId))break;
+//		}
+//	}
+	
+	public void update(float fTpf){
 		for(KeyBoundVarField bind:tmbindList.values()){
-			if(bind.checkRunCallerAssigned(bRun, strId))break;
+			bind.runIfActivated();
 		}
 	}
+	
+//	public void refreshPressedState(int iKeyCode, boolean bPressed){
+//		for(KeyBoundVarField bind:tmbindList.values()){
+//			bind.getValue().applyPressedState(iKeyCode, bPressed);
+//		}
+//	}
 	
 	public ArrayList<KeyBoundVarField> getListCopy(){
 		return new ArrayList<KeyBoundVarField>(tmbindList.values());

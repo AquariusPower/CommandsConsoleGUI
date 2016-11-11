@@ -31,13 +31,11 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.globals.GlobalAppOSI;
-import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
+import com.github.commandsconsolegui.globals.GlobalUpdaterI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
-import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
-import com.github.commandsconsolegui.misc.ManageHoldRestartableI;
 import com.github.commandsconsolegui.misc.IManager;
+import com.github.commandsconsolegui.misc.ManageHoldRestartableI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
@@ -77,15 +75,14 @@ public class ManageConditionalStateI extends AbstractAppState implements IManage
 	}
 	
 	@Override
-	public void update(float tpf) {
-		super.update(tpf);
+	public void update(float fTpf) {
+		super.update(fTpf);
 		
-		GlobalSimulationTimeI.i().updateAdd(tpf);
-		CallQueueI.i().update(tpf);
+		GlobalUpdaterI.i().update(fTpf);
 		
 		ArrayList<ConditionalStateAbs> aToDiscard = null;
 		for(ConditionalStateAbs cas:aCondStateList){
-			if(!cas.doItAllProperly(ccSelf,tpf))continue;
+			if(!cas.doItAllProperly(ccSelf,fTpf))continue;
 			
 			if(cas.isBeingDiscarded()){
 				if(aToDiscard==null)aToDiscard=new ArrayList<ConditionalStateAbs>();
