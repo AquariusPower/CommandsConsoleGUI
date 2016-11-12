@@ -31,6 +31,7 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.ManageKeyCode;
 import com.github.commandsconsolegui.ManageKeyCode.Key;
+import com.github.commandsconsolegui.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
@@ -212,6 +213,8 @@ public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 		
 		if(objValue!=null){
 			((KeyBind)objValue).setOwner(this);
+			
+			GlobalManageKeyBindI.i().addKeyBind(this);
 		}
 		
 		super.setObjectRawValue(objValue);
@@ -286,7 +289,7 @@ public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 //		return getValue().isActivated();
 //	}
 	
-	public void runIfActivatedOrResetIfDeactivated() {
+	public void runIfActivatedOrResetIfDeactivating() {
 		if(getValue().isActivated()){
 			boolean bRun=false;
 			
@@ -323,7 +326,12 @@ public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 		}
 	}
 	
-	public boolean isWaitingDeactivation(){
+	/**
+	 * was already activated at least once
+	 * @return
+	 */
+//	public boolean isWaitingDeactivation(){
+	public boolean isWasAlreadyActivatedAtLeastOnce(){
 		return lLastActivationMilis!=-1;
 	}
 	

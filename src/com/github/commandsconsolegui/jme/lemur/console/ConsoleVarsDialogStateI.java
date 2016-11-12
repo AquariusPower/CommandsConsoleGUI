@@ -33,22 +33,22 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.PkgTopRef;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.KeyBoundVarField;
+import com.github.commandsconsolegui.cmd.varfield.ManageVarCmdFieldI;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
-import com.github.commandsconsolegui.cmd.varfield.ManageVarCmdFieldI;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdUId;
 import com.github.commandsconsolegui.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.AudioUII;
-import com.github.commandsconsolegui.jme.ConditionalStateAbs;
-import com.github.commandsconsolegui.jme.ManageConditionalStateI;
 import com.github.commandsconsolegui.jme.AudioUII.EAudio;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
+import com.github.commandsconsolegui.jme.ManageConditionalStateI;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.lemur.dialog.MaintenanceListLemurDialogStateAbs;
-import com.github.commandsconsolegui.misc.HoldRestartable;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.jme3.input.KeyInput;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 
@@ -58,7 +58,20 @@ import com.simsilica.lemur.Command;
 public class ConsoleVarsDialogStateI<T extends Command<Button>> extends MaintenanceListLemurDialogStateAbs<T,ConsoleVarsDialogStateI<T>> {
 	private static ConsoleVarsDialogStateI<Command<Button>>	instance=new ConsoleVarsDialogStateI<Command<Button>>();
 	public static ConsoleVarsDialogStateI<Command<Button>> i(){return instance;}
-
+	
+	private KeyBoundVarField bindToggleEnable = new KeyBoundVarField(this,KeyInput.KEY_F9)
+		.setCallerAssigned(new CallableX(this) {
+			@Override
+			public Boolean call() {
+//				if(!ConsoleVarsDialogStateI.this.isConfigured())return false;
+//				if(!ConsoleVarsDialogStateI.this.isInitializedProperly())return false;
+				
+				requestToggleEnabled();
+				
+				return true;
+			}
+		});
+	
 	@Override
 	protected boolean modifyEntry(DialogStateAbs<T, ?> diagModal,	DialogListEntryData<T> dledAtModal,	ArrayList<DialogListEntryData<T>> adledAtThisToApplyResultsList) {
 		String strUserTypedValue = diagModal.getInputTextAsUserTypedValue();
@@ -159,7 +172,8 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			changeValue(dledSelected);
 		}else
 		if(objUser instanceof KeyBoundVarField){
-			GlobalManageKeyBindI.i().captureAndSetKeyBindAt((KeyBoundVarField)objUser);
+			GlobalManageKeyBindI.i().captureAndSetKeyBindAt((KeyBoundVarField)objUser, this);
+//			requestRefreshUpdateList();
 		}else
 		{
 			if(objUser instanceof VarCmdFieldAbs){
@@ -393,4 +407,8 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		fld.set(this,value);
 	}
 	
+	@Override
+	public void requestRefresh() {
+		requestRefreshUpdateList();
+	}
 }

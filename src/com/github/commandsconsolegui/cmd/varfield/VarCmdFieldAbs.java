@@ -145,6 +145,8 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	}
 	
 	private Class<VAL> clValueTypeConstraint;
+
+	private boolean	bAllowCallerAssignedToBeRun = true; 
 	
 //	public VarCmdFieldAbs(boolean bAddToList){
 //		if(bAddToList)VarCmdFieldAbs.avcfList.add(this);
@@ -514,7 +516,11 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 			this.objRawLazyValue = (VAL)objValueNew;
 		}
 		
-		if(objCurrentValue!=objValueNew)prepareCallerAssigned(false);
+		if(bAllowCallerAssignedToBeRun){
+			if(objCurrentValue!=objValueNew){
+				prepareCallerAssigned(false);
+			}
+		}
 		
 		return getThis();
 	}
@@ -748,5 +754,9 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 //		}else{
 //			return getUniqueCmdId().equals(strCmdChk);
 //		}
+	}
+
+	public void setAllowCallerAssignedToBeRun(boolean b) {
+		this.bAllowCallerAssignedToBeRun=b;
 	}
 }

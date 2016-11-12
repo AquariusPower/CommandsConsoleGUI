@@ -37,6 +37,7 @@ import com.github.commandsconsolegui.globals.GlobalHolderAbs.IGlobalOpt;
 import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
+import com.github.commandsconsolegui.misc.IRefresh;
 import com.github.commandsconsolegui.misc.ManageConfigI;
 import com.github.commandsconsolegui.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.misc.HoldRestartable;
@@ -72,7 +73,7 @@ import com.jme3.scene.Node;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>> implements IGlobalOpt,IRestartable,ISimulationTime,IConfigure<ConditionalStateAbs<THIS>>,IRetryListOwner,IReflexFillCfg{
+public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>> implements IGlobalOpt,IRestartable,ISimulationTime,IConfigure<ConditionalStateAbs<THIS>>,IRetryListOwner,IReflexFillCfg,IRefresh{
 //	public static final class CompositeControl extends CompositeControlAbs<ConditionalStateAbs>{
 //		private CompositeControl(ConditionalStateAbs casm){super(casm);};
 //	};private CompositeControl ccSelf = new CompositeControl(this);
@@ -1036,4 +1037,8 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 //	public void requestRetryUntilEnabled() {
 //		CallQueueI.i().addCall(callerRequestRetryUntilEnabled);
 //	}
+	
+	@Override
+	public void requestRefresh() {
+	}
 }

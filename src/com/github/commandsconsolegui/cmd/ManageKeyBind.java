@@ -36,6 +36,7 @@ import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.globals.GlobalManageKeyCodeI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
+import com.github.commandsconsolegui.misc.IRefresh;
 import com.github.commandsconsolegui.misc.KeyBind;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -104,8 +105,41 @@ public abstract class ManageKeyBind {
 	private KeyBoundVarField	bindCaptureToTarget;
 	
 	private KeyBind kbCaptured;
+
+	private boolean	bResetCaptureBeacon;
+
+	private IRefresh	refreshOwnerAfterCapture;
 	
 	public void update(float fTpf){
+		/**
+		 * this prevent executing the command just after capturing its bind!
+		 */
+		if(bResetCaptureBeacon){
+			if(bindCaptureToTarget.getValue().isActivated()){ 
+				//still pressed (with modifiers)
+				MsgI.i().info("waiting captured key bind to be released");
+				return; 
+			}else
+			if(bindCaptureToTarget.getValue().getActionKey().isPressed()){ 
+				//still pressed (only the action key is still being holded)
+				MsgI.i().info("waiting captured action key to be released");
+				return;
+			}else
+			{ //released
+//				if(bindCaptureToTarget.isWasAlreadyActivatedAtLeastOnce()){ 
+//					bindCaptureToTarget.runIfActivatedOrResetIfDeactivating();
+					
+					//reset
+					bindCaptureToTarget=null;
+					kbCaptured=null;
+					bResetCaptureBeacon=false;
+					refreshOwnerAfterCapture.requestRefresh();
+//				}
+			}
+			
+			return;
+		}
+		
 		/**
 		 * this will hold the bound keys execution
 		 */
@@ -116,12 +150,18 @@ public abstract class ManageKeyBind {
 			
 //			if(kbCaptured.getActionKey()!=null){
 			if(kbCaptured!=null){
+				bindCaptureToTarget.setAllowCallerAssignedToBeRun(false);
 				bindCaptureToTarget.setValue(kbCaptured);
+				bindCaptureToTarget.setAllowCallerAssignedToBeRun(true);
+				
 				MsgI.i().info(
 					"captured key bind "+kbCaptured.getBindCfg()
 					+" for "+bindCaptureToTarget.getKeyBindRunCommand(),
 					bindCaptureToTarget,kbCaptured,this);
-				bindCaptureToTarget=null;
+				
+				bResetCaptureBeacon=true;
+//				bindCaptureToTarget=null;
+//				kbCaptured=null;
 			}
 			
 			return;
@@ -133,7 +173,7 @@ public abstract class ManageKeyBind {
 		 */
 		hmKeyCodeVsActivatedBind.clear();
 		for(KeyBoundVarField bind:tmbindList.values()){
-			if(bind.getValue().isActivated()){
+			if(bind.getValue().isActivated()){ //pressed
 				Integer iKeyCode = bind.getValue().getActionKey().getKeyCode();
 				
 				ArrayList<KeyBoundVarField> abindForActKeyCode = hmKeyCodeVsActivatedBind.get(iKeyCode);
@@ -143,9 +183,9 @@ public abstract class ManageKeyBind {
 				}
 				
 				abindForActKeyCode.add(bind);
-			}else{
-				if(bind.isWaitingDeactivation()){
-					bind.runIfActivatedOrResetIfDeactivated();
+			}else{ //released
+				if(bind.isWasAlreadyActivatedAtLeastOnce()){
+					bind.runIfActivatedOrResetIfDeactivating();
 				}
 			}
 		}
@@ -162,7 +202,7 @@ public abstract class ManageKeyBind {
 				}
 			}
 			
-			bindWin.runIfActivatedOrResetIfDeactivated();
+			bindWin.runIfActivatedOrResetIfDeactivating();
 		}
 		
 	}
@@ -204,7 +244,8 @@ public abstract class ManageKeyBind {
 		return astr;
 	}
 
-	public void captureAndSetKeyBindAt(KeyBoundVarField bindTarget) {
+	public void captureAndSetKeyBindAt(KeyBoundVarField bindTarget, IRefresh refreshOwner) {
+		this.refreshOwnerAfterCapture=refreshOwner;
 		this.bindCaptureToTarget=bindTarget;
 		MsgI.i().info("For unconventional (more complex) key bindings, use the console command.", bindTarget); 
 //		bindTarget.setValue(captureKeyBind(bindTarget));

@@ -173,7 +173,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 		addKnownStyle(Styles.ROOT_STYLE);
 		
 		bindToggleConsole.setObjectRawValue(cfg.iToggleConsoleKey);//bindToggleConsole.getUniqueCmdId()
-		GlobalManageKeyBindI.i().addKeyBind(bindToggleConsole);
+//		GlobalManageKeyBindI.i().addKeyBind(bindToggleConsole);
 		
 //		initializationCompleted();
 		

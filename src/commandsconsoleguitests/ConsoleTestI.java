@@ -34,6 +34,7 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.CommandsHelperI;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.cmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.extras.SingleMandatoryAppInstanceI;
 import com.github.commandsconsolegui.globals.GlobalAppOSI;
@@ -47,6 +48,7 @@ import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDiagChoice;
 import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDiagMaintList;
 import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDiagQuestion;
 import com.github.commandsconsolegui.misc.ManageConfigI;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.misc.HoldRestartable;
 import com.github.commandsconsolegui.misc.MiscI;
@@ -58,6 +60,7 @@ import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexHacksPluginI;
 import com.github.commandsconsolegui.misc.ManageSingleInstanceI;
 import com.jme3.app.SimpleApplication;
+import com.jme3.input.KeyInput;
 import com.jme3.system.AppSettings;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
@@ -177,8 +180,19 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 			null, null, null, null, diagChoice, diagQuestion)));
 		
 		prepareTestData(diagChoice);
+		
+		bindListToggleEnable = new KeyBoundVarField(this,KeyInput.KEY_F5)
+			.setCallerAssigned(new CallableX(this) {
+				@Override
+				public Boolean call() {
+					hchdiagList.getRef().requestToggleEnabled();
+					return true;
+				}
+			});
 	}
 	
+	private KeyBoundVarField bindListToggleEnable;
+
 	private void prepareTestData(SimpleDiagChoice<T> diagChoice){
 		for(int i=0;i<10;i++){
 			diagChoice.addEntryQuick(null); 
