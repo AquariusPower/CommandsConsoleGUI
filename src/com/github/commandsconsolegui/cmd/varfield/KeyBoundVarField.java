@@ -29,8 +29,8 @@ package com.github.commandsconsolegui.cmd.varfield;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.cmd.ManageKeyCodeI;
-import com.github.commandsconsolegui.cmd.ManageKeyCodeI.Key;
+import com.github.commandsconsolegui.ManageKeyCode;
+import com.github.commandsconsolegui.ManageKeyCode.Key;
 import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
@@ -275,7 +275,11 @@ public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 	private long lConsecutiveActivationCount = 0;
 	private long lLastActivationMilis=-1;
 	
-	public void runIfActivated() {
+//	public boolean isActivated(){
+//		return getValue().isActivated();
+//	}
+	
+	public void runIfActivatedOrResetIfDeactivated() {
 		if(getValue().isActivated()){
 			boolean bRun=false;
 			
@@ -310,6 +314,10 @@ public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 			lConsecutiveActivationCount=0;
 			lLastActivationMilis=-1;
 		}
+	}
+	
+	public boolean isWaitingDeactivation(){
+		return lLastActivationMilis!=-1;
 	}
 	
 //	public boolean checkRunCallerAssigned(boolean bRun, String strId) {

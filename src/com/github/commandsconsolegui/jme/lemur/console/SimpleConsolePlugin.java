@@ -30,12 +30,12 @@ package com.github.commandsconsolegui.jme.lemur.console;
 import java.lang.reflect.Field;
 
 import com.github.commandsconsolegui.SimulationTime;
-import com.github.commandsconsolegui.cmd.ManageKeyCodeI;
 import com.github.commandsconsolegui.cmd.ScriptingCommandsDelegator;
 import com.github.commandsconsolegui.cmd.Updater;
 import com.github.commandsconsolegui.cmd.UserCmdStackTrace;
 import com.github.commandsconsolegui.globals.GlobalMainThreadI;
 import com.github.commandsconsolegui.globals.GlobalManageKeyBindI;
+import com.github.commandsconsolegui.globals.GlobalManageKeyCodeI;
 import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.globals.GlobalSingleMandatoryAppInstanceI;
 import com.github.commandsconsolegui.globals.GlobalUpdaterI;
@@ -49,6 +49,7 @@ import com.github.commandsconsolegui.globals.jme.lemur.GlobalLemurConsoleStateI;
 import com.github.commandsconsolegui.globals.jme.lemur.GlobalLemurDialogHelperI;
 import com.github.commandsconsolegui.jme.AudioUII;
 import com.github.commandsconsolegui.jme.JmeAppOS;
+import com.github.commandsconsolegui.jme.JmeManageKeyCode;
 import com.github.commandsconsolegui.jme.ManageKeyBindJme;
 import com.github.commandsconsolegui.jme.cmd.CommandsBackgroundStateI;
 import com.github.commandsconsolegui.jme.extras.FpsLimiterStateI;
@@ -115,7 +116,8 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
   	cfg = (CfgParm)icfg;
   	
   	setGlobals();
-  	ManageKeyCodeI.i().fillKeyIdCodeFrom(KeyInput.class, "KEY_");
+  	
+  	GlobalManageKeyCodeI.i().configure();
   	
   	GlobalManageKeyBindI.i().configure();
   	
@@ -197,6 +199,10 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
   	if(!GlobalCommandsDelegatorI.iGlobal().isSet()){
   		// defaults to the more complex (scripting) one
   		GlobalCommandsDelegatorI.iGlobal().set(new ScriptingCommandsDelegator());
+  	}
+  	
+  	if(!GlobalManageKeyCodeI.iGlobal().isSet()){
+  		GlobalManageKeyCodeI.iGlobal().set(new JmeManageKeyCode());
   	}
   	
   	if(!GlobalManageKeyBindI.iGlobal().isSet()){

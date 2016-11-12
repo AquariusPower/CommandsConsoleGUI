@@ -42,6 +42,8 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.codehaus.groovy.ast.expr.PrefixExpression;
+
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
@@ -54,6 +56,7 @@ import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdUId;
 import com.github.commandsconsolegui.globals.GlobalAppOSI;
 import com.github.commandsconsolegui.globals.GlobalManageKeyBindI;
+import com.github.commandsconsolegui.globals.GlobalManageKeyCodeI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.cmd.GlobalConsoleUII;
 import com.github.commandsconsolegui.misc.CallQueueI;
@@ -65,6 +68,7 @@ import com.github.commandsconsolegui.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.misc.IHandleExceptions;
 import com.github.commandsconsolegui.misc.IMessageListener;
 import com.github.commandsconsolegui.misc.IMultiInstanceOverride;
+import com.github.commandsconsolegui.misc.IUserInputDetector;
 import com.github.commandsconsolegui.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MiscI.EStringMatchMode;
@@ -89,7 +93,7 @@ import com.google.common.io.Files;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMessageListener{
+public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMessageListener, IUserInputDetector{
 	public static final class CompositeControl extends CompositeControlAbs<CommandsDelegator>{
 		private CompositeControl(CommandsDelegator cc){super(cc);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
@@ -905,6 +909,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 //			tmbindList.put(strBindCfg,bind);
 			GlobalManageKeyBindI.i().addKeyBind(bind);
 			
+			varSaveSetupFile();
 //			cui().addKeyBind(bind);
 			
 			bCmdWorked=true;
@@ -1120,7 +1125,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			
 		}else
 		if(checkCmdValidity(scfListKeyCodes,"list all available key ids and codes")){
-			for(String str:ManageKeyCodeI.i().getAllKeyCodesReport()){
+			for(String str:GlobalManageKeyCodeI.i().getKeyCodeListReport()){
 				dumpSubEntry(str);
 			}
 		}else
@@ -1580,7 +1585,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		ArrayList<String> astrDumpLineList = new ArrayList<String>();
 		
 		if(de.isImportant()){
-			astrDumpLineList.add("ImportantMessage(uid="+de.getImportantMessageLink().getUId()+")");
+			astrDumpLineList.add("\t"+getCommandPrefixStr()+scfMessageReview.getSimpleId()+" uid="+de.getImportantMessageLink().getUId()+" #");
 		}
 		
 //		if(de.getLineOriginal().isEmpty()){
@@ -3519,6 +3524,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	
 	ArrayList<StringCmdField> ascfCmdWithCallerList = new ArrayList<StringCmdField>();
 	private File	flConsDataPath;
+	private boolean	bConsoleCommandRunningFromDirectUserInput;
 	private void updateCmdWithCallerList() {
 		for(StringCmdField scf:ManageVarCmdFieldI.i().getListCopy(StringCmdField.class)){
 			if(scf.isCallerAssigned()){
@@ -4410,7 +4416,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	 * @param strCmd
 	 * @return
 	 */
-	public boolean actionSubmitCommand(final String strCmd){
+	public boolean actionSubmitDirectlyFromUserInput(final String strCmd){
 		if(strCmd.isEmpty() || strCmd.trim().equals(""+getCommandPrefix())){
 			cui().clearInputTextField(); 
 			return false;
@@ -4468,7 +4474,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		if(strType.equals(strTypeCmd)){
 			strLastTypedUserCommand = strCmd;
 			
+			bConsoleCommandRunningFromDirectUserInput=true;
 			ECmdReturnStatus ecrs = executeCommand(strCmd);
+			bConsoleCommandRunningFromDirectUserInput=false;
+			
 			switch(ecrs){
 				case FoundAndExceptionHappened:
 				case FoundAndFailedGracefully:
@@ -4490,7 +4499,16 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		
 		return bIsCmd;
 	}
-
+	
+	/**
+	 * User commands, like thru console, may contain invalid values.
+	 * Exceptions from it must never make the application exit...
+	 */
+	@Override
+	public boolean isConsoleCommandRunningFromDirectUserInput(){
+		return bConsoleCommandRunningFromDirectUserInput;
+	}
+	
 	public int getCmdHistorySize() {
 		return astrCmdHistory.size();
 	}

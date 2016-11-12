@@ -27,10 +27,9 @@
 package com.github.commandsconsolegui.misc;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
-import com.github.commandsconsolegui.cmd.ManageKeyCodeI;
-import com.github.commandsconsolegui.cmd.ManageKeyCodeI.Key;
+import com.github.commandsconsolegui.ManageKeyCode.Key;
+import com.github.commandsconsolegui.globals.GlobalManageKeyCodeI;
 
 /**
  * 
@@ -71,12 +70,12 @@ public class KeyBind {
 	
 	public void addModifier(String... astrKeyId){
 		for(String strId:astrKeyId){
-			addModifier(ManageKeyCodeI.i().getKeyForId(strId));
+			addModifier(GlobalManageKeyCodeI.i().getKeyForId(strId));
 		}
 	}
 	public void addModifier(int... aiKeyCode){
 		for(Integer iKeyCode:aiKeyCode){
-			addModifier(ManageKeyCodeI.i().getFirstKeyForCode(iKeyCode));
+			addModifier(GlobalManageKeyCodeI.i().getFirstKeyForCode(iKeyCode));
 		}
 	}
 	public void addModifier(Key... akey){
@@ -87,7 +86,7 @@ public class KeyBind {
 		}
 	}
 	
-	public ArrayList<Key> getModifiers(){
+	public ArrayList<Key> getKeyModifiers(){
 		return new ArrayList<Key>(akeyModifierList);
 	}
 	
@@ -99,10 +98,10 @@ public class KeyBind {
 	}
 	
 	public void setActionKey(String strId) {
-		setActionKey(ManageKeyCodeI.i().getKeyForId(strId));
+		setActionKey(GlobalManageKeyCodeI.i().getKeyForId(strId));
 	}
 	public void setActionKey(int iKeyCode) {
-		setActionKey(ManageKeyCodeI.i().getFirstKeyForCode(iKeyCode));
+		setActionKey(GlobalManageKeyCodeI.i().getFirstKeyForCode(iKeyCode));
 	}
 	
 	/**
@@ -127,7 +126,7 @@ public class KeyBind {
 	 * @return
 	 */
 	public KeyBind setFromKeyCodes(Integer... ai){
-		setActionKey(ManageKeyCodeI.i().getFirstKeyForCode(ai[ai.length-1])); //last
+		setActionKey(GlobalManageKeyCodeI.i().getFirstKeyForCode(ai[ai.length-1])); //last
 		
 		for(int i=0;i<ai.length-1;i++){ //least last
 			addModifier(ai[i]);
@@ -137,7 +136,7 @@ public class KeyBind {
 	}
 
 	public KeyBind setFromKeyIds(String[] astr) {
-		setActionKey(ManageKeyCodeI.i().getKeyForId(astr[astr.length-1])); //last
+		setActionKey(GlobalManageKeyCodeI.i().getKeyForId(astr[astr.length-1])); //last
 		
 		for(int i=0;i<astr.length-1;i++){ //least last
 			addModifier(astr[i]);
@@ -149,11 +148,12 @@ public class KeyBind {
 	public String getBindCfg(){
 		String str="";
 		
-		for(Key key:getModifiers()){
-			str+=ManageKeyCodeI.i().getKeyId(key.getKeyCode())+"+";
+		for(Key key:getKeyModifiers()){
+			str+=key.getId()+"+";
+//			str+=GlobalManageKeyCodeI.i().getKeyIdFromCode(key.getKeyCode())+"+";
 		}
 		
-		str+=ManageKeyCodeI.i().getKeyId(getActionKey().getKeyCode());
+		str+=getActionKey().getId(); //GlobalManageKeyCodeI.i().getKeyIdFromCode(getActionKey().getKeyCode());
 		
 		return str;
 	}

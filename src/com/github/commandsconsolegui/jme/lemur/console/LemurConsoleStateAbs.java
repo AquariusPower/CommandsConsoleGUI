@@ -631,7 +631,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 						break;
 					case KeyInput.KEY_NUMPADENTER:
 					case KeyInput.KEY_RETURN:
-						actionSubmit(getInputText());
+						actionSubmitDirectlyFromUserInput(getInputText());
 						break;
 					case KeyInput.KEY_TAB:
 						autoCompleteInputFieldWithCmd(bControl);
@@ -2350,10 +2350,10 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 	 * @param strCmd
 	 * @return false if was a comment, empty or invalid
 	 */
-	protected boolean actionSubmit(final String strCmd){
+	protected boolean actionSubmitDirectlyFromUserInput(final String strCmd){
 		if(checkAndApplyHintAtInputField())return true;
 		
-		return cd().actionSubmitCommand(strCmd);
+		return cd().actionSubmitDirectlyFromUserInput(strCmd);
 	}
 	
 	@Override

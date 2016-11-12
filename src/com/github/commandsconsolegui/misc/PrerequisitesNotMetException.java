@@ -30,9 +30,6 @@ package com.github.commandsconsolegui.misc;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.github.commandsconsolegui.cmd.UserCmdStackTrace;
-import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
-
 /**
  * "Things that should be been coded in a certain way but were overlooked",
  * but... is basically a buffed generic NullPointerException anyway...
@@ -47,15 +44,21 @@ import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 public class PrerequisitesNotMetException extends NullPointerException { //@STATIC_OK
 	private static final long	serialVersionUID	= 1342052861109804737L;
 	private static PrerequisitesNotMetException	exRequestExit;
+	private static IUserInputDetector	userInputDetector;
 
 	public PrerequisitesNotMetException(boolean bExitApplication, String strMessage, Object... aobj) {
 		super(DebugI.i().joinMessageWithObjects(strMessage,aobj));
-		if(bExitApplication && !UserCmdStackTrace.i().isUserActionStack()){
+		
+		if(bExitApplication && (userInputDetector!=null && !userInputDetector.isConsoleCommandRunningFromDirectUserInput())){
 			PrerequisitesNotMetException.exRequestExit = this;
 		}
 	}
 	public PrerequisitesNotMetException(String str, Object... aobj) {
 		this(true,str,aobj);
+	}
+	
+	public static void setUserInputDetector(IUserInputDetector u){
+		userInputDetector = u;
 	}
 	
 	public static boolean isExitRequested(){

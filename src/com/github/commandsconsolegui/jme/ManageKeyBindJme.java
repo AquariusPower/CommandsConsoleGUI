@@ -27,9 +27,9 @@
 
 package com.github.commandsconsolegui.jme;
 
+import com.github.commandsconsolegui.ManageKeyCode.Key;
 import com.github.commandsconsolegui.cmd.ManageKeyBind;
-import com.github.commandsconsolegui.cmd.ManageKeyCodeI;
-import com.github.commandsconsolegui.cmd.ManageKeyCodeI.Key;
+import com.github.commandsconsolegui.globals.GlobalManageKeyCodeI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
@@ -57,7 +57,7 @@ public class ManageKeyBindJme extends ManageKeyBind {
 				if(!GlobalAppRefI.iGlobal().isSet())return false;
 				if(GlobalAppRefI.i().getInputManager()==null)return false;
 				
-				for(Key key:ManageKeyCodeI.i().getAllKeysListCopy()){
+				for(Key key:GlobalManageKeyCodeI.i().getKeyListCopy()){
 					addKeyCodeMapping(key);
 				}
 				
@@ -68,13 +68,15 @@ public class ManageKeyBindJme extends ManageKeyBind {
 		alGeneralJmeKeyCodeListener = new ActionListener() {
 			@Override
 			public void onAction(String strKeyId, boolean bPressed, float tpf) {
-				ManageKeyCodeI.i().refreshPressedState(strKeyId, bPressed);
+				GlobalManageKeyCodeI.i().refreshPressedState(strKeyId, bPressed);
 			}
 		};
 		
 	}
 	
 	private void addKeyCodeMapping(Key key){
+		if(!key.isKeyWithCode())return;
+		
 		removeKeyCodeMaping(key);
 		
 		String strMapping=key.getId();

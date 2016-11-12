@@ -24,61 +24,13 @@
 	OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN 
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-package com.github.commandsconsolegui.cmd;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import com.github.commandsconsolegui.misc.ManageConfigI.IConfigure;
+package com.github.commandsconsolegui.misc;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class UserCmdStackTrace implements IConfigure<UserCmdStackTrace>{
-	private static UserCmdStackTrace instance = new UserCmdStackTrace();
-	public static UserCmdStackTrace i(){return instance;}
-
-	private boolean	bConfigured;
-	private CfgParm	cfg;
-
-	@Override
-	public boolean isConfigured() {
-		return bConfigured;
-	}
-	
-	public static class CfgParm implements ICfgParm{
-		ArrayList<Class<?>> aclassUserActionStackList = new ArrayList<Class<?>>();
-		public CfgParm(Class<?>... aclassUserActionStack) {
-			this.aclassUserActionStackList.addAll(Arrays.asList(aclassUserActionStack));
-		}
-	}
-	
-	@Override
-	public UserCmdStackTrace configure(ICfgParm icfg) {
-		this.cfg=(CfgParm)icfg;
-		bConfigured=true;
-		return this;
-	}
-	
-	/**
-	 * @return
-	 */
-	public boolean isUserActionStack(){
-		for(StackTraceElement ste:Thread.currentThread().getStackTrace()){
-			for(Class<?> cl:cfg.aclassUserActionStackList){
-				if(
-						ste.getClassName().equals(cl.getName())
-						||
-						ste.getClassName().startsWith(cl.getName()+"$")
-				){
-					return true;
-				}
-			}
-		}
-		
-		return false;
-	}
+public interface IUserInputDetector {
+	boolean isConsoleCommandRunningFromDirectUserInput();
 }

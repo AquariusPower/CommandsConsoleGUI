@@ -28,11 +28,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.github.commandsconsolegui.cmd;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.TreeMap;
 
+import com.github.commandsconsolegui.ManageKeyCode.Key;
 import com.github.commandsconsolegui.cmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
-import com.github.commandsconsolegui.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -56,7 +57,7 @@ public class ManageKeyBind {
 		String strMapping=null;
 		
 		if(bind.isField()){
-			strMapping=bind.getUniqueCmdId();
+			strMapping=bind.getUniqueVarId(true);
 			if(tmbindList.containsKey(strMapping)){
 				KeyBoundVarField bindExisting = tmbindList.get(strMapping);
 				if(bindExisting!=bind){
@@ -74,8 +75,8 @@ public class ManageKeyBind {
 		String strMapping=getMappingFrom(bind);
 		removeKeyBind(strMapping);
 	}
-	public void removeKeyBind(String strMapping){
-		tmbindList.remove(strMapping);
+	public void removeKeyBind(String strBindCfg){
+		tmbindList.remove(KeyBoundVarField.parseToBoundCfg(strBindCfg,false).getBindCfg());
 	}
 	
 	public void addKeyBind(KeyBoundVarField bind){
@@ -95,10 +96,42 @@ public class ManageKeyBind {
 //		}
 //	}
 	
+	private HashMap<Integer,ArrayList<KeyBoundVarField>> hmKeyCodeVsActivatedBind = new HashMap<Integer, ArrayList<KeyBoundVarField>>();
+	
 	public void update(float fTpf){
+		/**
+		 * fill all binds for each action keycode to check which will win.
+		 */
+		hmKeyCodeVsActivatedBind.clear();
 		for(KeyBoundVarField bind:tmbindList.values()){
-			bind.runIfActivated();
+			if(bind.getValue().isActivated()){
+				Integer iKeyCode = bind.getValue().getActionKey().getKeyCode();
+				ArrayList<KeyBoundVarField> abindForActKeyCode = hmKeyCodeVsActivatedBind.get(iKeyCode);
+				if(abindForActKeyCode==null){
+					abindForActKeyCode=new ArrayList<KeyBoundVarField>();
+					hmKeyCodeVsActivatedBind.put(iKeyCode, abindForActKeyCode);
+				}
+				abindForActKeyCode.add(bind);
+			}else{
+				if(bind.isWaitingDeactivation()){
+					bind.runIfActivatedOrResetIfDeactivated();
+				}
+			}
 		}
+		
+		/**
+		 * only the activated bind with most modifiers will be run! 
+		 */
+		for(ArrayList<KeyBoundVarField> abindForActKeyCode:hmKeyCodeVsActivatedBind.values()){
+			KeyBoundVarField bindWin=abindForActKeyCode.get(0);
+			for(KeyBoundVarField bind:abindForActKeyCode){
+				if(bindWin.getValue().getKeyModifiers().size() < bind.getValue().getKeyModifiers().size()){
+					bindWin=bind;
+				}
+			}
+			bindWin.runIfActivatedOrResetIfDeactivated();
+		}
+		
 	}
 	
 //	public void refreshPressedState(int iKeyCode, boolean bPressed){

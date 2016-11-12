@@ -24,61 +24,30 @@
 	OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN 
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+package com.github.commandsconsolegui.jme;
 
-package com.github.commandsconsolegui.cmd;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import com.github.commandsconsolegui.misc.ManageConfigI.IConfigure;
+import com.github.commandsconsolegui.ManageKeyCode;
+import com.jme3.input.KeyInput;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class UserCmdStackTrace implements IConfigure<UserCmdStackTrace>{
-	private static UserCmdStackTrace instance = new UserCmdStackTrace();
-	public static UserCmdStackTrace i(){return instance;}
-
-	private boolean	bConfigured;
-	private CfgParm	cfg;
-
+public class JmeManageKeyCode extends ManageKeyCode{
 	@Override
-	public boolean isConfigured() {
-		return bConfigured;
-	}
-	
-	public static class CfgParm implements ICfgParm{
-		ArrayList<Class<?>> aclassUserActionStackList = new ArrayList<Class<?>>();
-		public CfgParm(Class<?>... aclassUserActionStack) {
-			this.aclassUserActionStackList.addAll(Arrays.asList(aclassUserActionStack));
-		}
+	public void configure() {
+  	fillKeyIdCodeFrom(KeyInput.class, "KEY_");
+		super.configure();
 	}
 	
 	@Override
-	public UserCmdStackTrace configure(ICfgParm icfg) {
-		this.cfg=(CfgParm)icfg;
-		bConfigured=true;
-		return this;
-	}
-	
-	/**
-	 * @return
-	 */
-	public boolean isUserActionStack(){
-		for(StackTraceElement ste:Thread.currentThread().getStackTrace()){
-			for(Class<?> cl:cfg.aclassUserActionStackList){
-				if(
-						ste.getClassName().equals(cl.getName())
-						||
-						ste.getClassName().startsWith(cl.getName()+"$")
-				){
-					return true;
-				}
-			}
-		}
+	public void addSpecialKeys() {
+		super.addSpecialKeys();
 		
-		return false;
+		addKey("Ctrl",	KeyInput.KEY_LCONTROL,KeyInput.KEY_RCONTROL);
+		addKey("Shift",	KeyInput.KEY_LSHIFT,	KeyInput.KEY_RSHIFT);
+		addKey("Alt",		KeyInput.KEY_LMENU,		KeyInput.KEY_RMENU);
 	}
+	
 }
