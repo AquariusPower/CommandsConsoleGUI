@@ -29,10 +29,12 @@ package com.github.commandsconsolegui.jme;
 
 import com.github.commandsconsolegui.ManageKeyCode.Key;
 import com.github.commandsconsolegui.cmd.ManageKeyBind;
+import com.github.commandsconsolegui.cmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.globals.GlobalManageKeyCodeI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.KeyBind;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
@@ -45,6 +47,7 @@ import com.jme3.input.controls.KeyTrigger;
  */
 public class ManageKeyBindJme extends ManageKeyBind {
 	private ActionListener	alGeneralJmeKeyCodeListener;
+	private boolean	bCaptureKeyModifiersMode;
 	
 	@Override
 	public void configure() {
@@ -75,7 +78,7 @@ public class ManageKeyBindJme extends ManageKeyBind {
 	}
 	
 	private void addKeyCodeMapping(Key key){
-		if(!key.isKeyWithCode())return;
+		if(!key.isModeKeyWithCode())return;
 		
 		removeKeyCodeMaping(key);
 		
@@ -91,6 +94,12 @@ public class ManageKeyBindJme extends ManageKeyBind {
 			GlobalAppRefI.i().getInputManager().deleteMapping(strMapping);
 		}
 	}
+	
+//	@Override
+//	protected KeyBind captureKeyBind(KeyBoundVarField bindTarget) {
+//		bCaptureKeyModifiersMode=true;
+//		return null;
+//	}
 	
 //	@Override
 //	public void configure(){

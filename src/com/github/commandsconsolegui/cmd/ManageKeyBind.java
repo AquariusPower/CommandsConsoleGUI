@@ -31,11 +31,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
 
-import com.github.commandsconsolegui.ManageKeyCode.Key;
 import com.github.commandsconsolegui.cmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
+import com.github.commandsconsolegui.globals.GlobalManageKeyCodeI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
+import com.github.commandsconsolegui.misc.KeyBind;
+import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 
 
@@ -44,7 +46,7 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 *
 */
-public class ManageKeyBind {
+public abstract class ManageKeyBind {
 	public static final class CompositeControl extends CompositeControlAbs<ManageKeyBind>{
 		private CompositeControl(ManageKeyBind cc){super(cc);};
 	};protected CompositeControl ccSelf = new CompositeControl(this);
@@ -76,7 +78,8 @@ public class ManageKeyBind {
 		removeKeyBind(strMapping);
 	}
 	public void removeKeyBind(String strBindCfg){
-		tmbindList.remove(KeyBoundVarField.parseToBoundCfg(strBindCfg,false).getBindCfg());
+//		tmbindList.remove(KeyBoundVarField.parseToBoundCfg(strBindCfg,false).getBindCfg());
+		tmbindList.remove(new KeyBind().setFromKeyCfg(strBindCfg).getBindCfg());
 	}
 	
 	public void addKeyBind(KeyBoundVarField bind){
@@ -97,8 +100,34 @@ public class ManageKeyBind {
 //	}
 	
 	private HashMap<Integer,ArrayList<KeyBoundVarField>> hmKeyCodeVsActivatedBind = new HashMap<Integer, ArrayList<KeyBoundVarField>>();
+
+	private KeyBoundVarField	bindCaptureToTarget;
+	
+	private KeyBind kbCaptured;
 	
 	public void update(float fTpf){
+		/**
+		 * this will hold the bound keys execution
+		 */
+		if(bindCaptureToTarget!=null){
+//			if(kbCaptured==null)kbCaptured = new KeyBind();
+			
+			kbCaptured=GlobalManageKeyCodeI.i().getPressedKeysAsKeyBind();
+			
+//			if(kbCaptured.getActionKey()!=null){
+			if(kbCaptured!=null){
+				bindCaptureToTarget.setValue(kbCaptured);
+				MsgI.i().info(
+					"captured key bind "+kbCaptured.getBindCfg()
+					+" for "+bindCaptureToTarget.getKeyBindRunCommand(),
+					bindCaptureToTarget,kbCaptured,this);
+				bindCaptureToTarget=null;
+			}
+			
+			return;
+		}
+		
+		
 		/**
 		 * fill all binds for each action keycode to check which will win.
 		 */
@@ -106,11 +135,13 @@ public class ManageKeyBind {
 		for(KeyBoundVarField bind:tmbindList.values()){
 			if(bind.getValue().isActivated()){
 				Integer iKeyCode = bind.getValue().getActionKey().getKeyCode();
+				
 				ArrayList<KeyBoundVarField> abindForActKeyCode = hmKeyCodeVsActivatedBind.get(iKeyCode);
 				if(abindForActKeyCode==null){
 					abindForActKeyCode=new ArrayList<KeyBoundVarField>();
 					hmKeyCodeVsActivatedBind.put(iKeyCode, abindForActKeyCode);
 				}
+				
 				abindForActKeyCode.add(bind);
 			}else{
 				if(bind.isWaitingDeactivation()){
@@ -124,11 +155,13 @@ public class ManageKeyBind {
 		 */
 		for(ArrayList<KeyBoundVarField> abindForActKeyCode:hmKeyCodeVsActivatedBind.values()){
 			KeyBoundVarField bindWin=abindForActKeyCode.get(0);
+			
 			for(KeyBoundVarField bind:abindForActKeyCode){
-				if(bindWin.getValue().getKeyModifiers().size() < bind.getValue().getKeyModifiers().size()){
+				if(bindWin.getValue().getKeyModListSize() < bind.getValue().getKeyModListSize()){
 					bindWin=bind;
 				}
 			}
+			
 			bindWin.runIfActivatedOrResetIfDeactivated();
 		}
 		
@@ -170,6 +203,14 @@ public class ManageKeyBind {
 		}
 		return astr;
 	}
+
+	public void captureAndSetKeyBindAt(KeyBoundVarField bindTarget) {
+		this.bindCaptureToTarget=bindTarget;
+		MsgI.i().info("For unconventional (more complex) key bindings, use the console command.", bindTarget); 
+//		bindTarget.setValue(captureKeyBind(bindTarget));
+	}
+
+//	protected abstract KeyBind captureKeyBind(KeyBoundVarField bindTarget);
 }
 
 

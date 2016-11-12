@@ -30,9 +30,11 @@ package com.github.commandsconsolegui.jme.lemur.console;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.cmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.cmd.varfield.NumberVarFieldAbs;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
+import com.github.commandsconsolegui.globals.GlobalManageKeyCodeI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData.SliderValueData.ESliderKey;
@@ -173,10 +175,6 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 	private void createValueEntries(){
 		DialogListEntryData<T> dledNew = null;
 		
-		if(vcf instanceof NumberVarFieldAbs){
-			createValueNumberEntries();
-		}
-		
 		dledNew = new DialogListEntryData<T>(this);
 		dledNew.setText(vcf.getRawValueDefault(), vcf);
 		dledNew.setAddVisibleQuotes(vcf instanceof StringVarField);
@@ -194,8 +192,17 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 		dledValue.setAddVisibleQuotes(vcf instanceof StringVarField);
 		dledValue.setParent(dledVals);
 		addEntry(dledValue).addCustomButtonAction("Value->",(T)cavai);
+		
+		if(vcf instanceof NumberVarFieldAbs){
+			createValueNumberEntries();
+		}
+//		else
+//		if(vcf instanceof KeyBoundVarField){
+//			createValueKeyEntries();
+//		}
 	}
 	
+
 	/**
 	 * see {@link CellRendererDialogEntry#updateVisibleText()}
 	 */
@@ -203,6 +210,13 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 		dledRawValue.updateTextTo(vcf.getRawValue());
 		dledValue.updateTextTo(vcf.getValueAsString(3));
 	}
+	
+//	private void createValueKeyEntries() {
+//		DialogListEntryData<T> dledNew = null;
+//		dledNew = new DialogListEntryData<T>(this);
+//		dledNew.setParent(dledVals);
+//		addEntry(dledNew.setText(varn.getMin(), vcf)).addCustomButtonAction("MinValue->",(T)cavai);
+//	}
 	
 	private void createValueNumberEntries(){
 		DialogListEntryData<T> dledNew = null;

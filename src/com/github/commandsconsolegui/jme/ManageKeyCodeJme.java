@@ -27,6 +27,7 @@
 package com.github.commandsconsolegui.jme;
 
 import com.github.commandsconsolegui.ManageKeyCode;
+import com.github.commandsconsolegui.misc.KeyBind;
 import com.jme3.input.KeyInput;
 
 /**
@@ -34,20 +35,62 @@ import com.jme3.input.KeyInput;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class JmeManageKeyCode extends ManageKeyCode{
+public class ManageKeyCodeJme extends ManageKeyCode{
 	@Override
 	public void configure() {
-  	fillKeyIdCodeFrom(KeyInput.class, "KEY_");
+  	fillKeyIdCodeFrom(KeyInput.KEY_ESCAPE, KeyInput.class, "KEY_");
 		super.configure();
+	}
+	
+	enum EKeyMod{
+		Ctrl,
+		Alt,
+		Shift,
+		;
+		
+		private Key	key;
+		
+		private void setKey(Key key){
+			this.key=key;
+		}
+		
+		public String s(){return toString();}
+		
+		public static boolean isModKey(Key key){
+			for(EKeyMod e:values()){
+				if(e.key==key)return true;
+				if(e.key.isMonitoredKey(key))return true;
+			}
+			return false;
+		}
 	}
 	
 	@Override
 	public void addSpecialKeys() {
 		super.addSpecialKeys();
 		
-		addKey("Ctrl",	KeyInput.KEY_LCONTROL,KeyInput.KEY_RCONTROL);
-		addKey("Shift",	KeyInput.KEY_LSHIFT,	KeyInput.KEY_RSHIFT);
-		addKey("Alt",		KeyInput.KEY_LMENU,		KeyInput.KEY_RMENU);
+		EKeyMod.Ctrl.key	=addKey(EKeyMod.Ctrl.s(),	KeyInput.KEY_LCONTROL,KeyInput.KEY_RCONTROL);
+		EKeyMod.Alt.key		=addKey(EKeyMod.Alt.s(),	KeyInput.KEY_LMENU,		KeyInput.KEY_RMENU);
+		EKeyMod.Shift.key	=addKey(EKeyMod.Shift.s(),KeyInput.KEY_LSHIFT,	KeyInput.KEY_RSHIFT);
+	}
+
+	@Override
+	public KeyBind getPressedKeysAsKeyBind() {
+		String strCfg = "";
+		for(EKeyMod e:EKeyMod.values()){
+			if(getKeyForId(e.s()).isPressed())strCfg+=e.s()+"+";
+		}
+		
+		for(Key key:getKeyList()){
+			if(EKeyMod.isModKey(key))continue;
+			
+			if(key.isPressed()){
+				strCfg+=key.getId();
+				return new KeyBind().setFromKeyCfg(strCfg);
+			}
+		}
+		
+		return null;
 	}
 	
 }

@@ -59,7 +59,7 @@ public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 		this(rfcfgOwnerUseThis, (KeyBind)null);
 	}
 	public KeyBoundVarField(IReflexFillCfg rfcfgOwnerUseThis, String strBindCfg) {
-		this(rfcfgOwnerUseThis, parseToBoundCfg(strBindCfg, true));
+		this(rfcfgOwnerUseThis, new KeyBind().setFromKeyCfg(strBindCfg));
 	}
 	/**
 	 * @param lInitialValue if null, the variable will be removed from console vars.
@@ -141,47 +141,49 @@ public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 //		}
 //	}
 	
-	/**
-	 * expected syntax ex:
-	 * LCONTROL+LSHIFT+LMENU+F1
-	 * TODO let it parse ex. ctrl+shift+alt+f1, as there are two of each of these modifiers LCONTROL RCONTROL etc, create a new code to represent both of each
-	 * @param strBindCfg
-	 * @return the last key will be returned as the first, the activator
-	 */
-	public static KeyBind parseToBoundCfg(String strBindCfg,boolean bExceptionOnFail){
-//		fillIdCode();
-		
-		String[] astr = strBindCfg.split("[+]");
-		
-		KeyBind kb = new KeyBind();
-		kb.setFromKeyIds(astr);
-		
-//		int[] ai = new int[astr.length];
-//		for(int i=0;i<astr.length;i++){
-//			Integer iCode = ManageKeyCodeI.i().getKeyCode(astr[i]);
-//			if(iCode==null){
-//				String strMsg="parse fail for "+astr[i]+", "+strBindCfg;
-//				if(!bExceptionOnFail){
-//					MsgI.i().warn(strMsg);
-//				}else{
-//					throw new PrerequisitesNotMetException(strMsg);
-//				}
-//				return null;
-//			}
-//			ai[i]=iCode;
-//		}
-//		
-//		KeyBind kb = new KeyBind();
-//		kb.setActionKey(new Key(ai[ai.length-1])); //last keycode
-//		
-////		ArrayList<Integer> aiList = new ArrayList<Integer>(Arrays.asList(ai));
-////		Collections.rotate(aiList, 1);
-////		return aiList.toArray(new Integer[0]);
-//		
-//		kb.addModifier(Arrays.copyOfRange(ai, 0, ai.length-1));
-		
-		return kb;
-	}
+//	/**
+//	 * expected syntax ex:
+//	 * LCONTROL+LSHIFT+LMENU+F1
+//	 * TODO let it parse ex. ctrl+shift+alt+f1, as there are two of each of these modifiers LCONTROL RCONTROL etc, create a new code to represent both of each
+//	 * @param strBindCfg
+//	 * @return the last key will be returned as the first, the activator
+//	 */
+//	public static KeyBind parseToBoundCfg(String strBindCfg,boolean bExceptionOnFail){
+//		return new KeyBind().setFromKeyCfg(strBindCfg);
+////		
+//////		fillIdCode();
+////		
+////		String[] astr = strBindCfg.split("[+]");
+////		
+////		KeyBind kb = new KeyBind();
+////		kb.setFromKeyIds(astr);
+////		
+//////		int[] ai = new int[astr.length];
+//////		for(int i=0;i<astr.length;i++){
+//////			Integer iCode = ManageKeyCodeI.i().getKeyCode(astr[i]);
+//////			if(iCode==null){
+//////				String strMsg="parse fail for "+astr[i]+", "+strBindCfg;
+//////				if(!bExceptionOnFail){
+//////					MsgI.i().warn(strMsg);
+//////				}else{
+//////					throw new PrerequisitesNotMetException(strMsg);
+//////				}
+//////				return null;
+//////			}
+//////			ai[i]=iCode;
+//////		}
+//////		
+//////		KeyBind kb = new KeyBind();
+//////		kb.setActionKey(new Key(ai[ai.length-1])); //last keycode
+//////		
+////////		ArrayList<Integer> aiList = new ArrayList<Integer>(Arrays.asList(ai));
+////////		Collections.rotate(aiList, 1);
+////////		return aiList.toArray(new Integer[0]);
+//////		
+//////		kb.addModifier(Arrays.copyOfRange(ai, 0, ai.length-1));
+////		
+////		return kb;
+//	}
 	
 	public String getBindCfg(){
 		return getValue().getBindCfg();
@@ -193,7 +195,8 @@ public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 			//keep this empty skipper nullifier
 		}else
 		if(objValue instanceof String){
-			objValue = parseToBoundCfg((String)objValue, false); //coming from user action will just warn on failure
+//			objValue = parseToBoundCfg((String)objValue, false); //coming from user action will just warn on failure
+			objValue = new KeyBind().setFromKeyCfg((String)objValue);
 		}else
 		if(objValue instanceof KeyBind){
 			//expected value
@@ -205,6 +208,10 @@ public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 			objValue = new KeyBind().setFromKeyCodes((Integer)objValue);
 		}else{
 			throw new PrerequisitesNotMetException("unsupported class type", objValue.getClass());
+		}
+		
+		if(objValue!=null){
+			((KeyBind)objValue).setOwner(this);
 		}
 		
 		super.setObjectRawValue(objValue);
@@ -356,5 +363,13 @@ public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 	}
 	public String getUserCommand() {
 		return strFullUserCommand;
+	}
+	
+	public String getKeyBindRunCommand() {
+		if(isField()){
+			return getUniqueVarId(true);
+		}else{
+			return getUserCommand();
+		}
 	}
 }

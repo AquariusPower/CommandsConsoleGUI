@@ -105,7 +105,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 	public static class CellDialogEntry<T> extends Container implements IReflexFillCfg {
 		public static enum EUserDataCellEntry{
 			colorFgBkp,
-			classCellRef,
+//			classCellRef,
 			bHoverOverIsWorking,
 			;
 			public String s(){return this.toString();}
@@ -398,8 +398,12 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			Button btn = new Button(strLabel,assignedCellRenderer.strStyle);
 			MiscJmeI.i().retrieveBitmapTextFor(btn).setLineWrapMode(LineWrapMode.NoWrap);
 			btn.setName(strPrefix+"Button"+strId);
-			btn.setUserData(EUserDataCellEntry.classCellRef.s(),this);
-			btn.setUserData(dled.getClass().getName(), dled);
+//			btn.setUserData(EUserDataCellEntry.classCellRef.s(),this);
+			MiscJmeI.i().setUserDataPSH(btn,this);
+//			btn.setUserData(dled.getClass().getName(), dled);
+			MiscJmeI.i().setUserDataPSH(btn,dled);
+//			btn.setUserData(assignedCellRenderer.diagParent.getClass().getName(),assignedCellRenderer.diagParent);
+			MiscJmeI.i().setUserDataPSH(btn,assignedCellRenderer.diagParent);
 			CursorEventControl.addListenersToSpatial(btn, DialogMouseCursorListenerI.i());
 			
 			cntrParent.addChild(btn,aobjConstraints);

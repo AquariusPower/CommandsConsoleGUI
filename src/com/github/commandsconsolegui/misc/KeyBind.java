@@ -41,7 +41,9 @@ public class KeyBind {
 	/** the last/main key to be pressed */
 	private Key keyAction = null;
 	
-	private ArrayList<Key> akeyModifierList = new ArrayList<Key>();
+	private ArrayList<Key> akeyModifierList;// = new ArrayList<Key>();
+
+	private Object	objOwner;
 	
 //	private void applyPressedState(Key key, int iKeyCodeCheck, boolean bPressed){
 //		if(key.getKeyCode()==iKeyCodeCheck)key.bPressed=(bPressed);
@@ -54,12 +56,19 @@ public class KeyBind {
 //		}
 //	}
 	
+	public void setOwner(Object obj){
+		PrerequisitesNotMetException.assertNotAlreadySet("owner", this.objOwner, obj, this);
+		this.objOwner=obj;
+	}
+	
 	public boolean isActivated(){
 		if(!keyAction.isPressed())return false;
 		
-		for(Key key:akeyModifierList){
-			if(!key.isPressed())return false;
-		}			
+		if(akeyModifierList!=null){
+			for(Key key:akeyModifierList){
+				if(!key.isPressed())return false;
+			}			
+		}
 		
 		return true;
 	}
@@ -80,13 +89,16 @@ public class KeyBind {
 	}
 	public void addModifier(Key... akey){
 //		akeyModifierList.addAll(Arrays.asList(akey));
+		if(akeyModifierList==null)akeyModifierList = new ArrayList<Key>();
+		
 		for(Key key:akey){
 			PrerequisitesNotMetException.assertNotNull("mod key", key, this);
 			akeyModifierList.add(key);
 		}
 	}
 	
-	public ArrayList<Key> getKeyModifiers(){
+	public ArrayList<Key> getKeyModifiersCopy(){
+		if(akeyModifierList==null)return null;
 		return new ArrayList<Key>(akeyModifierList);
 	}
 	
@@ -109,7 +121,11 @@ public class KeyBind {
 	 * @return
 	 */
 	public Integer[] getAllKeyCodes(){
-		Integer[] ai = new Integer[akeyModifierList.size()+1];
+		if(akeyModifierList==null){
+			return new Integer[]{keyAction.getKeyCode()};
+		}
+		
+		Integer[] ai = new Integer[akeyModifierList.size()+1]; 
 		
 		int i=0;
 		for(Key key:akeyModifierList){
@@ -148,13 +164,35 @@ public class KeyBind {
 	public String getBindCfg(){
 		String str="";
 		
-		for(Key key:getKeyModifiers()){
-			str+=key.getId()+"+";
-//			str+=GlobalManageKeyCodeI.i().getKeyIdFromCode(key.getKeyCode())+"+";
+		if(akeyModifierList!=null){
+			for(Key key:akeyModifierList){
+				str+=key.getId()+"+";
+	//			str+=GlobalManageKeyCodeI.i().getKeyIdFromCode(key.getKeyCode())+"+";
+			}
 		}
 		
 		str+=getActionKey().getId(); //GlobalManageKeyCodeI.i().getKeyIdFromCode(getActionKey().getKeyCode());
 		
 		return str;
+	}
+
+	public boolean isHasKeyModifiers() {
+		return akeyModifierList!=null;
+	}
+	
+	public int getKeyModListSize(){
+		return akeyModifierList!=null ? akeyModifierList.size() : 0;
+	}
+	
+	/**
+	 * expected syntax ex:
+	 * LCONTROL+RSHIFT+LMENU+F1 (specific mod keys)
+	 * Ctrl+Alt+k (grouped mod keys)
+	 * 
+	 * @param strCfg
+	 * @return
+	 */
+	public KeyBind setFromKeyCfg(String strCfg) {
+		return setFromKeyIds(strCfg.split("[+]"));
 	}
 }

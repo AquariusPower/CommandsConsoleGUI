@@ -72,7 +72,8 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 		switch(e){
 			case Action1Click:
 //				if(iClickCount==1){
-					final CellDialogEntry cell = (CellDialogEntry<?>)capture.getUserData(EUserDataCellEntry.classCellRef.s());
+//					final CellDialogEntry cell = (CellDialogEntry<?>)capture.getUserData(EUserDataCellEntry.classCellRef.s());
+					final CellDialogEntry cell = MiscJmeI.i().getUserDataPSH(capture, CellDialogEntry.class);
 					if(cell!=null){
 //						if(cell.isCfgButton(capture)){
 //							diag.openCfgDataDialog(cell.getData());

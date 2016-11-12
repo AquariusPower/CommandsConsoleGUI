@@ -32,10 +32,12 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.PkgTopRef;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.cmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.cmd.varfield.ManageVarCmdFieldI;
 import com.github.commandsconsolegui.cmd.varfield.VarCmdUId;
+import com.github.commandsconsolegui.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.AudioUII;
 import com.github.commandsconsolegui.jme.ConditionalStateAbs;
@@ -156,6 +158,9 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 		if(objUser instanceof BoolTogglerCmdField){
 			changeValue(dledSelected);
 		}else
+		if(objUser instanceof KeyBoundVarField){
+			GlobalManageKeyBindI.i().captureAndSetKeyBindAt((KeyBoundVarField)objUser);
+		}else
 		{
 			if(objUser instanceof VarCmdFieldAbs){
 				super.actionCustomAtEntry(dledSelected);
@@ -194,17 +199,6 @@ public class ConsoleVarsDialogStateI<T extends Command<Button>> extends Maintena
 			for(DialogListEntryData<T> dled:getCompleteEntriesListCopy()){
 				Object obj = dled.getUserObj();
 				if (obj instanceof EGroupKeys)continue;
-//				{
-//					EGroupKeys ek = (EGroupKeys) obj;
-//					switch(ek){
-//						case DialogsCons:
-//						case ParentConcreteClass:
-//						case ParentDeclaringClass:
-//						case PkgTopRef:
-//							continue;
-//					}
-//				}
-//				if(dled.getUserObj()==PkgTopRef.class)continue;
 				VarCmdFieldAbs vcfAtListEntry = ((VarCmdFieldAbs)obj);
 				if(vcfVarEntry.getUniqueVarId().equals(vcfAtListEntry.getUniqueVarId())){
 					dledVarEntry = dled;

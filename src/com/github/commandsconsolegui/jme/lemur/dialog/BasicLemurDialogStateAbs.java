@@ -35,6 +35,7 @@ import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.jme.MouseCursorCentralI.EMouseCursorButton;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.jme.MiscJmeI;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
@@ -102,10 +103,11 @@ public abstract class BasicLemurDialogStateAbs<T,THIS extends BasicLemurDialogSt
 	
 	@SuppressWarnings("unchecked")
 	public DialogListEntryData<T> getDledFrom(Spatial spt){
-		String strKey = DialogListEntryData.class.getName();
-		Object data = spt.getUserData(strKey);
-		if(data==null)throw new PrerequisitesNotMetException("missing user object "+strKey);
-		return (DialogListEntryData<T>) data;
+		return MiscJmeI.i().getUserDataPSH(spt, DialogListEntryData.class);
+//		String strKey = DialogListEntryData.class.getName();
+//		Object data = spt.getUserData(strKey);
+//		if(data==null)throw new PrerequisitesNotMetException("missing user object "+strKey);
+//		return (DialogListEntryData<T>) data;
 	}
 	
 //	enum EAudio{

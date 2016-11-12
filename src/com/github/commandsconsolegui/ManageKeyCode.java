@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import com.github.commandsconsolegui.misc.KeyBind;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 
@@ -41,7 +42,7 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class ManageKeyCode {
+public abstract class ManageKeyCode {
 //	private static ManageKeyCodeI instance = new ManageKeyCodeI();
 //	public static ManageKeyCodeI i(){return instance;}
 	
@@ -49,7 +50,7 @@ public class ManageKeyCode {
 		private String strId;
 		private Integer iKeyCode = null;
 		private boolean bPressed = false;
-		ArrayList<Key> akeyGroupList = null;
+		ArrayList<Key> akeyMonitoredList = null;
 		
 //		private Key(Integer iKeyCode) {
 //			this(ManageKeyCodeI.i().getKeyId(iKeyCode), iKeyCode);
@@ -88,10 +89,14 @@ public class ManageKeyCode {
 			this.strId=strId;
 		}
 		
-		public boolean isKeyGroupMonitor(){
-			return akeyGroupList!=null;
+		public ArrayList<Key> getKeysToMonitorCopy(){
+			return new ArrayList<Key>(akeyMonitoredList);
 		}
-		public boolean isKeyWithCode(){
+		
+		public boolean isModeKeyGroupMonitor(){
+			return akeyMonitoredList!=null;
+		}
+		public boolean isModeKeyWithCode(){
 			return iKeyCode!=null;
 		}
 		
@@ -106,22 +111,22 @@ public class ManageKeyCode {
 				throw new PrerequisitesNotMetException("this key is NOT a group reference!", this, iKeyCode, akeyToMonitor);
 			}
 			
-			if(this.akeyGroupList==null)this.akeyGroupList = new ArrayList<Key>();
+			if(this.akeyMonitoredList==null)this.akeyMonitoredList = new ArrayList<Key>();
 			
 			int iCount=0;
 			for(Key key:akeyToMonitor.clone()){
 				if(key==null)continue;
 				
 				if(bAdd){
-					if(this.akeyGroupList.contains(key)){
+					if(this.akeyMonitoredList.contains(key)){
 						MsgI.i().devWarn("already contains", this, key);
 						continue;
 					}
 					
-					this.akeyGroupList.add(key);
+					this.akeyMonitoredList.add(key);
 					iCount++;
 				}else{
-					this.akeyGroupList.remove(key);
+					this.akeyMonitoredList.remove(key);
 					iCount++;
 				}
 			}
@@ -134,8 +139,8 @@ public class ManageKeyCode {
 		}
 
 		public boolean isPressed() {
-			if(akeyGroupList!=null){
-				for(Key key:akeyGroupList){
+			if(akeyMonitoredList!=null){
+				for(Key key:akeyMonitoredList){
 					if(key.isPressed())return true;
 				}
 				return false;
@@ -144,20 +149,26 @@ public class ManageKeyCode {
 			return bPressed;
 		}
 		private void setPressed(boolean bPressed) {
-			if(akeyGroupList!=null)throw new PrerequisitesNotMetException("this key is a group reference, cannot be directly pressed...", this, akeyGroupList, bPressed);
+			if(akeyMonitoredList!=null)throw new PrerequisitesNotMetException("this key is a group reference, cannot be directly pressed...", this, akeyMonitoredList, bPressed);
 			this.bPressed = bPressed;
 		}
 
 		public String getId() {
 			return strId;
 		}
+
+		public boolean isMonitoredKey(Key key) {
+			return akeyMonitoredList.contains(key);
+		}
 	}
 	
+	private ArrayList<Key> akeyList = new ArrayList<Key>();
 	private TreeMap<String,Key> tmKey = new TreeMap<String,Key>(String.CASE_INSENSITIVE_ORDER);
 	private TreeMap<Integer,HashMap<String,Key>> tmCodeKeys = new TreeMap<Integer,HashMap<String,Key>>();
 	private String	strKeyIdPrefixFilter;
+	private int	iKeyCodeForEscape;
 	
-	public boolean addKey(String strId, Integer... aiCodeToMonitor){
+	public Key addKey(String strId, Integer... aiCodeToMonitor){
 		ArrayList<Key> akey = new ArrayList<Key>();
 		for(Integer iKeyCode:aiCodeToMonitor){
 			akey.add(getFirstKeyForCode(iKeyCode));
@@ -165,7 +176,7 @@ public class ManageKeyCode {
 		
 		return addKey(strId, akey.toArray(new Key[0]));
 	}
-	public boolean addKey(String strId, Key... akeyToMonitor){
+	public Key addKey(String strId, Key... akeyToMonitor){
 		return addKeyWorkFull(strId,null,akeyToMonitor);
 	}
 	
@@ -175,21 +186,21 @@ public class ManageKeyCode {
 	 * @param iCode
 	 * @return true if added or already set with same code, false if already set with different code
 	 */
-	private boolean addKeyWorkFull(String strId, Integer iCode, Key... akeyToMonitor){
+	private Key addKeyWorkFull(String strId, Integer iCode, Key... akeyToMonitor){
 		if(iCode!=null && akeyToMonitor.length>0){
 			throw new PrerequisitesNotMetException("both params were set...", iCode, akeyToMonitor);
 		}
 		
 		Key keyExisting = tmKey.get(strId);
 		if(keyExisting!=null){
-			if(keyExisting.isKeyWithCode()){
+			if(keyExisting.isModeKeyWithCode()){
 				Integer iCodeExisting = keyExisting.getKeyCode();
 				if(iCodeExisting==iCode){
 					MsgI.i().devWarn("already set", strId, iCode);
-					return true;
+					return keyExisting;
 				}else{
 					MsgI.i().devWarn("cannot modify the code for", strId, iCodeExisting, iCode);
-					return false;
+					return null;
 				}
 			}
 		}
@@ -207,7 +218,9 @@ public class ManageKeyCode {
 			}
 			
 			Key keyNew = new Key(strId,iCode);
+			PrerequisitesNotMetException.assertNotAlreadySet("key id", tmKey.get(strId), keyNew, strId, iCode, this);
 			tmKey.put(strId, keyNew);
+			akeyList.add(keyNew);
 			
 			/**
 			 * populate list of keys with the same code
@@ -219,12 +232,12 @@ public class ManageKeyCode {
 			}
 			hm.put(keyNew.getId(), keyNew);
 			
-			return true;
+			return keyNew;
 		}else
 		if(akeyToMonitor.length>0){
-			if(keyExisting!=null && !keyExisting.isKeyGroupMonitor()){
+			if(keyExisting!=null && !keyExisting.isModeKeyGroupMonitor()){
 				MsgI.i().devWarn("existing is not a key group monitor", keyExisting);
-				return false;
+				return null;
 			}
 			
 			Key keyGroupMonitor = keyExisting;
@@ -236,23 +249,31 @@ public class ManageKeyCode {
 				tmKey.put(strId, keyGroupMonitor);
 			}else{
 				MsgI.i().devWarn("no key added to monitoring", strId, akeyToMonitor);
-				return false;
+				return null;
 			}
 			
-			return true;
+			return keyGroupMonitor;
 		}else{
 			throw new PrerequisitesNotMetException("both are not set", iCode, akeyToMonitor);
 		}
 		
 	}
 	
-	public ArrayList<Key> getKeyListCopy() {
-		ArrayList<Key> akeyList = new ArrayList<Key>();
-		for(Entry<String,Key> entry:tmKey.entrySet()){
-			akeyList.add(entry.getValue());
-		}
+	protected ArrayList<Key> getKeyList(){
 		return akeyList;
 	}
+	public ArrayList<Key> getKeyListCopy(){
+//		if(tmKey.size()!=akeyList.size())
+		return new ArrayList<Key>(akeyList);
+	}
+	
+//	public ArrayList<Key> getKeyListCopy() {
+//		ArrayList<Key> akeyList = new ArrayList<Key>();
+//		for(Entry<String,Key> entry:tmKey.entrySet()){
+//			akeyList.add(entry.getValue());
+//		}
+//		return akeyList;
+//	}
 	
 	public ArrayList<String> getKeyCodeListReport(){
 		ArrayList<String> astr = new ArrayList<String>();
@@ -263,14 +284,21 @@ public class ManageKeyCode {
 		return astr;
 	}
 	
+	public int getKeyCodeForEscape(){
+		return iKeyCodeForEscape;
+	}
+	
 	/**
 	 * TODO should this be allowed to be called only once? other classes without conflicts would be no problem tho...
+	 * @param iKeyCodeForEscape generic cancel fail-safe key
 	 * @param cl
 	 * @param strKeyIdPrefixFilter can be null
 	 * @return
 	 */
-	public boolean fillKeyIdCodeFrom(Class<?> cl, String strKeyIdPrefixFilter){
+	public boolean fillKeyIdCodeFrom(int iKeyCodeForEscape, Class<?> cl, String strKeyIdPrefixFilter){
 		this.strKeyIdPrefixFilter=strKeyIdPrefixFilter;
+		
+		this.iKeyCodeForEscape=iKeyCodeForEscape;
 		
 //		if(tmIdCode.size()>0){			return;		}
 		try {
@@ -285,7 +313,7 @@ public class ManageKeyCode {
 				
 				String strId=fld.getName();//.substring(4); //removes the KEY_ prefix
 				
-				if(!addKeyWorkFull(strId,iCode)){
+				if(addKeyWorkFull(strId,iCode)==null){
 					throw new PrerequisitesNotMetException("keycode filling failed",strId,iCode,cl,strKeyIdPrefixFilter);
 				}
 			}
@@ -298,14 +326,14 @@ public class ManageKeyCode {
 	
 	public Integer getKeyCodeFromId(String strId){
 		Key key = tmKey.get(strId);
-		if(key.isKeyWithCode())return key.getKeyCode();
+		if(key.isModeKeyWithCode())return key.getKeyCode();
 		return null;
 	}
 	
 	public String getKeyIdFromCode(int iCode){
 		for(Entry<String,Key> entry:tmKey.entrySet()){
 			Key key = entry.getValue();
-			if(!key.isKeyWithCode())continue;
+			if(!key.isModeKeyWithCode())continue;
 			if(key.getKeyCode()==iCode)return key.getId();
 		}
 		return null;
@@ -361,5 +389,7 @@ public class ManageKeyCode {
 	public void configure() {
   	addSpecialKeys();
 	}
+	
+	public abstract KeyBind getPressedKeysAsKeyBind();
 
 }

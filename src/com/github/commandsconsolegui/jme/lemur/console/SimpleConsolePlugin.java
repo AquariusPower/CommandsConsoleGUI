@@ -49,7 +49,7 @@ import com.github.commandsconsolegui.globals.jme.lemur.GlobalLemurConsoleStateI;
 import com.github.commandsconsolegui.globals.jme.lemur.GlobalLemurDialogHelperI;
 import com.github.commandsconsolegui.jme.AudioUII;
 import com.github.commandsconsolegui.jme.JmeAppOS;
-import com.github.commandsconsolegui.jme.JmeManageKeyCode;
+import com.github.commandsconsolegui.jme.ManageKeyCodeJme;
 import com.github.commandsconsolegui.jme.ManageKeyBindJme;
 import com.github.commandsconsolegui.jme.cmd.CommandsBackgroundStateI;
 import com.github.commandsconsolegui.jme.extras.FpsLimiterStateI;
@@ -202,7 +202,7 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
   	}
   	
   	if(!GlobalManageKeyCodeI.iGlobal().isSet()){
-  		GlobalManageKeyCodeI.iGlobal().set(new JmeManageKeyCode());
+  		GlobalManageKeyCodeI.iGlobal().set(new ManageKeyCodeJme());
   	}
   	
   	if(!GlobalManageKeyBindI.iGlobal().isSet()){
