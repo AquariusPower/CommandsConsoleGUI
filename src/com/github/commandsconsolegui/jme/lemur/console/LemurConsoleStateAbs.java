@@ -34,6 +34,8 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
+import org.lwjgl.opengl.Display;
+
 import com.github.commandsconsolegui.cmd.CommandData;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
@@ -54,7 +56,7 @@ import com.github.commandsconsolegui.jme.AudioUII.EAudio;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.jme.IJmeConsoleUI;
 import com.github.commandsconsolegui.jme.ManageConditionalStateI;
-import com.github.commandsconsolegui.jme.MouseCursorCentralI.EMouseCursorButton;
+import com.github.commandsconsolegui.jme.ManageMouseCursorI.EMouseCursorButton;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.jme.lemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs;
@@ -65,6 +67,7 @@ import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.misc.DebugI;
 import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -248,8 +251,8 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 //		if(!app().getStateManager().attach(LemurMiscHelpersStateI.i())){
 //			throw new NullPointerException("already attached state "+LemurMiscHelpersStateI.class.getName());
 //		}
-		if(!LemurFocusHelperStateI.i().isConfigured()){
-			LemurFocusHelperStateI.i().configure(new LemurFocusHelperStateI.CfgParm(null));
+		if(!LemurDiagFocusHelperStateI.i().isConfigured()){
+			LemurDiagFocusHelperStateI.i().configure(new LemurDiagFocusHelperStateI.CfgParm(null));
 		}
 		
 		if(!ManageConditionalStateI.i().isConfigured()){
@@ -382,7 +385,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 		// main container
 //		setContainerMain(new ContainerMain(new BorderLayout(), getDiagStyle()).setDiagOwner(this));
 		setDialogMainContainer(new DialogMainContainer(this, new BorderLayout(), getDiagStyle()));
-		MiscLemurStateI.i().setSizeSafely(getDialogMainContainer(), getConsoleSizeCopy(), true);
+		MiscLemurStateI.i().setPreferredSizeSafely(getDialogMainContainer(), getConsoleSizeCopy(), true);
 		
 		/**
 		 * TOP ELEMENT =================================================================
@@ -452,7 +455,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 		// input
 		super.setInputField(new TextField(""+cd().getCommandPrefix(),getDiagStyle()));
     CursorEventControl.addListenersToSpatial(getInputField(), ConsoleMouseCursorListenerI.i());
-		LemurFocusHelperStateI.i().addFocusChangeListener(getInputField());
+		LemurDiagFocusHelperStateI.i().addFocusChangeListener(getInputField());
 //		fInputHeight = MiscJmeI.i().retrieveBitmapTextFor(getInputField()).getLineHeight();
 		getDialogMainContainer().addChild( getInputField(), BorderLayout.Position.South );
 		
@@ -467,7 +470,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 	protected boolean enableAttempt() {
 		if(!_enableAttempt())return false;
 		
-		LemurFocusHelperStateI.i().requestFocus(getInputField());
+		LemurDiagFocusHelperStateI.i().requestFocus(getInputField());
 //	commonOnEnableDisable();
 		
 		if(isFullyInitialized()){
@@ -486,7 +489,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 		}
 		
 		closeHint();
-		LemurFocusHelperStateI.i().removeFocusableFromList(getInputField());
+		LemurDiagFocusHelperStateI.i().removeFocusableFromList(getInputField());
 //		commonOnEnableDisable();
 		
 		return true;
@@ -580,7 +583,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 	}
 	
 	public LemurConsoleStateAbs setHintBoxSize(Vector3f v3fBoxSizeXY, Integer iVisibleLines) {
-		MiscLemurStateI.i().setSizeSafely(getHintBox(), v3fBoxSizeXY, true);
+		MiscLemurStateI.i().setPreferredSizeSafely(getHintBox(), v3fBoxSizeXY, true);
 		getHintBox().setVisibleItems(iVisibleLines);
 		return this;
 	}
@@ -930,7 +933,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 	}
 	
 	public void setContainerConsolePreferredSize(Vector3f v3f) {
-		MiscLemurStateI.i().setSizeSafely(getDialogMainContainer(), v3f, true);
+		MiscLemurStateI.i().setPreferredSizeSafely(getDialogMainContainer(), v3f, true);
 	}
 	public void addRemoveContainerConsoleChild(boolean bAdd, Node pnlChild){
 		if(bAdd){
@@ -998,9 +1001,9 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 //	}
 
 	protected void updateOverrideInputFocus() {
-		if( !LemurFocusHelperStateI.i().isDialogFocusedFor(getInputField()) ){
+		if( !LemurDiagFocusHelperStateI.i().isDialogFocusedFor(getInputField()) ){
 //		if(!getInputField().equals(LemurFocusHelperStateI.i().getFocused())){
-			LemurFocusHelperStateI.i().requestFocus(getInputField(),true);
+			LemurDiagFocusHelperStateI.i().requestFocus(getInputField(),true);
 		}
 	}
 	
@@ -1223,7 +1226,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 	//private boolean	bUseDumbWrap = true;
 	//private Integer	iConsoleMaxWidthInCharsForLineWrap = 0;
 	private BitmapFont	fntMakeFixedWidth;
-	private StatsAppState	stateStats;
+	private StatsAppState	stateStatsOptional;
 	//private boolean	bEngineStatsFps;
 	//private float	fMonofontCharWidth;
 	//private GridPanel	gpListboxDumpArea;
@@ -1518,7 +1521,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 	//	astrStyleList.add(Styles.ROOT_STYLE);
 	//	astrStyleList.add(STYLE_CONSOLE);
 		
-		stateStats = app().getStateManager().getState(StatsAppState.class);
+		stateStatsOptional = app().getStateManager().getState(StatsAppState.class);
 		updateEngineStats();
 		
 		// instantiations initializer
@@ -1604,8 +1607,8 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 		if(bInitializeOnlyTheUI)throw new NullPointerException("already configured!");
 		
 		v3fApplicationWindowSize = new Vector3f(
-				app().getContext().getSettings().getWidth(),
-				app().getContext().getSettings().getHeight(),
+				Display.getWidth(), //app().getContext().getSettings().getWidth(),
+				Display.getHeight(), //app().getContext().getSettings().getHeight(),
 				MiscLemurStateI.i().getPreferredThickness());
 		
 		iMargin=2;
@@ -2747,8 +2750,13 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 	}
 	
 	public void updateEngineStats() {
-		stateStats.setDisplayStatView(cd().btgEngineStatsView.get());
-		stateStats.setDisplayFps(cd().btgEngineStatsFps.get());
+		if(stateStatsOptional==null){
+			MsgI.i().warn("the default state for engine stats was not set", this);
+			return;
+		}
+		
+		stateStatsOptional.setDisplayStatView(cd().btgEngineStatsView.get());
+		stateStatsOptional.setDisplayFps(cd().btgEngineStatsFps.get());
 	}
 	private void styleHelp(){
 		cd().dumpInfoEntry("Available styles:");
@@ -3764,14 +3772,6 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 //	protected abstract Float getStatsHeight();
 	
 	@Override
-	public void focusGained() {
-	}
-	
-	@Override
-	public void focusLost() {
-	}
-
-	@Override
 	public boolean execTextDoubleClickActionFor(DialogListEntryData<T> dled) {
 		throw new UnsupportedOperationException("method not implemented yet");
 	}
@@ -3790,5 +3790,10 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 //	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 //		if(fld.getDeclaringClass()!=ConsoleStateAbs.class){super.setFieldValue(fld,value);return;}
 //		fld.set(this,value);
+//	}
+	
+//	@Override
+//	public void infoSystemTopOverride(String str) {
+//		LemurDiagFocusHelperStateI.i().requestFocus(spt);
 //	}
 }

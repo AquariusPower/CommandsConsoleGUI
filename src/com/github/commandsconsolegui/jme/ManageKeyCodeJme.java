@@ -85,7 +85,7 @@ public class ManageKeyCodeJme extends ManageKeyCode{
 			if(EKeyMod.isModKey(key))continue;
 			
 			if(key.isPressed()){
-				strCfg+=key.getId();
+				strCfg+=key.getSimpleId();
 				return new KeyBind().setFromKeyCfg(strCfg);
 			}
 		}

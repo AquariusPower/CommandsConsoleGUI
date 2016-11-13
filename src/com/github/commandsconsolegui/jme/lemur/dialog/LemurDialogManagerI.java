@@ -34,18 +34,18 @@ import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.ManageDialogAbs;
-import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs.SaveLmrDiag;
+import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.misc.ManageSingleInstanceI;
-import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
+import com.simsilica.lemur.Insets3f;
+import com.simsilica.lemur.Label;
 import com.simsilica.lemur.ListBox;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.Slider;
@@ -90,7 +90,9 @@ public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends ManageDi
 		/** TODO not working yet */
 		SliderForValueChange,
 		
-		PopupHelp,
+		PopupHelp, 
+		
+		SystemAlert,
 		
 		;
 		public String s(){return this.toString();}
@@ -163,6 +165,13 @@ public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends ManageDi
 		attrs.set("color", ColorRGBA.Blue.clone());
 		clBg = ColorRGBA.Cyan.clone();
 		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
+		
+		attrs = styles.getSelector(DialogStyleElementId.SystemAlert.s(), STYLE_CONSOLE);
+		attrs.set("color", ColorRGBA.Blue.clone());
+		clBg = ColorRGBA.Yellow.clone();clBg.a=0.75f;
+		attrs.set(Label.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
+		//TODO not working? 		attrs.set(Label.LAYER_INSETS, new Insets3f(5f, 5f, 5f, 5f));
+		//TODO not working? 		attrs.set(Label.LAYER_BORDER, new QuadBackgroundComponent(ColorRGBA.Red.clone()));
 		
 		attrs = styles.getSelector(DialogStyleElementId.ResizeBorder.s(), STYLE_CONSOLE);
 		clBg = ColorRGBA.Cyan.clone();

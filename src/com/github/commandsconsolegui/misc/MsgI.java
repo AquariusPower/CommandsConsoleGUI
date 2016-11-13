@@ -183,5 +183,20 @@ public class MsgI implements IMessageListener{
 		
 		return true;
 	}
+
+//	public boolean infoSystemTopOverride(String str) {
+//		boolean bListened=false;
+//		for(IMessageListener imsg:aimsgList){
+//			if(imsg.infoSystemTopOverride(str)){
+//				bListened=true;
+//			}
+//		}
+//		
+//		if(!bListened){
+//			System.err.println(DebugI.i().joinMessageWithObjects(true,"SystemInfo:"+str));
+//		}
+//		
+//		return true;
+//	}
 	
 }

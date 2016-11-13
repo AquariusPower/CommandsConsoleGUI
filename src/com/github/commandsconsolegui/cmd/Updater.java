@@ -26,9 +26,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package com.github.commandsconsolegui.cmd;
 
+import com.github.commandsconsolegui.globals.GlobalAppOSI;
 import com.github.commandsconsolegui.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.misc.CallQueueI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 
 /**
  * 
@@ -37,9 +39,16 @@ import com.github.commandsconsolegui.misc.CallQueueI;
  */
 public class Updater {
 	public void update(float fTpf){
-		GlobalSimulationTimeI.i().updateAdd(fTpf);
-		
-		GlobalManageKeyBindI.i().update(fTpf); //this may create queued calls
-		CallQueueI.i().update(fTpf);
+//		try{
+			GlobalSimulationTimeI.i().updateAdd(fTpf); //above all
+			
+			//these may create queued calls
+			GlobalManageKeyBindI.i().update(fTpf);
+			GlobalAppOSI.i().update(fTpf);
+			
+			CallQueueI.i().update(fTpf); //after all
+//		}catch(Exception e){
+//			throw new PrerequisitesNotMetException("problem").setCauseAndReturnSelf(e);
+//		}
 	}
 }

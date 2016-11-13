@@ -249,7 +249,7 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 			dledSlider.setParent(dledVals);
 			dledSlider.setText("Change value: ", vcf);
 			dledSlider.setSlider(
-				varn.getMin().doubleValue(), varn.getMax().doubleValue(), varn.getValue().doubleValue(),
+				varn.getMin().doubleValue(), varn.getMax().doubleValue(), varn.getNumber().doubleValue(),
 				caller, true, false);
 			addEntry(dledSlider);
 		}

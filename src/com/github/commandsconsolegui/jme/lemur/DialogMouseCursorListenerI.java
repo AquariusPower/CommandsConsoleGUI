@@ -32,10 +32,10 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.jme.MouseCursorButtonData;
-import com.github.commandsconsolegui.jme.MouseCursorCentralI.EMouseCursorButton;
+import com.github.commandsconsolegui.jme.ManageMouseCursorI.EMouseCursorButton;
 import com.github.commandsconsolegui.jme.MultiClickCondStateI;
 import com.github.commandsconsolegui.jme.MultiClickCondStateI.ECallMode;
-import com.github.commandsconsolegui.jme.lemur.console.LemurFocusHelperStateI;
+import com.github.commandsconsolegui.jme.lemur.console.LemurDiagFocusHelperStateI;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogStateAbs;
 import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
 import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserDataCellEntry;
@@ -60,14 +60,14 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 	public boolean clickEnd(MouseCursorButtonData buttonData, CursorButtonEvent eventButton, Spatial target,Spatial capture) {
 		if(capture==null)return false; //TODO ??? if(capture==null)capture=target; ??? 
 		
-		LemurFocusHelperStateI.i().requestDialogFocus(capture);
+		LemurDiagFocusHelperStateI.i().requestDialogFocus(capture);
 		
 		//TODO try to disable elements at parent dialog (as modal child has focus), this didnt work: if(LemurFocusHelperStateI.i().isDialogFocusedFor(capture))return false;
 		
 		// missing ones are ignored so each element can consume it properly
 		boolean bConsumed = false;
 		final LemurDialogStateAbs<?,?> diag = 
-				(LemurDialogStateAbs)LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
+				(LemurDialogStateAbs)LemurDiagFocusHelperStateI.i().retrieveDialogFromSpatial(capture);
 		EMouseCursorButton e = buttonData.getActivatorType();
 		switch(e){
 			case Action1Click:
@@ -136,7 +136,7 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 //				}
 				break;
 			case ScrollClick:
-				bConsumed = LemurFocusHelperStateI.i().lowerDialogFocusPriority(capture);
+				bConsumed = LemurDiagFocusHelperStateI.i().lowerDialogFocusPriority(capture);
 				break;
 //			case ContextPropertiesClick:
 ////			LemurDialogGUIStateAbs diag = LemurFocusHelperStateI.i().retrieveDialogFromSpatial(capture);

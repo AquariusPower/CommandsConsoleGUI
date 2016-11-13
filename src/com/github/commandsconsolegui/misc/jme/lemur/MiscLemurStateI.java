@@ -43,10 +43,10 @@ import com.github.commandsconsolegui.globals.jme.GlobalDialogHelperI;
 import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jme.lemur.GlobalLemurDialogHelperI;
 import com.github.commandsconsolegui.jme.ManageDialogAbs;
-import com.github.commandsconsolegui.jme.MouseCursorCentralI;
+import com.github.commandsconsolegui.jme.ManageMouseCursorI;
 import com.github.commandsconsolegui.jme.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jme.lemur.DialogMouseCursorListenerI;
-import com.github.commandsconsolegui.jme.lemur.console.LemurFocusHelperStateI;
+import com.github.commandsconsolegui.jme.lemur.console.LemurDiagFocusHelperStateI;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI.DialogStyleElementId;
 import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry;
 import com.github.commandsconsolegui.jme.lemur.extras.DialogMainContainer;
@@ -269,7 +269,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 	private void updateBlinkInputFieldTextCursor(TextField tf) {
 		if(!bBlinkingTextCursor)return;
 //		if(!tf.equals(LemurFocusHelperStateI.i().getFocused()))return;
-		if(!LemurFocusHelperStateI.i().isDialogFocusedFor(tf))return;
+		if(!LemurDiagFocusHelperStateI.i().isDialogFocusedFor(tf))return;
 		
 		Geometry geomCursor = tf.getUserData(EUserData.geomCursorHotLink.toString());
 		if(geomCursor==null){
@@ -710,11 +710,13 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 				lblPopupHelp = new Label("nothing yet...", new ElementId(DialogStyleElementId.PopupHelp.s()), GlobalLemurDialogHelperI.i().STYLE_CONSOLE);
 			}
 			lblPopupHelp.setText("["+strPopupHelp+"]");
-			Vector2f v2f = MouseCursorCentralI.i().getMouseCursorPositionCopy();
+			Vector2f v2f = ManageMouseCursorI.i().getMouseCursorPositionCopy();
 			
 			Vector3f v3fSize = lblPopupHelp.getSize();
 			
-			lblPopupHelp.setLocalTranslation(v2f.x-v3fSize.x/2, v2f.y+v3fSize.y+10, 1000);
+			float fDistFromCursor=10f;
+			float fZAboveAll=1000;
+			lblPopupHelp.setLocalTranslation(v2f.x-v3fSize.x/2, v2f.y+v3fSize.y+fDistFromCursor, fZAboveAll);
 			
 			if(lblPopupHelp.getParent()==null)GlobalGUINodeI.i().attachChild(lblPopupHelp);
 		}else{
@@ -905,7 +907,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 			if(v3fPrefSize!=null){
 				if(fNewZSize!=null && Float.compare(v3fPrefSize.z,0.0f)==0 ){
 					v3fPrefSize.z=fNewZSize;
-					setSizeSafely(panel,v3fPrefSize,true);
+					setPreferredSizeSafely(panel,v3fPrefSize,true);
 				}
 			}
 			
@@ -961,7 +963,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 	private boolean	bAllowMinSizeCheckAndFix = false; //MUST BE INITIALLY FALSE!
 	
 	/**
-	 * see {@link #setSizeSafely(Panel, Vector3f, boolean)}
+	 * see {@link #setPreferredSizeSafely(Panel, Vector3f, boolean)}
 	 * 
 	 * @param pnl
 	 * @param fX
@@ -970,18 +972,20 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 	 * @return
 	 */
 	public Vector3f setSizeSafely(Panel pnl, float fX, float fY, boolean bForce){
-		return setSizeSafely(pnl, new Vector3f(fX,fY,-1), bForce); //z=-1 will be fixed
+		return setPreferredSizeSafely(pnl, new Vector3f(fX,fY,-1), bForce); //z=-1 will be fixed
 	}
 	
 	/**
 	 * this only works without crashing because of {@link DialogMainContainer#updateLogicalState()}
+	 * 
+	 * this only applies on next frame.
 	 * 
 	 * @param pnl
 	 * @param v3fSizeNew x,y,z use -1 to let it be automatic = preferred
 	 * @param bForceSpecificSize otherwise the preferred values will be used as minimum
 	 * @return the possibly valid size after fixed (including z)
 	 */
-	public Vector3f setSizeSafely(
+	public Vector3f setPreferredSizeSafely(
 		final Panel pnl, 
 		final Vector3f v3fSizeNew, 
 		final boolean bForceSpecificSize 
@@ -1017,7 +1021,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 	}
 	
 	/**
-	 * IMPORTANT!! This is not strongly crash safe, prefer using {@link #setSizeSafely(Panel, Vector3f, boolean)}
+	 * IMPORTANT!! This is not strongly crash safe, prefer using {@link #setPreferredSizeSafely(Panel, Vector3f, boolean)}
 	 * 
 	 * Sets custom sizes with crash prevention.
 	 * And make it sure the thickness is correct (not 0.0f).
@@ -1047,7 +1051,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 				Vector3f v3fSize = v3fSizeF;
 				
 				Vector3f v3fPreferredBkp = pnl.getPreferredSize().clone();
-				setSizeSafely(pnl, v3fSizeF, bForceSpecificSize);
+				setPreferredSizeSafely(pnl, v3fSizeF, bForceSpecificSize);
 				
 				// the check
 				if(!validatePanelUpdate(pnl)){

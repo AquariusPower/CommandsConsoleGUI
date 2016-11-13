@@ -47,21 +47,23 @@ import com.github.commandsconsolegui.jme.lemur.dialog.MaintenanceListLemurDialog
 import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDiagChoice;
 import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDiagMaintList;
 import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDiagQuestion;
-import com.github.commandsconsolegui.misc.ManageConfigI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
-import com.github.commandsconsolegui.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.misc.HoldRestartable;
+import com.github.commandsconsolegui.misc.ManageConfigI;
+import com.github.commandsconsolegui.misc.ManageConfigI.IConfigure;
+import com.github.commandsconsolegui.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.MsgI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexHacksPluginI;
-import com.github.commandsconsolegui.misc.ManageSingleInstanceI;
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
 import com.jme3.system.AppSettings;
+import com.jme3.system.lwjgl.LwjglAbstractDisplay;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 
@@ -165,6 +167,11 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		ManageConfigI.i().assertConfigured(this);
 		
 		MsgI.i().setEnableDebugMessages(true);
+		
+		// disable some mappings to let the console manage it.
+		getInputManager().deleteMapping(super.INPUT_MAPPING_CAMERA_POS); //TODO there is no super code for it?
+		getInputManager().deleteMapping(super.INPUT_MAPPING_MEMORY); //TODO there is no super code for it?
+		getInputManager().deleteMapping(super.INPUT_MAPPING_HIDE_STATS);
 		
 		consolePlugin.initialize();
 		
@@ -356,5 +363,15 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 	@Override
 	public String getUniqueId() {
 		return MiscI.i().prepareUniqueId(this);
+	}
+	
+	/**
+	 * this is called for uncaugth exceptions! from {@link LwjglAbstractDisplay}
+	 */
+	@Override
+	public void handleError(String errMsg, Throwable t) {
+		PrerequisitesNotMetException.setExitRequestCause(errMsg,t);
+		
+		super.handleError(errMsg, t); //this will end up calling stop() here
 	}
 }	

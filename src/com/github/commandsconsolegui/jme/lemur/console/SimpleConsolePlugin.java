@@ -27,6 +27,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.github.commandsconsolegui.jme.lemur.console;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.reflect.Field;
 
 import com.github.commandsconsolegui.SimulationTime;
@@ -48,13 +49,13 @@ import com.github.commandsconsolegui.globals.jme.GlobalSimpleAppRefI;
 import com.github.commandsconsolegui.globals.jme.lemur.GlobalLemurConsoleStateI;
 import com.github.commandsconsolegui.globals.jme.lemur.GlobalLemurDialogHelperI;
 import com.github.commandsconsolegui.jme.AudioUII;
-import com.github.commandsconsolegui.jme.JmeAppOS;
-import com.github.commandsconsolegui.jme.ManageKeyCodeJme;
 import com.github.commandsconsolegui.jme.ManageKeyBindJme;
+import com.github.commandsconsolegui.jme.ManageKeyCodeJme;
 import com.github.commandsconsolegui.jme.cmd.CommandsBackgroundStateI;
 import com.github.commandsconsolegui.jme.extras.FpsLimiterStateI;
 import com.github.commandsconsolegui.jme.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.jme.lemur.DialogMouseCursorListenerI;
+import com.github.commandsconsolegui.jme.lemur.LemurAppOS;
 import com.github.commandsconsolegui.jme.lemur.MouseCursorListenerAbs;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI;
 import com.github.commandsconsolegui.misc.ISimpleGetThisTrickIndicator;
@@ -62,6 +63,7 @@ import com.github.commandsconsolegui.misc.ManageConfigI;
 import com.github.commandsconsolegui.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.misc.MiscI;
+import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
@@ -87,6 +89,23 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
 	private boolean	bConfigured; 
 	
 	public SimpleConsolePlugin(Application app){
+		if(Thread.getDefaultUncaughtExceptionHandler()==null){ //TODO is this too much???
+//		if(Thread.currentThread().getUncaughtExceptionHandler()==Thread.currentThread().getThreadGroup()){
+//			System.err.println(">>>>>>>>>>>>>>>>>>>>>>>>>>"+Thread.currentThread().getName());
+//			Thread.currentThread().setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+			
+			/**
+			 * this may never be reached as it is already set at {@link LwjglAbstractDisplay}
+			 */
+			Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+				@Override
+				public void uncaughtException(Thread t, Throwable e) {
+//					System.err.println(">>>>>>>>>>>>>>>>>>>>>>>>>>");
+					throw new PrerequisitesNotMetException("uncaught exception at thread "+t.getName()).initCauseAndReturnSelf(e);
+				}
+			});
+		}
+		
 		ManageSingleInstanceI.i().add(this);
 		
 		if(app instanceof SimpleApplication){
@@ -225,17 +244,20 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
   	}
   	
   	if(!GlobalJmeAppOSI.iGlobal().isSet()){
-			GlobalJmeAppOSI.iGlobal().set(new JmeAppOS(
+			GlobalJmeAppOSI.iGlobal().set(new LemurAppOS(
 				cfg.strApplicationBaseSaveDataPath, StorageFolderType.Internal));
   	}
 	}
 
 	public SimpleConsolePlugin initialize() {
 		ManageConfigI.i().assertConfigured(this);
+		
 		if(GlobalSingleMandatoryAppInstanceI.iGlobal().isSet()){
 			GlobalSingleMandatoryAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);
 		}
+		
 		GlobalMainThreadI.iGlobal().set(Thread.currentThread());
+		
 		return this;
 	}
 	

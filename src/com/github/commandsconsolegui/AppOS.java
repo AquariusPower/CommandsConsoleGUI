@@ -91,6 +91,9 @@ public class AppOS {
 	}
 
 	private boolean	bExiting=false;
+	private String	strAlertMsg;
+	private long	lLastAlertMilis;
+	private StackTraceElement[]	asteDebugAlertFrom;
 	/**
 	 * this is important to let some other threads know the application is exiting and behave properly
 	 */
@@ -102,5 +105,38 @@ public class AppOS {
 	public boolean isApplicationExiting(){
 		//TODO is there some way to test if JME is exiting???
 		return bExiting;
+	}
+	
+	public void update(float fTpf){
+		if(strAlertMsg!=null){
+			if( (lLastAlertMilis+1500) < System.currentTimeMillis()){
+				dumpAlert();
+				lLastAlertMilis=System.currentTimeMillis();
+			}
+		}
+	}
+	
+	protected void dumpAlert(){
+		System.err.println("Alert!!! "+strAlertMsg);
+	}
+	
+	public String getAlertMessage(){
+		return strAlertMsg;
+	}
+	
+	public boolean isShowingAlert(){
+		return strAlertMsg!=null;
+	}
+	
+	public StackTraceElement[] showSystemAlert(String strMsg){
+		PrerequisitesNotMetException.assertNotAlreadySet("system alert message", this.strAlertMsg, strMsg, asteDebugAlertFrom, this);
+		this.asteDebugAlertFrom=Thread.currentThread().getStackTrace();
+		this.strAlertMsg=strMsg;
+//		dumpAlert(); //just in case another one happens before the update...
+		return this.asteDebugAlertFrom;
+	}
+	public void hideSystemAlert(StackTraceElement[] asteFrom){
+		PrerequisitesNotMetException.assertIsTrue("alert from matches", asteFrom==asteDebugAlertFrom, asteFrom, asteDebugAlertFrom, this);
+		this.strAlertMsg=null;
 	}
 }

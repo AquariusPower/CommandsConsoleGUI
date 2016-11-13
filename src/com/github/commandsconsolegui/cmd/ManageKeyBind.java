@@ -33,6 +33,7 @@ import java.util.TreeMap;
 
 import com.github.commandsconsolegui.cmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
+import com.github.commandsconsolegui.globals.GlobalAppOSI;
 import com.github.commandsconsolegui.globals.GlobalManageKeyCodeI;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
@@ -109,18 +110,20 @@ public abstract class ManageKeyBind {
 	private boolean	bResetCaptureBeacon;
 
 	private IRefresh	refreshOwnerAfterCapture;
+
+	private StackTraceElement[]	asteAlertFrom;
 	
 	public void update(float fTpf){
 		/**
 		 * this prevent executing the command just after capturing its bind!
 		 */
 		if(bResetCaptureBeacon){
-			if(bindCaptureToTarget.getValue().isActivated()){ 
+			if(bindCaptureToTarget.getKeyBind().isActivated()){ 
 				//still pressed (with modifiers)
 				MsgI.i().info("waiting captured key bind to be released");
 				return; 
 			}else
-			if(bindCaptureToTarget.getValue().getActionKey().isPressed()){ 
+			if(bindCaptureToTarget.getKeyBind().getActionKey().isPressed()){ 
 				//still pressed (only the action key is still being holded)
 				MsgI.i().info("waiting captured action key to be released");
 				return;
@@ -132,8 +135,12 @@ public abstract class ManageKeyBind {
 					//reset
 					bindCaptureToTarget=null;
 					kbCaptured=null;
+					
 					bResetCaptureBeacon=false;
+					
 					refreshOwnerAfterCapture.requestRefresh();
+					
+					GlobalCommandsDelegatorI.i().setupRecreateFile();
 //				}
 			}
 			
@@ -149,7 +156,16 @@ public abstract class ManageKeyBind {
 			kbCaptured=GlobalManageKeyCodeI.i().getPressedKeysAsKeyBind();
 			
 //			if(kbCaptured.getActionKey()!=null){
-			if(kbCaptured!=null){
+			if(kbCaptured==null){
+				if(!GlobalAppOSI.i().isShowingAlert()){
+					asteAlertFrom = GlobalAppOSI.i().showSystemAlert(
+						"Press a key combination to be captured (where modifiers are ctrl, shift or alt). "
+						+"More complex keybindings can be set thru console commands.");
+//					LemurDiagFocusHelperStateI.i().removeAllFocus();
+				}
+			}else{
+				GlobalAppOSI.i().hideSystemAlert(asteAlertFrom);
+				
 				bindCaptureToTarget.setAllowCallerAssignedToBeRun(false);
 				bindCaptureToTarget.setValue(kbCaptured);
 				bindCaptureToTarget.setAllowCallerAssignedToBeRun(true);
@@ -173,8 +189,8 @@ public abstract class ManageKeyBind {
 		 */
 		hmKeyCodeVsActivatedBind.clear();
 		for(KeyBoundVarField bind:tmbindList.values()){
-			if(bind.getValue().isActivated()){ //pressed
-				Integer iKeyCode = bind.getValue().getActionKey().getKeyCode();
+			if(bind.getKeyBind().isActivated()){ //pressed
+				Integer iKeyCode = bind.getKeyBind().getActionKey().getKeyCode();
 				
 				ArrayList<KeyBoundVarField> abindForActKeyCode = hmKeyCodeVsActivatedBind.get(iKeyCode);
 				if(abindForActKeyCode==null){
@@ -184,7 +200,7 @@ public abstract class ManageKeyBind {
 				
 				abindForActKeyCode.add(bind);
 			}else{ //released
-				if(bind.isWasAlreadyActivatedAtLeastOnce()){
+				if(bind.getKeyBind().isWasAlreadyActivatedAtLeastOnce()){
 					bind.runIfActivatedOrResetIfDeactivating();
 				}
 			}
@@ -197,7 +213,7 @@ public abstract class ManageKeyBind {
 			KeyBoundVarField bindWin=abindForActKeyCode.get(0);
 			
 			for(KeyBoundVarField bind:abindForActKeyCode){
-				if(bindWin.getValue().getKeyModListSize() < bind.getValue().getKeyModListSize()){
+				if(bindWin.getKeyBind().getKeyModListSize() < bind.getKeyBind().getKeyModListSize()){
 					bindWin=bind;
 				}
 			}

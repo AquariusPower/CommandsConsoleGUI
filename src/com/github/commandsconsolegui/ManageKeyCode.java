@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import com.github.commandsconsolegui.globals.GlobalManageKeyCodeI;
 import com.github.commandsconsolegui.misc.KeyBind;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
@@ -152,7 +153,20 @@ public abstract class ManageKeyCode {
 			if(akeyMonitoredList!=null)throw new PrerequisitesNotMetException("this key is a group reference, cannot be directly pressed...", this, akeyMonitoredList, bPressed);
 			this.bPressed = bPressed;
 		}
-
+		
+		public String getSimpleId(){
+			String strIdSimple = strId;
+			
+			String strPrefix=GlobalManageKeyCodeI.i().getKeyIdPrefixFilter();
+			if(strPrefix!=null){
+				if(strIdSimple.startsWith(strPrefix)){
+					strIdSimple=strIdSimple.substring(strPrefix.length());
+				}
+			}
+			
+			return strIdSimple;
+		}
+		
 		public String getId() {
 			return strId;
 		}
@@ -286,6 +300,10 @@ public abstract class ManageKeyCode {
 	
 	public int getKeyCodeForEscape(){
 		return iKeyCodeForEscape;
+	}
+	
+	public String getKeyIdPrefixFilter() {
+		return strKeyIdPrefixFilter;
 	}
 	
 	/**

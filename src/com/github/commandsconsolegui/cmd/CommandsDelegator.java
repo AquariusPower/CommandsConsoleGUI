@@ -42,8 +42,6 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.codehaus.groovy.ast.expr.PrefixExpression;
-
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
@@ -356,7 +354,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		if(rfcvField.getClass().isAssignableFrom(KeyBoundVarField.class)){
 			if(bCodePrefixIsDefault){
 				rfcfg = new ReflexFillCfg(rfcvField);
-				rfcfg.setSuffix("Bind");
+				rfcfg.setSuffix("Bind"); // this is important to help on using filters at vars dialog
 			}
 			
 			if(rfcfg!=null)rfcfg.setAsCommandToo(true);
@@ -899,6 +897,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		if(checkCmdValidity(scfUnBindKey,"<KeyMod...+KeyAction>")){
 			String strBindCfg = ccl.paramString(1);
 			GlobalManageKeyBindI.i().removeKeyBind(strBindCfg);
+			setupRecreateFile();
 		}else
 		if(checkCmdValidity(scfBindKey,"<KeyMod...+KeyAction> <full console command>")){
 			String strBindCfg = ccl.paramString(1);
@@ -909,7 +908,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 //			tmbindList.put(strBindCfg,bind);
 			GlobalManageKeyBindI.i().addKeyBind(bind);
 			
-			varSaveSetupFile();
+			setupRecreateFile();
 //			cui().addKeyBind(bind);
 			
 			bCmdWorked=true;
@@ -2295,7 +2294,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	private boolean isRestrictedAndDoesNotExist(String strVar){
 		if(CommandsHelperI.i().isRestricted(strVar)){
 			// user can only set existing restricted vars
-			if(!selectVarSource(strVar).containsKey(strVar)){
+			if(!selectVarSource(strVar).containsKey(CommandsHelperI.i().removeRestrictedToken(strVar))){
 				dumpDevInfoEntry("Restricted var does not exist: "+strVar);
 				return true;
 			}
@@ -2895,6 +2894,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			}
 		}
 		
+		// store keybinds
 		MiscI.i().fileAppendListTS(flSetup, 
 			GlobalManageKeyBindI.i().getReportAsCommands(scfBindKey, true));
 	}
@@ -3732,10 +3732,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		userAliasListHashcode,
 	}
 	
-	private void setupRecreateFile(){
+	public void setupRecreateFile(){
 		dumpDevInfoEntry("Recreating restricted vars setup file:");
 		
-		flSetup.delete();
+//		flSetup.delete();
+		if(flSetup.exists()){
+			flSetup.renameTo(new File(flSetup.getAbsoluteFile()+".old"));
+		}
 		
 		/**
 		 * comments for user
@@ -3782,6 +3785,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	
 	/**
 	 * override to allow custom external vars to be updated thru this method
+	 * will be called from {@link #setupVars(boolean)}
 	 */
 	protected void setupVars(){}
 	
@@ -4719,6 +4723,13 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	public String getUniqueId() {
 		return MiscI.i().prepareUniqueId(this);
 	}
+
+//	@Override
+//	public boolean infoSystemTopOverride(String str) {
+//		dumpEntry(false, true, false, true, "SystemInfo:"+str);
+//		cui().infoSystemTopOverride(str);
+//		return true;
+//	}
 	
 //	public void executeUserBinds(boolean bRun, String strId){
 //		for(KeyBoundVarField bind:tmbindList.values()){

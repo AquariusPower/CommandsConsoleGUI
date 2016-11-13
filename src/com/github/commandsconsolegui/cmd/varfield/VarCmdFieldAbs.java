@@ -440,12 +440,20 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		return valueReport(getRawValue())+"("+valueReport(getRawValueDefault())+")";
 	}
 	
-	/** TODO modify return to O, also on vivo? or will be too much unnecessary complexity? just casts should suffice? */ 
-	public VAL getValue(){
+	/**
+	 * Let each concrete class determine the best naming for the main get() method
+	 * @return
+	 */
+	protected VAL getValue(){
 		return (VAL)getRawValue();
 	}
 	
-	public Object getRawValue(){ //this is safe to be public because it is a base access to the concrete class simple value ex.: will return a primitive Long on the concrete class
+	/**
+	 * this is safe to be public because it is a base access to the concrete class simple value 
+	 * ex.: will return a primitive Long on the concrete class
+	 * @return
+	 */
+	public Object getRawValue(){ 
 		Object val = null;
 		if(cvar!=null){
 			val = cvar.getRawValue();

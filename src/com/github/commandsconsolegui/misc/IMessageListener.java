@@ -33,6 +33,7 @@ package com.github.commandsconsolegui.misc;
 public interface IMessageListener{
 	public boolean info(String str, Object... aobj);
 	public boolean devInfo(String str, Object... aobj);
+//	public boolean infoSystemTopOverride(String str);
 	public boolean warn(String str, Object... aobj);
 	public boolean devWarn(String str, Object... aobj);
 	public boolean debug(String str, Object... aobj);
@@ -44,4 +45,5 @@ public interface IMessageListener{
 	 * @return
 	 */
 	public boolean exception(String strMsgOverride, Exception ex, Object... aobj);
+	
 }

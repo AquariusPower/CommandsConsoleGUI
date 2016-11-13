@@ -43,8 +43,9 @@ import java.util.Arrays;
  */
 public class PrerequisitesNotMetException extends NullPointerException { //@STATIC_OK
 	private static final long	serialVersionUID	= 1342052861109804737L;
-	private static PrerequisitesNotMetException	exRequestExit;
+	private static Throwable	exRequestExit;
 	private static IUserInputDetector	userInputDetector;
+	private static String	strErrorMessage;
 
 	public PrerequisitesNotMetException(boolean bExitApplication, String strMessage, Object... aobj) {
 		super(DebugI.i().joinMessageWithObjects(strMessage,aobj));
@@ -65,8 +66,13 @@ public class PrerequisitesNotMetException extends NullPointerException { //@STAT
 		return exRequestExit!=null;
 	}
 	
-	public static PrerequisitesNotMetException getExitRequestCause(){
+	public static Throwable getExitRequestCause(){
 		return exRequestExit;
+	}
+	
+	public static void setExitRequestCause(String strErrMsg, Throwable t){
+		PrerequisitesNotMetException.strErrorMessage=strErrMsg;
+		PrerequisitesNotMetException.exRequestExit=t;
 	}
 	
 	public static void assertNotEmpty(String strDescWhat, String str, Object... aobjMoreObjectsForDebugInfo){
@@ -159,6 +165,9 @@ public class PrerequisitesNotMetException extends NullPointerException { //@STAT
 	@Override
 	public synchronized Throwable initCause(Throwable cause) {
 		throw new NullPointerException("do not use, just to avoid ignoring the more useful ones");
+	}
+	public static String getExitErrorMessage() {
+		return strErrorMessage;
 	}
 	
 }

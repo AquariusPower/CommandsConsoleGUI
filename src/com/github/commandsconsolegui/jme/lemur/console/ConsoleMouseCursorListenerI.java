@@ -31,7 +31,7 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.console.GlobalJmeConsoleUII;
 import com.github.commandsconsolegui.jme.MouseCursorButtonData;
-import com.github.commandsconsolegui.jme.MouseCursorCentralI;
+import com.github.commandsconsolegui.jme.ManageMouseCursorI;
 import com.github.commandsconsolegui.jme.lemur.MouseCursorListenerAbs;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Panel;
@@ -56,8 +56,8 @@ public class ConsoleMouseCursorListenerI extends MouseCursorListenerAbs {
 		this.cd=GlobalCommandsDelegatorI.i();
 //		this.cgui=GlobalConsoleGuiI.i();
 		
-		if(!MouseCursorCentralI.i().isConfigured()){
-			MouseCursorCentralI.i().configure(null);
+		if(!ManageMouseCursorI.i().isConfigured()){
+			ManageMouseCursorI.i().configure(null);
 		}
 		
 		bConfigured=true;

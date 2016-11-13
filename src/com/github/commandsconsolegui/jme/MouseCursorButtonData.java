@@ -30,7 +30,7 @@ package com.github.commandsconsolegui.jme;
 import java.util.HashMap;
 
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.jme.MouseCursorCentralI.EMouseCursorButton;
+import com.github.commandsconsolegui.jme.ManageMouseCursorI.EMouseCursorButton;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;

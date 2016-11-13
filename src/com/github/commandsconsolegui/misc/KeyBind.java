@@ -30,6 +30,7 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.ManageKeyCode.Key;
 import com.github.commandsconsolegui.globals.GlobalManageKeyCodeI;
+import com.github.commandsconsolegui.globals.GlobalSimulationTimeI;
 
 /**
  * 
@@ -166,12 +167,13 @@ public class KeyBind {
 		
 		if(akeyModifierList!=null){
 			for(Key key:akeyModifierList){
-				str+=key.getId()+"+";
+				String strId=key.getSimpleId();
+				str+=strId+"+";
 	//			str+=GlobalManageKeyCodeI.i().getKeyIdFromCode(key.getKeyCode())+"+";
 			}
 		}
 		
-		str+=getActionKey().getId(); //GlobalManageKeyCodeI.i().getKeyIdFromCode(getActionKey().getKeyCode());
+		str+=getActionKey().getSimpleId(); //GlobalManageKeyCodeI.i().getKeyIdFromCode(getActionKey().getKeyCode());
 		
 		return str;
 	}
@@ -195,4 +197,72 @@ public class KeyBind {
 	public KeyBind setFromKeyCfg(String strCfg) {
 		return setFromKeyIds(strCfg.split("[+]"));
 	}
+
+	/** consecutive activation limit*/
+	private long lActLim = 1; //run once
+	/** Consecutive Activation Interval Milis */
+	private long lActDelayMilis = 0; //every frame
+	
+	public void setRepeatedActivation(){
+		this.lActLim=0; //no limit
+		this.lActDelayMilis=0; //every frame
+	}
+	public void setRepeatedActivation(long lDelayMilis){
+		this.lActLim=0; //no limit
+		this.lActDelayMilis=lDelayMilis;
+	}
+	public void setRepeatedActivation(long lLimit, long lDelayMilis){
+		this.lActLim=lLimit;
+		this.lActDelayMilis=lDelayMilis;
+	}
+	
+	private long lConsecutiveActivationCount = 0;
+	private long lLastActivationMilis=-1;
+
+	public boolean isCanBeRunNowOrReset() {
+		if(isActivated()){
+			boolean bRun=false;
+			
+			if(lActLim>0){
+				if(lConsecutiveActivationCount<lActLim){
+					if(lConsecutiveActivationCount==0){ //no delay for 1st time
+						bRun=true;
+					}else{
+						if(lActDelayMilis==0){ //every frame
+							bRun=true;
+						}else{
+							if(GlobalSimulationTimeI.i().getMilis() > (lLastActivationMilis+lActDelayMilis)){
+								bRun=true;
+							}
+						}
+					}
+				}
+			}
+			
+			lLastActivationMilis = GlobalSimulationTimeI.i().getMilis();
+			lConsecutiveActivationCount++;
+			
+			return bRun;
+		}else{
+			//reset
+			lConsecutiveActivationCount=0;
+			lLastActivationMilis=-1;
+			
+			return false;
+		}
+	}
+	
+//	public boolean isActivated(){
+//		return getValue().isActivated();
+//	}
+	
+	/**
+	 * was already activated at least once
+	 * @return
+	 */
+//	public boolean isWaitingDeactivation(){
+	public boolean isWasAlreadyActivatedAtLeastOnce(){
+		return lLastActivationMilis!=-1;
+	}
+	
 }

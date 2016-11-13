@@ -32,7 +32,7 @@ import java.lang.reflect.Field;
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
-import com.github.commandsconsolegui.jme.MouseCursorCentralI.EMouseCursorButton;
+import com.github.commandsconsolegui.jme.ManageMouseCursorI.EMouseCursorButton;
 import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.misc.jme.MiscJmeI;

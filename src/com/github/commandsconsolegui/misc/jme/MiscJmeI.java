@@ -39,6 +39,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import org.lwjgl.opengl.Display;
+
 import jme3tools.savegame.SaveGame;
 import truetypefont.TrueTypeBitmapGlyph;
 import truetypefont.TrueTypeFont;
@@ -928,8 +930,8 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 	
 	public Vector3f getAppWindowSize(){
 		return new Vector3f(
-			GlobalAppRefI.i().getContext().getSettings().getWidth(),
-			GlobalAppRefI.i().getContext().getSettings().getHeight(),
+			Display.getWidth(),// GlobalAppRefI.i().getContext().getSettings().getWidth(),
+			Display.getHeight(), //GlobalAppRefI.i().getContext().getSettings().getHeight(),
 			0);
 	}
 
@@ -992,7 +994,7 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 	 * @return
 	 */
 	public Trigger[] asTriggerArray(KeyBoundVarField bind){
-		Integer[] ai = bind.getValue().getAllKeyCodes();
+		Integer[] ai = bind.getKeyBind().getAllKeyCodes();
 		Trigger[] at = new Trigger[ai.length];
 		for(int i=0;i<ai.length;i++){
 			at[i]=new KeyTrigger(ai[i]);

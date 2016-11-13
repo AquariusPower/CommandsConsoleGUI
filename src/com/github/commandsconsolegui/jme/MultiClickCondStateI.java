@@ -90,7 +90,7 @@ public class MultiClickCondStateI extends ConditionalStateAbs {
 			/**
 			 * If was not refreshed, it has timed out waiting for a new cmd change.
 			 */
-			boolean bTimedOut = !MouseCursorCentralI.i().isMultiClickDelayWithinLimitFrom(
+			boolean bTimedOut = !ManageMouseCursorI.i().isMultiClickDelayWithinLimitFrom(
 				mc.lLastRequestMilis);
 			
 			boolean bRunNow = false;

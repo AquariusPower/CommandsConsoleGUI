@@ -59,7 +59,11 @@ public abstract class NumberVarFieldAbs<VAL, THIS extends NumberVarFieldAbs<VAL,
 	public VAL getMax() {
 		return nMax;
 	}
-
+	
+	public VAL getNumber(){
+		return getValue();
+	}
+	
 	public THIS setMax(VAL nMax) {
 		PrerequisitesNotMetException.assertNotAlreadySet("max", this.nMax, nMax, this);
 		this.nMax = nMax;

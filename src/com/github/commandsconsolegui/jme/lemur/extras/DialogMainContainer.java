@@ -52,6 +52,7 @@ import com.simsilica.lemur.core.GuiLayout;
 import com.simsilica.lemur.style.ElementId;
 
 /**
+ * This is the top container, attached directly to the GuiNode.
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *

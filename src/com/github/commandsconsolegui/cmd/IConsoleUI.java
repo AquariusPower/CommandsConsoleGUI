@@ -97,5 +97,7 @@ public interface IConsoleUI extends ICheckInitAndCleanupI{
 
 	public abstract boolean checkAndApplyHintAtInputField();
 
+//	public abstract void infoSystemTopOverride(String str);
+
 //	public abstract void addKeyBind(KeyBoundVarField bind);
 }

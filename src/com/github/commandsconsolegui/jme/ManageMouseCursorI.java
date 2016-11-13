@@ -51,15 +51,15 @@ import com.jme3.math.Vector3f;
  * Allows multiple mouse buttons to be clicked or dragged at same time.
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public class MouseCursorCentralI implements IReflexFillCfg, IConsoleCommandListener{
-	private static MouseCursorCentralI instance = new MouseCursorCentralI();
-	public static MouseCursorCentralI i(){return instance;}
+public class ManageMouseCursorI implements IReflexFillCfg, IConsoleCommandListener{
+	private static ManageMouseCursorI instance = new ManageMouseCursorI();
+	public static ManageMouseCursorI i(){return instance;}
 	
-	public static final class CompositeControl extends CompositeControlAbs<MouseCursorCentralI>{
-		private CompositeControl(MouseCursorCentralI casm){super(casm);};
+	public static final class CompositeControl extends CompositeControlAbs<ManageMouseCursorI>{
+		private CompositeControl(ManageMouseCursorI casm){super(casm);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
 	
-	public MouseCursorCentralI() {
+	public ManageMouseCursorI() {
 		ManageSingleInstanceI.i().add(this);
 	}
 	

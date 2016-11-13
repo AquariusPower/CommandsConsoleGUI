@@ -35,6 +35,7 @@ import com.github.commandsconsolegui.cmd.CommandsDelegator;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.globals.jme.GlobalJmeAppOSI;
 import com.github.commandsconsolegui.jme.DialogStateAbs;
 import com.github.commandsconsolegui.jme.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.jme.lemur.MouseCursorListenerAbs;
@@ -64,13 +65,13 @@ import com.simsilica.lemur.focus.FocusTarget;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 
  */
-public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHelperStateI> implements FocusChangeListener {
-	public static final class CompositeControl extends CompositeControlAbs<LemurFocusHelperStateI>{
-		private CompositeControl(LemurFocusHelperStateI casm){super(casm);}; }
+public class LemurDiagFocusHelperStateI extends CmdConditionalStateAbs<LemurDiagFocusHelperStateI> implements FocusChangeListener {
+	public static final class CompositeControl extends CompositeControlAbs<LemurDiagFocusHelperStateI>{
+		private CompositeControl(LemurDiagFocusHelperStateI casm){super(casm);}; }
 	private CompositeControl ccSelf = new CompositeControl(this);
 	
-	private static LemurFocusHelperStateI	instance=new LemurFocusHelperStateI();
-	public static LemurFocusHelperStateI i(){return instance;}
+	private static LemurDiagFocusHelperStateI	instance=new LemurDiagFocusHelperStateI();
+	public static LemurDiagFocusHelperStateI i(){return instance;}
 	
 	ArrayList<FocusTarget> aftZOrderList = new ArrayList<FocusTarget>();
 	ArrayList<Spatial> asptFocusRequestList = new ArrayList<Spatial>();
@@ -89,7 +90,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHel
 //		cc.addConsoleCommandListener(this);
 //	}
 	
-	public LemurFocusHelperStateI() {
+	public LemurDiagFocusHelperStateI() {
 		setPrefixCmdWithIdToo(true);
 	}
 	
@@ -107,7 +108,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHel
 	 * @return 
 	 */
 	@Override
-	public LemurFocusHelperStateI configure(ICfgParm icfg) {
+	public LemurDiagFocusHelperStateI configure(ICfgParm icfg) {
 //	public void configure(Float fBaseZ){
 		CfgParm cfg = (CfgParm)icfg;
 		if(cfg.fBaseZ!=null)this.fdvDialogBazeZ.setObjectRawValue(cfg.fBaseZ);
@@ -208,7 +209,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHel
 		@Override
 		public void cursorButtonEvent(CursorButtonEvent event, Spatial target, Spatial capture) {
 			if(event.isPressed()){ //do not consume the event
-				LemurFocusHelperStateI.i().requestDialogFocus(capture);
+				LemurDiagFocusHelperStateI.i().requestDialogFocus(capture);
 			}
 			
 			super.cursorButtonEvent(event, target, capture);
@@ -330,8 +331,11 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHel
 				Spatial sptDeNest = diagWork.getInputFieldForManagement(ccSelf);
 				
 				if(diagWork.isLayoutValid())assertIsAtRenderingNode(sptDeNest);
-				asptFocusRequestList.remove(sptDeNest); //to update the priority
-				asptFocusRequestList.add(sptDeNest); //top priority
+				/**
+				 * re-add to update the priority to top priority
+				 */
+				asptFocusRequestList.remove(sptDeNest);
+				asptFocusRequestList.add(sptDeNest); 
 				
 				if(sptDeNest instanceof TextField){
 					zSortLatest(((TextField)sptDeNest).getControl(GuiControl.class), false);
@@ -356,7 +360,7 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHel
 	}
 	
 	private void zSortLatest(FocusTarget ftLatest, boolean bJustRemove){
-		aftZOrderList.remove(ftLatest); //remove to update priority
+		aftZOrderList.remove(ftLatest); //remove just to update priority
 		if(!bJustRemove)aftZOrderList.add(ftLatest);
 		
 //		if(ftLatest instanceof TextEntryComponent){
@@ -405,7 +409,8 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHel
 					}
 				}
 				
-				WorkAroundI.i().bugFix(btgBugFixZSortApply, spt, fZ);
+//				WorkAroundI.i().bugFix(btgBugFixZSortApply, spt, fZ);
+				applyDialogZOrder(spt, fZ);
 				
 //				parentestApplyZ(gct.getSpatial(), fZ);
 //				gct.getSpatial().getLocalTranslation().z = (i*0.1f)+0.1f; //so will always be above all other GUI elements that are expectedly at 0
@@ -462,40 +467,72 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHel
 	
 	@Override
 	protected boolean updateAttempt(float tpf) {
-		Spatial spt = getCurrentFocusRequester();
-		GuiGlobals.getInstance().requestFocus(spt); //TODO timed delay?
+		if(GlobalJmeAppOSI.i().isShowingAlert()){
+			GuiGlobals.getInstance().requestFocus(GlobalJmeAppOSI.i().getAlertSpatial());
+		}else{
+			Spatial spt = getCurrentFocusRequester();
+			GuiGlobals.getInstance().requestFocus(spt); //TODO timed delay?
+		}
 		
-		GuiGlobals.getInstance().setCursorEventsEnabled(
-			!isFocusRequesterListEmpty());
+		GuiGlobals.getInstance().setCursorEventsEnabled(!isFocusRequesterListEmpty());
 		
 		return super.updateAttempt(tpf);
 	}
 	
-	private BugFixBoolTogglerCmdField btgBugFixZSortApply = new BugFixBoolTogglerCmdField(this,false)
-		.setCallerAssigned(new CallableX(this) {
-			@Override
-			public Boolean call() {
-				if(!isEnabled())return true; //skipper
-				
-				Spatial spt = this.getParamsForMaintenance().getParam(Spatial.class, 0);
-				Float fZ = this.getParamsForMaintenance().getParam(Float.class, 1);
-				
-				/**
-				 * must be re-added to work...
-				 */
-				Node nodeParent = spt.getParent();
-				if(nodeParent==null){
-					GlobalCommandsDelegatorI.i().dumpDevWarnEntry("parent shouldnt be null...", spt, this, btgBugFixZSortApply);
-					return false;
-				}
-				
-				spt.removeFromParent();
-				spt.getLocalTranslation().z=fZ;
-				nodeParent.attachChild(spt);
-				
-				return true;
-			}
-		});
+	/**
+	 * Lemur only controls the Z order for child elements.
+	 * Each dialog is a Top (parentest) element. 
+	 * There is no Lemur auto Z positioning for top elements.
+	 * The top elements are all at 0.0f (TODO confirm this).
+	 * These dialogs managing exists only on this project. 
+	 * @param spt
+	 * @param fZ
+	 * @return
+	 */
+	private boolean applyDialogZOrder(Spatial spt, Float fZ){
+		if(!isEnabled())return true; //skipper
+		
+		/**
+		 * must be re-added to work...
+		 */
+		Node nodeParent = spt.getParent();
+		if(nodeParent==null){
+			GlobalCommandsDelegatorI.i().dumpDevWarnEntry("parent shouldnt be null...", spt, fZ, this);
+			return false;
+		}
+		
+		spt.removeFromParent();
+		spt.getLocalTranslation().z=fZ;
+		nodeParent.attachChild(spt);
+		
+		return true;
+	}
+	
+//	private BugFixBoolTogglerCmdField btgBugFixZSortApply = new BugFixBoolTogglerCmdField(this,false)
+//		.setCallerAssigned(new CallableX(this) {
+//			@Override
+//			public Boolean call() {
+//				if(!isEnabled())return true; //skipper
+//				
+//				Spatial spt = this.getParamsForMaintenance().getParam(Spatial.class, 0);
+//				Float fZ = this.getParamsForMaintenance().getParam(Float.class, 1);
+//				
+//				/**
+//				 * must be re-added to work...
+//				 */
+//				Node nodeParent = spt.getParent();
+//				if(nodeParent==null){
+//					GlobalCommandsDelegatorI.i().dumpDevWarnEntry("parent shouldnt be null...", spt, this, btgBugFixZSortApply);
+//					return false;
+//				}
+//				
+//				spt.removeFromParent();
+//				spt.getLocalTranslation().z=fZ;
+//				nodeParent.attachChild(spt);
+//				
+//				return true;
+//			}
+//		});
 	
 //	@Override
 //	public <BFR> BFR bugFix(Class<BFR> clReturnType, BFR objRetIfBugFixBoolDisabled, BoolTogglerCmdField btgBugFixId, Object... aobjCustomParams) {
@@ -524,17 +561,17 @@ public class LemurFocusHelperStateI extends CmdConditionalStateAbs<LemurFocusHel
 
 	@Override
 	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
-		if(fld.getDeclaringClass()!=LemurFocusHelperStateI.class)return super.getFieldValue(fld);
+		if(fld.getDeclaringClass()!=LemurDiagFocusHelperStateI.class)return super.getFieldValue(fld);
 		return fld.get(this);
 	}
 	@Override
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
-		if(fld.getDeclaringClass()!=LemurFocusHelperStateI.class){super.setFieldValue(fld,value);return;}
+		if(fld.getDeclaringClass()!=LemurDiagFocusHelperStateI.class){super.setFieldValue(fld,value);return;}
 		fld.set(this,value);
 	}
 
 	@Override
-	protected LemurFocusHelperStateI getThis() {
+	protected LemurDiagFocusHelperStateI getThis() {
 		return this;
 	}
 }

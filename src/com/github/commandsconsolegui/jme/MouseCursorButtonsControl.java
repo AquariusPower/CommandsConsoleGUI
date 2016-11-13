@@ -29,7 +29,7 @@ package com.github.commandsconsolegui.jme;
 
 import java.util.HashMap;
 
-import com.github.commandsconsolegui.jme.MouseCursorCentralI.EMouseCursorButton;
+import com.github.commandsconsolegui.jme.ManageMouseCursorI.EMouseCursorButton;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
 
 /**
@@ -41,7 +41,7 @@ public class MouseCursorButtonsControl {
 	HashMap<EMouseCursorButton, MouseCursorButtonData> hmButtonData = new HashMap<EMouseCursorButton, MouseCursorButtonData>();
 	private Object	objParent;
 	
-	public MouseCursorButtonsControl(MouseCursorCentralI.CompositeControl cc, Object objParent) {
+	public MouseCursorButtonsControl(ManageMouseCursorI.CompositeControl cc, Object objParent) {
 		cc.assertSelfNotNull();
 		
 		if(objParent==null)throw new PrerequisitesNotMetException("missing parent");

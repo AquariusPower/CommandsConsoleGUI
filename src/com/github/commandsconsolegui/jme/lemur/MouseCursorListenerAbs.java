@@ -31,8 +31,8 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.jme.MouseCursorButtonData;
 import com.github.commandsconsolegui.jme.MouseCursorButtonsControl;
-import com.github.commandsconsolegui.jme.MouseCursorCentralI;
-import com.github.commandsconsolegui.jme.MouseCursorCentralI.EMouseCursorButton;
+import com.github.commandsconsolegui.jme.ManageMouseCursorI;
+import com.github.commandsconsolegui.jme.ManageMouseCursorI.EMouseCursorButton;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI;
 import com.github.commandsconsolegui.jme.lemur.dialog.LemurDialogManagerI.DummyEffect;
 import com.github.commandsconsolegui.jme.lemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserDataCellEntry;
@@ -72,7 +72,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 	
 	public MouseCursorButtonsControl mb(){
 //		return mcab;
-		return MouseCursorCentralI.i().getButtonsInstance();
+		return ManageMouseCursorI.i().getButtonsInstance();
 	}
 	
 	@Override

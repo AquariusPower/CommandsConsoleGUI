@@ -27,7 +27,7 @@
 
 package com.github.commandsconsolegui.misc;
 
-import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdFieldAbs;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
@@ -55,7 +55,7 @@ public class WorkAroundI {
 		private CompositeControl(WorkAroundI casm){super(casm);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
 	
-	private static WorkAroundI	instance=new WorkAroundI();
+	private static WorkAroundI instance=new WorkAroundI();
 	public static WorkAroundI i(){return instance;}
 	
 	public void bugFix(BugFixBoolTogglerCmdField btgBugFixId, Object... aobjCustomParams) {
@@ -110,35 +110,24 @@ public class WorkAroundI {
 //		btgBugFix.getCallerAssignedForMaintenance(ccSelf).setQueueDenied();
 //	}
 	
-	public static class BugFixBoolTogglerCmdField extends BoolTogglerCmdField<BugFixBoolTogglerCmdField>{
+	public static class BugFixBoolTogglerCmdField extends BoolTogglerCmdFieldAbs<BugFixBoolTogglerCmdField>{
 
-		public BugFixBoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis,
-				boolean bInitialValue, String strHelp) {
+		public BugFixBoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitialValue, String strHelp) {
 			super(rfcfgOwnerUseThis, bInitialValue, strHelp);
-			// TODO Auto-generated constructor stub
 		}
 
-		public BugFixBoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis,
-				boolean bInitValue) {
+		public BugFixBoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitValue) {
 			super(rfcfgOwnerUseThis, bInitValue);
-			// TODO Auto-generated constructor stub
 		}
 		
 		@Override
 		public BugFixBoolTogglerCmdField setCallerAssigned(CallableX caller) {
 			caller.setQueueDenied();
-//			WorkAroundI.i().prepareBugFix(this);
 			
 			super.setCallerAssigned(caller);
 			
 			return getThis();
 		}
-		
-//		@Override
-//		public BoolTogglerCmdField setHelp(String strHelp) {
-//			super.setHelp(strHelp);
-//			return getThis();
-//		}
 		
 		@Override
 		protected BugFixBoolTogglerCmdField getThis() {
