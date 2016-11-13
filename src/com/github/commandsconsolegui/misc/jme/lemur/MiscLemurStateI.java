@@ -1276,4 +1276,14 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 	public void setPopupHelpString(String str) {
 		this.strPopupHelp=str;
 	}
+
+	public Vector3f getCenterPositionOf(Panel pnl) {
+		Vector3f v3fPos = pnl.getSize().clone();
+		if(v3fPos.length()<2){ //TODO why??
+			v3fPos = pnl.getPreferredSize().clone();
+		}
+		v3fPos.multLocal(0.5f);
+		v3fPos.x*=-1;
+		return v3fPos;
+	}
 }

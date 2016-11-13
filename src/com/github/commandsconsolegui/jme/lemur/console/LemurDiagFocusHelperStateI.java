@@ -80,8 +80,12 @@ public class LemurDiagFocusHelperStateI extends CmdConditionalStateAbs<LemurDiag
 	private FocusManagerState focusState;
 //	private SimpleApplication	sapp;
 //	private CommandsDelegatorI	cc;
-	FloatDoubleVarField fdvDialogBazeZ = new FloatDoubleVarField(this, 20f, "the starting point at Z axis to place dialogs");
-	FloatDoubleVarField fdvDialogDisplacement = new FloatDoubleVarField(this, 10f, "the displacement between dialogs in the Z axis, to let one be shown properly above another.");
+	private FloatDoubleVarField fdvDialogBazeZ = new FloatDoubleVarField(this, 20f, "the starting point at Z axis to place dialogs");
+	private FloatDoubleVarField fdvDialogZDisplacement = new FloatDoubleVarField(this, 10f, "the displacement between dialogs in the Z axis, to let one be shown properly above another.");
+	
+	public float getDialogZDisplacement(){
+		return fdvDialogZDisplacement.getFloat();
+	}
 	
 //	public void configure(){
 //		this.sapp=GlobalSappRefI.i().get();
@@ -393,8 +397,8 @@ public class LemurDiagFocusHelperStateI extends CmdConditionalStateAbs<LemurDiag
 				 * so will always be above all other GUI elements that are expectedly at 0
 				 */
 				float fZ = fdvDialogBazeZ.getFloat() 
-					+ (i*fdvDialogDisplacement.floatValue())
-					+ fdvDialogDisplacement.floatValue(); 
+					+ (i*fdvDialogZDisplacement.floatValue())
+					+ fdvDialogZDisplacement.floatValue(); 
 				
 				GuiControl gcTarget = (GuiControl)ft;
 				Spatial spt = MiscJmeI.i().getParentestFrom(gcTarget.getSpatial());

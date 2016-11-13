@@ -166,12 +166,14 @@ public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends ManageDi
 		clBg = ColorRGBA.Cyan.clone();
 		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
-		attrs = styles.getSelector(DialogStyleElementId.SystemAlert.s(), STYLE_CONSOLE);
-		attrs.set("color", ColorRGBA.Blue.clone());
-		clBg = ColorRGBA.Yellow.clone();clBg.a=0.75f;
-		attrs.set(Label.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
-		//TODO not working? 		attrs.set(Label.LAYER_INSETS, new Insets3f(5f, 5f, 5f, 5f));
-		//TODO not working? 		attrs.set(Label.LAYER_BORDER, new QuadBackgroundComponent(ColorRGBA.Red.clone()));
+//		attrs = styles.getSelector(DialogStyleElementId.SystemAlert.s(), STYLE_CONSOLE);
+//		attrs.set("color", ColorRGBA.Blue.clone());
+//		clBg = ColorRGBA.Yellow.clone();clBg.a=0.75f;
+////		attrs.set(Label.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
+//		attrs.set(Label.LAYER_INSETS, new Insets3f(5f, 5f, 5f, 5f));
+//		QuadBackgroundComponent qbc = new QuadBackgroundComponent(clBg);
+//		qbc.setMargin(3f, 3f);
+//		attrs.set(Label.LAYER_BORDER, qbc);
 		
 		attrs = styles.getSelector(DialogStyleElementId.ResizeBorder.s(), STYLE_CONSOLE);
 		clBg = ColorRGBA.Cyan.clone();

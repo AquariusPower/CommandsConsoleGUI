@@ -30,19 +30,19 @@ package com.github.commandsconsolegui.jme;
 import java.lang.reflect.Field;
 
 import com.github.commandsconsolegui.cmd.CommandsDelegator;
-import com.github.commandsconsolegui.cmd.CommandsHelperI;
 import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.cmd.CommandsHelperI;
 import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.misc.CompositeControlAbs;
+import com.github.commandsconsolegui.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.misc.MiscI;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.github.commandsconsolegui.misc.ManageSingleInstanceI;
 import com.jme3.input.MouseInput;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
@@ -274,6 +274,10 @@ public class ManageMouseCursorI implements IReflexFillCfg, IConsoleCommandListen
 		fld.set(this,value);
 	}
 
+	public Vector3f getMouseCursorPositionCopyAsV3f() {
+		Vector2f v2f = getMouseCursorPositionCopy();
+		return new Vector3f(v2f.x,v2f.y,0);
+	}
 	public Vector2f getMouseCursorPositionCopy() {
 		return GlobalAppRefI.i().getInputManager().getCursorPosition().clone();
 	}

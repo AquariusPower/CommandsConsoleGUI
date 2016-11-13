@@ -159,8 +159,11 @@ public abstract class ManageKeyBind {
 			if(kbCaptured==null){
 				if(!GlobalAppOSI.i().isShowingAlert()){
 					asteAlertFrom = GlobalAppOSI.i().showSystemAlert(
-						"Press a key combination to be captured (where modifiers are ctrl, shift or alt). "
-						+"More complex keybindings can be set thru console commands.");
+						 " Press a key combination to be captured (where modifiers are ctrl, shift or alt).\n"
+						+" More complex keybindings can be set thru console commands.\n"
+						+" Re-binding keys for command:\n"
+						+"  "+bindCaptureToTarget.getKeyBindRunCommand()
+					);
 //					LemurDiagFocusHelperStateI.i().removeAllFocus();
 				}
 			}else{
@@ -261,9 +264,14 @@ public abstract class ManageKeyBind {
 	}
 
 	public void captureAndSetKeyBindAt(KeyBoundVarField bindTarget, IRefresh refreshOwner) {
+		if(this.bindCaptureToTarget!=null){
+			MsgI.i().devWarn("already capturing keybind for", this.bindCaptureToTarget, this.refreshOwnerAfterCapture, this);
+			return;
+		}
+		
 		this.refreshOwnerAfterCapture=refreshOwner;
 		this.bindCaptureToTarget=bindTarget;
-		MsgI.i().info("For unconventional (more complex) key bindings, use the console command.", bindTarget); 
+//		MsgI.i().info("For unconventional (more complex) key bindings, use the console command.", bindTarget); 
 //		bindTarget.setValue(captureKeyBind(bindTarget));
 	}
 
