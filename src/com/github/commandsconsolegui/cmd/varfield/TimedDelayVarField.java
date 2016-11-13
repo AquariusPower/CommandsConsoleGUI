@@ -45,44 +45,14 @@ import com.github.commandsconsolegui.misc.TimeHelperI;
  */
 
 public class TimedDelayVarField extends VarCmdFieldAbs<Float,TimedDelayVarField>{
-//	private static IHandleExceptions ihe = SimpleHandleExceptionsI.i();
-//	private static ArrayList<TimedDelayVarField> atdList = new ArrayList<TimedDelayVarField>();
 	
-//	private static Long lCurrentTimeNano;
-//	private static boolean	bConfigured;
-	
-//	public static final long lNanoOneSecond = 1000000000L; // 1s in nano time
-//	public static final float fNanoToSeconds = 1f/lNanoOneSecond; //multiply nano by it to get in seconds
-//	public static final float fSecondsToNano = lNanoOneSecond; //multiply seconds to get in nano
-	
-	private Long	lLastUpdateReferenceTimeNano;
-//	private float	fDelayLimitSeconds;
-//	private long	lDelayLimitNano;
+	/**
+	 * it must be initialized as inactive (null) so the begin time can be set properly/precisely.
+	 */
+	private Long	lLastUpdateReferenceTimeNano = null;
 
 	private boolean	bOscilate;
 
-//	public static final String	strCodePrefix = "td";
-	
-//	public static void configure(){//IHandleExceptions ihe){
-//		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-////		if(ihe==null)throw new NullPointerException("invalid instance for "+IHandleExceptions.class.getName()); // KEEP ON TOP
-////		TimedDelayVarField.ihe=ihe;
-//		bConfigured=true;
-//	}
-	
-//	/**
-//	 * use this to prevent current time to read from realtime
-//	 * @param lCurrentTimeNano if null, will use realtime
-//	 */
-//	public static void setCurrentTimeNano(Long lCurrentTimeNano){
-//		TimedDelayVarField.lCurrentTimeNano = lCurrentTimeNano;
-//	}
-	
-//	public static long getCurrentTimeNano(){
-//		if(lCurrentTimeNano==null)return System.nanoTime();
-//		return lCurrentTimeNano;
-//	}
-	
 	/**
 	 * This constructor is exclusively for methods local variables.
 	 * Such variables will not be stored neither easily accessible at console.

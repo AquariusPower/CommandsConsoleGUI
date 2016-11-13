@@ -272,16 +272,21 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 	}
 	
 	public void updateColorFading(TimedDelayVarField td, ColorRGBA color, boolean bFadeInAndOut){
-		float fMinAlpha=0.25f;
-		float fDeltaWorkAlpha = 1.0f - fMinAlpha;
+		updateColorFading(td, color, bFadeInAndOut, 0.25f, 1.0f);
+	}
+	public void updateColorFading(TimedDelayVarField td, ColorRGBA color, boolean bFadeInAndOut, float fMinAlpha, float fMaxAlpha){
+		if(fMinAlpha<0f)fMinAlpha=0f;
+		if(fMaxAlpha>1f)fMaxAlpha=1f;
+		
+		float fDeltaWorkAlpha = fMaxAlpha - fMinAlpha;
 		
 		td.setOscilateMode(bFadeInAndOut);
 		
 		color.a = fMinAlpha + td.getCurrentDelayCalcDynamic(fDeltaWorkAlpha);
 		
 //		if(color.a<0)color.a=0;
-		if(color.a>1f){
-			color.a=1f;
+		if(color.a>fMaxAlpha){
+			color.a=fMaxAlpha;
 		}else
 		if(color.a < fMinAlpha){
 			color.a=fMinAlpha;

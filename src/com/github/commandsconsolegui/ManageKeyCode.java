@@ -180,7 +180,8 @@ public abstract class ManageKeyCode {
 	private TreeMap<String,Key> tmKey = new TreeMap<String,Key>(String.CASE_INSENSITIVE_ORDER);
 	private TreeMap<Integer,HashMap<String,Key>> tmCodeKeys = new TreeMap<Integer,HashMap<String,Key>>();
 	private String	strKeyIdPrefixFilter;
-	private int	iKeyCodeForEscape;
+	private int	iKeyCodeForEscape=-1;
+	private int	iKeyCodeForEnter=-1;
 	
 	public Key addKey(String strId, Integer... aiCodeToMonitor){
 		ArrayList<Key> akey = new ArrayList<Key>();
@@ -298,6 +299,9 @@ public abstract class ManageKeyCode {
 		return astr;
 	}
 	
+	public int getKeyCodeForReturn() {
+		return iKeyCodeForEnter;
+	}
 	public int getKeyCodeForEscape(){
 		return iKeyCodeForEscape;
 	}
@@ -306,17 +310,19 @@ public abstract class ManageKeyCode {
 		return strKeyIdPrefixFilter;
 	}
 	
-	/**
+	/** 
 	 * TODO should this be allowed to be called only once? other classes without conflicts would be no problem tho...
-	 * @param iKeyCodeForEscape generic cancel fail-safe key
+	 * @param iKeyCodeForEscape to setup a generic cancel fail-safe key
+	 * @param iKeyCodeForReturn to setup a generic accept fail-safe key
 	 * @param cl
 	 * @param strKeyIdPrefixFilter can be null
 	 * @return
 	 */
-	public boolean fillKeyIdCodeFrom(int iKeyCodeForEscape, Class<?> cl, String strKeyIdPrefixFilter){
+	public boolean fillKeyIdCodeFrom(int iKeyCodeForEscape, int iKeyCodeForReturn, Class<?> cl, String strKeyIdPrefixFilter){
 		this.strKeyIdPrefixFilter=strKeyIdPrefixFilter;
 		
 		this.iKeyCodeForEscape=iKeyCodeForEscape;
+		this.iKeyCodeForEnter=iKeyCodeForReturn;
 		
 //		if(tmIdCode.size()>0){			return;		}
 		try {

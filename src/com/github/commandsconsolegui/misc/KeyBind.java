@@ -27,6 +27,8 @@
 package com.github.commandsconsolegui.misc;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import com.github.commandsconsolegui.ManageKeyCode.Key;
 import com.github.commandsconsolegui.globals.GlobalManageKeyCodeI;
@@ -263,6 +265,31 @@ public class KeyBind {
 //	public boolean isWaitingDeactivation(){
 	public boolean isWasAlreadyActivatedAtLeastOnce(){
 		return lLastActivationMilis!=-1;
+	}
+	
+//	public Comparator<KeyBind> getComparatorById(){
+//		return new Comparator<KeyBind>() {
+//			@Override
+//			public int compare(KeyBind o1, KeyBind o2) {
+//				return o1.get;
+//			}
+//		};
+//	}
+	
+	public boolean isEquivalentTo(KeyBind kbOther) {
+		if(getActionKey().getId().equals(kbOther.getActionKey().getId())){
+			if(getKeyModListSize()==kbOther.getKeyModListSize()){
+				if(getKeyModListSize()==0)return true;
+				
+				ArrayList<Key> akeyModOther = kbOther.getKeyModifiersCopy();
+				for(Key keyMod:getKeyModifiersCopy()){
+					if(akeyModOther.contains(keyMod))akeyModOther.remove(keyMod);
+					if(akeyModOther.size()==0)return true;
+				}
+			}
+		}
+		
+		return false;
 	}
 	
 }

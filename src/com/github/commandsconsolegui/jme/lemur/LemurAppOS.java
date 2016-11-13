@@ -26,6 +26,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package com.github.commandsconsolegui.jme.lemur;
 
+import java.lang.reflect.Field;
+
+import com.github.commandsconsolegui.cmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.globals.jme.GlobalGUINodeI;
 import com.github.commandsconsolegui.globals.jme.lemur.GlobalLemurDialogHelperI;
 import com.github.commandsconsolegui.jme.JmeAppOS;
@@ -50,12 +53,14 @@ import com.simsilica.lemur.component.QuadBackgroundComponent;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class LemurAppOS extends JmeAppOS{
+public class LemurAppOS extends JmeAppOS {
 //	private Label	lblAlert;
 	
 	private Container	cntrAlert;
 	private Label	lblAlertMsg;
 	private Panel	pnlBlocker;
+	private TimedDelayVarField	tdBlockerGlow = new TimedDelayVarField(this, 3f, "...");
+	private ColorRGBA	colorBlockerBkg;
 
 	public Panel getAlertPanel() {
 		return (Panel)super.getAlertSpatial();
@@ -71,6 +76,10 @@ public class LemurAppOS extends JmeAppOS{
 		super.update(fTpf);
 		
 		updateFollowMouse();
+		
+		if(pnlBlocker!=null){
+			MiscJmeI.i().updateColorFading(tdBlockerGlow, colorBlockerBkg, true, 0.25f, 0.35f);
+		}
 	}
 	
 	@Override
@@ -132,13 +141,17 @@ public class LemurAppOS extends JmeAppOS{
 	public StackTraceElement[] showSystemAlert(String strMsg) {
 		StackTraceElement[] aste = super.showSystemAlert(strMsg);
 		
-		strMsg="ALERT!!! "+strMsg;
+		strMsg="ALERT!!!\n"+strMsg;
 		
 		if(getAlertPanel()==null){
-			// old trick to prevent access to other gui elements easily! :D
-			pnlBlocker = new Button("");
-			pnlBlocker.setBackground(new QuadBackgroundComponent(new ColorRGBA(1f,0,0,0.25f)));
-			GlobalGUINodeI.i().attachChild(pnlBlocker);
+			if(pnlBlocker==null){
+				// old trick to prevent access to other gui elements easily! :D
+				pnlBlocker = new Button("");
+				colorBlockerBkg = ColorRGBA.Red.clone(); //new ColorRGBA(1f,0,0,1);//0.25f);
+				pnlBlocker.setBackground(new QuadBackgroundComponent(colorBlockerBkg));
+				tdBlockerGlow.setActive(true);
+				GlobalGUINodeI.i().attachChild(pnlBlocker);
+			}
 			
 			// the alert container
 			QuadBackgroundComponent qbc;
@@ -183,16 +196,37 @@ public class LemurAppOS extends JmeAppOS{
 		cntrAlert.addChild(lbl, eEdge);
 	}
 	
+	/**
+	 * 
+	 * @param asteFrom
+	 * @param bKeepGuiBlockerOnce useful when going to retry having subsequent alerts
+	 */
 	@Override
-	public void hideSystemAlert(StackTraceElement[] asteFrom) {
-		super.hideSystemAlert(asteFrom);
+	public void hideSystemAlert(StackTraceElement[] asteFrom, boolean bKeepGuiBlockerOnce) {
+		super.hideSystemAlert(asteFrom,bKeepGuiBlockerOnce);
 		cntrAlert.removeFromParent();
 		cntrAlert=null;
-		lblAlertMsg.removeFromParent();
-		lblAlertMsg=null;
-		pnlBlocker.removeFromParent();
-		pnlBlocker=null;
+//		lblAlertMsg.removeFromParent();
+//		lblAlertMsg=null;
+		if(!bKeepGuiBlockerOnce){
+			pnlBlocker.removeFromParent();
+			pnlBlocker=null;
+		}
+		
 		setAlertSpatial(null);
 	}
 	
+
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException,IllegalAccessException {
+		if(fld.getDeclaringClass()!=LemurAppOS.class)return super.getFieldValue(fld); //For subclasses uncomment this line
+		return fld.get(this);
+	}
+
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=LemurAppOS.class){super.setFieldValue(fld,value);return;} //For subclasses uncomment this line
+		fld.set(this,value);
+	}
+
 }

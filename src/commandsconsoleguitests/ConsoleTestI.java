@@ -172,6 +172,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		getInputManager().deleteMapping(super.INPUT_MAPPING_CAMERA_POS); //TODO there is no super code for it?
 		getInputManager().deleteMapping(super.INPUT_MAPPING_MEMORY); //TODO there is no super code for it?
 		getInputManager().deleteMapping(super.INPUT_MAPPING_HIDE_STATS);
+		getInputManager().deleteMapping(super.INPUT_MAPPING_EXIT); //this is important to let ESC be used to more things
 		
 		consolePlugin.initialize();
 		

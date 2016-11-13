@@ -29,12 +29,10 @@ package com.github.commandsconsolegui.jme;
 
 import com.github.commandsconsolegui.ManageKeyCode.Key;
 import com.github.commandsconsolegui.cmd.ManageKeyBind;
-import com.github.commandsconsolegui.cmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.globals.GlobalManageKeyCodeI;
 import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
 import com.github.commandsconsolegui.misc.CallQueueI;
 import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
-import com.github.commandsconsolegui.misc.KeyBind;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;

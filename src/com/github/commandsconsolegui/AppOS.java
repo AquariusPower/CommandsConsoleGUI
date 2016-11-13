@@ -28,9 +28,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.github.commandsconsolegui;
 
 import java.io.File;
+import java.lang.reflect.Field;
 
+import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.misc.MsgI;
 import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
 
 /**
  * Very basic configurations related to the OS goes here.
@@ -38,7 +43,7 @@ import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class AppOS {
+public class AppOS implements IReflexFillCfg{
 //	private static OperationalSystem instance = new OperationalSystem();
 //	public static OperationalSystem i(){return instance;}
 	
@@ -94,6 +99,7 @@ public class AppOS {
 	private String	strAlertMsg;
 	private long	lLastAlertMilis;
 	private StackTraceElement[]	asteDebugAlertFrom;
+	private boolean	bFirstTimeQuickUpdate;
 	/**
 	 * this is important to let some other threads know the application is exiting and behave properly
 	 */
@@ -109,9 +115,10 @@ public class AppOS {
 	
 	public void update(float fTpf){
 		if(strAlertMsg!=null){
-			if( (lLastAlertMilis+1500) < System.currentTimeMillis()){
+			if( bFirstTimeQuickUpdate || ((lLastAlertMilis+1500) < System.currentTimeMillis()) ){
 				dumpAlert();
 				lLastAlertMilis=System.currentTimeMillis();
+				bFirstTimeQuickUpdate=false;
 			}
 		}
 	}
@@ -132,11 +139,45 @@ public class AppOS {
 		PrerequisitesNotMetException.assertNotAlreadySet("system alert message", this.strAlertMsg, strMsg, asteDebugAlertFrom, this);
 		this.asteDebugAlertFrom=Thread.currentThread().getStackTrace();
 		this.strAlertMsg=strMsg;
+		bFirstTimeQuickUpdate=true;
 //		dumpAlert(); //just in case another one happens before the update...
 		return this.asteDebugAlertFrom;
 	}
-	public void hideSystemAlert(StackTraceElement[] asteFrom){
+	
+	/**
+	 * 
+	 * @param asteFrom
+	 * @param bKeepGuiBlockerOnce useful when going to retry having subsequent alerts (DevNote: will only work if overriden by GUI)
+	 */
+	public void hideSystemAlert(StackTraceElement[] asteFrom, boolean bKeepGuiBlockerOnce) {
 		PrerequisitesNotMetException.assertIsTrue("alert from matches", asteFrom==asteDebugAlertFrom, asteFrom, asteDebugAlertFrom, this);
 		this.strAlertMsg=null;
+	}
+	public void hideSystemAlert(StackTraceElement[] asteFrom){
+		hideSystemAlert(asteFrom, false);
+	}
+
+
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException,IllegalAccessException {
+		 return fld.get(this);
+	}
+
+
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		fld.set(this,value);
+	}
+
+
+	@Override
+	public String getUniqueId() {
+		throw new UnsupportedOperationException("method not implemented yet");
+	}
+
+
+	@Override
+	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField) {
+		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcvField);
 	}
 }

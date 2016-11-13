@@ -42,6 +42,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.github.commandsconsolegui.ManageKeyCode.Key;
 import com.github.commandsconsolegui.cmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.cmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.cmd.varfield.IntLongVarField;
@@ -112,6 +113,16 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	
 	CurrentCommandLine ccl = new CurrentCommandLine(this);
 	
+	private KeyBoundVarField bindFastExit = new KeyBoundVarField(this)
+		.setHelp("the developer's debug mode most helpful key-binding!")
+		.setCallerAssigned(new CallableX(this) {
+			@Override
+			public Boolean call() {
+				cmdRequestExit();
+				return true;
+			}
+		});
+	
 	/**
 	 * Togglers:
 	 * 
@@ -169,6 +180,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 //	public final StringField CMD_CONSOLE_STYLE = new StringField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField scfBindKey = new StringCmdField(this);
 	public final StringCmdField scfUnBindKey = new StringCmdField(this);
+	public final StringCmdField scfAddKeyCodeMonitor = new StringCmdField(this);
 	public final StringCmdField scfBindList = new StringCmdField(this);
 	public final StringCmdField CMD_CONSOLE_SCROLL_BOTTOM = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField CMD_CLEAR_COMMANDS_HISTORY = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
@@ -893,6 +905,29 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		}else
 		if(checkCmdValidity(scfAlias,getAliasHelp())){
 			bCmdWorked=cmdAlias();
+		}else
+		if(checkCmdValidity(scfAddKeyCodeMonitor,"<id> <code...>")){
+			String strNewKeyId = ccl.paramString(1);
+			
+			for(Key key:GlobalManageKeyCodeI.i().getKeyListCopy()){
+				if(key.getId().equalsIgnoreCase(strNewKeyId)){
+					dumpWarnEntry("conflicting with", key);
+					bCmdWorked=false;
+					break;
+				}
+			}
+			
+			if(bCmdWorked==null){
+				ArrayList<Integer> ai = new ArrayList<Integer>();
+				
+				Integer iCode=null;
+				int iIndex=2;
+				while( (iCode=ccl.paramInt(iIndex++)) != null ){
+					ai.add(iCode);
+				}
+				
+				GlobalManageKeyCodeI.i().addKey(strNewKeyId, ai.toArray(new Integer[0]));
+			}
 		}else
 		if(checkCmdValidity(scfUnBindKey,"<KeyMod...+KeyAction>")){
 			String strBindCfg = ccl.paramString(1);

@@ -38,7 +38,7 @@ import com.jme3.input.KeyInput;
 public class ManageKeyCodeJme extends ManageKeyCode{
 	@Override
 	public void configure() {
-  	fillKeyIdCodeFrom(KeyInput.KEY_ESCAPE, KeyInput.class, "KEY_");
+  	fillKeyIdCodeFrom(KeyInput.KEY_ESCAPE, KeyInput.KEY_RETURN, KeyInput.class, "KEY_");
 		super.configure();
 	}
 	
@@ -65,6 +65,10 @@ public class ManageKeyCodeJme extends ManageKeyCode{
 		}
 	}
 	
+	/**
+	 * here are mergers, id shorteners etc
+	 * all are key monitors tho.
+	 */
 	@Override
 	public void addSpecialKeys() {
 		super.addSpecialKeys();
@@ -72,6 +76,15 @@ public class ManageKeyCodeJme extends ManageKeyCode{
 		EKeyMod.Ctrl.key	=addKey(EKeyMod.Ctrl.s(),	KeyInput.KEY_LCONTROL,KeyInput.KEY_RCONTROL);
 		EKeyMod.Alt.key		=addKey(EKeyMod.Alt.s(),	KeyInput.KEY_LMENU,		KeyInput.KEY_RMENU);
 		EKeyMod.Shift.key	=addKey(EKeyMod.Shift.s(),KeyInput.KEY_LSHIFT,	KeyInput.KEY_RSHIFT);
+		
+		addKey("Enter", KeyInput.KEY_RETURN, KeyInput.KEY_NUMPADENTER); //merger
+		
+		addKey("ESC", KeyInput.KEY_ESCAPE); //short sinonym
+		
+		addKey("LAlt", KeyInput.KEY_LMENU);
+		addKey("RAlt", KeyInput.KEY_RMENU);
+		addKey("CapsLock", KeyInput.KEY_CAPITAL);
+		addKey("ScrollLock", KeyInput.KEY_SCROLL);
 	}
 
 	@Override

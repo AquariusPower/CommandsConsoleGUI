@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
 
+import com.github.commandsconsolegui.ManageKeyCode.Key;
 import com.github.commandsconsolegui.cmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.globals.GlobalAppOSI;
@@ -106,42 +107,42 @@ public abstract class ManageKeyBind {
 	private KeyBoundVarField	bindCaptureToTarget;
 	
 	private KeyBind kbCaptured;
+	private KeyBind kbWaitBeReleased;
 
-	private boolean	bResetCaptureBeacon;
+//	private boolean	bResetCaptureBeaconOnSuccess;
+	
 
 	private IRefresh	refreshOwnerAfterCapture;
 
 	private StackTraceElement[]	asteAlertFrom;
+
+	private KeyBoundVarField	bindConflict;
+
+//	private boolean	bWaitingUserDecision;
+	
+	private String strRequestUserDecision="Press ESC to cancel or Enter to retry.\n";
 	
 	public void update(float fTpf){
 		/**
-		 * this prevent executing the command just after capturing its bind!
+		 * this also prevents executing the bind's target command just after capturing its bind!
 		 */
-		if(bResetCaptureBeacon){
-			if(bindCaptureToTarget.getKeyBind().isActivated()){ 
+		if(kbWaitBeReleased!=null){
+			if(kbWaitBeReleased.isActivated()){ 
 				//still pressed (with modifiers)
 				MsgI.i().info("waiting captured key bind to be released");
 				return; 
 			}else
-			if(bindCaptureToTarget.getKeyBind().getActionKey().isPressed()){ 
+			if(kbWaitBeReleased.getActionKey().isPressed()){ 
 				//still pressed (only the action key is still being holded)
 				MsgI.i().info("waiting captured action key to be released");
 				return;
 			}else
 			{ //released
-//				if(bindCaptureToTarget.isWasAlreadyActivatedAtLeastOnce()){ 
-//					bindCaptureToTarget.runIfActivatedOrResetIfDeactivating();
-					
-					//reset
-					bindCaptureToTarget=null;
-					kbCaptured=null;
-					
-					bResetCaptureBeacon=false;
-					
-					refreshOwnerAfterCapture.requestRefresh();
-					
-					GlobalCommandsDelegatorI.i().setupRecreateFile();
-//				}
+				if(bindCaptureToTarget!=null && bindCaptureToTarget.getKeyBind()==kbWaitBeReleased){
+					resetCapture(ECaptureUserDecision.Success);
+				}else{
+					resetCapture(ECaptureUserDecision.KeyReleased);
+				}
 			}
 			
 			return;
@@ -151,9 +152,45 @@ public abstract class ManageKeyBind {
 		 * this will hold the bound keys execution
 		 */
 		if(bindCaptureToTarget!=null){
-//			if(kbCaptured==null)kbCaptured = new KeyBind();
 			
 			kbCaptured=GlobalManageKeyCodeI.i().getPressedKeysAsKeyBind();
+			
+			if(bindConflict!=null){
+				ECaptureUserDecision eud=null;
+				if(isCapturedThisKeyCodeWithoutMods(GlobalManageKeyCodeI.i().getKeyCodeForEscape())){
+					eud=ECaptureUserDecision.Cancelled;
+				}else
+				if(isCapturedThisKeyCodeWithoutMods(GlobalManageKeyCodeI.i().getKeyCodeForReturn())){
+					eud=ECaptureUserDecision.Retry;
+				}
+				
+				if(eud!=null){
+					kbWaitBeReleased=kbCaptured;
+					GlobalAppOSI.i().hideSystemAlert(asteAlertFrom, eud.compareTo(ECaptureUserDecision.Retry)==0);
+					resetCapture(eud);
+				}
+				
+//				if(
+//						kbCaptured!=null &&
+//						kbCaptured.getKeyModListSize()==0 //looking for just ESC or Enter
+//				){
+//					ECaptureUserDecision eOk=null;
+//					if(kbCaptured.getActionKey().getKeyCode()==GlobalManageKeyCodeI.i().getKeyCodeForEscape()){
+//						eOk=ECaptureUserDecision.Cancelled;
+//					}else
+//					if(kbCaptured.getActionKey().getKeyCode()==GlobalManageKeyCodeI.i().getKeyCodeForEnter()){
+//						eOk=ECaptureUserDecision.Retry;
+//					}
+//					
+//					if(eOk!=null){
+//						kbWaitBeReleased=kbCaptured;
+//						GlobalAppOSI.i().hideSystemAlert(asteAlertFrom);
+//						resetCapture(eOk);
+//					}
+//				}
+				
+				return;
+			}
 			
 //			if(kbCaptured.getActionKey()!=null){
 			if(kbCaptured==null){
@@ -161,6 +198,7 @@ public abstract class ManageKeyBind {
 					asteAlertFrom = GlobalAppOSI.i().showSystemAlert(
 						 " Press a key combination to be captured (where modifiers are ctrl, shift or alt).\n"
 						+" More complex keybindings can be set thru console commands.\n"
+						+" Press ESC to cancel.\n"
 						+" Re-binding keys for command:\n"
 						+"  "+bindCaptureToTarget.getKeyBindRunCommand()
 					);
@@ -169,16 +207,36 @@ public abstract class ManageKeyBind {
 			}else{
 				GlobalAppOSI.i().hideSystemAlert(asteAlertFrom);
 				
-				bindCaptureToTarget.setAllowCallerAssignedToBeRun(false);
-				bindCaptureToTarget.setValue(kbCaptured);
-				bindCaptureToTarget.setAllowCallerAssignedToBeRun(true);
+				if(isCapturedThisKeyCodeWithoutMods(GlobalManageKeyCodeI.i().getKeyCodeForEscape())){
+					resetCapture(ECaptureUserDecision.Cancelled);
+					return;
+				}
 				
-				MsgI.i().info(
-					"captured key bind "+kbCaptured.getBindCfg()
-					+" for "+bindCaptureToTarget.getKeyBindRunCommand(),
-					bindCaptureToTarget,kbCaptured,this);
+				bindConflict=null;
+				for(KeyBoundVarField bind:getListCopy()){
+					if(bind==bindCaptureToTarget)continue;
+					if(bind.getKeyBind().isEquivalentTo(kbCaptured)){
+						bindConflict=bind;
+						break;
+					}
+				}
 				
-				bResetCaptureBeacon=true;
+				if(bindConflict!=null){
+					resetCapture(ECaptureUserDecision.HasConflict);
+					return;
+				}else{
+					bindCaptureToTarget.setAllowCallerAssignedToBeRun(false);
+					bindCaptureToTarget.setValue(kbCaptured);
+					bindCaptureToTarget.setAllowCallerAssignedToBeRun(true);
+					
+					MsgI.i().info(
+						"captured key bind "+kbCaptured.getBindCfg()
+						+" for "+bindCaptureToTarget.getKeyBindRunCommand(),
+						bindCaptureToTarget,kbCaptured,this);
+				}
+				
+				kbWaitBeReleased=kbCaptured;
+//				bResetCaptureBeaconOnSuccess=true;
 //				bindCaptureToTarget=null;
 //				kbCaptured=null;
 			}
@@ -232,6 +290,65 @@ public abstract class ManageKeyBind {
 //		}
 //	}
 	
+	private boolean isCapturedThisKeyCodeWithoutMods(int iKeyCode) {
+		if(
+				kbCaptured!=null &&
+				kbCaptured.getKeyModListSize()==0 //looking for just ESC or Enter
+		){
+			if(kbCaptured.getActionKey().getKeyCode() == iKeyCode){
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	enum ECaptureUserDecision{
+		Cancelled,
+		Retry,
+		Success, 
+		
+		/** wait user decision */
+		HasConflict, 
+		
+		KeyReleased,
+	}
+	
+	private void resetCapture(ECaptureUserDecision e) {
+		switch(e){
+			case Retry:
+				kbCaptured=null;
+				bindConflict=null;
+				break;
+			case KeyReleased:
+				kbWaitBeReleased=null;
+				break;
+			case HasConflict:
+				String strMsg = "captured key bind "+kbCaptured.getBindCfg()
+					+" is already being used by "+bindConflict.getKeyBindRunCommand()+"\n"
+					+strRequestUserDecision;
+				MsgI.i().warn(strMsg,	bindConflict,bindCaptureToTarget,kbCaptured,this);
+				
+				asteAlertFrom = GlobalAppOSI.i().showSystemAlert(strMsg);
+				
+				kbCaptured=null;
+				break;
+			case Cancelled:
+				kbCaptured=null;
+				bindConflict=null;
+				bindCaptureToTarget=null;
+				kbWaitBeReleased=null;
+				break;
+			case Success:
+				resetCapture(ECaptureUserDecision.Cancelled);
+				
+				refreshOwnerAfterCapture.requestRefresh();
+				GlobalCommandsDelegatorI.i().setupRecreateFile();
+				break;
+		}
+		
+	}
+
 	public ArrayList<KeyBoundVarField> getListCopy(){
 		return new ArrayList<KeyBoundVarField>(tmbindList.values());
 	}

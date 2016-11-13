@@ -28,6 +28,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.github.commandsconsolegui.jme;
 
 import java.io.File;
+import java.lang.reflect.Field;
 
 import com.github.commandsconsolegui.AppOS;
 import com.github.commandsconsolegui.globals.jme.GlobalAppSettingsI;
@@ -77,44 +78,15 @@ public class JmeAppOS extends AppOS {
 		this.sptAlert=spt;
 	}
 	
-//	@Override
-//	protected void dumpAlert() {
-//		super.dumpAlert();
-//		
-//		float fZ=0;
-//		for(Spatial spt:MiscJmeI.i().getAllChildrenRecursiveFrom(GlobalGUINodeI.i())){
-//			if(spt.getLocalTranslation().z > fZ)fZ=spt.getLocalTranslation().z;
-//		}
-//		
-//		Vector3f v3fAppWindowSize = MiscJmeI.i().getAppWindowSize();
-//		v3fAppWindowSize.x*=0.5f;
-//		v3fAppWindowSize.y*=0.5f;
-//		v3fAppWindowSize.z=fZ+10;
-//		
-//		btAlert.setLocalTranslation(v3fAppWindowSize);//new Vector3f(Display.getWidth()/2f, Display.getHeight()/2f, fZ+10)); //above any other gui elements  
-//	}
-//	
-//	private BitmapText	btAlert;
-//	@Override
-//	public StackTraceElement[] showSystemAlert(String strMsg) {
-//		StackTraceElement[] aste = super.showSystemAlert(strMsg);
-//		
-//		if(btAlert==null){
-//			btAlert = new BitmapText(GlobalAppRefI.i().getAssetManager().loadFont("Interface/Fonts/Console.fnt"));
-//			GlobalGUINodeI.i().attachChild(btAlert);
-//		}
-//		
-//		if(!btAlert.getText().equals(strMsg)){
-//			btAlert.setText(strMsg);
-//		}
-//		
-//		return aste;
-//	}
-//	
-//	@Override
-//	public void hideSystemAlert(StackTraceElement[] asteFrom) {
-//		super.hideSystemAlert(asteFrom);
-//		btAlert.removeFromParent();
-//		btAlert=null;
-//	}
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException,IllegalAccessException {
+		if(fld.getDeclaringClass()!=JmeAppOS.class)return super.getFieldValue(fld); //For subclasses uncomment this line
+		return fld.get(this);	}
+
+
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=JmeAppOS.class){super.setFieldValue(fld,value);return;} //For subclasses uncomment this line
+		fld.set(this,value);
+	}
 }
