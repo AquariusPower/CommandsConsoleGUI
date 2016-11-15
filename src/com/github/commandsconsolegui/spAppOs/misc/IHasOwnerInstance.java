@@ -25,50 +25,17 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package commandsconsoleguitests;
-
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spCmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.spJme.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
+package com.github.commandsconsolegui.spAppOs.misc;
 
 /**
+ * The class implementing this will also be catch in the {@link IDiscardableInstance} check,
+ * so such class does not need to implement that interface, as it's owner (ownerest) is the only one
+ * required to. Tho it will cause no problem if it is used.
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
+ * @param <T>
  */
-public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
-//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
-
-	public CommandsTest(){
-		super();
-		setAllowUserCmdOS(true);
-	}
-	
-	@Override
-	public String prepareStatsFieldText() {
-		String strStatsLast = super.prepareStatsFieldText();
-		
-		if(EStats.MouseCursorPosition.isShow()){
-			strStatsLast+=
-				"xy"
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
-					+","
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
-					+";";
-		}
-		
-		if(EStats.TimePerFrame.isShow()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
-		}
-		
-		return strStatsLast; 
-	}
-	
-//	@Override
-//	public void cmdExit() {
-//		GlobalAppRefI.i().stop();
-//		super.cmdExit();
-//	}
-	
+public interface IHasOwnerInstance<T> {
+	public T getOwner();
 }

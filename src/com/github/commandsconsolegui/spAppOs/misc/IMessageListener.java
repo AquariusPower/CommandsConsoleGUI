@@ -25,50 +25,25 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package commandsconsoleguitests;
-
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spCmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.spJme.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
+package com.github.commandsconsolegui.spAppOs.misc;
 
 /**
- * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
- *
  */
-public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
-//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
-
-	public CommandsTest(){
-		super();
-		setAllowUserCmdOS(true);
-	}
+public interface IMessageListener{
+	public boolean info(String str, Object... aobj);
+	public boolean devInfo(String str, Object... aobj);
+//	public boolean infoSystemTopOverride(String str);
+	public boolean warn(String str, Object... aobj);
+	public boolean devWarn(String str, Object... aobj);
+	public boolean debug(String str, Object... aobj);
 	
-	@Override
-	public String prepareStatsFieldText() {
-		String strStatsLast = super.prepareStatsFieldText();
-		
-		if(EStats.MouseCursorPosition.isShow()){
-			strStatsLast+=
-				"xy"
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
-					+","
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
-					+";";
-		}
-		
-		if(EStats.TimePerFrame.isShow()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
-		}
-		
-		return strStatsLast; 
-	}
-	
-//	@Override
-//	public void cmdExit() {
-//		GlobalAppRefI.i().stop();
-//		super.cmdExit();
-//	}
+	/**
+	 * @param strMsgOverride the exception one may contain variations like changing numbers, but this message may be used as a key/identifier of exception type/kind so the message spam can be countered and counted!
+	 * @param ex
+	 * @param aobj
+	 * @return
+	 */
+	public boolean exception(String strMsgOverride, Exception ex, Object... aobj);
 	
 }

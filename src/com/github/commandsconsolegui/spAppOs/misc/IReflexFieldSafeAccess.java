@@ -25,50 +25,36 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package commandsconsoleguitests;
+package com.github.commandsconsolegui.spAppOs.misc;
 
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spCmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.spJme.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
+import java.lang.reflect.Field;
 
 /**
+ * The class implementing it is agreeing to properly allow set and get of field values,
+ * therefore this is an expected and safe access/behavior. 
+ * So, the class implementing get and set, will ALWAYS have access to field's value management!
+ * 
+ * All classes from superest to concrete int the inheritance MUST implement these methods.
+ * If some subclass misses such implementation, the superest will simply fail to access the Field object.
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
- *
  */
-public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
-//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
-
-	public CommandsTest(){
-		super();
-		setAllowUserCmdOS(true);
-	}
+public interface IReflexFieldSafeAccess {
+	/**
+	 * Use this at superest implementor:<br>
+	 * //if(fld.getDeclaringClass()!=CURRENT_SUB_CLASS.class)return super.getFieldValue(fld); //For subclasses uncomment this line<br>
+	 * return fld.get(Modifier.isStatic(fld.getModifiers()) ? null : this);<br>
+	 * //or if statics are not allowed/expected, use just:<br>
+	 * return fld.get(this);<br>
+	 */
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException;
 	
-	@Override
-	public String prepareStatsFieldText() {
-		String strStatsLast = super.prepareStatsFieldText();
-		
-		if(EStats.MouseCursorPosition.isShow()){
-			strStatsLast+=
-				"xy"
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
-					+","
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
-					+";";
-		}
-		
-		if(EStats.TimePerFrame.isShow()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
-		}
-		
-		return strStatsLast; 
-	}
-	
-//	@Override
-//	public void cmdExit() {
-//		GlobalAppRefI.i().stop();
-//		super.cmdExit();
-//	}
-	
+	/**
+	 * Use this at superest implementor:<br>
+	 * //if(fld.getDeclaringClass()!=CURRENT_SUB_CLASS.class){super.setFieldValue(fld,value);return;} //For subclasses uncomment this line<br>
+	 * fld.set(Modifier.isStatic(fld.getModifiers()) ? null : this, value);<br>
+	 * //or if statics are not allowed/expected, use just:<br>
+	 * fld.set(this,value)
+	 */
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException;
 }

@@ -25,50 +25,45 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package commandsconsoleguitests;
+package com.github.commandsconsolegui.spCmd;
 
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spCmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.spJme.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
+import java.util.ArrayList;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
-//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
+public enum EDataBaseOperations{
+	/** saving also will shrink the DB */
+	save,
+	
+	load,
+	
+	show,
+	
+	/** A backup is made of the existing file. */
+	backup,
+	
+	;
+	public static String help(){ //@STATIC_OK
+		String str = null;
+		for(EDataBaseOperations e:values()){
+			if(str!=null){
+				str+="|";
+			}else{
+				str="";
+			}
+			str+=e.toString();
+		}
+		return "["+str+"] aliases and variables, plain text file";
+	}
 
-	public CommandsTest(){
-		super();
-		setAllowUserCmdOS(true);
-	}
-	
-	@Override
-	public String prepareStatsFieldText() {
-		String strStatsLast = super.prepareStatsFieldText();
-		
-		if(EStats.MouseCursorPosition.isShow()){
-			strStatsLast+=
-				"xy"
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
-					+","
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
-					+";";
+	public static ArrayList<String> getValuesAsArrayList() { //@STATIC_OK
+		ArrayList<String> astr = new ArrayList<String>();
+		for(EDataBaseOperations e:values()){
+			astr.add(e.toString());
 		}
-		
-		if(EStats.TimePerFrame.isShow()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
-		}
-		
-		return strStatsLast; 
+		return astr;
 	}
-	
-//	@Override
-//	public void cmdExit() {
-//		GlobalAppRefI.i().stop();
-//		super.cmdExit();
-//	}
-	
 }

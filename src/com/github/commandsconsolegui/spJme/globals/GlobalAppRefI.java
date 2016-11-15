@@ -25,50 +25,18 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package commandsconsoleguitests;
+package com.github.commandsconsolegui.spJme.globals;
 
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spCmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.spJme.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalHolderAbs;
+import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 
 /**
- * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
- *
  */
-public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
-//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
-
-	public CommandsTest(){
-		super();
-		setAllowUserCmdOS(true);
-	}
-	
-	@Override
-	public String prepareStatsFieldText() {
-		String strStatsLast = super.prepareStatsFieldText();
-		
-		if(EStats.MouseCursorPosition.isShow()){
-			strStatsLast+=
-				"xy"
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
-					+","
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
-					+";";
-		}
-		
-		if(EStats.TimePerFrame.isShow()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
-		}
-		
-		return strStatsLast; 
-	}
-	
-//	@Override
-//	public void cmdExit() {
-//		GlobalAppRefI.i().stop();
-//		super.cmdExit();
-//	}
-	
+public class GlobalAppRefI extends GlobalHolderAbs<Application>{
+	private static GlobalAppRefI instance = new GlobalAppRefI();
+	public static GlobalAppRefI iGlobal(){return instance;}
+	public static Application i(){return iGlobal().get();}
 }
+

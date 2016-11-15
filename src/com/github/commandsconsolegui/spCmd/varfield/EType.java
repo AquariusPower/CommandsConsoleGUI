@@ -25,50 +25,35 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package commandsconsoleguitests;
-
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spCmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.spJme.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
+package com.github.commandsconsolegui.spCmd.varfield;
 
 /**
- * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
- *
  */
-public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
-//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
-
-	public CommandsTest(){
-		super();
-		setAllowUserCmdOS(true);
-	}
+public enum EType{
+	Int,
+	Long,
+	Float,
+	Double,
+	String,
+	Boolean,
+	Var,
+	;
 	
-	@Override
-	public String prepareStatsFieldText() {
-		String strStatsLast = super.prepareStatsFieldText();
-		
-		if(EStats.MouseCursorPosition.isShow()){
-			strStatsLast+=
-				"xy"
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
-					+","
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
-					+";";
+	public static EType forClass(Class clValue) throws UnsupportedOperationException{ //@STATIC_OK
+		EType e = null;
+		if(clValue==Float.class		|| clValue==float.class		){e=EType.Float;}else
+		if(clValue==Double.class	|| clValue==double.class	){e=EType.Double;}else
+		if(clValue==Integer.class	|| clValue==int.class			){e=EType.Int;}else
+		if(clValue==Long.class		|| clValue==long.class		){e=EType.Long;}else
+		if(clValue==Boolean.class	|| clValue==boolean.class	){e=EType.Boolean;}else
+		if(clValue==String.class														){e=EType.String;}else
+		if(VarCmdFieldAbs.class.isAssignableFrom(clValue)		){e=EType.Var;}else
+		{
+			throw new UnsupportedOperationException("unsupported value class type "+clValue.getName());
 		}
 		
-		if(EStats.TimePerFrame.isShow()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
-		}
-		
-		return strStatsLast; 
+		return e;
 	}
-	
-//	@Override
-//	public void cmdExit() {
-//		GlobalAppRefI.i().stop();
-//		super.cmdExit();
-//	}
 	
 }

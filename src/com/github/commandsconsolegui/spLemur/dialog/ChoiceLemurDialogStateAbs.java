@@ -25,50 +25,60 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package commandsconsoleguitests;
+package com.github.commandsconsolegui.spLemur.dialog;
 
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spCmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.spJme.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
+import java.lang.reflect.Field;
+
+import com.simsilica.lemur.Button;
+import com.simsilica.lemur.Command;
 
 /**
+ * TODO CfgChoiceDialogState
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
-//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
-
-	public CommandsTest(){
-		super();
-		setAllowUserCmdOS(true);
+public abstract class ChoiceLemurDialogStateAbs<T extends Command<Button>, THIS extends ChoiceLemurDialogStateAbs<T,THIS>> extends BasicLemurDialogStateAbs<T,THIS> {
+	public static class CfgParm extends BasicLemurDialogStateAbs.CfgParm{
+		public CfgParm(
+				Float fDialogWidthPercentOfAppWindow,
+				Float fDialogHeightPercentOfAppWindow,
+				Float fInfoHeightPercentOfDialog, Float fEntryHeightMultiplier) {
+			super(fDialogWidthPercentOfAppWindow,
+					fDialogHeightPercentOfAppWindow, fInfoHeightPercentOfDialog,
+					fEntryHeightMultiplier);
+//			super.setUIId(ChoiceDialogStateAbs.class.getSimpleName());
+		}
+	}
+	private CfgParm	cfg;
+	@Override
+	public THIS configure(ICfgParm icfg) {
+		cfg = (CfgParm)icfg;
+		super.configure(cfg);
+		storeCfgAndReturnSelf(cfg);
+		return getThis();
 	}
 	
 	@Override
-	public String prepareStatsFieldText() {
-		String strStatsLast = super.prepareStatsFieldText();
+	protected boolean initAttempt() {
+		super.setOptionChoiceSelectionMode(true);
 		
-		if(EStats.MouseCursorPosition.isShow()){
-			strStatsLast+=
-				"xy"
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
-					+","
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
-					+";";
-		}
-		
-		if(EStats.TimePerFrame.isShow()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
-		}
-		
-		return strStatsLast; 
+		return super.initAttempt();
 	}
 	
 //	@Override
-//	public void cmdExit() {
-//		GlobalAppRefI.i().stop();
-//		super.cmdExit();
+//	protected THIS getThis() {
+//		return (THIS)this;
 //	}
 	
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=ChoiceLemurDialogStateAbs.class)return super.getFieldValue(fld);
+		return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		if(fld.getDeclaringClass()!=ChoiceLemurDialogStateAbs.class){super.setFieldValue(fld,value);return;}
+		fld.set(this,value);
+	}
 }

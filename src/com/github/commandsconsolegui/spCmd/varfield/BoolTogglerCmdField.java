@@ -24,51 +24,29 @@
 	OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN 
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+package com.github.commandsconsolegui.spCmd.varfield;
 
-package commandsconsoleguitests;
-
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spCmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.spJme.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
+import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
-//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
+public class BoolTogglerCmdField extends BoolTogglerCmdFieldAbs<BoolTogglerCmdField> {
+	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis,
+			boolean bDefault, String strHelp) {
+		super(rfcfgOwnerUseThis, bDefault, strHelp);
+		// TODO Auto-generated constructor stub
+	}
 
-	public CommandsTest(){
-		super();
-		setAllowUserCmdOS(true);
+	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis,boolean bInitValue) {
+		super(rfcfgOwnerUseThis, bInitValue);
+		// TODO Auto-generated constructor stub
 	}
-	
+
 	@Override
-	public String prepareStatsFieldText() {
-		String strStatsLast = super.prepareStatsFieldText();
-		
-		if(EStats.MouseCursorPosition.isShow()){
-			strStatsLast+=
-				"xy"
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
-					+","
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
-					+";";
-		}
-		
-		if(EStats.TimePerFrame.isShow()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
-		}
-		
-		return strStatsLast; 
+	protected BoolTogglerCmdField getThis() {
+		return this;
 	}
-	
-//	@Override
-//	public void cmdExit() {
-//		GlobalAppRefI.i().stop();
-//		super.cmdExit();
-//	}
-	
 }

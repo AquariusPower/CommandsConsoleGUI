@@ -25,50 +25,50 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package commandsconsoleguitests;
+package com.github.commandsconsolegui.spAppOs.misc;
 
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spCmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.spJme.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
+import java.util.ArrayList;
+
+import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
- *
+ * 
  */
-public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
-//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
+public class ManageConfigI implements IManager<IConfigure>{
+	private static ManageConfigI instance = new ManageConfigI();
+	public static ManageConfigI i(){return instance;}
+	
+	public void assertConfigured(IConfigure icfg){
+		if(!icfg.isConfigured()){
+			throw new PrerequisitesNotMetException("not configured", icfg);
+		}
+	}
+	
+	public static interface IConfigure<T extends IConfigure<T>> {
+		/**
+		 * Each subclass can have the same name "CfgParm".<br>
+		 * <br>
+		 * Just reference the CfgParm of the superclass directly ex.:<br> 
+		 * 	new ConditionalAppStateAbs.CfgParm()<br>
+		 * <br>
+		 * This is also very important when restarting (configuring a new and fresh robust instance)<br>
+		 * where the current configuration will be just passed to the new instance!<br> 
+		 */
+		public static interface ICfgParm{}
+		
+		boolean isConfigured();
+		T configure(ICfgParm icfg);
+	}
 
-	public CommandsTest(){
-		super();
-		setAllowUserCmdOS(true);
-	}
-	
 	@Override
-	public String prepareStatsFieldText() {
-		String strStatsLast = super.prepareStatsFieldText();
-		
-		if(EStats.MouseCursorPosition.isShow()){
-			strStatsLast+=
-				"xy"
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
-					+","
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
-					+";";
-		}
-		
-		if(EStats.TimePerFrame.isShow()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
-		}
-		
-		return strStatsLast; 
+	public boolean add(IConfigure objNew) {
+		throw new UnsupportedOperationException("method not implemented yet");
 	}
-	
-//	@Override
-//	public void cmdExit() {
-//		GlobalAppRefI.i().stop();
-//		super.cmdExit();
-//	}
-	
+
+	@Override
+	public ArrayList<IConfigure> getListCopy() {
+		throw new UnsupportedOperationException("method not implemented yet");
+	}
 }

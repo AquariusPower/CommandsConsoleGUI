@@ -29,12 +29,12 @@ package commandsconsoleguitests;
 
 import java.io.File;
 
-import com.github.commandsconsolegui.extras.SingleMandatoryAppInstanceI;
-import com.github.commandsconsolegui.globals.GlobalSingleMandatoryAppInstanceI;
-import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.globals.jme.GlobalAppRefI;
-import com.github.commandsconsolegui.globals.jme.GlobalAppSettingsI;
-import com.github.commandsconsolegui.jme.lemur.console.SimpleConsolePlugin;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalSingleMandatoryAppInstanceI;
+import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spExtras.SingleMandatoryAppInstanceI;
+import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
+import com.github.commandsconsolegui.spJme.globals.GlobalAppSettingsI;
+import com.github.commandsconsolegui.spLemur.console.SimpleConsolePlugin;
 import com.jme3.app.SimpleApplication;
 import com.jme3.system.AppSettings;
 
@@ -74,13 +74,13 @@ public class SimpleConsoleTest extends SimpleApplication {
 	/** This is called when pressing ESC key */
 	@Override
 	public void stop(boolean waitFor) {
-		GlobalCommandsDelegatorI.i().cmdRequestExit();
+		GlobalCommandsDelegatorI.i().cmdRequestCleanSafeNormalExit();
 		super.stop(waitFor);
 	}
 	/** this is directly called when window is closed using it's close button */
 	@Override
 	public void destroy() {
-		GlobalCommandsDelegatorI.i().cmdRequestExit();
+		GlobalCommandsDelegatorI.i().cmdRequestCleanSafeNormalExit();
 		super.destroy();
 	}
 }	

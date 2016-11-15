@@ -11,13 +11,17 @@ for strRunClass in "${astrRunClasses[@]}";do
 	
 	declare -p strRunClass
 	
-	nPid="`pgrep -f "java .* $strRunClass"`"&&:
-	if [[ -n "$nPid" ]];then
-		SECFUNCexecA -ce ps -o pid,cmd -p $nPid
-
-		if echoc -q "kill $nPid?";then
+	anPid=(`pgrep -f "java .* $strRunClass"`)&&:
+	if [[ -n "${anPid[@]-}" ]];then
+		for nPid in "${anPid[@]}";do
+			SECFUNCexecA -ce ps --no-headers -o pid,cmd -p $nPid
+			
+			if((${#anPid[@]}>1));then
+				if ! echoc -q "kill $nPid?";then continue;fi
+			fi
+			
 			SECFUNCexecA -ce kill -SIGKILL $nPid
-		fi
+		done
 	else
 		echoc --info "no pid found"
 	fi

@@ -25,50 +25,26 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package commandsconsoleguitests;
+package com.github.commandsconsolegui.spJme.globals.console;
 
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spCmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.spJme.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalHolderAbs;
+import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalConsoleUII;
+import com.github.commandsconsolegui.spJme.IJmeConsoleUI;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
-//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
-
-	public CommandsTest(){
-		super();
-		setAllowUserCmdOS(true);
-	}
+//public class GlobalConsoleGUII extends GlobalHolderAbs<DialogStateAbs<?,? extends DialogStateAbs<?,?>>>{
+public class GlobalJmeConsoleUII extends GlobalHolderAbs<IJmeConsoleUI>{
+	private static GlobalJmeConsoleUII instance = new GlobalJmeConsoleUII();
+	public static GlobalJmeConsoleUII iGlobal(){return instance;}
+	public static IJmeConsoleUI i(){return iGlobal().get();}
 	
 	@Override
-	public String prepareStatsFieldText() {
-		String strStatsLast = super.prepareStatsFieldText();
-		
-		if(EStats.MouseCursorPosition.isShow()){
-			strStatsLast+=
-				"xy"
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
-					+","
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
-					+";";
-		}
-		
-		if(EStats.TimePerFrame.isShow()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
-		}
-		
-		return strStatsLast; 
+	public IJmeConsoleUI set(IJmeConsoleUI obj) {
+		GlobalConsoleUII.iGlobal().set(obj);
+		return super.set(obj);
 	}
-	
-//	@Override
-//	public void cmdExit() {
-//		GlobalAppRefI.i().stop();
-//		super.cmdExit();
-//	}
-	
 }

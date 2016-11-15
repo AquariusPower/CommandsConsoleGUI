@@ -25,50 +25,49 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package commandsconsoleguitests;
+package com.github.commandsconsolegui.spAppOs.misc;
 
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spCmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.spJme.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
+import java.util.ArrayList;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
-//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
-
-	public CommandsTest(){
-		super();
-		setAllowUserCmdOS(true);
+public class ManageHoldRestartableI<T extends IRestartable> implements IManager<HoldRestartable<T>>{
+	private static ManageHoldRestartableI instance = new ManageHoldRestartableI();
+	public static ManageHoldRestartableI i(){return instance;}
+	
+	public static final class CompositeControl extends CompositeControlAbs<ManageHoldRestartableI>{
+		private CompositeControl(ManageHoldRestartableI casm){super(casm);};
+	};private CompositeControl ccSelf = new CompositeControl(this);
+	
+	private ArrayList<HoldRestartable<T>> ahrList=new ArrayList<HoldRestartable<T>>();
+	
+	public void revalidateAndUpdateAllRestartableHoldersFor(IRestartable irDiscarding, IRestartable irNew){
+		for(HoldRestartable<T> hr:new ArrayList<HoldRestartable<T>>(ahrList)){
+			// discard
+			if(hr.isDiscardSelf() || DiscardableInstanceI.i().isBeingDiscardedRecursiveOwner(hr)){
+				ahrList.remove(hr);
+				continue;
+			}
+			
+			// update ref
+			if(hr.getRef()==irDiscarding){
+				hr.setRef(irNew);
+			}
+		}
 	}
 	
 	@Override
-	public String prepareStatsFieldText() {
-		String strStatsLast = super.prepareStatsFieldText();
-		
-		if(EStats.MouseCursorPosition.isShow()){
-			strStatsLast+=
-				"xy"
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
-					+","
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
-					+";";
-		}
-		
-		if(EStats.TimePerFrame.isShow()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
-		}
-		
-		return strStatsLast; 
+	public boolean add(HoldRestartable<T> hr){
+		PrerequisitesNotMetException.assertNotAlreadyAdded(ahrList, hr, this);
+		return ahrList.add(hr);
 	}
 	
-//	@Override
-//	public void cmdExit() {
-//		GlobalAppRefI.i().stop();
-//		super.cmdExit();
-//	}
-	
+	@Deprecated
+	@Override
+	public ArrayList<HoldRestartable<T>> getListCopy() {
+		throw new UnsupportedOperationException("method not implemented yet");
+	}
 }

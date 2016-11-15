@@ -25,50 +25,40 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package commandsconsoleguitests;
-
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spCmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.spJme.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
+package com.github.commandsconsolegui.spAppOs.misc;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
+ * @param <T>
  */
-public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
-//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
+public class CompositeControlAbs<T>{
+	private T	ref;
+	
+	/** 
+	 * sub class MUST override this constructor as PRIVATE!!!
+	 * so it can only be instantiated at its composite owner!
+	 */
+	public CompositeControlAbs(T ref){
+		this.ref=ref;
+	};
+	
+	public T getOwner(){
+		//TODO validate if owner really owns this object? humm??? o.O
+		return ref;
+	}
+	
+	/**
+	 * quite fun this one...
+	 */
+	public void assertSelfNotNull(){/*yes, there is no point putting anything here...*/}
 
-	public CommandsTest(){
-		super();
-		setAllowUserCmdOS(true);
-	}
-	
-	@Override
-	public String prepareStatsFieldText() {
-		String strStatsLast = super.prepareStatsFieldText();
-		
-		if(EStats.MouseCursorPosition.isShow()){
-			strStatsLast+=
-				"xy"
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
-					+","
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
-					+";";
+	public CompositeControlAbs assertSelfNotNullEqualsStored(CompositeControlAbs ccStored) {
+		if(ccStored!=null && ccStored!=this){
+			throw new PrerequisitesNotMetException("forbidden composite change",this,ccStored);
 		}
 		
-		if(EStats.TimePerFrame.isShow()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
-		}
-		
-		return strStatsLast; 
+		return this;
 	}
-	
-//	@Override
-//	public void cmdExit() {
-//		GlobalAppRefI.i().stop();
-//		super.cmdExit();
-//	}
-	
 }

@@ -25,50 +25,30 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package commandsconsoleguitests;
+package com.github.commandsconsolegui.spCmd;
 
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spCmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.spJme.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
+import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
-//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
-
-	public CommandsTest(){
-		super();
-		setAllowUserCmdOS(true);
-	}
-	
-	@Override
-	public String prepareStatsFieldText() {
-		String strStatsLast = super.prepareStatsFieldText();
-		
-		if(EStats.MouseCursorPosition.isShow()){
-			strStatsLast+=
-				"xy"
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
-					+","
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
-					+";";
-		}
-		
-		if(EStats.TimePerFrame.isShow()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
-		}
-		
-		return strStatsLast; 
-	}
-	
-//	@Override
-//	public void cmdExit() {
-//		GlobalAppRefI.i().stop();
-//		super.cmdExit();
-//	}
-	
+public interface IConsoleCommandListener{
+	/**
+	 * Any class can implement commands.
+	 * The main requirement is that the listener is registered with:
+	 * {@link CommandsDelegator#addConsoleCommandListener(IConsoleCommandListener)}
+	 * 
+	 * This will be called in two moments:
+	 *  1) during configuration/initialization of related class. The commands will not be 
+	 *   executed. At this time, the class specific initializations should be skippable.
+	 *   Use {@link CommandsDelegator#isFillingCommandList()} to know if this flow is being run.
+	 *   
+	 *  2) normally when executing a console command.
+	 * 
+	 * @param cd this is mainly to provide an easy access to the global
+	 * @return
+	 */
+	public abstract ECmdReturnStatus execConsoleCommand(CommandsDelegator cd);
 }

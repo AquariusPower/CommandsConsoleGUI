@@ -25,50 +25,34 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package commandsconsoleguitests;
+package com.github.commandsconsolegui.spAppOs.misc;
 
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spCmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.spJme.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
-//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
-
-	public CommandsTest(){
-		super();
-		setAllowUserCmdOS(true);
-	}
+public class DiscardableInstanceI{
+	private static DiscardableInstanceI instance = new DiscardableInstanceI();
+	public static DiscardableInstanceI i(){return instance;}
 	
-	@Override
-	public String prepareStatsFieldText() {
-		String strStatsLast = super.prepareStatsFieldText();
-		
-		if(EStats.MouseCursorPosition.isShow()){
-			strStatsLast+=
-				"xy"
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
-					+","
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
-					+";";
+	public boolean isBeingDiscardedRecursiveOwner(Object obj){
+		if(obj instanceof IHasOwnerInstance){
+			if(isBeingDiscardedRecursiveOwner(((IHasOwnerInstance)obj).getOwner())){
+				return true;
+			}
 		}
 		
-		if(EStats.TimePerFrame.isShow()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
+		if(obj instanceof IDiscardableInstance){
+			return ((IDiscardableInstance)obj).isBeingDiscarded();
 		}
 		
-		return strStatsLast; 
+		return false;
 	}
 	
-//	@Override
-//	public void cmdExit() {
-//		GlobalAppRefI.i().stop();
-//		super.cmdExit();
+//	public static interface IDiscardableInstance {
+//		public boolean isPreparingToBeDiscarded();
+////		public <T> HashChangeHolder<T> getHolder(Class<T> cl);
 //	}
-	
 }

@@ -25,50 +25,38 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package commandsconsoleguitests;
-
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spCmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.spJme.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
+package com.github.commandsconsolegui.spAppOs.misc;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
-//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
-
-	public CommandsTest(){
-		super();
-		setAllowUserCmdOS(true);
+public class TimeHelperI {
+	private static TimeHelperI instance = new TimeHelperI();
+	public static TimeHelperI i(){return instance;}
+	
+	private long lNanoOneSecond  = 1000000000L;
+	private long lMilisToNano = 1000000L;
+	private double dNanoToSeconds = 1.0/lNanoOneSecond;
+	
+	public long secondsToNano(double dSeconds){
+		return (long) (dSeconds*lNanoOneSecond);
+	}
+	public long secondsToNano(float fSeconds){
+		return (long) (fSeconds*lNanoOneSecond);
+	}
+	public long nanoToMilis(long lTimeNano){
+		return lTimeNano/lMilisToNano;
+	}
+	public long milisToNano(long lTimeMilis){
+		return lTimeMilis*lMilisToNano;
+	}
+	public double nanoToSeconds(long lNano) {
+		return lNano*dNanoToSeconds;
 	}
 	
-	@Override
-	public String prepareStatsFieldText() {
-		String strStatsLast = super.prepareStatsFieldText();
-		
-		if(EStats.MouseCursorPosition.isShow()){
-			strStatsLast+=
-				"xy"
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
-					+","
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
-					+";";
-		}
-		
-		if(EStats.TimePerFrame.isShow()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
-		}
-		
-		return strStatsLast; 
-	}
-	
-//	@Override
-//	public void cmdExit() {
-//		GlobalAppRefI.i().stop();
-//		super.cmdExit();
+//	public double convertDelayNanoToSeconds(long lDelayNano){
+//		return (double)((double)lDelayNano/(double)lNano); //TODO is that?
 //	}
-	
 }

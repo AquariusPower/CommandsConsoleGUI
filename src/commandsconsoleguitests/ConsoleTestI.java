@@ -30,36 +30,38 @@ package commandsconsoleguitests;
 import java.io.File;
 import java.lang.reflect.Field;
 
-import com.github.commandsconsolegui.cmd.CommandsDelegator;
-import com.github.commandsconsolegui.cmd.CommandsDelegator.ECmdReturnStatus;
-import com.github.commandsconsolegui.cmd.CommandsHelperI;
-import com.github.commandsconsolegui.cmd.IConsoleCommandListener;
-import com.github.commandsconsolegui.cmd.varfield.KeyBoundVarField;
-import com.github.commandsconsolegui.cmd.varfield.StringCmdField;
-import com.github.commandsconsolegui.extras.SingleMandatoryAppInstanceI;
-import com.github.commandsconsolegui.globals.GlobalAppOSI;
-import com.github.commandsconsolegui.globals.GlobalSingleMandatoryAppInstanceI;
-import com.github.commandsconsolegui.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.globals.jme.GlobalAppSettingsI;
-import com.github.commandsconsolegui.jme.extras.DialogListEntryData;
-import com.github.commandsconsolegui.jme.lemur.console.SimpleConsolePlugin;
-import com.github.commandsconsolegui.jme.lemur.dialog.MaintenanceListLemurDialogStateAbs;
-import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDiagChoice;
-import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDiagMaintList;
-import com.github.commandsconsolegui.jme.lemur.dialog.SimpleDiagQuestion;
-import com.github.commandsconsolegui.misc.CallQueueI.CallableX;
-import com.github.commandsconsolegui.misc.HoldRestartable;
-import com.github.commandsconsolegui.misc.ManageConfigI;
-import com.github.commandsconsolegui.misc.ManageConfigI.IConfigure;
-import com.github.commandsconsolegui.misc.ManageSingleInstanceI;
-import com.github.commandsconsolegui.misc.MiscI;
-import com.github.commandsconsolegui.misc.MsgI;
-import com.github.commandsconsolegui.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.misc.ReflexFillI;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexFillI.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.misc.ReflexFillI.ReflexFillCfg;
-import com.github.commandsconsolegui.misc.ReflexHacksPluginI;
+import com.github.commandsconsolegui.spAppOs.ManageKeyCode;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalSingleMandatoryAppInstanceI;
+import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spAppOs.misc.HoldRestartable;
+import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
+import com.github.commandsconsolegui.spAppOs.misc.MiscI;
+import com.github.commandsconsolegui.spAppOs.misc.MsgI;
+import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
+import com.github.commandsconsolegui.spAppOs.misc.ReflexHacksPluginI;
+import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
+import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
+import com.github.commandsconsolegui.spCmd.CommandsDelegator;
+import com.github.commandsconsolegui.spCmd.CommandsHelperI;
+import com.github.commandsconsolegui.spCmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.spCmd.varfield.KeyBoundVarField;
+import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
+import com.github.commandsconsolegui.spExtras.SingleMandatoryAppInstanceI;
+import com.github.commandsconsolegui.spJme.extras.DialogListEntryData;
+import com.github.commandsconsolegui.spJme.extras.SimpleApplicationHelperI;
+import com.github.commandsconsolegui.spJme.globals.GlobalAppSettingsI;
+import com.github.commandsconsolegui.spLemur.console.SimpleConsolePlugin;
+import com.github.commandsconsolegui.spLemur.dialog.MaintenanceListLemurDialogStateAbs;
+import com.github.commandsconsolegui.spLemur.dialog.SimpleDiagChoice;
+import com.github.commandsconsolegui.spLemur.dialog.SimpleDiagMaintList;
+import com.github.commandsconsolegui.spLemur.dialog.SimpleDiagQuestion;
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
 import com.jme3.system.AppSettings;
@@ -159,20 +161,13 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		return this;
   }
 	
-	/**
-	 * 
-	 */
 	@Override
 	public void simpleInitApp() {
 		ManageConfigI.i().assertConfigured(this);
 		
 		MsgI.i().setEnableDebugMessages(true);
 		
-		// disable some mappings to let the console manage it.
-		getInputManager().deleteMapping(super.INPUT_MAPPING_CAMERA_POS); //TODO there is no super code for it?
-		getInputManager().deleteMapping(super.INPUT_MAPPING_MEMORY); //TODO there is no super code for it?
-		getInputManager().deleteMapping(super.INPUT_MAPPING_HIDE_STATS);
-		getInputManager().deleteMapping(super.INPUT_MAPPING_EXIT); //this is important to let ESC be used to more things
+		SimpleApplicationHelperI.i().simpleInitApp();
 		
 		consolePlugin.initialize();
 		
@@ -189,6 +184,10 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		
 		prepareTestData(diagChoice);
 		
+		/**
+		 * this must be initialized here because of its dependencies like {@link ManageKeyCode}
+		 * that are available only after the console plugin initializer... TODO for now?
+		 */
 		bindListToggleEnable = new KeyBoundVarField(this,KeyInput.KEY_F5)
 			.setCallerAssigned(new CallableX(this) {
 				@Override
@@ -234,11 +233,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 	 */
 	@Override
 	public void simpleUpdate(float tpf) {
-		if(GlobalAppOSI.i().isApplicationExiting()){
-			stop();
-			return; //useless?
-		}
-
+		SimpleApplicationHelperI.i().simpleUpdate(tpf);
 		super.simpleUpdate(tpf);
 	}
 	
@@ -334,18 +329,15 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 	 */
 	@Override
 	public void stop(boolean waitFor) {
-		GlobalCommandsDelegatorI.i().cmdRequestExit();
+		GlobalCommandsDelegatorI.i().cmdRequestCleanSafeNormalExit();
 		super.stop(waitFor);
 	}
-	/**
-	 * this is directly called when window is closed using it's close button
-	 */
+	
 	@Override
 	public void destroy() {
-		GlobalCommandsDelegatorI.i().cmdRequestExit();
+		SimpleApplicationHelperI.i().destroy();
 		super.destroy();
 	}
-
 
 	@Override
 	public boolean isConfigured() {
@@ -366,13 +358,9 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		return MiscI.i().prepareUniqueId(this);
 	}
 	
-	/**
-	 * this is called for uncaugth exceptions! from {@link LwjglAbstractDisplay}
-	 */
 	@Override
 	public void handleError(String errMsg, Throwable t) {
-		PrerequisitesNotMetException.setExitRequestCause(errMsg,t);
-		
+		SimpleApplicationHelperI.i().handleError(errMsg, t);
 		super.handleError(errMsg, t); //this will end up calling stop() here
 	}
 }	

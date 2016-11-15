@@ -25,50 +25,48 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package commandsconsoleguitests;
+package com.github.commandsconsolegui.spAppOs.misc;
 
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spCmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.spJme.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
-//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
-
-	public CommandsTest(){
-		super();
-		setAllowUserCmdOS(true);
+public class Parameters {
+	private ArrayList<Object> aobj = new ArrayList<Object>();
+	
+	public void setReplaceAllParams(Object... aobj) {
+		clearParams();
+		this.aobj.addAll(Arrays.asList(aobj));
 	}
 	
-	@Override
-	public String prepareStatsFieldText() {
-		String strStatsLast = super.prepareStatsFieldText();
-		
-		if(EStats.MouseCursorPosition.isShow()){
-			strStatsLast+=
-				"xy"
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
-					+","
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
-					+";";
-		}
-		
-		if(EStats.TimePerFrame.isShow()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
-		}
-		
-		return strStatsLast; 
+	public ArrayList<Object> getAllParamsCopy() {
+		return new ArrayList<Object>(aobj);
 	}
 	
-//	@Override
-//	public void cmdExit() {
-//		GlobalAppRefI.i().stop();
-//		super.cmdExit();
-//	}
+	public Parameters clearParams(){
+		aobj.clear();
+		return this;
+	}
 	
+	public Parameters addParam(Object obj){
+		aobj.add(obj);
+		return this;
+	}
+	
+	/**
+	 * 
+	 * @param clReturnType
+	 * @param aobj params are expected to be NOT null
+	 * @param iIndex
+	 * @return null if invalid class type to cast
+	 */
+	public <T> T getParam(Class<T> clReturnType, int iIndex){
+		Object obj = aobj.get(iIndex);
+		if(clReturnType.isInstance(obj))return (T)obj;
+		return null;
+	}
 }

@@ -25,50 +25,60 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package commandsconsoleguitests;
+package com.github.commandsconsolegui.spCmd;
 
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spCmd.ScriptingCommandsDelegator;
-import com.github.commandsconsolegui.spJme.extras.FpsLimiterStateI;
-import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CommandsTest extends ScriptingCommandsDelegator{ //use ConsoleCommands to prevent scripts usage
-//	public final BoolTogglerCmdField	btgFpsLimit=new BoolTogglerCmdField(this,false);
+public class UserCmdStackTrace implements IConfigure<UserCmdStackTrace>{
+	private static UserCmdStackTrace instance = new UserCmdStackTrace();
+	public static UserCmdStackTrace i(){return instance;}
 
-	public CommandsTest(){
-		super();
-		setAllowUserCmdOS(true);
+	private boolean	bConfigured;
+	private CfgParm	cfg;
+
+	@Override
+	public boolean isConfigured() {
+		return bConfigured;
+	}
+	
+	public static class CfgParm implements ICfgParm{
+		ArrayList<Class<?>> aclassUserActionStackList = new ArrayList<Class<?>>();
+		public CfgParm(Class<?>... aclassUserActionStack) {
+			this.aclassUserActionStackList.addAll(Arrays.asList(aclassUserActionStack));
+		}
 	}
 	
 	@Override
-	public String prepareStatsFieldText() {
-		String strStatsLast = super.prepareStatsFieldText();
-		
-		if(EStats.MouseCursorPosition.isShow()){
-			strStatsLast+=
-				"xy"
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().x
-					+","
-					+(int)GlobalAppRefI.i().getInputManager().getCursorPosition().y
-					+";";
-		}
-		
-		if(EStats.TimePerFrame.isShow()){
-			strStatsLast+=FpsLimiterStateI.i().getSimpleStatsReport(getTPF())+";";
-		}
-		
-		return strStatsLast; 
+	public UserCmdStackTrace configure(ICfgParm icfg) {
+		this.cfg=(CfgParm)icfg;
+		bConfigured=true;
+		return this;
 	}
 	
-//	@Override
-//	public void cmdExit() {
-//		GlobalAppRefI.i().stop();
-//		super.cmdExit();
-//	}
-	
+	/**
+	 * @return
+	 */
+	public boolean isUserActionStack(){
+		for(StackTraceElement ste:Thread.currentThread().getStackTrace()){
+			for(Class<?> cl:cfg.aclassUserActionStackList){
+				if(
+						ste.getClassName().equals(cl.getName())
+						||
+						ste.getClassName().startsWith(cl.getName()+"$")
+				){
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
 }
