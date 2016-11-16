@@ -446,7 +446,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 		}
 	}
 	
-	BugFixBoolTogglerCmdField btgBugFixInvisibleCursor = new BugFixBoolTogglerCmdField(this,false,"in case text cursor is invisible")
+	BugFixBoolTogglerCmdField btgBugFixInvisibleCursor = new BugFixBoolTogglerCmdField(this,"in case text cursor is invisible")
 		.setCallerAssigned(new CallableX(this) {
 			@Override
 			public Boolean call() {
@@ -505,7 +505,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 //		.setAsBugFixerMode();
 	
 	BugFixBoolTogglerCmdField btgBugFixUpdateTextFieldTextAndCaratVisibility = 
-		new BugFixBoolTogglerCmdField(this,false)
+		new BugFixBoolTogglerCmdField(this)
 			.setCallerAssigned(new CallableX(this) {
 				@Override
 				public Boolean call() {

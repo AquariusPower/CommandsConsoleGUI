@@ -364,7 +364,7 @@ public class SavableHelperI {
 			case String:	valRead=ic.readString	(strName, (String)objValDef);	break;
 			case Var:
 				VarCmdFieldAbs var = (VarCmdFieldAbs)SavableHelperI.i().getFieldVal(isfa,fld);
-				addDbgInfo(aobjDbg,var.getReport());
+				addDbgInfo(aobjDbg, var.getFailSafeDebugReport());
 				var.setObjectRawValue(
 					read(isfa, ic, var.getRawValue().getClass(), strName, null, var.getRawValueDefault(), aobjDbg));
 				return null;
@@ -467,7 +467,7 @@ public class SavableHelperI {
 			case String:	oc.write((String)val,		strName, changeVal(isfa,String.class,	val, valDef));break;
 			case Var:
 				VarCmdFieldAbs<?,?> var = (VarCmdFieldAbs<?,?>)val;
-				addDbgInfo(aobjDbg, var.getReport());
+				addDbgInfo(aobjDbg, var.getFailSafeDebugReport());
 //				if(var.getRawValue() != var.getRawValueDefault()){
 					write(isfa,oc, strName, var.getRawValue(), var.getRawValueDefault(), aobjDbg);
 //				}

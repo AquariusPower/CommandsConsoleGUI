@@ -385,7 +385,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	 */
 	@Override
 	protected boolean initAttempt() {
-		if(getDiagStyle()==null){
+		if(!isDiagStyleSet()){
 			setStyle(GlobalDialogHelperI.i().STYLE_CONSOLE);
 		}
 		if(!super.initAttempt())return false;
@@ -1134,7 +1134,11 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	public String getTitle() {
 		return strTitle;
 	}
-
+	
+	public boolean isDiagStyleSet(){
+		return !svfStyle.isValueNull();
+	}
+	
 	public String getDiagStyle() {
 		return svfStyle.getValueAsString();
 	}

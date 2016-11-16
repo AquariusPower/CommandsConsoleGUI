@@ -30,8 +30,9 @@ package com.github.commandsconsolegui.spCmd.varfield;
 import com.github.commandsconsolegui.spAppOs.misc.CallQueueI;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.DebugI;
-import com.github.commandsconsolegui.spAppOs.misc.IReport;
+import com.github.commandsconsolegui.spAppOs.misc.IDebugReport;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
+import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
 import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallableX;
@@ -55,7 +56,7 @@ import com.github.commandsconsolegui.spCmd.ConsoleVariable;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 
  */
-public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> implements IReflexFillCfgVariant,IReport{//, IVarIdValueOwner{
+public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> implements IReflexFillCfgVariant,IDebugReport{//, IVarIdValueOwner{
 	public static final class CompositeControl extends CompositeControlAbs<VarCmdFieldAbs>{
 		private CompositeControl(VarCmdFieldAbs casm){super(casm);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
@@ -187,7 +188,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	}
 	
 	/**
-	 * 
+	 * The lazy value will be applied at the console var link's value (that must come null).
 	 * @param cc
 	 * @param cvar if the object already set is different from it, will throw exception
 	 * @return
@@ -195,39 +196,55 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	public THIS setConsoleVarLink(CommandsDelegator.CompositeControl cc, ConsoleVariable cvar) {
 		cc.assertSelfNotNull();
 		
-		if(cvar==null){
-			throw new PrerequisitesNotMetException("VarLink is null", this);
+		// validate pre-conditions
+		PrerequisitesNotMetException.assertNotNull("ConsoleVarLinkNew", cvar, this);
+		PrerequisitesNotMetException.assertNotAlreadySet("ConsoleVarLinkCurrent", this.cvarLinkAndValueStorage, cvar, this);
+		PrerequisitesNotMetException.assertNotAlreadySet("ConsoleVarOwner", cvar.getRestrictedVarOwner(), this);
+		PrerequisitesNotMetException.assertNotAlreadySet("ConsoleVarValue", cvar.getRawValue(), cvar, this);
+		PrerequisitesNotMetException.assertIsTrue("isRawLazyValueSet()", isRawLazyValueSet(), cvar, this);
+		if(!isAllowNullValue() && isRawLazyValueNull()){//this.toString()
+			MsgI.i().devWarn("Null values are not allowed but the lazy one is null.", cvar, this);
 		}
 		
-		PrerequisitesNotMetException.assertNotAlreadySet("ConsoleVarLink", this.cvarLinkAndValueStorage, cvar, this);
-		PrerequisitesNotMetException.assertNotAlreadySet("ConsoleVarOwner", cvar.getRestrictedVarOwner(), this);
-		PrerequisitesNotMetException.assertIsTrue("isRawLazyValueSet()", isRawLazyValueSet(), cvar, this);
+		
+//		/**
+//		 * console var will come with a value to be set here
+//		 */
+////		boolean bSetNormalMode=false;
+//		if(cvar.getRawValue()==null && isValueNull()){
+//			/**
+//			 * The console var link's value is null.
+//			 * The lazy value is null too.
+//			 * This will be called just to let the console variable do it's internal work, 
+//			 * even if nulls are not allowed, just for completeness.
+//			 */
+//			cvar.setRawValue(ccSelf,null);
+//		}else{
+////			if(cvar.getRawValue()!=null){
+////				throw new PrerequisitesNotMetException(
+////					"The console var should not come with a value as the lazy one here was not applied at it yet.", 
+////					cvar.getRawValue(), cvar, this);
+////			}
+//			
+//			if(isAllowNullValue() || !isRawLazyValueNull()){
+//				cvar.setRawValue(ccSelf,getRawValueLazy());
+////				bSetNormalMode=true;
+//			}else{
+//				throw new PrerequisitesNotMetException(
+//					"Null values are not allowed but the lazy one is null.",
+//					cvar, this);
+//			}
+//		}
 		
 		/**
-		 * console var will come with a value to be set here
+		 * simply/direcly apply the lazy value at the console variable
 		 */
-		if(cvar.getRawValue()==null && isValueNull()){
-			/**
-			 * The console var link's value is null.
-			 * The lazy value is null too.
-			 * This will be called just to let the console variable do it's internal work, for completeness.
-			 */
-			cvar.setRawValue(ccSelf,null);
-		}else{
-			if(cvar.getRawValue()!=null){
-				throw new PrerequisitesNotMetException(
-					"The console var should not come with a value as the lazy one here was not applied at it yet.", 
-					cvar.getRawValue(), cvar, this);
-			}
-			
-			if(isAllowNullValue() || !isRawLazyValueNull()){
-				setObjectRawValue(getRawValueLazy());
-			}else{
-				throw new PrerequisitesNotMetException(
-					"Null values are not allowed but the lazy one is null.",
-					cvar, this);
-			}
-		}
+		cvar.setRawValue(ccSelf,objRawLazyValue);//getRawValueLazy());
+		
+		/**
+		 * after console var checks above to not interfere in both setup
+		 */
+		cvar.setRestrictedVarOwner(this);
 		
 		/**
 		 * lazy value is not required anymore, so clean it up
@@ -235,9 +252,21 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		bRawLazyValueAvailable=false;
 		objRawLazyValue=null;
 		
-		// last thing to not interfere in both setup
-		this.cvarLinkAndValueStorage = cvar;
-		this.cvarLinkAndValueStorage.setRestrictedVarOwner(this);
+		/**
+		 * The console var must be completely setup BEFORE this to avoid reference this backwards!!!!
+		 * from this code line on, if this var is accessed, it's value will be based on 
+		 * the console var link and not the lazy one anymore, even from withing this very method 
+		 * even if it has not returned yet! so, this must be THE LAST THING!!!!
+		 */
+		this.cvarLinkAndValueStorage = cvar; //LAST THING!!
+		
+////		this.cvarLinkAndValueStorage.setRestrictedVarOwner(this);
+//		if(bSetNormalMode){
+//			/**
+//			 * console var link must have already been set
+//			 */
+//			setObjectRawValue(getRawValueLazy());
+//		}
 		
 		return getThis();
 	}
@@ -420,8 +449,11 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		return getThis();
 	}
 	
+	/**
+	 * this is safe to be public because it is just a report string
+	 */
 	@Override
-	public String getReport(){
+	public String getFailSafeDebugReport(){
 		String str="";
 		if(vcuid==null){
 			str+="(Not a class field.";
@@ -436,10 +468,12 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 			}
 		}
 		
-		return str+" = "+getValueReport();
-	}; //this is safe to be public because it is just a report string
+		return str+" = " //+getValueReport();
+			+getFailSafeDebugValueReport(getRawValueUnsafely())
+			+"("+getFailSafeDebugValueReport(objRawValueDefault)+")";
+	}
 	
-	protected String valueReport(Object val){
+	protected String getFailSafeDebugValueReport(Object val){
 		if(val==null)return ""+null;
 		
 		if(val instanceof String){
@@ -449,9 +483,9 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		return ""+val;
 	}
 	
-	public String getValueReport(){
-		return valueReport(getRawValue())+"("+valueReport(getRawValueDefault())+")";
-	}
+//	private String getValueReport(){
+//		return getFailSafeDebugValueReport(getRawValue())+"("+getFailSafeDebugValueReport(getRawValueDefault())+")";
+//	}
 	
 	/**
 	 * Let each concrete class determine the best naming for the main get() method
@@ -462,11 +496,12 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	}
 	
 	/**
-	 * this is safe to be public because it is a base access to the concrete class simple value 
-	 * ex.: will return a primitive Long on the concrete class
-	 * @return
+	 * From the time when null is not allowed anymore:
+	 * this must fail (if value is still null) to make it sure this method
+	 * is not being called improperly, like in a place that would accept a null value
+	 * but it was expected to NOT be a null value anymore! 
 	 */
-	public Object getRawValue(){ 
+	public Object getRawValue(){
 		return assertIfNullValueIsAllowed(getRawValueUnsafely());
 	}
 	
@@ -503,16 +538,34 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		return objValue;
 	}
 	
+	/**
+	 * see {@link #setObjectRawValue(Object, boolean, boolean)}
+	 * 
+	 * @param value
+	 * @return
+	 */
 	public THIS setValue(VAL value) {
 		setObjectRawValue(value);
 		return getThis();
 	}
 	
+	/**
+	 * see {@link #setObjectRawValue(Object, boolean, boolean)}
+	 * 
+	 * @param objValue
+	 * @return
+	 */
 	public THIS setObjectRawValue(Object objValue) { // do not use O at param here, ex.: bool toggler can be used on overriden
 		setObjectRawValue(objValue,false,false);
 		return getThis();
 	}
 	
+	/**
+	 * see {@link #setObjectRawValue(Object, boolean, boolean)}
+	 * @param objValue
+	 * @param bPreventCallerRunOnce
+	 * @return
+	 */
 	public THIS setObjectRawValue(Object objValue,boolean bPreventCallerRunOnce) { // do not use O at param here, ex.: bool toggler can be used on overriden
 		setObjectRawValue(objValue,false,bPreventCallerRunOnce);
 		return getThis();
@@ -521,6 +574,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	/**
 	 * It is the unmodified/original value.
 	 * If var link is not set, the raw value will be lazily stored.
+	 * The value will be set at the console var link's value or here at the lazy one.
 	 *  
 	 * @param objValueNew on its overridens, a string value should always be parseable, as it can be the by-hand user input at console!
 	 * @return
@@ -681,26 +735,6 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		return ""+value;
 	}
 	
-	@Override
-	public String toString() {
-//		/**
-//		 * enable the debug key to show improper use of toString()
-//		 */
-//		if(DebugI.i().isKeyEnabled(EDebugKey.VarToStringDenied)){
-		if(!DebugI.i().isInIDEdebugMode()){
-//			boolean bIgnoreOnce=false; // bIgnoreOnce=true // evaluate in debug, to ignore once.
-//			if(!bIgnoreOnce){
-				throw new PrerequisitesNotMetException("use getReport() instead!", this);
-//			}
-		}
-		
-		String str="("+this.getClass().getName()+")";
-		str+=getReport();
-		str+=" (" + super.toString() + ")";
-		
-		return str;
-	}
-
 	public VarCmdUId getIdTmpCopy() {
 		return vcuid.clone();
 	}
@@ -810,6 +844,60 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 
 	public void setAllowCallerAssignedToBeRun(boolean b) {
 		this.bAllowCallerAssignedToBeRunOnValueChange=b;
+	}
+
+//	//@Override
+//	public String toStringb() {
+//		/**
+//		 * this is allowed in debug mode so the IDE can show it's value
+//		 */
+//		if(!DebugI.i().isInIDEdebugMode()){
+//			throw new PrerequisitesNotMetException("use getReport() instead!", this);
+//		}
+//		
+//		
+//	}	
+//	
+//	/**
+//	 * this is allowed in debug mode to let the IDE show it's values 
+//	 */
+//	//@Override
+//	public String toStringa() {
+//	//	/**
+//	//	 * enable the debug key to show improper use of toString()
+//	//	 */
+//	//	if(DebugI.i().isKeyEnabled(EDebugKey.VarToStringDenied)){
+//		if(!DebugI.i().isInIDEdebugMode()){
+//	//		boolean bIgnoreOnce=false; // bIgnoreOnce=true // evaluate in debug, to ignore once.
+//	//		if(!bIgnoreOnce){
+//				throw new PrerequisitesNotMetException("use getReport() instead!", this);
+//	//		}
+//		}
+//		
+//		String str="("+this.getClass().getName()+")";
+//	//	if(DebugI.i().isInIDEdebugMode()){
+//	//		try{
+//	//			str+=getReport();
+//	//		}catch(Exception ex){
+//	////			System.err.println("[IGNOREING EXCEPTION IN DEBUG MODE]");
+//	////			ex.printStackTrace();
+//	//			str+="[IGNORING EXCEPTION IN DEBUG MODE]";
+//	//		}
+//	//	}else{
+//			str+=getReport();
+//	//	}
+//		str+=" (" + super.toString() + ")";
+//		
+//		return str;
+//	}
+
+	/**
+	 * This is intended to be used ONLY as non-reusable debug information!
+	 * Use {@link #getFailSafeDebugReport()} for coding! 
+	 */
+	@Override
+	public String toString() {
+		return vcuid.toString();
 	}
 
 	

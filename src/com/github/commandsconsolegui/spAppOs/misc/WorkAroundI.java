@@ -110,14 +110,17 @@ public class WorkAroundI {
 //		btgBugFix.getCallerAssignedForMaintenance(ccSelf).setQueueDenied();
 //	}
 	
+	/**
+	 * Bug fixers will default to false, only end user can decide...
+	 */
 	public static class BugFixBoolTogglerCmdField extends BoolTogglerCmdFieldAbs<BugFixBoolTogglerCmdField>{
 
-		public BugFixBoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitialValue, String strHelp) {
-			super(rfcfgOwnerUseThis, bInitialValue, strHelp);
+		public BugFixBoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, String strHelp) {
+			super(rfcfgOwnerUseThis, false, strHelp);
 		}
 
-		public BugFixBoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitValue) {
-			super(rfcfgOwnerUseThis, bInitValue);
+		public BugFixBoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis) {
+			super(rfcfgOwnerUseThis, false);
 		}
 		
 		@Override

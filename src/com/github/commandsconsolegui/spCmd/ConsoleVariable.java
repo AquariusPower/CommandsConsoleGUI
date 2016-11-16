@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.spCmd;
 
+import java.util.Arrays;
+
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
@@ -186,4 +188,10 @@ public class ConsoleVariable<VAL> {
 		return (getRestrictedVarOwner()!=null && getRestrictedVarOwner().isConsoleVarLink(this));
 	}
 
+	@Override
+	public String toString() {
+		return strUniqueId+"="+objRawValue;
+	}
+	
+	
 }

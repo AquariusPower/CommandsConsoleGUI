@@ -51,7 +51,7 @@ public class ManageCellRendererI implements IReflexFillCfg,IManager{
 	
 	public final StringVarField svfTreeDepthToken = new StringVarField(this, " ", null);
 	public final BoolTogglerCmdField	btgShowTreeUId = new BoolTogglerCmdField(this,false).setCallNothingOnChange();
-	public final BugFixBoolTogglerCmdField btgNOTWORKINGBugFixGapForListBoxSelectorArea = new BugFixBoolTogglerCmdField(this,false);
+	public final BugFixBoolTogglerCmdField btgNOTWORKINGBugFixGapForListBoxSelectorArea = new BugFixBoolTogglerCmdField(this);
 	
 	public ManageCellRendererI() {
 		ManageSingleInstanceI.i().add(this);

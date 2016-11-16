@@ -160,7 +160,7 @@ public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 	}
 	
 	@Override
-	protected String valueReport(Object val) {
+	protected String getFailSafeDebugValueReport(Object val) {
 		if(val==null)return ""+null;
 		
 		return getBindCfg();

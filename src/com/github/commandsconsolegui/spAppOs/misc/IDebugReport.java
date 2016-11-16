@@ -31,6 +31,10 @@ package com.github.commandsconsolegui.spAppOs.misc;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public interface IReport {
-	String getReport();
+public interface IDebugReport {
+	/**
+	 * this method must not fail
+	 * @return
+	 */
+	String getFailSafeDebugReport();
 }

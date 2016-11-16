@@ -1830,10 +1830,10 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		return adiag;
 	}
 	
-	BugFixBoolTogglerCmdField btgBugFixReinitBordersByRecreatingThem = new BugFixBoolTogglerCmdField(this,false)
+	BugFixBoolTogglerCmdField btgBugFixReinitBordersByRecreatingThem = new BugFixBoolTogglerCmdField(this)
 		.setHelp("this can cause minor problems too concerning mouse cursor clicks on borders, but it is more granted to make the borders work better overall");
 	
-	BugFixBoolTogglerCmdField btgBugFixOnFocusAutoReinitBorder = new BugFixBoolTogglerCmdField(this,false)
+	BugFixBoolTogglerCmdField btgBugFixOnFocusAutoReinitBorder = new BugFixBoolTogglerCmdField(this)
 		.setCallerAssigned(new CallableX(this) {
 			@Override
 			public Boolean call() {

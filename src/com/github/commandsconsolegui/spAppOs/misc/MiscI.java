@@ -743,8 +743,8 @@ public class MiscI {
 		if(objValue==null){
 			str+=""+null;
 		}else{
-			if(objValue instanceof IReport){
-				return ((IReport)objValue).getReport();
+			if(objValue instanceof IDebugReport){
+				return ((IDebugReport)objValue).getFailSafeDebugReport();
 			}
 			
 			Object[] aobjKey=null;
@@ -806,14 +806,6 @@ public class MiscI {
 		if(aobjCustom!=null){
 			for(int i=0;i<aobjCustom.length;i++){
 				Object obj = aobjCustom[i];
-//				if(i==0)strMessage+=":\n";
-//				if(str.equals(strKey)){
-//				if(i<(aobjCustom.length-1)){
-//					str+="\n";
-//				}
-				
-//				str+="\t["+i+"]("+obj.getClass().getName()+":"+(obj==null?obj:obj.toString())+")\n";
-//				str+="\n\t["+i+"]("+(obj==null?null:obj.getClass().getName()+":"+obj.toString())+")";
 				strMessage+=multilineIfArray("\n\t["+i+"]",obj);
 			}
 		}
@@ -894,9 +886,9 @@ public class MiscI {
 		if(obj!=null && bShowClassName)strCl=obj.getClass().getName();
 		
 		String strObj = "";
-		if (obj instanceof IReport) {
-			IReport ir = (IReport) obj;
-			strObj=ir.getReport();
+		if (obj instanceof IDebugReport) {
+			IDebugReport ir = (IDebugReport) obj;
+			strObj=ir.getFailSafeDebugReport();
 		}else{
 			strObj=""+obj.toString();
 		}

@@ -31,7 +31,7 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.IHasOwnerInstance;
-import com.github.commandsconsolegui.spAppOs.misc.IReport;
+import com.github.commandsconsolegui.spAppOs.misc.IDebugReport;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.RefHolder;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
@@ -42,7 +42,7 @@ import com.github.commandsconsolegui.spCmd.varfield.VarCmdFieldAbs;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CommandData implements Comparable<CommandData>,IHasOwnerInstance<IReflexFillCfg>,IReport{//,IDiscardableInstance{
+public class CommandData implements Comparable<CommandData>,IHasOwnerInstance<IReflexFillCfg>,IDebugReport{//,IDiscardableInstance{
 	/** 
 	 * Core IDs are simple short commands.
 	 * They may conflict, but it is not critical as the full command is what matters. 
@@ -183,7 +183,7 @@ public class CommandData implements Comparable<CommandData>,IHasOwnerInstance<IR
 	}
 
 	@Override
-	public String getReport() {
+	public String getFailSafeDebugReport() {
 		return getUniqueCmdId();
 	}
 	

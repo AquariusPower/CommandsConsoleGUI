@@ -40,6 +40,7 @@ public class MsgI implements IMessageListener{
 	public static MsgI i(){return instance;}
 	
 	private boolean bDebug=false;
+	private String strMsgHeader="["+MsgI.class.getSimpleName()+"]";
 	
 	private ArrayList<IMessageListener> aimsgList = new ArrayList<IMessageListener>();
 	
@@ -51,31 +52,6 @@ public class MsgI implements IMessageListener{
 		}
 	}
 	
-//	/**
-//	 * 
-//	 * @param str
-//	 * @param bSuccess
-//	 * @param objOwner use "this"
-//	 */
-//	public void dbg(String str, boolean bSuccess, Object objOwner){
-//		if(!bDebug)return;
-//		
-//		if(!bSuccess){
-//			int i,i2=0;
-//			i=i2;i2=i;
-//		}
-//		
-//		System.err.println(MsgI.class.getName()+":DBG: "
-//			+new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()))+": "
-//			+(objOwner!=null ? objOwner.getClass().getName()+": " : "")
-//			+(bSuccess?"ok":"FAIL")+": "
-//			+str);
-//		
-//		if(!bSuccess){
-//			Thread.dumpStack();
-//		}
-//	}
-	
 	@Override
 	public boolean warn(String str, Object... aobj){
 		boolean bListened=false;
@@ -86,7 +62,7 @@ public class MsgI implements IMessageListener{
 		}
 		
 		if(!bListened){
-			System.err.println(MiscI.i().joinMessageWithObjects(true,"WARN:"+str,aobj));
+			System.err.println(MiscI.i().joinMessageWithObjects(true,strMsgHeader+"WARN:"+str,aobj));
 		}
 		
 		return true;
@@ -102,7 +78,7 @@ public class MsgI implements IMessageListener{
 		}
 		
 		if(!bListened){
-			System.out.println(MiscI.i().joinMessageWithObjects(true,"Info:"+str,aobj));
+			System.out.println(MiscI.i().joinMessageWithObjects(true,strMsgHeader+"Info:"+str,aobj));
 		}
 		return true;
 	}
@@ -119,7 +95,7 @@ public class MsgI implements IMessageListener{
 		}
 		
 		if(!bListened){
-			System.err.println(MiscI.i().joinMessageWithObjects(true,"Debug:"+str,aobj));
+			System.err.println(MiscI.i().joinMessageWithObjects(true,strMsgHeader+"Debug:"+str,aobj));
 		}
 		
 		return true;
@@ -142,7 +118,7 @@ public class MsgI implements IMessageListener{
 				strMsgOverride=ex.getMessage();
 			}
 			
-			System.err.println(MiscI.i().joinMessageWithObjects(true,"EXCEPTION:"+strMsgOverride,aobj));
+			System.err.println(MiscI.i().joinMessageWithObjects(true,strMsgHeader+"EXCEPTION:"+strMsgOverride,aobj));
 			ex.printStackTrace();
 //			Thread.dumpStack();
 		}
@@ -163,7 +139,7 @@ public class MsgI implements IMessageListener{
 		}
 		
 		if(!bListened){
-			System.out.println(MiscI.i().joinMessageWithObjects(true,"DevInfo:"+str,aobj));
+			System.out.println(MiscI.i().joinMessageWithObjects(true,strMsgHeader+"DevInfo:"+str,aobj));
 		}
 		return true;
 	}
@@ -178,25 +154,10 @@ public class MsgI implements IMessageListener{
 		}
 		
 		if(!bListened){
-			System.err.println(MiscI.i().joinMessageWithObjects(true,"DEVWARN:"+str,aobj));
+			System.err.println(MiscI.i().joinMessageWithObjects(true,strMsgHeader+"DEVWARN:"+str,aobj));
 		}
 		
 		return true;
 	}
 
-//	public boolean infoSystemTopOverride(String str) {
-//		boolean bListened=false;
-//		for(IMessageListener imsg:aimsgList){
-//			if(imsg.infoSystemTopOverride(str)){
-//				bListened=true;
-//			}
-//		}
-//		
-//		if(!bListened){
-//			System.err.println(MiscI.i().joinMessageWithObjects(true,"SystemInfo:"+str));
-//		}
-//		
-//		return true;
-//	}
-	
 }

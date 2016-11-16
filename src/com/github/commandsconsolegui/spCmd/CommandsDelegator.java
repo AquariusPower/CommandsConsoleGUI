@@ -49,8 +49,10 @@ import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyCodeI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalConsoleUII;
 import com.github.commandsconsolegui.spAppOs.misc.CallQueueI;
+import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.DebugI;
+import com.github.commandsconsolegui.spAppOs.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.spAppOs.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.IHandleExceptions;
 import com.github.commandsconsolegui.spAppOs.misc.IMessageListener;
@@ -58,16 +60,15 @@ import com.github.commandsconsolegui.spAppOs.misc.IMultiInstanceOverride;
 import com.github.commandsconsolegui.spAppOs.misc.IUserInputDetector;
 import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
+import com.github.commandsconsolegui.spAppOs.misc.MiscI.EStringMatchMode;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallableX;
-import com.github.commandsconsolegui.spAppOs.misc.DebugI.EDebugKey;
-import com.github.commandsconsolegui.spAppOs.misc.MiscI.EStringMatchMode;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdFieldAbs;
 import com.github.commandsconsolegui.spCmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.spCmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.spCmd.varfield.KeyBoundVarField;
@@ -150,6 +151,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		"If enabled, this will use a fixed line wrap column even for non mono spaced fonts, "
 		+"based on the width of the 'W' character. Otherwise it will dynamically guess the best "
 		+"fitting string size.").setCallNothingOnChange();
+	
 	/**
 	 * Developer vars, keep together!
 	 * Initialy true, the default init will disable them.
@@ -169,7 +171,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	/**
 	 * used to hold a reference to the identified/typed user command
 	 */
-	private BoolTogglerCmdField	btgReferenceMatched;
+	private BoolTogglerCmdFieldAbs	btgReferenceMatched;
 	
 	/**
 	 * user can type these below at console (the actual commands are prepared by reflex)
@@ -544,7 +546,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	
 	private boolean checkCmdValidityBoolTogglers(){
 		btgReferenceMatched=null;
-		for(BoolTogglerCmdField btg : ManageVarCmdFieldI.i().getListCopy(BoolTogglerCmdField.class)){
+		for(BoolTogglerCmdFieldAbs btg : ManageVarCmdFieldI.i().getListCopy(BoolTogglerCmdFieldAbs.class)){
 			String strSimpleCmdId = btg.getSimpleId();
 			if(!strSimpleCmdId.endsWith("Toggle"))strSimpleCmdId+="Toggle";
 			if(checkCmdValidity(btg.getOwner(), btg.getUniqueCmdId(), strSimpleCmdId, "[bEnable] "+btg.getHelp(), true)){
@@ -2606,7 +2608,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	 * 
 	 * @return false if toggle failed
 	 */
-	private boolean toggle(BoolTogglerCmdField btg){
+	private boolean toggle(BoolTogglerCmdFieldAbs btg){
 		if(ccl.paramBooleanCheckForToggle(1)){
 			Boolean bEnable = ccl.paramBoolean(1);
 			btg.setObjectRawValue(bEnable==null ? !btg.get() : bEnable); //overrider
@@ -3203,7 +3205,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		ConsoleVariable cvar = getVarFromRightSource(CommandsHelperI.i().getRestrictedToken()+owner.getUniqueVarId());
 		if(cvar==null)return false;
 		owner.setObjectRawValue(strValue);
-		dumpSubEntry(owner.getReport());
+		dumpSubEntry(owner.getFailSafeDebugReport());
 		return true;
 	}
 	
@@ -3891,7 +3893,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		
 		ArrayList<VarCmdFieldAbs> acvarAllVarsList = new ArrayList<VarCmdFieldAbs>();
 		acvarAllVarsList.addAll(ManageVarCmdFieldI.i().getListCopy(KeyBoundVarField.class));
-		acvarAllVarsList.addAll(ManageVarCmdFieldI.i().getListCopy(BoolTogglerCmdField.class));
+		acvarAllVarsList.addAll(ManageVarCmdFieldI.i().getListCopy(BoolTogglerCmdFieldAbs.class)); //special case!
 		acvarAllVarsList.addAll(ManageVarCmdFieldI.i().getListCopy(TimedDelayVarField.class));
 		acvarAllVarsList.addAll(ManageVarCmdFieldI.i().getListCopy(FloatDoubleVarField.class));
 		acvarAllVarsList.addAll(ManageVarCmdFieldI.i().getListCopy(IntLongVarField.class));
@@ -3940,8 +3942,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		
 //		dumpSubEntry("Previous Second FPS  = "+lPreviousSecondFPS);
 		
-		for(BoolTogglerCmdField btg : ManageVarCmdFieldI.i().getListCopy(BoolTogglerCmdField.class)){
-			dumpSubEntry(btg.getReport());
+		for(BoolTogglerCmdFieldAbs btg : ManageVarCmdFieldI.i().getListCopy(BoolTogglerCmdFieldAbs.class)){
+			dumpSubEntry(btg.getFailSafeDebugReport());
 		}
 		
 //		for(TimedDelayVar td : TimedDelayVar.getListCopy()){

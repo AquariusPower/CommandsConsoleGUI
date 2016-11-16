@@ -33,6 +33,7 @@ import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.IMultiInstanceOverride;
+import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.RefHolder;
 
@@ -82,10 +83,18 @@ public class ManageVarCmdFieldI implements IManager<VarCmdFieldAbs>{
 	
 	public <T extends VarCmdFieldAbs> ArrayList<T> getListCopy(Class<T> clFilter){
 		ArrayList<T> a = new ArrayList<T>();
-		for(VarCmdFieldAbs vcf:avcfList){
-			if(clFilter.isInstance(vcf)){
+		for(VarCmdFieldAbs vcf:avcfList){ 
+			if(clFilter.isInstance(vcf)){ // (vcf.getClass().getDeclaredClasses()) (vcf.getClass().isAssignableFrom(clFilter)) (vcf instanceof clFilter) (clFilter.isAssignableFrom(vcf.getClass()))
 				a.add((T)vcf);
 			}
+//			else{
+//				for(Class cl:MiscI.i().getSuperClassesOf(vcf)){
+//					if(cl.getName().equals(clFilter.getName())){
+////					if(cl.isAssignableFrom(clFilter)){
+//						a.add((T)vcf);
+//					}
+//				}
+//			}
 		}
 		
 		return a;

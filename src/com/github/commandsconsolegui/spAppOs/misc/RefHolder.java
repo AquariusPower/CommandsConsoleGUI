@@ -37,7 +37,7 @@ import java.util.Arrays;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class RefHolder<T> implements IReport{
+public class RefHolder<T> implements IDebugReport{
 	
 	private T objRefHolded;
 	private int	iHash;
@@ -100,7 +100,7 @@ public class RefHolder<T> implements IReport{
 	}
 	
 	@Override
-	public String getReport(){
+	public String getFailSafeDebugReport(){
 		String str="";
 		
 		str+=MiscI.i().asReport("RefHolded",objRefHolded,true);
@@ -112,7 +112,7 @@ public class RefHolder<T> implements IReport{
 	public String toString() {
 		return String.format(
 			"RefHolder [iHash=%s, lCount=%s, lLastChangeTime=%s, steDbgLastSetAt=%s], objRefHolded=%s",
-			iHash, lCount, lLastChangeTime, Arrays.toString(steDbgLastSetAt), getReport());
+			iHash, lCount, lLastChangeTime, Arrays.toString(steDbgLastSetAt), getFailSafeDebugReport());
 	}
 
 	

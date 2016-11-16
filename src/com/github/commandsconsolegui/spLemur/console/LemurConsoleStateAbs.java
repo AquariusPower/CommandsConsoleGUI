@@ -1293,7 +1293,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 	//private BitmapFont	fontConsoleExtraDefault;
 	//private boolean	bConfigureSimpleCompleted;
 	
-	BugFixBoolTogglerCmdField btgBugFixStatsLabelTextSize = new BugFixBoolTogglerCmdField(this,false,"FIXED: By fixating the size of the label, this crash preventer is not that necesary anymore.")
+	BugFixBoolTogglerCmdField btgBugFixStatsLabelTextSize = new BugFixBoolTogglerCmdField(this,"FIXED: By fixating the size of the label, this crash preventer is not that necesary anymore.")
 		.setCallerAssigned(new CallableX(this) {
 			@Override
 			public Boolean call() {

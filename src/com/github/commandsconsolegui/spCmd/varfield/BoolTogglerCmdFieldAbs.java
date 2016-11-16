@@ -192,7 +192,7 @@ public abstract class BoolTogglerCmdFieldAbs<THIS extends BoolTogglerCmdFieldAbs
 					if(isCallerAssigned()){
 						super.prepareCallerAssigned();
 					}else{
-						MsgI.i().devWarn("caller not set "+this.getReport(), this);
+						MsgI.i().devWarn("caller not set "+this.getFailSafeDebugReport(), this);
 					}
 				}
 			}
