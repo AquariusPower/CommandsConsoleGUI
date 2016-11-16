@@ -158,7 +158,7 @@ public abstract class BoolTogglerCmdFieldAbs<THIS extends BoolTogglerCmdFieldAbs
 //	}
 	
 	@Override
-	public THIS setObjectRawValue(Object objValue) {
+	public THIS setObjectRawValue(Object objValue,boolean bPreventCallerRunOnce) {
 		if(objValue==null)throw new PrerequisitesNotMetException(BoolTogglerCmdFieldAbs.class.getSimpleName()+" can't be set to null!");
 		
 		if(objValue instanceof BoolTogglerCmdFieldAbs){
@@ -179,7 +179,7 @@ public abstract class BoolTogglerCmdFieldAbs<THIS extends BoolTogglerCmdFieldAbs
 			objValue = (Boolean)objValue; //default is expected type
 		}
 		
-		super.setObjectRawValue(objValue);
+		super.setObjectRawValue(objValue,bPreventCallerRunOnce);
 		
 		return getThis();
 	}

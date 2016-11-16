@@ -93,7 +93,7 @@ public class IntLongVarField extends NumberVarFieldAbs<Long,IntLongVarField>{
 	
 	@Override
 //	public IntLongVarField setObjectValue(CommandsDelegator.CompositeControl cc, Object objValue) {
-	public IntLongVarField setObjectRawValue(Object objValue) {
+	public IntLongVarField setObjectRawValue(Object objValue,boolean bPreventCallerRunOnce) {
 		if(objValue == null){
 			//keep this empty skipper nullifier
 		}else
@@ -125,7 +125,7 @@ public class IntLongVarField extends NumberVarFieldAbs<Long,IntLongVarField>{
 //		if(lMax!=null && (lValue==null || lValue>lMax))lValue=lMax;
 		
 //		super.setObjectValue(cc,objValue);
-		super.setObjectRawValue(objValue);
+		super.setObjectRawValue(objValue,bPreventCallerRunOnce);
 		
 		return getThis();
 	}

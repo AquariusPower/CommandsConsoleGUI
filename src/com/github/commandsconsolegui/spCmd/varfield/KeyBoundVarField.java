@@ -112,6 +112,15 @@ public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 	
 	@Override
 	public KeyBoundVarField setObjectRawValue(Object objValue) {
+		setObjectRawValue(objValue,true);
+		return getThis();
+	}
+	
+	/**
+	 * @param bPreventCallerRunOnce (dummified, will be overriden by true)
+	 */
+	@Override
+	public KeyBoundVarField setObjectRawValue(Object objValue,boolean bPreventCallerRunOnce) {
 		if(objValue == null){
 			//keep this empty skipper nullifier
 		}else
@@ -137,7 +146,7 @@ public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 			GlobalManageKeyBindI.i().addKeyBind(this);
 		}
 		
-		super.setObjectRawValue(objValue,true);
+		super.setObjectRawValue(objValue,true); //must NEVER execute just on bind change...
 		
 		return getThis();
 	}

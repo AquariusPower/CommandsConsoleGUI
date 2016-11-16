@@ -270,7 +270,7 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Float,TimedDelayVarField>
 //		return this;
 //	}
 	@Override
-	public TimedDelayVarField setObjectRawValue(Object objValue) {
+	public TimedDelayVarField setObjectRawValue(Object objValue,boolean bPreventCallerRunOnce) {
 		if(objValue==null)throw new PrerequisitesNotMetException(TimedDelayVarField.class.getSimpleName()+" can't be set to null!");
 		
 		if(objValue instanceof Double){
@@ -290,7 +290,7 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Float,TimedDelayVarField>
 		}
 		
 //		if(super.getConsoleVarLink()!=null)
-			super.setObjectRawValue(objValue);
+			super.setObjectRawValue(objValue,bPreventCallerRunOnce);
 //		super.setObjectValue(ccCD, objValue);
 		
 		return this;

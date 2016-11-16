@@ -37,19 +37,6 @@ import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
  *
  */
 public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
-//	private static boolean	bConfigured;
-//	private static IHandleExceptions	ihe = SimpleHandleExceptionsI.i();
-//	private static String	strCodePrefixVariant = "svf";
-//	private static ArrayList<StringVarField> ailvList = new ArrayList<StringVarField>();
-	
-//	String strValue;
-	
-//	public static void configure(IHandleExceptions ihe){
-//		if(bConfigured)throw new NullPointerException("already configured."); // KEEP ON TOP
-//		StringVarField.ihe=ihe;
-//		bConfigured=true;
-//	}
-	
 	public StringVarField(IReflexFillCfg rfcfgOwnerUseThis, StringVarField ilv,String strHelp) {
 		this(rfcfgOwnerUseThis, ilv.getValue(),strHelp);
 	}
@@ -76,7 +63,10 @@ public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 	
 	@Override
 //	public StringVarField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
-	public StringVarField setObjectRawValue(Object objValue) {
+	public StringVarField setObjectRawValue(Object objValue,boolean bPreventCallerRunOnce) {
+//		if(objValue==null){ //this MUST be the 1st check as a null can come "cast" to String detected below...
+//			//keep empty, null may be accepted!
+//		}else
 		if(objValue instanceof StringVarField){
 			objValue = ((StringVarField)objValue).getValue();
 		}else
@@ -88,7 +78,7 @@ public class StringVarField extends VarCmdFieldAbs<String,StringVarField>{
 		} // can be a nullifier!
 		
 //		super.setObjectValue(ccCD,objValue);
-		super.setObjectRawValue(objValue);
+		super.setObjectRawValue(objValue,bPreventCallerRunOnce);
 		
 		return this;
 	}

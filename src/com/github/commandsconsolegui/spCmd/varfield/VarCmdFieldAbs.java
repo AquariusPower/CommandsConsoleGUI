@@ -144,7 +144,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 //		if(isField())
 		ManageVarCmdFieldI.i().add(this);
 //		Class<VAL> cl;
-		setObjectRawValue(valueDefault,true);
+		setObjectRawValue(valueDefault,true); //DO NOT CALL THE PRIVATE ONE HERE! as it cant be overriden!
 	}
 	
 	private Class<VAL> clValueTypeConstraint;
@@ -556,7 +556,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	 * @return
 	 */
 	public THIS setObjectRawValue(Object objValue) { // do not use O at param here, ex.: bool toggler can be used on overriden
-		setObjectRawValue(objValue,false,false);
+		setObjectRawValue(objValue,false); //MUST CALL an overridenable one
 		return getThis();
 	}
 	

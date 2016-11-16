@@ -91,7 +91,7 @@ public class FloatDoubleVarField extends NumberVarFieldAbs<Double,FloatDoubleVar
 	
 	@Override
 //	public FloatDoubleVarField setObjectValue(CommandsDelegator.CompositeControl ccCD, Object objValue) {
-	public FloatDoubleVarField setObjectRawValue(Object objValue) {
+	public FloatDoubleVarField setObjectRawValue(Object objValue,boolean bPreventCallerRunOnce) {
 		if(objValue == null){
 			//keep this empty skipper nullifier
 		}else
@@ -128,7 +128,7 @@ public class FloatDoubleVarField extends NumberVarFieldAbs<Double,FloatDoubleVar
 //		}
 		
 //		super.setObjectValue(ccCD,objValue);
-		super.setObjectRawValue(objValue);
+		super.setObjectRawValue(objValue,bPreventCallerRunOnce);
 		
 		return getThis();
 	}

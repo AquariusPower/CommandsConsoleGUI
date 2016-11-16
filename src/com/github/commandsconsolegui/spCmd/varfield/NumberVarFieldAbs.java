@@ -80,8 +80,8 @@ public abstract class NumberVarFieldAbs<VAL, THIS extends NumberVarFieldAbs<VAL,
 	 * TODO add console info message in case of under/overflow?
 	 */
 	@Override
-	public THIS setObjectRawValue(Object objValue) {
-		super.setObjectRawValue(objValue); //this may put a call on queue
+	public THIS setObjectRawValue(Object objValue,boolean bPreventCallerRunOnce) {
+		super.setObjectRawValue(objValue,bPreventCallerRunOnce); //this may put a call on queue
 		
 		/**
 		 * these will also re-put the same call on queue, just that, whenever it is run
