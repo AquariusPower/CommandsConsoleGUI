@@ -107,7 +107,7 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 	private IHandleExceptions	ihe;
 	private boolean	bConfigured;
 	
-	private BoolTogglerCmdField btgUseXmlSaveMode = new BoolTogglerCmdField(this, false);
+	private final BoolTogglerCmdField btgUseXmlSaveMode = new BoolTogglerCmdField(this, false);
 	
 	public MiscJmeI() {
 		ManageSingleInstanceI.i().add(this);

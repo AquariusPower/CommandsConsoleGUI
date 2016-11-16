@@ -122,8 +122,8 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 	
 	public static class AudioCfg implements IReflexFillCfg{
 		private String	strUniqueId;
-		private StringVarField svfFile = new StringVarField(this,"","");
-		private FloatDoubleVarField fdvVolumeGain = new FloatDoubleVarField(this,1.0,"").setMin(0.0).setMax(1.0);
+		private final StringVarField svfFile = new StringVarField(this,"","");
+		private final FloatDoubleVarField fdvVolumeGain = new FloatDoubleVarField(this,1.0,"").setMin(0.0).setMax(1.0);
 		
 		public AudioCfg(String strUId) {
 			this.strUniqueId=strUId;

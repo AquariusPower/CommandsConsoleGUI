@@ -161,7 +161,7 @@ public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 		return this;
 	}
 
-	private String strCodePrefixDefault="bind";
+	private final String strCodePrefixDefault="bind";
 	private boolean	bUseCallQueue = true;
 	@Override
 	public String getCodePrefixDefault() {

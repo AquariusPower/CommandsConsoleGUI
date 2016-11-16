@@ -80,7 +80,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	private Spatial	sptIntputField;
 	private Spatial sptMainList;
 	private String	strTitle;
-	private StringVarField svfStyle = new StringVarField(this, (String)null, null).setDenyNullValue();
+	private final StringVarField svfStyle = new StringVarField(this, (String)null, null).setDenyNullValue();
 	
 	private Vector3f	v3fBkpDiagPosB4Effect;
 	private Vector3f	v3fBkpDiagSizeB4Effect;
@@ -113,11 +113,11 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //	private Long	lChoiceMadeAtMilis = null;
 	private ArrayList<DialogListEntryData<DIAG>> adataChosenEntriesList = new ArrayList<DialogListEntryData<DIAG>>();
 	
-	private BoolTogglerCmdField btgRestoreIniPosSizeOnce = new BoolTogglerCmdField(this, false);
+	private final BoolTogglerCmdField btgRestoreIniPosSizeOnce = new BoolTogglerCmdField(this, false);
 	
-	private BoolTogglerCmdField btgEffectLocation = new BoolTogglerCmdField(this, true);
-	protected BoolTogglerCmdField btgEffect = new BoolTogglerCmdField(this, true);
-	private TimedDelayVarField tdDialogEffect = new TimedDelayVarField(this, 0.15f, "");
+	private final BoolTogglerCmdField btgEffectLocation = new BoolTogglerCmdField(this, true);
+	protected final BoolTogglerCmdField btgEffect = new BoolTogglerCmdField(this, true);
+	private final TimedDelayVarField tdDialogEffect = new TimedDelayVarField(this, 0.15f, "");
 	private float	fMinEffectScale=0.01f;
 	
 	protected abstract <N extends Node> void lineWrapDisableForChildrenOf(N node);
@@ -459,8 +459,8 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	
 //	private Retry rUpdateList = new Retry();
 	
-//	private TimedDelayVarField tdUpdateRefreshList = new TimedDelayVarField(this, /*0.3f*/0.0f, "PROBLEM: this can cause crash as the list will remain unchanged while the dialog is resized, and the specific list resize related to the dialog new size will not be checked for failure before being accepted...");
-	private TimedDelayVarField tdUpdateRefreshList = new TimedDelayVarField(this, 0.3f, "");
+//	private final TimedDelayVarField tdUpdateRefreshList = new TimedDelayVarField(this, /*0.3f*/0.0f, "PROBLEM: this can cause crash as the list will remain unchanged while the dialog is resized, and the specific list resize related to the dialog new size will not be checked for failure before being accepted...");
+	private final TimedDelayVarField tdUpdateRefreshList = new TimedDelayVarField(this, 0.3f, "");
 	
 	/**
 	 * this will react to changes on the list
@@ -1014,8 +1014,8 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		}
 	}
 	
-	protected BoolTogglerCmdField btgSortListEntries = new BoolTogglerCmdField(this, true);
-	protected BoolTogglerCmdField btgSortListEntriesAtoZ = new BoolTogglerCmdField(this, true);
+	protected final BoolTogglerCmdField btgSortListEntries = new BoolTogglerCmdField(this, true);
+	protected final BoolTogglerCmdField btgSortListEntriesAtoZ = new BoolTogglerCmdField(this, true);
 	
 	protected void prepareTree(){
 		adleTmp = new ArrayList<DialogListEntryData<DIAG>>(adleCompleteEntriesList);
@@ -1616,7 +1616,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //	private int saveLoadWarnAfterFailTimes(){
 //		return (getEffectMaxTimeMilis()/iSaveLoadRetryDelayMilis)+1;
 //	}
-	final public StringCmdField scfSave = new StringCmdField(this)
+	public final StringCmdField scfSave = new StringCmdField(this)
 		.setCallerAssigned(new CallableX(this,iSaveLoadRetryDelayMilis) {@Override public Boolean call() {
 			if(!isDialogEffectsDone()){
 				setQuietOnFail(true);
@@ -1648,7 +1648,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //		return true;
 ////	}}.setFailWarnEveryTimes(saveLoadWarnAfterFailTimes()));
 //	}};
-	final public StringCmdField scfLoad = new StringCmdField(this)
+	public final StringCmdField scfLoad = new StringCmdField(this)
 //		.setCallerAssigned(callerLoad);
 		.setCallerAssigned(new CallableX(this,iSaveLoadRetryDelayMilis) {@Override public Boolean call() {
 			if(!isDialogEffectsDone()){

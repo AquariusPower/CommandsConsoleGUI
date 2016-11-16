@@ -34,8 +34,7 @@ import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
  *
  */
 public class BoolTogglerCmdField extends BoolTogglerCmdFieldAbs<BoolTogglerCmdField> {
-	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis,
-			boolean bDefault, String strHelp) {
+	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis,boolean bDefault, String strHelp) {
 		super(rfcfgOwnerUseThis, bDefault, strHelp);
 		// TODO Auto-generated constructor stub
 	}

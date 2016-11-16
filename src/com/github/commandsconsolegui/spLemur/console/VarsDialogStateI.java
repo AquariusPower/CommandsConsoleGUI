@@ -59,7 +59,7 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 	private static VarsDialogStateI<Command<Button>>	instance=new VarsDialogStateI<Command<Button>>();
 	public static VarsDialogStateI<Command<Button>> i(){return instance;}
 	
-	private KeyBoundVarField bindToggleEnable = new KeyBoundVarField(this,KeyInput.KEY_F9)
+	private final KeyBoundVarField bindToggleEnable = new KeyBoundVarField(this,KeyInput.KEY_F9)
 		.setCallerAssigned(new CallableX(this) {
 			@Override
 			public Boolean call() {

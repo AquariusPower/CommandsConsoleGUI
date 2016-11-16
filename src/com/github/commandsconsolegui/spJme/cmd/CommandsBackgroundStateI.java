@@ -44,7 +44,7 @@ public class CommandsBackgroundStateI extends CmdConditionalStateAbs<CommandsBac
 	private static CommandsBackgroundStateI instance = new CommandsBackgroundStateI();
 	public static CommandsBackgroundStateI i(){return instance;}
 	
-	private BoolTogglerCmdField	btgExecCommandsInBackground=new BoolTogglerCmdField(this, true,
+	private final BoolTogglerCmdField	btgExecCommandsInBackground=new BoolTogglerCmdField(this, true,
 		"Will continue running console commands even if console is closed.").setCallNothingOnChange();
 	
 //	private IConsoleUI	icui;

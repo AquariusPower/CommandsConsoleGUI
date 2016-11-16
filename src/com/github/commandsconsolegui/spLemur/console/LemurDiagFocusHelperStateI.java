@@ -78,8 +78,8 @@ public class LemurDiagFocusHelperStateI extends CmdConditionalStateAbs<LemurDiag
 	private FocusManagerState focusState;
 //	private SimpleApplication	sapp;
 //	private CommandsDelegatorI	cc;
-	private FloatDoubleVarField fdvDialogBazeZ = new FloatDoubleVarField(this, 20f, "the starting point at Z axis to place dialogs");
-	private FloatDoubleVarField fdvDialogZDisplacement = new FloatDoubleVarField(this, 10f, "the displacement between dialogs in the Z axis, to let one be shown properly above another.");
+	private final FloatDoubleVarField fdvDialogBazeZ = new FloatDoubleVarField(this, 20f, "the starting point at Z axis to place dialogs");
+	private final FloatDoubleVarField fdvDialogZDisplacement = new FloatDoubleVarField(this, 10f, "the displacement between dialogs in the Z axis, to let one be shown properly above another.");
 	
 	public float getDialogZDisplacement(){
 		return fdvDialogZDisplacement.getFloat();
@@ -511,7 +511,7 @@ public class LemurDiagFocusHelperStateI extends CmdConditionalStateAbs<LemurDiag
 		return true;
 	}
 	
-//	private BugFixBoolTogglerCmdField btgBugFixZSortApply = new BugFixBoolTogglerCmdField(this,false)
+//	private final BugFixBoolTogglerCmdField btgBugFixZSortApply = new BugFixBoolTogglerCmdField(this,false)
 //		.setCallerAssigned(new CallableX(this) {
 //			@Override
 //			public Boolean call() {

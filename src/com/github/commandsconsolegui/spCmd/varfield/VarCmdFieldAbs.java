@@ -144,12 +144,19 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 //		if(isField())
 		ManageVarCmdFieldI.i().add(this);
 //		Class<VAL> cl;
-		setObjectRawValue(valueDefault,true); //DO NOT CALL THE PRIVATE ONE HERE! as it cant be overriden!
+		switch(this.evcm){
+			case Var:
+			case VarCmd:
+				setObjectRawValue(valueDefault,true); //DO NOT CALL THE PRIVATE ONE HERE! as it cant be overriden!
+				break;
+		}
 	}
 	
 	private Class<VAL> clValueTypeConstraint;
 
-	private boolean	bAllowCallerAssignedToBeRunOnValueChange = true; 
+	private boolean	bAllowCallerAssignedToBeRunOnValueChange = true;
+
+	private StackTraceElement[]	asteDebugLastSetOrigin; 
 	
 //	public VarCmdFieldAbs(boolean bAddToList){
 //		if(bAddToList)VarCmdFieldAbs.avcfList.add(this);
@@ -505,7 +512,8 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		return assertIfNullValueIsAllowed(getRawValueUnsafely());
 	}
 	
-	private Object getRawValueUnsafely(){ 
+	private Object getRawValueUnsafely(){
+		PrerequisitesNotMetException.assertIsTrue("constructed", bConstructed, this);
 		if(cvarLinkAndValueStorage!=null){
 			return cvarLinkAndValueStorage.getRawValue();
 		}else{
@@ -571,6 +579,14 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		return getThis();
 	}
 	
+//	private void assertSettingAtOwnerType(){
+//		if(!isConstructed())return;
+//		
+//		for(StackTraceElement ste:asteDebugLastSetOrigin){
+//			ste.get
+//		}
+//	}
+	
 	/**
 	 * It is the unmodified/original value.
 	 * If var link is not set, the raw value will be lazily stored.
@@ -580,6 +596,8 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	 * @return
 	 */
 	private THIS setObjectRawValue(Object objValueNew, boolean bSetDefault, boolean bOnValueChangePreventCallerRunOnce) { // do not use O at param here, ex.: bool toggler can be used on overriden
+		asteDebugLastSetOrigin=Thread.currentThread().getStackTrace();
+//		assertSettingAtOwnerType();
 		assertIfNullValueIsAllowed(objValueNew);
 		
 		if(objValueNew!=null && !clValueTypeConstraint.isInstance(objValueNew)){
@@ -674,13 +692,12 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 
 	@Override
 	public String getCodePrefixVariant() {
-		if(strCodePrefixVariant==null){
+		if(strCodePrefixVariant==null){ //already validated during its set
 			strCodePrefixVariant=MiscI.i().assertGetValidId(null, getCodePrefixDefault());
 		}
 		
 		return strCodePrefixVariant;
 	}
-
 	public THIS setCodePrefixVariant(String strCodePrefixVariant) {
 		this.strCodePrefixVariant = MiscI.i().assertGetValidId(
 			strCodePrefixVariant, getCodePrefixDefault());

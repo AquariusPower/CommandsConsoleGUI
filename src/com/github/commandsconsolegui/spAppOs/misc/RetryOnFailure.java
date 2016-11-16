@@ -69,7 +69,7 @@ public class RetryOnFailure implements IReflexFillCfg,IHasOwnerInstance<IRetryLi
 	private long lStartMilis=0; // as this is only in case of failure, the 1st attempt will always be ready!
 	
 	/** 0 means retry at every update*/
-	private IntLongVarField ilvDelayMilis = null;
+	private final IntLongVarField ilvDelayMilis;
 //	long lDelayMilis=0;
 
 	private String	strId;

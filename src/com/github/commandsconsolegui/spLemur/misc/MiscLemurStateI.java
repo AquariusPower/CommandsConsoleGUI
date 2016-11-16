@@ -101,7 +101,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 	private static MiscLemurStateI instance = new MiscLemurStateI();
 	public static MiscLemurStateI i(){return instance;}
 	
-	private BoolTogglerCmdField	btgHoverHighlight = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
+	private final BoolTogglerCmdField	btgHoverHighlight = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 
 	public final BoolTogglerCmdField	btgListBoxSelectorAsUnderline = 
 		new BoolTogglerCmdField(this,true,
@@ -122,7 +122,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 //		this.sapp = sapp;
 //	}
 	
-	private TimedDelayVarField tdTextCursorBlink = new TimedDelayVarField(this,1f,"blink delay");
+	private final TimedDelayVarField tdTextCursorBlink = new TimedDelayVarField(this,1f,"blink delay");
 	private boolean	bBlinkingTextCursor = true;
 	private FocusManagerState	focusState;
 	private TextField	tfToBlinkCursor;

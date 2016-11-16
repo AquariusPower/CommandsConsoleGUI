@@ -59,7 +59,7 @@ public class OSAppLemur extends OSAppJme {
 	private Container	cntrAlert;
 	private Label	lblAlertMsg;
 	private Panel	pnlBlocker;
-	private TimedDelayVarField	tdBlockerGlow = new TimedDelayVarField(this, 3f, "...");
+	private final TimedDelayVarField	tdBlockerGlow = new TimedDelayVarField(this, 3f, "...");
 	private ColorRGBA	colorBlockerBkg;
 
 	public Panel getAlertPanel() {

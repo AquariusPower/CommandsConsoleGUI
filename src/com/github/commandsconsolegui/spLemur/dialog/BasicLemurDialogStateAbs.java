@@ -45,7 +45,7 @@ import com.simsilica.lemur.GuiGlobals;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
 public abstract class BasicLemurDialogStateAbs<T,THIS extends BasicLemurDialogStateAbs<T,THIS>> extends LemurDialogStateAbs<T,THIS>{
-	private StringCmdField scfAddEntry = new StringCmdField(this);
+	private final StringCmdField scfAddEntry = new StringCmdField(this);
 	private CfgParm	cfg;
 	
 	public BasicLemurDialogStateAbs() {

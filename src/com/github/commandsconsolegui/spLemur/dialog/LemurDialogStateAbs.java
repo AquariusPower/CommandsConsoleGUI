@@ -125,7 +125,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 	private Vector3f	v3fEntryListSizeIni;
 	private Container	cntrEntryCfg;
 	private SelectionModel	selectionModel;
-	private BoolTogglerCmdField btgAutoScroll = new BoolTogglerCmdField(this, true).setCallNothingOnChange();
+	private final BoolTogglerCmdField btgAutoScroll = new BoolTogglerCmdField(this, true).setCallNothingOnChange();
 //	private ButtonCommand	bc;
 	private boolean	bRefreshScroll;
 	private HashMap<String, HoldRestartable<LemurDialogStateAbs<T,?>>> hmhrChildDiagModals = new HashMap<String, HoldRestartable<LemurDialogStateAbs<T,?>>>();
@@ -134,12 +134,12 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 	private Label	lblSelectedEntryStatus;
 	private ArrayList<BindKey>	abkList = new ArrayList<BindKey>();
 	private KeyActionListener	actSimpleActions;
-	private TimedDelayVarField tdListboxSelectorAreaBlinkFade = new TimedDelayVarField(1f,"");
+	private final TimedDelayVarField tdListboxSelectorAreaBlinkFade = new TimedDelayVarField(1f,"");
 	private CellRendererDialogEntry<T>	cr;
-	private BoolTogglerCmdField btgEffectListEntries = new BoolTogglerCmdField(this, true);
-//	private TimedDelayVarField tdEffectListEachEntry = new TimedDelayVarField(this, 0.05f, "");
+	private final BoolTogglerCmdField btgEffectListEntries = new BoolTogglerCmdField(this, true);
+//	private final TimedDelayVarField tdEffectListEachEntry = new TimedDelayVarField(this, 0.05f, "");
 //	private float fEffectListEntryDelay=0.05f;
-	private FloatDoubleVarField fdvEffectListEntryDelay = new FloatDoubleVarField(this, 0.15f, "");
+	private final FloatDoubleVarField fdvEffectListEntryDelay = new FloatDoubleVarField(this, 0.15f, "");
 	
 //	public abstract T getCmdDummy();
 	
@@ -148,7 +148,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		return (DialogMainContainer)super.getDialogMainContainer();
 	}
 	
-	private FloatDoubleVarField fdvEntryHeightMultiplier = new FloatDoubleVarField(this,1f,"");
+	private final FloatDoubleVarField fdvEntryHeightMultiplier = new FloatDoubleVarField(this,1f,"");
 	
 	public static class CfgParm extends DialogStateAbs.CfgParm{
 		private Float fDialogHeightPercentOfAppWindow;
@@ -557,8 +557,8 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		requestRefreshUpdateList();
 	}
 
-	private BoolTogglerCmdField btgResizeBordersNorthAndSouthAlsoAffectEastBorder = new BoolTogglerCmdField(this,true);
-	private BoolTogglerCmdField btgResizeBordersWestAndEastAlsoAffectSouthBorder = new BoolTogglerCmdField(this,true);
+	private final BoolTogglerCmdField btgResizeBordersNorthAndSouthAlsoAffectEastBorder = new BoolTogglerCmdField(this,true);
+	private final BoolTogglerCmdField btgResizeBordersWestAndEastAlsoAffectSouthBorder = new BoolTogglerCmdField(this,true);
 	
 	@Override
 	public void move(Spatial sptDraggedElement, Vector3f v3fDisplacement) {
@@ -631,7 +631,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 //		return new Vector3f();
 //	}
 	private boolean bMouseCursorWasInsideDragMargin = false;
-	private IntLongVarField ilvDragMagnecticMarginPixels = new IntLongVarField(this,10,null).setMinMax(0L,20L);
+	private final IntLongVarField ilvDragMagnecticMarginPixels = new IntLongVarField(this,10,null).setMinMax(0L,20L);
 	private Button	btnCurrentlyActiveDraggedReziseBorder;
 //	private Vector3f adaptDragDisplacement(Panel pnl, Vector3f v3fDragDisplacement){
 //		v3fDragDisplacement=v3fDragDisplacement.clone();
@@ -852,7 +852,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 //		/**
 //		 * This console variable will be saved at console cfg file and also with the dialog JME savable. 
 //		 */
-//		private IntLongVarField ilvBorderThickness;
+//		private final IntLongVarField ilvBorderThickness;
 		
 		@Override
 		protected void initialize(){

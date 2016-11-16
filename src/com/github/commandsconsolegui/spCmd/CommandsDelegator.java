@@ -114,7 +114,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	
 	CurrentCommandLine ccl = new CurrentCommandLine(this);
 	
-	private KeyBoundVarField bindFastExit = new KeyBoundVarField(this)
+	private final KeyBoundVarField bindFastExit = new KeyBoundVarField(this)
 		.setHelp("the developer's debug mode most helpful key-binding!")
 		.setCallerAssigned(new CallableX(this) {
 			@Override
@@ -164,9 +164,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	/**
 	 * keep delayers together!
 	 */
-	private TimedDelayVarField tdLetCpuRest = new TimedDelayVarField(this,0.1f,"updates will be skipped and only one update will be processed per delay, if this is active");
-	private TimedDelayVarField tdDumpQueuedSlowEntry = new TimedDelayVarField(this,1f/5f,"how many dump entries will be shown per second (from the slow queue)");
-//	private TimedDelayVarField tdSpareGpuFan = new TimedDelayVarField(this,1.0f/60f); // like 60 FPS
+	private final TimedDelayVarField tdLetCpuRest = new TimedDelayVarField(this,0.1f,"updates will be skipped and only one update will be processed per delay, if this is active");
+	private final TimedDelayVarField tdDumpQueuedSlowEntry = new TimedDelayVarField(this,1f/5f,"how many dump entries will be shown per second (from the slow queue)");
+//	private final TimedDelayVarField tdSpareGpuFan = new TimedDelayVarField(this,1.0f/60f); // like 60 FPS
 	
 	/**
 	 * used to hold a reference to the identified/typed user command
@@ -254,9 +254,9 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	 */
 	
 	/** 0 is auto wrap, -1 will trunc big lines */
-	private IntLongVarField ilvConsoleMaxWidthInCharsForLineWrap = new IntLongVarField(this,0,null);
+	private final IntLongVarField ilvConsoleMaxWidthInCharsForLineWrap = new IntLongVarField(this,0,null);
 	
-	private IntLongVarField ilvCurrentFixedLineWrapAtColumn = new IntLongVarField(this,0,null);
+	private final IntLongVarField ilvCurrentFixedLineWrapAtColumn = new IntLongVarField(this,0,null);
 	private HashMap<IConsoleCommandListener,StackTraceElement[]> hmDebugListenerAddedStack = new HashMap<IConsoleCommandListener,StackTraceElement[]>();
 	
 	private boolean	bAddEmptyLineAfterCommand = true;
@@ -279,8 +279,8 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	private String	strFileInitConsCmds = strFilePrefix+"-Init";
 	private String	strFileSetup = strFilePrefix+"-Setup";
 	private String	strFileDatabase = strFilePrefix+"-DB";
-	private IntLongVarField ilvMaxCmdHistSize = new IntLongVarField(this,1000,null);
-	private IntLongVarField ilvMaxDumpEntriesAmount = new IntLongVarField(this,100000,"max dump area list size before older ones get removed");
+	private final IntLongVarField ilvMaxCmdHistSize = new IntLongVarField(this,1000,null);
+	private final IntLongVarField ilvMaxDumpEntriesAmount = new IntLongVarField(this,100000,"max dump area list size before older ones get removed");
 //	private ArrayList<String>	astrCmdAndParams = new ArrayList<String>();
 	
 	/**
@@ -318,7 +318,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 //	LinkedHashMap<String,CommandData> asdf = new LinkedHashMap<String,CommandData>(String.CASE_INSENSITIVE_ORDER);
 	
 	private class PreQueueCmdsBlockSubListData{
-		private TimedDelayVarField tdSleep = null;
+		private TimedDelayVarField tdSleep = null; //private class, no need to be final..
 		private String strUId = MiscI.i().getNextUniqueId();
 		private ArrayList<String> astrCmdList = new ArrayList<String>();
 		private boolean	bPrepend = false;
@@ -3676,7 +3676,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	
 	private void updateExecPreQueuedCmdsBlockDispatcher(){
 		for(PreQueueCmdsBlockSubListData pqe:astrExecConsoleCmdsPreQueue.toArray(new PreQueueCmdsBlockSubListData[0])){
-			if(pqe.tdSleep!=null){
+			if(pqe.tdSleep.isActive()){
 				if(pqe.tdSleep.isReady()){
 					if(doesCmdQueueStillHasUId(commentToAppend(pqe.getUniqueInfo()))){
 						/**
@@ -3685,7 +3685,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 						 */
 						continue;
 					}else{
-						pqe.tdSleep=null;
+						pqe.tdSleep.setActive(false);
 					}
 				}else{
 					if(!pqe.bInfoSleepBegin){
@@ -3717,7 +3717,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 							pqe.bForceFailBlockExecution=true;
 							break;
 						}
-						pqe.tdSleep = new TimedDelayVarField(fDelay,null);
+						pqe.tdSleep.resetAndChangeDelayTo(fDelay);
 						pqe.tdSleep.updateTime();
 //						dumpDevInfoEntry(strCmd);
 						break;

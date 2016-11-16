@@ -192,7 +192,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 		return true;
 	}
 	
-	private KeyBoundVarField bindToggleConsole = new KeyBoundVarField(this)
+	private final KeyBoundVarField bindToggleConsole = new KeyBoundVarField(this)
 		.setCallerAssigned(new CallableX(this) {
 			@Override
 			public Boolean call() {
@@ -1102,9 +1102,9 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 	public final StringCmdField CMD_FONT_LIST = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	
 	//private String strDefaultFont = "DroidSansMono";
-	//private StringVarField	svfUserFontOption = new StringVarField(this, strDefaultFont, null);
+	//private final StringVarField	svfUserFontOption = new StringVarField(this, strDefaultFont, null);
 	//private int iDefaultFontSize = 12;
-	//private IntLongVarField ilvFontSize = new IntLongVarField(this, iDefaultFontSize,null);
+	//private final IntLongVarField ilvFontSize = new IntLongVarField(this, iDefaultFontSize,null);
 	
 	///**
 	// * keep "initialized" vars together!
@@ -1114,9 +1114,9 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 	/**
 	 * keep delayers together!
 	 */
-	private TimedDelayVarField tdStatsRefresh = new TimedDelayVarField(this,0.5f,"delay between simple stats field refresh");
-	private TimedDelayVarField tdScrollToBottomRequestAndSuspend = new TimedDelayVarField(this,0.5f,null);
-	private TimedDelayVarField tdScrollToBottomRetry = new TimedDelayVarField(this,0.1f,null);
+	private final TimedDelayVarField tdStatsRefresh = new TimedDelayVarField(this,0.5f,"delay between simple stats field refresh");
+	private final TimedDelayVarField tdScrollToBottomRequestAndSuspend = new TimedDelayVarField(this,0.5f,null);
+	private final TimedDelayVarField tdScrollToBottomRetry = new TimedDelayVarField(this,0.1f,null);
 	
 	//private TimedDelay tdLetCpuRest = new TimedDelay(0.1f);
 	//private TimedDelay tdStatsRefresh = new TimedDelay(0.5f);
@@ -1190,7 +1190,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 	//private String	strFileInitConsCmds = strFilePrefix+"-Init";
 	//private String	strFileSetup = strFilePrefix+"-Setup";
 	//private String	strFileDatabase = strFilePrefix+"-DB";
-	private FloatDoubleVarField	fdvConsoleHeightPercDefault = new FloatDoubleVarField(this,0.5,"percentual of the application window");
+	private final FloatDoubleVarField	fdvConsoleHeightPercDefault = new FloatDoubleVarField(this,0.5,"percentual of the application window");
 	
 	/**
 	 * use the console height command to set this var, do not use a console variable for it,

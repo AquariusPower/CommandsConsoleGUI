@@ -67,7 +67,7 @@ public class DialogMainContainer extends Container implements ISpatialLayoutVali
 	private Vector3f	v3fLastValidNorthPSize;
 	private Vector3f	v3fLastFailedSize;
 	
-	private BoolTogglerCmdField btgAllowInvalidSize = new BoolTogglerCmdField(this,false);
+	private final BoolTogglerCmdField btgAllowInvalidSize = new BoolTogglerCmdField(this,false);
 	private String	strMessageKey;
 	
 	@Override

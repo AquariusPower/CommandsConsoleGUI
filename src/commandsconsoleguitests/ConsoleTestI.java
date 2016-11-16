@@ -85,19 +85,19 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 	
 //	public final StringCmdField CMD_END_DEVELOPER_COMMAND_TEST = new StringCmdField(
 //		this,CustomCommands.strFinalCmdCodePrefix);
-	public final StringCmdField scfEndDeveloperCommandTest = new StringCmdField(this);
-	public final StringCmdField scfHelp = new StringCmdField(this);
+	private final StringCmdField scfEndDeveloperCommandTest = new StringCmdField(this);
+	private final StringCmdField scfHelp = new StringCmdField(this);
 	
 	/**
 	 * these below were not implemented as commands here, 
 	 * are just to exemplify how the auto-fill works.
 	 */
-	private StringCmdField sfTestCommandAutoFillVariant1 = new StringCmdField(this,strFieldCodePrefix);
-	private StringCmdField testCommandAutoFillPrefixLessVariant2 = new StringCmdField(this,strFieldCodePrefixLess);
-	private StringCmdField scfCommandAutoFillPrefixLessVariantDefaulted3 = new StringCmdField(this,null);
-	private StringCmdField CMD_TRADITIONAL_PRETTYFIED_0 = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	private final StringCmdField sfTestCommandAutoFillVariant1 = new StringCmdField(this,strFieldCodePrefix);
+	private final StringCmdField testCommandAutoFillPrefixLessVariant2 = new StringCmdField(this,strFieldCodePrefixLess);
+	private final StringCmdField scfCommandAutoFillPrefixLessVariantDefaulted3 = new StringCmdField(this,null);
+	private final StringCmdField CMD_TRADITIONAL_PRETTYFIED_0 = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	
-//	private StringVarField svfOptionSelectedDialog2 = new StringVarField(this,"");
+//	private final StringVarField svfOptionSelectedDialog2 = new StringVarField(this,"");
 	
 	// generic dialog
 //	private ChoiceLemurDialogState<T>	diagChoice;
@@ -188,7 +188,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		 * this must be initialized here because of its dependencies like {@link ManageKeyCode}
 		 * that are available only after the console plugin initializer... TODO for now?
 		 */
-		bindListToggleEnable = new KeyBoundVarField(this,KeyInput.KEY_F5)
+		bindListToggleEnable.setObjectRawValue(KeyInput.KEY_F5)
 			.setCallerAssigned(new CallableX(this) {
 				@Override
 				public Boolean call() {
@@ -198,7 +198,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 			});
 	}
 	
-	private KeyBoundVarField bindListToggleEnable;
+	private final KeyBoundVarField bindListToggleEnable = new KeyBoundVarField(this);
 
 	private void prepareTestData(SimpleDiagChoice<T> diagChoice){
 		for(int i=0;i<10;i++){

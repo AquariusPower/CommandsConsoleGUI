@@ -81,15 +81,6 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Float,TimedDelayVarField>
 		constructed();
 	}
 	
-	private TimedDelayVarField setDelayLimitSeconds(float fDelaySeconds){
-//		this.fDelayLimitSeconds = fDelaySeconds;
-//		this.lDelayLimitNano = (long) (this.fDelayLimitSeconds * lNanoOneSecond);;
-//		setObjectRawValue( (long) (fDelaySeconds * lNanoOneSecond) );
-		setObjectRawValue(fDelaySeconds);
-//		if(isActive())updateTime(); //this is required for consistency at get percentual
-		return this;
-	}
-	
 	public long getCurrentDelayNano() {
 		return getCurrentDelayNano(false,false);
 	}
@@ -351,5 +342,11 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Float,TimedDelayVarField>
 	@Override
 	public String getCodePrefixDefault() {
 		return strCodePrefixDefault;
+	}
+	
+	public TimedDelayVarField resetAndChangeDelayTo(float fDelaySeconds){
+		reset();
+		setObjectRawValue(fDelaySeconds);
+		return this;
 	}
 }

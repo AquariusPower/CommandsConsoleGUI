@@ -164,7 +164,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 //		private long lStartMilis=0; // as this is only in case of failure, the 1st attempt will always be ready!
 //		
 //		/** 0 means retry at every update*/
-//		private IntLongVarField ilvDelayMilis = new IntLongVarField(this, 0L, "retry delay between failed state mode attempts");
+//		private final IntLongVarField ilvDelayMilis = new IntLongVarField(this, 0L, "retry delay between failed state mode attempts");
 ////		long lDelayMilis=0;
 //
 //		private String	strId;
