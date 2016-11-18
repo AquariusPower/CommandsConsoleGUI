@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
-import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.spAppOs.misc.Priority.EPriority;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.spJme.ConditionalStateAbs;
@@ -85,6 +85,8 @@ public class UngrabMouseStateI extends ConditionalStateAbs<UngrabMouseStateI> {
 //	public void configure(Long lSlowMachineDelayToUngrabMilis, Boolean bKeepUngrabbedOnSlowdown) {
 		CfgParm cfg = (CfgParm)icfg;
 		super.configure(icfg);
+		
+		setPriority(EPriority.Top);
 		
 		if(cfg.lSlowMachineDelayToUngrabMilis!=null)this.lDelayToUngrabMilis=cfg.lSlowMachineDelayToUngrabMilis;
 		if(cfg.bKeepUngrabbedOnSlowdown!=null)this.bKeepUngrabbedOnSlowDown=cfg.bKeepUngrabbedOnSlowdown;

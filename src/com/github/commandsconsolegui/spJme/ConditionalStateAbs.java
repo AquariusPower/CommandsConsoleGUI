@@ -32,20 +32,22 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.spAppOs.SimulationTime.ISimulationTime;
-import com.github.commandsconsolegui.spAppOs.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalHolderAbs.IGlobalOpt;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.spAppOs.misc.HoldRestartable;
 import com.github.commandsconsolegui.spAppOs.misc.IRefresh;
 import com.github.commandsconsolegui.spAppOs.misc.IRestartable;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.spAppOs.misc.Priority.EPriority;
+import com.github.commandsconsolegui.spAppOs.misc.Priority.IPriority;
+import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.Request;
 import com.github.commandsconsolegui.spAppOs.misc.RetryOnFailure;
-import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.RetryOnFailure.IRetryListOwner;
 import com.github.commandsconsolegui.spCmd.varfield.ManageVarCmdFieldI;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
@@ -73,7 +75,7 @@ import com.jme3.scene.Node;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>> implements IGlobalOpt,IRestartable,ISimulationTime,IConfigure<ConditionalStateAbs<THIS>>,IRetryListOwner,IReflexFillCfg,IRefresh{
+public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>> implements IGlobalOpt,IRestartable,ISimulationTime,IConfigure<ConditionalStateAbs<THIS>>,IRetryListOwner,IReflexFillCfg,IRefresh,IPriority{
 //	public static final class CompositeControl extends CompositeControlAbs<ConditionalStateAbs>{
 //		private CompositeControl(ConditionalStateAbs casm){super(casm);};
 //	};private CompositeControl ccSelf = new CompositeControl(this);
@@ -123,7 +125,13 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 		}
 	}
 	
-	
+	private EPriority esp=EPriority.Normal;
+	public EPriority getPriority(){
+		return esp;
+	}
+	protected void setPriority(EPriority esp){
+		this.esp=esp;
+	}
 	
 	/**
 	 * This Id is only required if there is more than one state of the same class.

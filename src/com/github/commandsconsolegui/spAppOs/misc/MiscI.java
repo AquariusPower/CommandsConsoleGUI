@@ -578,11 +578,13 @@ public class MiscI {
 		
 		Class<?> cl = obj.getClass();
 		while(cl!=null){
-			if(!bAddConcreteToo){
-				if(cl.toString().equals(Object.class.toString()))continue;
-			}
+			boolean bAdd=true;
 			
-			ac.add(cl);
+			if(!bAddConcreteToo && cl.toString().equals(obj.getClass().toString()))bAdd=false;
+			if(cl.toString().equals(Object.class.toString()))bAdd=false; //avoid unnecessary base class
+			
+			if(bAdd)ac.add(cl);
+			
 			cl=cl.getSuperclass();
 		}
 		

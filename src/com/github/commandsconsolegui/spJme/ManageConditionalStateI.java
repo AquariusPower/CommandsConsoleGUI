@@ -28,6 +28,8 @@
 package com.github.commandsconsolegui.spJme;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalUpdaterI;
@@ -36,6 +38,7 @@ import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.ManageHoldRestartableI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.spAppOs.misc.Priority;
 import com.github.commandsconsolegui.spCmd.IConsoleCommandListener;
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
@@ -160,31 +163,34 @@ public class ManageConditionalStateI extends AbstractAppState implements IManage
 	}
 	
 	public boolean attach(ConditionalStateAbs casToAttach){
-		return attach(casToAttach,null);
-	}
-	/**
-	 * 
-	 * @param casToAttach
-	 * @param iBeforeIndex can be null. If negative, will count index from the end.
-	 * @return false if already attached
-	 */
-	public boolean attach(ConditionalStateAbs casToAttach, Integer iBeforeIndex) {
+//		return attach(casToAttach,null);
+//	}
+//	/**
+//	 * 
+//	 * @param casToAttach
+//	 * @param iBeforeIndex can be null. If negative, will count index from the end (no overlaps tho).
+//	 * @return false if already attached
+//	 */
+//	private boolean attach(ConditionalStateAbs casToAttach, Integer iBeforeIndex) {
 		if(isAttached(casToAttach))return false;
 		
-		if(iBeforeIndex==null){
+//		if(iBeforeIndex==null){
 			aCondStateList.add(casToAttach);
-		}else{
-			if(iBeforeIndex<0){
-				iBeforeIndex=aCondStateList.size()+iBeforeIndex+1;
-			}
+//		}else{
+//			if(iBeforeIndex<0){
+//				iBeforeIndex=aCondStateList.size()+iBeforeIndex+1;
+//			}
+//			
+//			if(iBeforeIndex<0)iBeforeIndex=0;
+//			
+//			if(iBeforeIndex>aCondStateList.size())iBeforeIndex=aCondStateList.size();
 			
-			if(iBeforeIndex<0)iBeforeIndex=0;
-			
-			if(iBeforeIndex>aCondStateList.size())iBeforeIndex=aCondStateList.size();
-			
-			aCondStateList.add(iBeforeIndex,casToAttach);
-		}
+//			aCondStateList.add(iBeforeIndex,casToAttach);
+//		}
 		
+		Collections.sort(aCondStateList, Priority.i().getComparator());
+			
+			
 		casToAttach.setAppStateManagingThis(ccSelf,this);
 		
 		return true;
