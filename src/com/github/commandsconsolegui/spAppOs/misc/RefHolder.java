@@ -61,7 +61,7 @@ public class RefHolder<T> implements IDebugReport{
 	 * like {@link #getHolded()}
 	 * @return
 	 */
-	public T ref(){
+	public T getRef(){
 		return objRefHolded;
 	}
 	

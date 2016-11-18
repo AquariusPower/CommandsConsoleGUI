@@ -910,7 +910,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 			throw new PrerequisitesNotMetException("id cant be null", 
 				this.isConfigured()?"configured(ok)":"this object was not configured!!!", 
 				this);
-		}
+		} 
 		return strCaseInsensitiveId;
 	}
 	

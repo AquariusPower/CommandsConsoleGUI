@@ -37,6 +37,9 @@ import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallerInfo;
+import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI.DebugData;
+import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI.EDbgStkOrigin;
+import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
@@ -169,7 +172,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 
 	private boolean	bAllowCallerAssignedToBeRunOnValueChange = true;
 
-	private StackTraceElement[]	asteDebugLastSetOrigin; 
+//	private StackTraceElement[]	asteDebugLastSetOrigin; 
 	
 //	public VarCmdFieldAbs(boolean bAddToList){
 //		if(bAddToList)VarCmdFieldAbs.avcfList.add(this);
@@ -600,6 +603,8 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	RegisteredClasses<IManager> rscManager = new RegisteredClasses<IManager>();
 
 	private IManager<VarCmdFieldAbs>	imgr;
+
+	private DebugData	dbg;
 	public IManager<VarCmdFieldAbs> getManger(){
 		return imgr;
 	}
@@ -611,7 +616,8 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		// so it must be called directly at the latest setter
 		StackTraceElement steSetter = Thread.currentThread().getStackTrace()[2];
 		
-		for(StackTraceElement ste:asteDebugLastSetOrigin){
+//		for(StackTraceElement ste:asteDebugLastSetOrigin){
+		for(StackTraceElement ste:ManageDebugDataI.i().getStack(dbg,EDbgStkOrigin.LastSetValue).getRef()){
 //			if(steSetter.getMethodName().equals(ste.getMethodName()))continue;
 			if(ManageVarCmdFieldI.i().getClassReg().isContainClass(ste.getClassName()))continue;
 			if(rscOwner.isContainClass(ste.getClassName()))break;//continue;
@@ -631,8 +637,9 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	 * @return
 	 */
 	private THIS setObjectRawValue(Object objValueNew, boolean bSetDefault, boolean bOnValueChangePreventCallerRunOnce) { // do not use O at param here, ex.: bool toggler can be used on overriden
-		asteDebugLastSetOrigin=Arrays.copyOfRange(Thread.currentThread().getStackTrace(),1,100); // 100 should suffice avoiding big array allocation... Short.MAX_VALUE); //least the 1st to easy the comparisons...
-		if(RunMode.bDebugIDE)assertSettingAtOwnerType();
+		if(RunMode.bValidateDevCode)dbg=ManageDebugDataI.i().setStack(dbg,EDbgStkOrigin.LastSetValue);
+//		asteDebugLastSetOrigin=Arrays.copyOfRange(Thread.currentThread().getStackTrace(),1,100); // 100 should suffice avoiding big array allocation... Short.MAX_VALUE); //least the 1st to easy the comparisons...
+		if(RunMode.bValidateDevCode)assertSettingAtOwnerType();
 		assertIfNullValueIsAllowed(objValueNew);
 		
 		if(objValueNew!=null && !clValueTypeConstraint.isInstance(objValueNew)){

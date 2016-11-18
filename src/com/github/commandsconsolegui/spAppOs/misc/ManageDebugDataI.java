@@ -26,54 +26,84 @@
 */
 package com.github.commandsconsolegui.spAppOs.misc;
 
+import java.util.Arrays;
 import java.util.TreeMap;
-
-import com.github.commandsconsolegui.spCmd.varfield.VarCmdFieldAbs;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
- * @param <E>
  */
-public class RegisteredClasses<E>{
-	RefHolder<TreeMap<String,Class<E>>> rhtmSubClass = new RefHolder<TreeMap<String,Class<E>>>(new TreeMap<String,Class<E>>());
-//	TreeMap<String,Class<E>> tmSubClass = new TreeMap<String,Class<E>>();
-	public void registerAllSuperClassesOf(E objTarget, boolean bItsInnerClassesToo, boolean bItsEnclosingClassesToo){
-		PrerequisitesNotMetException.assertNotNull("objTarget", objTarget, this);
+public class ManageDebugDataI {
+	private static ManageDebugDataI instance = new ManageDebugDataI();
+	public static ManageDebugDataI i(){return instance;}
+	
+	public static enum EDbgStkOrigin{
+		Constructed,
+		LastSetValue,
+		LastCall,
+	}
+	
+	public static class DebugData{
+		TreeMap<EDbgStkOrigin,DebugInfo> tm = new TreeMap<EDbgStkOrigin,DebugInfo>();
 		
-		for(Class cl:MiscI.i().getSuperClassesOf(objTarget,true)){
-			registerClass(cl);
+		public DebugInfo get(EDbgStkOrigin eso){
+			DebugInfo di = tm.get(eso); //searches
+			
+			if(di==null){ //creates
+				di=new DebugInfo();
+				tm.put(eso,di);
+			}
+			
+			return di;
 		}
 		
-		if(bItsInnerClassesToo){
-			for(Class cl:objTarget.getClass().getDeclaredClasses()){ //register inner classes
-				registerClass(cl);
-			}
-		}
-		
-		if(bItsEnclosingClassesToo){ //enclosing tree
-			for(Class cl:MiscI.i().getEnclosingClassesOf(objTarget)){
-				registerClass(cl);
-			}
+		public void setStackForCurrentMethod(DebugInfo di, int iIncIndex){
+			StackTraceElement[] aste = Thread.currentThread().getStackTrace();
+			/**
+			 * skips:
+			 * 0 - getStackTrace()
+			 * 1 - this method
+			 */
+			aste = Arrays.copyOfRange(aste, 2+iIncIndex, aste.length);
+			di.rh.setHolded(aste);
 		}
 	}
-	public void registerClass(Class<E> cl){
-		rhtmSubClass.getRef().put(cl.getName(),cl);
+	
+	public static class DebugInfo{
+		EDbgStkOrigin eso;
+		
+		/**
+		 * {@link RefHolder} to improve stack readability on IDE
+		 */
+		RefHolder<StackTraceElement[]> rh=new RefHolder<StackTraceElement[]>(null);
 	}
-	public boolean isContainClass(String strClassTypeKey){
-		Class<E> cl = (rhtmSubClass.getRef().get(strClassTypeKey));
+	
+	
+	/**
+	 * use like if(RunMode.bValidateDevCode)this.di=DebugData.i().(this.di,...)
+	 * @param diExisting
+	 * @param eso
+	 * @return
+	 */
+	public DebugData setStack(DebugData dbgExisting, EDbgStkOrigin eso){
+		DebugData dbg = dbgExisting;
+		if(dbg==null)dbg=new DebugData();
+		dbg.setStackForCurrentMethod(dbg.get(eso), 1);
 		
-//		//TODO instead: register inner classes too?
-//		if(cl==null){ //check if the key is a inner class
-//			int i = strClassTypeKey.indexOf("$");
-//			if(i>=0){
-//				strClassTypeKey=strClassTypeKey.substring(0, i);
-//			}
-//			
-//			cl = (rhtmSubClass.ref().get(strClassTypeKey));
-//		}
-		
-		return ( cl != null );
+		return dbg;
+	}
+	
+	/**
+	 * 
+	 * @param dbg
+	 * @param eso
+	 * @return {@link RefHolder} is more IDE readable than stack
+	 */
+	public RefHolder<StackTraceElement[]> getStack(DebugData dbg, EDbgStkOrigin eso){
+		if(dbg==null)return null;
+		DebugInfo di = dbg.get(eso);
+		if(di==null)return null;
+		return di.rh;
 	}
 }
