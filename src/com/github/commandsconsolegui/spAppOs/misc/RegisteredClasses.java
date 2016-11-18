@@ -36,7 +36,7 @@ import com.github.commandsconsolegui.spCmd.varfield.VarCmdFieldAbs;
  *
  * @param <E>
  */
-public class RegisteredSuperClasses<E>{
+public class RegisteredClasses<E>{
 	RefHolder<TreeMap<String,Class<E>>> rhtmSubClass = new RefHolder<TreeMap<String,Class<E>>>(new TreeMap<String,Class<E>>());
 //	TreeMap<String,Class<E>> tmSubClass = new TreeMap<String,Class<E>>();
 	public void registerAllSuperClassesOf(E obj, boolean bItsInnerClassesToo, boolean bItsEnclosingClassesToo){

@@ -40,7 +40,7 @@ import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.spAppOs.misc.RegisteredSuperClasses;
+import com.github.commandsconsolegui.spAppOs.misc.RegisteredClasses;
 import com.github.commandsconsolegui.spAppOs.misc.RunMode;
 import com.github.commandsconsolegui.spCmd.CommandData;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
@@ -589,7 +589,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		return getThis();
 	}
 	
-	RegisteredSuperClasses<IReflexFillCfg> rscOwner = new RegisteredSuperClasses<IReflexFillCfg>();
+	RegisteredClasses<IReflexFillCfg> rscOwner = new RegisteredClasses<IReflexFillCfg>();
 	
 	private void assertSettingAtOwnerType(){
 		if(!isConstructed())return;

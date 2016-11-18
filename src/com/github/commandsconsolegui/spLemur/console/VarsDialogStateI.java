@@ -249,7 +249,7 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 			
 			// truncate value string
 			String strVal=null;
-			if(vcfVarEntry.getRawValue()==null){
+			if(vcfVarEntry.isValueNull()){
 				strVal=""+null;
 			}else{
 				strVal=vcfVarEntry.getValueAsString(3);

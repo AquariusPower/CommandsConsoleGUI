@@ -35,7 +35,7 @@ import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.IMultiInstanceOverride;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.RefHolder;
-import com.github.commandsconsolegui.spAppOs.misc.RegisteredSuperClasses;
+import com.github.commandsconsolegui.spAppOs.misc.RegisteredClasses;
 
 /**
  * 
@@ -129,8 +129,8 @@ public class ManageVarCmdFieldI implements IManager<VarCmdFieldAbs>{
 		avcfList.remove(vcf);
 	}
 	
-	RegisteredSuperClasses<VarCmdFieldAbs> rsc = new RegisteredSuperClasses<VarCmdFieldAbs>();
-	public RegisteredSuperClasses<VarCmdFieldAbs> getClassReg(){
+	RegisteredClasses<VarCmdFieldAbs> rsc = new RegisteredClasses<VarCmdFieldAbs>();
+	public RegisteredClasses<VarCmdFieldAbs> getClassReg(){
 		return rsc;
 	}
 	
