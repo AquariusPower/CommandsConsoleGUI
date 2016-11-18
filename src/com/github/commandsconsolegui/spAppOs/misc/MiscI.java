@@ -548,8 +548,16 @@ public class MiscI {
 		return strId;
 	}
 	
+	
+	
+	/**
+	 * TODO add enclosings
+	 * @param obj
+	 * @param bSimpleName
+	 * @return
+	 */
 	public String getClassTreeReportFor(Object obj,boolean bSimpleName){
-		ArrayList<Class<?>> ac = getSuperClassesOf(obj);
+		ArrayList<Class<?>> ac = getSuperClassesOf(obj,true);
 		String strClassTree="";
 		for(Class<?> cl:ac){
 			if(!strClassTree.isEmpty())strClassTree+="/";
@@ -558,17 +566,36 @@ public class MiscI {
 		return strClassTree;
 	}
 	/**
-	 * different from: obj.getClass().getDeclaredClasses()
+	 * Differs from: obj.getClass().getDeclaredClasses()
+	 * 
+	 * Will include the concrete/instanced one too.
+	 * 
 	 * @param obj
 	 * @return
 	 */
-	public ArrayList<Class<?>> getSuperClassesOf(Object obj){
+	public ArrayList<Class<?>> getSuperClassesOf(Object obj,boolean bAddConcreteToo){
 		ArrayList<Class<?>> ac = new ArrayList<Class<?>>();
 		
 		Class<?> cl = obj.getClass();
-		while(!cl.toString().equals(Object.class.toString())){
+		while(cl!=null){
+			if(!bAddConcreteToo){
+				if(cl.toString().equals(Object.class.toString()))continue;
+			}
+			
 			ac.add(cl);
 			cl=cl.getSuperclass();
+		}
+		
+		return ac;
+	}
+	
+	public ArrayList<Class<?>> getEnclosingClassesOf(Object obj){
+		ArrayList<Class<?>> ac = new ArrayList<Class<?>>();
+		
+		Class cl = obj.getClass().getEnclosingClass();
+		while(cl!=null){
+			ac.add(cl);
+			cl = cl.getEnclosingClass();
 		}
 		
 		return ac;
@@ -749,7 +776,7 @@ public class MiscI {
 			
 			Object[] aobjKey=null;
 			Object[] aobjVal=null;
-			if(objValue instanceof Map) {
+			if(objValue instanceof Map) { //HashMap TreeMap etc
 				Set<Map.Entry> es = ((Map)objValue).entrySet();
 				aobjVal=new Object[es.size()];
 				aobjKey=new Object[es.size()];
@@ -904,11 +931,11 @@ public class MiscI {
 	 * @param irfsa
 	 */
 	public void assertFieldsHaveDefaultValue(IReflexFieldSafeAccess irfsa){
-		if(!DebugI.i().isInIDEdebugMode()){
+		if(!RunMode.bDebugIDE){
 			return; //spend this time only in development mode
 		}
 		
-		ArrayList<Class<?>> superClassesOf = MiscI.i().getSuperClassesOf(irfsa);
+		ArrayList<Class<?>> superClassesOf = MiscI.i().getSuperClassesOf(irfsa,true);
 		for(Class cl:superClassesOf){
 			@SuppressWarnings("unused") int iDbgBreakPoint=0;
 			for(Field fld:cl.getDeclaredFields()){

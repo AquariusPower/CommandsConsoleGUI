@@ -84,7 +84,7 @@ public abstract class ManageKeyBind {
 		tmbindList.remove(new KeyBind().setFromKeyCfg(strBindCfg).getBindCfg());
 	}
 	
-	public void addKeyBind(KeyBoundVarField bind){
+	public void addRef(KeyBoundVarField bind){
 		String strMapping=getMappingFrom(bind);
 		
 		tmbindList.put(strMapping,bind);

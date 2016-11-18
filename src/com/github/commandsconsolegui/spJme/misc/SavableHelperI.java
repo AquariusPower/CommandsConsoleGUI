@@ -162,7 +162,7 @@ public class SavableHelperI {
 	private Set<Entry<Field,FieldExtraInfo>> getAllFields(ISavableFieldAccess isfa){
 		if(isfa.getSkipper().getFieldExtraInfo()==null){
 			isfa.getSkipper().setFieldExtraInfo(new HashMap<Field,FieldExtraInfo>());
-			for(Class clOwner:MiscI.i().getSuperClassesOf(isfa)){
+			for(Class clOwner:MiscI.i().getSuperClassesOf(isfa,false)){
 				for(Field fld:clOwner.getDeclaredFields()){
 //					boolean bAccessible = allowFieldAccess(fld);
 					if(checkSkip(isfa,fld))continue;

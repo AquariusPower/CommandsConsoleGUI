@@ -59,18 +59,19 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 	private static VarsDialogStateI<Command<Button>>	instance=new VarsDialogStateI<Command<Button>>();
 	public static VarsDialogStateI<Command<Button>> i(){return instance;}
 	
-	private final KeyBoundVarField bindToggleEnable = new KeyBoundVarField(this,KeyInput.KEY_F9)
-		.setCallerAssigned(new CallableX(this) {
-			@Override
-			public Boolean call() {
-//				if(!ConsoleVarsDialogStateI.this.isConfigured())return false;
-//				if(!ConsoleVarsDialogStateI.this.isInitializedProperly())return false;
-				
-				requestToggleEnabled();
-				
-				return true;
-			}
-		});
+	private final KeyBoundVarField bindToggleEnable = new KeyBoundVarField(this);
+//	= new KeyBoundVarField(this,KeyInput.KEY_F9)
+//		.setCallerAssigned(new CallableX(this) {
+//			@Override
+//			public Boolean call() {
+////				if(!ConsoleVarsDialogStateI.this.isConfigured())return false;
+////				if(!ConsoleVarsDialogStateI.this.isInitializedProperly())return false;
+//				
+//				requestToggleEnabled();
+//				
+//				return true;
+//			}
+//		});
 	
 	@Override
 	protected boolean modifyEntry(DialogStateAbs<T, ?> diagModal,	DialogListEntryData<T> dledAtModal,	ArrayList<DialogListEntryData<T>> adledAtThisToApplyResultsList) {
@@ -128,6 +129,19 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 		cfg.setDiagQuestion(null);
 		
 		super.configure(cfg);
+		
+		bindToggleEnable.setObjectRawValue(KeyInput.KEY_F9)
+			.setCallerAssigned(new CallableX(this) {
+				@Override
+				public Boolean call() {
+//					if(!ConsoleVarsDialogStateI.this.isConfigured())return false;
+//					if(!ConsoleVarsDialogStateI.this.isInitializedProperly())return false;
+					
+					requestToggleEnabled();
+					
+					return true;
+				}
+			});
 		
 		storeCfgAndReturnSelf(cfg);
 		return getThis();

@@ -60,6 +60,7 @@ import com.github.commandsconsolegui.spAppOs.misc.IMultiInstanceOverride;
 import com.github.commandsconsolegui.spAppOs.misc.IUserInputDetector;
 import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
+import com.github.commandsconsolegui.spAppOs.misc.RunMode;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI.EStringMatchMode;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
@@ -945,7 +946,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			bind.setUserCommand(ccl.getPreparedCmdAndParamsListCopyFrom(2));
 			
 //			tmbindList.put(strBindCfg,bind);
-			GlobalManageKeyBindI.i().addKeyBind(bind);
+			GlobalManageKeyBindI.i().addRef(bind);
 			
 			setupRecreateFile();
 //			cui().addKeyBind(bind);
@@ -4170,7 +4171,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		}
 		
 		// for debug mode, auto show messages
-		if(DebugI.i().isInIDEdebugMode())addCmdToQueue(scfMessageReview);
+		if(RunMode.bDebugIDE)addCmdToQueue(scfMessageReview);
 		
 		// init valid cmd list
 		bFillCommandList=true;

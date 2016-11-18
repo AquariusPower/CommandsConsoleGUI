@@ -33,9 +33,9 @@ import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.IMultiInstanceOverride;
-import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.RefHolder;
+import com.github.commandsconsolegui.spAppOs.misc.RegisteredSuperClasses;
 
 /**
  * 
@@ -128,6 +128,26 @@ public class ManageVarCmdFieldI implements IManager<VarCmdFieldAbs>{
 		
 		avcfList.remove(vcf);
 	}
+	
+	RegisteredSuperClasses<VarCmdFieldAbs> rsc = new RegisteredSuperClasses<VarCmdFieldAbs>();
+	public RegisteredSuperClasses<VarCmdFieldAbs> getClassReg(){
+		return rsc;
+	}
+	
+//	public static class RegisteredSuperClasses<E extends VarCmdFieldAbs>{
+//		TreeMap<String,Class<E>> tmSubClass = new TreeMap<String,Class<E>>();
+//		public void registerSuperClassesFrom(E obj){
+//			for(Class cl:MiscI.i().getSuperClassesOf(obj)){
+//				registerSuperClass(cl);
+//			}
+//		}
+//		public void registerSuperClass(Class<E> cl){
+//			tmSubClass.put(cl.getName(),cl);
+//		}
+//		public boolean isContainSubClass(String strClassTypeKey){
+//			return (tmSubClass.get(strClassTypeKey)) != null;
+//		}
+//	}
 	
 	/**
 	 * each call will only return true once per list change

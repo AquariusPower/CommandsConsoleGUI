@@ -111,6 +111,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 	
 	public ConsoleTestI() {
 		super();
+		bindListToggleEnable = new KeyBoundVarField(this);
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 		ManageSingleInstanceI.i().add(this);
 	}
@@ -198,7 +199,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 			});
 	}
 	
-	private final KeyBoundVarField bindListToggleEnable = new KeyBoundVarField(this);
+	private final KeyBoundVarField bindListToggleEnable;
 
 	private void prepareTestData(SimpleDiagChoice<T> diagChoice){
 		for(int i=0;i<10;i++){

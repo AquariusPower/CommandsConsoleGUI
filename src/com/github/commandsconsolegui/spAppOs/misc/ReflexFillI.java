@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.spAppOs.misc;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 
 import com.github.commandsconsolegui.spCmd.varfield.VarCmdUId;
 
@@ -569,5 +570,26 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		this.strCommandPartSeparator = strCommandPartSeparator;
 		if(this.strCommandPartSeparator==null)throw new PrerequisitesNotMetException("use empty intead of null separator!");
 	}
+	
+	/**
+	 * @param objClassToInspect surely works with anonymous (inner) classes, just like new ArrayList<String>(){}
+	 * @param iGenericParamIndex
+	 * @return
+	 */
+  public Class getGenericParamAsClassTypeFrom(Object objClassToInspect, int iGenericParamIndex){
+		try {
+			Class cl = objClassToInspect.getClass();
+	    ParameterizedType pt = (ParameterizedType)cl.getGenericSuperclass();
+	    String strParamClassName = pt.getActualTypeArguments()[iGenericParamIndex].getTypeName();
+	  	return Class.forName(strParamClassName);
+		} catch (ClassNotFoundException e) {
+	  	if(!objClassToInspect.getClass().isAnonymousClass()){
+	  		throw new PrerequisitesNotMetException("will surely work with anonymous (inner) classes tho")
+	  			.setCauseAndReturnSelf(e);
+	  	}else{
+	  		throw new PrerequisitesNotMetException(e);
+	  	}
+		}
+  }
 	
 }

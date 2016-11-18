@@ -27,12 +27,9 @@
 
 package com.github.commandsconsolegui.spAppOs.misc;
 
-import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
@@ -52,13 +49,24 @@ import com.github.commandsconsolegui.spCmd.varfield.TimedDelayVarField;
  *
  */
 public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
-//	private ConsoleCommands	cc;
+	private static DebugI instance = new DebugI();
+	public static DebugI i(){return instance;}
+	
+//	private Boolean	bIDEDebugMode=false; //TODO could this be public final static and accessed directly to be fastest?
 	
 	public DebugI() {
 		ManageSingleInstanceI.i().add(this);
 		
-		bDebugMode=ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
-			.indexOf("-agentlib:jdwp") > 0;
+//		bIDEDebugMode=ManagementFactory.getRuntimeMXBean().getInputArguments().toString().indexOf("-agentlib:jdwp") > 0;
+		
+		scfReportKeyValue = new StringCmdField(this)
+			.setCallerAssigned(new CallableX(this) {
+				@Override
+				public Boolean call() {
+					GlobalCommandsDelegatorI.i().dumpSubEntry(reportKeyValue());
+					return true;
+				}
+			});
 	}
 	
 	/**
@@ -105,13 +113,6 @@ public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
 		}
 	}
 	
-	private static DebugI instance = new DebugI();
-	public static DebugI i(){return instance;}
-//	public static void init(Debug dbg){
-//		Debug.instance=dbg;
-//	}
-
-	private Boolean	bDebugMode;
 	private boolean	bConfigured;
 	private HashMap<String,Object> hmDebugKeyValue = new HashMap<String,Object>();
 	
@@ -167,14 +168,7 @@ public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
 		return astr;
 	}
 	
-	StringCmdField scfReportKeyValue = new StringCmdField(this)
-		.setCallerAssigned(new CallableX(this) {
-			@Override
-			public Boolean call() {
-				GlobalCommandsDelegatorI.i().dumpSubEntry(reportKeyValue());
-				return true;
-			}
-		});
+	private final StringCmdField scfReportKeyValue;
 	
 //	@Override
 //	public ECmdReturnStatus execConsoleCommand(CommandsDelegator	cd) {
@@ -207,14 +201,17 @@ public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
 //		
 //		return cd.cmdFoundReturnStatus(bCmdWorked);
 //	}
-
-	public boolean isInIDEdebugMode() {
-//		if(bDebugMode==null){
-//			bDebugMode=ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
-//				.indexOf("-agentlib:jdwp") > 0;
-//		}
-		return bDebugMode;
-	}
+	
+//	/**
+//	 * Use this everywhere that has validations for proper coding,
+//	 * as only for a developer is useful such extra spent CPU time! 
+//	 * 
+//	 * @return
+//	 */
+//	public boolean isInIDEdebugMode() {
+////		return bIDEDebugMode;
+//		return RunMode.bIDEDebug;
+//	}
 	
 	/**
 	 * put a breakpoint inside this method!

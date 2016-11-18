@@ -531,7 +531,7 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 	 * @param obj each key will be one super class of it
 	 */
 	public <T extends Spatial> T setUserDataPSH(T spt, Object obj) {
-		for(Class<?> cl:MiscI.i().getSuperClassesOf(obj)){
+		for(Class<?> cl:MiscI.i().getSuperClassesOf(obj,true)){
 			setUserDataPSH(spt, cl.getName(), obj);
 		}
 		return spt;

@@ -29,11 +29,11 @@ package com.github.commandsconsolegui.spAppOs.misc;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
@@ -292,7 +292,7 @@ public class CallQueueI implements IReflexFillCfg {
 		
 	}
 	
-	ArrayList<CallableX> aCallList = new ArrayList<CallableX>();
+	BfdArrayList<CallableX> aCallList = new BfdArrayList<CallableX>(){};
 	private boolean	bIgnoreRecursiveCallWarning;
 	private CallableX	callerQueuedCurrentlyRunning;
 	private CallableX	callerCurrentlyRunning;
@@ -300,7 +300,8 @@ public class CallQueueI implements IReflexFillCfg {
 	public int update(float fTPF){
 		int i=0;
 		
-		for(CallableX caller:new ArrayList<CallableX>(aCallList)){
+//		for(CallableX caller:aCallList.toArray(new CallableX[aCallList.size()])){
+		for(CallableX caller:aCallList.toArray()){
 			assertQueueAllowed(caller);
 			
 			caller.updateTimeMilisNow();
@@ -420,7 +421,7 @@ public class CallQueueI implements IReflexFillCfg {
 	private void warnIfPossibleCallRecursiveness(CallableX callerNewAdded) {
 		if(callerCurrentlyRunning!=null && callerCurrentlyRunning.bIgnoreRecursiveCallWarning)return;
 //		if(bIgnoreRecursiveCallWarning)return;
-		if(!DebugI.i().isInIDEdebugMode())return;
+		if(!RunMode.bDebugIDE)return;
 		
 		ArrayList<StackTraceElement> asteList = new ArrayList<StackTraceElement>();
 		StackTraceElement[] aste = Thread.currentThread().getStackTrace();

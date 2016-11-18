@@ -27,19 +27,21 @@
 
 package com.github.commandsconsolegui.spCmd.varfield;
 
+import java.util.Arrays;
+
 import com.github.commandsconsolegui.spAppOs.misc.CallQueueI;
+import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallerInfo;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
-import com.github.commandsconsolegui.spAppOs.misc.DebugI;
 import com.github.commandsconsolegui.spAppOs.misc.IDebugReport;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallableX;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallerInfo;
-import com.github.commandsconsolegui.spAppOs.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.spAppOs.misc.RegisteredSuperClasses;
+import com.github.commandsconsolegui.spAppOs.misc.RunMode;
 import com.github.commandsconsolegui.spCmd.CommandData;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
 import com.github.commandsconsolegui.spCmd.ConsoleVariable;
@@ -50,8 +52,6 @@ import com.github.commandsconsolegui.spCmd.ConsoleVariable;
  * 
  * Objects instances should not have console variables unless they are unique: 
  * one single instance for each concrete class.
- *
- * 
  *
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 
@@ -138,8 +138,11 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	 * @param evcm
 	 */
 	public VarCmdFieldAbs(IReflexFillCfg rfcfgOwner, EVarCmdMode evcm, VAL valueDefault, Class<VAL> clValueTypeConstraint){
+		ManageVarCmdFieldI.i().getClassReg().registerAllSuperClassesOf(this,true,false);
 		this.evcm=evcm;
-		this.rfcfgOwner=rfcfgOwner;
+		
+		setOwner(rfcfgOwner);
+		
 		this.clValueTypeConstraint=clValueTypeConstraint;
 //		if(isField())
 		ManageVarCmdFieldI.i().add(this);
@@ -149,6 +152,13 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 			case VarCmd:
 				setObjectRawValue(valueDefault,true); //DO NOT CALL THE PRIVATE ONE HERE! as it cant be overriden!
 				break;
+		}
+	}
+	
+	private void setOwner(IReflexFillCfg rfcfgOwner){
+		this.rfcfgOwner=rfcfgOwner;
+		if(this.rfcfgOwner!=null){
+			rscOwner.registerAllSuperClassesOf(this.rfcfgOwner,true,true);
 		}
 	}
 	
@@ -579,13 +589,24 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		return getThis();
 	}
 	
-//	private void assertSettingAtOwnerType(){
-//		if(!isConstructed())return;
-//		
-//		for(StackTraceElement ste:asteDebugLastSetOrigin){
-//			ste.get
-//		}
-//	}
+	RegisteredSuperClasses<IReflexFillCfg> rscOwner = new RegisteredSuperClasses<IReflexFillCfg>();
+	
+	private void assertSettingAtOwnerType(){
+		if(!isConstructed())return;
+		if(getOwner()==null)return;
+		
+		// so it must be called directly at the latest setter
+		StackTraceElement steSetter = Thread.currentThread().getStackTrace()[2];
+		
+		for(StackTraceElement ste:asteDebugLastSetOrigin){
+//			if(steSetter.getMethodName().equals(ste.getMethodName()))continue;
+			if(ManageVarCmdFieldI.i().getClassReg().isContainClass(ste.getClassName()))continue;
+			if(rscOwner.isContainClass(ste.getClassName()))break;//continue;
+//			if(!getOwner().getClass().getName().equals(ste.getClassName())){
+				throw new PrerequisitesNotMetException("not being set at owner class type", ste.getClassName(), getOwner().getClass().getName(), this);
+//			}
+		}
+	}
 	
 	/**
 	 * It is the unmodified/original value.
@@ -596,8 +617,8 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	 * @return
 	 */
 	private THIS setObjectRawValue(Object objValueNew, boolean bSetDefault, boolean bOnValueChangePreventCallerRunOnce) { // do not use O at param here, ex.: bool toggler can be used on overriden
-		asteDebugLastSetOrigin=Thread.currentThread().getStackTrace();
-//		assertSettingAtOwnerType();
+		asteDebugLastSetOrigin=Arrays.copyOfRange(Thread.currentThread().getStackTrace(),1,100); // 100 should suffice avoiding big array allocation... Short.MAX_VALUE); //least the 1st to easy the comparisons...
+		if(RunMode.bDebugIDE)assertSettingAtOwnerType();
 		assertIfNullValueIsAllowed(objValueNew);
 		
 		if(objValueNew!=null && !clValueTypeConstraint.isInstance(objValueNew)){

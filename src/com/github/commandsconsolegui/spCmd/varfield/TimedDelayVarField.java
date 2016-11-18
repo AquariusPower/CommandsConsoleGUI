@@ -78,7 +78,7 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Float,TimedDelayVarField>
 //		this.setOwner(rfcfgOwnerUseThis);
 //		setObjectRawValue(fDelay);
 		setHelp(strHelp);
-		constructed();
+		constructed(); 
 	}
 	
 	public long getCurrentDelayNano() {

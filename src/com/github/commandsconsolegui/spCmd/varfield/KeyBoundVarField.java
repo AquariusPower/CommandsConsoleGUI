@@ -143,7 +143,7 @@ public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 		if(objValue!=null){
 			((KeyBind)objValue).setOwner(this);
 			
-			GlobalManageKeyBindI.i().addKeyBind(this);
+			GlobalManageKeyBindI.i().addRef(this);
 		}
 		
 		super.setObjectRawValue(objValue,true); //must NEVER execute just on bind change...

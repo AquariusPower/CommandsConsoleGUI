@@ -75,6 +75,13 @@ public class PrerequisitesNotMetException extends NullPointerException { //@STAT
 	public PrerequisitesNotMetException(String str, Object... aobj) {
 		this(true,str,aobj);
 	}
+	public PrerequisitesNotMetException() {
+		this("(no extra info)");
+	}
+	public PrerequisitesNotMetException(Exception ex) {
+		this("(just rethrowing the cause)");
+		setCauseAndReturnSelf(ex);
+	}
 	
 	public static void setUserInputDetector(IUserInputDetector u){
 		userInputDetector = u;

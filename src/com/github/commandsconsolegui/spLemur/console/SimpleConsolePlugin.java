@@ -199,7 +199,7 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
   }
   
 	/**
-	 * cannot be extended for getThis() trick to work
+	 * cannot be further extended for getThis() trick to work
 	 */
   public static final class SimpleLemurConsoleState extends LemurConsoleStateAbs<Command<Button>, SimpleLemurConsoleState> implements ISimpleGetThisTrickIndicator{
 		@Override public SimpleLemurConsoleState getThis() {return this;}

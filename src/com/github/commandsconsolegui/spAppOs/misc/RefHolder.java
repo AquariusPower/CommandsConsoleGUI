@@ -57,6 +57,13 @@ public class RefHolder<T> implements IDebugReport{
 	public T getHolded(){
 		return objRefHolded;
 	}
+	/**
+	 * like {@link #getHolded()}
+	 * @return
+	 */
+	public T ref(){
+		return objRefHolded;
+	}
 	
 	public boolean isChangedAndUpdateHash(){
 		return isChangedAndUpdateHash(objRefHolded);

@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.spAppOs.misc.DebugI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.spAppOs.misc.RunMode;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
 
 /**
@@ -46,7 +47,7 @@ import com.github.commandsconsolegui.spCmd.CommandsDelegator;
 public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 //	public final BoolTogglerCmd	btgSingleInstaceMode = new BoolTogglerCmd(this,true,BoolTogglerCmd.strTogglerCodePrefix,
 //		"better keep this enabled, other instances may conflict during files access.");
-	private boolean bDevModeExitIfThereIsANewerInstance;
+//	private boolean bDevModeExitIfThereIsANewerInstance;
 //	public final BoolToggler	btgSingleInstaceOverrideOlder = new BoolToggler(this,false,ConsoleCommands.strTogglerCodePrefix,
 //		"If true, any older instance will exit and this will keep running."
 //		+"If false, the oldest instance will keep running and this one will exit.");
@@ -75,12 +76,16 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 		PrerequisitesNotMetException.assertNotAlreadySet("single instance", instanceLock, this);
 		instanceLock = this;
 		
-		bDevModeExitIfThereIsANewerInstance = true; //true if in debug mode
+//		bDevModeExitIfThereIsANewerInstance = true; //true if in debug mode
 		lLockUpdateTargetDelayMilis=3000;
 		strPrefix=SingleMandatoryAppInstanceI.class.getSimpleName()+"-";
 		strSuffix=".lock";
 		strExitReasonOtherInstance = "";
 		setUseFilesystemFileAttributeModifiedTime(false);
+	}
+	
+	private boolean isDevModeExitIfThereIsANewerInstance(){
+		return RunMode.bDebugIDE;
 	}
 	
 	/**
@@ -163,6 +168,11 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 		return flSelfLock.getName().equalsIgnoreCase(fl.getName());
 	}
 	
+	/**
+	 * In debug mode, the newest will win and the oldest will exit. Developer mode.
+	 * In release mode, the oldest will win and the newers will exit. End user mode.
+	 * @return
+	 */
 	private boolean checkExitTD(){
 //		if(!btgSingleInstaceMode.b())return false;
 		
@@ -197,13 +207,13 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 //			if(!bOtherIsAlive){
 //				applyExitReasonAboutOtherInstanceStatus("STILLALIVE"+getMode(ermOther,true));
 //			}else{
-				if(bDevModeExitIfThereIsANewerInstance && bOtherIsNewer){
+				if(isDevModeExitIfThereIsANewerInstance() && bOtherIsNewer){
 					/**
 					 * exits if there is a newer debug application instance (development machine)
 					 */
 					applyExitReasonAboutOtherInstanceStatus("NEWER"+getMode(ermOther,true));
 				}else
-				if(!bDevModeExitIfThereIsANewerInstance && !bOtherIsNewer){
+				if(!isDevModeExitIfThereIsANewerInstance() && !bOtherIsNewer){
 					/**
 					 * exits if there is an older release application instance (end user machine)
 					 */
@@ -216,7 +226,7 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 			 * despite.. it may never happen at the end user machine...
 			 */
 			if(bExitApplicationTD){
-				if(!bSelfIsDebugMode){ // self is release mode
+				if(!RunMode.bDebugIDE){ // self is release mode
 					if(ermOther.compareTo(ERunMode.Debug)==0){
 						/**
 						 * will ignore exit request if the other is in debug mode.
@@ -231,7 +241,7 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 				 * 
 				 * To test, start a release mode, and AFTER that, start a debug mode one.
 				 */
-				if(bSelfIsDebugMode){
+				if(RunMode.bDebugIDE){
 					if(ermOther.compareTo(ERunMode.Release)==0){
 						applyExitReasonAboutOtherInstanceStatus(ermOther.toString());
 					}
@@ -337,7 +347,7 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 //	String strReleaseMode="ReleaseMode";
 	private boolean	bConfigured;
 //	private String	strErrorMissingValue="ERROR_MISSING_VALUE";
-	private Boolean	bSelfIsDebugMode;
+//	private Boolean	bSelfIsDebugMode;
 	private Thread	threadMain; // threadApplicationRendering
 	private Thread	threadChecker;
 	private int	lWaitCount;
@@ -383,7 +393,7 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 //	}
 	
 	private String getSelfMode(boolean bReportMode){
-		return getMode((bSelfIsDebugMode?ERunMode.Debug:ERunMode.Release), bReportMode);
+		return getMode((RunMode.bDebugIDE?ERunMode.Debug:ERunMode.Release), bReportMode);
 	}
 	private String getMode(ERunMode erm, boolean bReportMode){
 		return ""
@@ -454,7 +464,7 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 //		this.cc=cc;
 //		this.threadMain=threadMain;
 		
-		bSelfIsDebugMode = DebugI.i().isInIDEdebugMode();
+//		bSelfIsDebugMode = DebugI.i().isInIDEdebugMode();
 		
 //		if(Debug.i().isInIDEdebugMode())strPrefix="DebugMode-"+strPrefix;
 		
@@ -471,9 +481,9 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 			}
 		};
 		
-		bDevModeExitIfThereIsANewerInstance = bSelfIsDebugMode;
+//		bDevModeExitIfThereIsANewerInstance = bSelfIsDebugMode;
 		
-		if(bSelfIsDebugMode){
+		if(RunMode.bDebugIDE){
 			outputTD("This instance is in DEBUG mode. ");
 		}
 		
