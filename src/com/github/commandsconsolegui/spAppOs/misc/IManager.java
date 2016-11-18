@@ -39,8 +39,9 @@ import java.util.ArrayList;
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 
+ * @param <T> do not extend {@link IManaged}, too much constraint and it not that useful!
  */
-public interface IManager<T> {
+public interface IManager<T> extends ISingleInstance{
 	public abstract boolean add(T objNew);
 	public abstract ArrayList<T> getListCopy();
 }

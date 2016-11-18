@@ -38,12 +38,13 @@ import com.github.commandsconsolegui.spAppOs.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalSingleMandatoryAppInstanceI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalUpdaterI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.ISimpleGetThisTrickIndicator;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -300,4 +301,5 @@ public class SimpleConsolePlugin implements IReflexFillCfg, IConfigure<SimpleCon
 	public String getUniqueId() {
 		return MiscI.i().prepareUniqueId(this);
 	}
+
 }	

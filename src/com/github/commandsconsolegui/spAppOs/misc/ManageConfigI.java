@@ -46,6 +46,10 @@ public class ManageConfigI implements IManager<IConfigure>{
 		}
 	}
 	
+	public ManageConfigI() {
+		ManageSingleInstanceI.i().add(this);
+	}
+	
 	public static interface IConfigure<T extends IConfigure<T>> {
 		/**
 		 * Each subclass can have the same name "CfgParm".<br>
@@ -71,4 +75,7 @@ public class ManageConfigI implements IManager<IConfigure>{
 	public ArrayList<IConfigure> getListCopy() {
 		throw new UnsupportedOperationException("method not implemented yet");
 	}
+
+	@Override public String getUniqueId() {return MiscI.i().prepareUniqueId(this);}
+
 }

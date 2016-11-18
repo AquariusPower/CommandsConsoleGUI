@@ -31,10 +31,11 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spCmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.spCmd.varfield.StringVarField;
 import com.github.commandsconsolegui.spJme.ManageDialogAbs;
@@ -243,7 +244,6 @@ public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends ManageDi
 	
 	public LemurDialogManagerI() {
 		super();
-		ManageSingleInstanceI.i().add(this);
 	}
 	
 	@Override

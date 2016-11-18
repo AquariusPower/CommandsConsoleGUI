@@ -42,7 +42,7 @@ import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexHacksPluginI;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -199,7 +199,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 			});
 	}
 	
-	private final KeyBoundVarField bindListToggleEnable;
+	public final KeyBoundVarField bindListToggleEnable;
 
 	private void prepareTestData(SimpleDiagChoice<T> diagChoice){
 		for(int i=0;i<10;i++){

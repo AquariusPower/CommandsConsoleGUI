@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
@@ -253,4 +253,5 @@ public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
 		System.err.println("DEBUG DUMP VALUE:\n"+str);
 		return str;
 	}
+
 }

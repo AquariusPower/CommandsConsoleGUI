@@ -88,6 +88,12 @@ public class ManageSingleInstanceI implements IManager<ISingleInstance>{
 		
 		hm.put(ii.getConcreteClassName(), ii);
 		
+		if (objNew instanceof IManaged) {
+			IManaged im = (IManaged) objNew;
+			PrerequisitesNotMetException.assertIsTrue("manager not set", !im.isManagerSet(), im, this);
+			im.setManager(this);
+		}
+		
 		return aList.add(objNew);
 	}
 	
@@ -95,5 +101,7 @@ public class ManageSingleInstanceI implements IManager<ISingleInstance>{
 	public ArrayList<ISingleInstance> getListCopy() {
 		return new ArrayList<ISingleInstance>(aList);
 	}
+
+	@Override public String getUniqueId() {return MiscI.i().prepareUniqueId(this);}
 	
 }

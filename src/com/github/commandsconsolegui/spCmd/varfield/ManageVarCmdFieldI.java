@@ -33,6 +33,8 @@ import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.IMultiInstanceOverride;
+import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
+import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.RefHolder;
 import com.github.commandsconsolegui.spAppOs.misc.RegisteredClasses;
@@ -49,6 +51,10 @@ public class ManageVarCmdFieldI implements IManager<VarCmdFieldAbs>{
 	public static final class CompositeControl extends CompositeControlAbs<ManageVarCmdFieldI>{
 		private CompositeControl(ManageVarCmdFieldI casm){super(casm);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
+	
+	public ManageVarCmdFieldI() {
+		ManageSingleInstanceI.i().add(this);
+	}
 	
 	private ArrayList<VarCmdFieldAbs> avcfList = new ArrayList<VarCmdFieldAbs>();
 	public  final RefHolder hvhVarList = new RefHolder(avcfList);
@@ -78,7 +84,13 @@ public class ManageVarCmdFieldI implements IManager<VarCmdFieldAbs>{
 //			throw new PrerequisitesNotMetException("already added", vcf, avcfList, this);
 //		}
 		
-		return avcfList.add(vcf);
+//		vcf.setManager(this);
+		
+		if(!avcfList.contains(vcf)){
+			return avcfList.add(vcf);
+		}
+		
+		return false;
 	}
 	
 	public <T extends VarCmdFieldAbs> ArrayList<T> getListCopy(Class<T> clFilter){
@@ -156,5 +168,7 @@ public class ManageVarCmdFieldI implements IManager<VarCmdFieldAbs>{
 	public boolean isListChanged() {
 		return hvhVarList.isChangedAndUpdateHash();
 	}
-	
+
+	@Override public String getUniqueId() {return MiscI.i().prepareUniqueId(this);}
+
 }

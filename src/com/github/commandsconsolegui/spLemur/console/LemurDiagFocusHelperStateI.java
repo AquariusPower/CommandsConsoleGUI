@@ -32,10 +32,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.spCmd.varfield.FloatDoubleVarField;
@@ -306,7 +306,7 @@ public class LemurDiagFocusHelperStateI extends CmdConditionalStateAbs<LemurDiag
 		
 		LemurDialogStateAbs diag = retrieveDialogFromSpatial(spt);
 		if(!diag.isLayoutValid()){
-			CallQueueI.i().addCall(new CallableX(this,1000) {
+			ManageCallQueueI.i().addCall(new CallableX(this,1000) {
 				@Override
 				public Boolean call() {
 					requestFocus(spt,bOnlyIfAlreadyOnTheList);

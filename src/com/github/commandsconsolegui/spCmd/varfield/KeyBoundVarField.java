@@ -29,14 +29,12 @@ package com.github.commandsconsolegui.spCmd.varfield;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.spAppOs.ManageKeyCode;
-import com.github.commandsconsolegui.spAppOs.ManageKeyCode.Key;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyBindI;
-import com.github.commandsconsolegui.spAppOs.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.KeyBind;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
+import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 
 /**
@@ -142,14 +140,29 @@ public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 		
 		if(objValue!=null){
 			((KeyBind)objValue).setOwner(this);
-			
-			GlobalManageKeyBindI.i().addRef(this);
+			GlobalManageKeyBindI.i().add(this);
 		}
 		
 		super.setObjectRawValue(objValue,true); //must NEVER execute just on bind change...
 		
 		return getThis();
 	}
+	
+//	@Override
+//	protected void applyManager(){
+//		/**
+//		 * set only one manager reference here,
+//		 * do not call super one!
+//		 */
+//		if(getManger()==null && !isValueNull()){
+//			if(GlobalManageKeyBindI.iGlobal().isSet()){
+//				GlobalManageKeyBindI.i().add(this);
+//				setManager(GlobalManageKeyBindI.i());
+//			}else{
+//				MsgI.i().devWarn("global manager not ready yet...", GlobalManageKeyBindI.class, this);
+//			}
+//		}
+//	}
 	
 	@Override
 	public String getVariablePrefix() {

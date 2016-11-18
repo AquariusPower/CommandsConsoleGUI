@@ -29,7 +29,7 @@ package com.github.commandsconsolegui.spCmd;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalSimulationTimeI;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 
 /**
@@ -46,7 +46,7 @@ public class Updater {
 			GlobalManageKeyBindI.i().update(fTpf);
 			GlobalAppOSI.i().update(fTpf);
 			
-			CallQueueI.i().update(fTpf); //after all
+			ManageCallQueueI.i().update(fTpf); //after all
 //		}catch(Exception e){
 //			throw new PrerequisitesNotMetException("problem").setCauseAndReturnSelf(e);
 //		}

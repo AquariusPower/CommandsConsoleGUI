@@ -88,4 +88,5 @@ public class ManageCellRendererI implements IReflexFillCfg,IManager{
 	public String getUniqueId() {
 		return MiscI.i().prepareUniqueId(this);
 	}
+
 }

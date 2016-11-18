@@ -32,13 +32,13 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.spAppOs.globals.GlobalMainThreadI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.WorkAroundI;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI.EStringMatchMode;
 import com.github.commandsconsolegui.spAppOs.misc.WorkAroundI.BugFixBoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
@@ -1080,7 +1080,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 			if(bMustDoItNow){
 				throw new PrerequisitesNotMetException("not going to be rendered", pnl, v3fSizeF, bForceSpecificSize);
 			}else{
-				CallQueueI.i().addCall(caller);
+				ManageCallQueueI.i().addCall(caller);
 				MsgI.i().debug("postponed resize "+pnl+", "+v3fSizeF, true, this);
 			}
 		}

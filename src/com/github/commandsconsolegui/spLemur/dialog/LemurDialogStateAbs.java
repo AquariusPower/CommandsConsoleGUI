@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
 import com.github.commandsconsolegui.spAppOs.misc.DebugI;
 import com.github.commandsconsolegui.spAppOs.misc.HoldRestartable;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
@@ -40,7 +40,7 @@ import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
 import com.github.commandsconsolegui.spAppOs.misc.WorkAroundI;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.spAppOs.misc.WorkAroundI.BugFixBoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
@@ -784,7 +784,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		abtnResizerList.add(btnNew);
 		final String strName="Dialog_Resizer_";
 		if(edge==null){
-			CallQueueI.i().addCall(new CallableX(this) {
+			ManageCallQueueI.i().addCall(new CallableX(this) {
 				@Override
 				public Boolean call() {
 					btnNew.setName(strName+ReflexFillI.i().assertAndGetField(LemurDialogStateAbs.this,btnNew).getName());
@@ -1524,7 +1524,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		/**
 		 * need to wait it actually get selected
 		 */
-		CallQueueI.i().addCall(new CallableX(this) {
+		ManageCallQueueI.i().addCall(new CallableX(this) {
 			@Override
 			public Boolean call() {
 				DialogListEntryData<T> dledParent = dledParentTmp;

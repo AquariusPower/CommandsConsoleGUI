@@ -24,6 +24,7 @@
 	OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN 
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+
 package com.github.commandsconsolegui.spAppOs.misc;
 
 /**
@@ -31,5 +32,6 @@ package com.github.commandsconsolegui.spAppOs.misc;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public interface ISingleInstance extends IUniqueId{
+public interface IConstructed {
+	boolean isConstructed();
 }

@@ -48,8 +48,8 @@ import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyCodeI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalConsoleUII;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.DebugI;
 import com.github.commandsconsolegui.spAppOs.misc.DebugI.EDebugKey;
@@ -60,7 +60,6 @@ import com.github.commandsconsolegui.spAppOs.misc.IMultiInstanceOverride;
 import com.github.commandsconsolegui.spAppOs.misc.IUserInputDetector;
 import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
-import com.github.commandsconsolegui.spAppOs.misc.RunMode;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI.EStringMatchMode;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
@@ -68,6 +67,7 @@ import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
+import com.github.commandsconsolegui.spAppOs.misc.RunMode;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdFieldAbs;
 import com.github.commandsconsolegui.spCmd.varfield.FloatDoubleVarField;
@@ -138,6 +138,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	public final BoolTogglerCmdField	btgShowWarn = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 	public final BoolTogglerCmdField	btgShowInfo = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
 	public final BoolTogglerCmdField	btgShowException = new BoolTogglerCmdField(this,true).setCallNothingOnChange();
+	public final BoolTogglerCmdField	btgValidateDevCode = new BoolTogglerCmdField(this,RunMode.bValidateDevCode)
+		.setCallerAssigned(new CallableX(this) {
+			@Override
+			public Boolean call() {
+				RunMode.bValidateDevCode=btgValidateDevCode.b();
+				return true;
+			}
+		});
 	public final BoolTogglerCmdField	btgDumpToTerminal = new BoolTogglerCmdField(this,true,
 		"The system terminal where the application is being run, will also receive "+CommandsDelegator.class.getSimpleName()+" output.").setCallNothingOnChange();
 	public final BoolTogglerCmdField	btgEngineStatsView = new BoolTogglerCmdField(this,false);
@@ -784,7 +792,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		/**
 		 * postponed to let configurations run smoothly
 		 */
-		CallQueueI.i().addCall(new CallableX(this) {
+		ManageCallQueueI.i().addCall(new CallableX(this) {
 			@Override
 			public Boolean call() {
 				if(!CommandsDelegator.this.isInitialized()){
@@ -946,7 +954,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			bind.setUserCommand(ccl.getPreparedCmdAndParamsListCopyFrom(2));
 			
 //			tmbindList.put(strBindCfg,bind);
-			GlobalManageKeyBindI.i().addRef(bind);
+			GlobalManageKeyBindI.i().add(bind);
 			
 			setupRecreateFile();
 //			cui().addKeyBind(bind);
@@ -4023,7 +4031,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			
 		if(EStats.CallQueueSize.isShow()){
 			strStatsLast+=
-				"Qu"+CallQueueI.i().getWaitingAmount()
+				"Qu"+ManageCallQueueI.i().getWaitingAmount()
 					+";";
 		}
 		
@@ -4091,7 +4099,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		/**
 		 * postponed to let configuration run smoothly
 		 */
-		CallQueueI.i().addCall(new CallableX(this) {
+		ManageCallQueueI.i().addCall(new CallableX(this) {
 			@Override
 			public Boolean call() {
 				return initialize();
@@ -4147,7 +4155,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		addCmdToQueue(btgShowDeveloperWarn.getCmdIdAsCommand(false));
 		addCmdToQueue(btgShowDeveloperInfo.getCmdIdAsCommand(false));
 		
-		CallQueueI.i().addCall(new CallableX(this) {
+		ManageCallQueueI.i().addCall(new CallableX(this) {
 			@Override
 			public Boolean call() {
 				fixSimpleCmdConflict(scfHelp.getCmdData(), scfHelp.getSimpleId(), true, true);

@@ -31,6 +31,7 @@ import java.io.File;
 import java.lang.reflect.Field;
 
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
@@ -208,4 +209,5 @@ public class OSApp implements IReflexFillCfg{
 	public String getDynamicInfo(){
 		return strDynamicInfo;
 	}
+
 }

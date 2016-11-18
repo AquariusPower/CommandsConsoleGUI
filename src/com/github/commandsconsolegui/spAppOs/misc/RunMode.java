@@ -37,11 +37,13 @@ import java.lang.management.ManagementFactory;
  *
  */
 public class RunMode {
-	/**
-	 * Use this everywhere that has validations for proper coding,
-	 * as only for a developer is useful such extra spent CPU time!
-	 */ 
 	public static final boolean bDebugIDE=ManagementFactory.getRuntimeMXBean().getInputArguments().toString().indexOf("-agentlib:jdwp") > 0;
 	public static final boolean bRelease=!bDebugIDE;
 	
+	/**
+	 * Use this everywhere that has validations for proper coding,
+	 * as only for a developer is useful such extra spent CPU time!
+	 * But can be enabled by users also to help on debugging!
+	 */ 
+	public static boolean bValidateDevCode=bDebugIDE;
 }

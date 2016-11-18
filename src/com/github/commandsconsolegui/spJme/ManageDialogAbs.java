@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
+import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
@@ -55,6 +56,10 @@ public abstract class ManageDialogAbs<T extends DialogStateAbs> implements IRefl
 	public static final class CompositeControl extends CompositeControlAbs<ManageDialogAbs>{
 		private CompositeControl(ManageDialogAbs casm){super(casm);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
+	
+	public ManageDialogAbs() {
+		ManageSingleInstanceI.i().add(this);
+	}
 	
 	public final String STYLE_CONSOLE="console";
 	private String strDefaultFont = "DroidSansMono";

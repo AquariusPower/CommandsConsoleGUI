@@ -52,11 +52,11 @@ import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CallQueueI implements IReflexFillCfg {
-	private static CallQueueI instance = new CallQueueI();
-	public static CallQueueI i(){return instance;}
+public class ManageCallQueueI implements IReflexFillCfg,IManager<ManageCallQueueI.CallableX> {
+	private static ManageCallQueueI instance = new ManageCallQueueI();
+	public static ManageCallQueueI i(){return instance;}
 	
-	public CallQueueI() {
+	public ManageCallQueueI() {
 		ManageSingleInstanceI.i().add(this);
 	}
 	
@@ -384,6 +384,13 @@ public class CallQueueI implements IReflexFillCfg {
 		addCall(caller,false,true);
 	}
 	
+	@Override
+	public boolean add(CallableX caller) {
+		boolean b = aCallList.contains(caller);
+		addCall(caller);
+		return !b;
+	}
+	
 	/**
 	 * if the caller returns false, it will be retried on the queue.
 	 * 
@@ -470,5 +477,10 @@ public class CallQueueI implements IReflexFillCfg {
 	@Override
 	public String getUniqueId() {
 		return MiscI.i().prepareUniqueId(this);
+	}
+	
+	@Override
+	public ArrayList<CallableX> getListCopy() {
+		return new BfdArrayList<ManageCallQueueI.CallableX>(aCallList){}; 
 	}
 }

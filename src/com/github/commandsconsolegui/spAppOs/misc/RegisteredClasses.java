@@ -39,19 +39,21 @@ import com.github.commandsconsolegui.spCmd.varfield.VarCmdFieldAbs;
 public class RegisteredClasses<E>{
 	RefHolder<TreeMap<String,Class<E>>> rhtmSubClass = new RefHolder<TreeMap<String,Class<E>>>(new TreeMap<String,Class<E>>());
 //	TreeMap<String,Class<E>> tmSubClass = new TreeMap<String,Class<E>>();
-	public void registerAllSuperClassesOf(E obj, boolean bItsInnerClassesToo, boolean bItsEnclosingClassesToo){
-		for(Class cl:MiscI.i().getSuperClassesOf(obj,true)){
+	public void registerAllSuperClassesOf(E objTarget, boolean bItsInnerClassesToo, boolean bItsEnclosingClassesToo){
+		PrerequisitesNotMetException.assertNotNull("objTarget", objTarget, this);
+		
+		for(Class cl:MiscI.i().getSuperClassesOf(objTarget,true)){
 			registerClass(cl);
 		}
 		
 		if(bItsInnerClassesToo){
-			for(Class cl:obj.getClass().getDeclaredClasses()){ //register inner classes
+			for(Class cl:objTarget.getClass().getDeclaredClasses()){ //register inner classes
 				registerClass(cl);
 			}
 		}
 		
 		if(bItsEnclosingClassesToo){ //enclosing tree
-			for(Class cl:MiscI.i().getEnclosingClassesOf(obj)){
+			for(Class cl:MiscI.i().getEnclosingClassesOf(objTarget)){
 				registerClass(cl);
 			}
 		}

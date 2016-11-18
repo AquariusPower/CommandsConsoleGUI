@@ -42,6 +42,10 @@ public class ManageHoldRestartableI<T extends IRestartable> implements IManager<
 		private CompositeControl(ManageHoldRestartableI casm){super(casm);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
 	
+	public ManageHoldRestartableI() {
+		ManageSingleInstanceI.i().add(this);
+	}
+	
 	private ArrayList<HoldRestartable<T>> ahrList=new ArrayList<HoldRestartable<T>>();
 	
 	public void revalidateAndUpdateAllRestartableHoldersFor(IRestartable irDiscarding, IRestartable irNew){
@@ -70,4 +74,7 @@ public class ManageHoldRestartableI<T extends IRestartable> implements IManager<
 	public ArrayList<HoldRestartable<T>> getListCopy() {
 		throw new UnsupportedOperationException("method not implemented yet");
 	}
+
+	@Override public String getUniqueId() {return MiscI.i().prepareUniqueId(this);}
+
 }

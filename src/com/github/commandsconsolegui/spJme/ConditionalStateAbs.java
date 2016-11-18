@@ -35,6 +35,8 @@ import com.github.commandsconsolegui.spAppOs.SimulationTime.ISimulationTime;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalHolderAbs.IGlobalOpt;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.spAppOs.misc.HoldRestartable;
+import com.github.commandsconsolegui.spAppOs.misc.IManaged;
+import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.IRefresh;
 import com.github.commandsconsolegui.spAppOs.misc.IRestartable;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI;
@@ -75,7 +77,7 @@ import com.jme3.scene.Node;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>> implements IGlobalOpt,IRestartable,ISimulationTime,IConfigure<ConditionalStateAbs<THIS>>,IRetryListOwner,IReflexFillCfg,IRefresh,IPriority{
+public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>> implements IGlobalOpt,IRestartable,ISimulationTime,IConfigure<ConditionalStateAbs<THIS>>,IRetryListOwner,IReflexFillCfg,IRefresh,IPriority,IManaged{
 //	public static final class CompositeControl extends CompositeControlAbs<ConditionalStateAbs>{
 //		private CompositeControl(ConditionalStateAbs casm){super(casm);};
 //	};private CompositeControl ccSelf = new CompositeControl(this);
@@ -295,7 +297,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 //	private boolean	bInstancedFromRestart;
 
 	private boolean	bFirstEnableDone;
-	
+
 	public boolean isWasEnabledBeforeRestarting(){
 		return bWasEnabled;
 	}
@@ -1046,7 +1048,27 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 //		CallQueueI.i().addCall(callerRequestRetryUntilEnabled);
 //	}
 	
+	/**
+	 * an update will always happen,
+	 * a refresh is about things that would not be updated during the
+	 * normal update!
+	 * 
+	 * if a refresh can be performed, override this one
+	 */
 	@Override
-	public void requestRefresh() {
+	public void requestRefresh() {}
+	
+	private IManager	imgr;
+	@Override
+	public boolean isManagerSet() {
+		return getManager()!=null;
+	}
+	@Override
+	public IManager getManager() {
+		return imgr;
+	}
+	@Override
+	public Object setManager(IManager imgr) {
+		return this.imgr=imgr;
 	}
 }

@@ -37,9 +37,9 @@ import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
+import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.spCmd.CommandsHelperI;
 import com.github.commandsconsolegui.spCmd.IConsoleCommandListener;
-import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.spCmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
@@ -286,4 +286,5 @@ public class ManageMouseCursorI implements IReflexFillCfg, IConsoleCommandListen
 	public String getUniqueId() {
 		return MiscI.i().prepareUniqueId(this);
 	}
+
 }

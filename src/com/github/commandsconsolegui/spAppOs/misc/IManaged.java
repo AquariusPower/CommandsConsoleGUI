@@ -31,5 +31,8 @@ package com.github.commandsconsolegui.spAppOs.misc;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public interface ISingleInstance extends IUniqueId{
+public interface IManaged {
+	boolean isManagerSet();
+	IManager getManager();
+	Object setManager(IManager imgr);
 }

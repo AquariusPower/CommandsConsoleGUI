@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.spJme.extras;
 
 import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
 import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
@@ -84,7 +85,7 @@ public class SimpleApplicationHelperI extends SimpleApplication implements ISing
 	@Override
 	public void simpleUpdate(float tpf) {
 		if(GlobalAppOSI.i().isApplicationExiting()){
-			stop();
+			GlobalAppRefI.i().stop();
 			return; //useless?
 		}
 	}
@@ -93,4 +94,5 @@ public class SimpleApplicationHelperI extends SimpleApplication implements ISing
 	public String getUniqueId() {
 		return MiscI.i().prepareUniqueId(this);
 	}
+
 }

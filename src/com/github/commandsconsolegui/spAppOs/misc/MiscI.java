@@ -915,11 +915,20 @@ public class MiscI {
 		if(obj!=null && bShowClassName)strCl=obj.getClass().getName();
 		
 		String strObj = "";
-		if (obj instanceof IDebugReport) {
-			IDebugReport ir = (IDebugReport) obj;
-			strObj=ir.getFailSafeDebugReport();
-		}else{
-			strObj=""+obj.toString();
+		if(obj instanceof IConstructed){
+			IConstructed ic = (IConstructed) obj;
+			if(!ic.isConstructed()){
+				strObj="(not constructed yet)";
+			}
+		}
+		
+		if(strObj.isEmpty()){
+			if(obj instanceof IDebugReport){
+				IDebugReport ir = (IDebugReport) obj;
+				strObj=ir.getFailSafeDebugReport();
+			}else{
+				strObj=""+obj.toString();
+			}
 		}
 		
 		return ""+(obj==null ? null : strCl+": "+strObj); //this is better when dumping a sub-stacktrace
@@ -1040,7 +1049,7 @@ public class MiscI {
 	}
 
 	public String prepareUniqueId(ISingleInstance si) {
-		return si.getClass().getName(); //TODO dots to underscores?
+		return si.getClass().getName(); //TODO dots to underscores? could shadow existing underscores tho in case of backwards conversion...
 	}
 	
 	public boolean isGetThisTrickImplementation(Object obj){

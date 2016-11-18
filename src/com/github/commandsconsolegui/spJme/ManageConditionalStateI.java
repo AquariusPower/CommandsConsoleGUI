@@ -37,6 +37,8 @@ import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegator
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.ManageHoldRestartableI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
+import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.Priority;
 import com.github.commandsconsolegui.spCmd.IConsoleCommandListener;
@@ -61,6 +63,10 @@ public class ManageConditionalStateI extends AbstractAppState implements IManage
 		private CompositeControl(ManageConditionalStateI casm){super(casm);};
 	}
 	private CompositeControl ccSelf = new CompositeControl(this);
+	
+	public ManageConditionalStateI() {
+		ManageSingleInstanceI.i().add(this);
+	}
 	
 	ArrayList<ConditionalStateAbs> aCondStateList = new ArrayList<ConditionalStateAbs>();
 
@@ -240,4 +246,7 @@ public class ManageConditionalStateI extends AbstractAppState implements IManage
 	public ArrayList<ConditionalStateAbs> getListCopy() {
 		return new ArrayList<ConditionalStateAbs>(aCondStateList);
 	}
+
+	@Override public String getUniqueId() {return MiscI.i().prepareUniqueId(this);}
+
 }

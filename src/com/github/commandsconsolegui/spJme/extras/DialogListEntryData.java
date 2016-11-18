@@ -35,12 +35,12 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
 import com.github.commandsconsolegui.spAppOs.misc.HoldRestartable;
 import com.github.commandsconsolegui.spAppOs.misc.IHasOwnerInstance;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spJme.AudioUII;
 import com.github.commandsconsolegui.spJme.DialogStateAbs;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData.SliderValueData.ESliderKey;
@@ -122,7 +122,7 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 		private void doCallOnChange() {
 			if(callerSlider!=null){
 				callerSlider.putCustomValue(ESliderKey.CurrentValue.s(), getCurrentValue());
-				CallQueueI.i().addCall(callerSlider);
+				ManageCallQueueI.i().addCall(callerSlider);
 			}
 		}
 

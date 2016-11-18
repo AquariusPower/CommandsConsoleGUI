@@ -36,8 +36,11 @@ import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyCodeI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
+import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.IRefresh;
 import com.github.commandsconsolegui.spAppOs.misc.KeyBind;
+import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
+import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spCmd.varfield.KeyBoundVarField;
@@ -49,10 +52,14 @@ import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
 * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 *
 */
-public abstract class ManageKeyBind {
+public abstract class ManageKeyBind implements IManager<KeyBoundVarField> {
 	public static final class CompositeControl extends CompositeControlAbs<ManageKeyBind>{
 		private CompositeControl(ManageKeyBind cc){super(cc);};
 	};protected CompositeControl ccSelf = new CompositeControl(this);
+	
+	public ManageKeyBind() {
+		ManageSingleInstanceI.i().add(this);
+	}
 	
 	private TreeMap<String,KeyBoundVarField> tmbindList = new TreeMap<String, KeyBoundVarField>(String.CASE_INSENSITIVE_ORDER);
 	
@@ -84,10 +91,18 @@ public abstract class ManageKeyBind {
 		tmbindList.remove(new KeyBind().setFromKeyCfg(strBindCfg).getBindCfg());
 	}
 	
-	public void addRef(KeyBoundVarField bind){
+	@Override
+	public boolean add(KeyBoundVarField bind){
 		String strMapping=getMappingFrom(bind);
 		
+		KeyBoundVarField kbExisting = tmbindList.get(strMapping);
+		
 		tmbindList.put(strMapping,bind);
+		
+		PrerequisitesNotMetException.assertIsTrue("manager not set", !bind.isManagerSet(), bind, this);
+		bind.setManager(this);
+		
+		return kbExisting!=bind;
 	}
 	
 	private HashMap<Integer,ArrayList<KeyBoundVarField>> hmKeyCodeVsActivatedBind = new HashMap<Integer, ArrayList<KeyBoundVarField>>();
@@ -231,6 +246,8 @@ public abstract class ManageKeyBind {
 		 */
 		hmKeyCodeVsActivatedBind.clear();
 		for(KeyBoundVarField bind:tmbindList.values()){
+			if(bind.isValueNull())continue; //not set yet
+			
 			if(bind.getKeyBind().isActivated()){ //pressed
 				Integer iKeyCode = bind.getKeyBind().getActionKey().getKeyCode();
 				
@@ -386,6 +403,7 @@ public abstract class ManageKeyBind {
 	}
 
 //	protected abstract KeyBind captureKeyBind(KeyBoundVarField bindTarget);
+
+	@Override public String getUniqueId() {return MiscI.i().prepareUniqueId(this);}
+
 }
-
-

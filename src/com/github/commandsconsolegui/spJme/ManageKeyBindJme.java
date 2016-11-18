@@ -29,9 +29,10 @@ package com.github.commandsconsolegui.spJme;
 
 import com.github.commandsconsolegui.spAppOs.ManageKeyCode.Key;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyCodeI;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
+import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallableX;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spCmd.ManageKeyBind;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
 import com.jme3.input.controls.ActionListener;
@@ -52,7 +53,7 @@ public class ManageKeyBindJme extends ManageKeyBind {
 		super.configure();
 		
 		// lazy initialization
-		CallQueueI.i().addCall(new CallableX(this) {
+		ManageCallQueueI.i().addCall(new CallableX(this) {
 			@Override
 			public Boolean call() {
 				if(!GlobalAppRefI.iGlobal().isSet())return false;

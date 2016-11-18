@@ -29,11 +29,14 @@ package com.github.commandsconsolegui.spCmd.varfield;
 
 import java.util.Arrays;
 
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallableX;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallerInfo;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
+import com.github.commandsconsolegui.spAppOs.misc.IConstructed;
 import com.github.commandsconsolegui.spAppOs.misc.IDebugReport;
+import com.github.commandsconsolegui.spAppOs.misc.IManaged;
+import com.github.commandsconsolegui.spAppOs.misc.IManager;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallerInfo;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
@@ -56,7 +59,7 @@ import com.github.commandsconsolegui.spCmd.ConsoleVariable;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 
  */
-public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> implements IReflexFillCfgVariant,IDebugReport{//, IVarIdValueOwner{
+public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> implements IReflexFillCfgVariant,IDebugReport,IConstructed,IManaged{//, IVarIdValueOwner{
 	public static final class CompositeControl extends CompositeControlAbs<VarCmdFieldAbs>{
 		private CompositeControl(VarCmdFieldAbs casm){super(casm);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
@@ -145,7 +148,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		
 		this.clValueTypeConstraint=clValueTypeConstraint;
 //		if(isField())
-		ManageVarCmdFieldI.i().add(this);
+		ManageVarCmdFieldI.i().add(this); //generic semi-dummy-manager just to hold the main list
 //		Class<VAL> cl;
 		switch(this.evcm){
 			case Var:
@@ -519,11 +522,11 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	 * but it was expected to NOT be a null value anymore! 
 	 */
 	public Object getRawValue(){
+		assertConstructed();
 		return assertIfNullValueIsAllowed(getRawValueUnsafely());
 	}
 	
 	private Object getRawValueUnsafely(){
-		PrerequisitesNotMetException.assertIsTrue("constructed", bConstructed, this);
 		if(cvarLinkAndValueStorage!=null){
 			return cvarLinkAndValueStorage.getRawValue();
 		}else{
@@ -548,6 +551,10 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	 * @return
 	 */
 	protected abstract THIS getThis();
+	
+	private void assertConstructed(){
+		PrerequisitesNotMetException.assertIsTrue("constructed", bConstructed, this);
+	}
 	
 	protected Object assertIfNullValueIsAllowed(Object objValue){
 		if(!bAllowNullValue && objValue==null){
@@ -590,6 +597,12 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	}
 	
 	RegisteredClasses<IReflexFillCfg> rscOwner = new RegisteredClasses<IReflexFillCfg>();
+	RegisteredClasses<IManager> rscManager = new RegisteredClasses<IManager>();
+
+	private IManager<VarCmdFieldAbs>	imgr;
+	public IManager<VarCmdFieldAbs> getManger(){
+		return imgr;
+	}
 	
 	private void assertSettingAtOwnerType(){
 		if(!isConstructed())return;
@@ -602,6 +615,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 //			if(steSetter.getMethodName().equals(ste.getMethodName()))continue;
 			if(ManageVarCmdFieldI.i().getClassReg().isContainClass(ste.getClassName()))continue;
 			if(rscOwner.isContainClass(ste.getClassName()))break;//continue;
+			if(rscManager.isContainClass(ste.getClassName()))break;
 //			if(!getOwner().getClass().getName().equals(ste.getClassName())){
 				throw new PrerequisitesNotMetException("not being set at owner class type", ste.getClassName(), getOwner().getClass().getName(), this);
 //			}
@@ -663,6 +677,8 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 			}
 		}
 		
+//		applyManager();
+		
 		return getThis();
 	}
 	
@@ -675,7 +691,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 				//TODO seems a bit confusing... more code (even if looking redundant) could make it more clear
 				if(bRunNow || getCallerAssignedInfo().isAllowQueue()){
 					callerAssigned.setRetryOnFail(!bRunNow);
-					return CallQueueI.i().addCall(callerAssigned,bRunNow);
+					return ManageCallQueueI.i().addCall(callerAssigned,bRunNow);
 //				}else{
 //					if(callerAssigned.isAllowQueue()){
 //						callerAssigned.setRetryOnFail(true);
@@ -693,6 +709,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	}
 	
 	protected Object getRawValueLazy(){
+		assertConstructed();
 		return assertIfNullValueIsAllowed(objRawLazyValue);
 	}
 	
@@ -782,6 +799,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	}
 	
 	public Object getRawValueDefault() {
+		assertConstructed();
 		return assertIfNullValueIsAllowed(objRawValueDefault);
 //		return objRawValueDefault;
 	}
@@ -814,6 +832,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	 * this is mainly to skip the initialing value at constructors
 	 * @return
 	 */
+	@Override
 	public boolean isConstructed(){
 		return bConstructed;
 	}
@@ -937,6 +956,34 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	public String toString() {
 		return vcuid.toString();
 	}
+	
+	@Override
+	public IManager getManager() {
+		return imgr;
+	}
+	
+	@Override
+	public boolean isManagerSet() {
+		return getManager()!=null;
+	}
+		
+	@Override
+	public THIS setManager(IManager imgr) {
+		if(RunMode.bDebugIDE)PrerequisitesNotMetException.assertNotAlreadySet("manager", this.imgr,imgr,this);
+		this.imgr=imgr;
+		rscManager.registerAllSuperClassesOf(imgr, true, true);
+		return getThis();
+	}
 
+	/**
+	 * Override this to properly apply a manager 
+	 */
+//	protected void applyManager(){}
+//	{
+//		if(getManger()==null){
+//			ManageVarCmdFieldI.i().add(this);
+//			setManager(ManageVarCmdFieldI.i());
+//		}
+//	}
 	
 }

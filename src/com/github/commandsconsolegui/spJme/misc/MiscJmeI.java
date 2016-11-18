@@ -51,11 +51,12 @@ import com.github.commandsconsolegui.spAppOs.globals.GlobalMainThreadI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.DebugI;
 import com.github.commandsconsolegui.spAppOs.misc.IHandleExceptions;
+import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.spAppOs.misc.CallQueueI.CallableWeak;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableWeak;
 import com.github.commandsconsolegui.spAppOs.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI.EStringMatchMode;
@@ -1007,4 +1008,5 @@ public class MiscJmeI implements IReflexFillCfg,IConfigure{
 		
 		return at;
 	}
+
 }
