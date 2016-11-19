@@ -27,8 +27,7 @@
 
 package com.github.commandsconsolegui.spCmd.varfield;
 
-import java.util.Arrays;
-
+import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.IConstructed;
 import com.github.commandsconsolegui.spAppOs.misc.IDebugReport;
@@ -37,12 +36,13 @@ import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallerInfo;
+import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI.DebugData;
 import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI.EDbgStkOrigin;
-import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.spAppOs.misc.RefHolder;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -144,7 +144,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	 * @param evcm
 	 */
 	public VarCmdFieldAbs(IReflexFillCfg rfcfgOwner, EVarCmdMode evcm, VAL valueDefault, Class<VAL> clValueTypeConstraint){
-		ManageVarCmdFieldI.i().getClassReg().registerAllSuperClassesOf(this,true,false);
+		ManageVarCmdFieldI.i().getClassReg().addSuperClassesOf(this,true,false);
 		this.evcm=evcm;
 		
 		setOwner(rfcfgOwner);
@@ -164,7 +164,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	private void setOwner(IReflexFillCfg rfcfgOwner){
 		this.rfcfgOwner=rfcfgOwner;
 		if(this.rfcfgOwner!=null){
-			rscOwner.registerAllSuperClassesOf(this.rfcfgOwner,true,true);
+			rscOwner.addSuperClassesOf(this.rfcfgOwner,true,true);
 		}
 	}
 	
@@ -282,6 +282,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		 * even if it has not returned yet! so, this must be THE LAST THING!!!!
 		 */
 		this.cvarLinkAndValueStorage = cvar; //LAST THING!!
+		rscConsVar.addSuperClassesOf(cvarLinkAndValueStorage, true, true);
 		
 ////		this.cvarLinkAndValueStorage.setRestrictedVarOwner(this);
 //		if(bSetNormalMode){
@@ -601,7 +602,8 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	
 	RegisteredClasses<IReflexFillCfg> rscOwner = new RegisteredClasses<IReflexFillCfg>();
 	RegisteredClasses<IManager> rscManager = new RegisteredClasses<IManager>();
-
+	RegisteredClasses<ConsoleVariable> rscConsVar = new RegisteredClasses<ConsoleVariable>();
+	
 	private IManager<VarCmdFieldAbs>	imgr;
 
 	private DebugData	dbg;
@@ -617,14 +619,17 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		StackTraceElement steSetter = Thread.currentThread().getStackTrace()[2];
 		
 //		for(StackTraceElement ste:asteDebugLastSetOrigin){
-		for(StackTraceElement ste:ManageDebugDataI.i().getStack(dbg,EDbgStkOrigin.LastSetValue).getRef()){
+		RefHolder<StackTraceElement[]> rh = ManageDebugDataI.i().getStack(dbg,EDbgStkOrigin.LastSetValue);
+		//rh.toString()
+		for(StackTraceElement ste:rh.getRef()){
 //			if(steSetter.getMethodName().equals(ste.getMethodName()))continue;
 			if(ManageVarCmdFieldI.i().getClassReg().isContainClass(ste.getClassName()))continue;
 			if(rscOwner.isContainClass(ste.getClassName()))break;//continue;
 			if(rscManager.isContainClass(ste.getClassName()))break;
-//			if(!getOwner().getClass().getName().equals(ste.getClassName())){
-				throw new PrerequisitesNotMetException("not being set at owner class type", ste.getClassName(), getOwner().getClass().getName(), this);
-//			}
+			if(rscConsVar.isContainClass(ste.getClassName()))break; //it's public set access is restricted to CommandsDelegator composite
+			if(GlobalCommandsDelegatorI.i().getRegisteredClasses().isContainClass(ste.getClassName()))break; //it's public set access is restricted to CommandsDelegator composite
+			
+			throw new PrerequisitesNotMetException("not being set at owner class type", ste.getClassName(), getOwner().getClass().getName(), this);
 		}
 	}
 	
@@ -770,7 +775,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	}
 	/**
 	 * 
-	 * @param iFloatingPrecision if -1 will not apply precision restriction
+	 * @param iFloatingPrecision if -1 will not apply precision restriction, and only works for floating values
 	 * @return
 	 */
 	public String getValueAsString(int iFloatingPrecision) {
@@ -977,8 +982,13 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	@Override
 	public THIS setManager(IManager imgr) {
 		if(RunMode.bDebugIDE)PrerequisitesNotMetException.assertNotAlreadySet("manager", this.imgr,imgr,this);
+		
 		this.imgr=imgr;
-		rscManager.registerAllSuperClassesOf(imgr, true, true);
+		
+		rscManager.addSuperClassesOf(imgr, true, true);
+//		rscManager.addSuperClassesOf(GlobalCommandsDelegatorI.i(), true, true);
+//		rscManager.addSuperClassesOf(cvarLinkAndValueStorage, true, true); //it's public set access is restricted to CommandsDelegator composite
+		
 		return getThis();
 	}
 

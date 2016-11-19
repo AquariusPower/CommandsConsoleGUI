@@ -71,6 +71,7 @@ import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
+import com.github.commandsconsolegui.spAppOs.misc.RegisteredClasses;
 import com.github.commandsconsolegui.spAppOs.misc.RunMode;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdFieldAbs;
@@ -98,7 +99,7 @@ import com.google.common.io.Files;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHandleExceptions, IMessageListener, IUserInputDetector{
+public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHandleExceptions, IMessageListener, IUserInputDetector{ //, IManager<VarCmdFieldAbs>{
 	public static final class CompositeControl extends CompositeControlAbs<CommandsDelegator>{
 		private CompositeControl(CommandsDelegator cc){super(cc);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
@@ -346,6 +347,8 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	
 	public CommandsDelegator() {
 		ManageSingleInstanceI.i().add(this);
+		
+		rsc.addSuperClassesOf(this, true, true);
 		
 		setCommandDelimiter(';');
 		setAliasPrefix('$');
@@ -1397,7 +1400,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 			getCommandPrefixStr()+scfMessageReview.getSimpleId()+" "+strUIdToken+imsg.getUId()+" "
 			+getCommentPrefixStr()+strCurrentIndex+" ";
 		
-		if( !bListingMode && (imsg.getException()!=null || imsg.getExceptionHappenedAt()!=null) ){
+		if( !bListingMode && (imsg.getDumpEntryData().getException()!=null) ){
 //			dumpSubEntry("MsgInfo: "+strHeader+imsg.getExceptionHappenedAtInfo());
 			dumpSubEntry(strHeader+imsg.getExceptionHappenedAtId());
 			dumpExceptionEntry(imsg, iStackLimit==null?0:iStackLimit);
@@ -1948,7 +1951,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 		/**
 		 * it is coming from the message buffer, so will not read it...
 		 */
-		dumpExceptionEntryWork(null, imsg.getException(), imsg.getExceptionHappenedAt(), iShowStackElementsCount, false, imsg.getDumpEntryData().getCustomObjects());
+		dumpExceptionEntryWork(null, imsg.getDumpEntryData().getException(), iShowStackElementsCount, false, imsg.getDumpEntryData().getCustomObjects());
 	}
 	public void dumpExceptionEntry(String strMsgOverride, Exception ex, Object... aobj){
 //		Exception exOverride=ex;
@@ -1957,7 +1960,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 //			exOverride.setStackTrace(ex.getStackTrace());
 //			exOverride.initCause(ex.getCause());
 //		}
-		dumpExceptionEntryWork(strMsgOverride, ex, null, null, true, aobj);
+		dumpExceptionEntryWork(strMsgOverride, ex, null, true, aobj);
 	}
 	/**
 	 * see {@link #dumpEntry(DumpEntryData)}
@@ -1965,17 +1968,17 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	 * @param aobj
 	 */
 	public void dumpExceptionEntry(Exception ex, Object... aobj){
-		dumpExceptionEntryWork(null, ex, null, null, true, aobj);
+		dumpExceptionEntryWork(null, ex, null, true, aobj);
 	}
 	/**
 	 * see {@link #dumpEntry(DumpEntryData)}
 	 * 
 	 * @param ex
-	 * @param asteStackOverride if null will use the exception one
 	 * @param iShowStackElementsCount if null, will show nothing. If 0, will show all.
 	 * @param bAddToMsgBuffer
 	 */
-	private void dumpExceptionEntryWork(String strMsgPrepend, Exception ex, StackTraceElement[] asteStackOverride, Integer iShowStackElementsCount, boolean bAddToMsgBuffer, Object... aobj){
+//	private void dumpExceptionEntryWork(String strMsgPrepend, Exception ex, StackTraceElement[] asteStackOverride, Integer iShowStackElementsCount, boolean bAddToMsgBuffer, Object... aobj){
+	private void dumpExceptionEntryWork(String strMsgPrepend, Exception ex, Integer iShowStackElementsCount, boolean bAddToMsgBuffer, Object... aobj){
 		String strMsgFull=ex.getMessage();
 		if(strMsgPrepend!=null){
 			strMsgFull=strMsgPrepend+"; "+strMsgFull;
@@ -1985,13 +1988,13 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 			ex=exOverride;
 		}
 		
-		if(asteStackOverride!=null){
-			strMsgFull="(StackOverriden)";
-			Exception exOverride = new Exception(strMsgFull);
-			exOverride.setStackTrace(asteStackOverride);
-			exOverride.initCause(ex);
-			ex=exOverride;
-		}
+//		if(asteStackOverride!=null){
+//			strMsgFull="(StackOverriden)";
+//			Exception exOverride = new Exception(strMsgFull);
+//			exOverride.setStackTrace(asteStackOverride);
+//			exOverride.initCause(ex);
+//			ex=exOverride;
+//		}
 		
 //		String strTime="";
 		PrintStream psStack = System.err;
@@ -2916,7 +2919,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 			objValueNew = prepareAddedValue(objValueCurrent, cvarAddOrOverwrite.getRawValue());
 		}
 			
-		cvarRequested.setRawValue(MiscI.i().parseToPrimitivesWithPriority(""+objValueNew));
+		cvarRequested.setRawValue(ccSelf,MiscI.i().parseToPrimitivesWithPriority(objValueNew==null ? null : ""+objValueNew));
 		return varApply(cvarRequested,null,bSave);
 	}
 	
@@ -3333,6 +3336,13 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 //			vivo = new VarIdValueOwnerData(strVarId, strValue, null, null, null);
 //		}
 //		
+		/**
+		 * "null" is a reserved global keyword
+		 */
+		if(strValue.equals("null")){
+			strValue=null;
+		}
+		
 		boolean bOk=varSetFixingType(new ConsoleVariable(strVarId, strValue, null, null), bSave);
 		
 		if(bOk){
@@ -3359,10 +3369,6 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	
 	/**
 	 * This is able to create restricted variables too.
-	 * 
-	 * @param strVarId
-	 * @param strValue
-	 * @return
 	 */
 	public boolean varSetFixingType(ConsoleVariable cvar, boolean bSave) {
 		if(getAlias(cvar.getUniqueVarId(false))!=null){
@@ -4885,6 +4891,21 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	public String getUniqueId() {
 		return MiscI.i().prepareUniqueId(this);
 	}
+	
+	RegisteredClasses<CommandsDelegator> rsc = new RegisteredClasses<CommandsDelegator>();
+	public RegisteredClasses<CommandsDelegator> getRegisteredClasses() {
+		return rsc;
+	}
+
+//	@Override
+//	public boolean add(VarCmdFieldAbs objNew) {
+//		throw new UnsupportedOperationException("method not implemented yet");
+//	}
+//
+//	@Override
+//	public ArrayList<VarCmdFieldAbs> getListCopy() {
+//		throw new UnsupportedOperationException("method not implemented yet");
+//	}
 
 //	@Override
 //	public boolean infoSystemTopOverride(String str) {

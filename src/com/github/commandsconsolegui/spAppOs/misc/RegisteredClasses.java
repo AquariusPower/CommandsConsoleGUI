@@ -39,7 +39,7 @@ import com.github.commandsconsolegui.spCmd.varfield.VarCmdFieldAbs;
 public class RegisteredClasses<E>{
 	RefHolder<TreeMap<String,Class<E>>> rhtmSubClass = new RefHolder<TreeMap<String,Class<E>>>(new TreeMap<String,Class<E>>());
 //	TreeMap<String,Class<E>> tmSubClass = new TreeMap<String,Class<E>>();
-	public void registerAllSuperClassesOf(E objTarget, boolean bItsInnerClassesToo, boolean bItsEnclosingClassesToo){
+	public void addSuperClassesOf(E objTarget, boolean bItsInnerClassesToo, boolean bItsEnclosingClassesToo){
 		PrerequisitesNotMetException.assertNotNull("objTarget", objTarget, this);
 		
 		for(Class cl:MiscI.i().getSuperClassesOf(objTarget,true)){
@@ -63,17 +63,6 @@ public class RegisteredClasses<E>{
 	}
 	public boolean isContainClass(String strClassTypeKey){
 		Class<E> cl = (rhtmSubClass.getRef().get(strClassTypeKey));
-		
-//		//TODO instead: register inner classes too?
-//		if(cl==null){ //check if the key is a inner class
-//			int i = strClassTypeKey.indexOf("$");
-//			if(i>=0){
-//				strClassTypeKey=strClassTypeKey.substring(0, i);
-//			}
-//			
-//			cl = (rhtmSubClass.ref().get(strClassTypeKey));
-//		}
-		
 		return ( cl != null );
 	}
 }

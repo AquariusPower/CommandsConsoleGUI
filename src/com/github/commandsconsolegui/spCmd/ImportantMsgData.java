@@ -42,8 +42,8 @@ import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 public class ImportantMsgData {
 	private String strMsgKey;
 //	long lKeyOcurrenceTimes=0;
-	private Exception ex;
-	private StackTraceElement[] asteExceptionHappenedAt;
+//	private Exception ex;
+//	private StackTraceElement[] asteExceptionHappenedAt;
 	private DumpEntryData de;
 	private Long lBufferedTimeNano;
 	private Long lFirstOcurrenceCreationTimeNano;
@@ -59,8 +59,8 @@ public class ImportantMsgData {
 //		ex=new Exception("(no real exception, just the stack trace)");
 //		ex.setStackTrace(aste);
 //	}
-		this.ex=de.getException();
-		this.asteExceptionHappenedAt=de.getException().getStackTrace();
+//		this.ex=de.getException();
+//		this.asteExceptionHappenedAt=de.getException().getStackTrace();
 		
 		lFirstOcurrenceCreationTimeNano=System.nanoTime();
 		
@@ -69,7 +69,7 @@ public class ImportantMsgData {
 	
 	public boolean isIdenticalTo(ImportantMsgData imdOther){
 		if (!strMsgKey.equals(imdOther.strMsgKey))return false; //equals() is faster, and such messages will not have string letter case difference...
-		if (!Arrays.equals(asteExceptionHappenedAt, imdOther.asteExceptionHappenedAt))return false;
+		if (!Arrays.equals(de.getException().getStackTrace(), imdOther.de.getException().getStackTrace()))return false;
 		
 		return true;
 	}
@@ -118,28 +118,24 @@ public class ImportantMsgData {
 		this.strMsgKey = strMsgKey;
 	}
 
-	public Exception getException() {
-		return ex;
-	}
-
-	public void setEx(Exception ex) {
-		this.ex = ex;
-	}
+//	public Exception getException() {
+//		return ex;
+//	}
+//
+//	public void setEx(Exception ex) {
+//		this.ex = ex;
+//	}
 
 	public String getExceptionHappenedAtId() {
-		return "ST="+getExceptionHappenedAt().hashCode();
+		return "ST="+de.getException().getStackTrace().hashCode();
 	}
-	public StackTraceElement[] getExceptionHappenedAt() {
-		return asteExceptionHappenedAt;
-	}
+//	public StackTraceElement[] getExceptionHappenedAt() {
+//		return asteExceptionHappenedAt;
+//	}
 
 //	public void setAsteExceptionHappenedAt(StackTraceElement[] asteExceptionHappenedAt) {
 //		this.asteExceptionHappenedAt = asteExceptionHappenedAt;
 //	}
-
-	public DumpEntryData getDe() {
-		return de;
-	}
 
 	public void setDe(DumpEntryData de) {
 		this.de = de;

@@ -798,9 +798,11 @@ public class MiscI {
 			}
 			
 			if(aobjVal!=null){ //array
-				str+=""+objValue.getClass().getName()+"["+aobjVal.length+"]{";
+				// this is just guessing all elements are of the same type
+				str+=""+objValue.getClass().getName()+"["+aobjVal.length+"]{"; //TODO check if all elements are same type? 
 				for(int i=0;i<aobjVal.length;i++){//Object obj:aobjVal){
-					str+=asReportLine(aobjKey[i],aobjVal[i],false);
+					Object objKey=null;if(aobjKey!=null)objKey=aobjKey[i];
+					str+=asReportLine(objKey,aobjVal[i],false);
 				}
 				str+="}";
 			}else{
@@ -915,10 +917,12 @@ public class MiscI {
 		if(obj!=null && bShowClassName)strCl=obj.getClass().getName();
 		
 		String strObj = "";
-		if(obj instanceof IConstructed){
-			IConstructed ic = (IConstructed) obj;
-			if(!ic.isConstructed()){
-				strObj="(not constructed yet)";
+		if(strObj.isEmpty()){
+			if(obj instanceof IConstructed){
+				IConstructed ic = (IConstructed) obj;
+				if(!ic.isConstructed()){
+					strObj="(not constructed yet)";
+				}
 			}
 		}
 		
@@ -926,10 +930,12 @@ public class MiscI {
 			if(obj instanceof IDebugReport){
 				IDebugReport ir = (IDebugReport) obj;
 				strObj=ir.getFailSafeDebugReport();
-			}else{
-				strObj=""+obj.toString();
 			}
 		}
+		
+//		if(strObj.isEmpty()){
+//			strObj=""+(obj==null?null:obj.toString());
+//		}
 		
 		return ""+(obj==null ? null : strCl+": "+strObj); //this is better when dumping a sub-stacktrace
 	}

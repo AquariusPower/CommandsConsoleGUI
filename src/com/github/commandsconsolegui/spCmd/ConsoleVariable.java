@@ -108,18 +108,24 @@ public class ConsoleVariable<VAL> {
 		return this;
 	}
 	
-	/**
-	 * If restricted var owner is set, this is also it's value.
-	 * @param objValue
-	 * @return
-	 */
-	public ConsoleVariable setRawValue(VAL objValue) {
+	private ConsoleVariable setRawValue(VAL objValue) {
 		if(getRestrictedVarOwner()!=null){
 			getRestrictedVarOwner().setObjectRawValue(objValue);
 		}else{
 			setRawValueDirectly(objValue);
 		}
 		
+		return this;
+	}
+	
+	/**
+	 * If restricted var owner is set, this is also it's value.
+	 * @param objValue
+	 * @return
+	 */
+	public ConsoleVariable setRawValue(CommandsDelegator.CompositeControl cc, VAL objValue) {
+		cc.assertSelfNotNull();
+		setRawValue(objValue);
 		return this;
 	}
 	public ConsoleVariable setRawValue(VarCmdFieldAbs.CompositeControl cc,VAL objValue) {
