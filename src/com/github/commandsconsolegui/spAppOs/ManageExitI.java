@@ -65,6 +65,7 @@ public class ManageExitI implements IManager<ICleanExit>, ICleanExit{
 	@Override
 	public boolean isCanCleanExit() {
 		for(ICleanExit i:a){
+			if(i==this)continue;
 			if(!i.isCanCleanExit())return false;
 		}
 		return true;

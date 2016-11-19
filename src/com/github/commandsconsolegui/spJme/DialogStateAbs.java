@@ -1556,6 +1556,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	private String strFilePrefix="Dialog_";
 	public void save(){
 		if(!isSaveDialog())return;
+		if(sv==null)return;
 		MiscJmeI.i().saveWriteConsoleData(strFilePrefix+getUniqueId(), sv);
 	}
 	/**
@@ -1774,6 +1775,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 			save();
 			bSavedBeforeExiting=true;
 		}
+		
 		return super.isCanCleanExit();
 	}
 }

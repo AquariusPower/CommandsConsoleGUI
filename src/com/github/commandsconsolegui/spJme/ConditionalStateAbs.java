@@ -1067,7 +1067,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	
 	@Override
 	public boolean isCanCleanExit() {
-		return true;
+		return true; //just to not freeze the exiting
 	}
 	
 }
