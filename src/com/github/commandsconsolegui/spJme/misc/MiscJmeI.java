@@ -48,6 +48,7 @@ import truetypefont.TrueTypeFont;
 import truetypefont.TrueTypeKey;
 import truetypefont.TrueTypeLoader;
 
+import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalMainThreadI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.DebugI;
@@ -112,7 +113,8 @@ public class MiscJmeI implements IReflexFillCfg,ISingleInstance,IConfigure{
 	private final BoolTogglerCmdField btgUseXmlSaveMode = new BoolTogglerCmdField(this, false);
 	
 	public MiscJmeI() {
-		ManageSingleInstanceI.i().add(this);
+		DelegateManagerI.i().add(this);
+//		ManageSingleInstanceI.i().add(this);
 	}
 	
 	public static class CfgParm implements ICfgParm{

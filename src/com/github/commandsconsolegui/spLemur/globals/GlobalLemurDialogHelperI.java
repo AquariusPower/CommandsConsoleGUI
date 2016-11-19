@@ -29,20 +29,20 @@ package com.github.commandsconsolegui.spLemur.globals;
 
 import com.github.commandsconsolegui.spAppOs.globals.GlobalHolderAbs;
 import com.github.commandsconsolegui.spJme.globals.GlobalDialogHelperI;
-import com.github.commandsconsolegui.spLemur.dialog.LemurDialogManagerI;
+import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialogI;
 
 /**
 * As you may not be using {@link SimpleApplication#}.
 *  
 * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 */
-public class GlobalLemurDialogHelperI extends GlobalHolderAbs<LemurDialogManagerI> {
+public class GlobalLemurDialogHelperI extends GlobalHolderAbs<ManageLemurDialogI> {
 	private static GlobalLemurDialogHelperI instance = new GlobalLemurDialogHelperI();
 	public static GlobalLemurDialogHelperI iGlobal(){return instance;}
-	public static LemurDialogManagerI i(){return iGlobal().get();}
+	public static ManageLemurDialogI i(){return iGlobal().get();}
 	
 	@Override
-	public LemurDialogManagerI set(LemurDialogManagerI obj) {
+	public ManageLemurDialogI set(ManageLemurDialogI obj) {
 		GlobalDialogHelperI.iGlobal().set(obj);
 		return super.set(obj);
 	}

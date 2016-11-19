@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
+import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
@@ -57,7 +58,8 @@ public class ManageCallQueueI implements IReflexFillCfg,IManager<ManageCallQueue
 	public static ManageCallQueueI i(){return instance;}
 	
 	public ManageCallQueueI() {
-		ManageSingleInstanceI.i().add(this);
+		DelegateManagerI.i().addManager(this, CallableX.class);
+//		ManageSingleInstanceI.i().add(this);
 	}
 	
 	public static interface CallableWeak<V> extends Callable<V>{

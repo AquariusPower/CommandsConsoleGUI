@@ -24,68 +24,13 @@
 	OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN 
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
 package com.github.commandsconsolegui.spAppOs.misc;
-
-import java.util.ArrayList;
-
-import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
-import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
-import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
- * 
+ *
  */
-public class ManageConfigI implements IManager<IConfigure>,IInstance{
-	private static ManageConfigI instance = new ManageConfigI();
-	public static ManageConfigI i(){return instance;}
-	
-	public void assertConfigured(IConfigure icfg){
-		if(!icfg.isConfigured()){
-			throw new PrerequisitesNotMetException("not configured", icfg);
-		}
-	}
-	
-	public ManageConfigI() {
-		DelegateManagerI.i().addManager(this, IConfigure.class);
-//		ManageSingleInstanceI.i().add(this);
-	}
-	
-	public static interface IConfigure<T extends IConfigure<T>> {
-		/**
-		 * Each subclass can have the same name "CfgParm".<br>
-		 * <br>
-		 * Just reference the CfgParm of the superclass directly ex.:<br> 
-		 * 	new ConditionalAppStateAbs.CfgParm()<br>
-		 * <br>
-		 * This is also very important when restarting (configuring a new and fresh robust instance)<br>
-		 * where the current configuration will be just passed to the new instance!<br> 
-		 */
-		public static interface ICfgParm{}
-		
-		boolean isConfigured();
-		T configure(ICfgParm icfg);
-	}
-	
-	private BfdArrayList<IConfigure> a = new BfdArrayList<IConfigure>(){};
-	
-	@Override
-	public boolean add(IConfigure objNew) {
-		return a.add(objNew);
-	}
-
-	@Override
-	public BfdArrayList<IConfigure> getListCopy() {
-		return a.getCopy();
-	}
-
-	@Override public String getUniqueId() {return MiscI.i().prepareUniqueId(this);}
-
-	@Override
-	public boolean isInstanceReady() {
-		return ManageConfigI.instance!=null;
-	}
-
+public interface IInstance {
+	boolean isInstanceReady();
 }

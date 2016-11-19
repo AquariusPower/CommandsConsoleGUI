@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.spLemur.console;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.reflect.Field;
 
+import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.SimulationTime;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalMainThreadI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyBindI;
@@ -66,7 +67,7 @@ import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spLemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.spLemur.MouseCursorListenerAbs;
 import com.github.commandsconsolegui.spLemur.OSAppLemur;
-import com.github.commandsconsolegui.spLemur.dialog.LemurDialogManagerI;
+import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialogI;
 import com.github.commandsconsolegui.spLemur.globals.GlobalLemurConsoleStateI;
 import com.github.commandsconsolegui.spLemur.globals.GlobalLemurDialogHelperI;
 import com.jme3.app.Application;
@@ -107,7 +108,8 @@ public class SimpleConsolePlugin implements IReflexFillCfg, ISingleInstance, ICo
 			});
 		}
 		
-		ManageSingleInstanceI.i().add(this);
+		DelegateManagerI.i().add(this);
+//		ManageSingleInstanceI.i().add(this);
 		
 		if(app instanceof SimpleApplication){
   		GlobalSimpleAppRefI.iGlobal().set((SimpleApplication)app);
@@ -241,7 +243,7 @@ public class SimpleConsolePlugin implements IReflexFillCfg, ISingleInstance, ICo
   	}
   	
   	if(!GlobalLemurDialogHelperI.iGlobal().isSet()){
-  		GlobalLemurDialogHelperI.iGlobal().set(LemurDialogManagerI.i());
+  		GlobalLemurDialogHelperI.iGlobal().set(ManageLemurDialogI.i());
   	}
   	
   	if(!GlobalJmeAppOSI.iGlobal().isSet()){

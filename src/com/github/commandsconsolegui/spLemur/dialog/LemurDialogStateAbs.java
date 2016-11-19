@@ -61,8 +61,8 @@ import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spLemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.spLemur.console.LemurConsoleStateAbs;
 import com.github.commandsconsolegui.spLemur.console.LemurDiagFocusHelperStateI;
-import com.github.commandsconsolegui.spLemur.dialog.LemurDialogManagerI.DialogStyleElementId;
-import com.github.commandsconsolegui.spLemur.dialog.LemurDialogManagerI.DummyEffect;
+import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialogI.DialogStyleElementId;
+import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialogI.DummyEffect;
 import com.github.commandsconsolegui.spLemur.extras.CellRendererDialogEntry;
 import com.github.commandsconsolegui.spLemur.extras.DialogMainContainer;
 import com.github.commandsconsolegui.spLemur.extras.CellRendererDialogEntry.CellDialogEntry;
@@ -460,7 +460,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		MiscLemurStateI.i().setSizeSafely(btnResizeInfoAndList, 1, 1, true);
 		getNorthContainer().addChild(btnResizeInfoAndList, BorderLayout.Position.South);
 //		setBordersThickness(getCompositeSavable(LmrDiagCS.class).ilvBorderThickness.intValue());
-		setBordersThickness(LemurDialogManagerI.i().ilvBorderThickness.intValue());
+		setBordersThickness(ManageLemurDialogI.i().ilvBorderThickness.intValue());
 		
 		cntrCenterMain.addChild(getNorthContainer(), BorderLayout.Position.North);
 	}
@@ -522,7 +522,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		btnResizeWest		= prepareResizer(btnResizeWest	, BorderLayout.Position.West);
 		
 //		setBordersThickness(getCompositeSavable(LmrDiagCS.class).ilvBorderThickness.intValue());
-		setBordersThickness(LemurDialogManagerI.i().ilvBorderThickness.intValue());
+		setBordersThickness(ManageLemurDialogI.i().ilvBorderThickness.intValue());
 //		getCompositeSavable(LemurDialogCS.class).ilvBorderThickness.callerAssignedRunNow();
 		
 //		if(bAppyBorderSize){
@@ -796,7 +796,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 			getDialogMainContainer().addChild(btnNew, edge); //this actually replaces the current at that border
 		}
 		
-		efDummy = LemurDialogManagerI.i().setupSimpleEffect(btnNew, EEffectId.FocusLost.s(), efFocusLost, efDummy);
+		efDummy = ManageLemurDialogI.i().setupSimpleEffect(btnNew, EEffectId.FocusLost.s(), efFocusLost, efDummy);
 		
 		return btnNew;
 	}

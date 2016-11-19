@@ -143,7 +143,9 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	 * @param rfcfgOwner use null if this is not a class field, but a local variable, or for any reason the related console variable creation is to be skipped.
 	 * @param evcm
 	 */
-	public VarCmdFieldAbs(IReflexFillCfg rfcfgOwner, EVarCmdMode evcm, VAL valueDefault, Class<VAL> clValueTypeConstraint){
+	public VarCmdFieldAbs(IReflexFillCfg rfcfgOwner, EVarCmdMode evcm, VAL valueDefault, Class<VAL> clValueTypeConstraint, boolean bAllowNullValue){
+		if(!bAllowNullValue)setDenyNullValue();
+		
 		ManageVarCmdFieldI.i().getClassReg().addSuperClassesOf(this,true,false);
 		this.evcm=evcm;
 		

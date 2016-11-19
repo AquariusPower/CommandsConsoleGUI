@@ -31,10 +31,12 @@ package com.github.commandsconsolegui.spJme;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.SimulationTime.ISimulationTime;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalHolderAbs.IGlobalOpt;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.spAppOs.misc.HoldRestartable;
+import com.github.commandsconsolegui.spAppOs.misc.ICleanExit;
 import com.github.commandsconsolegui.spAppOs.misc.IManaged;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.IRefresh;
@@ -42,7 +44,6 @@ import com.github.commandsconsolegui.spAppOs.misc.IRestartable;
 import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
-import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
@@ -78,7 +79,7 @@ import com.jme3.scene.Node;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>> implements IGlobalOpt,IRestartable,ISimulationTime,IConfigure<ConditionalStateAbs<THIS>>,IRetryListOwner,IReflexFillCfg,IRefresh,IPriority,IManaged,ISingleInstance{
+public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>> implements IGlobalOpt,IRestartable,ISimulationTime,IConfigure<ConditionalStateAbs<THIS>>,IRetryListOwner,IReflexFillCfg,IRefresh,IPriority,IManaged,ISingleInstance,ICleanExit{
 //	public static final class CompositeControl extends CompositeControlAbs<ConditionalStateAbs>{
 //		private CompositeControl(ConditionalStateAbs casm){super(casm);};
 //	};private CompositeControl ccSelf = new CompositeControl(this);
@@ -88,7 +89,8 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	public ConditionalStateAbs(){
 		super();
 		
-		ManageSingleInstanceI.i().add(this);
+		DelegateManagerI.i().add(this);
+//		ManageSingleInstanceI.i().add(this);
 //		MiscI.i().assertFieldsHaveDefaultValue(this);
 		
 		asteDbgInstance = Thread.currentThread().getStackTrace();
@@ -321,34 +323,24 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 		
 		if(isDiscarded())throw new PrerequisitesNotMetException("cannot re-use after discarded");
 		
-//	private void configure(Application app){
 		if(this.bConfigured)throw new PrerequisitesNotMetException("already configured");
 		
 		/**
 		 * Internal Configurations
 		 */
-//		if(!isRestartCfgSet())setRestartCfg(new RestartCfg());
-//		if(cfg.app==null)throw new PrerequisitesNotMetException("app is null");
-		
 		// the Unique State Id
 		if(cfg.strId==null){
-//			throw new PrerequisitesNotMetException("id cant be null");
 			cfg.strId = MiscI.i().getClassName(this,true);
 		}
 		
-//		@SuppressWarnings("unchecked") //so obvious...
-//		ConditionalStateAbs csa = ConditionalStateManagerI.i().getConditionalState(
-//			(Class<ConditionalStateAbs>)this.getClass(), cfg.strId);
 		ConditionalStateAbs csa = ManageConditionalStateI.i().getConditionalState(this.getClass(), cfg.strId);
 		if(csa!=null)throw new PrerequisitesNotMetException("conflicting state Id "+cfg.strId);
 		this.strCaseInsensitiveId = cfg.strId;
 		
-		if(!ManageConditionalStateI.i().attach(this)){
-//		if(!app.getStateManager().attach(this)){
-			throw new PrerequisitesNotMetException("state already attached: "
-				+this.getClass()+"; "+this);
-		}
-//		preInitRequest();
+//		if(!ManageConditionalStateI.i().attach(this)){
+//			throw new PrerequisitesNotMetException("state already attached: "
+//				+this.getClass()+"; "+this);
+//		}
 		
 		// configs above
 		this.bConfigured=true;
@@ -905,7 +897,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	 */
 	@Override
 	public String getUniqueId() {
-		ManageConfigI.i().assertConfigured(this);
+		ManageConfigI.i().assertConfigured(this); //because the id may depend on custom prefixes available only after configure
 		
 		if(strCaseInsensitiveId==null){
 			throw new PrerequisitesNotMetException("id cant be null", 
@@ -1072,4 +1064,10 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	public Object setManager(IManager imgr) {
 		return this.imgr=imgr;
 	}
+	
+	@Override
+	public boolean isCanCleanExit() {
+		return true;
+	}
+	
 }

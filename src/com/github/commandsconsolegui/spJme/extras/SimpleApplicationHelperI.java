@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.spJme.extras;
 
+import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
+import com.github.commandsconsolegui.spAppOs.ManageExitI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
@@ -50,7 +52,8 @@ public class SimpleApplicationHelperI extends SimpleApplication implements ISing
 	public static SimpleApplicationHelperI i(){return instance;}
 	
 	public SimpleApplicationHelperI() {
-		ManageSingleInstanceI.i().add(this);
+		DelegateManagerI.i().add(this);
+//		ManageSingleInstanceI.i().add(this);
 	}
 	
 	@Override
@@ -85,8 +88,10 @@ public class SimpleApplicationHelperI extends SimpleApplication implements ISing
 	@Override
 	public void simpleUpdate(float tpf) {
 		if(GlobalAppOSI.i().isApplicationExiting()){
-			GlobalAppRefI.i().stop();
-			return; //useless?
+			if(ManageExitI.i().isCanCleanExit()){
+				GlobalAppRefI.i().stop();
+				return; //useless?
+			}
 		}
 	}
 

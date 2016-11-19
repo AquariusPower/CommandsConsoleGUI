@@ -39,6 +39,9 @@ import java.util.Collection;
  */
 public class Buffeds {
 	/**
+	 * Does not allow duplicates.
+	 * Does not allow nulls.
+	 * 
 	 * must be abstract to ensure an anonimous (inner) instance is created,
 	 * otherwise {@link ReflexFillI#getGenericParamAsClassTypeFrom(Object, int)}
 	 * will not work
@@ -50,13 +53,48 @@ public class Buffeds {
 			 * new instance array of size 0 here is important to avoid exception with class types that 
 			 * have no default empty constructor! 
 			 */
-			Class cl = ReflexFillI.i().getGenericParamAsClassTypeFrom(this,0);
+			Class cl=null;
+			
+//			if(size()>0){
+//				cl=get(0).getClass();
+//			}else{
+				cl = ReflexFillI.i().getGenericParamAsClassTypeFrom(this,0);
+//			}
+			
 			E[] a = (E[])Array.newInstance(cl,0);
 		  return super.toArray(a);
 		}
 		
 		public BfdArrayList() {
 			super();
+		}
+		
+		private boolean isCanAdd(E o){
+			if(o==null)return false;
+			if(contains(o))return false;
+			return true;
+		}
+		
+		@Override
+		public boolean add(E e) {
+			if(!isCanAdd(e))return false;
+			return super.add(e);
+		}
+		@Override
+		public void add(int index, E element) {
+			if(!isCanAdd(element))return;
+			super.add(index, element);
+		}
+		
+		@Override
+		public boolean addAll(Collection<? extends E> c) {
+			for(E o:(E[])c.toArray()){if(!isCanAdd(o))c.remove(o);}
+			return super.addAll(c);
+		}
+		@Override
+		public boolean addAll(int index, Collection<? extends E> c) {
+			for(E o:(E[])c.toArray()){if(!isCanAdd(o))c.remove(o);}
+			return super.addAll(index, c);
 		}
 		
     public BfdArrayList(Collection<? extends E> c) {
@@ -69,6 +107,14 @@ public class Buffeds {
     
 		public BfdArrayList<E> getCopy(){
 			return new BfdArrayList<E>(this){};
+		}
+		
+		/**
+		 * TODO this works???
+		 * @return
+		 */
+		public BfdArrayList getGenericCopy(){
+			return new BfdArrayList(this){};
 		}
 	}
 }

@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
 
+import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.ManageKeyCode.Key;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyCodeI;
@@ -58,7 +59,8 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField> {
 	};protected CompositeControl ccSelf = new CompositeControl(this);
 	
 	public ManageKeyBind() {
-		ManageSingleInstanceI.i().add(this);
+		DelegateManagerI.i().addManager(this,KeyBoundVarField.class);
+//		ManageSingleInstanceI.i().add(this);
 	}
 	
 	private TreeMap<String,KeyBoundVarField> tmbindList = new TreeMap<String, KeyBoundVarField>(String.CASE_INSENSITIVE_ORDER);

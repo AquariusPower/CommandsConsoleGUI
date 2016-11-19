@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.spAppOs.misc;
 
+import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
+
 
 /**
  * 
@@ -43,7 +45,8 @@ public class HoldRestartable<T extends IRestartable> implements IHasOwnerInstanc
 	public HoldRestartable(Object objOwner){
 		if(objOwner==null)throw new PrerequisitesNotMetException("invalid owner, use 'this'",this);
 		this.objOwner = objOwner;
-		ManageHoldRestartableI.i().add(this);
+		DelegateManagerI.i().add(this);
+//		ManageHoldRestartableI.i().add(this);
 	}
 	public HoldRestartable(Object objOwner, IRestartable ir){
 		this(objOwner);

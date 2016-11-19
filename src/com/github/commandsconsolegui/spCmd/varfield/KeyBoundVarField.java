@@ -50,7 +50,7 @@ public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 	private String	strFullUserCommand;
 	
 	public KeyBoundVarField(IReflexFillCfg rfcfgOwnerUseThis, KeyBind kb) {
-		super(rfcfgOwnerUseThis, EVarCmdMode.VarCmd, kb, KeyBind.class);
+		super(rfcfgOwnerUseThis, EVarCmdMode.VarCmd, kb, KeyBind.class, true);
 //		this.strFullCommand=strFullCommand;
 		constructed();
 	}
@@ -140,7 +140,7 @@ public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 		
 		if(objValue!=null){
 			((KeyBind)objValue).setOwner(this);
-			GlobalManageKeyBindI.i().add(this);
+//			GlobalManageKeyBindI.i().add(this);
 		}
 		
 		super.setObjectRawValue(objValue,true); //must NEVER execute just on bind change...

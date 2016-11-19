@@ -42,8 +42,8 @@ public abstract class NumberVarFieldAbs<VAL, THIS extends NumberVarFieldAbs<VAL,
 	private VAL nMin;
 	private VAL nMax;
 	
-	public NumberVarFieldAbs(IReflexFillCfg rfcfgOwner, VAL valueDefault, Class<VAL> clValueTypeConstraint) {
-		super(rfcfgOwner, EVarCmdMode.Var, valueDefault, clValueTypeConstraint);
+	public NumberVarFieldAbs(IReflexFillCfg rfcfgOwner, VAL valueDefault, Class<VAL> clValueTypeConstraint, boolean bAllowNullValue) {
+		super(rfcfgOwner, EVarCmdMode.Var, valueDefault, clValueTypeConstraint, bAllowNullValue);
 	}
 
 	public VAL getMin() {

@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.spCmd.varfield;
 
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
@@ -53,7 +54,8 @@ public class ManageVarCmdFieldI implements IManager<VarCmdFieldAbs>{
 	};private CompositeControl ccSelf = new CompositeControl(this);
 	
 	public ManageVarCmdFieldI() {
-		ManageSingleInstanceI.i().add(this);
+		DelegateManagerI.i().addManager(this, VarCmdFieldAbs.class);
+//		ManageSingleInstanceI.i().add(this);
 	}
 	
 	private ArrayList<VarCmdFieldAbs> avcfList = new ArrayList<VarCmdFieldAbs>();

@@ -58,8 +58,8 @@ public abstract class BoolTogglerCmdFieldAbs<THIS extends BoolTogglerCmdFieldAbs
 	 */
 //	public BoolTogglerCmdField(IReflexFillCfg rfcfgOwnerUseThis, boolean bInitialValue, String strReflexFillCfgCodePrefixVariant, String strHelp){
 	public BoolTogglerCmdFieldAbs(IReflexFillCfg rfcfgOwnerUseThis, boolean bDefault, String strHelp){
-		super(rfcfgOwnerUseThis, EVarCmdMode.VarCmd, bDefault, Boolean.class);
-		setDenyNullValue(); //booleans cannot be null
+		super(rfcfgOwnerUseThis, EVarCmdMode.VarCmd, bDefault, Boolean.class, false);
+//		setDenyNullValue(); //booleans cannot be null
 		setHelp(strHelp);
 		constructed();
 	}

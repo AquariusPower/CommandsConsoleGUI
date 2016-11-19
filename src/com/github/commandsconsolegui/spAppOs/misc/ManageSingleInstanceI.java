@@ -29,6 +29,8 @@ package com.github.commandsconsolegui.spAppOs.misc;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
+
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
@@ -40,6 +42,10 @@ public class ManageSingleInstanceI implements IManager<ISingleInstance>{
 	
 	HashMap<String,InstanceInfo> hm = new HashMap<String,InstanceInfo>();
 	ArrayList<ISingleInstance> aList = new ArrayList<ISingleInstance>();
+	
+	public ManageSingleInstanceI() {
+		DelegateManagerI.i().addManager(this, ISingleInstance.class);
+	}
 	
 	public static class InstanceInfo{
 		private StackTraceElement[] asteInstancedAt;

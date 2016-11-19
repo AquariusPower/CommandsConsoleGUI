@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
@@ -55,7 +56,8 @@ public class DebugI implements IReflexFillCfg,ISingleInstance {//, IConsoleComma
 //	private Boolean	bIDEDebugMode=false; //TODO could this be public final static and accessed directly to be fastest?
 	
 	public DebugI() {
-		ManageSingleInstanceI.i().add(this);
+		DelegateManagerI.i().add(this);
+//		ManageSingleInstanceI.i().add(this);
 		
 //		bIDEDebugMode=ManagementFactory.getRuntimeMXBean().getInputArguments().toString().indexOf("-agentlib:jdwp") > 0;
 		

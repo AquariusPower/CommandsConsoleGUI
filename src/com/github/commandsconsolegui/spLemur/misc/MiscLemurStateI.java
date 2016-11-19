@@ -56,7 +56,7 @@ import com.github.commandsconsolegui.spJme.globals.GlobalGUINodeI;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spLemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.spLemur.console.LemurDiagFocusHelperStateI;
-import com.github.commandsconsolegui.spLemur.dialog.LemurDialogManagerI.DialogStyleElementId;
+import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialogI.DialogStyleElementId;
 import com.github.commandsconsolegui.spLemur.extras.DialogMainContainer;
 import com.github.commandsconsolegui.spLemur.extras.CellRendererDialogEntry.CellDialogEntry;
 import com.github.commandsconsolegui.spLemur.globals.GlobalLemurDialogHelperI;

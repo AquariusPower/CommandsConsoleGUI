@@ -29,15 +29,16 @@ package com.github.commandsconsolegui.spJme;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 
+import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalUpdaterI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
+import com.github.commandsconsolegui.spAppOs.misc.IInstance;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.ManageHoldRestartableI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.Priority;
@@ -52,7 +53,7 @@ import com.jme3.app.state.AbstractAppState;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class ManageConditionalStateI extends AbstractAppState implements IManager<ConditionalStateAbs>{
+public class ManageConditionalStateI extends AbstractAppState implements IManager<ConditionalStateAbs>,IInstance{
 	private static ManageConditionalStateI instance = new ManageConditionalStateI();
 	public static ManageConditionalStateI i(){return instance;}
 	
@@ -65,10 +66,11 @@ public class ManageConditionalStateI extends AbstractAppState implements IManage
 	private CompositeControl ccSelf = new CompositeControl(this);
 	
 	public ManageConditionalStateI() {
-		ManageSingleInstanceI.i().add(this);
+		DelegateManagerI.i().addManager(this, ConditionalStateAbs.class);
+//		ManageSingleInstanceI.i().add(this);
 	}
 	
-	ArrayList<ConditionalStateAbs> aCondStateList = new ArrayList<ConditionalStateAbs>();
+	BfdArrayList<ConditionalStateAbs> aCondStateList = new BfdArrayList<ConditionalStateAbs>(){};
 
 	private boolean	bConfigured;
 
@@ -89,21 +91,31 @@ public class ManageConditionalStateI extends AbstractAppState implements IManage
 		
 		GlobalUpdaterI.i().update(fTpf);
 		
+		for(ConditionalStateAbs csa:acsaLazyList.toArray()){
+			if(csa.isConfigured()){
+				if(!attach(csa)){
+					throw new PrerequisitesNotMetException("state already attached ",csa);
+				}
+				
+				acsaLazyList.remove(csa);
+			}
+		}
+		
 		ArrayList<ConditionalStateAbs> aToDiscard = null;
-		for(ConditionalStateAbs cas:aCondStateList){
-			if(!cas.doItAllProperly(ccSelf,fTpf))continue;
+		for(ConditionalStateAbs csa:aCondStateList){
+			if(!csa.doItAllProperly(ccSelf,fTpf))continue;
 			
-			if(cas.isBeingDiscarded()){
+			if(csa.isBeingDiscarded()){
 				if(aToDiscard==null)aToDiscard=new ArrayList<ConditionalStateAbs>();
-				aToDiscard.add(cas);
+				aToDiscard.add(csa);
 			}else{
-				if(cas.isRestartRequested()){
-					if(cas.isEnabled()){
-						if(!cas.isDisabling()){
-							cas.requestDisable();
+				if(csa.isRestartRequested()){
+					if(csa.isEnabled()){
+						if(!csa.isDisabling()){
+							csa.requestDisable();
 						}
 					}else{
-						cas.requestDiscard();
+						csa.requestDiscard();
 					}
 				}
 			}
@@ -168,7 +180,7 @@ public class ManageConditionalStateI extends AbstractAppState implements IManage
 //		GlobalAppRefI.iGlobal().setAppExiting();
 	}
 	
-	public boolean attach(ConditionalStateAbs casToAttach){
+	private boolean attach(ConditionalStateAbs casToAttach){
 //		return attach(casToAttach,null);
 //	}
 //	/**
@@ -236,17 +248,29 @@ public class ManageConditionalStateI extends AbstractAppState implements IManage
 	public boolean isConfigured() {
 		return bConfigured;
 	}
-
+	
+	
+	private BfdArrayList<ConditionalStateAbs> acsaLazyList = new BfdArrayList<ConditionalStateAbs>(){};
 	@Override
 	public boolean add(ConditionalStateAbs objNew) {
-		throw new UnsupportedOperationException("use attach()");
+		PrerequisitesNotMetException.assertNotAlreadyAdded(acsaLazyList, objNew, this);
+		return acsaLazyList.add(objNew);
+//		throw new UnsupportedOperationException("use attach()");
 	}
 	
 	@Override
-	public ArrayList<ConditionalStateAbs> getListCopy() {
-		return new ArrayList<ConditionalStateAbs>(aCondStateList);
+	public BfdArrayList<ConditionalStateAbs> getListCopy() {
+		BfdArrayList<ConditionalStateAbs> a = new BfdArrayList<ConditionalStateAbs>(){};
+		a.addAll(acsaLazyList);
+		a.addAll(aCondStateList);
+		return a;
 	}
 
 	@Override public String getUniqueId() {return MiscI.i().prepareUniqueId(this);}
+
+	@Override
+	public boolean isInstanceReady() {
+		return ManageConditionalStateI.instance!=null;
+	}
 
 }

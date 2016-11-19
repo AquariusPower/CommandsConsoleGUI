@@ -64,9 +64,9 @@ import com.simsilica.lemur.style.Styles;
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends ManageDialogAbs<T>{
-	private static LemurDialogManagerI instance = new LemurDialogManagerI();
-	public static LemurDialogManagerI i(){return instance;}
+public class ManageLemurDialogI<T extends LemurDialogStateAbs> extends ManageDialogAbs<T>{
+	private static ManageLemurDialogI instance = new ManageLemurDialogI();
+	public static ManageLemurDialogI i(){return instance;}
 	
 	private ColorRGBA	colorConsoleStyleBackground;
 	
@@ -242,7 +242,7 @@ public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends ManageDi
 		return super.getDialogListCopy(LemurDialogStateAbs.class);
 	}
 	
-	public LemurDialogManagerI() {
+	public ManageLemurDialogI() {
 		super();
 	}
 	
@@ -251,7 +251,7 @@ public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends ManageDi
 		super.update(tpf);
 		
 		for(LemurDialogStateAbs diag:getDialogListCopy(LemurDialogStateAbs.class)){
-			fixDialogPosition(diag);
+			if(diag.isInitializedProperly())fixDialogPosition(diag);
 		}
 	}
 
@@ -263,12 +263,12 @@ public class LemurDialogManagerI<T extends LemurDialogStateAbs> extends ManageDi
 	}
 	@Override
 	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
-		if(fld.getDeclaringClass()!=LemurDialogManagerI.class)return super.getFieldValue(fld);
+		if(fld.getDeclaringClass()!=ManageLemurDialogI.class)return super.getFieldValue(fld);
 		return fld.get(this);
 	}
 	@Override
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
-		if(fld.getDeclaringClass()!=LemurDialogManagerI.class){super.setFieldValue(fld,value);return;}
+		if(fld.getDeclaringClass()!=ManageLemurDialogI.class){super.setFieldValue(fld,value);return;}
 		fld.set(this,value);
 	}
 	

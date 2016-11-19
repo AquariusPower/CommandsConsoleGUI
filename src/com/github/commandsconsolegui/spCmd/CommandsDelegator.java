@@ -42,6 +42,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.ManageKeyCode.Key;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyBindI;
@@ -346,7 +347,8 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	}
 	
 	public CommandsDelegator() {
-		ManageSingleInstanceI.i().add(this);
+		DelegateManagerI.i().add(this);
+//		ManageSingleInstanceI.i().add(this);
 		
 		rsc.addSuperClassesOf(this, true, true);
 		
@@ -578,7 +580,8 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	 */
 	private class PseudoSelfListener implements IReflexFillCfg,IConsoleCommandListener,ISingleInstance{
 		public PseudoSelfListener(){
-			ManageSingleInstanceI.i().add(this);
+			DelegateManagerI.i().add(this);
+//			ManageSingleInstanceI.i().add(this);
 		}
 		@Override
 		public ECmdReturnStatus execConsoleCommand(CommandsDelegator ccRequester) {

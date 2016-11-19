@@ -30,6 +30,7 @@ package commandsconsoleguitests;
 import java.io.File;
 import java.lang.reflect.Field;
 
+import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalSingleMandatoryAppInstanceI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.HoldRestartable;
@@ -110,7 +111,8 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		super();
 		bindListToggleEnable = new KeyBoundVarField(this);
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
-		ManageSingleInstanceI.i().add(this);
+		DelegateManagerI.i().add(this);
+//		ManageSingleInstanceI.i().add(this);
 	}
 	
 	

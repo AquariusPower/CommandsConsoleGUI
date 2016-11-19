@@ -29,9 +29,10 @@ package com.github.commandsconsolegui.spLemur.extras;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
-import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -39,13 +40,14 @@ import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.WorkAroundI.BugFixBoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.StringVarField;
+import com.github.commandsconsolegui.spLemur.extras.CellRendererDialogEntry.CellDialogEntry;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class ManageCellRendererI implements IReflexFillCfg,IManager{
+public class ManageCellRendererI implements IReflexFillCfg,IManager<CellDialogEntry>{
 	private static ManageCellRendererI instance = new ManageCellRendererI();
 	public static ManageCellRendererI i(){return instance;}
 	
@@ -54,7 +56,8 @@ public class ManageCellRendererI implements IReflexFillCfg,IManager{
 	public final BugFixBoolTogglerCmdField btgNOTWORKINGBugFixGapForListBoxSelectorArea = new BugFixBoolTogglerCmdField(this);
 	
 	public ManageCellRendererI() {
-		ManageSingleInstanceI.i().add(this);
+		DelegateManagerI.i().addManager(this,CellDialogEntry.class);
+//		ManageSingleInstanceI.i().add(this);
 	}
 	
 	@Override
@@ -72,16 +75,15 @@ public class ManageCellRendererI implements IReflexFillCfg,IManager{
 		fld.set(this,value);
 	}
 	
-	@Deprecated
+	private BfdArrayList<CellDialogEntry> a = new BfdArrayList<CellDialogEntry>(){};
 	@Override
-	public boolean add(Object objNew) {
-		throw new UnsupportedOperationException("method not implemented yet");
+	public boolean add(CellDialogEntry objNew) {
+		return a.add(objNew);
 	}
 	
-	@Deprecated
 	@Override
-	public ArrayList getListCopy() {
-		throw new UnsupportedOperationException("method not implemented yet");
+	public ArrayList<CellDialogEntry> getListCopy() {
+		return a.getCopy();
 	}
 
 	@Override

@@ -35,6 +35,7 @@ import java.util.Arrays;
 import org.lwjgl.opengl.XRandR;
 import org.lwjgl.opengl.XRandR.Screen;
 
+import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -74,7 +75,8 @@ public class ReflexHacksPluginI implements IConsoleCommandListener, IReflexFillC
 	public static ReflexHacksPluginI i(){return instance;}
 	
 	public ReflexHacksPluginI() {
-		ManageSingleInstanceI.i().add(this);
+		DelegateManagerI.i().add(this);
+//		ManageSingleInstanceI.i().add(this);
 	}
 	
 	public final BoolTogglerCmdField	btgAllowHacks = new BoolTogglerCmdField(this,false,

@@ -30,10 +30,11 @@ package com.github.commandsconsolegui.spJme;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
-import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
@@ -41,7 +42,6 @@ import com.github.commandsconsolegui.spCmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.spCmd.varfield.StringVarField;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
-import com.github.commandsconsolegui.spJme.savablevalues.CompositeSavableAbs;
 import com.jme3.asset.AssetNotFoundException;
 import com.jme3.font.BitmapFont;
 import com.jme3.math.Vector3f;
@@ -58,7 +58,9 @@ public abstract class ManageDialogAbs<T extends DialogStateAbs> implements IRefl
 	};private CompositeControl ccSelf = new CompositeControl(this);
 	
 	public ManageDialogAbs() {
-		ManageSingleInstanceI.i().add(this);
+		DelegateManagerI.i().addManager(this, DialogStateAbs.class);
+//		DelegateManagerI.i().add(this);
+//		ManageSingleInstanceI.i().add(this);
 	}
 	
 	public final String STYLE_CONSOLE="console";
@@ -135,7 +137,7 @@ public abstract class ManageDialogAbs<T extends DialogStateAbs> implements IRefl
 		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcv);
 	}
 	
-	private ArrayList<DialogStateAbs> adiagList = new ArrayList<DialogStateAbs>();
+	private BfdArrayList<DialogStateAbs> adiagList = new BfdArrayList<DialogStateAbs>(){};
 
 	public void update(float tpf){
 	}
@@ -153,11 +155,17 @@ public abstract class ManageDialogAbs<T extends DialogStateAbs> implements IRefl
 		return adiagList.add(objNew);
 	}
 	
-	@Deprecated
+	/**
+	 * use {@link #getDialogListCopy(Class)} instead!
+	 */
 	@Override
-	public ArrayList<T> getListCopy() {
-		//return new ArrayList(adiagList);
-		throw new UnsupportedOperationException("UNSAFE! DO NOT IMPLEMENT! use the other with filter instead!");
+	@SuppressWarnings("unchecked")
+	public BfdArrayList<T> getListCopy() {
+		if(!DelegateManagerI.i().isAmICallingThis()){
+			throw new UnsupportedOperationException("UNSAFE! use the other with filter instead!");
+		}
+		
+		return (BfdArrayList<T>) adiagList.getCopy();
 	}
 	
 	public <S extends DialogStateAbs> ArrayList<S> getDialogListCopy(Class<S> clFilter) {

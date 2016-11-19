@@ -55,7 +55,7 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 	 */
 	public StringCmdField(IReflexFillCfg rfcfgOwner, String strReflexFillCfgCodePrefixVariant, String strHelpComment){ // int iReflexFillCfgVariant){
 //		this((String)null,strHelpComment);
-		super(rfcfgOwner, EVarCmdMode.Cmd, null, String.class);
+		super(rfcfgOwner, EVarCmdMode.Cmd, null, String.class, false);
 		setHelp(strHelpComment);
 		
 		setCodePrefixVariant(strReflexFillCfgCodePrefixVariant);

@@ -27,14 +27,15 @@
 
 package com.github.commandsconsolegui.spAppOs.misc;
 
-import java.util.ArrayList;
+import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
+import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class ManageHoldRestartableI<T extends IRestartable> implements IManager<HoldRestartable<T>>{
+public class ManageHoldRestartableI implements IManager<HoldRestartable<IRestartable>>{
 	private static ManageHoldRestartableI instance = new ManageHoldRestartableI();
 	public static ManageHoldRestartableI i(){return instance;}
 	
@@ -43,13 +44,14 @@ public class ManageHoldRestartableI<T extends IRestartable> implements IManager<
 	};private CompositeControl ccSelf = new CompositeControl(this);
 	
 	public ManageHoldRestartableI() {
-		ManageSingleInstanceI.i().add(this);
+		DelegateManagerI.i().addManager(this, IRestartable.class);
+//		ManageSingleInstanceI.i().add(this);
 	}
 	
-	private ArrayList<HoldRestartable<T>> ahrList=new ArrayList<HoldRestartable<T>>();
+	private BfdArrayList<HoldRestartable<IRestartable>> ahrList=new BfdArrayList<HoldRestartable<IRestartable>>(){};
 	
 	public void revalidateAndUpdateAllRestartableHoldersFor(IRestartable irDiscarding, IRestartable irNew){
-		for(HoldRestartable<T> hr:new ArrayList<HoldRestartable<T>>(ahrList)){
+		for(HoldRestartable<IRestartable> hr:ahrList.toArray()){
 			// discard
 			if(hr.isDiscardSelf() || DiscardableInstanceI.i().isBeingDiscardedRecursiveOwner(hr)){
 				ahrList.remove(hr);
@@ -64,15 +66,16 @@ public class ManageHoldRestartableI<T extends IRestartable> implements IManager<
 	}
 	
 	@Override
-	public boolean add(HoldRestartable<T> hr){
-		PrerequisitesNotMetException.assertNotAlreadyAdded(ahrList, hr, this);
-		return ahrList.add(hr);
+	public boolean add(HoldRestartable<IRestartable> hr){
+		PrerequisitesNotMetException.assertNotAlreadyAdded(ahrList, (HoldRestartable<IRestartable>)hr, this);
+		return ahrList.add((HoldRestartable<IRestartable>) hr);
 	}
 	
-	@Deprecated
 	@Override
-	public ArrayList<HoldRestartable<T>> getListCopy() {
-		throw new UnsupportedOperationException("method not implemented yet");
+	public BfdArrayList<HoldRestartable<IRestartable>> getListCopy() {
+//		if(ahrList.size()==0)return new BfdArrayList<HoldRestartable<IRestartable>>(){};
+//		return ahrList.getGenericCopy();
+		return ahrList.getCopy();
 	}
 
 	@Override public String getUniqueId() {return MiscI.i().prepareUniqueId(this);}

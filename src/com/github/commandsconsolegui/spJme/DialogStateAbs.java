@@ -1709,6 +1709,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 
 	private boolean bRequestHitBorderToContinueDragging = false;
 	private String	strLastEntryUniqueId="0";
+	private boolean	bSavedBeforeExiting;
 	public void setRequestHitBorderToContinueDragging(boolean b) {
 		this.bRequestHitBorderToContinueDragging = b;
 	}
@@ -1765,5 +1766,14 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 
 	public float getInputFieldHeight(){
 		return MiscJmeI.i().retrieveBitmapTextFor((Node)getInputField()).getLineHeight();
+	}
+	
+	@Override
+	public boolean isCanCleanExit() {
+		if(!bSavedBeforeExiting){
+			save();
+			bSavedBeforeExiting=true;
+		}
+		return super.isCanCleanExit();
 	}
 }

@@ -29,6 +29,7 @@ package com.github.commandsconsolegui.spJme;
 
 import java.lang.reflect.Field;
 
+import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
@@ -61,7 +62,8 @@ public class ManageMouseCursorI implements IReflexFillCfg, IConsoleCommandListen
 	};private CompositeControl ccSelf = new CompositeControl(this);
 	
 	public ManageMouseCursorI() {
-		ManageSingleInstanceI.i().add(this);
+		DelegateManagerI.i().add(this);
+//		ManageSingleInstanceI.i().add(this);
 	}
 	
 	public final StringCmdField CMD_FIX_RESETING_MOUSE_CURSOR = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
