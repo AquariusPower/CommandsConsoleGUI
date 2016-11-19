@@ -49,7 +49,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	 * the owner class will have the configurations for each
 	 * field class type.
 	 */
-	public static interface IReflexFillCfg extends IReflexFieldSafeAccess,ISingleInstance{
+	public static interface IReflexFillCfg extends IReflexFieldSafeAccess{
 		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField);
 	}
 	

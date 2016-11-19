@@ -31,11 +31,9 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.spAppOs.misc.DiscardableInstanceI;
-import com.github.commandsconsolegui.spAppOs.misc.IDiscardableInstance;
 import com.github.commandsconsolegui.spAppOs.misc.IHasOwnerInstance;
+import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
-import com.github.commandsconsolegui.spAppOs.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
@@ -44,7 +42,6 @@ import com.github.commandsconsolegui.spJme.DialogStateAbs;
 import com.github.commandsconsolegui.spJme.ISpatialLayoutValidator;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.jme3.math.Vector3f;
-import com.jogamp.nativewindow.util.Dimension;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.component.BorderLayout;
@@ -57,7 +54,7 @@ import com.simsilica.lemur.style.ElementId;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class DialogMainContainer extends Container implements ISpatialLayoutValidator, IReflexFillCfg, IHasOwnerInstance<DialogStateAbs>{ //IDiscardableInstance
+public class DialogMainContainer extends Container implements ISpatialLayoutValidator, IReflexFillCfg, ISingleInstance, IHasOwnerInstance<DialogStateAbs>{ //IDiscardableInstance
 	private DialogStateAbs	diagOwner;
 	private boolean	bLayoutValid;
 //	ISpatialValidator diag;

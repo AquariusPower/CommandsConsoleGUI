@@ -537,10 +537,10 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			fld.set(this,value);
 		}
 
-		@Override
-		public String getUniqueId() {
-			return strUniqueId;
-		}
+//		@Override
+//		public String getUniqueId() {
+//			return strUniqueId;
+//		}
 
 	}
 	
@@ -575,12 +575,6 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 	@Override
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		fld.set(this,value);
-	}
-	
-	@Deprecated
-	@Override
-	public String getUniqueId() {
-		throw new UnsupportedOperationException("is there a point on implementing this?");
 	}
 	
 }

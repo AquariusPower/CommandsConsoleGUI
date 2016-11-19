@@ -1048,7 +1048,7 @@ public class MiscI {
 		return null;
 	}
 
-	public String prepareUniqueId(ISingleInstance si) {
+	public String prepareUniqueId(IUniqueId si) {
 		return si.getClass().getName(); //TODO dots to underscores? could shadow existing underscores tho in case of backwards conversion...
 	}
 	

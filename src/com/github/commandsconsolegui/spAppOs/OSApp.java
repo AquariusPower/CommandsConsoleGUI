@@ -190,10 +190,10 @@ public class OSApp implements IReflexFillCfg{
 	}
 
 
-	@Override
-	public String getUniqueId() {
-		throw new UnsupportedOperationException("method not implemented yet");
-	}
+//	@Override
+//	public String getUniqueId() {
+//		throw new UnsupportedOperationException("method not implemented yet");
+//	}
 
 
 	@Override

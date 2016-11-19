@@ -126,17 +126,16 @@ public class ImportantMsgData {
 		this.ex = ex;
 	}
 
-	public String getExceptionHappenedAtInfo() {
+	public String getExceptionHappenedAtId() {
 		return "ST="+getExceptionHappenedAt().hashCode();
 	}
 	public StackTraceElement[] getExceptionHappenedAt() {
 		return asteExceptionHappenedAt;
 	}
 
-	public void setAsteExceptionHappenedAt(
-			StackTraceElement[] asteExceptionHappenedAt) {
-		this.asteExceptionHappenedAt = asteExceptionHappenedAt;
-	}
+//	public void setAsteExceptionHappenedAt(StackTraceElement[] asteExceptionHappenedAt) {
+//		this.asteExceptionHappenedAt = asteExceptionHappenedAt;
+//	}
 
 	public DumpEntryData getDe() {
 		return de;

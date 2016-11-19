@@ -48,7 +48,7 @@ import com.github.commandsconsolegui.spCmd.varfield.TimedDelayVarField;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
+public class DebugI implements IReflexFillCfg,ISingleInstance {//, IConsoleCommandListener{
 	private static DebugI instance = new DebugI();
 	public static DebugI i(){return instance;}
 	
@@ -72,7 +72,7 @@ public class DebugI implements IReflexFillCfg {//, IConsoleCommandListener{
 	/**
 	 * when enabled, these keys are used to perform debug tests
 	 */
-	public static enum EDebugKey implements IReflexFillCfg{
+	public static enum EDebugKey implements IReflexFillCfg, IUniqueId{
 		AddTextToConsStats,
 		DumpFontImgFile, 
 		ShowConsNewDayInfoOnce,

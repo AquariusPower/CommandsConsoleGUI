@@ -42,7 +42,7 @@ import com.github.commandsconsolegui.spCmd.varfield.IntLongVarField;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class RetryOnFailure implements IReflexFillCfg,IHasOwnerInstance<IRetryListOwner>{ //IDiscardableInstance
+public class RetryOnFailure implements IReflexFillCfg,IHasOwnerInstance<IRetryListOwner>,IUniqueId{ //IDiscardableInstance
 	public static final class CompositeControl extends CompositeControlAbs<RetryOnFailure>{
 		private CompositeControl(RetryOnFailure casm){super(casm);};
 	};private CompositeControl ccSelf = new CompositeControl(this);

@@ -64,9 +64,15 @@ public class PrerequisitesNotMetException extends NullPointerException { //@STAT
 			return "(failed to gather further exception information)";
 		}
 	}
+	private String	strMessageKey;
+	public String getMessageKey() {
+		return strMessageKey;
+	}
 	
 	public PrerequisitesNotMetException(boolean bExitApplication, String strMessage, Object... aobj) {
 		super(joinMessageWithObjects(strMessage, aobj));
+		
+		this.strMessageKey=strMessage;
 		
 		if(bExitApplication && (userInputDetector!=null && !userInputDetector.isConsoleCommandRunningFromDirectUserInput())){
 			PrerequisitesNotMetException.exRequestExit = this;

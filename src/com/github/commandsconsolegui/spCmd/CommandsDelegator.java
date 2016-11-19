@@ -48,8 +48,6 @@ import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyCodeI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalConsoleUII;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.DebugI;
 import com.github.commandsconsolegui.spAppOs.misc.DebugI.EDebugKey;
@@ -57,7 +55,13 @@ import com.github.commandsconsolegui.spAppOs.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.IHandleExceptions;
 import com.github.commandsconsolegui.spAppOs.misc.IMessageListener;
 import com.github.commandsconsolegui.spAppOs.misc.IMultiInstanceOverride;
+import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
 import com.github.commandsconsolegui.spAppOs.misc.IUserInputDetector;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
+import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI.DebugData;
+import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI.EDbgStkOrigin;
 import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI.EStringMatchMode;
@@ -94,7 +98,7 @@ import com.google.common.io.Files;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMessageListener, IUserInputDetector{
+public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHandleExceptions, IMessageListener, IUserInputDetector{
 	public static final class CompositeControl extends CompositeControlAbs<CommandsDelegator>{
 		private CompositeControl(CommandsDelegator cc){super(cc);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
@@ -569,7 +573,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	/**
 	 * placeholder pseudo dummy class to help pipe all commands in a single place
 	 */
-	private class PseudoSelfListener implements IReflexFillCfg,IConsoleCommandListener{
+	private class PseudoSelfListener implements IReflexFillCfg,IConsoleCommandListener,ISingleInstance{
 		public PseudoSelfListener(){
 			ManageSingleInstanceI.i().add(this);
 		}
@@ -827,6 +831,25 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 		NotFound,
 		Skip,
 		;
+		
+		Object obj;
+		private DebugData	dbg;
+		public ECmdReturnStatus setCustom(Object obj){
+			PrerequisitesNotMetException.assertNotAlreadySet("custom object", this.obj, obj, dbg, this);
+			if(RunMode.bValidateDevCode)dbg=ManageDebugDataI.i().setStack(dbg,EDbgStkOrigin.LastSetValue);
+			this.obj=obj;
+			return this;
+		}
+		public Object getAndResetCustom(){
+			PrerequisitesNotMetException.assertIsTrue("set", this.obj!=null, this);
+			Object objOut=this.obj;
+			this.obj=null;
+			return objOut;
+		}
+		public Exception getAndResetCustomIfException(){
+			if(this.compareTo(FoundAndExceptionHappened)!=0)return null;
+			return (Exception)getAndResetCustom();
+		}
 	}
 	
 	/**
@@ -1369,17 +1392,19 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	private String strUIdToken="uid=";
 	private void dumpMessageReview(ImportantMsgData imsg, Integer iStackLimit, Integer iCurrentIndex, boolean bListingMode){
 		String strCurrentIndex = iCurrentIndex==null ? "" : ""+iCurrentIndex+": ";
+		
 		String strHeader = 
 			getCommandPrefixStr()+scfMessageReview.getSimpleId()+" "+strUIdToken+imsg.getUId()+" "
 			+getCommentPrefixStr()+strCurrentIndex+" ";
+		
 		if( !bListingMode && (imsg.getException()!=null || imsg.getExceptionHappenedAt()!=null) ){
 //			dumpSubEntry("MsgInfo: "+strHeader+imsg.getExceptionHappenedAtInfo());
-			dumpSubEntry(strHeader+imsg.getExceptionHappenedAtInfo());
+			dumpSubEntry(strHeader+imsg.getExceptionHappenedAtId());
 			dumpExceptionEntry(imsg, iStackLimit==null?0:iStackLimit);
 		}else{
 			dumpSubEntry(strHeader
 				+imsg.getDumpEntryData().getLineFinal(false)+" "
-				+imsg.getExceptionHappenedAtInfo());
+				+imsg.getExceptionHappenedAtId());
 		}
 	}
 	private void cmdMessageReview() {
@@ -1420,7 +1445,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 				if(strUId!=null)break;
 			}
 			
-			if(bListMode){
+			if(bListMode){ //total
 				dumpSubEntry("Messages(shown="+iCount+";total="+aimsg.size()+")");
 			}
 		}
@@ -1763,8 +1788,12 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	 * @param aobj
 	 */
 	public void dumpWarnEntry(String strMessageKey, Object... aobj){
+		dumpWarnEntry(null,strMessageKey,aobj);
+	}
+	public void dumpWarnEntry(Exception exUserCause, String strMessageKey, Object... aobj){
 		EMessageType e = EMessageType.Warn;
 		Exception ex = new Exception("(This is just a "+e.s()+" stacktrace) "+strMessageKey);
+		ex.initCause(exUserCause);
 		ex.setStackTrace(Thread.currentThread().getStackTrace());
 		dumpEntry(new DumpEntryData()
 			.setImportant(e.s(),strMessageKey,ex)
@@ -1946,11 +1975,21 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 	 * @param iShowStackElementsCount if null, will show nothing. If 0, will show all.
 	 * @param bAddToMsgBuffer
 	 */
-	private void dumpExceptionEntryWork(String strMsgOverride, Exception ex, StackTraceElement[] asteStackOverride, Integer iShowStackElementsCount, boolean bAddToMsgBuffer, Object... aobj){
-		if(strMsgOverride!=null){
-			Exception exOverride = new Exception(strMsgOverride+"; "+ex.getMessage());
+	private void dumpExceptionEntryWork(String strMsgPrepend, Exception ex, StackTraceElement[] asteStackOverride, Integer iShowStackElementsCount, boolean bAddToMsgBuffer, Object... aobj){
+		String strMsgFull=ex.getMessage();
+		if(strMsgPrepend!=null){
+			strMsgFull=strMsgPrepend+"; "+strMsgFull;
+			Exception exOverride = new Exception(strMsgFull);
 			exOverride.setStackTrace(ex.getStackTrace());
 			exOverride.initCause(ex.getCause());
+			ex=exOverride;
+		}
+		
+		if(asteStackOverride!=null){
+			strMsgFull="(StackOverriden)";
+			Exception exOverride = new Exception(strMsgFull);
+			exOverride.setStackTrace(asteStackOverride);
+			exOverride.initCause(ex);
 			ex=exOverride;
 		}
 		
@@ -1970,8 +2009,14 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			psInfo = psStack = System.out;
 		}
 		
+		String strMsgKey = ex.toString();
+		if (ex instanceof PrerequisitesNotMetException) {
+			PrerequisitesNotMetException pex = (PrerequisitesNotMetException) ex;
+			strMsgKey=pex.getMessageKey();
+		}
 		dumpEntry(new DumpEntryData()
-			.setImportant(EMessageType.Exception.s(),strMsgOverride!=null ? strMsgOverride : ex.toString(),ex)
+//		.setImportant(EMessageType.Exception.s(), strMsgPrepend!=null ? strMsgPrepend : ex.toString(), ex)
+			.setImportant(EMessageType.Exception.s(), strMsgFull, ex)
 			.setPrintStream(psInfo) //this is good to show the time at terminal
 			.setApplyNewLineRequests(false)
 			.setDumpToConsole(btgShowException.get())
@@ -1979,24 +2024,41 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			.setShowDumpObjects(iShowStackElementsCount!=null)
 			.setUseSlowQueue(false)
 			.setApplyNewLineRequests(true)
-			.setKey(strExceptionEntryPrefix+ex.toString())
+			.setKey(strExceptionEntryPrefix+strMsgKey)
 		);
-			
+		
+		Throwable twbToDump = ex;
 		if(iShowStackElementsCount!=null){
-			if(asteStackOverride==null)asteStackOverride=ex.getStackTrace();
-			
-			for(int i=0;i<asteStackOverride.length;i++){
-				StackTraceElement ste = asteStackOverride[i]; 
-				if(iShowStackElementsCount>0 && i>=iShowStackElementsCount)break;
-				dumpEntry(new DumpEntryData()
-					.setPrintStream(psStack) 
-					.setApplyNewLineRequests(true)
-					.setDumpToConsole(true)
-					.setUseSlowQueue(false)
-					.setShowTime(false)
-					.setKey(strSubEntryPrefix+ste.toString()));
+			while(twbToDump!=null){
+				StackTraceElement[] aste = twbToDump.getStackTrace();
+//				if(asteStackOverride==null)asteStackOverride=twbToDump.getStackTrace();
+				
+				for(int i=0;i<aste.length;i++){
+					StackTraceElement ste = aste[i]; 
+					if(iShowStackElementsCount>0 && i>=iShowStackElementsCount)break;
+					dumpStackPart(psStack,ste.toString());
+				}
+				
+//				Throwable twbCurrent = twbToDump;
+				twbToDump=twbToDump.getCause();
+//				if(twbCurrent==twbToDump)break; //TODO why the exception cause would be itself!?!?
+				if(twbToDump!=null){
+					dumpStackPart(psStack,"[Caused by] "+twbToDump.getMessage());
+//					asteStackOverride=twbToDump.getStackTrace();
+				}
 			}
 		}
+		
+	}
+	
+	private void dumpStackPart(PrintStream psStack, String strMsg){
+		dumpEntry(new DumpEntryData()
+			.setPrintStream(psStack) 
+			.setApplyNewLineRequests(true)
+			.setDumpToConsole(true)
+			.setUseSlowQueue(false)
+			.setShowTime(false)
+			.setKey(strSubEntryPrefix+strMsg));
 	}
 	
 	public void dumpSubEntry(ArrayList<?> aobj){
@@ -3524,10 +3586,10 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 			
 			if(!isFound(ecrs))ecrs=stillExecutingCommand();
 			
-		}catch(Exception e){
-			dumpExceptionEntry(e);
+		}catch(Exception ex){
+			dumpExceptionEntry(ex);
 			
-			ecrs=ECmdReturnStatus.FoundAndExceptionHappened;
+			ecrs=ECmdReturnStatus.FoundAndExceptionHappened.setCustom(ex);
 		}
 		
 //		catch(NumberFormatException e){
@@ -3798,7 +3860,7 @@ public class CommandsDelegator implements IReflexFillCfg, IHandleExceptions, IMe
 //				case FoundCallerAndQueuedIt:
 					break;
 				default:
-					dumpWarnEntry("QueueExecFail("+ecrs+"): "+strCmdOnQueue);
+					dumpWarnEntry(ecrs.getAndResetCustomIfException(),"QueueExecFail("+ecrs+"): "+strCmdOnQueue);
 					break;
 			}
 //			if(ecrs.compareTo(ECmdReturnStatus.FoundAndWorked)!=0){

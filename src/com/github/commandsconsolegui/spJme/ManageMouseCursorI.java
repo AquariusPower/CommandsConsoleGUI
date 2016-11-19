@@ -31,6 +31,7 @@ import java.lang.reflect.Field;
 
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
+import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
 import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
@@ -51,7 +52,7 @@ import com.jme3.math.Vector3f;
  * Allows multiple mouse buttons to be clicked or dragged at same time.
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public class ManageMouseCursorI implements IReflexFillCfg, IConsoleCommandListener{
+public class ManageMouseCursorI implements IReflexFillCfg, IConsoleCommandListener, ISingleInstance{
 	private static ManageMouseCursorI instance = new ManageMouseCursorI();
 	public static ManageMouseCursorI i(){return instance;}
 	

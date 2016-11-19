@@ -39,9 +39,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import jme3tools.savegame.SaveGame;
+
 import org.lwjgl.opengl.Display;
 
-import jme3tools.savegame.SaveGame;
 import truetypefont.TrueTypeBitmapGlyph;
 import truetypefont.TrueTypeFont;
 import truetypefont.TrueTypeKey;
@@ -50,16 +51,16 @@ import truetypefont.TrueTypeLoader;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalMainThreadI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.DebugI;
+import com.github.commandsconsolegui.spAppOs.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.spAppOs.misc.IHandleExceptions;
-import com.github.commandsconsolegui.spAppOs.misc.IManager;
+import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableWeak;
+import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
+import com.github.commandsconsolegui.spAppOs.misc.MiscI.EStringMatchMode;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableWeak;
-import com.github.commandsconsolegui.spAppOs.misc.DebugI.EDebugKey;
-import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
-import com.github.commandsconsolegui.spAppOs.misc.MiscI.EStringMatchMode;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
@@ -100,7 +101,7 @@ import com.jme3.texture.Texture2D;
 /**
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public class MiscJmeI implements IReflexFillCfg,IConfigure{
+public class MiscJmeI implements IReflexFillCfg,ISingleInstance,IConfigure{
 	private static MiscJmeI instance = new MiscJmeI();
 	public static MiscJmeI i(){return instance;}
 

@@ -40,8 +40,8 @@ import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
-import com.github.commandsconsolegui.spCmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.spCmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
 
@@ -69,7 +69,7 @@ import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 
  */
-public class ReflexHacksPluginI implements IConsoleCommandListener, IReflexFillCfg {
+public class ReflexHacksPluginI implements IConsoleCommandListener, IReflexFillCfg, ISingleInstance{
 	private static ReflexHacksPluginI instance = new ReflexHacksPluginI();
 	public static ReflexHacksPluginI i(){return instance;}
 	
