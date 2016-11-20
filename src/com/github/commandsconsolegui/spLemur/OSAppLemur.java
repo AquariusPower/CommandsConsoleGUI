@@ -35,6 +35,7 @@ import com.github.commandsconsolegui.spJme.globals.GlobalGUINodeI;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spLemur.console.LemurDiagFocusHelperStateI;
 import com.github.commandsconsolegui.spLemur.globals.GlobalLemurDialogHelperI;
+import com.github.commandsconsolegui.spLemur.misc.LemurEffectsI;
 import com.github.commandsconsolegui.spLemur.misc.MiscLemurStateI;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -44,14 +45,15 @@ import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.Panel;
+import com.simsilica.lemur.anim.Animation;
 import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.BorderLayout.Position;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
+import com.simsilica.lemur.effect.Effect;
+import com.simsilica.lemur.effect.EffectInfo;
 
 /**
- * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
- *
  */
 public class OSAppLemur extends OSAppJme {
 //	private Label	lblAlert;
@@ -139,43 +141,51 @@ public class OSAppLemur extends OSAppJme {
 			fZ + LemurDiagFocusHelperStateI.i().getDialogZDisplacement()*2));
 	}
 	
+	private void createAlert(){
+		if(pnlBlocker==null){
+			// old trick to prevent access to other gui elements easily! :D
+			pnlBlocker = new Button("");
+			colorBlockerBkg = ColorRGBA.Red.clone(); //new ColorRGBA(1f,0,0,1);//0.25f);
+			pnlBlocker.setBackground(new QuadBackgroundComponent(colorBlockerBkg));
+			tdBlockerGlow.setActive(true);
+			GlobalGUINodeI.i().attachChild(pnlBlocker);
+		}
+		
+		// the alert container
+		QuadBackgroundComponent qbc;
+		
+		cntrAlert = new Container(new BorderLayout());
+		setAlertSpatial(cntrAlert);
+		
+		LemurEffectsI.i().addEffectTo(cntrAlert, LemurEffectsI.i().efGrow);
+		
+		//yellow background with border margin
+		lblAlertMsg = new Label("",GlobalLemurDialogHelperI.i().STYLE_CONSOLE);
+		lblAlertMsg.setColor(ColorRGBA.Blue.clone());
+		lblAlertMsg.setShadowColor(ColorRGBA.Black.clone());
+		lblAlertMsg.setShadowOffset(new Vector3f(1,1,0));
+		lblAlertMsg.setBackground(null);
+		qbc=new QuadBackgroundComponent(new ColorRGBA(1,1,0,0.75f));
+		qbc.setMargin(10f, 10f);
+		lblAlertMsg.setBorder(qbc);
+		cntrAlert.addChild(lblAlertMsg, BorderLayout.Position.Center);
+		
+		//edges countour in red
+		for(BorderLayout.Position eEdge:new Position[]{Position.East,Position.West,Position.North,Position.South}){
+			addAlertEdge(eEdge, ColorRGBA.Red.clone(), new Vector3f(2f,2f,0.1f));
+		}
+		
+	}
+	
 	@Override
 	public StackTraceElement[] showSystemAlert(String strMsg) {
 		StackTraceElement[] aste = super.showSystemAlert(strMsg);
 		
-		if(getAlertPanel()==null){
-			if(pnlBlocker==null){
-				// old trick to prevent access to other gui elements easily! :D
-				pnlBlocker = new Button("");
-				colorBlockerBkg = ColorRGBA.Red.clone(); //new ColorRGBA(1f,0,0,1);//0.25f);
-				pnlBlocker.setBackground(new QuadBackgroundComponent(colorBlockerBkg));
-				tdBlockerGlow.setActive(true);
-				GlobalGUINodeI.i().attachChild(pnlBlocker);
-			}
-			
-			// the alert container
-			QuadBackgroundComponent qbc;
-			
-			cntrAlert = new Container(new BorderLayout());
-			setAlertSpatial(cntrAlert);
-			
-			//yellow background with border margin
-			lblAlertMsg = new Label("",GlobalLemurDialogHelperI.i().STYLE_CONSOLE);
-			lblAlertMsg.setColor(ColorRGBA.Blue.clone());
-			lblAlertMsg.setShadowColor(ColorRGBA.Black.clone());
-			lblAlertMsg.setShadowOffset(new Vector3f(1,1,0));
-			lblAlertMsg.setBackground(null);
-			qbc=new QuadBackgroundComponent(new ColorRGBA(1,1,0,0.75f));
-			qbc.setMargin(10f, 10f);
-			lblAlertMsg.setBorder(qbc);
-			cntrAlert.addChild(lblAlertMsg, BorderLayout.Position.Center);
-			
-			//edges countour in red
-			for(BorderLayout.Position eEdge:new Position[]{Position.East,Position.West,Position.North,Position.South}){
-				addAlertEdge(eEdge, ColorRGBA.Red.clone(), new Vector3f(2f,2f,0.1f));
-			}
-			
-			GlobalGUINodeI.i().attachChild(cntrAlert);//getAlertPanel());
+		if(getAlertPanel()==null)createAlert();
+		
+		if(!GlobalGUINodeI.i().hasChild(cntrAlert)){
+			GlobalGUINodeI.i().attachChild(cntrAlert);
+			cntrAlert.runEffect(LemurEffectsI.i().efGrow.getName());
 		}
 		
 //		if(!lblAlertMsg.getText().equals(strMsg)){
@@ -224,6 +234,7 @@ public class OSAppLemur extends OSAppJme {
 		super.hideSystemAlert(asteFrom,bKeepGuiBlockerOnce);
 		cntrAlert.removeFromParent();
 		cntrAlert=null;
+		
 //		lblAlertMsg.removeFromParent();
 //		lblAlertMsg=null;
 		if(!bKeepGuiBlockerOnce){

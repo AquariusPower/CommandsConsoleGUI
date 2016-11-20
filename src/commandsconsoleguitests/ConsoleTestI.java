@@ -123,9 +123,9 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		cd.dumpSubEntry("CommandTest0: "+CMD_TRADITIONAL_PRETTYFIED_0);
 		cd.dumpSubEntry("CommandTest1: "+sfTestCommandAutoFillVariant1);
 		cd.dumpSubEntry("CommandTest2: "+testCommandAutoFillPrefixLessVariant2);
-		if(ReflexFillI.i().isUseDefaultCfgIfMissing()){
+//		if(ReflexFillI.i().isUseDefaultCfgIfMissing()){
 			cd.dumpSubEntry("CommandTest3: "+scfCommandAutoFillPrefixLessVariantDefaulted3);
-		}
+//		}
 		return true;
 	}
 	

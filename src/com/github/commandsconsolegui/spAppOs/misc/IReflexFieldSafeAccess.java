@@ -41,7 +41,7 @@ import java.lang.reflect.Field;
  */
 public interface IReflexFieldSafeAccess {
 	/**
-	 * Use this at superest implementor:<br>
+	 * //Use this at superest implementor:<br>
 	 * //if(fld.getDeclaringClass()!=CURRENT_SUB_CLASS.class)return super.getFieldValue(fld); //For subclasses uncomment this line<br>
 	 * return fld.get(Modifier.isStatic(fld.getModifiers()) ? null : this);<br>
 	 * //or if statics are not allowed/expected, use just:<br>
@@ -50,11 +50,11 @@ public interface IReflexFieldSafeAccess {
 	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException;
 	
 	/**
-	 * Use this at superest implementor:<br>
+	 * //Use this at superest implementor:<br>
 	 * //if(fld.getDeclaringClass()!=CURRENT_SUB_CLASS.class){super.setFieldValue(fld,value);return;} //For subclasses uncomment this line<br>
 	 * fld.set(Modifier.isStatic(fld.getModifiers()) ? null : this, value);<br>
 	 * //or if statics are not allowed/expected, use just:<br>
-	 * fld.set(this,value)
+	 * fld.set(this,value);<br>
 	 */
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException;
 }

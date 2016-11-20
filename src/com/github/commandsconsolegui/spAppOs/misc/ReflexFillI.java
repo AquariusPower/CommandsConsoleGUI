@@ -42,7 +42,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	private static ReflexFillI instance = new ReflexFillI();
 	public static ReflexFillI i(){return instance;}
 	
-	private boolean bUseDefaultCfgIfMissing = true;
+//	private final boolean bUseDefaultCfgIfMissing = true; //changing this may cause a lot of unnecesary trouble...
 	private String	strCommandPartSeparator = "_";
 	
 	/**
@@ -50,6 +50,11 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	 * field class type.
 	 */
 	public static interface IReflexFillCfg extends IReflexFieldSafeAccess{
+		/**
+		 * 
+		 * @param rfcvField
+		 * @return if null, will use default one.
+		 */
 		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField);
 	}
 	
@@ -403,16 +408,16 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		
 		ReflexFillCfg rfcfg = rfcfgOwnerOfField.getReflexFillCfg(rfcvFieldAtTheOwner);
 		if(rfcfg==null){
-			if(isUseDefaultCfgIfMissing()){
+//			if(isUseDefaultCfgIfMissing()){
 				rfcfg = new ReflexFillCfg(rfcvFieldAtTheOwner);
-			}else{
-				throw new PrerequisitesNotMetException("Configuration is missing for "
-					+rfcfgOwnerOfField.getClass().getName()
-					+" -> "
-					+rfcvFieldAtTheOwner.getClass().getName()
-					+":"
-					+rfcvFieldAtTheOwner.getCodePrefixVariant());
-			}
+//			}else{
+//				throw new PrerequisitesNotMetException("Configuration is missing for "
+//					+rfcfgOwnerOfField.getClass().getName()
+//					+" -> "
+//					+rfcvFieldAtTheOwner.getClass().getName()
+//					+":"
+//					+rfcvFieldAtTheOwner.getCodePrefixVariant());
+//			}
 		}
 		
 		VarCmdUId id = new VarCmdUId();
@@ -541,13 +546,13 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		}
 	}
 	
-	public boolean isUseDefaultCfgIfMissing() {
-		return bUseDefaultCfgIfMissing;
-	}
-
-	public void setUseDefaultCfgIfMissing(boolean bUseDefaultCfgIfMissing) {
-		this.bUseDefaultCfgIfMissing = bUseDefaultCfgIfMissing;
-	}
+//	public boolean isUseDefaultCfgIfMissing() {
+//		return bUseDefaultCfgIfMissing;
+//	}
+//
+//	public void setUseDefaultCfgIfMissing(boolean bUseDefaultCfgIfMissing) {
+//		this.bUseDefaultCfgIfMissing = bUseDefaultCfgIfMissing;
+//	}
 	
 	/**
 	 * 
