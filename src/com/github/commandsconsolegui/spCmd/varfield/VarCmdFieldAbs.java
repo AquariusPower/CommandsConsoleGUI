@@ -609,9 +609,6 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	private IManager<VarCmdFieldAbs>	imgr;
 
 	private DebugData	dbg;
-	public IManager<VarCmdFieldAbs> getManger(){
-		return imgr;
-	}
 	
 	private void assertSettingAtOwnerType(){
 		if(!isConstructed())return;

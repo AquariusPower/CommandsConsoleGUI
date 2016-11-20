@@ -70,7 +70,7 @@ public class ManageLemurDialogI<T extends LemurDialogStateAbs> extends ManageDia
 	
 	private ColorRGBA	colorConsoleStyleBackground;
 	
-	public final StringVarField svfBackgroundHexaColorRGBA = new StringVarField(this,"","XXXXXXXX ex.: 'FF12BC4A' Red Green Blue Alpha");
+	public final StringVarField svfBackgroundHexaColorRGBA = new StringVarField(this,"","XXXXXXXX ex.: 'FF12BC4A' (2 chars hexa) Red Green Blue Alpha");
 	public final IntLongVarField ilvBorderThickness = new IntLongVarField(this, 3, "")
 		.setMinMax(1L, 20L)
 		.setCallerAssigned(new CallableX(this,100) {
@@ -134,7 +134,7 @@ public class ManageLemurDialogI<T extends LemurDialogStateAbs> extends ManageDia
 		}else{
 			try{
 				int i = Integer.parseInt(svfBackgroundHexaColorRGBA.getValueAsString(),16);//hexa string
-				colorConsoleStyleBackground.fromIntRGBA(i);
+				colorConsoleStyleBackground.fromIntRGBA(i); //called just to validate the string 
 			}catch(IllegalArgumentException ex){
 				GlobalCommandsDelegatorI.i().dumpExceptionEntry(ex);
 			}
@@ -144,22 +144,15 @@ public class ManageLemurDialogI<T extends LemurDialogStateAbs> extends ManageDia
 		
 		Attributes attrs;
 		attrs = styles.getSelector(STYLE_CONSOLE); // this also creates the style
-		attrs.set("fontSize", 16);
-		attrs.set("color", ColorRGBA.White.clone());
-//		clBg = ColorRGBA.Blue.clone();clBg.b=0.25f;clBg.a=0.75f;
+		attrs.set("fontSize", 14);
+		attrs.set("color", ColorRGBA.White.clone()); //console default text
 		clBg = colorConsoleStyleBackground;
 		attrs.set("background", new QuadBackgroundComponent(clBg));
 		attrs.set("font", getFont());
 		
-//			attrs = styles.getSelector("grid", STYLE_CONSOLE);
-//			attrs.set("background", new QuadBackgroundComponent(new ColorRGBA(0,1,0,1)));
-		
 		attrs = styles.getSelector(Button.ELEMENT_ID, STYLE_CONSOLE);
-//		attrs.set("color", new ColorRGBA(0,1,0.5f,1));
-//		clBg = new ColorRGBA(0,0,0.125f,1);
-		attrs.set("color", ColorRGBA.Cyan.clone());
-//		clBg = new ColorRGBA(0,0.25f,0,1);
-		clBg = new ColorRGBA(0,0.25f,0,0.75f);
+		attrs.set("color", ColorRGBA.Cyan.clone()); // button's text
+		clBg = colorConsoleStyleBackground.mult(1.1f); //new ColorRGBA(0,0.25f,0,0.75f);
 		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
 		attrs = styles.getSelector(DialogStyleElementId.PopupHelp.s(), STYLE_CONSOLE);
@@ -167,37 +160,9 @@ public class ManageLemurDialogI<T extends LemurDialogStateAbs> extends ManageDia
 		clBg = ColorRGBA.Cyan.clone();
 		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
-//		attrs = styles.getSelector(DialogStyleElementId.SystemAlert.s(), STYLE_CONSOLE);
-//		attrs.set("color", ColorRGBA.Blue.clone());
-//		clBg = ColorRGBA.Yellow.clone();clBg.a=0.75f;
-////		attrs.set(Label.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
-//		attrs.set(Label.LAYER_INSETS, new Insets3f(5f, 5f, 5f, 5f));
-//		QuadBackgroundComponent qbc = new QuadBackgroundComponent(clBg);
-//		qbc.setMargin(3f, 3f);
-//		attrs.set(Label.LAYER_BORDER, qbc);
-		
 		attrs = styles.getSelector(DialogStyleElementId.ResizeBorder.s(), STYLE_CONSOLE);
 		clBg = ColorRGBA.Cyan.clone();
 		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
-//		Effect<Button> efHighLightBkgNeg = new AbstractEffect<Button>("HighLight") {
-//			@Override
-//			public Animation create(final Button target, final EffectInfo existing) {
-//				final QuadBackgroundComponent gcBg = (QuadBackgroundComponent)target.getBackground();
-//				final ColorRGBA colorBkp = gcBg.getColor();
-//				return new Animation() {
-//					@Override	public void cancel() {
-//						gcBg.setColor(colorBkp);
-//					}
-//					@Override	public boolean animate(double tpf) {
-//						if(existing.getAnimation()==this)return true;
-//						gcBg.setColor(MiscJmeI.i().negateColor(colorBkp));
-//						return true;
-//					}
-//				};
-//			}
-//		};
-//		attrs.set(Button.EFFECT_ACTIVATE, efHighLightBkgNeg);
-////		attrs.set(Button.EFFECT_DEACTIVATE, efHighLightBkgNeg);
 		
 		//TODO the slider style is not working yet... copy from another style temporarily?
 		attrs = styles.getSelector(DialogStyleElementId.SliderForValueChange.s(), STYLE_CONSOLE);
@@ -209,33 +174,9 @@ public class ManageLemurDialogI<T extends LemurDialogStateAbs> extends ManageDia
 		clBg = new ColorRGBA(0.15f, 0.25f, 0, 1);
 		attrs.set(TextField.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
-//		lstbx.getElementId().child(ListBox.SELECTOR_ID);
 		attrs = styles.getSelector(ListBox.ELEMENT_ID, ListBox.SELECTOR_ID, STYLE_CONSOLE);
-//			attrs = styles.getSelector("list", "selector", STYLE_CONSOLE);
-//			attrs.set("color", ColorRGBA.Red.clone());
 		clBg = ColorRGBA.Yellow.clone();clBg.a=0.25f;
 		attrs.set(ListBox.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
-		
-//		attrs = styles.getSelector(ListBox.ELEMENT_ID, ListBox.ITEMS_ID, STYLE_CONSOLE);
-//		clBg = new ColorRGBA(0,0,0,0);
-//		attrs.set(ListBox.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
-
-//			attrs.set("background", new QuadBackgroundComponent(new ColorRGBA(0,0,0.25f,1)));
-//
-//			attrs = styles.getSelector("slider", "button", STYLE_CONSOLE);
-//			attrs.set("color", ColorRGBA.Yellow.clone());
-//			attrs.set("background", new QuadBackgroundComponent(new ColorRGBA(0,0,0.25f,1)));
-//			
-//			attrs = styles.getSelector("grid", "button", STYLE_CONSOLE);
-//			attrs.set("color", ColorRGBA.Yellow.clone());
-//			attrs.set("background", new QuadBackgroundComponent(new ColorRGBA(0,0,0.25f,1)));
-		
-//		String strAllChars="W";
-//		fMonofontCharWidth = fontWidth(strAllChars,STYLE_CONSOLE);
-		
-//		bConsoleStyleCreated=true;
-		
-//		updateFontStuff();
 	}
 	
 	public ArrayList<LemurDialogStateAbs> getDialogListCopy() {
