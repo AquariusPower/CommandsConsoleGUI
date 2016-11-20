@@ -101,7 +101,7 @@ public class OSApp implements IReflexFillCfg{
 	private long	lLastAlertMilis;
 	private StackTraceElement[]	asteStackKeyRequestOrigin;
 	private boolean	bFirstTimeQuickUpdate;
-	private String	strDynamicInfo;
+	private String	strDynamicInfo="";
 	private StackTraceElement[]	asteLastValidHideRequestOrigin;
 	/**
 	 * this is important to let some other threads know the application is exiting and behave properly
@@ -209,5 +209,8 @@ public class OSApp implements IReflexFillCfg{
 	public String getDynamicInfo(){
 		return strDynamicInfo;
 	}
-
+	
+	public boolean isDynamicInfoSet(){
+		return !strDynamicInfo.isEmpty();
+	}
 }

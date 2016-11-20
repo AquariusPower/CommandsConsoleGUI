@@ -61,6 +61,7 @@ public class OSAppJme extends OSApp {
 
 	private StorageFolderType	esft;
 	private Spatial	sptAlert;
+	private Object	objAlertUserInteractionIndicator;
 	public StorageFolderType getStorageFolderType() {
 		if(esft==null)throw new PrerequisitesNotMetException("strStorageFolderType is null",StorageFolderType.class);
 		return esft;
@@ -88,5 +89,13 @@ public class OSAppJme extends OSApp {
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
 		if(fld.getDeclaringClass()!=OSAppJme.class){super.setFieldValue(fld,value);return;} //For subclasses uncomment this line
 		fld.set(this,value);
+	}
+	
+	public void setAlertUserInteractionIndicator(Object obj){
+		this.objAlertUserInteractionIndicator=obj;
+	}
+	
+	protected Object getAlertUserInteractionIndicator(){
+		return objAlertUserInteractionIndicator;
 	}
 }

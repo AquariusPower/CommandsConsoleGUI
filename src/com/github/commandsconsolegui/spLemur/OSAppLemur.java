@@ -28,6 +28,7 @@ package com.github.commandsconsolegui.spLemur;
 
 import java.lang.reflect.Field;
 
+import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.spJme.ManageMouseCursorI;
@@ -113,6 +114,13 @@ public class OSAppLemur extends OSAppJme {
 			bStartedShowEffect=true;
 		}
 		
+//		if(getAlertUserInteractionIndicator()!=null){
+		if(isDynamicInfoSet()){
+			updateEdgesColor(ColorRGBA.Cyan.clone());
+		}else{
+			updateEdgesColor(null);
+		}
+	
 //		Vector3f v3fPos = ManageMouseCursorI.i().getMouseCursorPositionCopyAsV3f();
 //		v3fPos.addLocal(MiscLemurStateI.i().getCenterPosOf(getAlertPanel()));
 ////		v3fPos.x-=v3fLblSize.x/2f;
@@ -296,13 +304,25 @@ public class OSAppLemur extends OSAppJme {
 		if(lblAlertMsg!=null)lblAlertMsg.setText(getFullMessage());
 	}
 	
+	private ColorRGBA colorEdgesDefault=ColorRGBA.Red.clone();
+	
+	private BfdArrayList<Panel> aedgeList = new BfdArrayList<Panel>() {};
 	private void addAlertEdge(BorderLayout.Position eEdge, ColorRGBA color, Vector3f v3fSize){
 		QuadBackgroundComponent qbc = new QuadBackgroundComponent(color);
 		Label lbl=new Label("",GlobalLemurDialogHelperI.i().STYLE_CONSOLE);
 		lbl.setBackground(qbc);
 		MiscLemurStateI.i().setPreferredSizeSafely(lbl, v3fSize, true);
 		
+		aedgeList.add(lbl);
+		
 		cntrAlert.addChild(lbl, eEdge);
+	}
+	
+	private void updateEdgesColor(ColorRGBA c){
+		if(c==null)c=colorEdgesDefault;
+		for(Panel pnl:aedgeList){
+			((QuadBackgroundComponent)pnl.getBackground()).setColor(c);
+		}
 	}
 	
 	/**

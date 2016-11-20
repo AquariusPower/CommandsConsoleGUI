@@ -37,6 +37,7 @@ import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVari
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Panel;
 import com.simsilica.lemur.anim.Animation;
 import com.simsilica.lemur.anim.SpatialTweens;
@@ -65,7 +66,7 @@ public class LemurEffectsI implements IReflexFillCfg, IConfigure<LemurEffectsI> 
 		ChnGrowShrink,
 		;
 		private TreeMap<EEffState,BfdEffect> tmEf = new TreeMap<EEffState,BfdEffect>();
-		private Vector3f	v3fPlayPosStart;
+		private Vector3f	v3fPlayPosStartOverride;
 		public void putEffect(EEffState es, BfdEffect ef){
 			PrerequisitesNotMetException.assertNotAlreadySet("effect", tmEf.get(es), ef, this);
 			tmEf.put(es,ef);
@@ -81,8 +82,14 @@ public class LemurEffectsI implements IReflexFillCfg, IConfigure<LemurEffectsI> 
 				pnl.addEffect(ef.getName(), ef);
 			}
 		}
-		public void play(EEffState es, Panel pnl, Vector3f v3fPosStart){
-			this.v3fPlayPosStart=v3fPosStart;
+		/**
+		 * 
+		 * @param es
+		 * @param pnl
+		 * @param v3fPosStartOverride can be null
+		 */
+		public void play(EEffState es, Panel pnl, Vector3f v3fPosStartOverride){
+			this.v3fPlayPosStartOverride=v3fPosStartOverride;
 			pnl.runEffect(tmEf.get(es).getName());
 		}
 		public String s(){return toString();}
@@ -90,6 +97,7 @@ public class LemurEffectsI implements IReflexFillCfg, IConfigure<LemurEffectsI> 
 	
 	public abstract class BfdEffect extends AbstractEffect<Panel>{
 		protected EEffChannel	echn;
+  	protected float fTime=0.250f;
 
 		public BfdEffect(EEffChannel echn, EEffState es) {
 			super(echn.s());
@@ -100,87 +108,49 @@ public class LemurEffectsI implements IReflexFillCfg, IConfigure<LemurEffectsI> 
 		public String getName(){
 			return ReflexFillI.i().assertAndGetField(LemurEffectsI.i(), this).getName();
 		}
+		
+		public Vector3f getMoveStartAt(Panel target){
+    	Vector3f v3fOrigin = target.getLocalTranslation().clone();
+    	if(echn.v3fPlayPosStartOverride!=null){
+      	v3fOrigin = echn.v3fPlayPosStartOverride.clone();
+    	}
+    	return v3fOrigin;
+		}
 	}
 	
 	BfdEffect efGrow = new BfdEffect(EEffChannel.ChnGrowShrink, EEffState.Show) {
     public Animation create( Panel target, EffectInfo existing ) {
-    	Vector3f v3fOrigin = echn.v3fPlayPosStart.clone();//ManageMouseCursorI.i().getMouseCursorPositionCopyAsV3f(); //Vector3f.ZERO.clone();
+    	Vector3f v3fOrigin = getMoveStartAt(target);
     	
     	/**
     	 * it is subtract because the start pos is the lower left corner
     	 */
     	Vector3f v3fFrom = v3fOrigin.subtract(MiscLemurStateI.i().getRelativeCenterXYposOf(target));
-//    	Vector3f v3fHalfSize = target.getSize().mult(0.5f);
-//    	v3fHalfSize.y*=-1f;
-//    	Vector3f v3fFrom = v3fOrigin.add(v3fHalfSize);
-    	
     	Vector3f v3fTo = v3fOrigin.clone();
     	
-    	float fTime=0.250f;
       Tween twMove = SpatialTweens.move(target, v3fFrom, v3fTo, fTime);
       Tween twScale = SpatialTweens.scale(target, 0, 1, fTime);
       return new TweenAnimation(Tweens.smoothStep(Tweens.parallel(twMove, twScale)));
     }
 	};
 	BfdEffect efShrink = new BfdEffect(EEffChannel.ChnGrowShrink, EEffState.Hide) {
-	    public Animation create( Panel target, EffectInfo existing ) {
-	        Tween move = SpatialTweens.move(target, new Vector3f(200, 200, 0), Vector3f.ZERO, 0.250);
-	        Tween scale = SpatialTweens.scale(target, 1, 0, 0.250);
-	        return new TweenAnimation(Tweens.smoothStep(Tweens.parallel(move, scale)));
-	    }
+    public Animation create( Panel target, EffectInfo existing ) {
+    	// always current position
+    	Vector3f v3fOrigin = target.getLocalTranslation().clone();
+    	
+    	/**
+    	 * it is subtract because the start pos is the lower left corner
+    	 */
+    	Vector3f v3fFrom = v3fOrigin.subtract(MiscLemurStateI.i().getRelativeCenterXYposOf(target));
+    	Vector3f v3fTo = v3fOrigin.clone();
+    	
+    	// just inverted "to" "from" related to grow one
+  		Tween twMove = SpatialTweens.move(target, v3fTo, v3fFrom, fTime);
+      Tween twScale = SpatialTweens.scale(target, 1, 0, fTime);
+      return new TweenAnimation(Tweens.smoothStep(Tweens.parallel(twMove, twScale)));
+    }
 	};
 	private boolean	bConfigured;
-
-//	public final BfdEffect efGrow = new BfdEffect() {
-//		
-//		@Override
-//		public String getChannel() {
-//			return EEffChannel.ChnGrowShrink.s();
-//		}
-//		
-//		@Override
-//		public Animation create(final Panel target, EffectInfo existing) {
-//			
-//			Animation anim = new Animation() {
-//				Long lStartMilis=null;
-//				long lMaxMilis=250;
-//				
-//				@Override
-//				public void cancel() {
-//					target.setLocalScale(1);
-//				}
-//				
-//				@Override
-//				public boolean animate(double tpf) {
-//					if(lStartMilis==null)lStartMilis=System.currentTimeMillis();
-//					
-//					long lDiff = System.currentTimeMillis()-lStartMilis;
-//					
-//					float fPerc=(float)lDiff/(float)lMaxMilis;
-//					
-//					boolean b=true;
-//					if(fPerc>=1f){
-//						fPerc=1f;
-//						b=false;
-//					}
-//					
-//					target.setLocalScale(fPerc);
-//					
-//					return b;
-//				}
-//			};
-//			
-//			return anim;
-//		}
-//	};
-	
-//	public void applyEffectsAt(Panel pnl, EEffChannel e){
-//		e.applyEffectsAt(pnl);
-//	}
-//	
-//	public void addEffectTo(Panel pnl, BfdEffect ef) {
-//		pnl.addEffect(ef.getName(), ef);
-//	}
 
 	@Override
 	public Object getFieldValue(Field fld) throws IllegalArgumentException,IllegalAccessException {
