@@ -35,6 +35,7 @@ import java.util.TreeMap;
 
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyCodeI;
 import com.github.commandsconsolegui.spAppOs.misc.KeyBind;
+import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 
@@ -43,7 +44,7 @@ import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public abstract class ManageKeyCode {
+public abstract class ManageKeyCode implements IConfigure<ManageKeyCode>{
 //	private static ManageKeyCodeI instance = new ManageKeyCodeI();
 //	public static ManageKeyCodeI i(){return instance;}
 	
@@ -182,6 +183,7 @@ public abstract class ManageKeyCode {
 	private String	strKeyIdPrefixFilter;
 	private int	iKeyCodeForEscape=-1;
 	private int	iKeyCodeForEnter=-1;
+	private boolean	bConfigured;
 	
 	public Key addKey(String strId, Integer... aiCodeToMonitor){
 		ArrayList<Key> akey = new ArrayList<Key>();
@@ -433,5 +435,15 @@ public abstract class ManageKeyCode {
 		}
 		return str;
 	}
-
+	
+	@Override
+	public boolean isConfigured() {
+		return bConfigured;
+	}
+	
+	@Override
+	public ManageKeyCode configure(ICfgParm icfg) {
+		bConfigured=true;
+		return this;
+	}
 }

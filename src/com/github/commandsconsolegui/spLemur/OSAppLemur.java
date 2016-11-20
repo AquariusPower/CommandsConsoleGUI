@@ -28,6 +28,7 @@ package com.github.commandsconsolegui.spLemur;
 
 import java.lang.reflect.Field;
 
+import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.spJme.ManageMouseCursorI;
 import com.github.commandsconsolegui.spJme.OSAppJme;
@@ -36,6 +37,8 @@ import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spLemur.console.LemurDiagFocusHelperStateI;
 import com.github.commandsconsolegui.spLemur.globals.GlobalLemurDialogHelperI;
 import com.github.commandsconsolegui.spLemur.misc.LemurEffectsI;
+import com.github.commandsconsolegui.spLemur.misc.LemurEffectsI.EEffChannel;
+import com.github.commandsconsolegui.spLemur.misc.LemurEffectsI.EEffState;
 import com.github.commandsconsolegui.spLemur.misc.MiscLemurStateI;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -61,8 +64,12 @@ public class OSAppLemur extends OSAppJme {
 	private Container	cntrAlert;
 	private Label	lblAlertMsg;
 	private Panel	pnlBlocker;
-	private final TimedDelayVarField	tdBlockerGlow = new TimedDelayVarField(this, 3f, "...");
+	private final TimedDelayVarField	tdBlockerGlow = new TimedDelayVarField(this, 3f, "the blocker blocks all gui elements to let some special feature be performed");
 	private ColorRGBA	colorBlockerBkg;
+	BoolTogglerCmdField btgAlertStayOnCenter = new BoolTogglerCmdField(this, false, "if false, will follow mouse");
+//	private boolean	bStayOnCenter = false;
+	private boolean	bStartedShowEffect;
+	private boolean	bAlertPanelIsReady;
 
 	public Panel getAlertPanel() {
 		return (Panel)super.getAlertSpatial();
@@ -79,7 +86,7 @@ public class OSAppLemur extends OSAppJme {
 		
 		updateMessage();
 		
-		updateFollowMouse();
+		updateIfPanelIsReady();
 		
 		if(pnlBlocker!=null){
 			MiscJmeI.i().updateColorFading(tdBlockerGlow, colorBlockerBkg, true, 0.25f, 0.35f);
@@ -93,29 +100,72 @@ public class OSAppLemur extends OSAppJme {
 		updateAlertPosSize();
 	}
 
-	private void updateFollowMouse(){
+	private void updateIfPanelIsReady(){
 		if(getAlertPanel()==null)return;
 		
 		Vector3f v3fLblSize = getAlertPanel().getSize();
-		if(getAlertPanel().getSize().length()==0)return;
+		if(v3fLblSize.length()==0)return;
 		
-		Vector3f v3fPos = ManageMouseCursorI.i().getMouseCursorPositionCopyAsV3f();
-		v3fPos.addLocal(MiscLemurStateI.i().getCenterPositionOf(getAlertPanel()));
-//		v3fPos.x-=v3fLblSize.x/2f;
-//		v3fPos.y+=v3fLblSize.y/2f;
+		bAlertPanelIsReady=true;
 		
-		MiscJmeI.i().setLocationXY(getAlertPanel(), v3fPos);
+		if(!bStartedShowEffect){
+			EEffChannel.ChnGrowShrink.play(EEffState.Show, cntrAlert, getPos(EElement.Alert,null));
+			bStartedShowEffect=true;
+		}
+		
+//		Vector3f v3fPos = ManageMouseCursorI.i().getMouseCursorPositionCopyAsV3f();
+//		v3fPos.addLocal(MiscLemurStateI.i().getCenterPosOf(getAlertPanel()));
+////		v3fPos.x-=v3fLblSize.x/2f;
+////		v3fPos.y+=v3fLblSize.y/2f;
+		
+//		MiscJmeI.i().setLocationXY(getAlertPanel(), v3fPos);
+//		MiscJmeI.i().setLocationXY(getAlertPanel(), 
+//			ManageMouseCursorI.i().getPosWithMouseOnCenter(
+//				MiscLemurStateI.i().getValidSizeFrom(getAlertPanel())));
+		MiscJmeI.i().setLocationXY(getAlertPanel(),getPos(EElement.Alert,v3fLblSize)); 
 	}
 	
+//	private void updateAlertPosSize(){
+////			MiscJmeI.i().setLocationXY(getAlertPanel(), ManageMouseCursorI.i().getMouseCursorPositionCopyAsV3f());
+//		
+//		Vector3f v3fWdwSize = MiscJmeI.i().getAppWindowSize();
+//		MiscLemurStateI.i().setPreferredSizeSafely(pnlBlocker, v3fWdwSize, true);
+//		
+//		Vector3f v3fLblSize = v3fWdwSize.mult(0.5f);
+//		MiscLemurStateI.i().setPreferredSizeSafely(getAlertPanel(), v3fLblSize, true);
+//		
+//		/**
+//		 * as preferred size is not applied imediately
+//		 */
+//		if(getAlertPanel().getSize().length()!=0){
+//			v3fLblSize = getAlertPanel().getSize();
+//		}
+//		
+//		Vector3f v3fPos = new Vector3f(v3fWdwSize.x/2f,v3fWdwSize.y/2f,0);
+//		v3fPos.x-=v3fLblSize.x/2f;
+//		v3fPos.y+=v3fLblSize.y/2f;
+//		
+//		/**
+//		 * the alert is ultra special and the Z can be dealt with here!
+//		 */
+//		float fZ=0;
+//		for(Spatial spt:MiscJmeI.i().getAllChildrenRecursiveFrom(GlobalGUINodeI.i())){
+//			if(spt.getLocalTranslation().z > fZ)fZ=spt.getLocalTranslation().z;
+//		}
+//		pnlBlocker.setLocalTranslation(new Vector3f(0, v3fWdwSize.y,
+//			fZ + LemurDiagFocusHelperStateI.i().getDialogZDisplacement()*1));
+//		getAlertPanel().setLocalTranslation(new Vector3f(v3fPos.x, v3fPos.y,
+//			fZ + LemurDiagFocusHelperStateI.i().getDialogZDisplacement()*2));
+//	}
+	
 	private void updateAlertPosSize(){
-//			MiscJmeI.i().setLocationXY(getAlertPanel(), ManageMouseCursorI.i().getMouseCursorPositionCopyAsV3f());
-		
 		Vector3f v3fWdwSize = MiscJmeI.i().getAppWindowSize();
 		MiscLemurStateI.i().setPreferredSizeSafely(pnlBlocker, v3fWdwSize, true);
 		
 		Vector3f v3fLblSize = v3fWdwSize.mult(0.5f);
-		
 		MiscLemurStateI.i().setPreferredSizeSafely(getAlertPanel(), v3fLblSize, true);
+		
+		pnlBlocker.setLocalTranslation(getPos(EElement.Blocker,null));
 		
 		/**
 		 * as preferred size is not applied imediately
@@ -123,10 +173,16 @@ public class OSAppLemur extends OSAppJme {
 		if(getAlertPanel().getSize().length()!=0){
 			v3fLblSize = getAlertPanel().getSize();
 		}
-		
-		Vector3f v3fPos = new Vector3f(v3fWdwSize.x/2f,v3fWdwSize.y/2f,0);
-		v3fPos.x-=v3fLblSize.x/2f;
-		v3fPos.y+=v3fLblSize.y/2f;
+		getAlertPanel().setLocalTranslation(getPos(EElement.Alert,v3fLblSize));
+	}
+	
+	private static enum EElement{
+		Blocker,
+		Alert,
+	}
+	
+	private Vector3f getPos(EElement e, Vector3f v3fLblSize){
+		Vector3f v3fWdwSize = MiscJmeI.i().getAppWindowSize();
 		
 		/**
 		 * the alert is ultra special and the Z can be dealt with here!
@@ -135,10 +191,34 @@ public class OSAppLemur extends OSAppJme {
 		for(Spatial spt:MiscJmeI.i().getAllChildrenRecursiveFrom(GlobalGUINodeI.i())){
 			if(spt.getLocalTranslation().z > fZ)fZ=spt.getLocalTranslation().z;
 		}
-		pnlBlocker.setLocalTranslation(new Vector3f(0, v3fWdwSize.y,
-			fZ + LemurDiagFocusHelperStateI.i().getDialogZDisplacement()*1));
-		getAlertPanel().setLocalTranslation(new Vector3f(v3fPos.x, v3fPos.y,
-			fZ + LemurDiagFocusHelperStateI.i().getDialogZDisplacement()*2));
+		
+		Vector3f v3fPos = null;
+		float fZDispl = LemurDiagFocusHelperStateI.i().getDialogZDisplacement();
+		switch(e){ // attention how the order/index is a multiplier of the displacement!
+			case Blocker:
+				v3fPos = new Vector3f(0, v3fWdwSize.y,
+						fZ + fZDispl*1);
+				break;
+			case Alert:
+				if(v3fLblSize==null){
+					v3fLblSize = v3fWdwSize.mult(0.5f);
+				}
+				
+				if(btgAlertStayOnCenter.b()){
+					v3fPos = new Vector3f(v3fWdwSize.x/2f,v3fWdwSize.y/2f,0);
+					v3fPos.x-=v3fLblSize.x/2f;
+					v3fPos.y+=v3fLblSize.y/2f;
+				}else{
+					v3fPos = ManageMouseCursorI.i().getPosWithMouseOnCenter(v3fLblSize);
+				}
+				
+				v3fPos.set(new Vector3f(v3fPos.x, v3fPos.y,
+						fZ + fZDispl*2));
+				
+				break;
+		}
+		
+		return v3fPos;
 	}
 	
 	private void createAlert(){
@@ -157,7 +237,8 @@ public class OSAppLemur extends OSAppJme {
 		cntrAlert = new Container(new BorderLayout());
 		setAlertSpatial(cntrAlert);
 		
-		LemurEffectsI.i().addEffectTo(cntrAlert, LemurEffectsI.i().efGrow);
+		EEffChannel.ChnGrowShrink.applyEffectsAt(cntrAlert);
+//		LemurEffectsI.i().addEffectTo(cntrAlert, LemurEffectsI.i().efGrow);
 		
 		//yellow background with border margin
 		lblAlertMsg = new Label("",GlobalLemurDialogHelperI.i().STYLE_CONSOLE);
@@ -185,7 +266,7 @@ public class OSAppLemur extends OSAppJme {
 		
 		if(!GlobalGUINodeI.i().hasChild(cntrAlert)){
 			GlobalGUINodeI.i().attachChild(cntrAlert);
-			cntrAlert.runEffect(LemurEffectsI.i().efGrow.getName());
+//			EEffChannel.ChnGrowShrink.play(EEffState.Show, cntrAlert, getPos(EElement.Alert,null));
 		}
 		
 //		if(!lblAlertMsg.getText().equals(strMsg)){
@@ -241,6 +322,10 @@ public class OSAppLemur extends OSAppJme {
 			pnlBlocker.removeFromParent();
 			pnlBlocker=null;
 		}
+		
+		bStartedShowEffect=false;
+		
+		bAlertPanelIsReady=false;
 		
 		setAlertSpatial(null);
 	}

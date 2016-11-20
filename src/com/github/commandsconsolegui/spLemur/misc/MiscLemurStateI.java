@@ -1276,14 +1276,32 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 	public void setPopupHelpString(String str) {
 		this.strPopupHelp=str;
 	}
-
-	public Vector3f getCenterPositionOf(Panel pnl) {
+	
+	public Vector3f getValidSizeFrom(Panel pnl) {
 		Vector3f v3fPos = pnl.getSize().clone();
 		if(v3fPos.length()<2){ //TODO why??
 			v3fPos = pnl.getPreferredSize().clone();
 		}
-		v3fPos.multLocal(0.5f);
-		v3fPos.x*=-1;
 		return v3fPos;
 	}
+	
+	/**
+	 * 
+	 * @param pnl
+	 * @return z will be of the panel
+	 */
+	public Vector3f getRelativeCenterXYposOf(Panel pnl) {
+//		Vector3f v3fPos = pnl.getSize().clone();
+//		if(v3fPos.length()<2){ //TODO why??
+//			v3fPos = pnl.getPreferredSize().clone();
+//		}
+		Vector3f v3fPos = MiscJmeI.i().getCenterXYposOf(getValidSizeFrom(pnl)).negate();
+		v3fPos.z=pnl.getLocalTranslation().z;
+		return v3fPos;
+//		return MiscJmeI.i().getCenterPosOf(v3fPos);
+//		v3fPos.multLocal(0.5f);
+//		v3fPos.x*=-1;
+//		return v3fPos;
+	}
+
 }

@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.TreeMap;
 
 import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
+import com.github.commandsconsolegui.spAppOs.ManageKeyCode;
 import com.github.commandsconsolegui.spAppOs.ManageKeyCode.Key;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyCodeI;
@@ -40,10 +41,12 @@ import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.IRefresh;
 import com.github.commandsconsolegui.spAppOs.misc.KeyBind;
+import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure.ICfgParm;
 import com.github.commandsconsolegui.spCmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
 
@@ -53,7 +56,7 @@ import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
 * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 *
 */
-public abstract class ManageKeyBind implements IManager<KeyBoundVarField> {
+public abstract class ManageKeyBind implements IManager<KeyBoundVarField>,IConfigure<ManageKeyBind> {
 	public static final class CompositeControl extends CompositeControlAbs<ManageKeyBind>{
 		private CompositeControl(ManageKeyBind cc){super(cc);};
 	};protected CompositeControl ccSelf = new CompositeControl(this);
@@ -126,6 +129,8 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField> {
 //	private boolean	bWaitingUserDecision;
 	
 	private String strRequestUserDecision="Press ESC to cancel or Enter to retry.\n";
+
+	private boolean	bConfigured;
 	
 	private boolean isWaitKeyRelease(){
 		/**
@@ -315,10 +320,12 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField> {
 				if(!GlobalAppOSI.i().isShowingAlert(true)){
 					asteAlertFrom = GlobalAppOSI.i().showSystemAlert(
 							 " Press a key combination to be captured (where modifiers are ctrl, shift or alt).\n"
-							+" More complex keybindings can be set thru console commands.\n"
+							+" More complex or specific keybindings can be set thru console commands.\n"
 							+" Press ESC to cancel.\n"
+							+"\n"
 							+" Re-binding keys for command:\n"
-							+"  "+bindCaptureToTarget.getKeyBindRunCommand()
+							+"  "+bindCaptureToTarget.getKeyBindRunCommand()+"\n"
+							+" Current key bind: "+bindCaptureToTarget.getBindCfg()+"\n"
 						);
 				}
 				break;
@@ -407,5 +414,16 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField> {
 //	protected abstract KeyBind captureKeyBind(KeyBoundVarField bindTarget);
 
 	@Override public String getUniqueId() {return MiscI.i().prepareUniqueId(this);}
+
+	@Override
+	public boolean isConfigured() {
+		return bConfigured;
+	}
+	
+	@Override
+	public ManageKeyBind configure(ICfgParm icfg) {
+		bConfigured=true;
+		return this;
+	}
 
 }

@@ -1011,5 +1011,14 @@ public class MiscJmeI implements IReflexFillCfg,ISingleInstance,IConfigure{
 		
 		return at;
 	}
+	
+	public Vector3f getCenterXYposOf(Vector3f v3fSize){
+		Vector3f v3fPos = v3fSize.clone();
+		v3fPos.multLocal(0.5f);
+//		v3fPos.x*=-1f;
+		v3fPos.y*=-1f;
+		v3fPos.z=v3fSize.z;
+		return v3fPos;
+	}
 
 }

@@ -70,6 +70,7 @@ import com.github.commandsconsolegui.spLemur.OSAppLemur;
 import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialogI;
 import com.github.commandsconsolegui.spLemur.globals.GlobalLemurConsoleStateI;
 import com.github.commandsconsolegui.spLemur.globals.GlobalLemurDialogHelperI;
+import com.github.commandsconsolegui.spLemur.misc.LemurEffectsI;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
@@ -139,9 +140,13 @@ public class SimpleConsolePlugin implements IReflexFillCfg, ISingleInstance, ICo
   	
   	setGlobals();
   	
-  	GlobalManageKeyCodeI.i().configure();
+  	if(!GlobalManageKeyCodeI.i().isConfigured()){
+  		GlobalManageKeyCodeI.i().configure();
+  	}
   	
-  	GlobalManageKeyBindI.i().configure();
+  	if(!GlobalManageKeyBindI.i().isConfigured()){
+  		GlobalManageKeyBindI.i().configure();
+  	}
   	
 		/**
 		 * Configs:
@@ -190,6 +195,10 @@ public class SimpleConsolePlugin implements IReflexFillCfg, ISingleInstance, ICo
   	
   	if(!AudioUII.i().isConfigured()){
 			AudioUII.i().configure(new AudioUII.CfgParm());
+  	}
+  	
+  	if(!LemurEffectsI.i().isConfigured()){
+  		LemurEffectsI.i().configure(null);
   	}
 		
 //		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
