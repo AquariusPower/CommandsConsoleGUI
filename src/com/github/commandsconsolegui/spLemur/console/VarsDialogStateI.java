@@ -302,21 +302,21 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 	 * @return
 	 */
 	private DialogListEntryData<T> createNewVarEntry(VarCmdFieldAbs vcf){
-		VarCmdUId vidCopy = vcf.getIdTmpCopy();
+		VarCmdUId vcuidCopy = vcf.getIdTmpCopy();
 		
 		DialogListEntryData<T> dledVarEntryParent = null;
 		
-		if(vidCopy.getConcreteClassSimpleName().equals(vidCopy.getDeclaringClassSimpleName())){
+		if(vcuidCopy.getConcreteClassSimpleName().equals(vcuidCopy.getDeclaringClassSimpleName())){
 			dledVarEntryParent = createParentEntry(
-					vidCopy.getDeclaringClassSimpleName(),
+					vcuidCopy.getDeclaringClassSimpleName(),
 					EGroupKeys.ParentDeclaringClass);
 		}else{
 			DialogListEntryData<T> dledDeclaringClassParent = createParentEntry(
-				vidCopy.getConcreteClassSimpleName()+vidCopy.getDeclaringClassSimpleName(),
+				vcuidCopy.getConcreteClassSimpleName()+vcuidCopy.getDeclaringClassSimpleName(),
 				EGroupKeys.ParentDeclaringClass);
 			
 			DialogListEntryData<T> dledConcreteClassParent = createParentEntry(
-				vidCopy.getConcreteClassSimpleName(),
+				vcuidCopy.getConcreteClassSimpleName(),
 				EGroupKeys.ParentConcreteClass);
 			
 			if(dledDeclaringClassParent.getParent()==null){
@@ -332,11 +332,15 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 		
 		// prepare var linked one
 		String strVarId = vcf.getUniqueVarId(true);
-		strVarId=strVarId.replaceFirst(vidCopy.getDeclaringClassSimpleName(), "");
-		strVarId=strVarId.replaceFirst(vidCopy.getConcreteClassSimpleName(), "");
+		strVarId=strVarId.replaceFirst(vcuidCopy.getDeclaringClassSimpleName(), "");
+		strVarId=strVarId.replaceFirst(vcuidCopy.getConcreteClassSimpleName(), "");
 		
 		DialogListEntryData<T> dledVar = new DialogListEntryData<T>(this);
-		dledVar.setText(strVarId, vcf);
+		String strExtraInfo="";
+		if(vcf instanceof FileVarField){
+			strExtraInfo="(file)";
+		}
+		dledVar.setText(strExtraInfo+strVarId, vcf);
 		dledVar.setParent(dledVarEntryParent);
 		addEntry(dledVar);
 		
