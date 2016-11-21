@@ -30,12 +30,13 @@ package com.github.commandsconsolegui.spLemur.console;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyCodeI;
+import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spAppOs.misc.IManager;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.RefHolder;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
-import com.github.commandsconsolegui.spCmd.varfield.KeyBoundVarField;
+import com.github.commandsconsolegui.spCmd.varfield.ManageVarCmdFieldI;
 import com.github.commandsconsolegui.spCmd.varfield.NumberVarFieldAbs;
 import com.github.commandsconsolegui.spCmd.varfield.StringVarField;
 import com.github.commandsconsolegui.spCmd.varfield.VarCmdFieldAbs;
@@ -53,7 +54,7 @@ import com.simsilica.lemur.Command;
  *
  * @param <T>
  */
-public final class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceLemurDialogStateAbs<T,ChoiceVarDialogState<T>>{
+public final class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceLemurDialogStateAbs<T,ChoiceVarDialogState<T>> implements IManager<VarCmdFieldAbs>{
 	public static class CfgParm extends ChoiceLemurDialogStateAbs.CfgParm{
 		public CfgParm(Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow,
@@ -62,7 +63,23 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 					fInfoHeightPercentOfDialog, fEntryHeightMultiplier);
 		}
 	}
-
+	CfgParm cfg;
+	
+	public ChoiceVarDialogState() {
+		DelegateManagerI.i().addManager(this, VarCmdFieldAbs.class);
+	}
+	
+	@Override
+	public ChoiceVarDialogState<T> configure(ICfgParm icfg) {
+		this.cfg=(CfgParm)icfg;
+		
+		ManageVarCmdFieldI.i().putVarManager(this,VarCmdFieldAbs.class);
+		
+		super.configure(icfg);
+		
+		return getThis();
+	}
+	
 	private VarCmdFieldAbs	vcf;
 	private DialogListEntryData<T>	dledAtParent;
 	
@@ -350,5 +367,15 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 	@Override
 	protected ChoiceVarDialogState<T> getThis() {
 		return this;
+	}
+
+	@Override
+	public boolean addHandled(VarCmdFieldAbs objNew) {
+		return false;
+	}
+
+	@Override
+	public ArrayList<VarCmdFieldAbs> getHandledListCopy() {
+		return null;
 	}
 }

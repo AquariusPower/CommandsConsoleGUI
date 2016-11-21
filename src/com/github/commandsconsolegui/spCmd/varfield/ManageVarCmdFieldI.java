@@ -28,13 +28,13 @@
 package com.github.commandsconsolegui.spCmd.varfield;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.DiscardableInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.IMultiInstanceOverride;
-import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.RefHolder;
@@ -62,7 +62,7 @@ public class ManageVarCmdFieldI implements IManager<VarCmdFieldAbs>{
 	public  final RefHolder hvhVarList = new RefHolder(avcfList);
 	
 	@Override
-	public ArrayList<VarCmdFieldAbs> getListCopy() {
+	public ArrayList<VarCmdFieldAbs> getHandledListCopy() {
 		return new ArrayList<VarCmdFieldAbs>(avcfList);
 	}
 //	public ArrayList<VarCmdFieldAbs> getListFullCopy(){
@@ -73,7 +73,7 @@ public class ManageVarCmdFieldI implements IManager<VarCmdFieldAbs>{
 	 * Only fields that should have direct console access are accepted here.
 	 */
 	@Override
-	public boolean add(VarCmdFieldAbs vcf){
+	public boolean addHandled(VarCmdFieldAbs vcf){
 		if(!vcf.isField())return false;
 		if(vcf.getOwner() instanceof IMultiInstanceOverride)return false; //only single instances allowed
 		
@@ -99,7 +99,8 @@ public class ManageVarCmdFieldI implements IManager<VarCmdFieldAbs>{
 		ArrayList<T> a = new ArrayList<T>();
 		for(VarCmdFieldAbs vcf:avcfList){ 
 			if(clFilter.isInstance(vcf)){ // (vcf.getClass().getDeclaredClasses()) (vcf.getClass().isAssignableFrom(clFilter)) (vcf instanceof clFilter) (clFilter.isAssignableFrom(vcf.getClass()))
-				a.add((T)vcf);
+				@SuppressWarnings("unchecked") T o = (T)vcf;
+				a.add(o);
 			}
 //			else{
 //				for(Class cl:MiscI.i().getSuperClassesOf(vcf)){
@@ -117,7 +118,7 @@ public class ManageVarCmdFieldI implements IManager<VarCmdFieldAbs>{
 	public ArrayList<VarCmdFieldAbs> removeAllWhoseOwnerIsBeingDiscarded(){
 		ArrayList<VarCmdFieldAbs> avcfDiscarded = new ArrayList<VarCmdFieldAbs>();
 		
-		for(VarCmdFieldAbs vcf:getListCopy()){
+		for(VarCmdFieldAbs vcf:getHandledListCopy()){
 			if(DiscardableInstanceI.i().isBeingDiscardedRecursiveOwner(vcf.getOwner())){
 				discard(vcf);
 				avcfDiscarded.add(vcf);
@@ -170,7 +171,56 @@ public class ManageVarCmdFieldI implements IManager<VarCmdFieldAbs>{
 	public boolean isListChanged() {
 		return hvhVarList.isChangedAndUpdateHash();
 	}
-
+	
 	@Override public String getUniqueId() {return MiscI.i().prepareUniqueId(this);}
+	
+	public static class VarMgr<V extends VarCmdFieldAbs>{
+		Class<V> cl;
+		IManager<V> imgr;
+		RegisteredClasses<IManager<V>> rscManager = new RegisteredClasses<IManager<V>>();
+	}
+	private HashMap<IManager,VarMgr> hmManagers = new HashMap<IManager,VarMgr>();
+	/**
+	 * each class can have many managers
+	 * @param imgrKey
+	 * @param cl
+	 */
+	public <V extends VarCmdFieldAbs> void putVarManager(IManager<V> imgrKey, Class<V> cl){
+		PrerequisitesNotMetException.assertNotAlreadySet("manager", hmManagers.get(imgrKey), cl, this);
+		
+		VarMgr<V> vm = new VarMgr<V>();
+		vm.cl=cl;
+		vm.imgr=imgrKey;
+		vm.rscManager.addClassesOf(imgrKey,true,true);
+		
+		hmManagers.put(imgrKey,vm);
+		
+//		if(!DelegateManagerI.i().isContainsManager(imgrKey)){
+//			DelegateManagerI.i().addManager(imgrKey, cl);
+//		}
+	}
+	
+	public <V extends VarCmdFieldAbs> boolean isHasVarManager(IManager<V> imgrKey){
+		return hmManagers.get(imgrKey)!=null;
+	}
+	
+	public boolean isVarManagerContainClassTypeName(String strClassTypeName){
+		for(VarMgr vm:hmManagers.values()){
+			if(vm.rscManager.isContainClassTypeName(strClassTypeName)){
+				return true;
+			}
+		}
+		return false;
+	}
 
+	public <T extends VarCmdFieldAbs> ArrayList<IManager> getManagerListFor(Class<T> cl) {
+		ArrayList<IManager> a = new ArrayList<IManager>();
+		for(VarMgr vm:hmManagers.values()){
+			if(vm.cl==cl)a.add(vm.imgr);
+		}
+		return a;
+//		VarMgr vm = tmManagers.get(cl);
+//		if(vm==null)return null;
+//		return vm.imgr;
+	}
 }

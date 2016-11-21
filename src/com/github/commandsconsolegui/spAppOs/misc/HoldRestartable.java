@@ -45,7 +45,7 @@ public class HoldRestartable<T extends IRestartable> implements IHasOwnerInstanc
 	public HoldRestartable(Object objOwner){
 		if(objOwner==null)throw new PrerequisitesNotMetException("invalid owner, use 'this'",this);
 		this.objOwner = objOwner;
-		DelegateManagerI.i().add(this);
+		DelegateManagerI.i().addManaged(this);
 //		ManageHoldRestartableI.i().add(this);
 	}
 	public HoldRestartable(Object objOwner, IRestartable ir){

@@ -579,8 +579,9 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	 * @param objClassToInspect surely works with anonymous (inner) classes, just like new ArrayList<String>(){}
 	 * @param iGenericParamIndex
 	 * @return
+	 * @throws ClassNotFoundException 
 	 */
-  public Class getGenericParamAsClassTypeFrom(Object objClassToInspect, int iGenericParamIndex){
+  public Class getGenericParamAsClassTypeFrom(Object objClassToInspect, int iGenericParamIndex) throws ClassNotFoundException{
 		try {
 			Class cl = objClassToInspect.getClass();
 	    ParameterizedType pt = (ParameterizedType)cl.getGenericSuperclass();
@@ -591,7 +592,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	  		throw new PrerequisitesNotMetException("will surely work with anonymous (inner) classes tho")
 	  			.setCauseAndReturnSelf(e);
 	  	}else{
-	  		throw new PrerequisitesNotMetException(e);
+	  		throw e;//new PrerequisitesNotMetException(e);
 	  	}
 		}
   }

@@ -56,7 +56,7 @@ public class DebugI implements IReflexFillCfg,ISingleInstance {//, IConsoleComma
 //	private Boolean	bIDEDebugMode=false; //TODO could this be public final static and accessed directly to be fastest?
 	
 	public DebugI() {
-		DelegateManagerI.i().add(this);
+		DelegateManagerI.i().addManaged(this);
 //		ManageSingleInstanceI.i().add(this);
 		
 //		bIDEDebugMode=ManagementFactory.getRuntimeMXBean().getInputArguments().toString().indexOf("-agentlib:jdwp") > 0;

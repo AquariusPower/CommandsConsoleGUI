@@ -53,12 +53,12 @@ public class ManageExitI implements IManager<ICleanExit>, ICleanExit{
 	private BfdArrayList<ICleanExit> a = new BfdArrayList<ICleanExit>(){};
 	
 	@Override
-	public boolean add(ICleanExit objNew) {
+	public boolean addHandled(ICleanExit objNew) {
 		return a.add(objNew);
 	}
 
 	@Override
-	public ArrayList<ICleanExit> getListCopy() {
+	public ArrayList<ICleanExit> getHandledListCopy() {
 		return a.getCopy();
 	}
 	

@@ -26,9 +26,11 @@
 */
 package com.github.commandsconsolegui.spAppOs.misc;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.TreeMap;
 
-import com.github.commandsconsolegui.spCmd.varfield.VarCmdFieldAbs;
+import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 
 /**
  * 
@@ -38,9 +40,17 @@ import com.github.commandsconsolegui.spCmd.varfield.VarCmdFieldAbs;
  */
 public class RegisteredClasses<E>{
 	RefHolder<TreeMap<String,Class<E>>> rhtmSubClass = new RefHolder<TreeMap<String,Class<E>>>(new TreeMap<String,Class<E>>());
-//	TreeMap<String,Class<E>> tmSubClass = new TreeMap<String,Class<E>>();
-	public void addSuperClassesOf(E objTarget, boolean bItsInnerClassesToo, boolean bItsEnclosingClassesToo){
+	BfdArrayList<E> aTargetList = new BfdArrayList<E>(){};
+	
+	/**
+	 * will add super classes basically
+	 * @param objTarget
+	 * @param bItsInnerClassesToo
+	 * @param bItsEnclosingClassesToo
+	 */
+	public void addClassesOf(E objTarget, boolean bItsInnerClassesToo, boolean bItsEnclosingClassesToo){
 		PrerequisitesNotMetException.assertNotNull("objTarget", objTarget, this);
+		PrerequisitesNotMetException.assertNotAlreadyAdded(aTargetList, objTarget, this);
 		
 		for(Class cl:MiscI.i().getSuperClassesOf(objTarget,true)){
 			registerClass(cl);
@@ -57,12 +67,17 @@ public class RegisteredClasses<E>{
 				registerClass(cl);
 			}
 		}
+		
+		aTargetList.add(objTarget);
 	}
 	public void registerClass(Class<E> cl){
 		rhtmSubClass.getRef().put(cl.getName(),cl);
 	}
-	public boolean isContainClass(String strClassTypeKey){
+	public boolean isContainClassTypeName(String strClassTypeKey){
 		Class<E> cl = (rhtmSubClass.getRef().get(strClassTypeKey));
 		return ( cl != null );
+	}
+	public ArrayList<E> getTargetList(){
+		return new ArrayList<E>(Arrays.asList(aTargetList.toArray()));
 	}
 }

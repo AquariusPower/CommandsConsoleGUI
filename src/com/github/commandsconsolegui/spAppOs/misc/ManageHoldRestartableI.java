@@ -66,13 +66,13 @@ public class ManageHoldRestartableI implements IManager<HoldRestartable<IRestart
 	}
 	
 	@Override
-	public boolean add(HoldRestartable<IRestartable> hr){
+	public boolean addHandled(HoldRestartable<IRestartable> hr){
 		PrerequisitesNotMetException.assertNotAlreadyAdded(ahrList, (HoldRestartable<IRestartable>)hr, this);
 		return ahrList.add((HoldRestartable<IRestartable>) hr);
 	}
 	
 	@Override
-	public BfdArrayList<HoldRestartable<IRestartable>> getListCopy() {
+	public BfdArrayList<HoldRestartable<IRestartable>> getHandledListCopy() {
 //		if(ahrList.size()==0)return new BfdArrayList<HoldRestartable<IRestartable>>(){};
 //		return ahrList.getGenericCopy();
 		return ahrList.getCopy();

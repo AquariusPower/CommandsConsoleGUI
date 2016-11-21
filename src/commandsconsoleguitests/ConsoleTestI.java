@@ -111,7 +111,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		super();
 		bindListToggleEnable = new KeyBoundVarField(this);
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
-		DelegateManagerI.i().add(this);
+		DelegateManagerI.i().addManaged(this);
 //		ManageSingleInstanceI.i().add(this);
 	}
 	

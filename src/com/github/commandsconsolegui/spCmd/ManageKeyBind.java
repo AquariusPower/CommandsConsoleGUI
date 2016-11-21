@@ -97,15 +97,15 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField>,IConfi
 	}
 	
 	@Override
-	public boolean add(KeyBoundVarField bind){
+	public boolean addHandled(KeyBoundVarField bind){
 		String strMapping=getMappingFrom(bind);
 		
 		KeyBoundVarField kbExisting = tmbindList.get(strMapping);
 		
 		tmbindList.put(strMapping,bind);
 		
-		PrerequisitesNotMetException.assertIsTrue("manager not set", !bind.isManagerSet(), bind, this);
-		bind.setManager(this);
+//		PrerequisitesNotMetException.assertIsTrue("manager not set", !bind.isHasManagers(), bind, this);
+		bind.addManager(this);
 		
 		return kbExisting!=bind;
 	}
@@ -210,7 +210,7 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField>,IConfi
 				}
 				
 				bindConflict=null;
-				for(KeyBoundVarField bind:getListCopy()){
+				for(KeyBoundVarField bind:getHandledListCopy()){
 					if(bind==bindCaptureToTarget)continue;
 					if(bind.getKeyBind().isEquivalentTo(kbCaptured)){
 						bindConflict=bind;
@@ -368,13 +368,13 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField>,IConfi
 		
 	}
 
-	public ArrayList<KeyBoundVarField> getListCopy(){
+	public ArrayList<KeyBoundVarField> getHandledListCopy(){
 		return new ArrayList<KeyBoundVarField>(tmbindList.values());
 	}
 
 	public ArrayList<String> getReportAsCommands(StringCmdField scfBindKey, boolean bOnlyUserCustomOnes) {
 		ArrayList<String> astr = new ArrayList<String>();
-		for(KeyBoundVarField bind:getListCopy()){
+		for(KeyBoundVarField bind:getHandledListCopy()){
 			if(bOnlyUserCustomOnes && bind.isField())continue;
 			
 			String strMapping = getMappingFrom(bind);

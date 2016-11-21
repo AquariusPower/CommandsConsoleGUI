@@ -252,14 +252,14 @@ public class ManageConditionalStateI extends AbstractAppState implements IManage
 	
 	private BfdArrayList<ConditionalStateAbs> acsaLazyList = new BfdArrayList<ConditionalStateAbs>(){};
 	@Override
-	public boolean add(ConditionalStateAbs objNew) {
+	public boolean addHandled(ConditionalStateAbs objNew) {
 		PrerequisitesNotMetException.assertNotAlreadyAdded(acsaLazyList, objNew, this);
 		return acsaLazyList.add(objNew);
 //		throw new UnsupportedOperationException("use attach()");
 	}
 	
 	@Override
-	public BfdArrayList<ConditionalStateAbs> getListCopy() {
+	public BfdArrayList<ConditionalStateAbs> getHandledListCopy() {
 		BfdArrayList<ConditionalStateAbs> a = new BfdArrayList<ConditionalStateAbs>(){};
 		a.addAll(acsaLazyList);
 		a.addAll(aCondStateList);

@@ -75,7 +75,7 @@ public class ReflexHacksPluginI implements IConsoleCommandListener, IReflexFillC
 	public static ReflexHacksPluginI i(){return instance;}
 	
 	public ReflexHacksPluginI() {
-		DelegateManagerI.i().add(this);
+		DelegateManagerI.i().addManaged(this);
 //		ManageSingleInstanceI.i().add(this);
 	}
 	

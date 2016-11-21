@@ -37,12 +37,13 @@ import com.github.commandsconsolegui.spAppOs.globals.GlobalHolderAbs.IGlobalOpt;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.spAppOs.misc.HoldRestartable;
 import com.github.commandsconsolegui.spAppOs.misc.ICleanExit;
-import com.github.commandsconsolegui.spAppOs.misc.IManaged;
+import com.github.commandsconsolegui.spAppOs.misc.IHandled;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.IRefresh;
 import com.github.commandsconsolegui.spAppOs.misc.IRestartable;
 import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI;
+import com.github.commandsconsolegui.spAppOs.misc.RegisteredClasses;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
@@ -79,7 +80,7 @@ import com.jme3.scene.Node;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>> implements IGlobalOpt,IRestartable,ISimulationTime,IConfigure<ConditionalStateAbs<THIS>>,IRetryListOwner,IReflexFillCfg,IRefresh,IPriority,IManaged,ISingleInstance,ICleanExit{
+public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>> implements IGlobalOpt,IRestartable,ISimulationTime,IConfigure<ConditionalStateAbs<THIS>>,IRetryListOwner,IReflexFillCfg,IRefresh,IPriority,IHandled,ISingleInstance,ICleanExit{
 //	public static final class CompositeControl extends CompositeControlAbs<ConditionalStateAbs>{
 //		private CompositeControl(ConditionalStateAbs casm){super(casm);};
 //	};private CompositeControl ccSelf = new CompositeControl(this);
@@ -89,7 +90,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	public ConditionalStateAbs(){
 		super();
 		
-		DelegateManagerI.i().add(this);
+		DelegateManagerI.i().addHandled(this);
 //		ManageSingleInstanceI.i().add(this);
 //		MiscI.i().assertFieldsHaveDefaultValue(this);
 		
@@ -1051,18 +1052,20 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	@Override
 	public void requestRefresh() {}
 	
-	private IManager	imgr;
+	RegisteredClasses<IManager> rscManager = new RegisteredClasses<IManager>();
+//	private IManager	imgr;
+//	@Override
+//	public boolean isHasManagers() {
+//		return getManager()!=null;
+//	}
 	@Override
-	public boolean isManagerSet() {
-		return getManager()!=null;
+	public ArrayList<IManager> getManagerList() {
+		return rscManager.getTargetList();
 	}
 	@Override
-	public IManager getManager() {
-		return imgr;
-	}
-	@Override
-	public Object setManager(IManager imgr) {
-		return this.imgr=imgr;
+	public void addManager(IManager imgr) {
+		rscManager.addClassesOf(imgr, true, true);
+//		return this.imgr=imgr;
 	}
 	
 	@Override

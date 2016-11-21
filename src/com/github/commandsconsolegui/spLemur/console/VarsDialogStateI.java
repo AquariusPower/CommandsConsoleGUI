@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.spAppOs.PkgTopRef;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
@@ -217,7 +218,7 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 	@Override
 	protected void updateList() {
 		//clearList()
-		ArrayList<VarCmdFieldAbs> avcf = ManageVarCmdFieldI.i().getListCopy();
+		ArrayList<VarCmdFieldAbs> avcf = ManageVarCmdFieldI.i().getHandledListCopy();
 		
 		for(VarCmdFieldAbs vcfVarEntry:avcf){
 			if(vcfVarEntry.getUniqueVarId()==null)continue;
@@ -425,4 +426,5 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 	public void requestRefresh() {
 		requestRefreshUpdateList();
 	}
+
 }

@@ -26,13 +26,15 @@
 */
 package com.github.commandsconsolegui.spAppOs.misc;
 
+import java.util.ArrayList;
+
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public interface IManaged {
-	boolean isManagerSet();
-	IManager getManager();
-	Object setManager(IManager imgr);
+public interface IHandled {
+//	boolean isHasManagers();
+	ArrayList<IManager> getManagerList();
+	void addManager(IManager imgr);
 }

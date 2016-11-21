@@ -29,11 +29,10 @@ package com.github.commandsconsolegui.spCmd.varfield;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.KeyBind;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
-import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 
@@ -229,6 +228,21 @@ public class KeyBoundVarField extends VarCmdFieldAbs<KeyBind,KeyBoundVarField>{
 			return getUniqueVarId(true);
 		}else{
 			return getUserCommand();
+		}
+	}
+	
+	@Override
+	public ArrayList<IManager> getManagerList() {
+		ArrayList<IManager> a = super.getManagerList();
+		a.addAll(ManageVarCmdFieldI.i().getManagerListFor(KeyBoundVarField.class));
+		return a;
+	}
+	
+	@Override
+	public void addManager(IManager imgr) {
+		super.addManager(imgr);
+		if(!ManageVarCmdFieldI.i().isHasVarManager(imgr)){
+			ManageVarCmdFieldI.i().putVarManager(imgr, KeyBoundVarField.class);
 		}
 	}
 }

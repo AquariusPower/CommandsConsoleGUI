@@ -55,15 +55,23 @@ public class Buffeds {
 			 */
 			Class cl=null;
 			
-//			if(size()>0){
-//				cl=get(0).getClass();
-//			}else{
+			/**
+			 * if it has elements, cannot use the 1st one class type as it can be a sub-class of the
+			 * required type and not be a valid cast for other objects...
+			 * Wont work: if(size()>0){cl=get(0).getClass();}else{...} 
+			 */
+			try {
 				cl = ReflexFillI.i().getGenericParamAsClassTypeFrom(this,0);
-//			}
-			
-			E[] a = (E[])Array.newInstance(cl,0);
-		  return super.toArray(a);
+				E[] a = (E[])Array.newInstance(cl,0);
+			  return super.toArray(a);
+			} catch (ClassNotFoundException e) {
+				return (E[])super.toArray(); //do it blindly
+			}
 		}
+		
+//		public Object[] toArrayRaw(){
+//			return super.toArray();
+//		}
 		
 		public BfdArrayList() {
 			super();

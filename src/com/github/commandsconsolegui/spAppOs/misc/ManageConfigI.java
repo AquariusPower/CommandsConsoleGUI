@@ -72,12 +72,12 @@ public class ManageConfigI implements IManager<IConfigure>,IInstance{
 	private BfdArrayList<IConfigure> a = new BfdArrayList<IConfigure>(){};
 	
 	@Override
-	public boolean add(IConfigure objNew) {
+	public boolean addHandled(IConfigure objNew) {
 		return a.add(objNew);
 	}
 
 	@Override
-	public BfdArrayList<IConfigure> getListCopy() {
+	public BfdArrayList<IConfigure> getHandledListCopy() {
 		return a.getCopy();
 	}
 

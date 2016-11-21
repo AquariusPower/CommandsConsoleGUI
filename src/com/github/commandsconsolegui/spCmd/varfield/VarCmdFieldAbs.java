@@ -27,11 +27,13 @@
 
 package com.github.commandsconsolegui.spCmd.varfield;
 
+import java.util.ArrayList;
+
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.IConstructed;
 import com.github.commandsconsolegui.spAppOs.misc.IDebugReport;
-import com.github.commandsconsolegui.spAppOs.misc.IManaged;
+import com.github.commandsconsolegui.spAppOs.misc.IHandled;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
@@ -62,7 +64,7 @@ import com.github.commandsconsolegui.spCmd.ConsoleVariable;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 
  */
-public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> implements IReflexFillCfgVariant,IDebugReport,IConstructed,IManaged{//, IVarIdValueOwner{
+public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> implements IReflexFillCfgVariant,IDebugReport,IConstructed,IHandled{//, IVarIdValueOwner{
 	public static final class CompositeControl extends CompositeControlAbs<VarCmdFieldAbs>{
 		private CompositeControl(VarCmdFieldAbs casm){super(casm);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
@@ -146,14 +148,14 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	public VarCmdFieldAbs(IReflexFillCfg rfcfgOwner, EVarCmdMode evcm, VAL valueDefault, Class<VAL> clValueTypeConstraint, boolean bAllowNullValue){
 		if(!bAllowNullValue)setDenyNullValue();
 		
-		ManageVarCmdFieldI.i().getClassReg().addSuperClassesOf(this,true,false);
+		ManageVarCmdFieldI.i().getClassReg().addClassesOf(this,true,false);
 		this.evcm=evcm;
 		
 		setOwner(rfcfgOwner);
 		
 		this.clValueTypeConstraint=clValueTypeConstraint;
 //		if(isField())
-		ManageVarCmdFieldI.i().add(this); //generic semi-dummy-manager just to hold the main list
+		ManageVarCmdFieldI.i().addHandled(this); //generic semi-dummy-manager just to hold the main list
 //		Class<VAL> cl;
 		switch(this.evcm){
 			case Var:
@@ -166,7 +168,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	private void setOwner(IReflexFillCfg rfcfgOwner){
 		this.rfcfgOwner=rfcfgOwner;
 		if(this.rfcfgOwner!=null){
-			rscOwner.addSuperClassesOf(this.rfcfgOwner,true,true);
+			rscOwner.addClassesOf(this.rfcfgOwner,true,true);
 		}
 	}
 	
@@ -284,7 +286,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		 * even if it has not returned yet! so, this must be THE LAST THING!!!!
 		 */
 		this.cvarLinkAndValueStorage = cvar; //LAST THING!!
-		rscConsVar.addSuperClassesOf(cvarLinkAndValueStorage, true, true);
+		rscConsVar.addClassesOf(cvarLinkAndValueStorage, true, true);
 		
 ////		this.cvarLinkAndValueStorage.setRestrictedVarOwner(this);
 //		if(bSetNormalMode){
@@ -603,14 +605,14 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	}
 	
 	RegisteredClasses<IReflexFillCfg> rscOwner = new RegisteredClasses<IReflexFillCfg>();
-	RegisteredClasses<IManager> rscManager = new RegisteredClasses<IManager>();
+//	RegisteredClasses<IManager> rscManager = new RegisteredClasses<IManager>();
 	RegisteredClasses<ConsoleVariable> rscConsVar = new RegisteredClasses<ConsoleVariable>();
 	
-	private IManager<VarCmdFieldAbs>	imgr;
+//	private IManager<VarCmdFieldAbs>	imgr;
 
 	private DebugData	dbg;
 	
-	private void assertSettingAtOwnerType(){
+	private void assertSettingFromRegisteredType(){
 		if(!isConstructed())return;
 		if(getOwner()==null)return;
 		
@@ -622,11 +624,12 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		//rh.toString()
 		for(StackTraceElement ste:rh.getRef()){
 //			if(steSetter.getMethodName().equals(ste.getMethodName()))continue;
-			if(ManageVarCmdFieldI.i().getClassReg().isContainClass(ste.getClassName()))continue;
-			if(rscOwner.isContainClass(ste.getClassName()))break;//continue;
-			if(rscManager.isContainClass(ste.getClassName()))break;
-			if(rscConsVar.isContainClass(ste.getClassName()))break; //it's public set access is restricted to CommandsDelegator composite
-			if(GlobalCommandsDelegatorI.i().getRegisteredClasses().isContainClass(ste.getClassName()))break; //it's public set access is restricted to CommandsDelegator composite
+			if(ManageVarCmdFieldI.i().getClassReg().isContainClassTypeName(ste.getClassName()))continue;
+			if(rscOwner.isContainClassTypeName(ste.getClassName()))break;//continue;
+			if(rscConsVar.isContainClassTypeName(ste.getClassName()))break; //it's public set access is restricted to CommandsDelegator composite
+			if(GlobalCommandsDelegatorI.i().getRegisteredClasses().isContainClassTypeName(ste.getClassName()))break; //it's public set access is restricted to CommandsDelegator composite
+			if(ManageVarCmdFieldI.i().isVarManagerContainClassTypeName(ste.getClassName()))break;
+//			if(rscManager.isContainClassTypeName(ste.getClassName()))break;
 			
 			throw new PrerequisitesNotMetException("not being set at owner class type", ste.getClassName(), getOwner().getClass().getName(), this);
 		}
@@ -643,7 +646,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	private THIS setObjectRawValue(Object objValueNew, boolean bSetDefault, boolean bOnValueChangePreventCallerRunOnce) { // do not use O at param here, ex.: bool toggler can be used on overriden
 		if(RunMode.bValidateDevCode)dbg=ManageDebugDataI.i().setStack(dbg,EDbgStkOrigin.LastSetValue);
 //		asteDebugLastSetOrigin=Arrays.copyOfRange(Thread.currentThread().getStackTrace(),1,100); // 100 should suffice avoiding big array allocation... Short.MAX_VALUE); //least the 1st to easy the comparisons...
-		if(RunMode.bValidateDevCode)assertSettingAtOwnerType();
+		if(RunMode.bValidateDevCode)assertSettingFromRegisteredType();
 		assertIfNullValueIsAllowed(objValueNew);
 		
 		if(objValueNew!=null && !clValueTypeConstraint.isInstance(objValueNew)){
@@ -969,26 +972,35 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	}
 	
 	@Override
-	public IManager getManager() {
-		return imgr;
+	public ArrayList<IManager> getManagerList() {
+//		return imgr;
+//		return rscManager.getTargetList();
+//		ArrayList<IManager> a = new ArrayList<IManager>();
+//		a.add(ManageVarCmdFieldI.i().getManagerFor(VarCmdFieldAbs.class));
+//		return a;
+		return ManageVarCmdFieldI.i().getManagerListFor(VarCmdFieldAbs.class);
 	}
 	
-	@Override
-	public boolean isManagerSet() {
-		return getManager()!=null;
-	}
+//	@Override
+//	public boolean isHasManagers() {
+//		return rscManager.
+//		return getManager()!=null;
+//	}
 		
 	@Override
-	public THIS setManager(IManager imgr) {
-		if(RunMode.bDebugIDE)PrerequisitesNotMetException.assertNotAlreadySet("manager", this.imgr,imgr,this);
+	public void addManager(IManager imgr) {
+//		if(RunMode.bDebugIDE)PrerequisitesNotMetException.assertNotAlreadySet("manager", this.imgr,imgr,this);
 		
-		this.imgr=imgr;
+//		this.imgr=imgr;
 		
-		rscManager.addSuperClassesOf(imgr, true, true);
+		if(!ManageVarCmdFieldI.i().isHasVarManager(imgr)){
+			ManageVarCmdFieldI.i().putVarManager(imgr, VarCmdFieldAbs.class);
+		}
+//		rscManager.addSuperClassesOf(imgr, true, true);
 //		rscManager.addSuperClassesOf(GlobalCommandsDelegatorI.i(), true, true);
 //		rscManager.addSuperClassesOf(cvarLinkAndValueStorage, true, true); //it's public set access is restricted to CommandsDelegator composite
 		
-		return getThis();
+//		return getThis();
 	}
 
 	/**

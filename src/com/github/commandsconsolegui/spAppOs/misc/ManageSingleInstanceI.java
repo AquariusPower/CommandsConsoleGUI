@@ -64,7 +64,7 @@ public class ManageSingleInstanceI implements IManager<ISingleInstance>{
 	 * @return
 	 */
 	@Override
-	public boolean add(ISingleInstance objNew) {
+	public boolean addHandled(ISingleInstance objNew) {
 		if(objNew instanceof IMultiInstanceOverride)return false; //a simple skipper is enough
 		
 		InstanceInfo ii = new InstanceInfo();
@@ -94,17 +94,17 @@ public class ManageSingleInstanceI implements IManager<ISingleInstance>{
 		
 		hm.put(ii.getConcreteClassName(), ii);
 		
-		if (objNew instanceof IManaged) {
-			IManaged im = (IManaged) objNew;
-			PrerequisitesNotMetException.assertIsTrue("manager not set", !im.isManagerSet(), im, this);
-			im.setManager(this);
+		if (objNew instanceof IHandled) {
+			IHandled im = (IHandled) objNew;
+//			PrerequisitesNotMetException.assertIsTrue("manager not set", !im.isHasManagers(), im, this);
+			im.addManager(this);
 		}
 		
 		return aList.add(objNew);
 	}
 	
 	@Override
-	public ArrayList<ISingleInstance> getListCopy() {
+	public ArrayList<ISingleInstance> getHandledListCopy() {
 		return new ArrayList<ISingleInstance>(aList);
 	}
 

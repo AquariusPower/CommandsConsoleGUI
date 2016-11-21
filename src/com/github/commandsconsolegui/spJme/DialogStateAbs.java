@@ -415,7 +415,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	protected void initSuccess() {
 		super.initSuccess();
 		
-		GlobalDialogHelperI.i().add(this);
+		GlobalDialogHelperI.i().addHandled(this);
 	}
 	
 	protected boolean initGUI(){

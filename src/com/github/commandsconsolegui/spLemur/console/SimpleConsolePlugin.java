@@ -109,7 +109,7 @@ public class SimpleConsolePlugin implements IReflexFillCfg, ISingleInstance, ICo
 			});
 		}
 		
-		DelegateManagerI.i().add(this);
+		DelegateManagerI.i().addManaged(this);
 //		ManageSingleInstanceI.i().add(this);
 		
 		if(app instanceof SimpleApplication){

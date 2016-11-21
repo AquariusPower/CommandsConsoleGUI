@@ -31,17 +31,17 @@ import java.util.ArrayList;
 /**
  * Basically:
  * - objects that can have many instances shall have a manager
- * - the manager will usually contain a list of such objects
+ * - the manager will contain a list of such objects
  * - the manager can contain fields that are related to all objects, like static fields would be,
  * but we are avoiding static fields now.
  * - managers must be single instances, therefore such class methods will be globably available 
- * thru its .i() single static method
+ * thru its .i() static method
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  * 
- * @param <T> do not extend {@link IManaged}, too much constraint and it not that useful!
+ * @param <T> do not extend {@link IHandled}, too much constraint and it will be not that useful!
  */
 public interface IManager<T> extends ISingleInstance{
-	public abstract boolean add(T objNew);
-	public abstract ArrayList<T> getListCopy();
+	public abstract boolean addHandled(T obj);
+	public abstract ArrayList<T> getHandledListCopy();
 }

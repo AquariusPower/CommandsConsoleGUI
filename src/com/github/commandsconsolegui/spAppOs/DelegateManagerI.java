@@ -29,7 +29,7 @@ package com.github.commandsconsolegui.spAppOs;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.spAppOs.misc.IInstance;
-import com.github.commandsconsolegui.spAppOs.misc.IManaged;
+import com.github.commandsconsolegui.spAppOs.misc.IHandled;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 
@@ -56,6 +56,13 @@ public class DelegateManagerI {
 	ArrayList<ManagerData> amgrd = new ArrayList<ManagerData>();
 	private boolean	bUpdateAllOnceLater;
 	
+	public boolean isContainsManager(IManager imgr){
+		for(ManagerData mgrd:amgrd){
+			if(mgrd.imgr==imgr)return true;
+		}
+		return false;
+	}
+	
 	/**
 	 * will also add the manager to another manager if appliable
 	 * @param imgr
@@ -76,7 +83,7 @@ public class DelegateManagerI {
 		amgrd.add(imgrd);
 		
 //		aobjStillAddedToNoManager.add(imgr);
-		add(imgr,true); //this adds the manager as managed to possible other managers
+		addHandled(imgr,true); //this adds the manager as managed to possible other managers
 		
 		boolean bUpdateAllNow=true;
 		if (imgr instanceof IInstance) {
@@ -90,7 +97,9 @@ public class DelegateManagerI {
 		/**
 		 * this is important to update all manageds to the new manager
 		 */
-		if(bUpdateAllNow)traverseRefreshAllManagedAndManagers();
+		if(bUpdateAllNow){
+			traverseRefreshAllManagedAndManagers();
+		}
 //		for(Object obj:aobjStillAddedToNoManager.toArray()){
 //			add(obj,true);
 //		}
@@ -98,34 +107,42 @@ public class DelegateManagerI {
 	
 	private void traverseRefreshAllManagedAndManagers(){
 		for(ManagerData mgrd:amgrd){
-			for(Object obj:mgrd.imgr.getListCopy()){
-				add(obj,true);
+			for(Object obj:mgrd.imgr.getHandledListCopy()){
+				addHandled(obj,true);
 			}
 		}
 	}
 	
-	public void add(IManaged img){
-		add((Object)img,false);
+	public void addHandled(IHandled imgd){
+		addHandled((Object)imgd,false);
+//		imgd.addManager(imgr);
 	}
 	
 	/**
-	 * this method allows not implementing {@link IManaged} and still be managed.
+	 * this method allows not implementing {@link IHandled} and still be managed.
 	 * @param obj
 	 */
-	public void add(Object obj){
-		add(obj,false);
+	public void addManaged(Object obj){
+		addHandled(obj,false);
 	}
 	
 	ArrayList<Object> aobjStillAddedToNoManager = new ArrayList<Object>();
-	private void add(Object obj, boolean bIgnoreIfNotAdded){
+	private void addHandled(Object obj, boolean bIgnoreIfNotAdded){
 		int iAddCount=0;
 		boolean bAlreadyAddedToAnyManager=false;
 		for(ManagerData mgrd:amgrd){
 			if(mgrd.clManaged.isInstance(obj)){
-				if(mgrd.imgr.getListCopy().contains(obj)){
+				if (obj instanceof IHandled) {
+					IHandled imgd = (IHandled) obj;
+					if(!imgd.getManagerList().contains(mgrd.imgr)){
+						imgd.addManager(mgrd.imgr);
+					}
+				}
+				
+				if(mgrd.imgr.getHandledListCopy().contains(obj)){
 					bAlreadyAddedToAnyManager=true;
 				}else{
-					if(mgrd.imgr.add(obj)){
+					if(mgrd.imgr.addHandled(obj)){
 						iAddCount++;
 					}
 				}
@@ -163,7 +180,7 @@ public class DelegateManagerI {
 		
 		if(aobjStillAddedToNoManager.size()==0)return;
 		for(Object obj:aobjStillAddedToNoManager.toArray()){
-			add(obj,true);
+			addHandled(obj,true);
 		}
 	}
 }

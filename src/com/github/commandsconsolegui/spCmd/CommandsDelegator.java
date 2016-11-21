@@ -347,10 +347,10 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	}
 	
 	public CommandsDelegator() {
-		DelegateManagerI.i().add(this);
+		DelegateManagerI.i().addManaged(this);
 //		ManageSingleInstanceI.i().add(this);
 		
-		rsc.addSuperClassesOf(this, true, true);
+		rsc.addClassesOf(this, true, true);
 		
 		setCommandDelimiter(';');
 		setAliasPrefix('$');
@@ -580,7 +580,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	 */
 	private class PseudoSelfListener implements IReflexFillCfg,IConsoleCommandListener,ISingleInstance{
 		public PseudoSelfListener(){
-			DelegateManagerI.i().add(this);
+			DelegateManagerI.i().addManaged(this);
 //			ManageSingleInstanceI.i().add(this);
 		}
 		@Override
@@ -983,7 +983,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 			bind.setUserCommand(ccl.getPreparedCmdAndParamsListCopyFrom(2));
 			
 //			tmbindList.put(strBindCfg,bind);
-			GlobalManageKeyBindI.i().add(bind);
+			GlobalManageKeyBindI.i().addHandled(bind);
 			
 			setupRecreateFile();
 //			cui().addKeyBind(bind);
@@ -2253,7 +2253,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 			 */
 //			ArrayList<VarCmdFieldAbs> avcf = new ArrayList<VarCmdFieldAbs>();
 			ArrayList<VarCmdFieldAbs> avcfLinkList = new ArrayList<VarCmdFieldAbs>();
-			for(VarCmdFieldAbs vcf:ManageVarCmdFieldI.i().getListCopy()){
+			for(VarCmdFieldAbs vcf:ManageVarCmdFieldI.i().getHandledListCopy()){
 				if(!vcf.isCmd())continue;//avcf.add(vcf);
 //			}
 ////			avcf.addAll(ManageVarCmdFieldI.i().getListCopy(BoolTogglerCmdField.class));
@@ -3111,7 +3111,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	private void createConsoleVarLinkWithField(ConsoleVariable cvar, VarCmdFieldAbs vcfOwner){
 		if(cvar.getRestrictedVarOwner()==null){
 			if(vcfOwner==null){
-				for(VarCmdFieldAbs vcfTmp:ManageVarCmdFieldI.i().getListCopy()){
+				for(VarCmdFieldAbs vcfTmp:ManageVarCmdFieldI.i().getHandledListCopy()){
 					if(!vcfTmp.isVar())continue;
 //					DebugI.i().conditionalBreakpoint(KeyBoundVarField.class.isInstance(vcfTmp));
 //					if(vcfTmp.getUniqueVarId().equals(CommandsHelperI.i().removeRestrictedToken(cvar.getUniqueVarId()))){

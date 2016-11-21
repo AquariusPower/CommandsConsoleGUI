@@ -77,12 +77,12 @@ public class ManageCellRendererI implements IReflexFillCfg,IManager<CellDialogEn
 	
 	private BfdArrayList<CellDialogEntry> a = new BfdArrayList<CellDialogEntry>(){};
 	@Override
-	public boolean add(CellDialogEntry objNew) {
+	public boolean addHandled(CellDialogEntry objNew) {
 		return a.add(objNew);
 	}
 	
 	@Override
-	public ArrayList<CellDialogEntry> getListCopy() {
+	public ArrayList<CellDialogEntry> getHandledListCopy() {
 		return a.getCopy();
 	}
 

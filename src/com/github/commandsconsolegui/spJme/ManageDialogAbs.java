@@ -151,7 +151,7 @@ public abstract class ManageDialogAbs<T extends DialogStateAbs> implements IRefl
 	}
 	
 	@Override
-	public boolean add(T objNew) {
+	public boolean addHandled(T objNew) {
 		return adiagList.add(objNew);
 	}
 	
@@ -160,7 +160,7 @@ public abstract class ManageDialogAbs<T extends DialogStateAbs> implements IRefl
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public BfdArrayList<T> getListCopy() {
+	public BfdArrayList<T> getHandledListCopy() {
 		if(!DelegateManagerI.i().isAmICallingThis()){
 			throw new UnsupportedOperationException("UNSAFE! use the other with filter instead!");
 		}

@@ -387,7 +387,7 @@ public class ManageCallQueueI implements IReflexFillCfg,IManager<ManageCallQueue
 	}
 	
 	@Override
-	public boolean add(CallableX caller) {
+	public boolean addHandled(CallableX caller) {
 		boolean b = aCallList.contains(caller);
 		addCall(caller);
 		return !b;
@@ -482,7 +482,7 @@ public class ManageCallQueueI implements IReflexFillCfg,IManager<ManageCallQueue
 	}
 	
 	@Override
-	public ArrayList<CallableX> getListCopy() {
+	public ArrayList<CallableX> getHandledListCopy() {
 		return new BfdArrayList<ManageCallQueueI.CallableX>(aCallList){}; 
 	}
 }
