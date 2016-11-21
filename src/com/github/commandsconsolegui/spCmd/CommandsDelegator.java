@@ -2136,7 +2136,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	public ArrayList<CommandData> removeAllCmdsOfOwnersBeingDiscarded(){
 		ArrayList<CommandData> acmdRm = new ArrayList<CommandData>();
 		
-		for(Entry<String, CommandData> entry:trmCmddList.entrySet()){//.toArray(new Entry[0])){
+		for(Entry<String, CommandData> entry:trmCmddList.entrySet().toArray(new Entry[0])){
 			CommandData cmd = entry.getValue();
 			if(DiscardableInstanceI.i().isBeingDiscardedRecursiveOwner(cmd)){
 				if(trmCmddList.remove(entry.getKey())==null){

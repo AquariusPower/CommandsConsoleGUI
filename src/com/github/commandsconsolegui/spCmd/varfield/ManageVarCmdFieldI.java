@@ -204,6 +204,17 @@ public class ManageVarCmdFieldI implements IManager<VarCmdFieldAbs>{
 		return hmManagers.get(imgrKey)!=null;
 	}
 	
+	RegisteredClasses rscSetter = new RegisteredClasses();
+	public boolean isVarAllowedSetterContainClassTypeName(String strClassTypeName){
+		return (rscSetter.isContainClassTypeName(strClassTypeName));
+	}
+	/**
+	 * for not {@link IManager}, simple setters that will not contain full handleds lists
+	 */
+	public void addVarAllowedSetter(Object obj){
+		rscSetter.addClassesOf(obj, true, true);
+	}
+	
 	public boolean isVarManagerContainClassTypeName(String strClassTypeName){
 		for(VarMgr vm:hmManagers.values()){
 			if(vm.rscManager.isContainClassTypeName(strClassTypeName)){

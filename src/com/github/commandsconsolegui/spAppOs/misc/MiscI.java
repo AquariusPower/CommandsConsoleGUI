@@ -1097,4 +1097,10 @@ public class MiscI {
 		
 		return false;
 	}
+	
+	public String getEnclosingIfAnonymous(String strClassType){
+		int iAnon=strClassType.indexOf("$");
+		if(iAnon!=-1)strClassType=strClassType.substring(0,iAnon);
+		return strClassType;
+	}
 }

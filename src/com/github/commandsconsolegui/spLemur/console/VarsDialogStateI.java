@@ -27,26 +27,27 @@
 
 package com.github.commandsconsolegui.spLemur.console;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.spAppOs.PkgTopRef;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.spAppOs.misc.IManager;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.spCmd.varfield.FileVarField;
 import com.github.commandsconsolegui.spCmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.spCmd.varfield.ManageVarCmdFieldI;
 import com.github.commandsconsolegui.spCmd.varfield.StringVarField;
 import com.github.commandsconsolegui.spCmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.spCmd.varfield.VarCmdUId;
 import com.github.commandsconsolegui.spJme.AudioUII;
+import com.github.commandsconsolegui.spJme.AudioUII.EAudio;
 import com.github.commandsconsolegui.spJme.DialogStateAbs;
 import com.github.commandsconsolegui.spJme.ManageConditionalStateI;
-import com.github.commandsconsolegui.spJme.AudioUII.EAudio;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.spLemur.dialog.MaintenanceListLemurDialogStateAbs;
 import com.jme3.input.KeyInput;
@@ -61,18 +62,6 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 	public static VarsDialogStateI<Command<Button>> i(){return instance;}
 	
 	private final KeyBoundVarField bindToggleEnable = new KeyBoundVarField(this);
-//	= new KeyBoundVarField(this,KeyInput.KEY_F9)
-//		.setCallerAssigned(new CallableX(this) {
-//			@Override
-//			public Boolean call() {
-////				if(!ConsoleVarsDialogStateI.this.isConfigured())return false;
-////				if(!ConsoleVarsDialogStateI.this.isInitializedProperly())return false;
-//				
-//				requestToggleEnabled();
-//				
-//				return true;
-//			}
-//		});
 	
 	@Override
 	protected boolean modifyEntry(DialogStateAbs<T, ?> diagModal,	DialogListEntryData<T> dledAtModal,	ArrayList<DialogListEntryData<T>> adledAtThisToApplyResultsList) {
@@ -111,6 +100,8 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 	@Override
 	public VarsDialogStateI<T> configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;
+		
+		ManageVarCmdFieldI.i().addVarAllowedSetter(this);
 		
 //		if(hrdiagChoice.getRef()==null){ 
 			//when restarting this, it's child may be already/still there TODO restart child too?
@@ -244,23 +235,33 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 				if (vcfVarEntry.getOwner() instanceof DialogStateAbs) {
 					setParentestParent(dledVarEntry, bConsProj ? dledDiagsCons : dledDiags);
 				}else{
-					if(bConsProj)setParentestParent(dledVarEntry, dledConsProjPackage);
+					if(bConsProj){
+						setParentestParent(dledVarEntry, dledConsProjPackage);
+					}
 				}
 			}
 			
 			// truncate value string
 			String strVal=null;
+			int iShortPreviewValueStringSizeLimit=10;
 			if(vcfVarEntry.isValueNull()){
 				strVal=""+null;
 			}else{
 				strVal=vcfVarEntry.getValueAsString(3);
 	//			if(strVal==null)strVal="";
+				String strEtc="+"; //TODO use 3 dots single character if it exists or some other symbol?
 				if(vcfVarEntry instanceof StringVarField){
 					strVal='"'+strVal+'"';
-					if(strVal.length()>10){
-						String strEtc="+"; //TODO use 3 dots single character if it exists or some other symbol?
-						strVal=strVal.substring(0, 10-strEtc.length())+strEtc;
+				}else
+				if(vcfVarEntry instanceof FileVarField){
+					if(strVal.length()>iShortPreviewValueStringSizeLimit){
+						String[] a = strVal.split(File.separator);
+						strVal=a[a.length-1];
 					}
+				}
+				
+				if(strVal.length()>iShortPreviewValueStringSizeLimit){
+					strVal=strVal.substring(0, iShortPreviewValueStringSizeLimit-strEtc.length())+strEtc;
 				}
 			}
 			

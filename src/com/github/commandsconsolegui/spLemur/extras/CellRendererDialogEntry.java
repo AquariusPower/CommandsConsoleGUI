@@ -273,7 +273,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			
 			btnTree = createButton("Tree", "?", cntrBase, Position.West);
 			btnTree.addCommands(ButtonAction.Click, ctt);
-			btnTree.setUserData(CellDialogEntry.class.getName(), this);
+//			btnTree.setUserData(CellDialogEntry.class.getName(), this);
 			btnTree.setUserData(EUserDataCellEntry.colorFgBkp.s(), btnTree.getColor());
 			
 			btnText = createButton("Text", this.dled.getVisibleText(), cntrBase, Position.Center);
@@ -309,7 +309,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			@Override
 			public void execute(Button source) {
 				@SuppressWarnings("rawtypes")
-				CellDialogEntry cell = (CellDialogEntry)source.getUserData(CellDialogEntry.class.getName());
+				CellDialogEntry cell = MiscJmeI.i().getUserDataPSH(source,CellDialogEntry.class);
 				
 				if(cell.dled.isParent()){
 					cell.dled.toggleExpanded();
@@ -398,11 +398,8 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			Button btn = new Button(strLabel,assignedCellRenderer.strStyle);
 			MiscJmeI.i().retrieveBitmapTextFor(btn).setLineWrapMode(LineWrapMode.NoWrap);
 			btn.setName(strPrefix+"Button"+strId);
-//			btn.setUserData(EUserDataCellEntry.classCellRef.s(),this);
 			MiscJmeI.i().setUserDataPSH(btn,this);
-//			btn.setUserData(dled.getClass().getName(), dled);
 			MiscJmeI.i().setUserDataPSH(btn,dled);
-//			btn.setUserData(assignedCellRenderer.diagParent.getClass().getName(),assignedCellRenderer.diagParent);
 			MiscJmeI.i().setUserDataPSH(btn,assignedCellRenderer.diagParent);
 			CursorEventControl.addListenersToSpatial(btn, DialogMouseCursorListenerI.i());
 			

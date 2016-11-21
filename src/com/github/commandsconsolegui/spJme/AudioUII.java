@@ -43,9 +43,9 @@ import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.spCmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.spCmd.UserCmdStackTrace;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdField;
+import com.github.commandsconsolegui.spCmd.varfield.FileVarField;
 import com.github.commandsconsolegui.spCmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
-import com.github.commandsconsolegui.spCmd.varfield.StringVarField;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.spJme.globals.GlobalRootNodeI;
 import com.jme3.asset.AssetNotFoundException;
@@ -124,14 +124,15 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 	
 	public static class AudioCfg implements IReflexFillCfg, IUniqueId{
 		private String	strUniqueId;
-		private final StringVarField svfFile = new StringVarField(this,"","");
+//		private final StringVarField svfFile = new StringVarField(this,"","");
+		private final FileVarField flSound = new FileVarField(this);
 		private final FloatDoubleVarField fdvVolumeGain = new FloatDoubleVarField(this,1.0,"").setMin(0.0).setMax(1.0);
 		
 		public AudioCfg(String strUId) {
 			this.strUniqueId=strUId;
 		}
-		public String getFile(){return svfFile.getValueAsString();}
-		public void setFile(String strFile){this.svfFile.setObjectRawValue(strFile);}
+		public String getFileName(){return flSound.getValueAsString();}
+		public void setFile(String strFile){this.flSound.setObjectRawValue(strFile);}
 		
 		@Override
 		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
@@ -192,7 +193,7 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 		
 		if(an==null){
 			try{
-				an = setAudio(strAudioId, cfg.getFile());
+				an = setAudio(strAudioId, cfg.getFileName());
 			}catch(IllegalArgumentException e){}
 		}
 		
@@ -371,7 +372,7 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 		if(!super.initAttempt())return false;
 		
 		for(EAudio ea:EAudio.values()){
-			setAudio(ea.toString(), ea.cfg().getFile());
+			setAudio(ea.toString(), ea.cfg().getFileName());
 		}
 		
 		return true;

@@ -54,7 +54,7 @@ import com.simsilica.lemur.Command;
  *
  * @param <T>
  */
-public final class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceLemurDialogStateAbs<T,ChoiceVarDialogState<T>> implements IManager<VarCmdFieldAbs>{
+public final class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceLemurDialogStateAbs<T,ChoiceVarDialogState<T>> {
 	public static class CfgParm extends ChoiceLemurDialogStateAbs.CfgParm{
 		public CfgParm(Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow,
@@ -66,14 +66,15 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 	CfgParm cfg;
 	
 	public ChoiceVarDialogState() {
-		DelegateManagerI.i().addManager(this, VarCmdFieldAbs.class);
+//		DelegateManagerI.i().addManager(this, VarCmdFieldAbs.class);
 	}
 	
 	@Override
 	public ChoiceVarDialogState<T> configure(ICfgParm icfg) {
 		this.cfg=(CfgParm)icfg;
 		
-		ManageVarCmdFieldI.i().putVarManager(this,VarCmdFieldAbs.class);
+		ManageVarCmdFieldI.i().addVarAllowedSetter(this);
+//		ManageVarCmdFieldI.i().putVarManager(this,VarCmdFieldAbs.class);
 		
 		super.configure(icfg);
 		
@@ -369,13 +370,13 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 		return this;
 	}
 
-	@Override
-	public boolean addHandled(VarCmdFieldAbs objNew) {
-		return false;
-	}
-
-	@Override
-	public ArrayList<VarCmdFieldAbs> getHandledListCopy() {
-		return null;
-	}
+//	@Override
+//	public boolean addHandled(VarCmdFieldAbs objNew) {
+//		return false;
+//	}
+//
+//	@Override
+//	public ArrayList<VarCmdFieldAbs> getHandledListCopy() {
+//		return null;
+//	}
 }

@@ -629,6 +629,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 			if(rscConsVar.isContainClassTypeName(ste.getClassName()))break; //it's public set access is restricted to CommandsDelegator composite
 			if(GlobalCommandsDelegatorI.i().getRegisteredClasses().isContainClassTypeName(ste.getClassName()))break; //it's public set access is restricted to CommandsDelegator composite
 			if(ManageVarCmdFieldI.i().isVarManagerContainClassTypeName(ste.getClassName()))break;
+			if(ManageVarCmdFieldI.i().isVarAllowedSetterContainClassTypeName(ste.getClassName()))break;
 //			if(rscManager.isContainClassTypeName(ste.getClassName()))break;
 			
 			throw new PrerequisitesNotMetException("not being set at owner class type", ste.getClassName(), getOwner().getClass().getName(), this);

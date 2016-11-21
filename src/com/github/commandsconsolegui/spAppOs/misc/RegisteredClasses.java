@@ -74,7 +74,7 @@ public class RegisteredClasses<E>{
 		rhtmSubClass.getRef().put(cl.getName(),cl);
 	}
 	public boolean isContainClassTypeName(String strClassTypeKey){
-		Class<E> cl = (rhtmSubClass.getRef().get(strClassTypeKey));
+		Class<E> cl = (rhtmSubClass.getRef().get(MiscI.i().getEnclosingIfAnonymous(strClassTypeKey)));
 		return ( cl != null );
 	}
 	public ArrayList<E> getTargetList(){
