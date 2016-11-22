@@ -34,12 +34,14 @@ import com.github.commandsconsolegui.spCmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.spJme.ManageMouseCursorI;
 import com.github.commandsconsolegui.spJme.OSAppJme;
 import com.github.commandsconsolegui.spJme.globals.GlobalGUINodeI;
+import com.github.commandsconsolegui.spJme.globals.GlobalSimpleAppRefI;
+import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI;
+import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI.EffectElectricity;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spLemur.console.LemurDiagFocusHelperStateI;
 import com.github.commandsconsolegui.spLemur.globals.GlobalLemurDialogHelperI;
-import com.github.commandsconsolegui.spLemur.misc.LemurEffectsI;
-import com.github.commandsconsolegui.spLemur.misc.LemurEffectsI.EEffChannel;
-import com.github.commandsconsolegui.spLemur.misc.LemurEffectsI.EEffState;
+import com.github.commandsconsolegui.spLemur.misc.EffectsLemurI.EEffChannel;
+import com.github.commandsconsolegui.spLemur.misc.EffectsLemurI.EEffState;
 import com.github.commandsconsolegui.spLemur.misc.MiscLemurStateI;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -49,12 +51,9 @@ import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.Panel;
-import com.simsilica.lemur.anim.Animation;
 import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.BorderLayout.Position;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
-import com.simsilica.lemur.effect.Effect;
-import com.simsilica.lemur.effect.EffectInfo;
 
 /**
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
@@ -111,6 +110,9 @@ public class OSAppLemur extends OSAppJme {
 		
 		if(!bStartedShowEffect){
 			EEffChannel.ChnGrowShrink.play(EEffState.Show, cntrAlert, getPos(EElement.Alert,null));
+			
+			createEffectLink();
+			
 			bStartedShowEffect=true;
 		}
 		
@@ -166,6 +168,21 @@ public class OSAppLemur extends OSAppJme {
 //			fZ + LemurDiagFocusHelperStateI.i().getDialogZDisplacement()*2));
 //	}
 	
+	private void createEffectLink() {
+//		Vector3f v3fMouse = ManageMouseCursorI.i().getMouseCursorPositionCopyAsV3f();
+//		v3fMouse.z=cntrAlert.getLocalTranslation().z;
+		EffectsJmeStateI.i().addEffect(
+			new EffectElectricity(
+				this,
+				getPos(EElement.Effects, ManageMouseCursorI.i().getMouseCursorPositionCopyAsV3f()), //v3fMouse,
+				new Vector3f(0,0,0),
+				ColorRGBA.Red,
+				GlobalSimpleAppRefI.i().getGuiNode()
+			)
+			.setFollowTarget(cntrAlert, null)
+		);
+	}
+
 	private void updateAlertPosSize(){
 		Vector3f v3fWdwSize = MiscJmeI.i().getAppWindowSize();
 		MiscLemurStateI.i().setPreferredSizeSafely(pnlBlocker, v3fWdwSize, true);
@@ -187,9 +204,11 @@ public class OSAppLemur extends OSAppJme {
 	private static enum EElement{
 		Blocker,
 		Alert,
+		Effects,
 	}
 	
-	private Vector3f getPos(EElement e, Vector3f v3fLblSize){
+	private Vector3f getPos(EElement e, Vector3f v3fRef){
+		if(v3fRef!=null)v3fRef=v3fRef.clone(); //safety
 		Vector3f v3fWdwSize = MiscJmeI.i().getAppWindowSize();
 		
 		/**
@@ -202,26 +221,33 @@ public class OSAppLemur extends OSAppJme {
 		
 		Vector3f v3fPos = null;
 		float fZDispl = LemurDiagFocusHelperStateI.i().getDialogZDisplacement();
-		switch(e){ // attention how the order/index is a multiplier of the displacement!
+		fZ += fZDispl*(e.ordinal()+1); // attention how the order/index is a multiplier of the displacement!
+		switch(e){ 
 			case Blocker:
-				v3fPos = new Vector3f(0, v3fWdwSize.y,
-						fZ + fZDispl*1);
+				v3fPos = new Vector3f(0, v3fWdwSize.y,fZ);
+//					fZ + fZDispl*1);
+				break;
+			case Effects:
+				v3fPos = new Vector3f(v3fRef);
+				v3fPos.z=fZ;
+//					fZ + fZDispl*2;
 				break;
 			case Alert:
-				if(v3fLblSize==null){
-					v3fLblSize = v3fWdwSize.mult(0.5f);
+				Vector3f v3fAlertSize=v3fRef;
+				if(v3fAlertSize==null){
+					v3fAlertSize = v3fWdwSize.mult(0.5f);
 				}
 				
 				if(btgAlertStayOnCenter.b()){
 					v3fPos = new Vector3f(v3fWdwSize.x/2f,v3fWdwSize.y/2f,0);
-					v3fPos.x-=v3fLblSize.x/2f;
-					v3fPos.y+=v3fLblSize.y/2f;
+					v3fPos.x-=v3fAlertSize.x/2f;
+					v3fPos.y+=v3fAlertSize.y/2f;
 				}else{
-					v3fPos = ManageMouseCursorI.i().getPosWithMouseOnCenter(v3fLblSize);
+					v3fPos = ManageMouseCursorI.i().getPosWithMouseOnCenter(v3fAlertSize);
 				}
 				
-				v3fPos.set(new Vector3f(v3fPos.x, v3fPos.y,
-						fZ + fZDispl*2));
+				v3fPos.set(new Vector3f(v3fPos.x, v3fPos.y, fZ));
+//					fZ + fZDispl*3));
 				
 				break;
 		}
@@ -346,6 +372,8 @@ public class OSAppLemur extends OSAppJme {
 		bStartedShowEffect=false;
 		
 		bAlertPanelIsReady=false;
+		
+		EffectsJmeStateI.i().removeEffectsForOwner(this);
 		
 		setAlertSpatial(null);
 	}

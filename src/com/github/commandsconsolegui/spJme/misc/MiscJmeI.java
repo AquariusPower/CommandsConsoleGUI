@@ -35,9 +35,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.nio.BufferUnderflowException;
+import java.nio.FloatBuffer;
+import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 
 import jme3tools.savegame.SaveGame;
 
@@ -57,7 +60,6 @@ import com.github.commandsconsolegui.spAppOs.misc.IHandleExceptions;
 import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableWeak;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
-import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI.EStringMatchMode;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
@@ -92,12 +94,16 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
+import com.jme3.scene.Mesh.Mode;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
+import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.system.JmeSystem;
 import com.jme3.system.JmeSystem.StorageFolderType;
 import com.jme3.texture.Texture2D;
+import com.jme3.util.BufferUtils;
 
 /**
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
@@ -1020,5 +1026,48 @@ public class MiscJmeI implements IReflexFillCfg,ISingleInstance,IConfigure{
 		v3fPos.z=v3fSize.z;
 		return v3fPos;
 	}
-
+	
+	public Geometry createMultiLineGeom(Vector3f[] av3f, ColorRGBA color, float fLineWidth){
+		Geometry geom = new Geometry();
+		geom.setMesh(createMultiLineMesh(av3f));
+		geom.setMaterial(retrieveMaterialUnshadedColor(color));
+		geom.getMaterial().getAdditionalRenderState().setLineWidth(fLineWidth);
+		return geom;
+	}
+	
+	HashMap<Integer,Material> hmMatUnshadedColor = new HashMap<Integer,Material>(); 
+	public Material retrieveMaterialUnshadedColor(ColorRGBA color){
+		int i = color.asIntRGBA();
+		Material mat = hmMatUnshadedColor.get(i);
+		if(mat==null){
+			mat = new Material(GlobalAppRefI.i().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+			mat.setColor("Color", color);
+			hmMatUnshadedColor.put(i,mat);
+		}
+		return mat;
+	}
+	
+	/**
+	 * 
+	 * @param av3f each dot from the multi-line
+	 * @return
+	 */
+	public Mesh createMultiLineMesh(Vector3f[] av3f){
+		Mesh mesh = new Mesh();
+		mesh.setMode(Mode.LineStrip);
+		
+		FloatBuffer fbuf = BufferUtils.createFloatBuffer(av3f);
+		mesh.setBuffer(Type.Position,3,fbuf);
+		
+		ShortBuffer sbuf = BufferUtils.createShortBuffer(av3f.length);
+		for(Short si=0;si<sbuf.capacity();si++){ //Mode.LineStrip
+			sbuf.put(si);
+		}
+		mesh.setBuffer(Type.Index,1,sbuf);
+		mesh.updateBound();
+		mesh.updateCounts();
+		
+		return mesh;
+	}
+	
 }

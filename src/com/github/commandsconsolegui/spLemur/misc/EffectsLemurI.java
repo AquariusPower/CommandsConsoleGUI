@@ -50,9 +50,9 @@ import com.simsilica.lemur.effect.EffectInfo;
 /**
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public class LemurEffectsI implements IReflexFillCfg, IConfigure<LemurEffectsI> {
-	private static LemurEffectsI instance = new LemurEffectsI();
-	public static LemurEffectsI i(){return instance;}
+public class EffectsLemurI implements IReflexFillCfg, IConfigure<EffectsLemurI> {
+	private static EffectsLemurI instance = new EffectsLemurI();
+	public static EffectsLemurI i(){return instance;}
 	
 	public static enum EEffState{
 		Show,
@@ -106,7 +106,7 @@ public class LemurEffectsI implements IReflexFillCfg, IConfigure<LemurEffectsI> 
 		}
 
 		public String getName(){
-			return ReflexFillI.i().assertAndGetField(LemurEffectsI.i(), this).getName();
+			return ReflexFillI.i().assertAndGetField(EffectsLemurI.i(), this).getName();
 		}
 		
 		public Vector3f getMoveStartAt(Panel target){
@@ -171,7 +171,7 @@ public class LemurEffectsI implements IReflexFillCfg, IConfigure<LemurEffectsI> 
 	}
 
 	@Override
-	public LemurEffectsI configure(ICfgParm icfg) {
+	public EffectsLemurI configure(ICfgParm icfg) {
 		bConfigured=true;
 		return this;
 	}

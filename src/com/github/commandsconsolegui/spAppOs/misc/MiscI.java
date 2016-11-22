@@ -53,13 +53,11 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import javax.naming.directory.InvalidAttributeValueException;
-
-import com.github.commandsconsolegui.spCmd.CommandData;
 
 /**
  * 
@@ -1102,5 +1100,10 @@ public class MiscI {
 		int iAnon=strClassType.indexOf("$");
 		if(iAnon!=-1)strClassType=strClassType.substring(0,iAnon);
 		return strClassType;
+	}
+	
+	private final Random rnd = new Random(System.currentTimeMillis());
+	public float randomMinusOneToPlusOne(){
+		return (rnd.nextFloat()*2f)-1f;
 	}
 }

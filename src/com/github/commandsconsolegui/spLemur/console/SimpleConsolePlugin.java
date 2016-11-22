@@ -63,6 +63,7 @@ import com.github.commandsconsolegui.spJme.globals.GlobalGUINodeI;
 import com.github.commandsconsolegui.spJme.globals.GlobalJmeAppOSI;
 import com.github.commandsconsolegui.spJme.globals.GlobalRootNodeI;
 import com.github.commandsconsolegui.spJme.globals.GlobalSimpleAppRefI;
+import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spLemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.spLemur.MouseCursorListenerAbs;
@@ -71,7 +72,7 @@ import com.github.commandsconsolegui.spLemur.dialog.FileChoiceDialogStateI;
 import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialogI;
 import com.github.commandsconsolegui.spLemur.globals.GlobalLemurConsoleStateI;
 import com.github.commandsconsolegui.spLemur.globals.GlobalLemurDialogHelperI;
-import com.github.commandsconsolegui.spLemur.misc.LemurEffectsI;
+import com.github.commandsconsolegui.spLemur.misc.EffectsLemurI;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
@@ -198,14 +199,18 @@ public class SimpleConsolePlugin implements IReflexFillCfg, ISingleInstance, ICo
 			AudioUII.i().configure(new AudioUII.CfgParm());
   	}
   	
-  	if(!LemurEffectsI.i().isConfigured()){
-  		LemurEffectsI.i().configure(null);
+  	if(!EffectsLemurI.i().isConfigured()){
+  		EffectsLemurI.i().configure(null);
   	}
   	
   	if(!FileChoiceDialogStateI.i().isConfigured()){
   		FileChoiceDialogStateI.i().configure(new FileChoiceDialogStateI.CfgParm());
   	}
 		
+  	if(!EffectsJmeStateI.i().isConfigured()){
+  		EffectsJmeStateI.i().configure(new EffectsJmeStateI.CfgParm());
+  	}
+  	
 //		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
 	
 		bConfigured = true;
