@@ -58,14 +58,14 @@ import com.simsilica.lemur.Command;
 /**
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/><https://sourceforge.net/u/teike/profile/>
  */
-public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceListLemurDialogStateAbs<T,VarsDialogStateI<T>> {
+public class VarsDialogStateI<ACT extends Command<Button>> extends MaintenanceListLemurDialogStateAbs<ACT,VarsDialogStateI<ACT>> {
 	private static VarsDialogStateI<Command<Button>>	instance=new VarsDialogStateI<Command<Button>>();
 	public static VarsDialogStateI<Command<Button>> i(){return instance;}
 	
 	private final KeyBoundVarField bindToggleEnable = new KeyBoundVarField(this);
 	
 	@Override
-	protected boolean modifyEntry(DialogStateAbs<T, ?> diagModal,	DialogListEntryData<T> dledAtModal,	ArrayList<DialogListEntryData<T>> adledAtThisToApplyResultsList) {
+	protected boolean modifyEntry(DialogStateAbs diagModal,	DialogListEntryData dledAtModal,	ArrayList<DialogListEntryData> adledAtThisToApplyResultsList) {
 		String strUserTypedValue = diagModal.getInputTextAsUserTypedValue();
 		if(strUserTypedValue==null)return false; //was a filter
 		
@@ -78,7 +78,7 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 		
 		// can be null
 		boolean bChangesMade=false;
-		for(DialogListEntryData<T> dledToCfg:adledAtThisToApplyResultsList){
+		for(DialogListEntryData dledToCfg:adledAtThisToApplyResultsList){
 			VarCmdFieldAbs vcf = (VarCmdFieldAbs)dledToCfg.getLinkedObj();
 			vcf.setObjectRawValue(strUserTypedValue);
 			bChangesMade=true;
@@ -99,7 +99,7 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 	}
 	private CfgParm	cfg;
 	@Override
-	public VarsDialogStateI<T> configure(ICfgParm icfg) {
+	public VarsDialogStateI<ACT> configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;
 		
 		ManageVarCmdFieldI.i().addVarAllowedSetter(this);
@@ -141,7 +141,7 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 	}
 	
 	@Override
-	protected VarsDialogStateI<T> getThis() {
+	protected VarsDialogStateI<ACT> getThis() {
 		return this;
 	}
 	
@@ -156,7 +156,7 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 	}
 	private CmdBtnChangeValue cbcv = new CmdBtnChangeValue();
 	
-	private void changeValue(DialogListEntryData<T> dled){
+	private void changeValue(DialogListEntryData dled){
 		AudioUII.i().playOnUserAction(EAudio.SelectEntry);
 		
 		VarCmdFieldAbs vcf = (VarCmdFieldAbs)dled.getLinkedObj();
@@ -173,7 +173,7 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 	}
 	
 	@Override
-	protected void actionMainAtEntry(DialogListEntryData<T> dledSelected) {
+	protected void actionMainAtEntry(DialogListEntryData dledSelected) {
 		Object obj = dledSelected.getLinkedObj();
 		if(obj instanceof BoolTogglerCmdField){
 			changeValue(dledSelected);
@@ -227,9 +227,9 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 		PkgTopRef,
 		;
 	}
-	private DialogListEntryData<T>	dledConsProjPackage;
-	private DialogListEntryData<T>	dledDiagsCons;
-	private DialogListEntryData<T>	dledDiags;
+	private DialogListEntryData	dledConsProjPackage;
+	private DialogListEntryData	dledDiagsCons;
+	private DialogListEntryData	dledDiags;
 	
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -241,8 +241,8 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 			if(vcfVarEntry.getUniqueVarId()==null)continue;
 			
 			// check if already at the list
-			DialogListEntryData<T> dledVarEntry = null;
-			for(DialogListEntryData<T> dled:getCompleteEntriesListCopy()){
+			DialogListEntryData dledVarEntry = null;
+			for(DialogListEntryData dled:getCompleteEntriesListCopy()){
 				Object obj = dled.getLinkedObj();
 				if (obj instanceof EGroupKeys)continue;
 				VarCmdFieldAbs vcfAtListEntry = ((VarCmdFieldAbs)obj);
@@ -269,21 +269,23 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 			
 			// truncate value string
 			String strVal=null;
+			String strValFull=null;
 			int iShortPreviewValueStringSizeLimit=10;
 			if(vcfVarEntry.isValueNull()){
-				strVal=""+null;
+				strValFull=strVal=""+null;
 			}else{
-				strVal=vcfVarEntry.getValueAsString(3);
+				strValFull=strVal=vcfVarEntry.getValueAsString(3);
 	//			if(strVal==null)strVal="";
 				String strEtc="+"; //TODO use 3 dots single character if it exists or some other symbol?
 				if(vcfVarEntry instanceof StringVarField){
 					strVal='"'+strVal+'"';
 				}else
 				if(vcfVarEntry instanceof FileVarField){
-					if(strVal.length()>iShortPreviewValueStringSizeLimit){
-						String[] a = strVal.split(File.separator);
-						strVal=a[a.length-1];
-					}
+					strVal = ((FileVarField)vcfVarEntry).getFile().getName();
+//					if(strVal.length()>iShortPreviewValueStringSizeLimit){
+//						String[] a = strVal.split(File.separator);
+//						strVal=a[a.length-1];
+//					}
 				}
 				
 				if(strVal.length()>iShortPreviewValueStringSizeLimit){
@@ -294,15 +296,15 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 			// update custom buttons as values may have changed
 			//TODO compare if values changed?
 			dledVarEntry.clearCustomButtonActions();
-			dledVarEntry.addCustomButtonAction(strVal, (T)cbcv);
+			dledVarEntry.addCustomButtonAction(strVal, (ACT)cbcv, strVal.equals(strValFull)?null:strValFull);
 		}
 		
 		
 		super.updateList(); //MiscI.i().getClassTreeFor(this)
 	}
 	
-	private void setParentestParent(DialogListEntryData<T> dledEntry, DialogListEntryData<T> dledParent){
-		DialogListEntryData<T> dledParentest = dledEntry.getParentest();
+	private void setParentestParent(DialogListEntryData dledEntry, DialogListEntryData dledParent){
+		DialogListEntryData dledParentest = dledEntry.getParentest();
 		
 		if (dledParentest.getLinkedObj() instanceof EGroupKeys) {
 			EGroupKeys egk = (EGroupKeys) dledParentest.getLinkedObj();
@@ -327,21 +329,21 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 	 * @param vcf
 	 * @return
 	 */
-	private DialogListEntryData<T> createNewVarEntry(VarCmdFieldAbs vcf){
+	private DialogListEntryData createNewVarEntry(VarCmdFieldAbs vcf){
 		VarCmdUId vcuidCopy = vcf.getIdTmpCopy();
 		
-		DialogListEntryData<T> dledVarEntryParent = null;
+		DialogListEntryData dledVarEntryParent = null;
 		
 		if(vcuidCopy.getConcreteClassSimpleName().equals(vcuidCopy.getDeclaringClassSimpleName())){
 			dledVarEntryParent = createParentEntry(
 					vcuidCopy.getDeclaringClassSimpleName(),
 					EGroupKeys.ParentDeclaringClass);
 		}else{
-			DialogListEntryData<T> dledDeclaringClassParent = createParentEntry(
+			DialogListEntryData dledDeclaringClassParent = createParentEntry(
 				vcuidCopy.getConcreteClassSimpleName()+vcuidCopy.getDeclaringClassSimpleName(),
 				EGroupKeys.ParentDeclaringClass);
 			
-			DialogListEntryData<T> dledConcreteClassParent = createParentEntry(
+			DialogListEntryData dledConcreteClassParent = createParentEntry(
 				vcuidCopy.getConcreteClassSimpleName(),
 				EGroupKeys.ParentConcreteClass);
 			
@@ -361,7 +363,7 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 		strVarId=strVarId.replaceFirst(vcuidCopy.getDeclaringClassSimpleName(), "");
 		strVarId=strVarId.replaceFirst(vcuidCopy.getConcreteClassSimpleName(), "");
 		
-		DialogListEntryData<T> dledVar = new DialogListEntryData<T>(this);
+		DialogListEntryData dledVar = new DialogListEntryData(this);
 		String strExtraInfo="";
 		if(vcf instanceof FileVarField){
 			strExtraInfo="(file)";
@@ -373,17 +375,17 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 		return dledVar;
 	}
 	
-	private DialogListEntryData<T> createParentEntry(String strParentTextKey, EGroupKeys egk){
+	private DialogListEntryData createParentEntry(String strParentTextKey, EGroupKeys egk){
 		// prepare declaring class as tree parent  
-		DialogListEntryData<T> dledParent=null;
-		for(DialogListEntryData<T> dled:getCompleteEntriesListCopy()){
+		DialogListEntryData dledParent=null;
+		for(DialogListEntryData dled:getCompleteEntriesListCopy()){
 			if(dled.getTextValue().equals(strParentTextKey)){
 				dledParent=dled;
 				break;
 			}
 		}
 		if(dledParent==null){
-			dledParent=new DialogListEntryData<T>(this);
+			dledParent=new DialogListEntryData(this);
 			dledParent.setText(strParentTextKey,egk);
 			addEntry(dledParent);
 		}
@@ -396,21 +398,21 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 		if(!super.initAttempt())return false;
 		
 		// the top package as parent:
-		dledConsProjPackage = new DialogListEntryData<T>(this);
+		dledConsProjPackage = new DialogListEntryData(this);
 		dledConsProjPackage.setText("(Package: "+PkgTopRef.class.getPackage().getName()+")", EGroupKeys.PkgTopRef);//PkgTopRef.class);
 		
-		dledDiagsCons = new DialogListEntryData<T>(this);
+		dledDiagsCons = new DialogListEntryData(this);
 		dledDiagsCons.setText("(DialogsCons)",EGroupKeys.DialogsCons);
 		dledDiagsCons.setParent(dledConsProjPackage);
 		
-		dledDiags = new DialogListEntryData<T>(this);
+		dledDiags = new DialogListEntryData(this);
 		dledDiags.setText("(Dialogs)",EGroupKeys.Dialogs);
 		
 		return true;
 	}
 	
 	@Override
-	public VarsDialogStateI<T> copyToSelfValuesFrom(VarsDialogStateI<T> casDiscarding) {
+	public VarsDialogStateI<ACT> copyToSelfValuesFrom(VarsDialogStateI<ACT> casDiscarding) {
 		cfg.setRestartCopyToSelfAllEntries(false);
 		
 		super.copyToSelfValuesFrom(casDiscarding);

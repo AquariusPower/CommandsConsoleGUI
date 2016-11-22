@@ -50,9 +50,9 @@ import com.simsilica.lemur.Command;
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
- * @param <T>
+ * @param <ACT>
  */
-public final class ChoiceVarDialogState<T extends Command<Button>> extends ChoiceLemurDialogStateAbs<T,ChoiceVarDialogState<T>> {
+public final class ChoiceVarDialogState<ACT extends Command<Button>> extends ChoiceLemurDialogStateAbs<ACT,ChoiceVarDialogState<ACT>> {
 	public static class CfgParm extends ChoiceLemurDialogStateAbs.CfgParm{
 		public CfgParm(Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow,
@@ -68,7 +68,7 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 	}
 	
 	@Override
-	public ChoiceVarDialogState<T> configure(ICfgParm icfg) {
+	public ChoiceVarDialogState<ACT> configure(ICfgParm icfg) {
 		this.cfg=(CfgParm)icfg;
 		
 		ManageVarCmdFieldI.i().addVarAllowedSetter(this);
@@ -80,7 +80,7 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 	}
 	
 	private VarCmdFieldAbs	vcf;
-	private DialogListEntryData<T>	dledAtParent;
+	private DialogListEntryData<ACT,VarCmdFieldAbs>	dledAtParent;
 //	private FileChoiceDialogState	diagFile;
 	
 //	@Override
@@ -96,7 +96,7 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 	protected boolean enableAttempt() {
 		if(!super.enableAttempt())return false;
 		
-		ArrayList<DialogListEntryData<T>> adledAtParentList = getParentReferencedDledListCopy();
+		ArrayList<DialogListEntryData> adledAtParentList = getParentReferencedDledListCopy();
 		if(adledAtParentList.size()==0){
 			GlobalCommandsDelegatorI.i().dumpWarnEntry("no entry selected at parente dialog", this, getParentDialog());
 			return false;
@@ -140,7 +140,7 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 	}
 	
 	@Override
-	public ChoiceVarDialogState<T> copyToSelfValuesFrom(ChoiceVarDialogState<T> discarding) {
+	public ChoiceVarDialogState<ACT> copyToSelfValuesFrom(ChoiceVarDialogState<ACT> discarding) {
 		super.copyToSelfValuesFrom(discarding);
 		
 		PrerequisitesNotMetException.assertNotNull("var", discarding.vcf);
@@ -162,53 +162,53 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 		}
 	}
 	CmdApplyValueAtInput cavai = new CmdApplyValueAtInput();
-	private DialogListEntryData<T>	dledRawValue;
+	private DialogListEntryData<ACT,VarCmdFieldAbs>	dledRawValue;
 	private boolean	bListIsFilled;
-	private DialogListEntryData<T>	dledVals;
-	private DialogListEntryData<T>	dledInfo;
+	private DialogListEntryData<ACT,VarCmdFieldAbs>	dledVals;
+	private DialogListEntryData<ACT,VarCmdFieldAbs>	dledInfo;
 	private RefHolder	hchVar;
-	private DialogListEntryData<T>	dledValue;
+	private DialogListEntryData<ACT,VarCmdFieldAbs>	dledValue;
 	protected boolean	bUpdateFromSliderChange;
 	
 	private void createInfoEntries(){
-		DialogListEntryData<T> dledNew = null;
+		DialogListEntryData<ACT,VarCmdFieldAbs> dledNew = null;
 		
-		dledNew = new DialogListEntryData<T>(this);
+		dledNew = new DialogListEntryData<ACT,VarCmdFieldAbs>(this);
 		dledNew.setText(vcf.getUniqueVarId(), vcf);
 		dledNew.setParent(dledInfo);
 		addEntry(dledNew).addCustomButtonAction("UniqueId",getCmdDummy());
 		
-		dledNew = new DialogListEntryData<T>(this);
+		dledNew = new DialogListEntryData<ACT,VarCmdFieldAbs>(this);
 		dledNew.setText(vcf.getSimpleId(), vcf);
 		dledNew.setParent(dledInfo);
 		addEntry(dledNew).addCustomButtonAction("SimpleId",getCmdDummy());
 			
-		dledNew = new DialogListEntryData<T>(this);
+		dledNew = new DialogListEntryData<ACT,VarCmdFieldAbs>(this);
 		dledNew.setText(vcf.getHelp(), vcf);
 		dledNew.setParent(dledInfo);
 		addEntry(dledNew).addCustomButtonAction("Help",getCmdDummy());
 	}
 	
 	private void createValueEntries(){
-		DialogListEntryData<T> dledNew = null;
+		DialogListEntryData<ACT,VarCmdFieldAbs> dledNew = null;
 		
-		dledNew = new DialogListEntryData<T>(this);
+		dledNew = new DialogListEntryData<ACT,VarCmdFieldAbs>(this);
 		dledNew.setText(vcf.getRawValueDefault(), vcf);
 		dledNew.setAddVisibleQuotes(vcf instanceof StringVarField);
 		dledNew.setParent(dledVals);
-		addEntry(dledNew).addCustomButtonAction("DefaultValueRaw->",(T)cavai);
+		addEntry(dledNew).addCustomButtonAction("DefaultValueRaw->",(ACT)cavai);
 		
-		dledRawValue = new DialogListEntryData<T>(this);
+		dledRawValue = new DialogListEntryData<ACT,VarCmdFieldAbs>(this);
 		dledRawValue.setText(vcf.getRawValue(), vcf);
 		dledRawValue.setAddVisibleQuotes(vcf instanceof StringVarField);
 		dledRawValue.setParent(dledVals);
-		addEntry(dledRawValue).addCustomButtonAction("ValueRaw->",(T)cavai);
+		addEntry(dledRawValue).addCustomButtonAction("ValueRaw->",(ACT)cavai);
 		
-		dledValue = new DialogListEntryData<T>(this);
+		dledValue = new DialogListEntryData<ACT,VarCmdFieldAbs>(this);
 		dledValue.setText(vcf.getValueAsString(3), vcf);
 		dledValue.setAddVisibleQuotes(vcf instanceof StringVarField);
 		dledValue.setParent(dledVals);
-		addEntry(dledValue).addCustomButtonAction("Value->",(T)cavai);
+		addEntry(dledValue).addCustomButtonAction("Value->",(ACT)cavai);
 		
 		if(vcf instanceof NumberVarFieldAbs){
 			createValueNumberEntries();
@@ -225,21 +225,21 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 	}
 	
 	private void createValueNumberEntries(){
-		DialogListEntryData<T> dledNew = null;
+		DialogListEntryData<ACT,VarCmdFieldAbs> dledNew = null;
 		
 		final NumberVarFieldAbs<Number,?> varn = (NumberVarFieldAbs<Number,?>)vcf;
 		
 		if(varn.getMin()!=null && varn.getMax()!=null){
-			dledNew = new DialogListEntryData<T>(this);
+			dledNew = new DialogListEntryData<ACT,VarCmdFieldAbs>(this);
 			dledNew.setParent(dledVals);
-			addEntry(dledNew.setText(varn.getMin(), vcf)).addCustomButtonAction("MinValue->",(T)cavai);
+			addEntry(dledNew.setText(varn.getMin(), vcf)).addCustomButtonAction("MinValue->",(ACT)cavai);
 			
-			dledNew = new DialogListEntryData<T>(this);
+			dledNew = new DialogListEntryData<ACT,VarCmdFieldAbs>(this);
 			dledNew.setParent(dledVals);
-			addEntry(dledNew.setText(varn.getMax(), vcf)).addCustomButtonAction("MaxValue->",(T)cavai);
+			addEntry(dledNew.setText(varn.getMax(), vcf)).addCustomButtonAction("MaxValue->",(ACT)cavai);
 			
 			///////////// the slider
-			final DialogListEntryData<T> dledSlider = new DialogListEntryData<T>(this);
+			final DialogListEntryData<ACT,VarCmdFieldAbs> dledSlider = new DialogListEntryData<ACT,VarCmdFieldAbs>(this);
 			
 			CallableX caller = new CallableX(this){
 				@Override
@@ -291,10 +291,10 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 		if(!bListIsFilled){
 //			clearList();
 			
-			DialogListEntryData<T> dledNew = null;
+			DialogListEntryData<ACT,VarCmdFieldAbs> dledNew = null;
 			
 			if(dledInfo==null){
-				dledInfo = new DialogListEntryData<T>(this);
+				dledInfo = new DialogListEntryData<ACT,VarCmdFieldAbs>(this);
 				dledInfo.setText("Info:", vcf);
 				dledInfo.setTreeExpanded(true);
 			}
@@ -303,7 +303,7 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 			createInfoEntries();
 			
 			if(dledVals==null){
-				dledVals = new DialogListEntryData<T>(this);
+				dledVals = new DialogListEntryData<ACT,VarCmdFieldAbs>(this);
 				dledVals.setText("Value:", vcf);
 				dledVals.setTreeExpanded(true);
 			}
@@ -356,7 +356,7 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 	}
 
 	@Override
-	protected ChoiceVarDialogState<T> getThis() {
+	protected ChoiceVarDialogState<ACT> getThis() {
 		return this;
 	}
 

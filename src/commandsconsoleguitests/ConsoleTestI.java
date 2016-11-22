@@ -209,15 +209,15 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		diagList.addEntryQuick(null);
 		diagList.addEntryQuick(null);
 		
-		DialogListEntryData<T> dleS1 = diagList.addEntryQuick("section 1");
+		DialogListEntryData dleS1 = diagList.addEntryQuick("section 1");
 		diagList.addEntryQuick(null).setParent(dleS1);
 		diagList.addEntryQuick(null).setParent(dleS1);
 		diagList.addEntryQuick(null).setParent(dleS1);
 		
-		DialogListEntryData<T> dleS2 = diagList.addEntryQuick("section 2");
+		DialogListEntryData dleS2 = diagList.addEntryQuick("section 2");
 		diagList.addEntryQuick(null).setParent(dleS2);
 		diagList.addEntryQuick(null).setParent(dleS2);
-		DialogListEntryData<T> dleS21 = diagList.addEntryQuick("section 2.1").setParent(dleS2);
+		DialogListEntryData dleS21 = diagList.addEntryQuick("section 2.1").setParent(dleS2);
 		diagList.addEntryQuick(null).setParent(dleS21);
 		diagList.addEntryQuick(null).setParent(dleS21);
 		diagList.addEntryQuick(null).setParent(dleS21);

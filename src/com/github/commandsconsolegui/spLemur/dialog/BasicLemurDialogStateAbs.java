@@ -44,7 +44,7 @@ import com.simsilica.lemur.GuiGlobals;
 /**
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  */
-public abstract class BasicLemurDialogStateAbs<T,THIS extends BasicLemurDialogStateAbs<T,THIS>> extends LemurDialogStateAbs<T,THIS>{
+public abstract class BasicLemurDialogStateAbs<ACT,THIS extends BasicLemurDialogStateAbs<ACT,THIS>> extends LemurDialogStateAbs<ACT,THIS>{
 	private final StringCmdField scfAddEntry = new StringCmdField(this);
 	private CfgParm	cfg;
 	
@@ -92,7 +92,7 @@ public abstract class BasicLemurDialogStateAbs<T,THIS extends BasicLemurDialogSt
 	}
 	
 	@SuppressWarnings("unchecked")
-	public DialogListEntryData<T> getDledFrom(Spatial spt){
+	public DialogListEntryData getDledFrom(Spatial spt){
 		return MiscJmeI.i().getUserDataPSH(spt, DialogListEntryData.class);
 	}
 	
@@ -110,8 +110,8 @@ public abstract class BasicLemurDialogStateAbs<T,THIS extends BasicLemurDialogSt
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public DialogListEntryData<T> addEntryQuick(String strText){
-		DialogListEntryData<T> dle = new DialogListEntryData<T>(this);
+	public DialogListEntryData addEntryQuick(String strText){
+		DialogListEntryData dle = new DialogListEntryData(this);
 		if(strText==null){
 			strText=this.getUniqueId()+": Quick filler temp entry: "
 //				+MiscI.i().getDateTimeForFilename(true)
@@ -122,7 +122,7 @@ public abstract class BasicLemurDialogStateAbs<T,THIS extends BasicLemurDialogSt
 		dle.setText(strText, null);
 		
 		if(isOptionChoiceSelectionMode()){
-			dle.addCustomButtonAction("<-",(T)cmdSel);
+			dle.addCustomButtonAction("<-",(ACT)cmdSel);
 		}
 		
 		super.addEntry(dle);
@@ -149,15 +149,15 @@ public abstract class BasicLemurDialogStateAbs<T,THIS extends BasicLemurDialogSt
 			String strText = cd.getCurrentCommandLine().paramString(1);
 			String strParentUId = cd.getCurrentCommandLine().paramString(2);
 			
-			DialogListEntryData<T> dleParent = null;
-			for(DialogListEntryData<T> dle:getCompleteEntriesListCopy()){
+			DialogListEntryData dleParent = null;
+			for(DialogListEntryData dle:getCompleteEntriesListCopy()){
 				if(dle.getUId().equalsIgnoreCase(strParentUId)){
 					dleParent=dle;
 					break;
 				}
 			}
 			
-			DialogListEntryData<T> dleNew = addEntryQuick(strText);
+			DialogListEntryData dleNew = addEntryQuick(strText);
 			if(dleParent!=null){
 				dleNew.setParent(dleParent);
 			}
@@ -173,7 +173,7 @@ public abstract class BasicLemurDialogStateAbs<T,THIS extends BasicLemurDialogSt
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public boolean execTextDoubleClickActionFor(DialogListEntryData<T> data) {
+	public boolean execTextDoubleClickActionFor(DialogListEntryData data) {
 		if(isOptionSelectionMode())throw new PrerequisitesNotMetException("Option mode should not reach this method.");
 		
 		actionMainAtEntry(data);

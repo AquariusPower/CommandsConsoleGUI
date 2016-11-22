@@ -40,8 +40,8 @@ import com.simsilica.lemur.Command;
  *
  */
 public abstract class QuestionLemurDialogStateAbs<T extends Command<Button>, THIS extends QuestionLemurDialogStateAbs<T,THIS>> extends BasicLemurDialogStateAbs<T,THIS> {
-	private DialogListEntryData<T>	dledYes;
-	private DialogListEntryData<T>	dledNo;
+	private DialogListEntryData	dledYes;
+	private DialogListEntryData	dledNo;
 	
 	public static class CfgParm extends BasicLemurDialogStateAbs.CfgParm{
 		public CfgParm(
@@ -84,11 +84,11 @@ public abstract class QuestionLemurDialogStateAbs<T extends Command<Button>, THI
 		return true;
 	}
 	
-	public boolean isYes(DialogListEntryData<T> dled){
+	public boolean isYes(DialogListEntryData dled){
 		return dled==dledYes;
 	}
 	
-	public boolean isNo(DialogListEntryData<T> dled){
+	public boolean isNo(DialogListEntryData dled){
 		return dled==dledNo;
 	}
 

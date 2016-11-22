@@ -29,19 +29,17 @@ package com.github.commandsconsolegui.spLemur.dialog;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
 import com.github.commandsconsolegui.spAppOs.misc.DebugI;
-import com.github.commandsconsolegui.spAppOs.misc.HoldRestartable;
+import com.github.commandsconsolegui.spAppOs.misc.DebugI.EDebugKey;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
 import com.github.commandsconsolegui.spAppOs.misc.WorkAroundI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
-import com.github.commandsconsolegui.spAppOs.misc.DebugI.EDebugKey;
 import com.github.commandsconsolegui.spAppOs.misc.WorkAroundI.BugFixBoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
@@ -51,10 +49,10 @@ import com.github.commandsconsolegui.spCmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.spJme.AudioUII;
-import com.github.commandsconsolegui.spJme.DialogStateAbs;
-import com.github.commandsconsolegui.spJme.ManageMouseCursorI;
 import com.github.commandsconsolegui.spJme.AudioUII.EAudio;
+import com.github.commandsconsolegui.spJme.DialogStateAbs;
 import com.github.commandsconsolegui.spJme.ManageConditionalStateI.CompositeControl;
+import com.github.commandsconsolegui.spJme.ManageMouseCursorI;
 import com.github.commandsconsolegui.spJme.ManageMouseCursorI.EMouseCursorButton;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
@@ -64,9 +62,9 @@ import com.github.commandsconsolegui.spLemur.console.LemurDiagFocusHelperStateI;
 import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialogI.DialogStyleElementId;
 import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialogI.DummyEffect;
 import com.github.commandsconsolegui.spLemur.extras.CellRendererDialogEntry;
-import com.github.commandsconsolegui.spLemur.extras.DialogMainContainer;
 import com.github.commandsconsolegui.spLemur.extras.CellRendererDialogEntry.CellDialogEntry;
 import com.github.commandsconsolegui.spLemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserDataCellEntry;
+import com.github.commandsconsolegui.spLemur.extras.DialogMainContainer;
 import com.github.commandsconsolegui.spLemur.misc.MiscLemurStateI;
 import com.github.commandsconsolegui.spLemur.misc.MiscLemurStateI.BindKey;
 import com.jme3.input.KeyInput;
@@ -100,6 +98,7 @@ import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.event.KeyAction;
 import com.simsilica.lemur.event.KeyActionListener;
 import com.simsilica.lemur.grid.GridModel;
+import com.simsilica.lemur.list.CellRenderer;
 import com.simsilica.lemur.list.SelectionModel;
 import com.simsilica.lemur.style.ElementId;
 
@@ -114,12 +113,12 @@ import com.simsilica.lemur.style.ElementId;
 *
 */
 //public abstract class LemurDialogGUIStateAbs<T,CS extends LemurDialogGUIStateAbs.CompositeSavableLemur,R extends LemurDialogGUIStateAbs<T,CS,R>> extends BaseDialogStateAbs<T,CS,R> {//implements IWorkAroundBugFix{
-public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,THIS>> extends DialogStateAbs<T,THIS> {//implements IWorkAroundBugFix{
+public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<ACT,THIS>> extends DialogStateAbs<ACT,THIS> {//implements IWorkAroundBugFix{
 	private boolean bOverrideNormalDialog = false;
 	private Label	lblTitle;
 	private Label	lblTextInfo;
 //	private ListBox<DialogListEntryData<T>>	lstbxEntriesToSelect;
-	private VersionedList<DialogListEntryData<T>>	vlVisibleEntriesList = new VersionedList<DialogListEntryData<T>>();
+	private VersionedList<DialogListEntryData>	vlVisibleEntriesList = new VersionedList<DialogListEntryData>();
 	private int	iVisibleRows;
 //	private Integer	iEntryHeightPixels; //TODO this is init is failing why? = 20; 
 	private Vector3f	v3fEntryListSizeIni;
@@ -135,7 +134,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 	private ArrayList<BindKey>	abkList = new ArrayList<BindKey>();
 	private KeyActionListener	actSimpleActions;
 	private final TimedDelayVarField tdListboxSelectorAreaBlinkFade = new TimedDelayVarField(1f,"");
-	private CellRendererDialogEntry<T>	cr;
+	private CellRendererDialogEntry<ACT>	cr;
 	private final BoolTogglerCmdField btgEffectListEntries = new BoolTogglerCmdField(this, true);
 //	private final TimedDelayVarField tdEffectListEachEntry = new TimedDelayVarField(this, 0.05f, "");
 //	private float fEffectListEntryDelay=0.05f;
@@ -235,7 +234,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		return storeCfgAndReturnSelf(cfg);
 	}
 	
-	public void selectAndChoseOption(DialogListEntryData<T> data){
+	public void selectAndChoseOption(DialogListEntryData data){
 		if(!isOptionSelectionMode())throw new PrerequisitesNotMetException("not option selection mode");
 		if(data==null)throw new PrerequisitesNotMetException("invalid null data");
 		
@@ -376,8 +375,8 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 //		float fListPerc = 1.0f - cfg.fInfoHeightPercentOfDialog;
 //		v3fEntryListSize.y *= fListPerc;
 		v3fEntryListSizeIni.y -= getNorthContainer().getPreferredSize().y;//fInfoHeightPixels;
-		setMainList(new ListBox<DialogListEntryData<T>>(
-			new VersionedList<DialogListEntryData<T>>(), 
+		setMainList(new ListBox<DialogListEntryData>(
+			new VersionedList<DialogListEntryData>(), 
 			getCellRenderer(), 
 			getDiagStyle()));
 		selectionModel = getMainList().getSelectionModel();
@@ -387,7 +386,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		cntrCenterMain.addChild(getMainList(), BorderLayout.Position.Center);
 		
 //		vlstrEntriesList.add("(Empty list)");
-		getMainList().setModel((VersionedList<DialogListEntryData<T>>)vlVisibleEntriesList);
+		getMainList().setModel((VersionedList<DialogListEntryData>)vlVisibleEntriesList);
 		
 //		LemurMiscHelpersStateI.i().bugFix(null, LemurMiscHelpersStateI.i().btgBugFixListBoxSelectorArea, getListEntries());
 		
@@ -888,12 +887,12 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 //	}
 
 	@Override
-	protected ListBox<DialogListEntryData<T>> getMainList() {
-		return (ListBox<DialogListEntryData<T>>)super.getMainList();
+	protected ListBox<DialogListEntryData> getMainList() {
+		return (ListBox<DialogListEntryData>)super.getMainList();
 	}
 	
-	protected CellRendererDialogEntry<T> getCellRenderer(){
-		if(cr==null)cr = new CellRendererDialogEntry<T>(getDiagStyle(),this);// bOptionSelectionMode),
+	protected CellRendererDialogEntry getCellRenderer(){
+		if(cr==null)cr = new CellRendererDialogEntry(getDiagStyle(),this);// bOptionSelectionMode),
 		return cr;
 	}
 	
@@ -942,7 +941,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 	}
 	
 	@Override
-	public DialogListEntryData<T> getSelectedEntryData() {
+	public DialogListEntryData getSelectedEntryData() {
 		Integer iSel = selectionModel.getSelection();
 		if(iSel==null)return null;
 		return	vlVisibleEntriesList.get(iSel);
@@ -983,12 +982,12 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 	//* call {@link #updateList(ArrayList)} from the method overriding this
 	//*/
 	
-	private void addWithParents(DialogListEntryData<T> dled){
+	private void addWithParents(DialogListEntryData dled){
 		if(vlVisibleEntriesList.contains(dled))return;
 		
 		vlVisibleEntriesList.add(dled);
 		
-		DialogListEntryData<T> dledParent = dled.getParent();
+		DialogListEntryData dledParent = dled.getParent();
 		while(dledParent!=null){
 			if(!vlVisibleEntriesList.contains(dledParent)){
 				vlVisibleEntriesList.add(vlVisibleEntriesList.indexOf(dled),dledParent);
@@ -1001,13 +1000,13 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 	@Override
 	protected void updateList(){
 //		updateList(adleCompleteEntriesList);
-		DialogListEntryData<T> dledLastSelectedBkp = getLastSelected();
+		DialogListEntryData dledLastSelectedBkp = getLastSelected();
 //		MiscLemurStateI.i().setSizeSafely(lblTextInfo,-1,100)
 		resetList();
 		
 		prepareTree();
 		
-		for(DialogListEntryData<T> dled:getCompleteEntriesListCopy()){
+		for(DialogListEntryData dled:getCompleteEntriesListCopy()){
 			if(!getLastFilter().isEmpty()){
 				if(dled.getVisibleText().toLowerCase().contains(getLastFilter())){
 					addWithParents(dled);
@@ -1061,8 +1060,8 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 	 * @param dled
 	 * @return
 	 */
-	private boolean checkAllParentTreesExpanded(DialogListEntryData<T> dled){
-		DialogListEntryData<T> dledParent = dled.getParent();
+	private boolean checkAllParentTreesExpanded(DialogListEntryData dled){
+		DialogListEntryData dledParent = dled.getParent();
 		while(dledParent!=null){
 			if(!dledParent.isTreeExpanded())return false;
 			dledParent = dledParent.getParent();
@@ -1102,15 +1101,15 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		bRefreshScroll=false;
 	}
 	
-	protected ArrayList<CellDialogEntry<T>> getVisibleCellEntries(){
-		ArrayList<CellDialogEntry<T>> acell = new ArrayList<CellDialogEntry<T>>();
+	protected ArrayList<CellDialogEntry<ACT>> getVisibleCellEntries(){
+		ArrayList<CellDialogEntry<ACT>> acell = new ArrayList<CellDialogEntry<ACT>>();
 		
 		GridPanel gp = getMainList().getGridPanel();
 		for(int iC=0;iC<gp.getVisibleColumns();iC++){
 			for(int iR=0;iR<gp.getVisibleRows();iR++){
 				Panel pnl = gp.getCell(gp.getRow()+iR, gp.getColumn()+iC);
 				if (pnl instanceof CellDialogEntry) {
-					CellDialogEntry<T> cell = (CellDialogEntry<T>) pnl;
+					CellDialogEntry<ACT> cell = (CellDialogEntry<ACT>) pnl;
 					acell.add(cell);
 				}
 			}
@@ -1120,7 +1119,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 	}
 	
 	protected boolean simpleUpdateVisibleCells(float tpf){
-		for(CellDialogEntry<T> cell:getVisibleCellEntries()){
+		for(CellDialogEntry<ACT> cell:getVisibleCellEntries()){
 			cell.simpleUpdateThisCell(tpf);
 		}
 		return true;
@@ -1419,8 +1418,8 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		selectionModel.setSelection(i);
 //		dleLastSelected = vlEntriesList.get(i);
 		
-		DialogListEntryData<T> dled = vlVisibleEntriesList.get(i);
-		DialogListEntryData<T> dledParent = dled.getParent();
+		DialogListEntryData dled = vlVisibleEntriesList.get(i);
+		DialogListEntryData dledParent = dled.getParent();
 		lblSelectedEntryStatus.setText(""
 			+"i="+i+", "
 			+"uid="+dled.getUId()+", "
@@ -1431,7 +1430,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 //		LemurMiscHelpersStateI.i().bugFix(null, LemurMiscHelpersStateI.i().btgBugFixListBoxSelectorArea, getListEntries());
 		MiscLemurStateI.i().listboxSelectorAsUnderline(getMainList());
 	}
-	public void selectEntry(DialogListEntryData<T> dledSelectRequested) {
+	public void selectEntry(DialogListEntryData dledSelectRequested) {
 		int i=vlVisibleEntriesList.indexOf(dledSelectRequested);
 		if(i>=0){
 			setSelectedEntryIndex(i);
@@ -1439,6 +1438,8 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		}else{
 			throw new PrerequisitesNotMetException("data not present on the list", dledSelectRequested, getMainList());
 		}
+		
+		bRefreshScroll=true;
 	}
 	
 	/**
@@ -1482,11 +1483,11 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 //		return iSel==null?-1:iSel;
 	}
 
-	public abstract boolean execTextDoubleClickActionFor(DialogListEntryData<T> dled);
+	public abstract boolean execTextDoubleClickActionFor(DialogListEntryData dled);
 
 	public abstract boolean execActionFor(EMouseCursorButton e, Spatial capture);
 
-	protected void updateSelected(DialogListEntryData<T> dledPreviouslySelected){
+	protected void updateSelected(DialogListEntryData dledPreviouslySelected){
 		if(dledPreviouslySelected==null)return;
 		
 		int i = vlVisibleEntriesList.indexOf(dledPreviouslySelected);
@@ -1497,14 +1498,14 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		}
 	}
 	@Override
-	protected void updateSelected(final DialogListEntryData<T> dledAbove, final DialogListEntryData<T> dledParentTmp){
+	protected void updateSelected(final DialogListEntryData dledAbove, final DialogListEntryData dledParentTmp){
 		/**
 		 * need to wait it actually get selected
 		 */
 		ManageCallQueueI.i().addCall(new CallableX(this) {
 			@Override
 			public Boolean call() {
-				DialogListEntryData<T> dledParent = dledParentTmp;
+				DialogListEntryData dledParent = dledParentTmp;
 				
 				if(vlVisibleEntriesList.contains(dledAbove)){
 					if(dledAbove.equals(dledParent)){
@@ -1559,7 +1560,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 //	private void prepareEffectListEntries(boolean bApplyNow) {
 //		bRunningEffectAtAllListEntries=true;
 		
-		for(CellDialogEntry<T> cell:getVisibleCellEntries()){
+		for(CellDialogEntry<ACT> cell:getVisibleCellEntries()){
 			MiscJmeI.i().setScaleXY(cell, fMinScale, 1f);
 		}
 //		GridPanel gp = getMainList().getGridPanel();
@@ -1592,7 +1593,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 //		int iCountConcurrent = 0;
 		
 		float fLastCalculatedEntryScale = 0f;
-		for(CellDialogEntry<T> cell:getVisibleCellEntries()){
+		for(CellDialogEntry<ACT> cell:getVisibleCellEntries()){
 //		for(int iC=0;iC<gp.getVisibleColumns();iC++){
 //			for(int iR=0;iR<gp.getVisibleRows();iR++){
 //				Panel pnl = gp.getCell(iR, iC);
@@ -1659,8 +1660,8 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		MiscLemurStateI.i().lineWrapDisableForListboxEntries(lstbx);
 	}
 	
-	public T getCmdDummy() {
-		return (T) MiscLemurStateI.i().getCmdDummy();
+	public ACT getCmdDummy() {
+		return (ACT) MiscLemurStateI.i().getCmdDummy();
 	}
 	
 	enum EEffectId{
@@ -1795,13 +1796,13 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 	 * 
 	 * @return a new list of parent's dialogs
 	 */
-	public ArrayList<LemurDialogStateAbs<T,?>> getParentsDialogList() {
-		ArrayList<LemurDialogStateAbs<T,?>> adiag = new ArrayList<LemurDialogStateAbs<T,?>>();
+	public ArrayList<LemurDialogStateAbs<ACT,?>> getParentsDialogList() {
+		ArrayList<LemurDialogStateAbs<ACT,?>> adiag = new ArrayList<LemurDialogStateAbs<ACT,?>>();
 		
-		LemurDialogStateAbs<T,?> diag = (LemurDialogStateAbs<T,?>)super.getParentDialog();
+		LemurDialogStateAbs<ACT,?> diag = (LemurDialogStateAbs<ACT,?>)super.getParentDialog();
 		while(diag!=null){
 			adiag.add(diag);
-			diag = (LemurDialogStateAbs<T,?>)diag.getParentDialog();
+			diag = (LemurDialogStateAbs<ACT,?>)diag.getParentDialog();
 		}
 		
 		return adiag;

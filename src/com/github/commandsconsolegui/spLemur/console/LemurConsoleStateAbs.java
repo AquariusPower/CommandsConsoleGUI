@@ -1044,7 +1044,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 	}
 
 	@Override
-	protected void updateSelected(DialogListEntryData<T> dledAbove, DialogListEntryData<T> dledParentTmp) {
+	protected void updateSelected(DialogListEntryData dledAbove, DialogListEntryData dledParentTmp) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("method not implemented yet");
 	}
@@ -3645,7 +3645,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 	}
 	
 	@Override
-	public DialogListEntryData<T> getSelectedEntryData() {
+	public DialogListEntryData getSelectedEntryData() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -3772,7 +3772,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 //	protected abstract Float getStatsHeight();
 	
 	@Override
-	public boolean execTextDoubleClickActionFor(DialogListEntryData<T> dled) {
+	public boolean execTextDoubleClickActionFor(DialogListEntryData dled) {
 		throw new UnsupportedOperationException("method not implemented yet");
 	}
 
@@ -3781,19 +3781,4 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 		throw new UnsupportedOperationException("method not implemented yet");
 	}
 	
-//	@Override
-//	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
-//		if(fld.getDeclaringClass()!=ConsoleStateAbs.class)return super.getFieldValue(fld);
-//		return fld.get(this);
-//	}
-//	@Override
-//	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
-//		if(fld.getDeclaringClass()!=ConsoleStateAbs.class){super.setFieldValue(fld,value);return;}
-//		fld.set(this,value);
-//	}
-	
-//	@Override
-//	public void infoSystemTopOverride(String str) {
-//		LemurDiagFocusHelperStateI.i().requestFocus(spt);
-//	}
 }

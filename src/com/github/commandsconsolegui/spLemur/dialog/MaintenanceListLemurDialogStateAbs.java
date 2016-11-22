@@ -103,13 +103,13 @@ public abstract class MaintenanceListLemurDialogStateAbs<T extends Command<Butto
 	public void applyResultsFromModalDialog() {
 		DialogStateAbs<T,?> diagModal = getChildDiagModalInfoCurrent().getDiagModal();
 		T cmdRequestedAtThisDiag = getChildDiagModalInfoCurrent().getCmdAtParent();
-		ArrayList<DialogListEntryData<T>> adledToApplyResultsList = getChildDiagModalInfoCurrent().getParentReferencedDledListCopy();
+		ArrayList<DialogListEntryData> adledToApplyResultsList = getChildDiagModalInfoCurrent().getParentReferencedDledListCopy();
 		
 		boolean bChangesMade = false;
-		for(DialogListEntryData<T> dledAtModal:diagModal.getDataSelectionListCopy()){
+		for(DialogListEntryData<T,?> dledAtModal:diagModal.getDataSelectionListCopy()){
 				if(cmdRequestedAtThisDiag.equals(cmdDel)){
 					if(diagModal instanceof QuestionLemurDialogStateAbs){
-						QuestionLemurDialogStateAbs<T,?> qds = (QuestionLemurDialogStateAbs<T,?>)diagModal;
+						QuestionLemurDialogStateAbs qds = (QuestionLemurDialogStateAbs)diagModal;
 						if(qds.isYes(dledAtModal)){
 							bChangesMade = deleteEntry(adledToApplyResultsList);
 							
@@ -147,18 +147,18 @@ public abstract class MaintenanceListLemurDialogStateAbs<T extends Command<Butto
 	 * @param adledToApplyResultsList
 	 * @return
 	 */
-	protected boolean modifyEntry(DialogStateAbs<T,?> diagModal, DialogListEntryData<T> dledAtModal, ArrayList<DialogListEntryData<T>> adledToApplyResultsList) {
+	protected boolean modifyEntry(DialogStateAbs diagModal, DialogListEntryData dledAtModal, ArrayList<DialogListEntryData> adledToApplyResultsList) {
 		boolean bChangesMade=false;
-		for(DialogListEntryData<T> dledToCfg:adledToApplyResultsList){
+		for(DialogListEntryData<T,?> dledToCfg:adledToApplyResultsList){
 			dledToCfg.updateTextTo(dledAtModal.getTextValue());
 			bChangesMade=true;
 		}
 		return bChangesMade;
 	}
 
-	protected boolean deleteEntry(ArrayList<DialogListEntryData<T>> adledToApplyResultsList) {
+	protected boolean deleteEntry(ArrayList<DialogListEntryData> adledToApplyResultsList) {
 		boolean bChangesMade = false;
-		for(DialogListEntryData<T> dledToApplyResults:adledToApplyResultsList){
+		for(DialogListEntryData<T,?> dledToApplyResults:adledToApplyResultsList){
 			removeEntry(dledToApplyResults);
 			bChangesMade=true;
 		}
@@ -172,7 +172,7 @@ public abstract class MaintenanceListLemurDialogStateAbs<T extends Command<Butto
 	}
 	
 	@Override
-	protected void actionMainAtEntry(DialogListEntryData<T> dledSelected) {
+	protected void actionMainAtEntry(DialogListEntryData<T,?> dledSelected) {
 		if(cfg.getDiagChoice()!=null){
 			super.actionMainAtEntry(dledSelected);
 			openModalDialog(getDiagChoice(dledSelected).getUniqueId(), dledSelected, (T)cmdCfg);
@@ -186,7 +186,7 @@ public abstract class MaintenanceListLemurDialogStateAbs<T extends Command<Butto
 		@SuppressWarnings("unchecked")
 		@Override
 		public void execute(Button btn) {
-			DialogListEntryData<T> dled = getDledFrom(btn);
+			DialogListEntryData<T,?> dled = getDledFrom(btn);
 			
 			if(dled.isParent()){
 //				CustomDialogGUIState.this.setDataToApplyModalChoice(data);
@@ -205,8 +205,8 @@ public abstract class MaintenanceListLemurDialogStateAbs<T extends Command<Butto
 	CommandDel cmdDel = new CommandDel();
 	
 	@Override
-	public DialogListEntryData<T> addEntryQuick(String strText) {
-		DialogListEntryData<T> dled = super.addEntryQuick(strText);
+	public DialogListEntryData<T,?> addEntryQuick(String strText) {
+		DialogListEntryData<T,?> dled = super.addEntryQuick(strText);
 		/**
 		 * this order matters
 		 */

@@ -32,22 +32,19 @@ import java.util.ArrayList;
 import java.util.Map.Entry;
 
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.spAppOs.misc.WorkAroundI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
-import com.github.commandsconsolegui.spAppOs.misc.WorkAroundI.BugFixBoolTogglerCmdField;
-import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdField;
-import com.github.commandsconsolegui.spCmd.varfield.StringVarField;
+import com.github.commandsconsolegui.spAppOs.misc.WorkAroundI;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData;
+import com.github.commandsconsolegui.spJme.extras.DialogListEntryData.CustomAction;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData.SliderValueData;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spLemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.spLemur.dialog.LemurDialogStateAbs;
-import com.github.commandsconsolegui.spLemur.dialog.LemurDialogStateAbs.SaveLmrDiag;
 import com.github.commandsconsolegui.spLemur.misc.MiscLemurStateI;
 import com.jme3.font.LineWrapMode;
 import com.jme3.math.ColorRGBA;
@@ -72,17 +69,17 @@ import com.simsilica.lemur.list.CellRenderer;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryData<T>>, IReflexFillCfg {
+public class CellRendererDialogEntry<ACT> implements CellRenderer<DialogListEntryData<ACT,?>>, IReflexFillCfg {
 //	private static StringVarField svfTreeDepthToken;
 //	private static BoolTogglerCmdField	btgShowTreeUId;
 	
 	private float fCellHeightMult = 1f;
 	private String	strStyle;
-	private LemurDialogStateAbs<T,?>	diagParent;
+	private LemurDialogStateAbs<ACT,?>	diagParent;
 //	private boolean	bOptionChoiceMode;
 	public String	strLastCellUId="0";
 	
-	public CellRendererDialogEntry(String strStyle, LemurDialogStateAbs<T,?> diag){//, boolean bOptionChoiceMode) {
+	public CellRendererDialogEntry(String strStyle, LemurDialogStateAbs<ACT,?> diag){//, boolean bOptionChoiceMode) {
 		this.strStyle=strStyle;
 		this.diagParent=diag;
 //		this.bOptionChoiceMode=bOptionChoiceMode;
@@ -102,7 +99,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 //		}
 	}
 	
-	public static class CellDialogEntry<T> extends Container implements IReflexFillCfg {
+	public static class CellDialogEntry<ACT> extends Container implements IReflexFillCfg {
 		public static enum EUserDataCellEntry{
 			colorFgBkp,
 //			classCellRef,
@@ -118,8 +115,8 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		
 //		private Button	btnCfg;
 //		private Button btnSelect;
-		private DialogListEntryData<T>	dled;
-		private CellRendererDialogEntry<T>	assignedCellRenderer;
+		private DialogListEntryData<ACT,?>	dled;
+		private CellRendererDialogEntry<ACT>	assignedCellRenderer;
 		private String	strPrefix = "Cell";
 //		private String	strColorFgBkpKey = "ColorFgBkp";
 		private Container	cntrCustomButtons;
@@ -127,11 +124,11 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 
 		private SliderValueData	svd;
 		
-		public LemurDialogStateAbs<T,?> getDialogOwner(){
+		public LemurDialogStateAbs<ACT,?> getDialogOwner(){
 			return assignedCellRenderer.diagParent;
 		}
 		
-		public DialogListEntryData<T> getDialogListEntryData(){
+		public DialogListEntryData<ACT,?> getDialogListEntryData(){
 			return dled;
 		}
 		
@@ -192,7 +189,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			String strDepthSeparator = "/";
 			
 			// tree depth
-			DialogListEntryData<T> dledParent = dled.getParent();
+			DialogListEntryData<ACT,?> dledParent = dled.getParent();
 			while(dledParent!=null){
 				if(ManageCellRendererI.i().btgShowTreeUId.b()){
 					strDepth = dledParent.getUId()+strDepthSeparator
@@ -231,7 +228,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		}
 		
 		@SuppressWarnings("unchecked")
-		public CellDialogEntry(CellRendererDialogEntry<T> parentCellRenderer, DialogListEntryData<T> dledToSet){
+		public CellDialogEntry(CellRendererDialogEntry<ACT> parentCellRenderer, DialogListEntryData<ACT,?> dledToSet){
 			super(new BorderLayout(), parentCellRenderer.strStyle);
 			
 			this.setName(strPrefix+"MainContainer");
@@ -321,8 +318,8 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 		CommandTreeToggle ctt = new CommandTreeToggle();
 		
 //		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public void updateWithEntry(DialogListEntryData<T> dled){
-			DialogListEntryData<T> dledOld = this.dled;
+		public void updateWithEntry(DialogListEntryData<ACT,?> dled){
+			DialogListEntryData<ACT,?> dledOld = this.dled;
 			this.dled=dled;
 			
 			// tree button
@@ -346,15 +343,15 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			
 			// check if buttons key and value changed
 			if(!bButtonsChanged){
-				ArrayList<Entry<String, T>> aenActionsListOld = dledOld.getCustomButtonsActionsListCopy();
-				ArrayList<Entry<String, T>> aenActionsList = this.dled.getCustomButtonsActionsListCopy();
+				ArrayList<Entry<String,CustomAction<ACT>>> aenActionsListOld = dledOld.getCustomButtonsActionsListCopy();
+				ArrayList<Entry<String,CustomAction<ACT>>> aenActionsList = this.dled.getCustomButtonsActionsListCopy();
 				if(aenActionsListOld.size()==aenActionsList.size()){
 					for(int i=0;i<aenActionsList.size();i++){
-						Entry<String,T> enOld = aenActionsListOld.get(i);
-						Entry<String,T> en = aenActionsList.get(i);
+						Entry<String,CustomAction<ACT>> enOld = aenActionsListOld.get(i);
+						Entry<String,CustomAction<ACT>> en = aenActionsList.get(i);
 						if(
 							!en.getKey().equals(enOld.getKey()) ||
-							!en.getValue().equals(enOld.getValue())
+							!en.getValue().getAction().equals(enOld.getValue().getAction())
 						){
 							bButtonsChanged = true;
 							break;
@@ -369,7 +366,7 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 			if(bButtonsChanged){
 				cntrCustomButtons.clearChildren();
 				
-				ArrayList<Entry<String,T>> aenList = this.dled.getCustomButtonsActionsListCopy();
+				ArrayList<Entry<String,CustomAction<ACT>>> aenList = this.dled.getCustomButtonsActionsListCopy();
 				int iLastIndex = aenList.size()-1;
 				
 				int iExtra=0;
@@ -379,9 +376,10 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 				}
 				
 				for(int i=iLastIndex; i>=0; i--){
-					Entry<String, T> entry = aenList.get(i);
+					Entry<String,CustomAction<ACT>> entry = aenList.get(i);
 					Button btn = createButton(entry.getKey(), "["+entry.getKey()+"]", cntrCustomButtons, i);
-					btn.addCommands(ButtonAction.Click, (Command<Button>)entry.getValue());
+					btn.addCommands(ButtonAction.Click, (Command<Button>)entry.getValue().getAction());
+					MiscJmeI.i().setPopupHelp(btn, entry.getValue().getPopupHint());
 				}
 			}
 		}
@@ -543,11 +541,11 @@ public class CellRendererDialogEntry<T> implements CellRenderer<DialogListEntryD
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public Panel getView(DialogListEntryData<T> dled, boolean selected, Panel existing) {
+	public Panel getView(DialogListEntryData<ACT,?> dled, boolean selected, Panel existing) {
     if( existing == null ) {
-      existing = new CellDialogEntry<T>(this,dled);
+      existing = new CellDialogEntry<ACT>(this,dled);
 	  } else {
-      ((CellDialogEntry<T>)existing).updateWithEntry(dled);
+      ((CellDialogEntry<ACT>)existing).updateWithEntry(dled);
 	  }
 	  return existing;
 	}

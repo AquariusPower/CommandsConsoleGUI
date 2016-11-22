@@ -35,12 +35,12 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
 import com.github.commandsconsolegui.spAppOs.misc.HoldRestartable;
 import com.github.commandsconsolegui.spAppOs.misc.IHasOwnerInstance;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spJme.AudioUII;
 import com.github.commandsconsolegui.spJme.DialogStateAbs;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData.SliderValueData.ESliderKey;
@@ -59,20 +59,45 @@ import com.jme3.export.Savable;
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
- * @param <T> is the action class for buttons
+ * @param <ACT> is the action class for buttons
  */
-public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogStateAbs>{ //IDiscardableInstance
+public class DialogListEntryData<ACT,LINK> implements Savable,IHasOwnerInstance<DialogStateAbs>{ 
 //	private static String strLastUniqueId = "0";
 	
 	private String	strUniqueId;
 	private HoldRestartable<DialogStateAbs> hrdiagOwner = null; //new HoldRestartable<DialogStateAbs>();
 	
-	private HashMap<String,T> hmCustomButtonsActions = new HashMap<String,T>();
-	private Object	objLinked;
+	public static class CustomAction<ACT>{
+		private String strLabelTextId;
+		private ACT action;
+		private String strPopupHint;
+		
+		public ACT getAction() {
+			return action;
+		}
+		private void setAction(ACT action) {
+			this.action = action;
+		}
+		public String getPopupHint() {
+			return strPopupHint;
+		}
+		private void setPopupHint(String strPopupHint) {
+			this.strPopupHint = strPopupHint;
+		}
+		public String getLabelTextId() {
+			return strLabelTextId;
+		}
+		private void setLabelTextId(String strLabelTextId) {
+			this.strLabelTextId = strLabelTextId;
+		}
+	}
 	
-	private DialogListEntryData<T> parent; //it must be set as the parent type too
+	private HashMap<String,CustomAction<ACT>> hmCustomActions = new HashMap<String,CustomAction<ACT>>();
+	private LINK	objLinked;
+	
+	private DialogListEntryData parent; //it must be set as the parent type too
 	private boolean bTreeExpanded = false; 
-	private ArrayList<DialogListEntryData<T>> aChildList = new ArrayList<DialogListEntryData<T>>();
+	private ArrayList<DialogListEntryData<ACT,LINK>> aChildList = new ArrayList<DialogListEntryData<ACT,LINK>>();
 	
 	public static class SliderValueData{
 		private Double dSliderMin;
@@ -172,7 +197,7 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 	 * @param bIntMode
 	 * @return
 	 */
-	public DialogListEntryData<T> setSlider(Double dMin, Double dMax, Double dCurrent, CallableX callerSlider, boolean bCallWhileChanging, boolean bIntMode){
+	public DialogListEntryData<ACT,LINK> setSlider(Double dMin, Double dMax, Double dCurrent, CallableX callerSlider, boolean bCallWhileChanging, boolean bIntMode){
 		this.svd = new SliderValueData();
 		
 		this.svd.dSliderMin=dMin;
@@ -190,12 +215,19 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 		return svd;
 	}
 	
-	public DialogListEntryData<T> addCustomButtonAction(String strLabelTextId, T action){
-		hmCustomButtonsActions.put(strLabelTextId,action);
+	public DialogListEntryData<ACT,LINK> addCustomButtonAction(String strLabelTextId, ACT action){
+		return addCustomButtonAction(strLabelTextId,action,null);
+	}
+	public DialogListEntryData<ACT,LINK> addCustomButtonAction(String strLabelTextId, ACT action,String strPopupHint){
+		CustomAction<ACT> ca = new CustomAction<ACT>();
+		ca.setLabelTextId(strLabelTextId);
+		ca.setAction(action);
+		ca.setPopupHint(strPopupHint);
+		hmCustomActions.put(strLabelTextId,ca);
 		return this;
 	}
-	public DialogListEntryData<T> clearCustomButtonActions(){
-		hmCustomButtonsActions.clear();
+	public DialogListEntryData<ACT,LINK> clearCustomButtonActions(){
+		hmCustomActions.clear();
 		return this;
 	}
 	
@@ -205,8 +237,8 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 //	}
 //	@SuppressWarnings("rawtypes")
 	@SuppressWarnings("unchecked")
-	public <E extends Entry<String,T>> ArrayList<E> getCustomButtonsActionsListCopy(){
-		E[] aen = (E[])hmCustomButtonsActions.entrySet().toArray(new Entry[0]);
+	public <E extends Entry<String,CustomAction<ACT>>> ArrayList<E> getCustomButtonsActionsListCopy(){
+		E[] aen = (E[])hmCustomActions.entrySet().toArray(new Entry[0]);
 		return new ArrayList<E>(Arrays.asList(aen));
 	}
 	
@@ -228,7 +260,7 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 		return bAddVisibleQuotes;
 	}
 	
-	public DialogListEntryData<T> setAddVisibleQuotes(boolean b){
+	public DialogListEntryData<ACT,LINK> setAddVisibleQuotes(boolean b){
 		this.bAddVisibleQuotes=b;
 		return this;
 	}
@@ -256,7 +288,7 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 		return strText;
 	}
 	
-	public Object getLinkedObj(){
+	public LINK getLinkedObj(){
 		return this.objLinked;
 	}
 	
@@ -264,7 +296,7 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 	 * @param strText 
 	 * @return
 	 */
-	public DialogListEntryData<T> updateTextTo(Object objText) {
+	public DialogListEntryData<ACT,LINK> updateTextTo(Object objText) {
 		if(objText == null){
 			this.strText=null;
 		}else
@@ -284,7 +316,7 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 	 * @param objLinked the linked object represented by the text
 	 * @return
 	 */
-	public DialogListEntryData<T> setText(Object objText, Object objLinked) {
+	public DialogListEntryData<ACT,LINK> setText(Object objText, LINK objLinked) {
 		updateTextTo(objText);
 		this.objLinked=objLinked;
 		return this;
@@ -322,7 +354,7 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 		
 	}
 
-	public DialogListEntryData<T> getParent() {
+	public DialogListEntryData<ACT,LINK> getParent() {
 		return parent;
 	}
 	
@@ -331,11 +363,11 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 	 * @param parent if null, will just remove from existing parent
 	 * @return
 	 */
-	public DialogListEntryData<T> setParent(DialogListEntryData<T> parent) {
+	public DialogListEntryData<ACT,LINK> setParent(DialogListEntryData<ACT,LINK> parent) {
 		if(this==parent)throw new PrerequisitesNotMetException("cant parent self: parent==this", this);
 		
 		// remove self from previous parent
-		DialogListEntryData<T> dledParentOld = this.getParent();
+		DialogListEntryData<ACT,LINK> dledParentOld = this.getParent();
 		if(dledParentOld!=null){
 			dledParentOld.aChildList.remove(this);
 		}
@@ -358,12 +390,12 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 		return this;
 	}
 	
-	public boolean hasChild(DialogListEntryData<T> dledChildToCheck){
+	public boolean hasChild(DialogListEntryData<ACT,LINK> dledChildToCheck){
 		if(dledChildToCheck==null){
 			throw new PrerequisitesNotMetException("null child to check", this);
 		}
 		
-		for(DialogListEntryData<T> dledChild:this.aChildList){
+		for(DialogListEntryData<ACT,LINK> dledChild:this.aChildList){
 			if(dledChild==dledChildToCheck)return true;
 			
 			if(dledChild.aChildList.size()>0){
@@ -387,15 +419,15 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 		return bTreeExpanded;
 	}
 
-	public DialogListEntryData<T> setTreeExpanded(boolean bTreeExpanded) {
+	public DialogListEntryData<ACT,LINK> setTreeExpanded(boolean bTreeExpanded) {
 		this.bTreeExpanded = bTreeExpanded;
 		return this;
 	}
 	
-	public ArrayList<DialogListEntryData<T>> getAllParents(){
-		ArrayList<DialogListEntryData<T>> adledParentList = new ArrayList<DialogListEntryData<T>>();
+	public ArrayList<DialogListEntryData<ACT,LINK>> getAllParents(){
+		ArrayList<DialogListEntryData<ACT,LINK>> adledParentList = new ArrayList<DialogListEntryData<ACT,LINK>>();
 		
-		DialogListEntryData<T> dledParent = getParent();
+		DialogListEntryData<ACT,LINK> dledParent = getParent();
 		while(dledParent!=null){
 			adledParentList.add(dledParent);
 			dledParent = dledParent.getParent();
@@ -410,7 +442,7 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 		this.bTreeExpanded = !this.bTreeExpanded;
 		
 		if(this.bTreeExpanded){
-			for(DialogListEntryData<T> dledParent:getAllParents()){
+			for(DialogListEntryData<ACT,LINK> dledParent:getAllParents()){
 				dledParent.setTreeExpanded(true);
 			}
 		}
@@ -472,15 +504,15 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 		return aChildList.size()>0;
 	}
 
-	public ArrayList<DialogListEntryData<T>> getChildrenCopy() {
-		return new ArrayList<DialogListEntryData<T>>(aChildList);
+	public ArrayList<DialogListEntryData> getChildrenCopy() {
+		return new ArrayList<DialogListEntryData>(aChildList);
 	}
 	
 	public String getUId() {
 		return strUniqueId;
 	}
 
-	public DialogListEntryData<T> clearChildren() {
+	public DialogListEntryData<ACT,LINK> clearChildren() {
 		aChildList.clear();
 		return this;
 	}
@@ -490,13 +522,13 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 	 * 
 	 * @return null if it has no parent
 	 */
-	public DialogListEntryData<T> getParentest() {
-		DialogListEntryData<T> dledParent = getParent();
+	public DialogListEntryData<ACT,LINK> getParentest() {
+		DialogListEntryData<ACT,LINK> dledParent = getParent();
 		if(dledParent==null)return null;
 		
 //		ArrayList<DialogListEntryData<T>> adledConsistencyChk = new ArrayList<DialogListEntryData<T>>();
 		while(true){
-			DialogListEntryData<T> dledParentTmp = dledParent.getParent();
+			DialogListEntryData<ACT,LINK> dledParentTmp = dledParent.getParent();
 			if(dledParentTmp==null)return dledParent;
 			
 //			if(adledConsistencyChk.contains(dledParentTmp)){
@@ -509,7 +541,7 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 		}
 	}
 
-	public void sortChildren(Comparator<DialogListEntryData<T>> cmpDled) {
+	public void sortChildren(Comparator<DialogListEntryData> cmpDled) {
 		Collections.sort(aChildList, cmpDled);
 	}
 

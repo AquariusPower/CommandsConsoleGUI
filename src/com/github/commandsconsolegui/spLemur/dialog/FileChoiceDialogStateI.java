@@ -70,7 +70,7 @@ public class FileChoiceDialogStateI extends ChoiceLemurDialogStateAbs<Command<Bu
 	protected void updateList() {
 		clearList();
 		
-		DialogListEntryData<Command<Button>> dledAtParent = getParentReferencedDledListCopy().get(0);
+		DialogListEntryData<Command<Button>,File> dledAtParent = getParentReferencedDledListCopy().get(0);
 		Object obj = dledAtParent.getLinkedObj();
 		File flAtParentTmp;
 		if (obj instanceof FileVarField) {
@@ -92,7 +92,7 @@ public class FileChoiceDialogStateI extends ChoiceLemurDialogStateAbs<Command<Bu
 		
 		MsgI.i().debug("current path",(new File(".")).getAbsolutePath()); //TODO this dont work why?
 		
-		DialogListEntryData<Command<Button>> dledSelectTmp=null;
+		DialogListEntryData<Command<Button>,File> dledSelectTmp=null;
 		
 		//folders 
 		for(File flTmp:flDir.listFiles()){ //flDir=new File("./Sounds/Effects/UI/13940__gameaudio__game-audio-ui-sfx/")
