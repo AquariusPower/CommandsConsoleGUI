@@ -59,10 +59,14 @@ import com.github.commandsconsolegui.spJme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.spJme.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.spJme.extras.UngrabMouseStateI.IUngrabMouse;
 import com.github.commandsconsolegui.spJme.globals.GlobalDialogHelperI;
+import com.github.commandsconsolegui.spJme.globals.GlobalSimpleAppRefI;
+import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI;
+import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI.EffectElectricity;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spJme.savablevalues.CompositeSavableAbs;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -601,9 +605,26 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 			if(bUserEnterCustomValueMode)setInputText(getUserEnterCustomValueToken());
 		}
 		
+		createDiagLinkEffect();
+		
 		return true;
 	}
 	
+	private void createDiagLinkEffect() {
+		if(getParentDialog()!=null){
+			float fZdispl=1f; //1f is like 100 stacked gui elements because each will heighten by 0.01f by lemur at least
+			EffectElectricity ie = new EffectElectricity(
+					this, 
+					ColorRGBA.Blue, 
+					GlobalSimpleAppRefI.i().getGuiNode())
+				.setFollowFromTarget(getParentDialog().getDialogMainContainer(), new Vector3f(0,0,fZdispl))
+				.setFollowToTarget(this.getDialogMainContainer(), null)
+				;
+			
+			EffectsJmeStateI.i().addEffect(ie);
+		}
+	}
+
 	@Override
 	protected void enableSuccess() {
 		super.enableSuccess();
@@ -653,6 +674,8 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 //		if(hrdiagParent.isSet()){
 //			hrdiagParent.getRef().removeModalDialog(this);
 //		}
+		
+		EffectsJmeStateI.i().removeEffectsForOwner(this);
 		
 		return true;
 	}

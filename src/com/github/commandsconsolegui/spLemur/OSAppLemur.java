@@ -174,12 +174,11 @@ public class OSAppLemur extends OSAppJme {
 		EffectsJmeStateI.i().addEffect(
 			new EffectElectricity(
 				this,
-				getPos(EElement.Effects, ManageMouseCursorI.i().getMouseCursorPositionCopyAsV3f()), //v3fMouse,
-				new Vector3f(0,0,0),
 				ColorRGBA.Red,
 				GlobalSimpleAppRefI.i().getGuiNode()
 			)
-			.setFollowTarget(cntrAlert, null)
+			.setFromTo( getPos(EElement.Effects, ManageMouseCursorI.i().getMouseCursorPositionCopyAsV3f()), null)
+			.setFollowToTarget(cntrAlert, null)
 		);
 	}
 

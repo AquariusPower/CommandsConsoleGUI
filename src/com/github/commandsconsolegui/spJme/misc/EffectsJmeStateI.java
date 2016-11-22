@@ -28,10 +28,12 @@ package com.github.commandsconsolegui.spJme.misc;
 
 import java.util.HashMap;
 
+import com.github.commandsconsolegui.spAppOs.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
+import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
@@ -61,12 +63,11 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 				addEffect(
 					new EffectElectricity(
 						this,
-						new Vector3f(10,10,100),
-						new Vector3f(500,500,100),
 						ColorRGBA.Cyan, 
 						GlobalSimpleAppRefI.i().getGuiNode()
 					)
-					.setFollowMouse(true)
+					.setFromTo(new Vector3f(10,10,100),null)
+					.setFollowToMouse(true)
 				);
 				return true;
 			}
@@ -85,7 +86,9 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 	
 	public static interface IEffect{
 		public String getUId();
-
+		
+		public void assertConfigIsValid();
+		
 		public void play(float tpf);
 		public Object getOwner();
 
@@ -120,24 +123,25 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 		private boolean	bToMouse;
 		private Object	objOwner;
 		private boolean	bPlay = true;
-		private Spatial	sptFollow;
+		private Spatial	sptFollowTo;
 //		private boolean	bDiscarding;
-		private Vector3f	v3fFollowDisplacement;
+		private Vector3f	v3fFollowToDisplacement;
+		private Spatial	sptFollowFrom;
+		private Vector3f	v3fFollowFromDisplacement;
+		private BfdArrayList<Vector3f>	av3fList  = new BfdArrayList<Vector3f>() {};
+		private long	iHoldUntilMilis;
+		private Vector3f	v3fHoldPreviousFrom=new Vector3f();
+		private Vector3f	v3fHoldPreviousTo=new Vector3f();
 		
 		/**
 		 * 
-		 * @param v3fFrom
-		 * @param v3fTo
 		 * @param colorBase
 		 * @param nodeParent
 		 */
-		public EffectElectricity(Object objOwner, Vector3f v3fFrom, Vector3f v3fTo, ColorRGBA colorBase, Node nodeParent){
+		public EffectElectricity(Object objOwner, ColorRGBA colorBase, Node nodeParent){
 			this.objOwner=objOwner;
 			this.nodeParent=nodeParent;
 			this.colorBase=colorBase;
-			
-			this.v3fFrom=v3fFrom; 
-			this.v3fTo=v3fTo;
 			
 //			this.v3fDirectionNormalized = v3fTo.subtract(v3fFrom).normalize();
 			
@@ -146,13 +150,23 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 			
 //			v3fRelativePartStepMaxPos = v3fDirectionNormalized.mult(iPartMaxDots);
 		}
-		public EffectElectricity setFollowMouse(boolean b){
+		public EffectElectricity setFromTo(Vector3f v3fFrom, Vector3f v3fTo){
+			this.v3fFrom=v3fFrom; 
+			this.v3fTo=v3fTo;
+			return this;
+		}
+		public EffectElectricity setFollowToMouse(boolean b){
 			this.bToMouse=b;
 			return this;
 		}
-		public EffectElectricity setFollowTarget(Spatial spt, Vector3f v3fDisplacement){
-			sptFollow=spt;
-			v3fFollowDisplacement = v3fDisplacement==null?new Vector3f():v3fDisplacement;
+		public EffectElectricity setFollowFromTarget(Spatial spt, Vector3f v3fDisplacement){
+			sptFollowFrom=spt;
+			v3fFollowFromDisplacement = v3fDisplacement==null?new Vector3f():v3fDisplacement;
+			return this;
+		}
+		public EffectElectricity setFollowToTarget(Spatial spt, Vector3f v3fDisplacement){
+			sptFollowTo=spt;
+			v3fFollowToDisplacement = v3fDisplacement==null?new Vector3f():v3fDisplacement;
 			return this;
 		}
 		
@@ -167,9 +181,10 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 //			if(bDiscarding)return;
 			
 			Geometry geomNew = MiscJmeI.i().createMultiLineGeom(
-				createPath().toArray(), ColorRGBA.Cyan, FastMath.nextRandomFloat()*4+1);
-			geomNew.setLocalTranslation(v3fFrom);
-//			geomNew.getLocalTranslation().setZ(v3fFrom.z);
+				recreatePath().toArray(), ColorRGBA.Cyan, FastMath.nextRandomFloat()*4+1);
+			geomNew.setLocalTranslation(getLocationFrom());
+//			geomNew.getLocalTranslation().z+=0.03f;
+//			geomNew.getLocalTranslation().setZ(v3fFrom.z); //getLocationTo()
 			
 			if(geomLast!=null)geomLast.removeFromParent();
 			
@@ -178,41 +193,56 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 			geomLast=geomNew;
 		}
 		private Vector3f getLocationTo() {
-			Vector3f v3fTargetSpot=v3fTo.clone();
+			Vector3f v3fTargetSpot = v3fTo==null?null:v3fTo.clone();
 			if(bToMouse){
 				v3fTargetSpot=ManageMouseCursorI.i().getMouseCursorPositionCopyAsV3f();
 				v3fTargetSpot.z=v3fTo.z;
 			}else
-			if(sptFollow!=null){
+			if(sptFollowTo!=null){
 				//TODO if sptFollow is a node, add a node to it and apply displacement to let rotations etc apply
-				v3fTargetSpot=sptFollow.getLocalTranslation().add(v3fFollowDisplacement);
+				v3fTargetSpot=sptFollowTo.getLocalTranslation().add(v3fFollowToDisplacement);
 			}
 			return v3fTargetSpot;
 		}
-		public BfdArrayList<Vector3f> createPath() {
+		private Vector3f getLocationFrom() {
+			Vector3f v3fTargetSpot = v3fFrom==null?null:v3fFrom.clone();
+			if(sptFollowFrom!=null){
+				//TODO if sptFollow is a node, add a node to it and apply displacement to let rotations etc apply
+				v3fTargetSpot=sptFollowFrom.getLocalTranslation().add(v3fFollowFromDisplacement);
+			}
+			return v3fTargetSpot;
+		}
+		public BfdArrayList<Vector3f> recreatePath() {
 			Vector3f v3fTargetSpot=getLocationTo();
 			
-			Vector3f v3fDirectionNormalized = v3fTargetSpot.subtract(v3fFrom).normalize();
+			Vector3f v3fDirectionNormalized = v3fTargetSpot.subtract(getLocationFrom()).normalize();
 			Vector3f v3fRelativePartStepMaxPos = v3fDirectionNormalized.mult(iPartMaxDots);
-			int iDotsMaxDist = (int) v3fFrom.distance(v3fTargetSpot);
+			int iDotsMaxDist = (int) getLocationFrom().distance(v3fTargetSpot);
 			int iMinDotsLength = (int) (iPartMaxDots*fPartMinPerc);
 			int iMaxAllowedParts = (iDotsMaxDist/iMinDotsLength);
 			
-			BfdArrayList<Vector3f> av3fList = new BfdArrayList<Vector3f>() {};
-			Vector3f v3fPartStart = v3fFrom.clone();
+			boolean bUpdate=false;
+			float fMaxMoveDetectDist=0.01f;
+			if(v3fHoldPreviousFrom.distance(getLocationFrom()) > fMaxMoveDetectDist)bUpdate=true;
+			if(v3fHoldPreviousTo.distance(getLocationTo()) > fMaxMoveDetectDist)bUpdate=true;
+			if(iHoldUntilMilis < GlobalSimulationTimeI.i().getMilis()){
+				iHoldUntilMilis = GlobalSimulationTimeI.i().getMilis() + FastMath.nextRandomInt(250, 3000);
+				bUpdate=true;
+			}
+			if(bUpdate){
+				av3fList.clear();
+				// updating
+				v3fHoldPreviousFrom.set(getLocationFrom());
+				v3fHoldPreviousTo.set(getLocationTo());
+			}else{
+				// holding
+				spreadInnersABit(av3fList);
+				return av3fList;
+			}
+			
+			Vector3f v3fPartStart = getLocationFrom();
 			av3fList.add(v3fPartStart.clone());
-//			for(int i=0;i<iMaxAllowedParts;i++){
 			while(true){
-//				Vector3f v3fPartEnd;
-//				int iDotsCurrentDist = (int) v3fFrom.distance(v3fPartStart);
-//				if( bMaxPartsReached || (v3fPartStart.distance(v3fTargetSpot) < iMinDotsLength) ){
-//				if( bMaxPartsReached || (iDotsCurrentDist>=iDotsMaxDist) ){
-//					av3fList.remove(av3fList.size()-1);
-//					v3fPartEnd=v3fTargetSpot.clone();
-//					if(bMaxPartsReached)MsgI.i().devInfo("max parts reached, is the code well implemented?",this,getUId());
-//					break;
-//				}
-				
 				// move a bit towards the end
 				Vector3f v3fPartEnd = new Vector3f(v3fPartStart);
 				float fPerc = fPartMinPerc + (FastMath.nextRandomFloat() * fDeltaPerc);
@@ -224,19 +254,15 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 				v3fPartEnd.y+=MiscI.i().randomMinusOneToPlusOne()*fDots;
 				v3fPartEnd.z+=MiscI.i().randomMinusOneToPlusOne()*fDots;
 				
-				int iDotsCurrentDist = (int) v3fFrom.distance(v3fPartEnd);
+				int iDotsCurrentDist = (int) getLocationFrom().distance(v3fPartEnd);
 				boolean bBreak = false;
 				if(!bBreak && av3fList.size()==iMaxAllowedParts-1){
 					MsgI.i().devInfo("max parts reached, is the code well implemented?",this,getUId());
 					bBreak=true; //max parts reached 
 				}
 				if(!bBreak && (iDotsCurrentDist>=iDotsMaxDist))bBreak=true; //max parts reached 
-//				if( bBreak || (iDotsCurrentDist>=iDotsMaxDist) ){
-//					av3fList.remove(av3fList.size()-1);
 				if(bBreak){
 					v3fPartEnd=v3fTargetSpot.clone();
-//					if(bBreak)MsgI.i().devInfo("max parts reached, is the code well implemented?",this,getUId());
-//					break;
 				}
 				
 				av3fList.add(v3fPartEnd.clone());
@@ -247,10 +273,28 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 			}
 			
 			for(Vector3f v3f:av3fList){
-				v3f.subtractLocal(v3fFrom); //the mesh is relative to the geometry
+				v3f.subtractLocal(getLocationFrom()); //the mesh is relative to the geometry
 			}
 			
 			return av3fList;
+		}
+		private void spreadInnersABit(BfdArrayList<Vector3f> av3fList) {
+			Vector3f v3fFromTmp=av3fList.get(0);
+			Vector3f v3fToTmp=av3fList.get(av3fList.size()-1);
+			float fDistMax=v3fFromTmp.distance(v3fToTmp);
+			for(int i=1;i<av3fList.size()-1;i++){
+				Vector3f v3f=av3fList.get(i);
+//			for(Vector3f v3f:av3fList){
+				/**
+				 * throw a line from <---> to
+				 * get the nearest point at it relative to the inner part vertex
+				 * not need to be precise tho :(
+				 */
+				float fDist=v3fFromTmp.distance(v3f);
+				Vector3f v3fNearest = v3fFromTmp.clone().interpolateLocal(v3fToTmp, fDist/fDistMax);
+				Vector3f v3fNew = v3fNearest.clone().interpolateLocal(v3f, 1.02f);
+				v3f.set(v3fNew);
+			}
 		}
 		@Override
 		public Object getOwner() {
@@ -266,12 +310,23 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 			if(geomLast!=null)geomLast.removeFromParent();
 //			bDiscarding=true;
 		}
+		@Override
+		public void assertConfigIsValid() {
+			if(v3fFrom==null && sptFollowFrom==null){
+				throw new PrerequisitesNotMetException("'from' not set",this);
+			}
+			
+			if(v3fTo==null && sptFollowTo==null && !bToMouse){
+				throw new PrerequisitesNotMetException("'to' not set",this);
+			}
+		}
 		
 	}
 	
 	HashMap<String,IEffect> hmEffects = new HashMap<String, IEffect>();
 	
 	public <T extends IEffect> T addEffect(T ie){
+		ie.assertConfigIsValid();
 		hmEffects.put(ie.getUId(),ie);
 		return ie;
 	}
@@ -289,12 +344,17 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 		}
 	}
 	
+	long lLastUpdateMilis=GlobalSimulationTimeI.i().getMilis();
 	@Override
 	protected boolean updateAttempt(float tpf) {
 		if(!super.updateAttempt(tpf))return false;
 		
-		for(IEffect ie:hmEffects.values()){
-			ie.play(tpf);
+		int iFPStarget=15;
+		if(lLastUpdateMilis+(1000/iFPStarget) < GlobalSimulationTimeI.i().getMilis()){
+			for(IEffect ie:hmEffects.values()){
+				ie.play(tpf);
+			}
+			lLastUpdateMilis=GlobalSimulationTimeI.i().getMilis();
 		}
 		
 		return true;

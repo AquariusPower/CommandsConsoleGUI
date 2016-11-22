@@ -42,8 +42,8 @@ import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
+ *	TODO create a TimedDelay class to be used without the var field!
  */
-
 public class TimedDelayVarField extends VarCmdFieldAbs<Float,TimedDelayVarField>{
 	
 	/**
