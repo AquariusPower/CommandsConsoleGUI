@@ -27,7 +27,7 @@
 package com.github.commandsconsolegui.spAppOs.misc;
 
 import java.util.Arrays;
-import java.util.TreeMap;
+import java.util.HashMap;
 
 /**
  * 
@@ -41,18 +41,20 @@ public class ManageDebugDataI {
 	public static enum EDbgStkOrigin{
 		Constructed,
 		LastSetValue,
-		LastCall,
+		LastCall,;
+
+		public String s() {return toString();}
 	}
 	
 	public static class DebugData{
-		TreeMap<EDbgStkOrigin,DebugInfo> tm = new TreeMap<EDbgStkOrigin,DebugInfo>();
+		HashMap<String,DebugInfo> hm = new HashMap<String,DebugInfo>();
 		
-		public DebugInfo get(EDbgStkOrigin eso){
-			DebugInfo di = tm.get(eso); //searches
+		public DebugInfo get(String eso){
+			DebugInfo di = hm.get(eso); //searches
 			
 			if(di==null){ //creates
 				di=new DebugInfo();
-				tm.put(eso,di);
+				hm.put(eso,di);
 			}
 			
 			return di;
@@ -87,9 +89,15 @@ public class ManageDebugDataI {
 	 * @return
 	 */
 	public DebugData setStack(DebugData dbgExisting, EDbgStkOrigin eso){
+		return setStack(dbgExisting,eso.s(),1);
+	}
+	public DebugData setStack(DebugData dbgExisting, String str){
+		return setStack(dbgExisting,str,1);
+	}
+	private DebugData setStack(DebugData dbgExisting, String str, int iIncStackIndex){
 		DebugData dbg = dbgExisting;
 		if(dbg==null)dbg=new DebugData();
-		dbg.setStackForCurrentMethod(dbg.get(eso), 1);
+		dbg.setStackForCurrentMethod(dbg.get(str), iIncStackIndex+1);
 		
 		return dbg;
 	}
@@ -101,6 +109,9 @@ public class ManageDebugDataI {
 	 * @return {@link RefHolder} is more IDE readable than stack
 	 */
 	public RefHolder<StackTraceElement[]> getStack(DebugData dbg, EDbgStkOrigin eso){
+		return getStack(dbg,eso.s());
+	}
+	public RefHolder<StackTraceElement[]> getStack(DebugData dbg, String eso){
 		if(dbg==null)return null;
 		DebugInfo di = dbg.get(eso);
 		if(di==null)return null;

@@ -128,7 +128,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 	private final BoolTogglerCmdField btgAutoScroll = new BoolTogglerCmdField(this, true).setCallNothingOnChange();
 //	private ButtonCommand	bc;
 	private boolean	bRefreshScroll;
-	private HashMap<String, HoldRestartable<LemurDialogStateAbs<T,?>>> hmhrChildDiagModals = new HashMap<String, HoldRestartable<LemurDialogStateAbs<T,?>>>();
+//	private HashMap<String, HoldRestartable<LemurDialogStateAbs<T,?>>> hmhrChildDiagModals = new HashMap<String, HoldRestartable<LemurDialogStateAbs<T,?>>>();
 	private Long	lClickActionMilis;
 //	private DialogListEntryData<T>	dataSelectRequested;
 	private Label	lblSelectedEntryStatus;
@@ -236,7 +236,7 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 	}
 	
 	public void selectAndChoseOption(DialogListEntryData<T> data){
-		if(!isOptionSelectionMode())throw new PrerequisitesNotMetException("not option mode");
+		if(!isOptionSelectionMode())throw new PrerequisitesNotMetException("not option selection mode");
 		if(data==null)throw new PrerequisitesNotMetException("invalid null data");
 		
 		selectEntry(data);
@@ -1367,37 +1367,22 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 //		return getThis();
 //	}
 	
-	public THIS addModalDialog(LemurDialogStateAbs<T,?> diagModal){
-		diagModal.setDiagParent(this);
-		hmhrChildDiagModals.put(diagModal.getUniqueId(), new HoldRestartable(this,diagModal));
-		return getThis();
-	}
-	
 	@Override
 	public boolean prepareToDiscard(CompositeControl cc) {
 		if(!super.prepareToDiscard(cc))return false;
 		
-//		for(Entry<String, LemurDialogStateAbs<T, ?>> entry:hmChildDiagModals.entrySet()){
-//			entry.getValue().applyDiscardingParent();
-//		}
-		
 		return true;
 	}
 	
-//	public DiagModalInfo<T> getDiagModalCurrent(){
-//		return dmi;
+//	public void openModalDialog(String strDialogId, DialogListEntryData<T> dledToAssignModalTo, T cmd){
+//		LemurDialogStateAbs<T,?> diagModalCurrent = hmhrChildDiagModals.get(strDialogId).getRef();
+//		if(diagModalCurrent!=null){
+//			setDiagModalInfoCurrent(new DiagModalInfo(diagModalCurrent,cmd,dledToAssignModalTo));
+//			diagModalCurrent.requestEnable();
+//		}else{
+//			throw new PrerequisitesNotMetException("no dialog set for id: "+strDialogId);
+//		}
 //	}
-
-	//	public void openModalDialog(String strDialogId, DialogListEntryData<T> dataToAssignModalTo, T cmd){
-	public void openModalDialog(String strDialogId, DialogListEntryData<T> dledToAssignModalTo, T cmd){
-		LemurDialogStateAbs<T,?> diagModalCurrent = hmhrChildDiagModals.get(strDialogId).getRef();
-		if(diagModalCurrent!=null){
-			setDiagModalInfoCurrent(new DiagModalInfo(diagModalCurrent,cmd,dledToAssignModalTo));
-			diagModalCurrent.requestEnable();
-		}else{
-			throw new PrerequisitesNotMetException("no dialog set for id: "+strDialogId);
-		}
-	}
 	
 	public void applyResultsFromModalDialog(){
 		if(getChildDiagModalInfoCurrent()==null)throw new PrerequisitesNotMetException("no modal active");
@@ -1447,17 +1432,9 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		MiscLemurStateI.i().listboxSelectorAsUnderline(getMainList());
 	}
 	public void selectEntry(DialogListEntryData<T> dledSelectRequested) {
-//		this.dataSelectRequested = data;
-//	}
-//	
-//	public void updateSelectEntryRequested() {
-//		if(dataSelectRequested==null)return;
-//		
 		int i=vlVisibleEntriesList.indexOf(dledSelectRequested);
 		if(i>=0){
 			setSelectedEntryIndex(i);
-//			selectionModel.setSelection(i);
-//			dataSelectRequested=null;
 			cd().dumpDebugEntry(getUniqueId()+",SelectIndex="+i+","+dledSelectRequested.toString());
 		}else{
 			throw new PrerequisitesNotMetException("data not present on the list", dledSelectRequested, getMainList());
@@ -1886,18 +1863,18 @@ public abstract class LemurDialogStateAbs<T,THIS extends LemurDialogStateAbs<T,T
 		load(SaveLmrDiag.class);
 	}
 	
-	@Override
-	public void requestRestart() {
-		// do not allow restart with childs enabled, this also grants many consistencies
-		for(HoldRestartable<LemurDialogStateAbs<T, ?>> hr:hmhrChildDiagModals.values()){
-			if(hr.getRef().isEnabled()){
-				AudioUII.i().play(EAudio.Failure);
-				return;
-			}
-		}
-		
-		super.requestRestart();
-	}
+//	@Override
+//	public void requestRestart() {
+//		// do not allow restart with childs enabled, this also grants many consistencies
+//		for(HoldRestartable<LemurDialogStateAbs<T, ?>> hr:hmhrChildDiagModals.values()){
+//			if(hr.getRef().isEnabled()){
+//				AudioUII.i().play(EAudio.Failure);
+//				return;
+//			}
+//		}
+//		
+//		super.requestRestart();
+//	}
 	
 	@Override
 	public THIS copyToSelfValuesFrom(THIS diagDiscarding) {

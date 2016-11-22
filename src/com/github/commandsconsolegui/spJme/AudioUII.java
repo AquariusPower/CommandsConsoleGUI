@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.spJme;
 import java.lang.reflect.Field;
 import java.util.TreeMap;
 
+import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
 import com.github.commandsconsolegui.spAppOs.misc.IUniqueId;
@@ -125,14 +126,14 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 	public static class AudioCfg implements IReflexFillCfg, IUniqueId{
 		private String	strUniqueId;
 //		private final StringVarField svfFile = new StringVarField(this,"","");
-		private final FileVarField flSound = new FileVarField(this);
+		private final FileVarField flfSound = new FileVarField(this);
 		private final FloatDoubleVarField fdvVolumeGain = new FloatDoubleVarField(this,1.0,"").setMin(0.0).setMax(1.0);
 		
 		public AudioCfg(String strUId) {
 			this.strUniqueId=strUId;
 		}
-		public String getFileName(){return flSound.getValueAsString();}
-		public void setFile(String strFile){this.flSound.setObjectRawValue(strFile);}
+		public String getFileName(){return flfSound.getValueAsString();}
+		public void setFile(String strFile){this.flfSound.setObjectRawValue(strFile);}
 		
 		@Override
 		public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcv) {
@@ -251,7 +252,7 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 			}catch(AssetNotFoundException ex){
 				switch(i){
 					case 1:
-						GlobalAppRefI.i().getAssetManager().registerLocator("./assets/", FileLocator.class);
+						GlobalAppRefI.i().getAssetManager().registerLocator(GlobalAppOSI.i().getAssetsFolder(), FileLocator.class);
 						continue labelRetry;
 					case 2:
 						GlobalCommandsDelegatorI.i().dumpExceptionEntry(ex, strAudioId, strFile);

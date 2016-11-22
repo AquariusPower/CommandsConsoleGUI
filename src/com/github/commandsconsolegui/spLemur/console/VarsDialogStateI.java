@@ -49,6 +49,7 @@ import com.github.commandsconsolegui.spJme.AudioUII.EAudio;
 import com.github.commandsconsolegui.spJme.DialogStateAbs;
 import com.github.commandsconsolegui.spJme.ManageConditionalStateI;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData;
+import com.github.commandsconsolegui.spLemur.dialog.FileChoiceDialogStateI;
 import com.github.commandsconsolegui.spLemur.dialog.MaintenanceListLemurDialogStateAbs;
 import com.jme3.input.KeyInput;
 import com.simsilica.lemur.Button;
@@ -78,7 +79,7 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 		// can be null
 		boolean bChangesMade=false;
 		for(DialogListEntryData<T> dledToCfg:adledAtThisToApplyResultsList){
-			VarCmdFieldAbs vcf = (VarCmdFieldAbs)dledToCfg.getUserObj();
+			VarCmdFieldAbs vcf = (VarCmdFieldAbs)dledToCfg.getLinkedObj();
 			vcf.setObjectRawValue(strUserTypedValue);
 			bChangesMade=true;
 		}
@@ -147,7 +148,7 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 	protected class CmdBtnChangeValue implements Command<Button>{
 		@Override
 		public void execute(Button source) {
-			VarsDialogStateI.this.actionCustomAtEntry(
+			VarsDialogStateI.this.actionMainAtEntry(
 				VarsDialogStateI.this.getDledFrom(source));
 //			ConsoleVarsDialogStateI.this.changeValue(
 //				ConsoleVarsDialogStateI.this.getDledFrom(source));
@@ -158,7 +159,7 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 	private void changeValue(DialogListEntryData<T> dled){
 		AudioUII.i().playOnUserAction(EAudio.SelectEntry);
 		
-		VarCmdFieldAbs vcf = (VarCmdFieldAbs)dled.getUserObj();
+		VarCmdFieldAbs vcf = (VarCmdFieldAbs)dled.getLinkedObj();
 		boolean bChanged=false;
 		if(vcf instanceof BoolTogglerCmdField){
 			((BoolTogglerCmdField)vcf).toggle();
@@ -172,24 +173,49 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 	}
 	
 	@Override
-	protected void actionCustomAtEntry(DialogListEntryData<T> dledSelected) {
-		Object objUser = dledSelected.getUserObj();
-		if(objUser instanceof BoolTogglerCmdField){
+	protected void actionMainAtEntry(DialogListEntryData<T> dledSelected) {
+		Object obj = dledSelected.getLinkedObj();
+		if(obj instanceof BoolTogglerCmdField){
 			changeValue(dledSelected);
 		}else
-		if(objUser instanceof KeyBoundVarField){
-			GlobalManageKeyBindI.i().captureAndSetKeyBindAt((KeyBoundVarField)objUser, this);
-//			requestRefreshUpdateList();
+		if(obj instanceof KeyBoundVarField){
+			GlobalManageKeyBindI.i().captureAndSetKeyBindAt((KeyBoundVarField)obj, this);
 		}else
+//		if(obj instanceof FileVarField){
+//			FileVarField flVar = ((FileVarField)obj);
+//			if(!getModalChildListCopy().contains(FileChoiceDialogStateI.i())){
+//				addModalDialog(FileChoiceDialogStateI.i());
+//			}
+//			FileChoiceDialogStateI.i().setInitiallyChosenFile(flVar.getFile());
+//			FileChoiceDialogStateI.i().requestEnable();
+//		}else
 		{
-			if(objUser instanceof VarCmdFieldAbs){
-				super.actionCustomAtEntry(dledSelected);
+			if(obj instanceof VarCmdFieldAbs){
+				super.actionMainAtEntry(dledSelected);
 			}else
-			if(objUser instanceof EGroupKeys){
+			if(obj instanceof EGroupKeys){
 				// skipper, this is actually an empty group (no tree expanded/shrinked)
 			}else{
-				throw new PrerequisitesNotMetException("user object not a var", objUser, dledSelected, this);
+				throw new PrerequisitesNotMetException("object not a var", obj, dledSelected, this);
 			}
+		}
+	}
+	
+	@Override
+	protected DialogStateAbs getDiagChoice(DialogListEntryData dledSelected) {
+		Object obj = dledSelected.getLinkedObj();
+		if(obj instanceof FileVarField){
+			if(!getModalChildListCopy().contains(FileChoiceDialogStateI.i())){
+				addModalDialog(FileChoiceDialogStateI.i());
+			}
+//			
+//			FileVarField flVar = ((FileVarField)obj);
+//			FileChoiceDialogStateI.i().setInitiallyChosenFile(flVar.getFile());
+//			FileChoiceDialogStateI.i().requestEnable();
+			
+			return FileChoiceDialogStateI.i();
+		}else{
+			return super.getDiagChoice(dledSelected);
 		}
 	}
 	
@@ -217,7 +243,7 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 			// check if already at the list
 			DialogListEntryData<T> dledVarEntry = null;
 			for(DialogListEntryData<T> dled:getCompleteEntriesListCopy()){
-				Object obj = dled.getUserObj();
+				Object obj = dled.getLinkedObj();
 				if (obj instanceof EGroupKeys)continue;
 				VarCmdFieldAbs vcfAtListEntry = ((VarCmdFieldAbs)obj);
 				if(vcfVarEntry.getUniqueVarId().equals(vcfAtListEntry.getUniqueVarId())){
@@ -278,8 +304,8 @@ public class VarsDialogStateI<T extends Command<Button>> extends MaintenanceList
 	private void setParentestParent(DialogListEntryData<T> dledEntry, DialogListEntryData<T> dledParent){
 		DialogListEntryData<T> dledParentest = dledEntry.getParentest();
 		
-		if (dledParentest.getUserObj() instanceof EGroupKeys) {
-			EGroupKeys egk = (EGroupKeys) dledParentest.getUserObj();
+		if (dledParentest.getLinkedObj() instanceof EGroupKeys) {
+			EGroupKeys egk = (EGroupKeys) dledParentest.getLinkedObj();
 			switch(egk){
 				case PkgTopRef:
 				case DialogsCons:

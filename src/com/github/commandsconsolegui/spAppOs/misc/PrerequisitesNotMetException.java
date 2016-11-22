@@ -117,6 +117,13 @@ public class PrerequisitesNotMetException extends NullPointerException { //@STAT
 			throw new PrerequisitesNotMetException(strDescWhat+": is empty", aobjAll.toArray());
 		}
 	}
+	
+	/**
+	 * DevSelfNote: do not return a value as this may be disableable one day, to avoid dependency.
+	 * @param strDescWhat
+	 * @param obj
+	 * @param aobjMoreObjectsForDebugInfo
+	 */
 	public static void assertNotNull(String strDescWhat, Object obj, Object... aobjMoreObjectsForDebugInfo){
 		if(obj==null){
 			ArrayList<Object> aobjAll = new ArrayList<Object>();

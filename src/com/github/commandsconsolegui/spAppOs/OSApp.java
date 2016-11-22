@@ -213,4 +213,9 @@ public class OSApp implements IReflexFillCfg{
 	public boolean isDynamicInfoSet(){
 		return !strDynamicInfo.isEmpty();
 	}
+
+
+	public String getAssetsFolder() {
+		return "./assets/";
+	}
 }

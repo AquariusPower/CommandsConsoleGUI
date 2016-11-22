@@ -120,42 +120,10 @@ public abstract class BoolTogglerCmdFieldAbs<THIS extends BoolTogglerCmdFieldAbs
 		return getUniqueCmdId()+" "+bForceState;
 	}
 	
-//	public IConsoleCommandListener getOwnerAsCmdListener() {
-//		if(getOwner() instanceof CommandsDelegator){
-//			return GlobalCommandsDelegatorI.i().getPseudoListener();
-//		}
-//		
-//		if(getOwner() instanceof IConsoleCommandListener){
-//			return (IConsoleCommandListener)getOwner();
-//		}
-//		
-//		return null;
-//	}
-
-//	@Override
-//	public String getReport() {
-//		return getUniqueCmdId()+" = "+bCurrent;
-//	}
-
-//	public void set(boolean b){
-////		set(b,true);
-////	}
-////	public void set(boolean b, boolean bUseCallQueue){
-//		setValue(b);
-//		
-//		if(bConstructed){
-//			if(isChangedAndRefresh()){
-//				if(bDoCallOnChange){
-//					if(this.caller==null){
-//						MsgI.i().warn("null caller for "+this.getReport(), this);
-////						throw new PrerequisitesNotMetException("null caller for "+this.getReport());
-//					}else{
-//						CallQueueI.i().addCall(this.caller);
-//					}
-//				}
-//			}
-//		}
-//	}
+	public THIS setBoolean(boolean b){
+		setValue(b);
+		return getThis();
+	}
 	
 	@Override
 	public THIS setObjectRawValue(Object objValue,boolean bPreventCallerRunOnce) {

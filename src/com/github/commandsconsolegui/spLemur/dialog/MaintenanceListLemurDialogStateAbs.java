@@ -99,32 +99,6 @@ public abstract class MaintenanceListLemurDialogStateAbs<T extends Command<Butto
 		return getThis();
 	}
 	
-//	@Override
-//	protected boolean prepareTestData(){
-//		addEntryQuick(null);
-//		addEntryQuick(null);
-//		
-//		DialogListEntryData<T> dleS1 = addEntryQuick("section 1");
-//		addEntryQuick(null).setParent(dleS1);
-//		addEntryQuick(null).setParent(dleS1);
-//		addEntryQuick(null).setParent(dleS1);
-//		
-//		DialogListEntryData<T> dleS2 = addEntryQuick("section 2");
-//		addEntryQuick(null).setParent(dleS2);
-//		addEntryQuick(null).setParent(dleS2);
-//		DialogListEntryData<T> dleS21 = addEntryQuick("section 2.1").setParent(dleS2);
-//		addEntryQuick(null).setParent(dleS21);
-//		addEntryQuick(null).setParent(dleS21);
-//		addEntryQuick(null).setParent(dleS21);
-//		
-//		addEntryQuick("S2 child").setParent(dleS2); //ok, will be placed properly
-//		
-//		addEntryQuick("S1 child").setParent(dleS1); //out of order for test
-//		addEntryQuick("S21 child").setParent(dleS21); //out of order for test
-//		
-//		return true;
-//	}
-
 	@Override
 	public void applyResultsFromModalDialog() {
 		DialogStateAbs<T,?> diagModal = getChildDiagModalInfoCurrent().getDiagModal();
@@ -191,12 +165,17 @@ public abstract class MaintenanceListLemurDialogStateAbs<T extends Command<Butto
 		
 		return bChangesMade;
 	}
-
+	
 	@Override
-	protected void actionCustomAtEntry(DialogListEntryData<T> dledSelected) {
+	protected DialogStateAbs getDiagChoice(DialogListEntryData dledSelected){
+		return cfg.getDiagChoice();
+	}
+	
+	@Override
+	protected void actionMainAtEntry(DialogListEntryData<T> dledSelected) {
 		if(cfg.getDiagChoice()!=null){
-			super.actionCustomAtEntry(dledSelected);
-			openModalDialog(cfg.getDiagChoice().getUniqueId(), dledSelected, (T)cmdCfg);
+			super.actionMainAtEntry(dledSelected);
+			openModalDialog(getDiagChoice(dledSelected).getUniqueId(), dledSelected, (T)cmdCfg);
 		}else{
 			AudioUII.i().playOnUserAction(AudioUII.EAudio.Failure);
 			GlobalCommandsDelegatorI.i().dumpDevWarnEntry("no choice dialog configured for "+this, dledSelected);
@@ -241,7 +220,7 @@ public abstract class MaintenanceListLemurDialogStateAbs<T extends Command<Butto
 		@Override
 		public void execute(Button btn) {
 //			DialogTestState.this.openModalDialog(EDiag.Cfg.toString(), getDataFrom(btn), (T)this);
-			actionCustomAtEntry(getDledFrom(btn));
+			actionMainAtEntry(getDledFrom(btn));
 //			DialogTestState.this.actionSubmit();
 		}
 	}

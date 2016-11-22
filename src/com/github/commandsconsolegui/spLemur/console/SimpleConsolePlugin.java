@@ -67,6 +67,7 @@ import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spLemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.spLemur.MouseCursorListenerAbs;
 import com.github.commandsconsolegui.spLemur.OSAppLemur;
+import com.github.commandsconsolegui.spLemur.dialog.FileChoiceDialogStateI;
 import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialogI;
 import com.github.commandsconsolegui.spLemur.globals.GlobalLemurConsoleStateI;
 import com.github.commandsconsolegui.spLemur.globals.GlobalLemurDialogHelperI;
@@ -199,6 +200,10 @@ public class SimpleConsolePlugin implements IReflexFillCfg, ISingleInstance, ICo
   	
   	if(!LemurEffectsI.i().isConfigured()){
   		LemurEffectsI.i().configure(null);
+  	}
+  	
+  	if(!FileChoiceDialogStateI.i().isConfigured()){
+  		FileChoiceDialogStateI.i().configure(new FileChoiceDialogStateI.CfgParm());
   	}
 		
 //		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);

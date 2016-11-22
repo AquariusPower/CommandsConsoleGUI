@@ -273,8 +273,10 @@ public class LemurDiagFocusHelperStateI extends CmdConditionalStateAbs<LemurDiag
 		LemurDialogStateAbs diagFocus = diag;
 		for(Object objDiagModal:diag.getModalChildListCopy()){
 			LemurDialogStateAbs diagModal = (LemurDialogStateAbs) objDiagModal;
-			diagFocus = diagModal;
-			break;
+			if(diagModal.isEnabled()){ //there can only have on modal enabled at a time TODO right?
+				diagFocus = diagModal;
+				break; 
+			}
 		}
 		
 		requestFocus(diagFocus.getInputFieldForManagement(ccSelf),true);

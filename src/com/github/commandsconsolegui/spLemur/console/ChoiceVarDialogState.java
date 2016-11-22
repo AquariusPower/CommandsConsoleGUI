@@ -30,9 +30,7 @@ package com.github.commandsconsolegui.spLemur.console;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.RefHolder;
@@ -83,6 +81,7 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 	
 	private VarCmdFieldAbs	vcf;
 	private DialogListEntryData<T>	dledAtParent;
+//	private FileChoiceDialogState	diagFile;
 	
 //	@Override
 //	public boolean doItAllProperly(CompositeControl cc, float tpf) {
@@ -104,7 +103,7 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 		}
 		
 		dledAtParent = adledAtParentList.get(0);
-		Object objUser = dledAtParent.getUserObj();
+		Object objUser = dledAtParent.getLinkedObj();
 		vcf=null; 
 		if(objUser instanceof VarCmdFieldAbs){
 			vcf = (VarCmdFieldAbs)objUser;
@@ -113,17 +112,17 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 			throw new PrerequisitesNotMetException("user object is not "+VarCmdFieldAbs.class, objUser, dledAtParent);
 		}
 		
-		btgSortListEntries.setObjectRawValue(false);
+//		if(vcf instanceof FileVarField){
+//			FileVarField flVar = ((FileVarField)vcf);
+//			addModalDialog(FileChoiceDialogStateI.i());
+//			FileChoiceDialogStateI.i().setInitiallyChosenFile(flVar.getFile());
+//			FileChoiceDialogStateI.i().requestEnable();
+//		}
+		
+		btgSortListEntries.setBoolean(false);
 		
 		return true;
 	}
-	
-//	@Override
-//	protected void enableSuccess() {
-//		super.enableSuccess();
-////		setInputText(getUserEnterCustomValueToken()+vcf.getValueAsString(10));
-//		setInputText(getUserEnterCustomValueToken()+vcf.getValueRaw());
-//	}
 	
 	@Override
 	protected String getTextInfo() {
@@ -214,10 +213,6 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 		if(vcf instanceof NumberVarFieldAbs){
 			createValueNumberEntries();
 		}
-//		else
-//		if(vcf instanceof KeyBoundVarField){
-//			createValueKeyEntries();
-//		}
 	}
 	
 
@@ -228,13 +223,6 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 		dledRawValue.updateTextTo(vcf.getRawValue());
 		dledValue.updateTextTo(vcf.getValueAsString(3));
 	}
-	
-//	private void createValueKeyEntries() {
-//		DialogListEntryData<T> dledNew = null;
-//		dledNew = new DialogListEntryData<T>(this);
-//		dledNew.setParent(dledVals);
-//		addEntry(dledNew.setText(varn.getMin(), vcf)).addCustomButtonAction("MinValue->",(T)cavai);
-//	}
 	
 	private void createValueNumberEntries(){
 		DialogListEntryData<T> dledNew = null;
@@ -276,7 +264,9 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 	@Override
 	protected boolean updateAttempt(float tpf) {
 		// keep here to help on debug...
-		return super.updateAttempt(tpf);
+		if(!super.updateAttempt(tpf))return false;
+		
+		return true;
 	}
 	
 	@Override
@@ -370,13 +360,4 @@ public final class ChoiceVarDialogState<T extends Command<Button>> extends Choic
 		return this;
 	}
 
-//	@Override
-//	public boolean addHandled(VarCmdFieldAbs objNew) {
-//		return false;
-//	}
-//
-//	@Override
-//	public ArrayList<VarCmdFieldAbs> getHandledListCopy() {
-//		return null;
-//	}
 }

@@ -94,7 +94,7 @@ public class FileVarField extends VarCmdFieldAbs<File,FileVarField>{
 		return this;
 	}
 	
-	private final String strCodePrefixDefault="fl";
+	private final String strCodePrefixDefault="flf";
 	@Override
 	public String getCodePrefixDefault() {
 		return strCodePrefixDefault;
@@ -125,5 +125,9 @@ public class FileVarField extends VarCmdFieldAbs<File,FileVarField>{
 		if(!ManageVarCmdFieldI.i().isHasVarManager(imgr)){
 			ManageVarCmdFieldI.i().putVarManager(imgr, KeyBoundVarField.class);
 		}
+	}
+	
+	public File getFile(){
+		return getValue();
 	}
 }

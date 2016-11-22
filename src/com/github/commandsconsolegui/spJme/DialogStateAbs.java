@@ -33,16 +33,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.HoldRestartable;
+import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI.DebugData;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.RefHolder;
 import com.github.commandsconsolegui.spAppOs.misc.Request;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
+import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI.DebugInfo;
+import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI.EDbgStkOrigin;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.spAppOs.misc.RunMode;
 //import com.github.commandsconsolegui.jmegui.lemur.extras.LemurDialogGUIStateAbs;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
@@ -57,6 +63,7 @@ import com.github.commandsconsolegui.spJme.extras.UngrabMouseStateI.IUngrabMouse
 import com.github.commandsconsolegui.spJme.globals.GlobalDialogHelperI;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spJme.savablevalues.CompositeSavableAbs;
+import com.github.commandsconsolegui.spLemur.dialog.LemurDialogStateAbs;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.math.Vector3f;
@@ -68,6 +75,11 @@ import com.jme3.scene.Spatial;
  * 
  * A console command will be automatically created based on the configured {@link #strUIId}.<br>
  * See it at {@link DialogStateAbs}.
+ * 
+ * Workflow:
+ * - configure the modal dialogs at the parent (the choice one is special and may vary from the default one) {@link #getDiagChoice(DialogListEntryData)}
+ * - on activating a parent's entry, a modal will be opened
+ * - the modal can access the selected parent's entry direcly for its value {@link #getParentReferencedDledListCopy()}
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
@@ -87,26 +99,17 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	private String	strUserEnterCustomValueToken = "=";
 	
 	private boolean	bUserEnterCustomValueMode;
-//	private DialogStateAbs<DIAG,?> diagParent;
 	private HoldRestartable<DialogStateAbs<DIAG,?>> hrdiagParent = new HoldRestartable<DialogStateAbs<DIAG,?>>(this);
-	private ArrayList<DialogStateAbs<DIAG,?>> aModalChildList = new ArrayList<DialogStateAbs<DIAG,?>>();
-//	private DialogListEntryData<T>	dataToCfgReference;
-//	private DialogListEntryData<T> dataFromModal;
+	private HashMap<String, HoldRestartable<DialogStateAbs>> hmhrChildDiagModals = new HashMap<String, HoldRestartable<DialogStateAbs>>();
+//	private ArrayList<DialogStateAbs> aModalChildList = new ArrayList<DialogStateAbs>();
 	private boolean	bRequestedActionSubmit;
-//	private Object[]	aobjModalAnswer;
 	private Node cntrNorth;
 	private Node cntrSouth;
 	private String	strLastFilter = "";
-//	private ArrayList<DialogListEntry> aEntryList = new ArrayList<DialogListEntry>();
-//	private String	strLastSelectedKey;
 	private ArrayList<DialogListEntryData<DIAG>>	adleCompleteEntriesList = new ArrayList<DialogListEntryData<DIAG>>();
 	private ArrayList<DialogListEntryData<DIAG>>	adleTmp;
 	private DialogListEntryData<DIAG>	dleLastSelected;
-//	private V	valueOptionSelected;
-//	private boolean	bRequestedRefreshList;
 	private Request reqRefreshList = new Request(this);
-//	private DialogListEntryData<T>	dataReferenceAtParent;
-//	private T	cmdAtParent;
 	private DiagModalInfo<DIAG> dmi = null;
 	
 	private boolean bOptionChoiceSelectionMode = false;
@@ -506,6 +509,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		return true;
 	}
 	RefHolder<String> hchInputText=new RefHolder<String>("");
+	private DebugData	dbg;
 	
 	/**
 	 * TODO try this instead: https://github.com/jMonkeyEngine-Contributions/Lemur/wiki/Effects-and-Animation#open-close-effect
@@ -585,15 +589,9 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		
 		getNodeGUI().attachChild(getDialogMainContainer());
 		
-//		setMouseCursorKeepUngrabbed(true);
-//		if(diagParent!=null)diagParent.updateModalChild(true,this);
-		if(hrdiagParent.isSet())hrdiagParent.getRef().updateModalChild(true,this);
-//		updateModalParent(true);
-		
-		
-//		// here to let the disable effect work
-//		v3fBkpDiagPosB4Effect = getDialogMainContainer().getLocalTranslation().clone();
-//		v3fBkpDiagSizeB4Effect = getMainSizeCopy();
+//		if(hrdiagParent.isSet()){
+//			hrdiagParent.getRef().addModalDialog(this);
+//		}
 		
 		if(btgEffect.b() && ( !cfg.isRestartNewInstance() || isFirstEnableDone() ) ){
 			Vector3f v3fScale = getDialogMainContainer().getLocalScale();
@@ -655,10 +653,9 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 			getDialogMainContainer().setLocalScale(1f);
 		}
 		
-//		setMouseCursorKeepUngrabbed(false);
-		if(hrdiagParent.isSet())hrdiagParent.getRef().updateModalChild(false,this);
-//		if(diagParent!=null)diagParent.updateModalChild(false,this);
-//		updateModalParent(false);
+//		if(hrdiagParent.isSet()){
+//			hrdiagParent.getRef().removeModalDialog(this);
+//		}
 		
 		return true;
 	}
@@ -732,7 +729,23 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //		}
 //	}
 	
-	protected THIS setDiagParent(DialogStateAbs<DIAG,?> diagParent) {
+	public THIS removeModalDialog(DialogStateAbs diagModal){
+		diagModal.setDiagParent(null);
+		if(hmhrChildDiagModals.remove(diagModal.getUniqueId())==null){
+			throw new PrerequisitesNotMetException("was not added?",diagModal,this);
+		}
+		return getThis();
+	}
+	
+	public THIS addModalDialog(DialogStateAbs diagModal){
+		PrerequisitesNotMetException.assertNotAlreadySet("parent", diagModal.getParentDialog(), this, diagModal);
+		diagModal.setDiagParent(this);
+		hmhrChildDiagModals.put(diagModal.getUniqueId(), new HoldRestartable(this,diagModal));
+		return getThis();
+	}
+	
+	protected THIS setDiagParent(DialogStateAbs diagParent) {
+		if(RunMode.bValidateDevCode)dbg=ManageDebugDataI.i().setStack(dbg,"LastSetParent"); 
 //		if(this.diagParent!=null)throw new PrerequisitesNotMetException("modal parent already set",this.diagParent,diagParent);
 //		PrerequisitesNotMetException.assertNotAlreadySet("modal parent", this.diagParent, diagParent, this);
 		hrdiagParent.setRef(diagParent);
@@ -742,20 +755,28 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	
 //	public abstract void setAnswerFromModalChild(Object... aobj);
 	
-	public ArrayList<DialogStateAbs<DIAG,?>> getModalChildListCopy() {
-		return new ArrayList<DialogStateAbs<DIAG,?>>(aModalChildList);
-	}
-	protected void updateModalChild(boolean bAdd, DialogStateAbs<DIAG,?> baseDialogStateAbs) {
-//		if(this.modalParent==null)return;
-			
-		if(bAdd){
-			if(!aModalChildList.contains(baseDialogStateAbs)){
-				aModalChildList.add(baseDialogStateAbs);
-			}
-		}else{
-			aModalChildList.remove(baseDialogStateAbs);
+	public ArrayList<DialogStateAbs> getModalChildListCopy() {
+		ArrayList<DialogStateAbs> a = new ArrayList<DialogStateAbs>();
+		for(HoldRestartable<DialogStateAbs> hr:hmhrChildDiagModals.values()){
+			a.add(hr.getRef());
 		}
+		return a;
 	}
+	
+//	/**
+//	 * 
+//	 * @param bAdd false to remove
+//	 * @param diag
+//	 */
+//	private void manageModalChild(boolean bAdd, DialogStateAbs diag) {
+//		if(bAdd){
+//			if(!aModalChildList.contains(diag)){
+//				aModalChildList.add(diag);
+//			}
+//		}else{
+//			aModalChildList.remove(diag);
+//		}
+//	}
 
 	public abstract void clearSelection();
 	
@@ -801,6 +822,29 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 //		});
 	}
 	
+	public void openModalDialog(String strDialogId, DialogListEntryData dledToAssignModalTo, Object cmd){
+		DialogStateAbs diagModalCurrent = hmhrChildDiagModals.get(strDialogId).getRef();
+		if(diagModalCurrent!=null){
+			setDiagModalInfoCurrent(new DiagModalInfo(diagModalCurrent,cmd,dledToAssignModalTo));
+			diagModalCurrent.requestEnable();
+		}else{
+			throw new PrerequisitesNotMetException("no dialog set for id: "+strDialogId);
+		}
+	}
+	
+	@Override
+	public void requestRestart() {
+		// do not allow restart with childs enabled, this also grants many consistencies
+		for(HoldRestartable<DialogStateAbs> hr:hmhrChildDiagModals.values()){
+			if(hr.getRef().isEnabled()){
+				AudioUII.i().play(EAudio.Failure);
+				return;
+			}
+		}
+		
+		super.requestRestart();
+	}
+
 	protected String getTextInfo(){
 		String str="";
 		
@@ -822,6 +866,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	
 	/**
 	 * NO! use {@link #getParentReferencedDledListCopy()} instead
+	 * Keep this as a warning!
 	 * @return
 	 */
 	@Deprecated
@@ -829,7 +874,9 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		throw new PrerequisitesNotMetException("NO! see this method documentation...");
 	}
 	/**
-	 * NO! use {@link #getParentReferencedDledListCopy()} instead
+	 * Will not be set anymore!
+	 * use {@link #getParentReferencedDledListCopy()} instead!
+	 * Keep this as a warning!
 	 */
 	@Deprecated
 	protected void setDledReferenceAtParent(){
@@ -898,7 +945,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 					dataSelected.toggleExpanded();
 //					requestRefreshList();
 				}else{
-					actionCustomAtEntry(dataSelected);
+					actionMainAtEntry(dataSelected);
 				}
 			}
 		}
@@ -1175,7 +1222,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 	 * 
 	 * @param dataSelected
 	 */
-	protected void actionCustomAtEntry(DialogListEntryData<DIAG> dataSelected){
+	protected void actionMainAtEntry(DialogListEntryData<DIAG> dataSelected){
 		AudioUII.i().playOnUserAction(AudioUII.EAudio.SubmitSelection);
 	}
 	
@@ -1201,6 +1248,7 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		@Override		protected void updateTextInfo() {		}
 		@Override		protected DialogStateAbs getThis() {			return null;		}
 		@Override		protected void setPositionSize(Vector3f v3fPos, Vector3f v3fSize) {		}
+		@Override		protected DialogStateAbs getDiagChoice(DialogListEntryData dledSelected) { return null;	}
 	}
 	
 	/**
@@ -1777,5 +1825,9 @@ public abstract class DialogStateAbs<DIAG,THIS extends DialogStateAbs<DIAG,THIS>
 		}
 		
 		return super.isCanCleanExit();
+	}
+
+	protected DialogStateAbs getDiagChoice(DialogListEntryData dledSelected){
+		throw new PrerequisitesNotMetException("must be overriden by list maintainers");
 	}
 }

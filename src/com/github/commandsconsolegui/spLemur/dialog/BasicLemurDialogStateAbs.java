@@ -53,11 +53,6 @@ public abstract class BasicLemurDialogStateAbs<T,THIS extends BasicLemurDialogSt
 	}
 	
 	public static class CfgParm extends LemurDialogStateAbs.CfgParm{
-//		boolean bPrepareTestData;
-//		public CfgParm doPrepareTestData(){
-//			bPrepareTestData=true;
-//			return this;
-//		}
 		public CfgParm(
 				Float fDialogWidthPercentOfAppWindow,
 				Float fDialogHeightPercentOfAppWindow, Float fInfoHeightPercentOfDialog,
@@ -96,25 +91,10 @@ public abstract class BasicLemurDialogStateAbs<T,THIS extends BasicLemurDialogSt
 		return true;
 	}
 	
-//	protected boolean prepareTestData(){
-//		for(int i=0;i<10;i++)addEntryQuick(null); //some test data
-//		return true;
-//	}
-	
 	@SuppressWarnings("unchecked")
 	public DialogListEntryData<T> getDledFrom(Spatial spt){
 		return MiscJmeI.i().getUserDataPSH(spt, DialogListEntryData.class);
-//		String strKey = DialogListEntryData.class.getName();
-//		Object data = spt.getUserData(strKey);
-//		if(data==null)throw new PrerequisitesNotMetException("missing user object "+strKey);
-//		return (DialogListEntryData<T>) data;
 	}
-	
-//	enum EAudio{
-//		RemoveListEntry,
-//		RemoveSubTreeEntry,
-//		;
-//	}
 	
 	protected class CommandSel implements Command<Button>{
 		@Override
@@ -154,11 +134,6 @@ public abstract class BasicLemurDialogStateAbs<T,THIS extends BasicLemurDialogSt
 		return dle;
 	}
 
-//	@Override
-//	private String getSelectedEntryKey() {
-//		return hmKeyValueTmp.get(formatEntryKey(getSelectedEntryValue()));
-//	}
-	
 	@Override
 	protected boolean initCheckPrerequisites() {
 		if(GuiGlobals.getInstance()==null)return false;
@@ -201,9 +176,7 @@ public abstract class BasicLemurDialogStateAbs<T,THIS extends BasicLemurDialogSt
 	public boolean execTextDoubleClickActionFor(DialogListEntryData<T> data) {
 		if(isOptionSelectionMode())throw new PrerequisitesNotMetException("Option mode should not reach this method.");
 		
-		actionCustomAtEntry(data);
-//		openModalDialog(EDiag.Cfg.toString(), data, (T)cmdCfg);
-//		data.getActionTextDoubleClick().execute(null);
+		actionMainAtEntry(data);
 		
 		return true;
 	}
@@ -223,17 +196,9 @@ public abstract class BasicLemurDialogStateAbs<T,THIS extends BasicLemurDialogSt
 	protected boolean initAttempt() {
 		if(!super.initAttempt())return false;
 		
-//		if(cfg.bPrepareTestData){
-//			if(!prepareTestData())return false;
-//		}
-		
 		return true;
 	}
 	
-//	@Override
-//	public Vector3f getMainSize() {
-//		return getContainerMain().getPreferredSize();
-//	}
 	@Override
 	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
 		if(fld.getDeclaringClass()!=BasicLemurDialogStateAbs.class)return super.getFieldValue(fld);

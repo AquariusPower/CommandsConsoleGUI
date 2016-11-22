@@ -66,11 +66,6 @@ public abstract class ChoiceLemurDialogStateAbs<T extends Command<Button>, THIS 
 		return super.initAttempt();
 	}
 	
-//	@Override
-//	protected THIS getThis() {
-//		return (THIS)this;
-//	}
-	
 	@Override
 	public Object getFieldValue(Field fld) throws IllegalArgumentException, IllegalAccessException {
 		if(fld.getDeclaringClass()!=ChoiceLemurDialogStateAbs.class)return super.getFieldValue(fld);

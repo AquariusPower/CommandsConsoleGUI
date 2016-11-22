@@ -68,7 +68,7 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 	private HoldRestartable<DialogStateAbs> hrdiagOwner = null; //new HoldRestartable<DialogStateAbs>();
 	
 	private HashMap<String,T> hmCustomButtonsActions = new HashMap<String,T>();
-	private Object	objUser;
+	private Object	objLinked;
 	
 	private DialogListEntryData<T> parent; //it must be set as the parent type too
 	private boolean bTreeExpanded = false; 
@@ -256,8 +256,8 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 		return strText;
 	}
 	
-	public Object getUserObj(){
-		return this.objUser;
+	public Object getLinkedObj(){
+		return this.objLinked;
 	}
 	
 	/**
@@ -280,28 +280,15 @@ public class DialogListEntryData<T> implements Savable,IHasOwnerInstance<DialogS
 	
 	/**
 	 * 
-	 * @param strText 
-	 * @param objUser the linked object represented by the text
+	 * @param strText an easily/clearly readable info about the linked object
+	 * @param objLinked the linked object represented by the text
 	 * @return
 	 */
-	public DialogListEntryData<T> setText(Object objText, Object objUser) {
+	public DialogListEntryData<T> setText(Object objText, Object objLinked) {
 		updateTextTo(objText);
-//		this.strText = strText;
-		this.objUser=objUser;
-//		this.objRef=objReference;
+		this.objLinked=objLinked;
 		return this;
 	}
-//	public Object getRef() {
-//		return objRef;
-//	}
-//	public DialogListEntryData<T> setRef(Object objRef) {
-//		this.objRef = objRef;
-//		return this;
-//	}
-	
-//	public T getAction(){
-//		return objRef;
-//	}
 	
 	@Override
 	public String toString() {

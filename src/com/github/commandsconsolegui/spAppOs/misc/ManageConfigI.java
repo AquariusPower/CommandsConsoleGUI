@@ -27,8 +27,6 @@
 
 package com.github.commandsconsolegui.spAppOs.misc;
 
-import java.util.ArrayList;
-
 import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
