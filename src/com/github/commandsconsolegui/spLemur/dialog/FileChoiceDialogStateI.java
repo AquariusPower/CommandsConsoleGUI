@@ -30,6 +30,8 @@ import java.io.File;
 import java.lang.reflect.Field;
 
 import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spCmd.varfield.FileVarField;
@@ -70,25 +72,27 @@ public class FileChoiceDialogStateI extends ChoiceLemurDialogStateAbs<Command<Bu
 		
 		DialogListEntryData<Command<Button>> dledAtParent = getParentReferencedDledListCopy().get(0);
 		Object obj = dledAtParent.getLinkedObj();
-		File fl = null;
+		File flAtParentTmp;
 		if (obj instanceof FileVarField) {
 			FileVarField flf = (FileVarField) obj;
-			fl = flf.getFile();
+			flAtParentTmp = flf.getFile();
 		}else
 		if (obj instanceof File) {
-			fl = (File) obj;
+			flAtParentTmp = (File) obj;
 		}else{
 			throw new PrerequisitesNotMetException("unsupported type", obj.getClass(), obj);
 		}
 		
-		if(!fl.exists()){
-			fl=new File(GlobalAppOSI.i().getAssetsFolder()+File.separator+fl.getPath());
-			PrerequisitesNotMetException.assertIsTrue("path exist", fl.exists(), fl);
+		if(!flAtParentTmp.exists()){ //try assets folder
+			flAtParentTmp=new File(GlobalAppOSI.i().getAssetsFolder()+File.separator+flAtParentTmp.getPath());
+			PrerequisitesNotMetException.assertIsTrue("path exist", flAtParentTmp.exists(), flAtParentTmp);
 		}
 		
-		File flDir = fl.getParentFile();
+		File flDir = flAtParentTmp.getParentFile();
 		
-		MsgI.i().debug("current path",(new File(".")).getAbsolutePath());
+		MsgI.i().debug("current path",(new File(".")).getAbsolutePath()); //TODO this dont work why?
+		
+		DialogListEntryData<Command<Button>> dledSelectTmp=null;
 		
 		//folders 
 		for(File flTmp:flDir.listFiles()){ //flDir=new File("./Sounds/Effects/UI/13940__gameaudio__game-audio-ui-sfx/")
@@ -96,6 +100,9 @@ public class FileChoiceDialogStateI extends ChoiceLemurDialogStateAbs<Command<Bu
 			DialogListEntryData dled = new DialogListEntryData(this);
 			dled.setText(">"+flTmp.getName()+"/", flTmp); // prepended a token just to help on sorting
 			addEntry(dled);
+//			if(flTmp.equals(flAtParent)){
+//				dledSelectTmp=dled;
+//			}
 		}
 		
 		// files
@@ -104,7 +111,30 @@ public class FileChoiceDialogStateI extends ChoiceLemurDialogStateAbs<Command<Bu
 			DialogListEntryData dled = new DialogListEntryData(this);
 			dled.setText(flTmp.getName(), flTmp);
 			addEntry(dled);
+//			if(flTmp.equals(flAtParent)){
+//				dledSelectTmp=dled;
+//			}
 		}
+		
+//		for(DialogListEntryData<Command<Button>> dled:getCompleteEntriesListCopy()){
+//			if(dled.getLinkedObj().getName().equals(dledAtParent.getLinkedObj()))
+//		}
+		
+//		final DialogListEntryData<Command<Button>> dledSelect=dledSelectTmp;
+		final File flAtParent = flAtParentTmp;
+		ManageCallQueueI.i().addCall(new CallableX(this,100) {
+			@Override
+			public Boolean call() {
+				for(DialogListEntryData dled:getCompleteEntriesListCopy()){
+					File fl = (File)dled.getLinkedObj();
+					if(fl.equals(flAtParent)){
+						selectEntry(dled);
+						return true;
+					}
+				}
+				return false;
+			}
+		});
 		
 		super.updateList();
 	}
