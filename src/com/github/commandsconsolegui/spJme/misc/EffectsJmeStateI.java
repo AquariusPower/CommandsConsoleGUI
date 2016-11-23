@@ -86,6 +86,8 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 	}
 	
 	public static interface IEffect{
+		public boolean isPlaying();
+		
 		public String getUId();
 		
 		public void assertConfigIsValid();
@@ -93,9 +95,9 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 		public void play(float tpf);
 		public Object getOwner();
 
-		public void pause();
+		public void setPlay(boolean b);
 		
-		public void prepareToBeDiscarded();
+		public void setAsDiscarded();
 	}
 	
 	private String strLastUId="0";
@@ -133,6 +135,7 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 		private long	iHoldUntilMilis;
 		private Vector3f	v3fHoldPreviousFrom=new Vector3f();
 		private Vector3f	v3fHoldPreviousTo=new Vector3f();
+		private boolean	bDiscarded;
 		
 		/**
 		 * 
@@ -152,20 +155,24 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 //			v3fRelativePartStepMaxPos = v3fDirectionNormalized.mult(iPartMaxDots);
 		}
 		public EffectElectricity setFromTo(Vector3f v3fFrom, Vector3f v3fTo){
+			assertNotDiscarded();
 			this.v3fFrom=v3fFrom; 
 			this.v3fTo=v3fTo;
 			return this;
 		}
 		public EffectElectricity setFollowToMouse(boolean b){
+			assertNotDiscarded();
 			this.bToMouse=b;
 			return this;
 		}
 		public EffectElectricity setFollowFromTarget(Spatial spt, Vector3f v3fDisplacement){
+			assertNotDiscarded();
 			sptFollowFrom=spt;
 			v3fFollowFromDisplacement = v3fDisplacement==null?new Vector3f():v3fDisplacement;
 			return this;
 		}
 		public EffectElectricity setFollowToTarget(Spatial spt, Vector3f v3fDisplacement){
+			assertNotDiscarded();
 			sptFollowTo=spt;
 			v3fFollowToDisplacement = v3fDisplacement==null?new Vector3f():v3fDisplacement;
 			return this;
@@ -173,11 +180,13 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 		
 		@Override
 		public String getUId(){
+			assertNotDiscarded();
 			return strUId;
 		}
 		
 		@Override
 		public void play(float tpf) {
+			assertNotDiscarded();
 			if(!bPlay)return;
 //			if(bDiscarding)return;
 			
@@ -214,6 +223,7 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 			return v3fTargetSpot;
 		}
 		public BfdArrayList<Vector3f> recreatePath() {
+			assertNotDiscarded();
 			Vector3f v3fTargetSpot=getLocationTo();
 			
 			Vector3f v3fDirectionNormalized = v3fTargetSpot.subtract(getLocationFrom()).normalize();
@@ -299,27 +309,47 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 		}
 		@Override
 		public Object getOwner() {
+			assertNotDiscarded();
 			return objOwner;
 		}
 		@Override
-		public void pause() {
-			bPlay=false;
+		public void setPlay(boolean b) {
+			assertNotDiscarded();
+			this.bPlay=b;
+			if(!this.bPlay){
+				if(geomLast!=null)geomLast.removeFromParent();
+			}
 		}
 		@Override
-		public void prepareToBeDiscarded() {
-			pause();
+		public void setAsDiscarded() {
+			setPlay(false);
 			if(geomLast!=null)geomLast.removeFromParent();
-//			bDiscarding=true;
+			bDiscarded=true;
+		}
+		private void assertNotDiscarded(){
+			if(bDiscarded){
+				throw new PrerequisitesNotMetException("cant work with a discarded effect");
+			}
 		}
 		@Override
 		public void assertConfigIsValid() {
+			assertNotDiscarded();
+			if(!isPlaying())return; //not redundant when called directly after adding the effect
+			
 			if(v3fFrom==null && sptFollowFrom==null){
-				throw new PrerequisitesNotMetException("'from' not set",this);
+				throw new PrerequisitesNotMetException("playing and 'from' not set",this);
 			}
 			
 			if(v3fTo==null && sptFollowTo==null && !bToMouse){
-				throw new PrerequisitesNotMetException("'to' not set",this);
+				throw new PrerequisitesNotMetException("playing and 'to' not set",this);
 			}
+		}
+		@Override
+		public boolean isPlaying() {
+			return bPlay;
+		}
+		public void setAmplitudePerc(float f) {
+			this.fAmplitudePerc=f;
 		}
 		
 	}
@@ -327,20 +357,20 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 	HashMap<String,IEffect> hmEffects = new HashMap<String, IEffect>();
 	
 	public <T extends IEffect> T addEffect(T ieff){
-		ieff.assertConfigIsValid();
+		if(ieff.isPlaying())ieff.assertConfigIsValid();
 		hmEffects.put(ieff.getUId(),ieff);
 		return ieff;
 	}
 	
-	public void removeEffect(IEffect ie){
-		ie.prepareToBeDiscarded();
+	public void discardEffect(IEffect ie){
 		hmEffects.remove(ie.getUId(),ie);
+		ie.setAsDiscarded();
 	}
 	
-	public void removeEffectsForOwner(Object objOwner){
+	public void discardEffectsForOwner(Object objOwner){
 		for(IEffect ie:hmEffects.values().toArray(new IEffect[0])){
 			if(ie.getOwner()==objOwner){
-				removeEffect(ie);
+				discardEffect(ie);
 			}
 		}
 	}
@@ -353,6 +383,7 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 		int iFPStarget=15;
 		if(lLastUpdateMilis+(1000/iFPStarget) < GlobalSimulationTimeI.i().getMilis()){
 			for(IEffect ie:hmEffects.values()){
+				ie.assertConfigIsValid(); //config may change during play
 				ie.play(tpf);
 			}
 			lLastUpdateMilis=GlobalSimulationTimeI.i().getMilis();

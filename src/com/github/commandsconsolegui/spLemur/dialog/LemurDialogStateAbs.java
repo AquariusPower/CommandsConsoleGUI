@@ -55,6 +55,9 @@ import com.github.commandsconsolegui.spJme.ManageConditionalStateI.CompositeCont
 import com.github.commandsconsolegui.spJme.ManageMouseCursorI;
 import com.github.commandsconsolegui.spJme.ManageMouseCursorI.EMouseCursorButton;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData;
+import com.github.commandsconsolegui.spJme.globals.GlobalSimpleAppRefI;
+import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI;
+import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI.EffectElectricity;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spLemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.spLemur.console.LemurConsoleStateAbs;
@@ -98,7 +101,6 @@ import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.event.KeyAction;
 import com.simsilica.lemur.event.KeyActionListener;
 import com.simsilica.lemur.grid.GridModel;
-import com.simsilica.lemur.list.CellRenderer;
 import com.simsilica.lemur.list.SelectionModel;
 import com.simsilica.lemur.style.ElementId;
 
@@ -211,6 +213,11 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 	@Override
 	public THIS configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
+		
+		effDraggedBorder = new EffectElectricity(this, ColorRGBA.Cyan, GlobalSimpleAppRefI.i().getGuiNode());
+		effDraggedBorder.setPlay(false);
+		effDraggedBorder.setAmplitudePerc(0.05f);
+		EffectsJmeStateI.i().addEffect(effDraggedBorder);
 		
 		fdvEntryHeightMultiplier.setObjectRawValue(cfg.fEntryHeightMultiplier);
 //		DialogMouseCursorListenerI.i().configure(null);
@@ -656,7 +663,10 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 //		return v3fDragDisplacement;
 //	}
 	private boolean isMouseCursorWithinReach(Button btn){
-		if(!isRequestHitBorderToContinueDragging())return true;
+		if(!isRequestHitBorderToContinueDragging()){
+			btnCurrentlyActiveDraggedReziseBorder = btn;
+			return true;
+		}
 		
 		Vector2f v2fPosMCursor = ManageMouseCursorI.i().getMouseCursorPositionCopy();
 		Vector3f v3fPosPnl = btn.getWorldTranslation().clone();
@@ -821,6 +831,7 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 			}
 		});
 //	private boolean	bReinitBordersAfterThicknessChange;
+	private EffectElectricity	effDraggedBorder;
 	
 //	IntLongVarField ilvBorderThickness = new IntLongVarField(this, 3, "").setMinMax(1L, 20L)
 //		.setCallerAssigned(new CallableX(this) {
@@ -1130,9 +1141,6 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 	protected boolean updateAttempt(float tpf) {
 		if(isOverrideNormalDialog())return true;
 		if(!super.updateAttempt(tpf))return false;
-
-		// abtnBorderList.get(0).setPreferredSize(new Vector3f(3,3,1))
-		// MiscLemurStateI.i().setSizeSafely(abtnBorderList.get(2), 3, 3)
 		
 		if(DebugI.i().isKeyEnabled(EDebugKey.FillKeyValueHashmap)){
 			for(Button btn:abtnResizerList){
@@ -1145,45 +1153,50 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 		
 		if(bRefreshScroll)autoScroll();
 		
-//		updateSelectEntryRequested();
+		updateBorderDraggedEffect();
 		
 		if(!getInputText().startsWith(getUserEnterCustomValueToken())){
 			if(!getInputText().equalsIgnoreCase(getLastFilter())){
-	//			setLastFilter(getInputText());
 				applyListKeyFilter();
 				requestRefreshUpdateList();	//updateList();				
 			}
 		}
 		
 		updateEffectListEntries(isTryingToEnable());
-//		if(isTryingToEnable()){
-//			if(isEffectsDone()){ // play list effect after main one completes
-////				if(btgEffectListEntries.b()){
-////					if(!tdEffectListEachEntry.isActive()){
-////						if(!bEffectListAllEntriesCompleted){
-////							tdEffectListEachEntry.setActive(true);
-////						}
-////					}
-////				}
-//		
-////				if(tdEffectListEachEntry.isActive()){ //dont use btgEffectListEntries.b() as it may be disabled during the grow effect
-//				if(bRunningEffectAtAllListEntries){
-//					updateEffectListEntries(isTryingToEnable());
-//				}
-//			}
-//		}
 		
 		MiscLemurStateI.i().updateBlinkListBoxSelector(getMainList());//,true);
-		
-//		bAllowUpdateLogicalState=MiscLemurHelpersStateI.i().validatePanelUpdate(getContainerMain());
-//		if(bReinitBordersAfterThicknessChange){
-//			reinitBorders(false); //false to avoid call queue recursion
-//			bReinitBordersAfterThicknessChange=false;
-//		}
 		
 		return true;
 	}
 	
+	protected void updateBorderDraggedEffect() {
+		if(btnCurrentlyActiveDraggedReziseBorder==null){
+//			if(EffectsJmeStateI.i().containsEffect(effDraggedBorder)){
+				effDraggedBorder.setPlay(false);
+//				EffectsJmeStateI.i().removeEffect(effDraggedBorder);
+//			}
+		}else{
+//			if(!EffectsJmeStateI.i().containsEffect(effDraggedBorder)){
+//				EffectsJmeStateI.i().addEffect(effDraggedBorder);
+//			}
+			
+			if(!effDraggedBorder.isPlaying()){
+				effDraggedBorder.setFollowFromTarget(btnCurrentlyActiveDraggedReziseBorder, 
+						new Vector3f(0,0,1));
+				
+				Vector3f v3fToDispl=btnCurrentlyActiveDraggedReziseBorder.getSize();
+//			if(v3fToDispl.x>v3fToDispl.y){v3fToDispl.y=0;}else{v3fToDispl.x=0;}
+//			v3fToDispl.negateLocal();
+				v3fToDispl.z+=1f;
+				
+				effDraggedBorder.setFollowToTarget(btnCurrentlyActiveDraggedReziseBorder, 
+						v3fToDispl);
+				
+				effDraggedBorder.setPlay(true);
+			}			
+		}
+	}
+
 	/**
 	 * default is the class name, will look like the dialog title
 	 */

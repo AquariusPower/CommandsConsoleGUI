@@ -409,7 +409,7 @@ public class OSAppLemur extends OSAppJme {
 			pnlBlocker.removeFromParent();
 			pnlBlocker=null;
 			
-			EffectsJmeStateI.i().removeEffectsForOwner(this);
+			EffectsJmeStateI.i().discardEffectsForOwner(this);
 			ieffAlert=null;
 //			bAllowNewEffectCreation=true;
 		}

@@ -698,7 +698,7 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 //			hrdiagParent.getRef().removeModalDialog(this);
 //		}
 		
-		EffectsJmeStateI.i().removeEffectsForOwner(this);
+		EffectsJmeStateI.i().discardEffectsForOwner(this);
 		
 		return true;
 	}
