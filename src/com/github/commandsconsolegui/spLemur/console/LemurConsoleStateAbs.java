@@ -1646,7 +1646,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 	//	createMonoSpaceFixedFontStyle();
 		
 		// main container
-		getNodeGUI().attachChild(getDialogMainContainer());
+//		getNodeGUI().attachChild(getDialogMainContainer());
 		getDialogMainContainer().setLocalTranslation(
 			iMargin, 
 			app().getContext().getSettings().getHeight()-iMargin, 

@@ -56,7 +56,12 @@ import com.simsilica.lemur.style.ElementId;
  */
 public class DialogMainContainer extends Container implements ISpatialLayoutValidator, IReflexFillCfg, ISingleInstance, IHasOwnerInstance<DialogStateAbs>{ //IDiscardableInstance
 	private DialogStateAbs	diagOwner;
-	private boolean	bLayoutValid;
+	
+	/** 
+	 * initialized as true because only user interaction should make it become invalid
+	 * like too small dialog.
+	 */
+	private boolean	bLayoutValid = true; 
 //	ISpatialValidator diag;
 //	
 	

@@ -34,6 +34,7 @@ import java.util.Collections;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
+import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
@@ -269,7 +270,10 @@ public class LemurDiagFocusHelperStateI extends CmdConditionalStateAbs<LemurDiag
 	
 	public void requestDialogFocus(Spatial sptChild) {
 		LemurDialogStateAbs diag = retrieveDialogFromSpatial(sptChild);
-		if(!diag.isLayoutValid())return; //TODO return false? or queue this request?
+		if(!diag.isLayoutValid()){
+			MsgI.i().devWarn("diag layout is invalid", diag, this);
+			return; //TODO return false? or queue this request?
+		}
 		
 		LemurDialogStateAbs diagFocus = diag;
 		for(Object objDiagModal:diag.getModalChildListCopy()){

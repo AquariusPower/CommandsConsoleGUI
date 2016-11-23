@@ -85,6 +85,7 @@ import com.github.commandsconsolegui.spCmd.varfield.StringVarField;
 import com.github.commandsconsolegui.spCmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.spCmd.varfield.VarCmdFieldAbs;
 import com.github.commandsconsolegui.spCmd.varfield.VarCmdUId;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
@@ -4620,7 +4621,8 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 		if(bShowInfo){
 			if(bIsCmd){
 				dumpSubEntry("");
-				dumpSubEntry("<> <> <> <> <> <> USER COMMAND <> <> <> <> <> <>");
+				String str="[USER COMMAND]";
+				dumpEntry(Strings.padEnd(str, getCurrentFixedLineWrapAtColumn(), '_'));
 			}
 			dumpInfoEntry(strType+": "+strCmd);
 		}

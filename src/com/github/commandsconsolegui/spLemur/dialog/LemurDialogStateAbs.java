@@ -340,7 +340,7 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 		LemurDiagFocusHelperStateI.i().prepareDialogToBeFocused(this);
 		CursorEventControl.addListenersToSpatial(getDialogMainContainer(), DialogMouseCursorListenerI.i());
 		
-		getNodeGUI().attachChild(getDialogMainContainer());
+//		getNodeGUI().attachChild(getDialogMainContainer());
 		
 		return true;
 	}
