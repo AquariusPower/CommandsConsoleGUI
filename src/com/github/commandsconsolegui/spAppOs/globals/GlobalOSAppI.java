@@ -25,25 +25,17 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.spJme.globals;
+package com.github.commandsconsolegui.spAppOs.globals;
 
-import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
-import com.github.commandsconsolegui.spAppOs.globals.GlobalHolderAbs;
-import com.github.commandsconsolegui.spJme.OSAppJme;
+import com.github.commandsconsolegui.spAppOs.OSApp;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class GlobalJmeAppOSI extends GlobalHolderAbs<OSAppJme>{
-	private static GlobalJmeAppOSI instance = new GlobalJmeAppOSI();
-	public static GlobalJmeAppOSI iGlobal(){return instance;}
-	public static OSAppJme i(){return iGlobal().get();}
-	
-	@Override
-	public OSAppJme set(OSAppJme obj) {
-		GlobalAppOSI.iGlobal().set(obj);
-		return super.set(obj);
-	}
+public class GlobalOSAppI extends GlobalHolderAbs<OSApp>{
+	private static GlobalOSAppI instance = new GlobalOSAppI();
+	public static GlobalOSAppI iGlobal(){return instance;}
+	public static OSApp i(){return iGlobal().get();}
 }

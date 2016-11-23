@@ -95,7 +95,7 @@ public class KeyBind {
 		if(akeyModifierList==null)akeyModifierList = new ArrayList<Key>();
 		
 		for(Key key:akey){
-			PrerequisitesNotMetException.assertNotNull("mod key", key, this);
+			PrerequisitesNotMetException.assertNotNull(key, "mod key", this);
 			akeyModifierList.add(key);
 		}
 	}
@@ -107,7 +107,7 @@ public class KeyBind {
 	
 	public void setActionKey(Key key) {
 		PrerequisitesNotMetException.assertNotAlreadySet("action key", this.keyAction, key, this);
-		PrerequisitesNotMetException.assertNotNull("action key", key, this);
+		PrerequisitesNotMetException.assertNotNull(key, "action key", this);
 		
 		this.keyAction=key;
 	}

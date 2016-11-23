@@ -31,20 +31,23 @@ import java.util.HashMap;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
+import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI.DebugData;
+import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI.EDbgStkOrigin;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
+import com.github.commandsconsolegui.spAppOs.misc.RunMode;
 import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.spJme.ConditionalStateAbs;
 import com.github.commandsconsolegui.spJme.ManageMouseCursorI;
-import com.github.commandsconsolegui.spJme.globals.GlobalSimpleAppRefI;
-import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI.EffectElectricity;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
@@ -62,11 +65,7 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 			@Override
 			public Boolean call() {
 				addEffect(
-					new EffectElectricity(
-						this,
-						ColorRGBA.Cyan, 
-						GlobalSimpleAppRefI.i().getGuiNode()
-					)
+					new EffectElectricity(this)
 					.setFromTo(new Vector3f(10,10,100),null)
 					.setFollowToMouse(true)
 				);
@@ -94,10 +93,13 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 		
 		public void play(float tpf);
 		public Object getOwner();
+		public void setSkipDiscardingByOwner();
 
 		public void setPlay(boolean b);
 		
 		public void setAsDiscarded();
+
+		public boolean isDiscardingByOwner();
 	}
 	
 	private String strLastUId="0";
@@ -107,6 +109,7 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 	 * TODO create like 10 patterns and randomize thru them to be less CPU intensive? also rotate them in teh "direction axis" to look more randomized.
 	 */
 	public static class EffectElectricity implements IEffect{
+		private DebugData dbg;
 		private String	strUId = EffectsJmeStateI.i().strLastUId = MiscI.i().getNextUniqueId(EffectsJmeStateI.i().strLastUId);
 		private Vector3f	v3fFrom;
 		private Vector3f	v3fTo;
@@ -117,10 +120,11 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 		private float fDeltaPerc = fPartMaxPerc-fPartMinPerc;
 		private float fAmplitudePerc = 0.15f;
 		private int	iParts;
-		private ColorRGBA	colorBase;
+		private ColorRGBA	colorRefDefault=ColorRGBA.White.clone();
+		private ColorRGBA	colorRefBase;
 //		private int	iMaxAllowedParts;
 		private Node	nodeParent;
-		private Geometry	geomLast;
+		private Geometry	geom;
 		private int	iPartMaxDots = 100;
 //		private Vector3f v3fRelativePartStepMaxPos;
 		private boolean	bToMouse;
@@ -136,28 +140,36 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 		private Vector3f	v3fHoldPreviousFrom=new Vector3f();
 		private Vector3f	v3fHoldPreviousTo=new Vector3f();
 		private boolean	bDiscarded;
+		private int	iMaxHoldMilis = 1000;
+		private boolean	bDiscardingByOwner=true;
 		
 		/**
 		 * 
 		 * @param colorBase
 		 * @param nodeParent
 		 */
-		public EffectElectricity(Object objOwner, ColorRGBA colorBase, Node nodeParent){
+		public EffectElectricity(Object objOwner){
+			if(RunMode.bValidateDevCode)dbg=ManageDebugDataI.i().setStack(dbg, EDbgStkOrigin.Constructed);
 			this.objOwner=objOwner;
-			this.nodeParent=nodeParent;
-			this.colorBase=colorBase;
 			
-//			this.v3fDirectionNormalized = v3fTo.subtract(v3fFrom).normalize();
-			
-//			fDist = v3fFrom.distance(v3fTo);
-//			iMaxAllowedParts = (int) (fDist/fPartMinPerc);
-			
-//			v3fRelativePartStepMaxPos = v3fDirectionNormalized.mult(iPartMaxDots);
+			this.geom = new Geometry("Geom:"+EffectElectricity.class.getSimpleName());
+			Mesh mesh = new Mesh();
+			mesh.setStreamed();
+			this.geom.setMesh(mesh);
+		}
+		public EffectElectricity setColor(ColorRGBA colorRef){
+			this.colorRefBase = colorRef!=null ? colorRef : colorRefDefault;
+			this.geom.setMaterial(MiscJmeI.i().retrieveMaterialUnshadedColor(colorRef));
+			return this;
+		}
+		public EffectElectricity setNodeParent(Node node){
+			this.nodeParent=node;
+			return this;
 		}
 		public EffectElectricity setFromTo(Vector3f v3fFrom, Vector3f v3fTo){
 			assertNotDiscarded();
-			this.v3fFrom=v3fFrom; 
-			this.v3fTo=v3fTo;
+			this.v3fFrom=PrerequisitesNotMetException.assertNotNull(v3fFrom,this); 
+			this.v3fTo=PrerequisitesNotMetException.assertNotNull(v3fTo,this);
 			return this;
 		}
 		public EffectElectricity setFollowToMouse(boolean b){
@@ -172,6 +184,7 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 			return this;
 		}
 		public EffectElectricity setFollowToTarget(Spatial spt, Vector3f v3fDisplacement){
+			if(RunMode.bValidateDevCode)dbg=ManageDebugDataI.i().setStack(dbg);
 			assertNotDiscarded();
 			sptFollowTo=spt;
 			v3fFollowToDisplacement = v3fDisplacement==null?new Vector3f():v3fDisplacement;
@@ -188,19 +201,24 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 		public void play(float tpf) {
 			assertNotDiscarded();
 			if(!bPlay)return;
+			
+			if(!nodeParent.hasChild(geom))nodeParent.attachChild(this.geom);
+
 //			if(bDiscarding)return;
 			
-			Geometry geomNew = MiscJmeI.i().createMultiLineGeom(
-				recreatePath().toArray(), colorBase, FastMath.nextRandomFloat()*4+1);
-			geomNew.setLocalTranslation(getLocationFrom());
+			MiscJmeI.i().updateMultiLineMesh(geom.getMesh(), recreatePath().toArray());
+			geom.getMaterial().getAdditionalRenderState().setLineWidth(getThickNess());
+//			Geometry geomNew = null;// MiscJmeI.i().createMultiLineGeom(recreatePath().toArray(), colorBase, FastMath.nextRandomFloat()*4+1);
+//			geomNew.setLocalTranslation(getLocationFrom());
+			geom.setLocalTranslation(getLocationFrom());
 //			geomNew.getLocalTranslation().z+=0.03f;
 //			geomNew.getLocalTranslation().setZ(v3fFrom.z); //getLocationTo()
 			
-			if(geomLast!=null)geomLast.removeFromParent();
+//			if(geom!=null)geom.removeFromParent();
 			
-			nodeParent.attachChild(geomNew);
+//			nodeParent.attachChild(geomNew);
 			
-			geomLast=geomNew;
+//			geom=geomNew;
 		}
 		private Vector3f getLocationTo() {
 			Vector3f v3fTargetSpot = v3fTo==null?null:v3fTo.clone();
@@ -222,14 +240,26 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 			}
 			return v3fTargetSpot;
 		}
+		public long getThickNess(){
+			long lRemainMilis = iHoldUntilMilis - GlobalSimulationTimeI.i().getMilis();
+			long lMaxThickness = 8;
+			long lThicknessStepMilis = iMaxHoldMilis/lMaxThickness;
+			long lCurrentThickness = lRemainMilis/lThicknessStepMilis;
+//			return FastMath.nextRandomFloat()*4+1;
+			return lCurrentThickness>=1 ? lCurrentThickness : 1;
+		}
+		
 		public BfdArrayList<Vector3f> recreatePath() {
 			assertNotDiscarded();
 			Vector3f v3fTargetSpot=getLocationTo();
 			
-			Vector3f v3fDirectionNormalized = v3fTargetSpot.subtract(getLocationFrom()).normalize();
-			Vector3f v3fRelativePartStepMaxPos = v3fDirectionNormalized.mult(iPartMaxDots);
+			int iPartMaxDotsCurrent = iPartMaxDots;
 			int iDotsMaxDist = (int) getLocationFrom().distance(v3fTargetSpot);
-			int iMinDotsLength = (int) (iPartMaxDots*fPartMinPerc);
+			if(iDotsMaxDist<iPartMaxDots)iPartMaxDotsCurrent=iDotsMaxDist;
+			
+			Vector3f v3fDirectionNormalized = v3fTargetSpot.subtract(getLocationFrom()).normalize();
+			Vector3f v3fRelativePartStepMaxPos = v3fDirectionNormalized.mult(iPartMaxDotsCurrent);
+			int iMinDotsLength = (int) (iPartMaxDotsCurrent*fPartMinPerc);
 			int iMaxAllowedParts = (iDotsMaxDist/iMinDotsLength);
 			
 			boolean bUpdate=false;
@@ -237,9 +267,10 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 			if(v3fHoldPreviousFrom.distance(getLocationFrom()) > fMaxMoveDetectDist)bUpdate=true;
 			if(v3fHoldPreviousTo.distance(getLocationTo()) > fMaxMoveDetectDist)bUpdate=true;
 			if(iHoldUntilMilis < GlobalSimulationTimeI.i().getMilis()){
-				iHoldUntilMilis = GlobalSimulationTimeI.i().getMilis() + FastMath.nextRandomInt(250, 3000);
+				iHoldUntilMilis = GlobalSimulationTimeI.i().getMilis() + FastMath.nextRandomInt(250, iMaxHoldMilis );
 				bUpdate=true;
 			}
+			
 			if(bUpdate){
 				av3fList.clear();
 				// updating
@@ -260,7 +291,7 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 				v3fPartEnd.interpolateLocal(v3fPartEnd.add(v3fRelativePartStepMaxPos), fPerc);
 				
 				// random coolness missplacement
-				float fDots=iPartMaxDots*fAmplitudePerc;
+				float fDots=iPartMaxDotsCurrent*fAmplitudePerc;
 				v3fPartEnd.x+=MiscI.i().randomMinusOneToPlusOne()*fDots;
 				v3fPartEnd.y+=MiscI.i().randomMinusOneToPlusOne()*fDots;
 				v3fPartEnd.z+=MiscI.i().randomMinusOneToPlusOne()*fDots;
@@ -317,13 +348,14 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 			assertNotDiscarded();
 			this.bPlay=b;
 			if(!this.bPlay){
-				if(geomLast!=null)geomLast.removeFromParent();
+				if(geom!=null)geom.removeFromParent();
 			}
 		}
 		@Override
 		public void setAsDiscarded() {
+			if(RunMode.bValidateDevCode)dbg=ManageDebugDataI.i().setStack(dbg, EDbgStkOrigin.Discarded);
 			setPlay(false);
-			if(geomLast!=null)geomLast.removeFromParent();
+			if(geom!=null)geom.removeFromParent();
 			bDiscarded=true;
 		}
 		private void assertNotDiscarded(){
@@ -336,12 +368,31 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 			assertNotDiscarded();
 			if(!isPlaying())return; //not redundant when called directly after adding the effect
 			
+			if(colorRefBase==null){
+				setColor(colorRefDefault);
+			}
+			
 			if(v3fFrom==null && sptFollowFrom==null){
 				throw new PrerequisitesNotMetException("playing and 'from' not set",this);
 			}
 			
 			if(v3fTo==null && sptFollowTo==null && !bToMouse){
 				throw new PrerequisitesNotMetException("playing and 'to' not set",this);
+			}
+			
+			if(nodeParent==null){
+				if (objOwner instanceof ILinkedSpatial) {
+					ILinkedSpatial ils = (ILinkedSpatial) objOwner;
+					// the top node
+					nodeParent=(Node)MiscJmeI.i().getParentestFrom(ils.getLinkedSpatial(),false); 
+				}else{
+					if (objOwner instanceof Spatial) {
+						Spatial spt = (Spatial) objOwner;
+						nodeParent=(Node)MiscJmeI.i().getParentestFrom(spt,false);
+					}
+				}
+				
+				PrerequisitesNotMetException.assertNotNull(nodeParent, "parent", objOwner, this);
 			}
 		}
 		@Override
@@ -350,6 +401,14 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 		}
 		public void setAmplitudePerc(float f) {
 			this.fAmplitudePerc=f;
+		}
+		@Override
+		public void setSkipDiscardingByOwner() {
+			bDiscardingByOwner=false;
+		}
+		@Override
+		public boolean isDiscardingByOwner() {
+			return bDiscardingByOwner;
 		}
 		
 	}
@@ -369,6 +428,8 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 	
 	public void discardEffectsForOwner(Object objOwner){
 		for(IEffect ie:hmEffects.values().toArray(new IEffect[0])){
+			if(!ie.isDiscardingByOwner())continue;
+			
 			if(ie.getOwner()==objOwner){
 				discardEffect(ie);
 			}

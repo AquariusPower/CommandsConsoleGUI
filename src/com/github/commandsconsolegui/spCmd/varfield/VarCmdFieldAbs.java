@@ -224,7 +224,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		cc.assertSelfNotNull();
 		
 		// validate pre-conditions
-		PrerequisitesNotMetException.assertNotNull("ConsoleVarLinkNew", cvar, this);
+		PrerequisitesNotMetException.assertNotNull(cvar, "ConsoleVarLinkNew", this);
 		PrerequisitesNotMetException.assertNotAlreadySet("ConsoleVarLinkCurrent", this.cvarLinkAndValueStorage, cvar, this);
 		PrerequisitesNotMetException.assertNotAlreadySet("ConsoleVarOwner", cvar.getRestrictedVarOwner(), this);
 		PrerequisitesNotMetException.assertNotAlreadySet("ConsoleVarValue", cvar.getRawValue(), cvar, this);

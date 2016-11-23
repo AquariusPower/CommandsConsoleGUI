@@ -29,7 +29,7 @@ package com.github.commandsconsolegui.spJme.extras;
 
 import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.ManageExitI;
-import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalOSAppI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
@@ -87,7 +87,7 @@ public class SimpleApplicationHelperI extends SimpleApplication implements ISing
 	 */
 	@Override
 	public void simpleUpdate(float tpf) {
-		if(GlobalAppOSI.i().isApplicationExiting()){
+		if(GlobalOSAppI.i().isApplicationExiting()){
 			if(ManageExitI.i().isCanCleanExit()){
 				GlobalAppRefI.i().stop();
 				return; //useless?

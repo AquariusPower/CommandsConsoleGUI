@@ -42,7 +42,7 @@ import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.spCmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.spJme.DialogStateAbs;
 import com.github.commandsconsolegui.spJme.cmd.CmdConditionalStateAbs;
-import com.github.commandsconsolegui.spJme.globals.GlobalJmeAppOSI;
+import com.github.commandsconsolegui.spJme.globals.GlobalOSAppJmeI;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spLemur.MouseCursorListenerAbs;
 import com.github.commandsconsolegui.spLemur.dialog.LemurDialogStateAbs;
@@ -476,9 +476,9 @@ public class LemurDiagFocusHelperStateI extends CmdConditionalStateAbs<LemurDiag
 	
 	@Override
 	protected boolean updateAttempt(float tpf) {
-		if(GlobalJmeAppOSI.i().isShowingAlert(false)){
+		if(GlobalOSAppJmeI.i().isShowingAlert(false)){
 			//TODO this does anything? has no text input element on it ...
-			GuiGlobals.getInstance().requestFocus(GlobalJmeAppOSI.i().getAlertSpatial());
+			GuiGlobals.getInstance().requestFocus(GlobalOSAppJmeI.i().getAlertSpatial());
 		}else{
 			Spatial spt = getCurrentFocusRequester();
 			GuiGlobals.getInstance().requestFocus(spt); //TODO timed delay?

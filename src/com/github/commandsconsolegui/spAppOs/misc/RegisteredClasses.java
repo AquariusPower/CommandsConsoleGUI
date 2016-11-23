@@ -49,7 +49,7 @@ public class RegisteredClasses<E>{
 	 * @param bItsEnclosingClassesToo
 	 */
 	public void addClassesOf(E objTarget, boolean bItsInnerClassesToo, boolean bItsEnclosingClassesToo){
-		PrerequisitesNotMetException.assertNotNull("objTarget", objTarget, this);
+		PrerequisitesNotMetException.assertNotNull(objTarget, "objTarget", this);
 		PrerequisitesNotMetException.assertNotAlreadyAdded(aTargetList, objTarget, this);
 		
 		for(Class cl:MiscI.i().getSuperClassesOf(objTarget,true)){

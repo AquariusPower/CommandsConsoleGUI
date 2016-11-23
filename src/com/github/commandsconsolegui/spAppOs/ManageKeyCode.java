@@ -66,7 +66,7 @@ public abstract class ManageKeyCode implements IConfigure<ManageKeyCode>{
 		private Key(String strId, Integer iKeyCode) {
 			this(strId);
 			
-			PrerequisitesNotMetException.assertNotNull("code", iKeyCode, this);
+			PrerequisitesNotMetException.assertNotNull(iKeyCode, "code", this);
 			PrerequisitesNotMetException.assertIsTrue("invalid negative keycode", iKeyCode>=0, this);
 			
 			this.iKeyCode=iKeyCode;
@@ -80,7 +80,7 @@ public abstract class ManageKeyCode implements IConfigure<ManageKeyCode>{
 		public Key(String strId, Key... akeyToMonitor) {
 			this(strId);
 			
-			PrerequisitesNotMetException.assertNotNull("keys to monitor", akeyToMonitor, this);
+			PrerequisitesNotMetException.assertNotNull(akeyToMonitor, "keys to monitor", this);
 			PrerequisitesNotMetException.assertIsTrue("keys to monitor list has items", akeyToMonitor.length>0, this);
 			
 			addKeysToMonitor(akeyToMonitor);

@@ -44,7 +44,7 @@ import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spJme.AudioUII;
 import com.github.commandsconsolegui.spJme.DialogStateAbs;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData.SliderValueData.ESliderKey;
-import com.github.commandsconsolegui.spJme.misc.ILinkedGuiElement;
+import com.github.commandsconsolegui.spJme.misc.ILinkedSpatial;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.export.Savable;
@@ -63,7 +63,7 @@ import com.jme3.scene.Spatial;
  *
  * @param <ACT> is the action class for buttons
  */
-public class DialogListEntryData<ACT,LINK> implements Savable,IHasOwnerInstance<DialogStateAbs>,ILinkedGuiElement{ 
+public class DialogListEntryData<ACT,LINK> implements Savable,IHasOwnerInstance<DialogStateAbs>,ILinkedSpatial{ 
 //	private static String strLastUniqueId = "0";
 	
 	private String	strUniqueId;
@@ -548,12 +548,11 @@ public class DialogListEntryData<ACT,LINK> implements Savable,IHasOwnerInstance<
 		Collections.sort(aChildList, cmpDled);
 	}
 	
-	@Override
-	public void setLinkedGuiElement(Spatial spt) {
+	public void setLinkedSpatial(Spatial spt) {
 		this.sptLastVisibleGuiElement=spt;
 	}
 	@Override
-	public Spatial getLinkedGuiElement() {
+	public Spatial getLinkedSpatial() {
 		return this.sptLastVisibleGuiElement;
 	}
 //	public RangedValueModel getSliderValueModel() {

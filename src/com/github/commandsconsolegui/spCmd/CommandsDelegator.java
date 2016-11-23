@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
 
 import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.ManageKeyCode.Key;
-import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalOSAppI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyCodeI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
@@ -556,7 +556,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 			cmdDatabase(EDataBaseOperations.save);
 		}
 		
-		GlobalAppOSI.i().setAppExiting();
+		GlobalOSAppI.i().setAppExiting();
 		
 		bCleanExitAlreadyRequested=true;
 		
@@ -1013,7 +1013,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 			bCmdWorked=true;
 		}else
 		if(checkCmdValidity(this,"activateSelfWindow")){
-			String strAppTitle=GlobalAppOSI.i().getApplicationTitle();
+			String strAppTitle=GlobalOSAppI.i().getApplicationTitle();
 			if(strAppTitle==null){
 				dumpWarnEntry("this functionality requires the application title to have been set");
 			}else{
@@ -3640,7 +3640,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	}
 	
 	public void update(float tpf) {
-		if(GlobalAppOSI.i().isApplicationExiting()){
+		if(GlobalOSAppI.i().isApplicationExiting()){
 //			GlobalAppRefI.i().stop();
 			return;
 		}
@@ -4332,7 +4332,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	}
 	
 	public String getConsoleSaveDataPath(){
-		File flPath = GlobalAppOSI.i().getBaseSaveDataPath();
+		File flPath = GlobalOSAppI.i().getBaseSaveDataPath();
 		flConsDataPath = new File(flPath.getAbsolutePath()+File.separator+"CommandsConsoleSaveData"+File.separator);
 		if(!flConsDataPath.exists())flConsDataPath.mkdirs();
 		return flConsDataPath+File.separator;

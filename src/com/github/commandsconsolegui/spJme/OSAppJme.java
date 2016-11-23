@@ -33,6 +33,7 @@ import java.lang.reflect.Field;
 import com.github.commandsconsolegui.spAppOs.OSApp;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppSettingsI;
+import com.github.commandsconsolegui.spJme.misc.ILinkedSpatial;
 import com.jme3.scene.Spatial;
 import com.jme3.system.JmeSystem;
 import com.jme3.system.JmeSystem.StorageFolderType;
@@ -42,7 +43,7 @@ import com.jme3.system.JmeSystem.StorageFolderType;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class OSAppJme extends OSApp {
+public class OSAppJme extends OSApp implements ILinkedSpatial{
 	public OSAppJme(String strApplicationBaseSaveDataPath,StorageFolderType esft) {
 		super(strApplicationBaseSaveDataPath);
 		
@@ -97,5 +98,10 @@ public class OSAppJme extends OSApp {
 	
 	protected Object getAlertUserInteractionIndicator(){
 		return objAlertUserInteractionIndicator;
+	}
+
+	@Override
+	public Spatial getLinkedSpatial() {
+		return getAlertSpatial();
 	}
 }

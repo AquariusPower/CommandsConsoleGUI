@@ -37,7 +37,7 @@ import com.github.commandsconsolegui.spJme.OSAppJme;
 import com.github.commandsconsolegui.spJme.globals.GlobalGUINodeI;
 import com.github.commandsconsolegui.spJme.globals.GlobalSimpleAppRefI;
 import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI;
-import com.github.commandsconsolegui.spJme.misc.ILinkedGuiElement;
+import com.github.commandsconsolegui.spJme.misc.ILinkedSpatial;
 import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI.EffectElectricity;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spLemur.console.LemurDiagFocusHelperStateI;
@@ -173,22 +173,14 @@ public class OSAppLemur extends OSAppJme {
 	
 	private void createAlertLinkEffect() {
 		if(ieffAlert==null){
-//		if(!bAllowNewEffectCreation)return;
-//		Vector3f v3fMouse = ManageMouseCursorI.i().getMouseCursorPositionCopyAsV3f();
-//		v3fMouse.z=cntrAlert.getLocalTranslation().z;
-			ieffAlert = new EffectElectricity(
-					this,
-					ColorRGBA.Cyan,	
-					GlobalSimpleAppRefI.i().getGuiNode()
-				);
-			
+			ieffAlert = new EffectElectricity(this);
 		}
 		
 		boolean bUseMouse = false;
 		if(getActionSourceElement()!=null){
 			Spatial spt=null;
-			if(getActionSourceElement() instanceof ILinkedGuiElement){
-				spt=((ILinkedGuiElement)getActionSourceElement()).getLinkedGuiElement();
+			if(getActionSourceElement() instanceof ILinkedSpatial){
+				spt=((ILinkedSpatial)getActionSourceElement()).getLinkedSpatial();
 			}else
 			if(getActionSourceElement() instanceof Spatial){
 				spt=(Spatial)getActionSourceElement();

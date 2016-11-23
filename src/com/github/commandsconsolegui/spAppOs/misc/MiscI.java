@@ -797,7 +797,8 @@ public class MiscI {
 			
 			if(aobjVal!=null){ //array
 				// this is just guessing all elements are of the same type
-				str+=""+objValue.getClass().getName()+"["+aobjVal.length+"]{"; //TODO check if all elements are same type? 
+				str+=""+objValue.getClass().getName()+"["+aobjVal.length+"]{"; //TODO check if all elements are same type?
+				if(aobjVal.length>0)str+="\n";
 				for(int i=0;i<aobjVal.length;i++){//Object obj:aobjVal){
 					Object objKey=null;if(aobjKey!=null)objKey=aobjKey[i];
 					str+=asReportLine(objKey,aobjVal[i],false);
