@@ -28,6 +28,7 @@ package com.github.commandsconsolegui.spLemur;
 
 import java.lang.reflect.Field;
 
+import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.TimedDelayVarField;
@@ -36,6 +37,7 @@ import com.github.commandsconsolegui.spJme.OSAppJme;
 import com.github.commandsconsolegui.spJme.globals.GlobalGUINodeI;
 import com.github.commandsconsolegui.spJme.globals.GlobalSimpleAppRefI;
 import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI;
+import com.github.commandsconsolegui.spJme.misc.ILinkedGuiElement;
 import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI.EffectElectricity;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spLemur.console.LemurDiagFocusHelperStateI;
@@ -70,6 +72,7 @@ public class OSAppLemur extends OSAppJme {
 //	private boolean	bStayOnCenter = false;
 	private boolean	bStartedShowEffect;
 	private boolean	bAlertPanelIsReady;
+	private EffectElectricity	ieffAlert;
 
 	public Panel getAlertPanel() {
 		return (Panel)super.getAlertSpatial();
@@ -111,7 +114,7 @@ public class OSAppLemur extends OSAppJme {
 		if(!bStartedShowEffect){
 			EEffChannel.ChnGrowShrink.play(EEffState.Show, cntrAlert, getPos(EElement.Alert,null));
 			
-			createEffectLink();
+			createAlertLinkEffect();
 			
 			bStartedShowEffect=true;
 		}
@@ -168,18 +171,46 @@ public class OSAppLemur extends OSAppJme {
 //			fZ + LemurDiagFocusHelperStateI.i().getDialogZDisplacement()*2));
 //	}
 	
-	private void createEffectLink() {
+	private void createAlertLinkEffect() {
+		if(ieffAlert==null){
+//		if(!bAllowNewEffectCreation)return;
 //		Vector3f v3fMouse = ManageMouseCursorI.i().getMouseCursorPositionCopyAsV3f();
 //		v3fMouse.z=cntrAlert.getLocalTranslation().z;
-		EffectsJmeStateI.i().addEffect(
-			new EffectElectricity(
-				this,
-				ColorRGBA.Red,
-				GlobalSimpleAppRefI.i().getGuiNode()
-			)
-			.setFromTo( getPos(EElement.Effects, ManageMouseCursorI.i().getMouseCursorPositionCopyAsV3f()), null)
-			.setFollowToTarget(cntrAlert, null)
-		);
+			ieffAlert = new EffectElectricity(
+					this,
+					ColorRGBA.Cyan,	
+					GlobalSimpleAppRefI.i().getGuiNode()
+				);
+			
+		}
+		
+		boolean bUseMouse = false;
+		if(getActionSourceElement()!=null){
+			Spatial spt=null;
+			if(getActionSourceElement() instanceof ILinkedGuiElement){
+				spt=((ILinkedGuiElement)getActionSourceElement()).getLinkedGuiElement();
+			}else
+			if(getActionSourceElement() instanceof Spatial){
+				spt=(Spatial)getActionSourceElement();
+			}
+			
+			if(spt!=null){
+				ieffAlert.setFollowFromTarget(spt, new Vector3f(0,0,1));
+			}else{
+				MsgI.i().devWarn("invalid type to follow", getActionSourceElement().getClass());
+				bUseMouse=true;
+			}
+		}
+		
+		if(bUseMouse){
+			ieffAlert.setFromTo( getPos(EElement.Effects, ManageMouseCursorI.i().getMouseCursorPositionCopyAsV3f()), null);
+		}
+		
+		ieffAlert.setFollowToTarget(cntrAlert, null);
+		
+		if(!EffectsJmeStateI.i().containsEffect(ieffAlert)){
+			EffectsJmeStateI.i().addEffect(ieffAlert);
+		}
 	}
 
 	private void updateAlertPosSize(){
@@ -292,8 +323,8 @@ public class OSAppLemur extends OSAppJme {
 	}
 	
 	@Override
-	public StackTraceElement[] showSystemAlert(String strMsg) {
-		StackTraceElement[] aste = super.showSystemAlert(strMsg);
+	public StackTraceElement[] showSystemAlert(String strMsg, Object objActionSourceElement) {
+		StackTraceElement[] aste = super.showSystemAlert(strMsg,objActionSourceElement);
 		
 		if(getAlertPanel()==null)createAlert();
 		
@@ -332,6 +363,7 @@ public class OSAppLemur extends OSAppJme {
 	private ColorRGBA colorEdgesDefault=ColorRGBA.Red.clone();
 	
 	private BfdArrayList<Panel> aedgeList = new BfdArrayList<Panel>() {};
+//	private boolean	bAllowNewEffectCreation = true;
 	private void addAlertEdge(BorderLayout.Position eEdge, ColorRGBA color, Vector3f v3fSize){
 		QuadBackgroundComponent qbc = new QuadBackgroundComponent(color);
 		Label lbl=new Label("",GlobalLemurDialogHelperI.i().STYLE_CONSOLE);
@@ -363,16 +395,24 @@ public class OSAppLemur extends OSAppJme {
 		
 //		lblAlertMsg.removeFromParent();
 //		lblAlertMsg=null;
-		if(!bKeepGuiBlockerOnce){
-			pnlBlocker.removeFromParent();
-			pnlBlocker=null;
-		}
+//		if(!bKeepGuiBlockerOnce){
+//			pnlBlocker.removeFromParent();
+//			pnlBlocker=null;
+//		}
 		
 		bStartedShowEffect=false;
 		
 		bAlertPanelIsReady=false;
 		
-		EffectsJmeStateI.i().removeEffectsForOwner(this);
+//		bAllowNewEffectCreation=false;
+		if(!bKeepGuiBlockerOnce){
+			pnlBlocker.removeFromParent();
+			pnlBlocker=null;
+			
+			EffectsJmeStateI.i().removeEffectsForOwner(this);
+			ieffAlert=null;
+//			bAllowNewEffectCreation=true;
+		}
 		
 		setAlertSpatial(null);
 	}

@@ -360,7 +360,7 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 		
 		super.configure(cfg);//new CmdConditionalStateAbs.CfgParm(cfg.strUIId, cfg.bIgnorePrefixAndSuffix));
 		
-		storeCfgAndReturnSelf(cfg);
+//		storeCfgAndReturnSelf(cfg);
 		return getThis();
 	}
 	
@@ -583,10 +583,30 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 		return (int)tdDialogEffect.getDelayLimitMilis();
 	}
 	
+	boolean bParentDiagIsRequired=false;
+	/**
+	 * usually because a parent list entry will be required to perform things here and give it back.
+	 * @param b
+	 */
+	protected void setParentDiagIsRequired(boolean  b){
+		this.bParentDiagIsRequired=b;
+	}
+	public boolean isParentDiagIsRequired(){
+		return this.bParentDiagIsRequired;
+	}
+	
 	@Override
 	protected boolean enableAttempt() {
 		if(!super.enableAttempt())return false;
-		if(!isLayoutValid())return false;
+		if(!isLayoutValid()){
+			MsgI.i().devWarn("gui elements layout is invalid", this);
+			return false;
+		}
+		if(isParentDiagIsRequired() && getParentDialog()==null){
+			MsgI.i().warn("a parent dialog is required to enable this one", this);
+			cancelEnableRequest();
+			return false;
+		}
 		
 		getNodeGUI().attachChild(getDialogMainContainer());
 		
@@ -650,6 +670,9 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 	@Override
 	protected boolean disableAttempt() {
 		if(!super.disableAttempt())return false;
+		if(getChildDiagModalInfoCurrent()!=null){
+			return false;
+		}
 		
 		if(btgEffect.b() && !isRestartRequested()){
 			Vector3f v3fScaleCopy = getDialogMainContainer().getLocalScale().clone();
@@ -904,8 +927,10 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 	}
 	
 	protected ArrayList<DialogListEntryData> getParentReferencedDledListCopy() {
+		PrerequisitesNotMetException.assertNotNull("parent diag", getParentDialog(), this);
+			
 		ArrayList<DialogListEntryData> adled = new ArrayList<DialogListEntryData>();
-		if(getParentDialog()!=null){
+//		if(getParentDialog()!=null){
 			DialogStateAbs<ACT,?>.DiagModalInfo<ACT> dmiSonsOfPapa = getParentDialog().getChildDiagModalInfoCurrent();
 			if(dmiSonsOfPapa!=null){
 				if(dmiSonsOfPapa.getDiagModal()!=this){
@@ -916,7 +941,7 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 					adled.add(dled);
 				}
 			}
-		}
+//		}
 		return adled;
 	}
 	
@@ -965,7 +990,7 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 					dataSelected.toggleExpanded();
 //					requestRefreshList();
 				}else{
-					actionMainAtEntry(dataSelected);
+					actionMainAtEntry(dataSelected,null);
 				}
 			}
 		}
@@ -1242,7 +1267,7 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 	 * 
 	 * @param dataSelected
 	 */
-	protected void actionMainAtEntry(DialogListEntryData<ACT,?> dataSelected){
+	protected void actionMainAtEntry(DialogListEntryData<ACT,?> dataSelected, Spatial sptActionSourceElement){
 		AudioUII.i().playOnUserAction(AudioUII.EAudio.SubmitSelection);
 	}
 	

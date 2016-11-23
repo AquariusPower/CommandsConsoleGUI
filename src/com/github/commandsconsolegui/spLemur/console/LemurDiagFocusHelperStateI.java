@@ -120,7 +120,8 @@ public class LemurDiagFocusHelperStateI extends CmdConditionalStateAbs<LemurDiag
 		
 //		MouseCursor.i().configure(null);
 		
-		return storeCfgAndReturnSelf(cfg);
+//		return storeCfgAndReturnSelf(cfg);
+		return getThis();
 	}
 	
 	public ArrayList<String> debugReport(){

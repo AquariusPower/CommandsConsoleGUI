@@ -37,6 +37,7 @@ import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
+import com.jme3.scene.Spatial;
 
 /**
  * Very basic configurations related to the OS goes here.
@@ -103,6 +104,7 @@ public class OSApp implements IReflexFillCfg{
 	private boolean	bFirstTimeQuickUpdate;
 	private String	strDynamicInfo="";
 	private StackTraceElement[]	asteLastValidHideRequestOrigin;
+	private Object	objActionSourceElement;
 	/**
 	 * this is important to let some other threads know the application is exiting and behave properly
 	 */
@@ -148,11 +150,16 @@ public class OSApp implements IReflexFillCfg{
 		return strAlertMsg!=null;
 	}
 	
-	public StackTraceElement[] showSystemAlert(String strMsg){
+	protected Object getActionSourceElement(){
+		return objActionSourceElement;
+	}
+	
+	public StackTraceElement[] showSystemAlert(String strMsg, Object objActionSourceElement){
 		PrerequisitesNotMetException.assertNotAlreadySet("system alert message", this.strAlertMsg, strMsg, asteStackKeyRequestOrigin, this);
 		this.asteStackKeyRequestOrigin=Thread.currentThread().getStackTrace();
 		this.strAlertMsg=strMsg;
 		bFirstTimeQuickUpdate=true;
+		this.objActionSourceElement=objActionSourceElement;
 //		dumpAlert(); //just in case another one happens before the update...
 		return this.asteStackKeyRequestOrigin;
 	}

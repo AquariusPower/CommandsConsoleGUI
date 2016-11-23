@@ -40,6 +40,7 @@ import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.spJme.ConditionalStateAbs;
 import com.github.commandsconsolegui.spJme.ManageMouseCursorI;
 import com.github.commandsconsolegui.spJme.globals.GlobalSimpleAppRefI;
+import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI.EffectElectricity;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
@@ -181,7 +182,7 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 //			if(bDiscarding)return;
 			
 			Geometry geomNew = MiscJmeI.i().createMultiLineGeom(
-				recreatePath().toArray(), ColorRGBA.Cyan, FastMath.nextRandomFloat()*4+1);
+				recreatePath().toArray(), colorBase, FastMath.nextRandomFloat()*4+1);
 			geomNew.setLocalTranslation(getLocationFrom());
 //			geomNew.getLocalTranslation().z+=0.03f;
 //			geomNew.getLocalTranslation().setZ(v3fFrom.z); //getLocationTo()
@@ -200,7 +201,7 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 			}else
 			if(sptFollowTo!=null){
 				//TODO if sptFollow is a node, add a node to it and apply displacement to let rotations etc apply
-				v3fTargetSpot=sptFollowTo.getLocalTranslation().add(v3fFollowToDisplacement);
+				v3fTargetSpot=sptFollowTo.getWorldTranslation().add(v3fFollowToDisplacement);
 			}
 			return v3fTargetSpot;
 		}
@@ -208,7 +209,7 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 			Vector3f v3fTargetSpot = v3fFrom==null?null:v3fFrom.clone();
 			if(sptFollowFrom!=null){
 				//TODO if sptFollow is a node, add a node to it and apply displacement to let rotations etc apply
-				v3fTargetSpot=sptFollowFrom.getLocalTranslation().add(v3fFollowFromDisplacement);
+				v3fTargetSpot=sptFollowFrom.getWorldTranslation().add(v3fFollowFromDisplacement);
 			}
 			return v3fTargetSpot;
 		}
@@ -325,10 +326,10 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 	
 	HashMap<String,IEffect> hmEffects = new HashMap<String, IEffect>();
 	
-	public <T extends IEffect> T addEffect(T ie){
-		ie.assertConfigIsValid();
-		hmEffects.put(ie.getUId(),ie);
-		return ie;
+	public <T extends IEffect> T addEffect(T ieff){
+		ieff.assertConfigIsValid();
+		hmEffects.put(ieff.getUId(),ieff);
+		return ieff;
 	}
 	
 	public void removeEffect(IEffect ie){
@@ -366,5 +367,9 @@ public class EffectsJmeStateI extends ConditionalStateAbs<EffectsJmeStateI>{
 	@Override
 	protected EffectsJmeStateI getThis() {
 		return this;
+	}
+
+	public boolean containsEffect(EffectElectricity ieffAlert) {
+		return hmEffects.get(ieffAlert.getUId())!=null;
 	}
 }

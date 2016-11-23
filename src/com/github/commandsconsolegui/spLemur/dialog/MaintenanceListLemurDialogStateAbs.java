@@ -38,6 +38,7 @@ import com.github.commandsconsolegui.spJme.DialogStateAbs;
 import com.github.commandsconsolegui.spJme.AudioUII.EAudio;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.spLemur.console.ChoiceVarDialogState;
+import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 
@@ -95,7 +96,7 @@ public abstract class MaintenanceListLemurDialogStateAbs<T extends Command<Butto
 		
 		super.configure(cfg);
 		
-		storeCfgAndReturnSelf(cfg);
+//		storeCfgAndReturnSelf(cfg);
 		return getThis();
 	}
 	
@@ -172,9 +173,9 @@ public abstract class MaintenanceListLemurDialogStateAbs<T extends Command<Butto
 	}
 	
 	@Override
-	protected void actionMainAtEntry(DialogListEntryData<T,?> dledSelected) {
+	protected void actionMainAtEntry(DialogListEntryData<T,?> dledSelected, Spatial sptActionSourceElement) {
 		if(cfg.getDiagChoice()!=null){
-			super.actionMainAtEntry(dledSelected);
+			super.actionMainAtEntry(dledSelected, sptActionSourceElement);
 			openModalDialog(getDiagChoice(dledSelected).getUniqueId(), dledSelected, (T)cmdCfg);
 		}else{
 			AudioUII.i().playOnUserAction(AudioUII.EAudio.Failure);
@@ -220,7 +221,7 @@ public abstract class MaintenanceListLemurDialogStateAbs<T extends Command<Butto
 		@Override
 		public void execute(Button btn) {
 //			DialogTestState.this.openModalDialog(EDiag.Cfg.toString(), getDataFrom(btn), (T)this);
-			actionMainAtEntry(getDledFrom(btn));
+			actionMainAtEntry(getDledFrom(btn),btn);
 //			DialogTestState.this.actionSubmit();
 		}
 	}

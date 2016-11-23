@@ -709,6 +709,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 			if(lblPopupHelp==null){
 				lblPopupHelp = new Label("nothing yet...", new ElementId(DialogStyleElementId.PopupHelp.s()), GlobalLemurDialogHelperI.i().STYLE_CONSOLE);
 			}
+			lblPopupHelp.setName("Popup Help/Hint Label");
 			lblPopupHelp.setText("["+strPopupHelp+"]");
 			Vector2f v2f = ManageMouseCursorI.i().getMouseCursorPositionCopy();
 			
@@ -746,7 +747,8 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 //		super.configure(new CmdConditionalStateAbs.CfgParm(LemurMiscHelpersStateI.class.getSimpleName()));
 		super.configure(icfg);
 		
-		return storeCfgAndReturnSelf(cfg);
+//		return storeCfgAndReturnSelf(cfg);
+		return getThis();
 	}
 
 //	public void initializeSpecialKeyListeners(TextEntryComponent source) {

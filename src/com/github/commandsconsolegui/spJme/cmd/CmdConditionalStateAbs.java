@@ -105,7 +105,7 @@ public abstract class CmdConditionalStateAbs<THIS extends CmdConditionalStateAbs
 		
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
 		
-		storeCfgAndReturnSelf(cfg);
+//		storeCfgAndReturnSelf(cfg);
 		return getThis();
 	}
 	
@@ -184,4 +184,10 @@ public abstract class CmdConditionalStateAbs<THIS extends CmdConditionalStateAbs
 		fld.set(this,value);
 	}
 	
+	@Override
+	protected void cancelEnableRequest() {
+		super.cancelEnableRequest();
+		
+		btgEnabled.setObjectRawValue(false,true);
+	}
 }

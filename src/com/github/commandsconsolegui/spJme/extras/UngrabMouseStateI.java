@@ -92,7 +92,8 @@ public class UngrabMouseStateI extends ConditionalStateAbs<UngrabMouseStateI> {
 		if(cfg.bKeepUngrabbedOnSlowdown!=null)this.bKeepUngrabbedOnSlowDown=cfg.bKeepUngrabbedOnSlowdown;
 		
 //		GlobalSappRefI.i().get().getStateManager().attach(this);
-		return storeCfgAndReturnSelf(cfg);
+//		return storeCfgAndReturnSelf(cfg);
+		return getThis();
 	}
 //	@Deprecated
 //	@Override

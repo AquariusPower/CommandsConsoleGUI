@@ -27,7 +27,6 @@
 
 package com.github.commandsconsolegui.spLemur.console;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
@@ -52,6 +51,7 @@ import com.github.commandsconsolegui.spJme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.spLemur.dialog.FileChoiceDialogStateI;
 import com.github.commandsconsolegui.spLemur.dialog.MaintenanceListLemurDialogStateAbs;
 import com.jme3.input.KeyInput;
+import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 
@@ -136,7 +136,7 @@ public class VarsDialogStateI<ACT extends Command<Button>> extends MaintenanceLi
 				}
 			});
 		
-		storeCfgAndReturnSelf(cfg);
+//		storeCfgAndReturnSelf(cfg);
 		return getThis();
 	}
 	
@@ -148,8 +148,7 @@ public class VarsDialogStateI<ACT extends Command<Button>> extends MaintenanceLi
 	protected class CmdBtnChangeValue implements Command<Button>{
 		@Override
 		public void execute(Button source) {
-			VarsDialogStateI.this.actionMainAtEntry(
-				VarsDialogStateI.this.getDledFrom(source));
+			VarsDialogStateI.this.actionMainAtEntry(VarsDialogStateI.this.getDledFrom(source), source);
 //			ConsoleVarsDialogStateI.this.changeValue(
 //				ConsoleVarsDialogStateI.this.getDledFrom(source));
 		}
@@ -173,13 +172,13 @@ public class VarsDialogStateI<ACT extends Command<Button>> extends MaintenanceLi
 	}
 	
 	@Override
-	protected void actionMainAtEntry(DialogListEntryData dledSelected) {
+	protected void actionMainAtEntry(DialogListEntryData dledSelected, Spatial sptActionSourceElement) {
 		Object obj = dledSelected.getLinkedObj();
 		if(obj instanceof BoolTogglerCmdField){
 			changeValue(dledSelected);
 		}else
 		if(obj instanceof KeyBoundVarField){
-			GlobalManageKeyBindI.i().captureAndSetKeyBindAt((KeyBoundVarField)obj, this);
+			GlobalManageKeyBindI.i().captureAndSetKeyBindAt((KeyBoundVarField)obj, this, dledSelected);
 		}else
 //		if(obj instanceof FileVarField){
 //			FileVarField flVar = ((FileVarField)obj);
@@ -191,7 +190,7 @@ public class VarsDialogStateI<ACT extends Command<Button>> extends MaintenanceLi
 //		}else
 		{
 			if(obj instanceof VarCmdFieldAbs){
-				super.actionMainAtEntry(dledSelected);
+				super.actionMainAtEntry(dledSelected, sptActionSourceElement);
 			}else
 			if(obj instanceof EGroupKeys){
 				// skipper, this is actually an empty group (no tree expanded/shrinked)

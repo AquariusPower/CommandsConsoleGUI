@@ -44,9 +44,11 @@ import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spJme.AudioUII;
 import com.github.commandsconsolegui.spJme.DialogStateAbs;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData.SliderValueData.ESliderKey;
+import com.github.commandsconsolegui.spJme.misc.ILinkedGuiElement;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.export.Savable;
+import com.jme3.scene.Spatial;
 
 /**
  * Each list entry can show differently, they could be:
@@ -61,11 +63,12 @@ import com.jme3.export.Savable;
  *
  * @param <ACT> is the action class for buttons
  */
-public class DialogListEntryData<ACT,LINK> implements Savable,IHasOwnerInstance<DialogStateAbs>{ 
+public class DialogListEntryData<ACT,LINK> implements Savable,IHasOwnerInstance<DialogStateAbs>,ILinkedGuiElement{ 
 //	private static String strLastUniqueId = "0";
 	
 	private String	strUniqueId;
 	private HoldRestartable<DialogStateAbs> hrdiagOwner = null; //new HoldRestartable<DialogStateAbs>();
+	private Spatial sptLastVisibleGuiElement=null;
 	
 	public static class CustomAction<ACT>{
 		private String strLabelTextId;
@@ -544,7 +547,15 @@ public class DialogListEntryData<ACT,LINK> implements Savable,IHasOwnerInstance<
 	public void sortChildren(Comparator<DialogListEntryData> cmpDled) {
 		Collections.sort(aChildList, cmpDled);
 	}
-
+	
+	@Override
+	public void setLinkedGuiElement(Spatial spt) {
+		this.sptLastVisibleGuiElement=spt;
+	}
+	@Override
+	public Spatial getLinkedGuiElement() {
+		return this.sptLastVisibleGuiElement;
+	}
 //	public RangedValueModel getSliderValueModel() {
 //		return modelSliderValue;
 //	}

@@ -347,7 +347,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 		this.bConfigured=true;
 		MsgI.i().debug("cfg",this.bConfigured,this);
 		
-		storeCfgAndReturnSelf(cfg);
+		storeCfg(cfg);
 		return getThis();
 	}
 	
@@ -363,7 +363,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	 * @return
 	 */
 //	protected <T extends ConditionalStateAbs> T storeCfgAndReturnSelf(ICfgParm icfg){
-	protected THIS storeCfgAndReturnSelf(CfgParm icfg){
+	private THIS storeCfg(CfgParm icfg){
 		if(this.cfg!=null && this.cfg!=icfg){
 			throw new PrerequisitesNotMetException(
 				"cfg already set", this, this.cfg, icfg);
@@ -377,7 +377,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 //		return (T)this;
 	}
 	
-	private void validateCfg(CfgParm cfg){
+	protected void validateCfg(CfgParm cfg){
 		if(!MiscI.i().isInnerClassOfConcrete(cfg, this)){
 			if(!MiscI.i().isGetThisTrickImplementation(this)){
 				throw new PrerequisitesNotMetException(
@@ -658,7 +658,13 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 				reqDisable.requestNow();
 			}
 		}
-	};
+	}
+	
+	protected void cancelEnableRequest(){
+		if(reqEnable.isRequestActive()){
+			reqEnable.reset();
+		}
+	}
 	
 	public boolean isDisabling(){
 		return reqDisable.isRequestActive();

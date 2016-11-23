@@ -35,6 +35,7 @@ import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spCmd.varfield.FileVarField;
+import com.github.commandsconsolegui.spJme.DialogStateAbs;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
@@ -62,6 +63,7 @@ public class FileChoiceDialogStateI extends ChoiceLemurDialogStateAbs<Command<Bu
 	@Override
 	public FileChoiceDialogStateI configure(ICfgParm icfg) {
 		this.cfg=(CfgParm)icfg;
+		setParentDiagIsRequired(true);
 		super.configure(icfg);
 		return getThis();
 	}
@@ -193,4 +195,9 @@ public class FileChoiceDialogStateI extends ChoiceLemurDialogStateAbs<Command<Bu
 //		PrerequisitesNotMetException.assertNotNull("selected file",fl,this);
 //		flChosen=fl;
 //	}
+	
+	@Override
+	public <T extends DialogStateAbs.SaveDiag> T load(Class<T> clCS) {
+		return super.load(clCS);
+	}
 }

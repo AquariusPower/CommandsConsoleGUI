@@ -99,7 +99,7 @@ public class DialogMouseCursorListenerI extends MouseCursorListenerAbs {
 												if(diag.isOptionSelectionMode()){
 													diag.selectAndChoseOption(cell.getDialogListEntryData());
 												}else{
-													diag.execTextDoubleClickActionFor(cell.getDialogListEntryData());
+													diag.execTextDoubleClickActionFor(cell.getDialogListEntryData(), cell);
 	//												diag.openCfgDataDialog(cell.getData());
 												}
 											}

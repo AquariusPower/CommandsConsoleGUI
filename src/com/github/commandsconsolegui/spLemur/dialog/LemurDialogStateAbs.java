@@ -231,7 +231,8 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 		
 		super.configure(cfg);
 		
-		return storeCfgAndReturnSelf(cfg);
+//		return storeCfgAndReturnSelf(cfg);
+		return getThis();
 	}
 	
 	public void selectAndChoseOption(DialogListEntryData data){
@@ -1483,7 +1484,7 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 //		return iSel==null?-1:iSel;
 	}
 
-	public abstract boolean execTextDoubleClickActionFor(DialogListEntryData dled);
+	public abstract boolean execTextDoubleClickActionFor(DialogListEntryData dled, Spatial sptActionSourceElement);
 
 	public abstract boolean execActionFor(EMouseCursorButton e, Spatial capture);
 

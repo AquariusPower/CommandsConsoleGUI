@@ -55,7 +55,7 @@ public abstract class ChoiceLemurDialogStateAbs<T extends Command<Button>, THIS 
 	public THIS configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;
 		super.configure(cfg);
-		storeCfgAndReturnSelf(cfg);
+//		storeCfgAndReturnSelf(cfg);
 		return getThis();
 	}
 	

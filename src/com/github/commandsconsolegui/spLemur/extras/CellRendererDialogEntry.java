@@ -382,6 +382,8 @@ public class CellRendererDialogEntry<ACT> implements CellRenderer<DialogListEntr
 					MiscJmeI.i().setPopupHelp(btn, entry.getValue().getPopupHint());
 				}
 			}
+			
+			this.dled.setLinkedGuiElement(this);
 		}
 		
 		/**

@@ -59,7 +59,7 @@ public abstract class QuestionLemurDialogStateAbs<T extends Command<Button>, THI
 	public THIS configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;
 		super.configure(cfg);
-		storeCfgAndReturnSelf(cfg);
+//		storeCfgAndReturnSelf(cfg);
 		return getThis();
 	}
 	

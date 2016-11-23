@@ -49,6 +49,8 @@ import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure.ICfgParm;
 import com.github.commandsconsolegui.spCmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
+import com.github.commandsconsolegui.spJme.misc.ILinkedGuiElement;
+import com.jme3.scene.Spatial;
 
 
 /**
@@ -131,6 +133,8 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField>,IConfi
 	private String strRequestUserDecision="Press ESC to cancel or Enter to retry.\n";
 
 	private boolean	bConfigured;
+
+	private ILinkedGuiElement ilge;
 	
 	private boolean isWaitKeyRelease(){
 		/**
@@ -325,7 +329,8 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField>,IConfi
 							+"\n"
 							+" Re-binding keys for command:\n"
 							+"  "+bindCaptureToTarget.getKeyBindRunCommand()+"\n"
-							+" Current key bind: "+bindCaptureToTarget.getBindCfg()+"\n"
+							+" Current key bind: "+bindCaptureToTarget.getBindCfg()+"\n",
+							ilge
 						);
 				}
 				break;
@@ -346,7 +351,7 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField>,IConfi
 					+strRequestUserDecision;
 				MsgI.i().warn(strMsg,	bindConflict,bindCaptureToTarget,kbCaptured,this);
 				
-				asteAlertFrom = GlobalAppOSI.i().showSystemAlert(strMsg);
+				asteAlertFrom = GlobalAppOSI.i().showSystemAlert(strMsg,ilge);
 				
 				kbCaptured=null;
 				break;
@@ -399,7 +404,7 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField>,IConfi
 		return astr;
 	}
 
-	public void captureAndSetKeyBindAt(KeyBoundVarField bindTarget, IRefresh refreshOwner) {
+	public void captureAndSetKeyBindAt(KeyBoundVarField bindTarget, IRefresh refreshOwner, ILinkedGuiElement ilge) {
 		if(this.bindCaptureToTarget!=null){
 			MsgI.i().devWarn("already capturing keybind for", this.bindCaptureToTarget, this.refreshOwnerAfterCapture, this);
 			return;
@@ -407,6 +412,7 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField>,IConfi
 		
 		this.refreshOwnerAfterCapture=refreshOwner;
 		this.bindCaptureToTarget=bindTarget;
+		this.ilge=ilge;
 //		MsgI.i().info("For unconventional (more complex) key bindings, use the console command.", bindTarget); 
 //		bindTarget.setValue(captureKeyBind(bindTarget));
 	}

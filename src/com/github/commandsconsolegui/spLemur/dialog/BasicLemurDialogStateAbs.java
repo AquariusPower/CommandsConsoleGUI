@@ -75,7 +75,9 @@ public abstract class BasicLemurDialogStateAbs<ACT,THIS extends BasicLemurDialog
 		 */
 		setRetryDelayFor(100L, ERetryDelayMode.Init.s());
 		
-		return storeCfgAndReturnSelf(cfg);
+//		storeCfgAndReturnSelf(cfg);
+		
+		return getThis();
 	}
 	
 	@Override
@@ -173,10 +175,10 @@ public abstract class BasicLemurDialogStateAbs<ACT,THIS extends BasicLemurDialog
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public boolean execTextDoubleClickActionFor(DialogListEntryData data) {
+	public boolean execTextDoubleClickActionFor(DialogListEntryData dled,Spatial sptActionSourceElement) {
 		if(isOptionSelectionMode())throw new PrerequisitesNotMetException("Option mode should not reach this method.");
 		
-		actionMainAtEntry(data);
+		actionMainAtEntry(dled, sptActionSourceElement);
 		
 		return true;
 	}

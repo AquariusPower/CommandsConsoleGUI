@@ -268,7 +268,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 				0.9f, 0.9f, 0.1f, null));
 		}
 		
-		storeCfgAndReturnSelf(cfg);
+//		storeCfgAndReturnSelf(cfg);
 		
 		return getThis();
 	}
@@ -3772,7 +3772,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 //	protected abstract Float getStatsHeight();
 	
 	@Override
-	public boolean execTextDoubleClickActionFor(DialogListEntryData dled) {
+	public boolean execTextDoubleClickActionFor(DialogListEntryData dled, Spatial sptActionSourceElement) {
 		throw new UnsupportedOperationException("method not implemented yet");
 	}
 
