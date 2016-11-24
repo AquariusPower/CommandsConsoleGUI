@@ -30,7 +30,7 @@ package com.github.commandsconsolegui.spJme;
 import java.lang.reflect.Field;
 import java.util.TreeMap;
 
-import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalOSAppI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
 import com.github.commandsconsolegui.spAppOs.misc.IUniqueId;
@@ -252,7 +252,7 @@ public class AudioUII extends ConditionalStateAbs implements IReflexFillCfg, ICo
 			}catch(AssetNotFoundException ex){
 				switch(i){
 					case 1:
-						GlobalAppRefI.i().getAssetManager().registerLocator(GlobalAppOSI.i().getAssetsFolder(), FileLocator.class);
+						GlobalAppRefI.i().getAssetManager().registerLocator(GlobalOSAppI.i().getAssetsFolder(), FileLocator.class);
 						continue labelRetry;
 					case 2:
 						GlobalCommandsDelegatorI.i().dumpExceptionEntry(ex, strAudioId, strFile);

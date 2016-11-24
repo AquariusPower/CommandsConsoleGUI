@@ -87,8 +87,21 @@ public abstract class BasicLemurDialogStateAbs<ACT,THIS extends BasicLemurDialog
 		if(getChildDiagModalInfoCurrent()!=null){
 			if(getChildDiagModalInfoCurrent().getDiagModal().isChoiceMade()){
 				applyResultsFromModalDialog();
+			}else{
+//				if(!getChildDiagModalInfoCurrent().getDiagModal().isEnabled()){
+				if(!isHasEnabledChildDialog()){
+					setChildDiagModalInfoCurrent(null); //TODO not working!
+				}
 			}
 		}
+		
+//		if(isHasEnabledChildDialog()){
+//			if(getChildDiagModalInfoCurrent().getDiagModal().isChoiceMade()){
+//				applyResultsFromModalDialog();
+//			}else{
+//				setChildDiagModalInfoCurrent(null);
+//			}
+//		}
 		
 		return true;
 	}

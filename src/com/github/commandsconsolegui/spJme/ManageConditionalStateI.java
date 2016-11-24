@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
-import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalOSAppI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalUpdaterI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
@@ -172,7 +172,7 @@ public class ManageConditionalStateI extends AbstractAppState implements IManage
 	public void cleanup() {
 //		if(!bApplicationIsExiting){
 //		if(false){ //dummyfied
-			if(!GlobalAppOSI.i().isApplicationExiting()){
+			if(!GlobalOSAppI.i().isApplicationExiting()){
 				throw new PrerequisitesNotMetException("this state MUST never be terminated/cleaned! "+ManageConditionalStateI.class.getName());
 			}
 //		}

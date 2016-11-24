@@ -73,7 +73,7 @@ import com.github.commandsconsolegui.spCmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.spJme.PseudoSavableHolder;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.spJme.globals.GlobalGUINodeI;
-import com.github.commandsconsolegui.spJme.globals.GlobalJmeAppOSI;
+import com.github.commandsconsolegui.spJme.globals.GlobalOSAppJmeI;
 import com.github.commandsconsolegui.spJme.globals.GlobalRootNodeI;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.AssetNotFoundException;
@@ -154,16 +154,13 @@ public class MiscJmeI implements IReflexFillCfg,ISingleInstance,IConfigure{
 		return getParentestFrom(sptStart,true);
 	}
 	/**
+	 * For best compatibility, returns Spatial.
+	 * This way, the starting one can be returned also if it is not a Node.
 	 * 
 	 * @param sptStart
 	 * @return parentest spatial
 	 */
 	public Spatial getParentestFrom(Spatial sptStart, boolean bExcludeRenderingNodes){
-		/**
-		 * For best compatibility, do not use Node, return Spatial.
-		 * This way, the starting one can be returned also!
-		 */
-		
 		Spatial sptParent = sptStart.getParent();
 		if(sptParent==null)return sptStart;
 		
@@ -813,7 +810,7 @@ public class MiscJmeI implements IReflexFillCfg,ISingleInstance,IConfigure{
 	 * @return
 	 */
 	public <T extends Savable> T dataStoringManagement(Class<T> cl, String strFileNameNoExt, Savable svMain, String strPath, boolean bSave) {
-		StorageFolderType esft = GlobalJmeAppOSI.i().getStorageFolderType();
+		StorageFolderType esft = GlobalOSAppJmeI.i().getStorageFolderType();
 		String strPathRelative = null;
 		String strBaseStorageFolder = JmeSystem.getStorageFolder(esft).getAbsolutePath();
 		
@@ -1027,15 +1024,20 @@ public class MiscJmeI implements IReflexFillCfg,ISingleInstance,IConfigure{
 		return v3fPos;
 	}
 	
-	public Geometry createMultiLineGeom(Vector3f[] av3f, ColorRGBA color, float fLineWidth){
-		Geometry geom = new Geometry();
-		geom.setMesh(createMultiLineMesh(av3f));
-		geom.setMaterial(retrieveMaterialUnshadedColor(color));
-		geom.getMaterial().getAdditionalRenderState().setLineWidth(fLineWidth);
-		return geom;
-	}
+//	public Geometry createMultiLineGeom(Vector3f[] av3f, ColorRGBA color, float fLineWidth){
+//		Geometry geom = new Geometry();
+//		geom.setMesh(createMultiLineMesh(av3f));
+//		geom.setMaterial(retrieveMaterialUnshadedColor(color));
+//		geom.getMaterial().getAdditionalRenderState().setLineWidth(fLineWidth);
+//		return geom;
+//	}
 	
-	HashMap<Integer,Material> hmMatUnshadedColor = new HashMap<Integer,Material>(); 
+	HashMap<Integer,Material> hmMatUnshadedColor = new HashMap<Integer,Material>();
+	/**
+	 * uses a cache too
+	 * @param color
+	 * @return
+	 */
 	public Material retrieveMaterialUnshadedColor(ColorRGBA color){
 		int i = color.asIntRGBA();
 		Material mat = hmMatUnshadedColor.get(i);
@@ -1052,18 +1054,19 @@ public class MiscJmeI implements IReflexFillCfg,ISingleInstance,IConfigure{
 	 * @param av3f each dot from the multi-line
 	 * @return
 	 */
-	public Mesh createMultiLineMesh(Vector3f[] av3f){
-		Mesh mesh = new Mesh();
+	public Mesh updateMultiLineMesh(Mesh mesh, Vector3f[] av3f){
+		if(mesh==null)mesh=new Mesh();
+//		mesh.setStreamed();
 		mesh.setMode(Mode.LineStrip);
 		
 		FloatBuffer fbuf = BufferUtils.createFloatBuffer(av3f);
 		mesh.setBuffer(Type.Position,3,fbuf);
 		
 		ShortBuffer sbuf = BufferUtils.createShortBuffer(av3f.length);
-		for(Short si=0;si<sbuf.capacity();si++){ //Mode.LineStrip
-			sbuf.put(si);
-		}
+		for(Short si=0;si<sbuf.capacity();si++){sbuf.put(si);}
+		
 		mesh.setBuffer(Type.Index,1,sbuf);
+		
 		mesh.updateBound();
 		mesh.updateCounts();
 		

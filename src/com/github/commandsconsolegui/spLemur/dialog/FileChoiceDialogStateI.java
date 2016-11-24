@@ -29,7 +29,7 @@ package com.github.commandsconsolegui.spLemur.dialog;
 import java.io.File;
 import java.lang.reflect.Field;
 
-import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalOSAppI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
@@ -86,7 +86,7 @@ public class FileChoiceDialogStateI extends ChoiceLemurDialogStateAbs<Command<Bu
 		}
 		
 		if(!flAtParentTmp.exists()){ //try assets folder
-			flAtParentTmp=new File(GlobalAppOSI.i().getAssetsFolder()+File.separator+flAtParentTmp.getPath());
+			flAtParentTmp=new File(GlobalOSAppI.i().getAssetsFolder()+File.separator+flAtParentTmp.getPath());
 			PrerequisitesNotMetException.assertIsTrue("path exist", flAtParentTmp.exists(), flAtParentTmp);
 		}
 		

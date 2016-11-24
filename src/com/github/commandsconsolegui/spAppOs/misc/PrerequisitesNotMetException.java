@@ -107,7 +107,7 @@ public class PrerequisitesNotMetException extends NullPointerException { //@STAT
 	}
 	
 	public static void assertNotEmpty(String strDescWhat, String str, Object... aobjMoreObjectsForDebugInfo){
-		assertNotNull(strDescWhat, str, aobjMoreObjectsForDebugInfo);
+		assertNotNull(str, strDescWhat, aobjMoreObjectsForDebugInfo);
 		
 		if(str.isEmpty()){
 			ArrayList<Object> aobjAll = new ArrayList<Object>();
@@ -119,19 +119,20 @@ public class PrerequisitesNotMetException extends NullPointerException { //@STAT
 	}
 	
 	/**
-	 * DevSelfNote: do not return a value as this may be disableable one day, to avoid dependency.
 	 * @param strDescWhat
 	 * @param obj
 	 * @param aobjMoreObjectsForDebugInfo
 	 */
-	public static void assertNotNull(String strDescWhat, Object obj, Object... aobjMoreObjectsForDebugInfo){
+	public static <T> T assertNotNull(T obj, Object... aobjMoreObjectsForDebugInfo){
 		if(obj==null){
 			ArrayList<Object> aobjAll = new ArrayList<Object>();
 			aobjAll.add(obj);
 			aobjAll.addAll(Arrays.asList(aobjMoreObjectsForDebugInfo));
 			
-			throw new PrerequisitesNotMetException(strDescWhat+": is null", aobjAll.toArray());
+			throw new PrerequisitesNotMetException("is null", aobjAll.toArray());
 		}
+		
+		return obj;
 	}
 	
 	public static <T> void assertNotAlreadyAdded(ArrayList<T> aList, T objNew, Object... aobj){

@@ -27,6 +27,8 @@
 
 package com.github.commandsconsolegui.spAppOs.misc;
 
+import java.util.HashMap;
+
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
@@ -57,6 +59,12 @@ public class WorkAroundI {
 	
 	private static WorkAroundI instance=new WorkAroundI();
 	public static WorkAroundI i(){return instance;}
+	
+	public static enum EWorkAround{
+		DialogBlockerOverlay,
+		;
+		boolean bEnabled=true;
+	}
 	
 	public void bugFix(BugFixBoolTogglerCmdField btgBugFixId, Object... aobjCustomParams) {
 		bugFix(btgBugFixId,null,null,aobjCustomParams);
@@ -136,5 +144,11 @@ public class WorkAroundI {
 		protected BugFixBoolTogglerCmdField getThis() {
 			return this;
 		}
+	}
+	
+//	private HashMap<EWorkAround,Boolean> hmWorkArounds = new HashMap<EWorkAround, Boolean>();
+	public boolean isWorkAroundEnabled(EWorkAround ewa) {
+//		return hmWorkArounds.get(ewa);
+		return ewa.bEnabled;
 	}
 }

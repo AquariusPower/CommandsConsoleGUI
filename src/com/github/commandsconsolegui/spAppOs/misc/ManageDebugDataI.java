@@ -40,8 +40,13 @@ public class ManageDebugDataI {
 	
 	public static enum EDbgStkOrigin{
 		Constructed,
+		Discarded,
+		
 		LastSetValue,
-		LastCall,;
+		
+		LastCall,
+		
+		;
 
 		public String s() {return toString();}
 	}
@@ -72,7 +77,7 @@ public class ManageDebugDataI {
 		}
 	}
 	
-	public static class DebugInfo{
+	private static class DebugInfo{
 		EDbgStkOrigin eso;
 		
 		/**
@@ -91,9 +96,31 @@ public class ManageDebugDataI {
 	public DebugData setStack(DebugData dbgExisting, EDbgStkOrigin eso){
 		return setStack(dbgExisting,eso.s(),1);
 	}
-	public DebugData setStack(DebugData dbgExisting, String str){
-		return setStack(dbgExisting,str,1);
+	/**
+	 * will use as key the fully qualified caller method name
+	 * @param dbgExisting
+	 * @return
+	 */
+	public DebugData setStack(DebugData dbgExisting){
+		return setStack(dbgExisting, Thread.currentThread().getStackTrace()[2].toString(), 1);
 	}
+	/**
+	 * 
+	 * @param dbgExisting
+	 * @param strKey
+	 * @return
+	 */
+	public DebugData setStack(DebugData dbgExisting, String strKey){
+		return setStack(dbgExisting,strKey,1);
+	}
+	/**
+	 * @DevSelfNote IMPORTANT!!! all other related methods here must call this one DIRECTLY!!! because of the stack index!
+	 * 
+	 * @param dbgExisting
+	 * @param str
+	 * @param iIncStackIndex
+	 * @return
+	 */
 	private DebugData setStack(DebugData dbgExisting, String str, int iIncStackIndex){
 		DebugData dbg = dbgExisting;
 		if(dbg==null)dbg=new DebugData();

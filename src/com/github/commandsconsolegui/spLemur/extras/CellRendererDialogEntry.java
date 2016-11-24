@@ -383,7 +383,7 @@ public class CellRendererDialogEntry<ACT> implements CellRenderer<DialogListEntr
 				}
 			}
 			
-			this.dled.setLinkedGuiElement(this);
+			this.dled.setLinkedSpatial(this);
 		}
 		
 		/**

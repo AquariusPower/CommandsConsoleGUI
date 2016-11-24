@@ -27,7 +27,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.github.commandsconsolegui.spCmd;
 
 import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
-import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalOSAppI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
@@ -45,7 +45,7 @@ public class Updater {
 			
 			//these may create queued calls
 			GlobalManageKeyBindI.i().update(fTpf);
-			GlobalAppOSI.i().update(fTpf);
+			GlobalOSAppI.i().update(fTpf);
 			DelegateManagerI.i().update(fTpf);
 			
 			ManageCallQueueI.i().update(fTpf); //after all

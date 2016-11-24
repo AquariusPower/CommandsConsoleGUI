@@ -34,7 +34,7 @@ import java.util.TreeMap;
 import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.ManageKeyCode;
 import com.github.commandsconsolegui.spAppOs.ManageKeyCode.Key;
-import com.github.commandsconsolegui.spAppOs.globals.GlobalAppOSI;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalOSAppI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyCodeI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
@@ -49,7 +49,7 @@ import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure.ICfgParm;
 import com.github.commandsconsolegui.spCmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
-import com.github.commandsconsolegui.spJme.misc.ILinkedGuiElement;
+import com.github.commandsconsolegui.spJme.misc.ILinkedSpatial;
 import com.jme3.scene.Spatial;
 
 
@@ -134,7 +134,7 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField>,IConfi
 
 	private boolean	bConfigured;
 
-	private ILinkedGuiElement ilge;
+	private ILinkedSpatial ilge;
 	
 	private boolean isWaitKeyRelease(){
 		/**
@@ -170,7 +170,7 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField>,IConfi
 		
 		if(bindCaptureToTarget!=null){
 			
-			GlobalAppOSI.i().setDynamicInfo(GlobalManageKeyCodeI.i().getAllPressedKeysSimpleReport());
+			GlobalOSAppI.i().setDynamicInfo(GlobalManageKeyCodeI.i().getAllPressedKeysSimpleReport());
 			
 			kbCaptured=GlobalManageKeyCodeI.i().getPressedKeysAsKeyBind();
 			
@@ -321,8 +321,8 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField>,IConfi
 	private void captureKeyStep(ECaptureUserDecision e) {
 		switch(e){
 			case KeepTrying:
-				if(!GlobalAppOSI.i().isShowingAlert(true)){
-					asteAlertFrom = GlobalAppOSI.i().showSystemAlert(
+				if(!GlobalOSAppI.i().isShowingAlert(true)){
+					asteAlertFrom = GlobalOSAppI.i().showSystemAlert(
 							 " Press a key combination to be captured (where modifiers are ctrl, shift or alt).\n"
 							+" More complex or specific keybindings can be set thru console commands.\n"
 							+" Press ESC to cancel.\n"
@@ -338,20 +338,20 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField>,IConfi
 				kbCaptured=null;
 				bindConflict=null;
 				
-				GlobalAppOSI.i().hideSystemAlert(asteAlertFrom,true);
+				GlobalOSAppI.i().hideSystemAlert(asteAlertFrom,true);
 				break;
 			case KeyReleased:
 				kbWaitBeReleased=null;
 				break;
 			case HasConflict:
-				GlobalAppOSI.i().hideSystemAlert(asteAlertFrom);
+				GlobalOSAppI.i().hideSystemAlert(asteAlertFrom);
 				
 				String strMsg = "captured key bind "+kbCaptured.getBindCfg()
 					+" is already being used by "+bindConflict.getKeyBindRunCommand()+"\n"
 					+strRequestUserDecision;
 				MsgI.i().warn(strMsg,	bindConflict,bindCaptureToTarget,kbCaptured,this);
 				
-				asteAlertFrom = GlobalAppOSI.i().showSystemAlert(strMsg,ilge);
+				asteAlertFrom = GlobalOSAppI.i().showSystemAlert(strMsg,ilge);
 				
 				kbCaptured=null;
 				break;
@@ -361,7 +361,7 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField>,IConfi
 				bindCaptureToTarget=null;
 				kbWaitBeReleased=null;
 				
-				GlobalAppOSI.i().hideSystemAlert(asteAlertFrom);
+				GlobalOSAppI.i().hideSystemAlert(asteAlertFrom);
 				break;
 			case Success:
 				captureKeyStep(ECaptureUserDecision.Cancelled);
@@ -404,7 +404,7 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField>,IConfi
 		return astr;
 	}
 
-	public void captureAndSetKeyBindAt(KeyBoundVarField bindTarget, IRefresh refreshOwner, ILinkedGuiElement ilge) {
+	public void captureAndSetKeyBindAt(KeyBoundVarField bindTarget, IRefresh refreshOwner, ILinkedSpatial ilge) {
 		if(this.bindCaptureToTarget!=null){
 			MsgI.i().devWarn("already capturing keybind for", this.bindCaptureToTarget, this.refreshOwnerAfterCapture, this);
 			return;

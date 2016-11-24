@@ -24,18 +24,19 @@ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN 
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+package com.github.commandsconsolegui.spJme.misc;
 
-package com.github.commandsconsolegui.spAppOs.globals;
-
-import com.github.commandsconsolegui.spAppOs.OSApp;
+import com.jme3.scene.Spatial;
 
 /**
  * 
- * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
+* @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class GlobalAppOSI extends GlobalHolderAbs<OSApp>{
-	private static GlobalAppOSI instance = new GlobalAppOSI();
-	public static GlobalAppOSI iGlobal(){return instance;}
-	public static OSApp i(){return iGlobal().get();}
+public interface ILinkedSpatial {
+	/**
+	 * only the getter is safe, a setter may cause problems like allowing setting when it shouldnt
+	 * @return
+	 */
+	Spatial getLinkedSpatial();
 }

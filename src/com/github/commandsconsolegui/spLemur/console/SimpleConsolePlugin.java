@@ -60,7 +60,7 @@ import com.github.commandsconsolegui.spJme.extras.FpsLimiterStateI;
 import com.github.commandsconsolegui.spJme.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.spJme.globals.GlobalGUINodeI;
-import com.github.commandsconsolegui.spJme.globals.GlobalJmeAppOSI;
+import com.github.commandsconsolegui.spJme.globals.GlobalOSAppJmeI;
 import com.github.commandsconsolegui.spJme.globals.GlobalRootNodeI;
 import com.github.commandsconsolegui.spJme.globals.GlobalSimpleAppRefI;
 import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI;
@@ -265,8 +265,8 @@ public class SimpleConsolePlugin implements IReflexFillCfg, ISingleInstance, ICo
   		GlobalLemurDialogHelperI.iGlobal().set(ManageLemurDialogI.i());
   	}
   	
-  	if(!GlobalJmeAppOSI.iGlobal().isSet()){
-			GlobalJmeAppOSI.iGlobal().set(new OSAppLemur(
+  	if(!GlobalOSAppJmeI.iGlobal().isSet()){
+			GlobalOSAppJmeI.iGlobal().set(new OSAppLemur(
 				cfg.strApplicationBaseSaveDataPath, StorageFolderType.Internal));
   	}
 	}

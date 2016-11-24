@@ -24,16 +24,26 @@ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN 
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package com.github.commandsconsolegui.spJme.misc;
 
-import com.jme3.scene.Spatial;
+package com.github.commandsconsolegui.spJme.globals;
+
+import com.github.commandsconsolegui.spAppOs.globals.GlobalOSAppI;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalHolderAbs;
+import com.github.commandsconsolegui.spJme.OSAppJme;
 
 /**
  * 
-* @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public interface ILinkedGuiElement {
-	Spatial getLinkedGuiElement();
-	void setLinkedGuiElement(Spatial spt);
+public class GlobalOSAppJmeI extends GlobalHolderAbs<OSAppJme>{
+	private static GlobalOSAppJmeI instance = new GlobalOSAppJmeI();
+	public static GlobalOSAppJmeI iGlobal(){return instance;}
+	public static OSAppJme i(){return iGlobal().get();}
+	
+	@Override
+	public OSAppJme set(OSAppJme obj) {
+		GlobalOSAppI.iGlobal().set(obj);
+		return super.set(obj);
+	}
 }

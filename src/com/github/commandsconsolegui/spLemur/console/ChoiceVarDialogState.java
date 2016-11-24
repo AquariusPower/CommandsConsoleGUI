@@ -143,7 +143,7 @@ public final class ChoiceVarDialogState<ACT extends Command<Button>> extends Cho
 	public ChoiceVarDialogState<ACT> copyToSelfValuesFrom(ChoiceVarDialogState<ACT> discarding) {
 		super.copyToSelfValuesFrom(discarding);
 		
-		PrerequisitesNotMetException.assertNotNull("var", discarding.vcf);
+		PrerequisitesNotMetException.assertNotNull(discarding.vcf,"var");
 		this.vcf=discarding.vcf;
 		
 		return getThis();

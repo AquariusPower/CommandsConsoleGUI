@@ -37,6 +37,7 @@ import java.util.HashMap;
 
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.HoldRestartable;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI.DebugData;
@@ -62,6 +63,7 @@ import com.github.commandsconsolegui.spJme.globals.GlobalDialogHelperI;
 import com.github.commandsconsolegui.spJme.globals.GlobalSimpleAppRefI;
 import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI;
 import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI.EffectElectricity;
+import com.github.commandsconsolegui.spJme.misc.ILinkedSpatial;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spJme.savablevalues.CompositeSavableAbs;
 import com.jme3.export.JmeExporter;
@@ -88,7 +90,7 @@ import com.jme3.scene.Spatial;
  * @param <THIS> is for getThis() concrete auto class type inherited trick
  */
 //public abstract class BaseDialogStateAbs<DIAG,CS extends BaseDialogStateAbs.DialogCS<THIS>,THIS extends BaseDialogStateAbs<DIAG,CS,THIS>> extends CmdConditionalStateAbs implements IReflexFillCfg {
-public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> extends CmdConditionalStateAbs<THIS> implements IReflexFillCfg,IUngrabMouse {
+public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> extends CmdConditionalStateAbs<THIS> implements IReflexFillCfg,IUngrabMouse,ILinkedSpatial {
 	private ISpatialLayoutValidator	sptvDialogMainContainer;
 	private Spatial	sptIntputField;
 	private Spatial sptMainList;
@@ -142,11 +144,18 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 		return bAtoZ ? cmpTextAtoZ : cmpTextZtoA;
 	}
 	
+	public boolean isHasEnabledChildDialog(){
+		if(getChildDiagModalInfoCurrent()==null)return false;
+		THIS diag = getChildDiagModalInfoCurrent().getDiagModal();
+		return diag.isEnabled() || diag.isEnabling();
+	}
+	
 	protected DiagModalInfo<ACT> getChildDiagModalInfoCurrent(){
 		return dmi;
 	}
 	
-	protected THIS setDiagModalInfoCurrent(DiagModalInfo<ACT> dmi){
+	protected THIS setChildDiagModalInfoCurrent(DiagModalInfo<ACT> dmi){
+		setBlockerEnabled(dmi!=null);
 		this.dmi=dmi;
 		return getThis();
 	}
@@ -625,24 +634,30 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 			if(bUserEnterCustomValueMode)setInputText(getUserEnterCustomValueToken());
 		}
 		
-		createDiagLinkEffect();
+		ManageCallQueueI.i().addCall(new CallableX(this,100) {
+			@Override
+			public Boolean call() {
+				if(getParentDialog()!=null){
+					return createDiagLinkToParentEffect() != null;
+				}
+				
+				return true;
+			}
+		});
 		
 		return true;
 	}
 	
-	private void createDiagLinkEffect() {
-		if(getParentDialog()!=null){
-			float fZdispl=1f; //1f is like 100 stacked gui elements because each will heighten by 0.01f by lemur at least
-			EffectElectricity ie = new EffectElectricity(
-					this, 
-					ColorRGBA.Blue, 
-					GlobalSimpleAppRefI.i().getGuiNode())
-				.setFollowFromTarget(getParentDialog().getDialogMainContainer(), new Vector3f(0,0,fZdispl))
-				.setFollowToTarget(this.getDialogMainContainer(), null)
-				;
-			
-			EffectsJmeStateI.i().addEffect(ie);
-		}
+	protected EffectElectricity createDiagLinkToParentEffect() {
+		float fZdispl=1f; //1f is like 100 stacked gui elements because each will heighten by 0.01f by lemur at least
+		EffectElectricity eff = new EffectElectricity(this)
+			.setFollowFromTarget(getParentDialog().getDialogMainContainer(), new Vector3f(0,0,fZdispl))
+			.setFollowToTarget(this.getDialogMainContainer(), null)
+			;
+		
+		EffectsJmeStateI.i().addEffect(eff);
+		
+		return eff;
 	}
 
 	@Override
@@ -670,7 +685,7 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 	@Override
 	protected boolean disableAttempt() {
 		if(!super.disableAttempt())return false;
-		if(getChildDiagModalInfoCurrent()!=null){
+		if(isHasEnabledChildDialog()){
 			return false;
 		}
 		
@@ -788,7 +803,7 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 	}
 	
 	protected THIS setDiagParent(DialogStateAbs diagParent) {
-		if(RunMode.bValidateDevCode)dbg=ManageDebugDataI.i().setStack(dbg,"LastSetParent"); 
+		if(RunMode.bValidateDevCode)dbg=ManageDebugDataI.i().setStack(dbg); 
 //		if(this.diagParent!=null)throw new PrerequisitesNotMetException("modal parent already set",this.diagParent,diagParent);
 //		PrerequisitesNotMetException.assertNotAlreadySet("modal parent", this.diagParent, diagParent, this);
 		hrdiagParent.setRef(diagParent);
@@ -868,13 +883,15 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 	public void openModalDialog(String strDialogId, DialogListEntryData dledToAssignModalTo, Object cmd){
 		DialogStateAbs diagModalCurrent = hmhrChildDiagModals.get(strDialogId).getRef();
 		if(diagModalCurrent!=null){
-			setDiagModalInfoCurrent(new DiagModalInfo(diagModalCurrent,cmd,dledToAssignModalTo));
+			setChildDiagModalInfoCurrent(new DiagModalInfo(diagModalCurrent,cmd,dledToAssignModalTo));
 			diagModalCurrent.requestEnable();
 		}else{
 			throw new PrerequisitesNotMetException("no dialog set for id: "+strDialogId);
 		}
 	}
 	
+	protected abstract void setBlockerEnabled(boolean b);
+
 	@Override
 	public void requestRestart() {
 		// do not allow restart with childs enabled, this also grants many consistencies
@@ -927,7 +944,7 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 	}
 	
 	protected ArrayList<DialogListEntryData> getParentReferencedDledListCopy() {
-		PrerequisitesNotMetException.assertNotNull("parent diag", getParentDialog(), this);
+		PrerequisitesNotMetException.assertNotNull(getParentDialog(), "parent diag", this);
 			
 		ArrayList<DialogListEntryData> adled = new ArrayList<DialogListEntryData>();
 //		if(getParentDialog()!=null){
@@ -1294,6 +1311,8 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 		@Override		protected DialogStateAbs getThis() {			return null;		}
 		@Override		protected void setPositionSize(Vector3f v3fPos, Vector3f v3fSize) {		}
 		@Override		protected DialogStateAbs getDiagChoice(DialogListEntryData dledSelected) { return null;	}
+		@Override		public Spatial getLinkedSpatial() {return null;}
+		@Override		protected void setBlockerEnabled(boolean b) {		}
 	}
 	
 	/**
@@ -1303,6 +1322,11 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 	 */
 	public void move(Spatial sptDraggedElement, Vector3f v3fDisplacement) {
 		getDialogMainContainer().move(v3fDisplacement);
+	}
+	
+	@Override
+	public Spatial getLinkedSpatial() {
+		return getDialogMainContainer();
 	}
 	
 	protected void restoreDefaultPositionSize(){
