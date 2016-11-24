@@ -1462,7 +1462,7 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 		}
 	}
 	
-	public void applyResultsFromModalDialog(){
+	public void applyResultsFromModalDialog(){ 
 		if(!isHasEnabledChildDialog())throw new PrerequisitesNotMetException("no modal active");
 		
 		getChildDiagModalInfoCurrent().getDiagModal().resetChoice();
