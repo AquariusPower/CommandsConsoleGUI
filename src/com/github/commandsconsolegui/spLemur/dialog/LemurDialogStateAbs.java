@@ -1429,7 +1429,7 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 //	}
 	
 	@Override
-	protected void setBlockerEnabled(boolean b) {
+	protected void setBlockerEnabled(boolean bEnabled) {
 		if(pnlBlocker==null){
 			pnlBlocker = new Button("");
 			CursorEventControl.addListenersToSpatial(pnlBlocker, DialogMouseCursorListenerI.i());
@@ -1447,7 +1447,7 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 			}
 		}
 		
-		if(b){
+		if(bEnabled){
 			DialogMainContainer cntr = getDialogMainContainer();
 			MiscLemurStateI.i().setPreferredSizeSafely(pnlBlocker, cntr.getSize(), true);
 			
