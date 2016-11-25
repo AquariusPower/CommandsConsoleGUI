@@ -189,7 +189,7 @@ public class MultiClickCondStateI extends ConditionalStateAbs {
 			hmActivatorCmd.put(objActivator,mc);
 		}
 		mc.eCallMode = e;
-		mc.lLastRequestMilis=System.currentTimeMillis();
+		mc.lLastRequestMilis=System.currentTimeMillis(); //must be realtime as is about detecting user actions/clicks on real world
 		mc.callCmd = callCmd; //can be null here, acts like a skipper
 		mc.iClickCount++;
 	}

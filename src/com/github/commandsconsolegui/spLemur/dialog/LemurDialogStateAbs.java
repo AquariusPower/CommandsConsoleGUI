@@ -70,6 +70,7 @@ import com.github.commandsconsolegui.spLemur.extras.DialogMainContainer;
 import com.github.commandsconsolegui.spLemur.globals.GlobalManageDialogLemurI;
 import com.github.commandsconsolegui.spLemur.misc.MiscLemurStateI;
 import com.github.commandsconsolegui.spLemur.misc.MiscLemurStateI.BindKey;
+import com.jme3.bounding.BoundingBox;
 import com.jme3.input.KeyInput;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
@@ -1492,7 +1493,13 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 			CursorEventControl.addListenersToSpatial(pnlBlocker, DialogMouseCursorListenerI.i());
 			MiscJmeI.i().setUserDataPSH(pnlBlocker, this);
 			
-			pnlBlocker.getLocalTranslation().z=LemurDiagFocusHelperStateI.i().getDialogZDisplacement()/2f; //TODO find the highest? getDialogMainContainer()
+			/**
+			 * the position is relative to the dialog
+			 */
+			pnlBlocker.getLocalTranslation().z =
+				((BoundingBox)getDialogMainContainer().getWorldBound()).getExtent(null).z*2f + 1f;
+//				((BoundingBox)getDialogMainContainer().getWorldBound()).getMax(null).z + 1f;
+//			pnlBlocker.getLocalTranslation().z=LemurDiagFocusHelperStateI.i().getDialogZDisplacement()/2f; //TODO find the highest? getDialogMainContainer()
 			
 			ColorRGBA clBg=ColorRGBA.Red.clone();
 			clBg.a=0.15f;
@@ -1511,7 +1518,7 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 			if(WorkAroundI.i().isWorkAroundEnabled(WorkAroundI.EWorkAround.DialogBlockerOverlay)){
 				nodeBlockerHolder.attachChild(pnlBlocker);
 			}else{ 
-				cntr.attachChild(pnlBlocker);
+				cntr.attachChild(pnlBlocker); //PROBLEM: lemur will consider it and make it vanish (in some way..)
 				throw new PrerequisitesNotMetException("Has WorkAround: this code above does NOT work!!! how to let lemur accept a blocker overlay?"); //TODO
 			}
 		}else{

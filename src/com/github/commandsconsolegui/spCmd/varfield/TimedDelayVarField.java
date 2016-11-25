@@ -95,12 +95,11 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Float,TimedDelayVarField>
 	 */
 	public long getCurrentDelayNano(boolean bOverlapLimit, boolean bOverlapModeAlsoUpdateReferenceTime) {
 		if(!isActive())throw new NullPointerException("inactive"); //this, of course, affects all others using this method
-//		System.err.println(getCurrentTime()-lNanoTime);
 		
 		long lCurrentDelay = 0;
 		
 		if(bOverlapLimit){
-			long lCurrentTimeNano = GlobalSimulationTimeI.i().getNano();//getCurrentTimeNano();
+			long lCurrentTimeNano = GlobalSimulationTimeI.i().getNano();
 			
 			long lTotalDelayNano = lCurrentTimeNano - lLastUpdateReferenceTimeNano;
 			
@@ -110,7 +109,6 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Float,TimedDelayVarField>
 				lLastUpdateReferenceTimeNano = lCurrentTimeNano;
 			}
 		}else{
-//			lCurrentDelay = getCurrentTimeNano()-lLastUpdateReferenceTimeNano;
 			lCurrentDelay = GlobalSimulationTimeI.i().getNano() -lLastUpdateReferenceTimeNano;
 		}
 		
@@ -118,7 +116,7 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Float,TimedDelayVarField>
 	}
 	
 	public void updateTime() {
-		lLastUpdateReferenceTimeNano = GlobalSimulationTimeI.i().getNano();//getCurrentTimeNano();
+		lLastUpdateReferenceTimeNano = GlobalSimulationTimeI.i().getNano();
 	}
 	public boolean isReady() {
 		return isReady(false);
@@ -135,22 +133,12 @@ public class TimedDelayVarField extends VarCmdFieldAbs<Float,TimedDelayVarField>
 	}
 	public long getDelayLimitNano(){
 		return TimeHelperI.i().secondsToNano(getDelayLimitSeconds());
-//		return (long) (getDelayLimitSeconds()*fSecondsToNano);
-//		if(bOscilate){
-//			return lDelayLimitNano*2;
-//		}else{
-//			return lDelayLimitNano;
-//		}
 	}
 	public float getDelayLimitSeconds(){
 		if(bOscilate){
-//			return fDelayLimitSeconds*2f;
-//			return lDelayLimitNano*fNanoToSeconds*2f;
 			return getValue()*2f;
 		}else{
-//			return lDelayLimitNano*fNanoToSeconds;
 			return getValue();
-//			return fDelayLimitSeconds;
 		}
 	}
 	public void reset() {

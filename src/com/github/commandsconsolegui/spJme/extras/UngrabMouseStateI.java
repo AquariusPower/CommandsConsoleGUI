@@ -158,7 +158,7 @@ public class UngrabMouseStateI extends ConditionalStateAbs<UngrabMouseStateI> {
 //	}
 //	
 	private void updateTimeAtMainThread(){
-		lLastUpdateMilisAtMainThread=System.currentTimeMillis();
+		lLastUpdateMilisAtMainThread=System.currentTimeMillis(); //must be realtime as this is related to real world and not simulation
 	}
 	
 	public boolean isKeepUngrabbed(){
@@ -172,7 +172,7 @@ public class UngrabMouseStateI extends ConditionalStateAbs<UngrabMouseStateI> {
 	}
 	
 	public void updateAtNewThread() {
-		long lCurrentTimeMilis = System.currentTimeMillis();
+		long lCurrentTimeMilis = System.currentTimeMillis(); //must be realtime as this is related to real world and not simulation
 		boolean bIsSlow = lCurrentTimeMilis > (lLastUpdateMilisAtMainThread+lDelayToUngrabMilis);
 //		lTimeLastUpdateMilis=lCurrentTimeMilis;
 		

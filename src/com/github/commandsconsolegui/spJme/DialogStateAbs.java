@@ -1008,10 +1008,7 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 			adataChosenEntriesList.clear();
 			if(dataSelected!=null){
 				adataChosenEntriesList.add(dataSelected); //TODO could be many, use a checkbox for multi-selection
-//				AudioUII.i().play(AudioUII.EAudio.ReturnChosen);
 				
-//			if(getParentDialog()!=null)getParentDialog().setModalChosenData(dataSelected);
-//				lChoiceMadeAtMilis=System.currentTimeMillis();
 				cd().dumpInfoEntry(this.getUniqueId()+": Option Selected: "+dataSelected.toString());
 				requestDisable(); //close if there is one entry selected
 			}
@@ -1019,7 +1016,6 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 			if(dataSelected!=null){
 				if(dataSelected.isParent()){
 					dataSelected.toggleExpanded();
-//					requestRefreshList();
 				}else{
 					actionMainAtEntry(dataSelected,null);
 				}

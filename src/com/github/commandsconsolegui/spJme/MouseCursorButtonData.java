@@ -130,7 +130,7 @@ public class MouseCursorButtonData{
 			return; //just skip
 		}
 		
-		this.lPressedMilis = System.currentTimeMillis();
+		this.lPressedMilis = System.currentTimeMillis(); //must be realtime as this is related to real world and not simulation
 		this.v3fPressedPos = v3fPressedPos.clone();
 		this.v3fDragLastUpdatePos = v3fPressedPos.clone();
 		
@@ -168,7 +168,7 @@ public class MouseCursorButtonData{
 		if(hmEventRef.get(EMethodCall.setReleasedAndGetDelay)!=objEventRef){
 			if(!isPressed())return null;
 			
-			lTmpLastReleasedDelay = System.currentTimeMillis() - this.lPressedMilis;
+			lTmpLastReleasedDelay = System.currentTimeMillis() - this.lPressedMilis; //must be realtime as this is related to real world and not simulation
 			this.lPressedMilis=null;
 			
 			hmEventRef.put(EMethodCall.setReleasedAndGetDelay,objEventRef);
@@ -181,24 +181,4 @@ public class MouseCursorButtonData{
 		return eButton;
 	}
 	
-//	public int setReleasedAndRetrieveClickCount(Object objEventRef, Spatial target, Spatial capture) {
-//		if(hmEventRef.get(EMethodCall.setReleasedAndRetrieveClickCount)!=objEventRef){
-//			iTmpLastClickCount=0;
-//			Long lDelay = setReleasedAndGetDelay(objEventRef);
-//			if(lDelay!=null){
-//				if(MouseCursorCentralI.i().isClickDelay(lDelay)){
-//					clicks.addClick(new MouseButtonClick(eButton, target, capture));
-//					iTmpLastClickCount = clicks.getMultiClickCountFor(eButton);
-//					GlobalCommandsDelegatorI.i().dumpDebugEntry("MultiClick:"+eButton+","+iTmpLastClickCount);
-//				}
-//			}else{
-//				GlobalCommandsDelegatorI.i().dumpDevWarnEntry("null delay, already released button");
-//			}
-//			
-//			hmEventRef.put(EMethodCall.setReleasedAndRetrieveClickCount,objEventRef);
-//		}
-//		
-//		return iTmpLastClickCount;
-//	}
-
 }

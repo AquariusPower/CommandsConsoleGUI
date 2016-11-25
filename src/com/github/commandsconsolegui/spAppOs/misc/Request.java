@@ -36,7 +36,7 @@ import com.github.commandsconsolegui.spAppOs.globals.GlobalSimulationTimeI;
  */
 public class Request {
 	long lRequestNano = 0;
-	private boolean	bUseGlobalSimulationTime = false;
+//	private boolean	bUseGlobalSimulationTime = true;
 	private ISimulationTime	owner = null;
 	private long	lDelayNano = 0;
 	
@@ -45,9 +45,9 @@ public class Request {
 	 */
 	public Request(){}
 	
-	public Request(boolean bUseGlobalSimulationTime){
-		this.bUseGlobalSimulationTime=bUseGlobalSimulationTime;
-	}
+//	public Request(boolean bUseRealTime){
+//		this.bUseGlobalSimulationTime=bUseRealTime;
+//	}
 	
 	/**
 	 * this one will use owner simulation time
@@ -57,20 +57,15 @@ public class Request {
 		this.owner=owner;
 	}
 	
-//	private long currentTime(boolean bUseGlobal){
 	private long currentTime(){
 		if(owner!=null){
 			return (owner.getCurrentNano());
 		}else{
-			if(bUseGlobalSimulationTime){
-//				if(bUseGlobal){
-					return GlobalSimulationTimeI.i().getNano();
-//				}else{
-//					throw new PrerequisitesNotMetException("to use this method, either an owner or flag to use simulation time is required", owner, bUseGlobalSimulationTime, this);
-//				}
-			}else{
-				return (System.nanoTime());
-			}
+//			if(bUseGlobalSimulationTime){
+				return GlobalSimulationTimeI.i().getNano();
+//			}else{
+//				return (System.nanoTime());
+//			}
 		}
 	}
 	
@@ -119,26 +114,4 @@ public class Request {
 		return lRequestNano!=0;
 	}
 	
-//	public boolean isReadyAndReset(){
-//		if(owner!=null){
-//			return isReadyAndReset(owner.getCurrentNano());
-//		}else{
-//			if(!bUseGlobalSimulationTime){
-//				return isReadyAndReset(System.nanoTime());
-//			}
-//		}
-//	}
-	
-//	/**
-//	 * @param lOwnerCurrentNano must be newer than request time
-//	 * @return
-//	 */
-//	private boolean isReadyAndReset(long lOwnerCurrentNano){
-//		if(lRequestNano!=0 && lRequestNano<lOwnerCurrentNano){
-//			lRequestNano=0;
-//			return true;
-//		}
-//		
-//		return false;
-//	}
 }

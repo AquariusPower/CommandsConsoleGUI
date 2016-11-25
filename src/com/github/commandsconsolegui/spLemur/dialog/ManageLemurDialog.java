@@ -37,6 +37,7 @@ import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spCmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.spCmd.varfield.StringVarField;
 import com.github.commandsconsolegui.spJme.ManageDialogAbs;
+import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
@@ -110,7 +111,22 @@ public class ManageLemurDialog<T extends LemurDialogStateAbs> extends ManageDial
 	protected void setTextAt(Spatial spt,String str) {
 		((TextField)spt).setText(str);
 	}
-
+	
+	public static enum EAttribute{
+		/** elemet text color */
+		color, 
+		
+		fontSize,
+		
+		/** color */
+		background,
+		
+		/** name/id */
+		font,
+		;
+		public String s(){return toString();}
+	}
+	
 	@Override
 	public void prepareStyle(){
 		super.prepareStyle();
@@ -118,9 +134,7 @@ public class ManageLemurDialog<T extends LemurDialogStateAbs> extends ManageDial
 		Styles styles = GuiGlobals.getInstance().getStyles();
 		
 		if(colorConsoleStyleBackground==null){
-			colorConsoleStyleBackground = ColorRGBA.Blue.clone();
-			colorConsoleStyleBackground.b=0.25f;
-			colorConsoleStyleBackground.a=1f; //0.75f;
+			colorConsoleStyleBackground = MiscJmeI.i().colorChangeCopy(ColorRGBA.Blue, -0.75f);
 		}
 		
 		if(svfBackgroundHexaColorRGBA.getValueAsString().isEmpty()){
@@ -140,24 +154,24 @@ public class ManageLemurDialog<T extends LemurDialogStateAbs> extends ManageDial
 		
 		Attributes attrs;
 		attrs = styles.getSelector(STYLE_CONSOLE); // this also creates the style
-		attrs.set("fontSize", 14);
-		attrs.set("color", ColorRGBA.White.clone()); //console default text
+		attrs.set(EAttribute.fontSize.s(), 14);
+		attrs.set(EAttribute.color.s(), MiscJmeI.i().colorChangeCopy(ColorRGBA.White,-0.25f)); //console default text
 		clBg = colorConsoleStyleBackground;
-		attrs.set("background", new QuadBackgroundComponent(clBg));
-		attrs.set("font", getFont());
+		attrs.set(EAttribute.background.s(), new QuadBackgroundComponent(clBg));
+		attrs.set(EAttribute.font.s(), getFont());
 		
 		attrs = styles.getSelector(Button.ELEMENT_ID, STYLE_CONSOLE);
-		attrs.set("color", ColorRGBA.Cyan.clone()); // button's text
+		attrs.set(EAttribute.color.s(), MiscJmeI.i().colorChangeCopy(ColorRGBA.Cyan,-0.10f)); 
 		clBg = colorConsoleStyleBackground.mult(1.1f); //new ColorRGBA(0,0.25f,0,0.75f);
 		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
 		attrs = styles.getSelector(DialogStyleElementId.PopupHelp.s(), STYLE_CONSOLE);
-		attrs.set("color", ColorRGBA.Blue.clone());
+		attrs.set(EAttribute.color.s(), ColorRGBA.Blue.clone());
 		clBg = ColorRGBA.Cyan.clone();
 		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
 		attrs = styles.getSelector(DialogStyleElementId.ResizeBorder.s(), STYLE_CONSOLE);
-		clBg = ColorRGBA.Cyan.clone();
+		clBg = MiscJmeI.i().colorChangeCopy(ColorRGBA.Cyan,-0.15f);
 		attrs.set(Button.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
 		//TODO the slider style is not working yet... copy from another style temporarily?
@@ -165,13 +179,14 @@ public class ManageLemurDialog<T extends LemurDialogStateAbs> extends ManageDial
 		clBg = colorConsoleStyleBackground;
 		attrs.set(Slider.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
+		// INPUT
 		attrs = styles.getSelector(TextField.ELEMENT_ID, STYLE_CONSOLE);
-		attrs.set("color", new ColorRGBA(0.75f,1,1,1));
-		clBg = new ColorRGBA(0.15f, 0.25f, 0, 1);
+		attrs.set(EAttribute.color.s(), new ColorRGBA(0.75f,0.75f,0.25f,1));
+		clBg = new ColorRGBA(0.15f, 0, 0.15f, 1);
 		attrs.set(TextField.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 		
 		attrs = styles.getSelector(ListBox.ELEMENT_ID, ListBox.SELECTOR_ID, STYLE_CONSOLE);
-		clBg = ColorRGBA.Yellow.clone();clBg.a=0.25f;
+		clBg = MiscJmeI.i().colorChangeCopy(ColorRGBA.Yellow,0,0.25f);
 		attrs.set(ListBox.LAYER_BACKGROUND, new QuadBackgroundComponent(clBg));
 	}
 	

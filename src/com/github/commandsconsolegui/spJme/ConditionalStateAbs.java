@@ -405,7 +405,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	 * you can override system time with your simulation time.
 	 */
 	protected void updateLastMainTopCoreUpdateTimeMilis(){
-		lLastMainTopCoreUpdateTimeMilis = System.currentTimeMillis();
+		lLastMainTopCoreUpdateTimeMilis = GlobalSimulationTimeI.i().getMillis();
 	}
 	
 	@Override
@@ -488,7 +488,6 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	protected boolean initAttempt(){return true;}
 	/** a failed attempt may be undone or it can just be gradually stepping towards success */
 	protected boolean updateAttempt(float tpf){
-//		lLastUpdateTimeNano=System.nanoTime();
 		return true;
 	}
 	/** a failed attempt may be undone or it can just be gradually stepping towards success */
@@ -533,9 +532,6 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 		ManageConfigI.i().assertConfigured(this);
 		
 		updateLastMainTopCoreUpdateTimeMilis();
-//		assertIsPreInitialized();
-//		if(bRestartRequested)return false;
-//		if(bDiscardRequested)return false;
 		
 		if(!bProperlyInitialized){
 			if(reqEnable.isReady()){

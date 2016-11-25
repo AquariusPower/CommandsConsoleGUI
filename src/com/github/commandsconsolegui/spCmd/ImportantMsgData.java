@@ -41,9 +41,6 @@ import com.github.commandsconsolegui.spAppOs.misc.MiscI;
  */
 public class ImportantMsgData {
 	private String strMsgKey;
-//	long lKeyOcurrenceTimes=0;
-//	private Exception ex;
-//	private StackTraceElement[] asteExceptionHappenedAt;
 	private DumpEntryData de;
 	private Long lBufferedTimeNano;
 	private Long lFirstOcurrenceCreationTimeNano;
@@ -51,18 +48,11 @@ public class ImportantMsgData {
 	private static String	strLastUId="0";
 	
 	public ImportantMsgData(DumpEntryData de) {
-//		this(de.getKey(),de.getException(),de.getException().getStackTrace());
 		this.de=de;
 		
 		this.strMsgKey=de.getKey();
-//	if(ex==null){
-//		ex=new Exception("(no real exception, just the stack trace)");
-//		ex.setStackTrace(aste);
-//	}
-//		this.ex=de.getException();
-//		this.asteExceptionHappenedAt=de.getException().getStackTrace();
 		
-		lFirstOcurrenceCreationTimeNano=System.nanoTime();
+		lFirstOcurrenceCreationTimeNano=System.nanoTime(); //must be real time as will be used only for reports
 		
 		this.strUId = strLastUId = MiscI.i().getNextUniqueId(strLastUId);
 	}
@@ -79,7 +69,7 @@ public class ImportantMsgData {
 	}
 	
 	public ImportantMsgData updateBufferedTime(){
-		lBufferedTimeNano = System.nanoTime();
+		lBufferedTimeNano = System.nanoTime(); //must be real time as will be used only for reports
 		return this;
 	}
 	

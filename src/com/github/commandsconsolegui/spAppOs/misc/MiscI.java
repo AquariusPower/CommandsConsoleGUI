@@ -105,7 +105,7 @@ public class MiscI {
 		return getDateTimeForFilename(false);
 	}
 	public String getDateTimeForFilename(boolean bShowMilis){
-		return getDateTimeForFilename(System.currentTimeMillis(), bShowMilis);
+		return getDateTimeForFilename(System.currentTimeMillis(), bShowMilis); //can be realtime as this is just information
 	}
 	public String getDateTimeForFilename(long lTimeMilis, boolean bShowMilis){
 		String strMilis="";
@@ -820,7 +820,7 @@ public class MiscI {
 	 * @return
 	 */
 	public String joinMessageWithObjects(boolean bPrependCurrentTime, String strMessage, Object... aobjCustom){
-		String strTime=new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()));
+		String strTime=new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis())); //can be realtime as this is just information
 		if(bPrependCurrentTime){
 			strMessage=strTime+strMessage;
 		}
@@ -1103,8 +1103,9 @@ public class MiscI {
 		return strClassType;
 	}
 	
-	private final Random rnd = new Random(System.currentTimeMillis());
+	private final Random rnd = new Random(System.currentTimeMillis()); //must be realtime as this is just a seed
 	public float randomMinusOneToPlusOne(){
 		return (rnd.nextFloat()*2f)-1f;
 	}
+	
 }

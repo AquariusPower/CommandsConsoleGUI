@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.concurrent.Callable;
 
 import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalSimulationTimeI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
@@ -100,7 +101,7 @@ public class ManageCallQueueI implements IReflexFillCfg,IManager<ManageCallQueue
 		private RetryOnFailure rReQueue;
 		private ArrayList<RetryOnFailure>	arList;
 		private String	strId;
-		private long	lLastUpdateMilis;
+		private long	lLastUpdateMillis;
 		private String strDbgGenericSuperClass;
 		private RefHolder<StackTraceElement[]>  rhasteDbgInstancedAt = new RefHolder<StackTraceElement[]>(null);
 		private RefHolder<StackTraceElement[]>  rhasteDbgLastQueuedAt = new RefHolder<StackTraceElement[]>(null);;
@@ -202,7 +203,7 @@ public class ManageCallQueueI implements IReflexFillCfg,IManager<ManageCallQueue
 		
 		@Override
 		public long getCurrentTimeMilis() {
-			return lLastUpdateMilis;
+			return lLastUpdateMillis;
 		}
 		
 		/**
@@ -210,7 +211,7 @@ public class ManageCallQueueI implements IReflexFillCfg,IManager<ManageCallQueue
 		 * @return
 		 */
 		public CallableX updateTimeMilisNow() {
-			this.lLastUpdateMilis = System.currentTimeMillis();
+			this.lLastUpdateMillis = GlobalSimulationTimeI.i().getMillis();
 			return this;
 		}
 		
@@ -262,7 +263,7 @@ public class ManageCallQueueI implements IReflexFillCfg,IManager<ManageCallQueue
 			builder.append(", strId=");
 			builder.append(strId);
 			builder.append(", lLastUpdateMilis=");
-			builder.append(lLastUpdateMilis);
+			builder.append(lLastUpdateMillis);
 			builder.append(", strDbgGenericSuperClass=");
 			builder.append(strDbgGenericSuperClass);
 			builder.append(", rhasteDbgInstancedAt=");
@@ -326,7 +327,7 @@ public class ManageCallQueueI implements IReflexFillCfg,IManager<ManageCallQueue
 
 	private boolean runCallerCode(CallableX caller) {
 //		try {
-			caller.lDbgLastRunTimeMilis=System.currentTimeMillis();
+			caller.lDbgLastRunTimeMilis=GlobalSimulationTimeI.i().getMillis();
 			callerCurrentlyRunning=caller;
 			if(caller.call().booleanValue()){
 				caller.iFailCount=0; //reset counter
@@ -415,7 +416,7 @@ public class ManageCallQueueI implements IReflexFillCfg,IManager<ManageCallQueue
 			return runCallerCode(caller);
 		}else{
 			assertQueueAllowed(caller);
-			caller.lDbgLastQueueTimeMilis=System.currentTimeMillis();
+			caller.lDbgLastQueueTimeMilis=GlobalSimulationTimeI.i().getMillis();
 			if(bApplyOriginalDebugStack)caller.rhasteDbgLastQueuedAt.setHolded(Thread.currentThread().getStackTrace());
 			if(caller.bPrepend){
 				aCallList.add(0,caller);

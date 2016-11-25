@@ -60,28 +60,35 @@ public class SimulationTime {
 	}	
 	
 	long lSimulationNano;
+	private boolean	bPaused;
 	
 	public long getNano() {
 		return lSimulationNano;
 	}
 	
-	public long getMilis(){
+	public long getMillis(){
 //		return lSimulationNano/1000000L;
 		return TimeHelperI.i().nanoToMilis(lSimulationNano);
 	}
 	
 	public void setToNano(long lNano){
-		if(this.lSimulationNano>=lNano)throw new PrerequisitesNotMetException("cannot update to same or older time", lNano, lSimulationNano);
+		if(lNano <= this.lSimulationNano)throw new PrerequisitesNotMetException("cannot update to same or older time", lNano, lSimulationNano);
 		this.lSimulationNano=lNano;
 	}
 	
 	public void setToMilis(long lMilis){
-//		setToNano(lMilis*1000000L);
 		setToNano(TimeHelperI.i().milisToNano(lMilis));
 	}
 	
+	public void setPaused(boolean b){
+		this.bPaused=b;
+	}
+	
 	public void updateAdd(float fTPF){
+		if(bPaused)return;
+		
 		if(fTPF<=0.0f)throw new PrerequisitesNotMetException("cannot update to same or older time", fTPF, lSimulationNano);
-		this.lSimulationNano+=TimeHelperI.i().secondsToNano(fTPF);//(fTPF*1000000000L);
+		
+		this.lSimulationNano+=TimeHelperI.i().secondsToNano(fTPF);
 	}
 }

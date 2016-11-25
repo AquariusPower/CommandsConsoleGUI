@@ -124,9 +124,9 @@ public class OSApp implements IReflexFillCfg{
 	
 	public void update(float fTpf){
 		if(strAlertMsg!=null){
-			if( bFirstTimeQuickUpdate || ((lLastAlertMilis+1500) < System.currentTimeMillis()) ){
+			if( bFirstTimeQuickUpdate || ((lLastAlertMilis+1500) < System.currentTimeMillis()) ){ //must be realtime to not depend on the simulation
 				dumpAlert();
-				lLastAlertMilis=System.currentTimeMillis();
+				lLastAlertMilis=System.currentTimeMillis(); //must be realtime to not depend on the simulation
 				bFirstTimeQuickUpdate=false;
 			}
 		}

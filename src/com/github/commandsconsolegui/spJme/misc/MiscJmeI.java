@@ -1073,4 +1073,22 @@ public class MiscJmeI implements IReflexFillCfg,ISingleInstance,IConfigure{
 		return mesh;
 	}
 	
+	public float colorComponentLimit(float f){
+		if(f<=0)f=0;
+		if(f>=1)f=1;
+		return f;
+	}
+	public ColorRGBA colorChangeCopy(ColorRGBA color, float fAddRGB){
+		return colorChangeCopy(color,fAddRGB,color.a);
+	}
+	public ColorRGBA colorChangeCopy(ColorRGBA color, float fAddRGB, float fAlpha){
+		color = color.clone();
+		
+		color.r=colorComponentLimit(color.r+=fAddRGB);
+		color.g=colorComponentLimit(color.g+=fAddRGB);
+		color.b=colorComponentLimit(color.b+=fAddRGB);
+		
+		color.a=fAlpha;
+		return color;
+	}
 }

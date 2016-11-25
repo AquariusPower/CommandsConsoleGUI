@@ -29,6 +29,8 @@ package com.github.commandsconsolegui.spAppOs.misc;
 
 import java.util.Arrays;
 
+import com.github.commandsconsolegui.spAppOs.globals.GlobalSimulationTimeI;
+
 /**
  * To easily detect if the reference value has changed using its hash.
  * 
@@ -42,7 +44,7 @@ public class RefHolder<T> implements IDebugReport{
 	private T objRefHolded;
 	private int	iHash;
 	private long lCount;
-	private long	lLastChangeTime;
+	private long	lLastChangeNano;
 	@SuppressWarnings("unused") private StackTraceElement[] steDbgLastSetAt; //used mainly during debugs
 	
 	/**
@@ -77,7 +79,7 @@ public class RefHolder<T> implements IDebugReport{
 			iHash=iHashTmp;
 			lCount++;
 			steDbgLastSetAt=Thread.currentThread().getStackTrace();
-			lLastChangeTime=System.nanoTime();
+			lLastChangeNano=GlobalSimulationTimeI.i().getNano();
 			return true;
 		}
 		
@@ -103,7 +105,7 @@ public class RefHolder<T> implements IDebugReport{
 	}
 	
 	public long getLastChangeTimeNano(){
-		return lLastChangeTime;
+		return lLastChangeNano;
 	}
 	
 	@Override
@@ -119,7 +121,7 @@ public class RefHolder<T> implements IDebugReport{
 	public String toString() {
 		return String.format(
 			"RefHolder [iHash=%s, lCount=%s, lLastChangeTime=%s, steDbgLastSetAt=%s], objRefHolded=%s",
-			iHash, lCount, lLastChangeTime, Arrays.toString(steDbgLastSetAt), getFailSafeDebugReport());
+			iHash, lCount, lLastChangeNano, Arrays.toString(steDbgLastSetAt), getFailSafeDebugReport());
 	}
 
 	

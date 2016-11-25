@@ -57,14 +57,14 @@ public class DumpEntryData{
 	private String	strKey = null;
 	private Exception	ex;
 	private boolean	bImportant;
-	private long	lMilis;
+	private long	lMillis;
 	private boolean	bShowTime = true;
 	private boolean	bShowDumpObjects;
 	private long lKeyOcurrenceTimes=1;
 	private ImportantMsgData	imsg;
 	
 	public DumpEntryData() {
-		lMilis = System.currentTimeMillis();
+		lMillis = System.currentTimeMillis(); //can be realtime as this is just information
 	}
 	
 	public boolean isApplyNewLineRequests() {
@@ -99,7 +99,7 @@ public class DumpEntryData{
 		String str = "";
 		
 		if(isShowTime()){
-			str+=MiscI.i().getSimpleTime(lMilis, GlobalCommandsDelegatorI.i().btgShowMiliseconds.get());
+			str+=MiscI.i().getSimpleTime(lMillis, GlobalCommandsDelegatorI.i().btgShowMiliseconds.get());
 		}
 		
 		str+=strKey;

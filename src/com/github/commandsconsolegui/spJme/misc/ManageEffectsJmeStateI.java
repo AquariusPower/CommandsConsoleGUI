@@ -163,19 +163,19 @@ public class ManageEffectsJmeStateI extends ConditionalStateAbs<ManageEffectsJme
 		}
 	}
 	
-	long lLastUpdateMilis=GlobalSimulationTimeI.i().getMilis();
+	long lLastUpdateMilis=GlobalSimulationTimeI.i().getMillis();
 	@Override
 	protected boolean updateAttempt(float tpf) {
 		if(!super.updateAttempt(tpf))return false;
 		
 		int iFPStarget=15;
-		if(lLastUpdateMilis+(1000/iFPStarget) < GlobalSimulationTimeI.i().getMilis()){
+		if(lLastUpdateMilis+(1000/iFPStarget) < GlobalSimulationTimeI.i().getMillis()){
 			for(IEffect ie:aEffectList){//.values()){
 				if(!ie.isPlaying())continue;
 				ie.assertConfigIsValid(); //config may change during play
 				ie.play(ccSelf,tpf);
 			}
-			lLastUpdateMilis=GlobalSimulationTimeI.i().getMilis();
+			lLastUpdateMilis=GlobalSimulationTimeI.i().getMillis();
 		}
 		
 		return true;

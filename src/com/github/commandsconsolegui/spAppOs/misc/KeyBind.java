@@ -233,7 +233,7 @@ public class KeyBind {
 						if(lActDelayMilis==0){ //every frame
 							bRun=true;
 						}else{
-							if(GlobalSimulationTimeI.i().getMilis() > (lLastActivationMilis+lActDelayMilis)){
+							if(GlobalSimulationTimeI.i().getMillis() > (lLastActivationMilis+lActDelayMilis)){
 								bRun=true;
 							}
 						}
@@ -241,7 +241,7 @@ public class KeyBind {
 				}
 			}
 			
-			lLastActivationMilis = GlobalSimulationTimeI.i().getMilis();
+			lLastActivationMilis = GlobalSimulationTimeI.i().getMillis();
 			lConsecutiveActivationCount++;
 			
 			return bRun;

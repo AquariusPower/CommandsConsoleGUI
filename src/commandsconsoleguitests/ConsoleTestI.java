@@ -146,15 +146,15 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		GlobalCommandsDelegatorI.iGlobal().set(new CommandsTest());
 //		GlobalConsoleGuiI.iGlobal().set(ConsoleLemurStateI.i());
 		
+		consolePlugin = new SimpleConsolePlugin(this);
+		consolePlugin.configure(new SimpleConsolePlugin.CfgParm(
+			ConsoleTestI.class.getName().replace(".",File.separator)));
+		
 		/**
 		 * this adds otherwise impossible fixes and workarounds,
 		 * can be safely disabled.
 		 */
 		ReflexHacksPluginI.i().configure(GlobalCommandsDelegatorI.i());
-		
-		consolePlugin = new SimpleConsolePlugin(this);
-		consolePlugin.configure(new SimpleConsolePlugin.CfgParm(
-			ConsoleTestI.class.getName().replace(".",File.separator)));
 		
 		GlobalManageDialogJmeI.i().setLinkToParentEffect(new EffectElectricity());
 		GlobalManageDialogJmeI.i().setDragBorderEffect(

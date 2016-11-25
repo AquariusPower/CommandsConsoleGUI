@@ -85,7 +85,7 @@ public abstract class ManageDialogAbs<T extends DialogStateAbs> implements IRefl
 	public final String STYLE_CONSOLE="console";
 	private String strDefaultFont = "DroidSansMono";
 	private final StringVarField	svfUserFontOption = new StringVarField(this, strDefaultFont, null);
-	private int iDefaultFontSize = 12;
+	private int iDefaultFontSize = 11;
 	private final IntLongVarField ilvFontSize = new IntLongVarField(this, iDefaultFontSize,null);
 	private BitmapFont	font;
 	private BitmapFont	fontConsoleDefault;

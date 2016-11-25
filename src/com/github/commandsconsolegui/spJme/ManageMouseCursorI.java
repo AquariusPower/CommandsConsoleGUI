@@ -167,14 +167,14 @@ public class ManageMouseCursorI implements IReflexFillCfg, IConsoleCommandListen
 	}
 	
 	public boolean isMultiClickDelayWithinLimitFrom(Long lFromMilis) {
-		return isMultiClickDelayWithinLimit(System.currentTimeMillis()-lFromMilis);
+		return isMultiClickDelayWithinLimit(System.currentTimeMillis()-lFromMilis); //must be realtime as is about detecting user actions/clicks on real world
 	}
 	public boolean isMultiClickDelayWithinLimit(Long lDelayMilis) {
 		return lDelayMilis <= ilvMultiClickMaxDelayMilis.getLong();
 	}
 	
 	public boolean isClickDelayFrom(Long lFromMilis) {
-		return isClickDelay(System.currentTimeMillis()-lFromMilis);
+		return isClickDelay(System.currentTimeMillis()-lFromMilis); //must be realtime as is about detecting user actions/clicks on real world
 	}
 	public boolean isClickDelay(Long lDelayMilis) {
 		return lDelayMilis <= ilvClickMaxDelayMilis.getLong();

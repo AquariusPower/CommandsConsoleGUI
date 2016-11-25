@@ -71,7 +71,7 @@ public class EffectElectricity extends EffectBaseAbs<EffectElectricity>{
 	}
 	
 	public long getThickNess(){
-		long lRemainMilis = getiHoldUntilMilis() - GlobalSimulationTimeI.i().getMilis();
+		long lRemainMilis = getiHoldUntilMilis() - GlobalSimulationTimeI.i().getMillis();
 		long lMaxThickness = 8;
 		long lThicknessStepMilis = getiMaxHoldMilis()/lMaxThickness;
 		long lCurrentThickness = lRemainMilis/lThicknessStepMilis;
@@ -96,8 +96,8 @@ public class EffectElectricity extends EffectBaseAbs<EffectElectricity>{
 		float fMaxMoveDetectDist=0.01f;
 		if(getV3fHoldPreviousFrom().distance(getLocationFrom()) > fMaxMoveDetectDist)bUpdate=true;
 		if(getV3fHoldPreviousTo().distance(getLocationTo()) > fMaxMoveDetectDist)bUpdate=true;
-		if(getiHoldUntilMilis() < GlobalSimulationTimeI.i().getMilis()){
-			setiHoldUntilMilis(GlobalSimulationTimeI.i().getMilis() + FastMath.nextRandomInt(250, getiMaxHoldMilis() ));
+		if(getiHoldUntilMilis() < GlobalSimulationTimeI.i().getMillis()){
+			setiHoldUntilMilis(GlobalSimulationTimeI.i().getMillis() + FastMath.nextRandomInt(250, getiMaxHoldMilis() ));
 			bUpdate=true;
 		}
 		

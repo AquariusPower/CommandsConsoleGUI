@@ -41,23 +41,17 @@ import com.github.commandsconsolegui.spCmd.CommandsDelegator;
 /**
  * Locks have a short timeout.
  * 
+ * Is not part of the simulation, therefore must use realtime: System.currentTimeMillis()
+ * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
 public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
-//	public final BoolTogglerCmd	btgSingleInstaceMode = new BoolTogglerCmd(this,true,BoolTogglerCmd.strTogglerCodePrefix,
-//		"better keep this enabled, other instances may conflict during files access.");
-//	private boolean bDevModeExitIfThereIsANewerInstance;
-//	public final BoolToggler	btgSingleInstaceOverrideOlder = new BoolToggler(this,false,ConsoleCommands.strTogglerCodePrefix,
-//		"If true, any older instance will exit and this will keep running."
-//		+"If false, the oldest instance will keep running and this one will exit.");
 	String strPrefix;
 	String strSuffix;
 	String strId;
 	private File	flSelfLock;
-//	private ConsoleCommands	cc;
 	private BasicFileAttributes	attrSelfLock;
-//	private boolean	bInitialized;
 	private FilenameFilter	fnf;
 	private File	flFolder;
 	private long lLockUpdateTargetDelayMilis;
@@ -69,14 +63,11 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 	private boolean	bUseFilesystemFileAttributeModifiedTime;
 	private boolean	bRecreateLockEveryLoop;
 	
-//	public static SingleAppInstanceI i(){return instance;}
-	
 	private static SingleMandatoryAppInstanceI instanceLock;
 	public SingleMandatoryAppInstanceI() {
 		PrerequisitesNotMetException.assertNotAlreadySet(instanceLock, this, "single instance");
 		instanceLock = this;
 		
-//		bDevModeExitIfThereIsANewerInstance = true; //true if in debug mode
 		lLockUpdateTargetDelayMilis=3000;
 		strPrefix=SingleMandatoryAppInstanceI.class.getSimpleName()+"-";
 		strSuffix=".lock";
@@ -151,20 +142,14 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 				if(!bOtherIsAlive)bDelete=true;
 			}
 			
-//			long lTimeLimit = System.currentTimeMillis() - lMaxDelayWithoutUpdate;
-//			if(attr.lastModifiedTime().toMillis() < lTimeLimit){
 			if(bDelete){
 				outputTD("Cleaning old lock: "+fl.getName());
-//				System.out.println(""+lOtherLastUpdateDelayMilis);
-//				System.out.println(""+lMaxDelayWithoutUpdate);
-//				System.out.println(""+bOtherIsAlive);
 				fl.delete();
 			}
 		}
 	}
 	
 	private boolean cmpSelfWithTD(File fl){
-//		System.out.println(">>>"+flSelfLock.getName()()+">>>"+(fl.getAbsolutePath()));
 		return flSelfLock.getName().equalsIgnoreCase(fl.getName());
 	}
 	
@@ -194,19 +179,6 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 			strReport+="OtherLock: "+flOtherLock.getName()+" "+getMode(ermOther,true)+"\n";
 			
 			boolean  bOtherIsNewer = lSelfLockCreationTimeMilis < lOtherCreationTimeMilis;
-//			long lOtherLastUpdateDelayMilis = System.currentTimeMillis()-lOtherLastUpdateTimeMilis;
-//			boolean bOtherIsAlive = lOtherLastUpdateDelayMilis < (lLockUpdateTargetDelayMilis*3) ;
-//			
-//			if(lOtherLastUpdateDelayMilis>lLockUpdateTargetDelayMilis*6){
-////				File flOtherDead=new File(flOtherLock.getAbsoluteFile()+".DEAD");
-////				System.out.println(flOtherDead);
-////				flOtherLock.renameTo(flOtherDead);
-//				flOtherLock.delete();
-//			}
-			
-//			if(!bOtherIsAlive){
-//				applyExitReasonAboutOtherInstanceStatus("STILLALIVE"+getMode(ermOther,true));
-//			}else{
 				if(isDevModeExitIfThereIsANewerInstance() && bOtherIsNewer){
 					/**
 					 * exits if there is a newer debug application instance (development machine)
@@ -313,7 +285,6 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 					
 					if(lLockUpdateFastInitDelayMilis<lLockUpdateTargetDelayMilis){
 						lLockUpdateFastInitDelayMilis+=lIncStep;
-//						outputTD("update delay milis "+lLockUpdateFastInitDelayMilis);
 					}
 					
 				} catch (InterruptedException e) {
@@ -405,9 +376,6 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 	
 	boolean bCreateLockOutputOnce=true;
 	private void createSelfLockFileTD() {
-//		try{
-//			flSelfLock.createNewFile();
-			
 			ArrayList<String> astr = new ArrayList<String>();
 			// line 1
 			astr.add(""+lSelfLockCreationTimeMilis);
@@ -427,8 +395,6 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 				
 				flSelfLock.deleteOnExit();
 			}else{
-//		} catch (IOException e) {
-//			e.printStackTrace();
 				throw new NullPointerException("unable to create lock file "+flSelfLock.getAbsolutePath());
 			}
 	}
@@ -461,12 +427,6 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 		if(!bAllowCfgOutOfMainMethod){
 			outputTD("DEVELOPER: if too much resources are being allocated, try the 'configuration at main()' option.");
 		}
-//		this.cc=cc;
-//		this.threadMain=threadMain;
-		
-//		bSelfIsDebugMode = DebugI.i().isInIDEdebugMode();
-		
-//		if(Debug.i().isInIDEdebugMode())strPrefix="DebugMode-"+strPrefix;
 		
 		lSelfLockCreationTimeMilis = System.currentTimeMillis();
 		strId=strPrefix+MiscI.i().getDateTimeForFilename(lSelfLockCreationTimeMilis,true)+strSuffix;
@@ -481,15 +441,9 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 			}
 		};
 		
-//		bDevModeExitIfThereIsANewerInstance = bSelfIsDebugMode;
-		
 		if(RunMode.bDebugIDE){
 			outputTD("This instance is in DEBUG mode. ");
 		}
-		
-//		if(!sapp.getStateManager().attach(this)){
-//			throw new NullPointerException("already attached state "+this.getClass().getName());
-//		}
 		
 		/**
 		 * creating the new thread here will make the application ends faster if it can.
@@ -545,7 +499,6 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 					 */
 					Thread.sleep(lWaitDelayMilis);
 				}else{
-//					if(lCheckCountsTD==0){
 					if(lCheckTotalDelay<lMaxDelayToWaitForChecksMilis){
 						Thread.sleep(lWaitDelayMilis);
 					}else{
