@@ -39,36 +39,36 @@ import org.lwjgl.opengl.Display;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.AutoCompleteI;
+import com.github.commandsconsolegui.spAppOs.misc.AutoCompleteI.AutoCompleteResult;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.DebugI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.spAppOs.misc.WorkAroundI;
-import com.github.commandsconsolegui.spAppOs.misc.AutoCompleteI.AutoCompleteResult;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
+import com.github.commandsconsolegui.spAppOs.misc.WorkAroundI;
 import com.github.commandsconsolegui.spAppOs.misc.WorkAroundI.BugFixBoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.CommandData;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
+import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.spCmd.CommandsHelperI;
 import com.github.commandsconsolegui.spCmd.DumpEntryData;
 import com.github.commandsconsolegui.spCmd.EDataBaseOperations;
-import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.spCmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.spCmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.spJme.AudioUII;
+import com.github.commandsconsolegui.spJme.AudioUII.EAudio;
 import com.github.commandsconsolegui.spJme.DialogStateAbs;
 import com.github.commandsconsolegui.spJme.IJmeConsoleUI;
 import com.github.commandsconsolegui.spJme.ManageConditionalStateI;
-import com.github.commandsconsolegui.spJme.AudioUII.EAudio;
 import com.github.commandsconsolegui.spJme.ManageMouseCursorI.EMouseCursorButton;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
-import com.github.commandsconsolegui.spJme.globals.GlobalDialogHelperI;
+import com.github.commandsconsolegui.spJme.globals.GlobalManageDialogJmeI;
 import com.github.commandsconsolegui.spJme.globals.console.GlobalJmeConsoleUII;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spLemur.DialogMouseCursorListenerI;
@@ -1482,7 +1482,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 		if(!super.initGUI())return false;
 		
 	//	initializePre();
-		addKnownStyle(GlobalDialogHelperI.i().STYLE_CONSOLE);
+		addKnownStyle(GlobalManageDialogJmeI.i().STYLE_CONSOLE);
 		
 	//	sapp = (SimpleApplication)app;
 	//	cc.sapp = sapp;
@@ -1621,7 +1621,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 	//private float fPreferredThickness=10.0f;
 	
 	private void initializeOnlyTheUIallSteps(){
-		GlobalDialogHelperI.i().prepareStyle();
+		GlobalManageDialogJmeI.i().prepareStyle();
 		initializeOnlyTheUI();
 		updateFontStuff();
 	}
@@ -2001,7 +2001,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 		 */
 		
 		cd().update(tpf);
-		GlobalDialogHelperI.i().update(tpf);
+		GlobalManageDialogJmeI.i().update(tpf);
 		
 		updateInputFieldFillWithSelectedEntry();
 		updateCurrentCmdHistoryEntryReset();
@@ -2913,8 +2913,8 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 		}else
 		if(cd.checkCmdValidity(CMD_DEFAULT,"will revert to default values/config/setup (use if something goes wrong)")){
 			//TODO apply all basic settings here, like font size etc
-			GlobalDialogHelperI.i().setDefault();
-			bCommandWorked=cmdStyleApply(GlobalDialogHelperI.i().STYLE_CONSOLE);
+			GlobalManageDialogJmeI.i().setDefault();
+			bCommandWorked=cmdStyleApply(GlobalManageDialogJmeI.i().STYLE_CONSOLE);
 		}else
 		if(cd.checkCmdValidity(CMD_FONT_LIST,"[strFilter] use 'all' as filter to show all, otherwise only monospaced will be the default filter")){
 			String strFilter = cd.getCurrentCommandLine().paramString(1);
@@ -3322,7 +3322,7 @@ public abstract class LemurConsoleStateAbs<T extends Command<Button>, THIS exten
 		/**
 		 * Mono spaced fonts can always have a fixed linewrap column!
 		 */
-		if(!bUseFixedWrapColumn)bUseFixedWrapColumn=GlobalDialogHelperI.i().STYLE_CONSOLE.equals(getDiagStyle());
+		if(!bUseFixedWrapColumn)bUseFixedWrapColumn=GlobalManageDialogJmeI.i().STYLE_CONSOLE.equals(getDiagStyle());
 		
 		if(bUseFixedWrapColumn){
 			return (int)

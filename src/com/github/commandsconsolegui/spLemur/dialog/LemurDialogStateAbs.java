@@ -55,19 +55,19 @@ import com.github.commandsconsolegui.spJme.ManageConditionalStateI.CompositeCont
 import com.github.commandsconsolegui.spJme.ManageMouseCursorI;
 import com.github.commandsconsolegui.spJme.ManageMouseCursorI.EMouseCursorButton;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData;
-import com.github.commandsconsolegui.spJme.globals.GlobalSimpleAppRefI;
-import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI;
-import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI.EffectElectricity;
+import com.github.commandsconsolegui.spJme.globals.GlobalManageDialogJmeI;
+import com.github.commandsconsolegui.spJme.misc.ManageEffectsJmeStateI.IEffect;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spLemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.spLemur.console.LemurConsoleStateAbs;
 import com.github.commandsconsolegui.spLemur.console.LemurDiagFocusHelperStateI;
-import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialogI.DialogStyleElementId;
-import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialogI.DummyEffect;
+import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialog.DialogStyleElementId;
+import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialog.DummyEffect;
 import com.github.commandsconsolegui.spLemur.extras.CellRendererDialogEntry;
 import com.github.commandsconsolegui.spLemur.extras.CellRendererDialogEntry.CellDialogEntry;
 import com.github.commandsconsolegui.spLemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserDataCellEntry;
 import com.github.commandsconsolegui.spLemur.extras.DialogMainContainer;
+import com.github.commandsconsolegui.spLemur.globals.GlobalManageDialogLemurI;
 import com.github.commandsconsolegui.spLemur.misc.MiscLemurStateI;
 import com.github.commandsconsolegui.spLemur.misc.MiscLemurStateI.BindKey;
 import com.jme3.input.KeyInput;
@@ -214,11 +214,10 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 	public THIS configure(ICfgParm icfg) {
 		cfg = (CfgParm)icfg;//this also validates if icfg is the CfgParam of this class
 		
-		effDraggedBorder = new EffectElectricity(this);
-		effDraggedBorder.setSkipDiscardingByOwner();
-		effDraggedBorder.setPlay(false);
-		effDraggedBorder.setAmplitudePerc(0.05f);
-		EffectsJmeStateI.i().addEffect(effDraggedBorder);
+//		effDraggedBorder = new EffectElectricity(this)
+//			.setSkipDiscardingByOwner()
+//			.setAmplitudePerc(0.05f);
+//		ManageEffectsJmeStateI.i().addEffect(effDraggedBorder);
 		
 		fdvEntryHeightMultiplier.setObjectRawValue(cfg.fEntryHeightMultiplier);
 //		DialogMouseCursorListenerI.i().configure(null);
@@ -464,11 +463,11 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 		getNorthContainer().addChild(lblTextInfo, BorderLayout.Position.Center);
 		
 		// info (and list) resizer
-		btnResizeInfoAndList=retrieveResizer(btnResizeInfoAndList,null);
+		btnResizeInfoAndList=retrieveBorderResizer(btnResizeInfoAndList,null);
 		MiscLemurStateI.i().setSizeSafely(btnResizeInfoAndList, 1, 1, true);
 		getNorthContainer().addChild(btnResizeInfoAndList, BorderLayout.Position.South);
 //		setBordersThickness(getCompositeSavable(LmrDiagCS.class).ilvBorderThickness.intValue());
-		setBordersThickness(ManageLemurDialogI.i().ilvBorderThickness.intValue());
+		setBordersThickness(GlobalManageDialogLemurI.i().ilvBorderThickness.intValue());
 		
 		cntrCenterMain.addChild(getNorthContainer(), BorderLayout.Position.North);
 	}
@@ -524,13 +523,13 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 	private void reinitBorders() {
 //		abtnResizeBorderList.clear();
 		
-		btnResizeNorth	= retrieveResizer(btnResizeNorth, BorderLayout.Position.North);
-		btnResizeSouth	= retrieveResizer(btnResizeSouth, BorderLayout.Position.South);
-		btnResizeEast		= retrieveResizer(btnResizeEast	, BorderLayout.Position.East);
-		btnResizeWest		= retrieveResizer(btnResizeWest	, BorderLayout.Position.West);
+		btnResizeNorth	= retrieveBorderResizer(btnResizeNorth, BorderLayout.Position.North);
+		btnResizeSouth	= retrieveBorderResizer(btnResizeSouth, BorderLayout.Position.South);
+		btnResizeEast		= retrieveBorderResizer(btnResizeEast	, BorderLayout.Position.East);
+		btnResizeWest		= retrieveBorderResizer(btnResizeWest	, BorderLayout.Position.West);
 		
 //		setBordersThickness(getCompositeSavable(LmrDiagCS.class).ilvBorderThickness.intValue());
-		setBordersThickness(ManageLemurDialogI.i().ilvBorderThickness.intValue());
+		setBordersThickness(GlobalManageDialogLemurI.i().ilvBorderThickness.intValue());
 //		getCompositeSavable(LemurDialogCS.class).ilvBorderThickness.callerAssignedRunNow();
 		
 //		if(bAppyBorderSize){
@@ -759,14 +758,16 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 	}
 	
 	@Override
-	protected EffectElectricity createDiagLinkToParentEffect() {
+	protected IEffect createDiagLinkToParentEffect() {
 		if(abtnResizerList.size()==0)return null;
 		
-		EffectElectricity eff = super.createDiagLinkToParentEffect();
+//		EffectElectricity eff = 
+		return super.createDiagLinkToParentEffect() //;
 		
-		eff.setColor(getBorderColor());
+//		eff
+		.setColor(getBorderColor());
 		
-		return eff;
+//		return eff;
 	}
 	
 	private ColorRGBA getBorderColor(){
@@ -779,7 +780,7 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 		return qbc.getColor().clone();
 	}
 	
-	private Button retrieveResizer(final Button btnExisting, final Position edge) {
+	private Button retrieveBorderResizer(final Button btnExisting, final Position edge) {
 		if(btnExisting!=null){
 			if(!btgBugFixReinitBordersByRecreatingThem.b()){
 				CursorEventControl.removeListenersFromSpatial(btnExisting, DialogMouseCursorListenerI.i());
@@ -807,6 +808,8 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 		EffectFocusData efd=new EffectFocusData();
 		efd.colorOriginal=((QuadBackgroundComponent)btnNew.getBackground()).getColor().clone(); //from style
 		efd.colorDim = efd.colorOriginal.clone().mult(0.5f);
+//		btnNew.setHighlightColor(efd.colorDim);
+//		btnNew.setHighlightShadowColor(ColorRGBA.Red);
 //		efd.colorDim.a=efd.colorOriginal.a;
 		MiscJmeI.i().setUserDataPSH(btnNew, efd);
 		
@@ -828,7 +831,7 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 			getDialogMainContainer().addChild(btnNew, edge); //this actually replaces the current at that border
 		}
 		
-		efDummy = ManageLemurDialogI.i().setupSimpleEffect(btnNew, EEffectId.FocusLost.s(), efFocusLost, efDummy);
+		efDummy = GlobalManageDialogLemurI.i().setupSimpleEffect(btnNew, EEffectId.FocusLost.s(), efFocusLost, efDummy);
 //		btnNew.addEffect(Button.EFFECT_ACTIVATE,(Effect)efFocusLost);
 //		btnNew.addEffect(Button.EFFECT_DEACTIVATE,efDummy);
 		
@@ -855,7 +858,7 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 			}
 		});
 //	private boolean	bReinitBordersAfterThicknessChange;
-	private EffectElectricity	effDraggedBorder;
+//	private EffectElectricity	effDraggedBorder;
 	private Button	btnDraggingReziseBorderLastToClearEffect;
 	private Panel	pnlBlocker;
 	private Node	nodeBlockerHolder;
@@ -1196,38 +1199,92 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 		return true;
 	}
 	
+//	protected void updateBorderDraggedEffect() {
+//		if(btnDraggingReziseBorder==null){
+//			if(btnDraggingReziseBorderLastToClearEffect!=null){
+//				effDraggedBorder.setPlay(false);
+//				
+//				btnDraggingReziseBorderLastToClearEffect.runEffect(efDummy.getId());
+//				btnDraggingReziseBorderLastToClearEffect=null;
+//			}
+//		}else{
+//			if(!effDraggedBorder.isPlaying()){
+//				effDraggedBorder.setColor(getBorderColor());
+//				effDraggedBorder.setPlay(true);
+//				
+//				btnDraggingReziseBorder.runEffect(EEffectId.FocusLost.s());
+//			}
+//			
+//			// set from/to
+//			Vector3f v3fFrom = btnDraggingReziseBorder.getWorldTranslation().clone();
+//			v3fFrom.z+=1f;
+//			Vector3f v3fSize=btnDraggingReziseBorder.getSize();
+//			Vector3f v3fTo=new Vector3f();
+//			if(v3fSize.x>v3fSize.y){
+//				v3fSize.y=0;
+//				v3fTo.set(v3fFrom.add(v3fSize));
+//			}else{
+//				v3fSize.x=0;
+//				v3fTo.set(v3fFrom.subtract(v3fSize));
+//			}
+//			effDraggedBorder.setFromTo(v3fFrom,v3fTo);
+//			
+//			btnDraggingReziseBorderLastToClearEffect = btnDraggingReziseBorder;
+//		}
+//	}
+	
 	protected void updateBorderDraggedEffect() {
-		if(btnDraggingReziseBorder==null){
+		boolean bClearEffectOnLast = true;
+		
+		if(btnDraggingReziseBorder!=null){
+			updateBorderDraggedEffect(btnDraggingReziseBorder);
+			bClearEffectOnLast=false;
+		}else{
+			for(Button btn:abtnResizerList){
+				if(btn.isHighlightOn()){
+					updateBorderDraggedEffect(btn);
+					bClearEffectOnLast=false;
+					break;
+				}
+			}
+		}
+		
+		if(bClearEffectOnLast){
 			if(btnDraggingReziseBorderLastToClearEffect!=null){
-				effDraggedBorder.setPlay(false);
+				GlobalManageDialogJmeI.i().getDragBorderEffect().setPlay(false);
+				
 				btnDraggingReziseBorderLastToClearEffect.runEffect(efDummy.getId());
 				btnDraggingReziseBorderLastToClearEffect=null;
 			}
-		}else{
-			if(!effDraggedBorder.isPlaying()){
-				effDraggedBorder.setColor(getBorderColor());
-				effDraggedBorder.setPlay(true);
-				btnDraggingReziseBorder.runEffect(EEffectId.FocusLost.s());
-			}
-			
-			// set from/to
-			Vector3f v3fFrom = btnDraggingReziseBorder.getWorldTranslation().clone();
-			v3fFrom.z+=1f;
-			Vector3f v3fSize=btnDraggingReziseBorder.getSize();
-			Vector3f v3fTo=new Vector3f();
-			if(v3fSize.x>v3fSize.y){
-				v3fSize.y=0;
-				v3fTo.set(v3fFrom.add(v3fSize));
-			}else{
-				v3fSize.x=0;
-				v3fTo.set(v3fFrom.subtract(v3fSize));
-			}
-			effDraggedBorder.setFromTo(v3fFrom,v3fTo);
-			
-			btnDraggingReziseBorderLastToClearEffect = btnDraggingReziseBorder;
 		}
 	}
-
+	
+	protected void updateBorderDraggedEffect(Button btnResizer) {
+		if(!GlobalManageDialogJmeI.i().getDragBorderEffect().isPlaying()){
+			GlobalManageDialogJmeI.i().getDragBorderEffect().setOwner(this);
+			GlobalManageDialogJmeI.i().getDragBorderEffect().setColor(getBorderColor());
+			GlobalManageDialogJmeI.i().getDragBorderEffect().setPlay(true);
+			
+			btnResizer.runEffect(EEffectId.FocusLost.s());
+		}
+		
+		// set from/to
+		Vector3f v3fFrom = btnResizer.getWorldTranslation().clone();
+		v3fFrom.z+=1f;
+		Vector3f v3fSize=btnResizer.getSize();
+		Vector3f v3fTo=new Vector3f();
+		if(v3fSize.x>v3fSize.y){
+			v3fSize.y=0;
+			v3fTo.set(v3fFrom.add(v3fSize));
+		}else{
+			v3fSize.x=0;
+			v3fTo.set(v3fFrom.subtract(v3fSize));
+		}
+		GlobalManageDialogJmeI.i().getDragBorderEffect().setFromTo(v3fFrom,v3fTo);
+		
+		btnDraggingReziseBorderLastToClearEffect=btnResizer;
+	}
+	
 	/**
 	 * default is the class name, will look like the dialog title
 	 */

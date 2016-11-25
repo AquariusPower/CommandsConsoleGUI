@@ -174,7 +174,7 @@ public class CommandData implements Comparable<CommandData>,IHasOwnerInstance<IR
 	}
 
 	public CommandData setVar(VarCmdFieldAbs vcf) {
-		PrerequisitesNotMetException.assertNotAlreadySet("var link to this cmd data", this.vcf, vcf, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.vcf, vcf, "var link to this cmd data", this);
 		if(vcf.getOwner()!=getOwner()){
 			throw new PrerequisitesNotMetException("should be the same owner", this, getOwner(), vcf, vcf.getOwner());
 		}

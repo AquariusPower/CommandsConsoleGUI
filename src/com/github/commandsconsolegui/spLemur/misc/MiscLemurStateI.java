@@ -32,34 +32,32 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.spAppOs.globals.GlobalMainThreadI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
+import com.github.commandsconsolegui.spAppOs.misc.MiscI.EStringMatchMode;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.WorkAroundI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
-import com.github.commandsconsolegui.spAppOs.misc.MiscI.EStringMatchMode;
 import com.github.commandsconsolegui.spAppOs.misc.WorkAroundI.BugFixBoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
+import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.spCmd.CommandsHelperI;
 import com.github.commandsconsolegui.spCmd.IConsoleCommandListener;
-import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.TimedDelayVarField;
-import com.github.commandsconsolegui.spJme.ManageDialogAbs;
 import com.github.commandsconsolegui.spJme.ManageMouseCursorI;
 import com.github.commandsconsolegui.spJme.cmd.CmdConditionalStateAbs;
-import com.github.commandsconsolegui.spJme.globals.GlobalDialogHelperI;
 import com.github.commandsconsolegui.spJme.globals.GlobalGUINodeI;
+import com.github.commandsconsolegui.spJme.globals.GlobalManageDialogJmeI;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spLemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.spLemur.console.LemurDiagFocusHelperStateI;
-import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialogI.DialogStyleElementId;
-import com.github.commandsconsolegui.spLemur.extras.DialogMainContainer;
+import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialog.DialogStyleElementId;
 import com.github.commandsconsolegui.spLemur.extras.CellRendererDialogEntry.CellDialogEntry;
-import com.github.commandsconsolegui.spLemur.globals.GlobalLemurDialogHelperI;
+import com.github.commandsconsolegui.spLemur.extras.DialogMainContainer;
 import com.jme3.font.BitmapText;
 import com.jme3.input.dummy.DummyKeyInput;
 import com.jme3.material.MatParam;
@@ -707,7 +705,7 @@ public class MiscLemurStateI extends CmdConditionalStateAbs<MiscLemurStateI> imp
 		
 		if(strPopupHelp!=null){
 			if(lblPopupHelp==null){
-				lblPopupHelp = new Label("nothing yet...", new ElementId(DialogStyleElementId.PopupHelp.s()), GlobalLemurDialogHelperI.i().STYLE_CONSOLE);
+				lblPopupHelp = new Label("nothing yet...", new ElementId(DialogStyleElementId.PopupHelp.s()), GlobalManageDialogJmeI.i().STYLE_CONSOLE);
 			}
 			lblPopupHelp.setName("Popup Help/Hint Label");
 			lblPopupHelp.setText("["+strPopupHelp+"]");

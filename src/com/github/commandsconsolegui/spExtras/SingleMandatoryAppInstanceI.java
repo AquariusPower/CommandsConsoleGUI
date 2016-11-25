@@ -73,7 +73,7 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 	
 	private static SingleMandatoryAppInstanceI instanceLock;
 	public SingleMandatoryAppInstanceI() {
-		PrerequisitesNotMetException.assertNotAlreadySet("single instance", instanceLock, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(instanceLock, this, "single instance");
 		instanceLock = this;
 		
 //		bDevModeExitIfThereIsANewerInstance = true; //true if in debug mode

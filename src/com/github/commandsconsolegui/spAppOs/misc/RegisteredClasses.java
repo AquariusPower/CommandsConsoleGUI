@@ -77,7 +77,7 @@ public class RegisteredClasses<E>{
 		Class<E> cl = (rhtmSubClass.getRef().get(MiscI.i().getEnclosingIfAnonymous(strClassTypeKey)));
 		return ( cl != null );
 	}
-	public ArrayList<E> getTargetList(){
+	public ArrayList<E> getTargetListCopy(){
 		return new ArrayList<E>(Arrays.asList(aTargetList.toArray()));
 	}
 }

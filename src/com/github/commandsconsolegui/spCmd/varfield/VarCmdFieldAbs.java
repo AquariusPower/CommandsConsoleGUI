@@ -209,7 +209,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	}
 	
 	public THIS setCmdData(CommandData cmdd){
-		PrerequisitesNotMetException.assertNotAlreadySet("cmd data link to this var", this.cmdd, cmdd, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.cmdd, cmdd, "cmd data link to this var", this);
 		this.cmdd=cmdd;
 		return getThis();
 	}
@@ -225,9 +225,9 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		
 		// validate pre-conditions
 		PrerequisitesNotMetException.assertNotNull(cvar, "ConsoleVarLinkNew", this);
-		PrerequisitesNotMetException.assertNotAlreadySet("ConsoleVarLinkCurrent", this.cvarLinkAndValueStorage, cvar, this);
-		PrerequisitesNotMetException.assertNotAlreadySet("ConsoleVarOwner", cvar.getRestrictedVarOwner(), this);
-		PrerequisitesNotMetException.assertNotAlreadySet("ConsoleVarValue", cvar.getRawValue(), cvar, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.cvarLinkAndValueStorage, cvar, "ConsoleVarLinkCurrent", this);
+		PrerequisitesNotMetException.assertNotAlreadySet(cvar.getRestrictedVarOwner(), "ConsoleVarOwner", this);
+		PrerequisitesNotMetException.assertNotAlreadySet(cvar.getRawValue(), cvar, "ConsoleVarValue", this);
 		PrerequisitesNotMetException.assertIsTrue("isRawLazyValueSet()", isRawLazyValueSet(), cvar, this);
 		if(!isAllowNullValue() && isRawLazyValueNull()){//this.toString()
 			MsgI.i().devWarn("Null values are not allowed but the lazy one is null.", cvar, this);
@@ -370,7 +370,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 //	}
 	
 	protected THIS setUniqueId(VarCmdUId vcuid){
-		if(this.vcuid!=null)PrerequisitesNotMetException.assertNotAlreadySet("UniqueId", this.vcuid, vcuid, vcuid.getUniqueId(null));
+		if(this.vcuid!=null)PrerequisitesNotMetException.assertNotAlreadySet(this.vcuid, vcuid, "UniqueId", vcuid.getUniqueId(null));
 		this.vcuid = vcuid;
 		
 //		String strExceptionId = null;
@@ -468,7 +468,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	 * @return
 	 */
 	public THIS setHelp(String strHelp) {
-		PrerequisitesNotMetException.assertNotAlreadySet("help", this.strHelp, strHelp);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.strHelp, strHelp, "help");
 		
 		if(strHelp!=null && !strHelp.isEmpty()){
 			this.strHelp = strHelp;
@@ -827,7 +827,7 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	 * @return
 	 */
 	public THIS setCallerAssigned(CallableX caller){
-		PrerequisitesNotMetException.assertNotAlreadySet("caller", this.callerAssigned, caller, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.callerAssigned, caller, "caller", this);
 		this.callerAssigned=caller;
 		return getThis();
 	}

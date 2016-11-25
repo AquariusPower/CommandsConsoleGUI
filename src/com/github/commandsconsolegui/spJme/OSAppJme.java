@@ -68,7 +68,7 @@ public class OSAppJme extends OSApp implements ILinkedSpatial{
 		return esft;
 	}
 	public void setStorageFolderType(StorageFolderType esft) {
-		PrerequisitesNotMetException.assertNotAlreadySet("storage folder type", this.esft, esft, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.esft, esft, "storage folder type", this);
 		this.esft = esft;
 	}
 

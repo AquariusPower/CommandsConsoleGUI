@@ -24,31 +24,32 @@ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN 
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package com.github.commandsconsolegui.spAppOs.misc;
+package com.github.commandsconsolegui.spJme.misc;
 
-import java.util.ArrayList;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.shape.Line;
+
 
 /**
- * Basically:
- * - objects that can have many instances shall have a manager
- * - the manager will contain a list of such objects
- * - the manager can contain fields that are related to all objects, like static fields would be,
- * but we are avoiding static fields now.
- * - managers must be single instances, therefore such class methods will be globably available 
- * thru its .i() static method
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
- * 
- * @param <HANDLED> do not extend {@link IHandled}, too much constraint and it will be not that useful!
+ *
  */
-public interface IManager<HANDLED> extends ISingleInstance{
+public class EffectLine extends EffectBaseAbs<EffectLine>{
+
+	@Override
+	public EffectLine getThis() {
+		return this;
+	}
 	
-	/**
-	 * 
-	 * @param obj
-	 * @return true if it was added this time (false if it was already there)
-	 */
-	public abstract boolean addHandled(HANDLED obj);
+	public EffectLine() {
+		super();
+		getGeom().setMesh(new Line(new Vector3f(0,0,0),new Vector3f(1,1,1)));
+	}
 	
-	public abstract ArrayList<HANDLED> getHandledListCopy();
+	@Override
+	protected void playWork() {
+		Vector3f v3fTo = getLocationTo();
+		((Line)getGeom().getMesh()).updatePoints(getLocationFrom(), v3fTo);
+	}
 }

@@ -68,7 +68,7 @@ public class EffectsLemurI implements IReflexFillCfg, IConfigure<EffectsLemurI> 
 		private TreeMap<EEffState,BfdEffect> tmEf = new TreeMap<EEffState,BfdEffect>();
 		private Vector3f	v3fPlayPosStartOverride;
 		public void putEffect(EEffState es, BfdEffect ef){
-			PrerequisitesNotMetException.assertNotAlreadySet("effect", tmEf.get(es), ef, this);
+			PrerequisitesNotMetException.assertNotAlreadySet(tmEf.get(es), ef, "effect", this);
 			tmEf.put(es,ef);
 		}
 		public BfdEffect getEffect(EEffState es){

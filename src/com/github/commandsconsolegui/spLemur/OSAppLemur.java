@@ -28,23 +28,23 @@ package com.github.commandsconsolegui.spLemur;
 
 import java.lang.reflect.Field;
 
-import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
+import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.spJme.ManageMouseCursorI;
 import com.github.commandsconsolegui.spJme.OSAppJme;
 import com.github.commandsconsolegui.spJme.globals.GlobalGUINodeI;
-import com.github.commandsconsolegui.spJme.globals.GlobalSimpleAppRefI;
-import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI;
+import com.github.commandsconsolegui.spJme.globals.GlobalManageDialogJmeI;
 import com.github.commandsconsolegui.spJme.misc.ILinkedSpatial;
-import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI.EffectElectricity;
+import com.github.commandsconsolegui.spJme.misc.ManageEffectsJmeStateI.IEffect;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spLemur.console.LemurDiagFocusHelperStateI;
-import com.github.commandsconsolegui.spLemur.globals.GlobalLemurDialogHelperI;
+import com.github.commandsconsolegui.spLemur.globals.GlobalManageDialogLemurI;
 import com.github.commandsconsolegui.spLemur.misc.EffectsLemurI.EEffChannel;
 import com.github.commandsconsolegui.spLemur.misc.EffectsLemurI.EEffState;
 import com.github.commandsconsolegui.spLemur.misc.MiscLemurStateI;
+import com.jme3.bounding.BoundingBox;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
@@ -72,7 +72,8 @@ public class OSAppLemur extends OSAppJme {
 //	private boolean	bStayOnCenter = false;
 	private boolean	bStartedShowEffect;
 	private boolean	bAlertPanelIsReady;
-	private EffectElectricity	ieffAlert;
+	private IEffect	ieffAlert;
+	private BoundingBox	bbGuiNodeWorldBoundPriorToAlert;
 
 	public Panel getAlertPanel() {
 		return (Panel)super.getAlertSpatial();
@@ -173,7 +174,8 @@ public class OSAppLemur extends OSAppJme {
 	
 	private void createAlertLinkEffect() {
 		if(ieffAlert==null){
-			ieffAlert = new EffectElectricity(this);
+//			ieffAlert = new EffectElectricity().setOwner(this);
+			ieffAlert = GlobalManageDialogLemurI.i().getLinkToParentEffectClone().setOwner(this);
 		}
 		
 		boolean bUseMouse = false;
@@ -200,19 +202,24 @@ public class OSAppLemur extends OSAppJme {
 		
 		ieffAlert.setFollowToTarget(cntrAlert, null);
 		
-		if(!EffectsJmeStateI.i().containsEffect(ieffAlert)){
-			EffectsJmeStateI.i().addEffect(ieffAlert);
-		}
+		ieffAlert.setPlay(true);
+		
+//		if(!ManageEffectsJmeStateI.i().containsEffect(ieffAlert)){
+//			ManageEffectsJmeStateI.i().addEffect(ieffAlert);
+//		}
 	}
 
 	private void updateAlertPosSize(){
+		if(pnlBlocker.getParent()==null){
+			pnlBlocker.setLocalTranslation(getPos(EElement.Blocker,null));
+			GlobalGUINodeI.i().attachChild(pnlBlocker);
+		}
+		
 		Vector3f v3fWdwSize = MiscJmeI.i().getAppWindowSize();
 		MiscLemurStateI.i().setPreferredSizeSafely(pnlBlocker, v3fWdwSize, true);
 		
 		Vector3f v3fLblSize = v3fWdwSize.mult(0.5f);
 		MiscLemurStateI.i().setPreferredSizeSafely(getAlertPanel(), v3fLblSize, true);
-		
-		pnlBlocker.setLocalTranslation(getPos(EElement.Blocker,null));
 		
 		/**
 		 * as preferred size is not applied imediately
@@ -233,16 +240,18 @@ public class OSAppLemur extends OSAppJme {
 		if(v3fRef!=null)v3fRef=v3fRef.clone(); //safety
 		Vector3f v3fWdwSize = MiscJmeI.i().getAppWindowSize();
 		
+		float fZDispl = LemurDiagFocusHelperStateI.i().getDialogZDisplacement();
 		/**
 		 * the alert is ultra special and the Z can be dealt with here!
 		 */
-		float fZ=0;
-		for(Spatial spt:MiscJmeI.i().getAllChildrenRecursiveFrom(GlobalGUINodeI.i())){
-			if(spt.getLocalTranslation().z > fZ)fZ=spt.getLocalTranslation().z;
-		}
+//		float fZ=0;
+//		for(Spatial spt:MiscJmeI.i().getAllChildrenRecursiveFrom(GlobalGUINodeI.i())){
+//			if(spt.getLocalTranslation().z > fZ)fZ=spt.getLocalTranslation().z;
+//		}
+		float fZ=bbGuiNodeWorldBoundPriorToAlert.getMax(null).z;
+//		fZ+=fZDispl;
 		
 		Vector3f v3fPos = null;
-		float fZDispl = LemurDiagFocusHelperStateI.i().getDialogZDisplacement();
 		fZ += fZDispl*(e.ordinal()+1); // attention how the order/index is a multiplier of the displacement!
 		switch(e){ 
 			case Blocker:
@@ -284,7 +293,7 @@ public class OSAppLemur extends OSAppJme {
 			colorBlockerBkg = ColorRGBA.Red.clone(); //new ColorRGBA(1f,0,0,1);//0.25f);
 			pnlBlocker.setBackground(new QuadBackgroundComponent(colorBlockerBkg));
 			tdBlockerGlow.setActive(true);
-			GlobalGUINodeI.i().attachChild(pnlBlocker);
+//			GlobalGUINodeI.i().attachChild(pnlBlocker);
 		}
 		
 		// the alert container
@@ -297,7 +306,7 @@ public class OSAppLemur extends OSAppJme {
 //		LemurEffectsI.i().addEffectTo(cntrAlert, LemurEffectsI.i().efGrow);
 		
 		//yellow background with border margin
-		lblAlertMsg = new Label("",GlobalLemurDialogHelperI.i().STYLE_CONSOLE);
+		lblAlertMsg = new Label("",GlobalManageDialogJmeI.i().STYLE_CONSOLE);
 		lblAlertMsg.setColor(ColorRGBA.Blue.clone());
 		lblAlertMsg.setShadowColor(ColorRGBA.Black.clone());
 		lblAlertMsg.setShadowOffset(new Vector3f(1,1,0));
@@ -319,6 +328,10 @@ public class OSAppLemur extends OSAppJme {
 		StackTraceElement[] aste = super.showSystemAlert(strMsg,objActionSourceElement);
 		
 		if(getAlertPanel()==null)createAlert();
+		
+		if(bbGuiNodeWorldBoundPriorToAlert==null){
+			bbGuiNodeWorldBoundPriorToAlert = (BoundingBox)GlobalGUINodeI.i().getWorldBound().clone();
+		}
 		
 		if(!GlobalGUINodeI.i().hasChild(cntrAlert)){
 			GlobalGUINodeI.i().attachChild(cntrAlert);
@@ -358,7 +371,7 @@ public class OSAppLemur extends OSAppJme {
 //	private boolean	bAllowNewEffectCreation = true;
 	private void addAlertEdge(BorderLayout.Position eEdge, ColorRGBA color, Vector3f v3fSize){
 		QuadBackgroundComponent qbc = new QuadBackgroundComponent(color);
-		Label lbl=new Label("",GlobalLemurDialogHelperI.i().STYLE_CONSOLE);
+		Label lbl=new Label("",GlobalManageDialogJmeI.i().STYLE_CONSOLE);
 		lbl.setBackground(qbc);
 		MiscLemurStateI.i().setPreferredSizeSafely(lbl, v3fSize, true);
 		
@@ -396,13 +409,16 @@ public class OSAppLemur extends OSAppJme {
 		
 		bAlertPanelIsReady=false;
 		
+		bbGuiNodeWorldBoundPriorToAlert = null;
+		
 //		bAllowNewEffectCreation=false;
 		if(!bKeepGuiBlockerOnce){
 			pnlBlocker.removeFromParent();
 			pnlBlocker=null;
 			
-			EffectsJmeStateI.i().discardEffectsForOwner(this);
-			ieffAlert=null;
+//			ManageEffectsJmeStateI.i().discardEffectsForOwner(this);
+			if(ieffAlert!=null)ieffAlert.setPlay(false);
+//			ieffAlert=null;
 //			bAllowNewEffectCreation=true;
 		}
 		

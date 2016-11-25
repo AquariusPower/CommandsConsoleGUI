@@ -78,7 +78,7 @@ public class VarCmdUId implements Cloneable{
 		}
 	}
 	public VarCmdUId setUniqueId(String strUniqueId) {
-		PrerequisitesNotMetException.assertNotAlreadySet("strUniqueId", this.strUniqueId, strUniqueId, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.strUniqueId, strUniqueId, "strUniqueId", this);
 		this.strUniqueId = strUniqueId;
 		return this;
 	}
@@ -86,7 +86,7 @@ public class VarCmdUId implements Cloneable{
 		return strSimpleId;
 	}
 	public VarCmdUId setSimpleId(String strSimpleId) {
-		PrerequisitesNotMetException.assertNotAlreadySet("simple id", this.strSimpleId, strSimpleId, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.strSimpleId, strSimpleId, "simple id", this);
 		this.strSimpleId = strSimpleId;
 		return this;
 	}
@@ -102,7 +102,7 @@ public class VarCmdUId implements Cloneable{
 		return strCustomPrefix;
 	}
 	public VarCmdUId setPrefixCustom(String strPrefixCustom) {
-		PrerequisitesNotMetException.assertNotAlreadySet("strPrefixCustom", this.strCustomPrefix, strPrefixCustom, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.strCustomPrefix, strPrefixCustom, "strPrefixCustom", this);
 		this.strCustomPrefix = strPrefixCustom;
 		return this;
 	}
@@ -110,7 +110,7 @@ public class VarCmdUId implements Cloneable{
 		return strVarType;
 	}
 	public VarCmdUId setVarType(String strType) {
-		PrerequisitesNotMetException.assertNotAlreadySet("strType", this.strVarType, strType, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.strVarType, strType, "strType", this);
 		this.strVarType = strType;
 		return this;
 	}
@@ -127,7 +127,7 @@ public class VarCmdUId implements Cloneable{
 		return strConcreteClassSimpleName;
 	}
 	public VarCmdUId setConcreteClass(Class clConcrete, String strConcreteClass) {
-		PrerequisitesNotMetException.assertNotAlreadySet("strConcreteClassSName", this.strConcreteClassSimpleName, strConcreteClassSimpleName, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.strConcreteClassSimpleName, strConcreteClassSimpleName, "strConcreteClassSName", this);
 		this.clConcrete=clConcrete;
 		this.strConcreteClassSimpleName = strConcreteClass;
 		return this;
@@ -137,7 +137,7 @@ public class VarCmdUId implements Cloneable{
 		return strDeclaringClassSimpleName;
 	}
 	public VarCmdUId setDeclaringClass(Class clDeclaring, String strDeclaringClass) {
-		PrerequisitesNotMetException.assertNotAlreadySet("strDeclaringClassSName", this.strDeclaringClassSimpleName, strDeclaringClassSimpleName, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.strDeclaringClassSimpleName, strDeclaringClassSimpleName, "strDeclaringClassSName", this);
 		this.clDeclaring=clDeclaring;
 		this.strDeclaringClassSimpleName = strDeclaringClass;
 		return this;
@@ -146,7 +146,7 @@ public class VarCmdUId implements Cloneable{
 		return strPrefix;
 	}
 	public VarCmdUId setPrefix(String strPrefix) {
-		PrerequisitesNotMetException.assertNotAlreadySet("prefix", this.strPrefix, strPrefix, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.strPrefix, strPrefix, "prefix", this);
 		this.strPrefix = strPrefix;
 		return this;
 	}
@@ -154,7 +154,7 @@ public class VarCmdUId implements Cloneable{
 		return strSuffix;
 	}
 	public VarCmdUId setSuffix(String strSuffix) {
-		PrerequisitesNotMetException.assertNotAlreadySet("suffix", this.strSuffix, strSuffix, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.strSuffix, strSuffix, "suffix", this);
 		this.strSuffix = strSuffix;
 		return this;
 	}

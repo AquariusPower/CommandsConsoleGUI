@@ -122,7 +122,7 @@ public class DelegateManagerI {
 	 * this method allows not implementing {@link IHandled} and still be managed.
 	 * @param obj
 	 */
-	public void addManaged(Object obj){
+	public void addHandled(Object obj){
 		addHandled(obj,false);
 	}
 	

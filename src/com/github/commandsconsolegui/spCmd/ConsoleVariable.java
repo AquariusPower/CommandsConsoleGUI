@@ -83,7 +83,7 @@ public class ConsoleVariable<VAL> {
 			}
 		}
 		
-		PrerequisitesNotMetException.assertNotAlreadySet("owner", this.vcfRestrictedVarOwner, vcfOwner, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.vcfRestrictedVarOwner, vcfOwner, "owner", this);
 		
 		if(!bRestrictedOwnerRequested){
 			MsgI.i().devWarn("restricted var owner not requested but is being set for "+getUniqueVarId(true), this, vcfOwner);

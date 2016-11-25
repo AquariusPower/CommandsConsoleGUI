@@ -43,7 +43,6 @@ import com.github.commandsconsolegui.spAppOs.misc.ISimpleGetThisTrickIndicator;
 import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
-import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
@@ -63,15 +62,15 @@ import com.github.commandsconsolegui.spJme.globals.GlobalGUINodeI;
 import com.github.commandsconsolegui.spJme.globals.GlobalOSAppJmeI;
 import com.github.commandsconsolegui.spJme.globals.GlobalRootNodeI;
 import com.github.commandsconsolegui.spJme.globals.GlobalSimpleAppRefI;
-import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI;
+import com.github.commandsconsolegui.spJme.misc.ManageEffectsJmeStateI;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spLemur.DialogMouseCursorListenerI;
 import com.github.commandsconsolegui.spLemur.MouseCursorListenerAbs;
 import com.github.commandsconsolegui.spLemur.OSAppLemur;
 import com.github.commandsconsolegui.spLemur.dialog.FileChoiceDialogStateI;
-import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialogI;
+import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialog;
 import com.github.commandsconsolegui.spLemur.globals.GlobalLemurConsoleStateI;
-import com.github.commandsconsolegui.spLemur.globals.GlobalLemurDialogHelperI;
+import com.github.commandsconsolegui.spLemur.globals.GlobalManageDialogLemurI;
 import com.github.commandsconsolegui.spLemur.misc.EffectsLemurI;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -111,7 +110,7 @@ public class SimpleConsolePlugin implements IReflexFillCfg, ISingleInstance, ICo
 			});
 		}
 		
-		DelegateManagerI.i().addManaged(this);
+		DelegateManagerI.i().addHandled(this);
 //		ManageSingleInstanceI.i().add(this);
 		
 		if(app instanceof SimpleApplication){
@@ -207,8 +206,8 @@ public class SimpleConsolePlugin implements IReflexFillCfg, ISingleInstance, ICo
   		FileChoiceDialogStateI.i().configure(new FileChoiceDialogStateI.CfgParm());
   	}
 		
-  	if(!EffectsJmeStateI.i().isConfigured()){
-  		EffectsJmeStateI.i().configure(new EffectsJmeStateI.CfgParm());
+  	if(!ManageEffectsJmeStateI.i().isConfigured()){
+  		ManageEffectsJmeStateI.i().configure(new ManageEffectsJmeStateI.CfgParm());
   	}
   	
 //		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
@@ -261,8 +260,8 @@ public class SimpleConsolePlugin implements IReflexFillCfg, ISingleInstance, ICo
   		}
   	}
   	
-  	if(!GlobalLemurDialogHelperI.iGlobal().isSet()){
-  		GlobalLemurDialogHelperI.iGlobal().set(ManageLemurDialogI.i());
+  	if(!GlobalManageDialogLemurI.iGlobal().isSet()){
+  		GlobalManageDialogLemurI.iGlobal().set(new ManageLemurDialog());
   	}
   	
   	if(!GlobalOSAppJmeI.iGlobal().isSet()){

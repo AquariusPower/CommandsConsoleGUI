@@ -235,7 +235,7 @@ public abstract class ManageKeyCode implements IConfigure<ManageKeyCode>{
 			}
 			
 			Key keyNew = new Key(strId,iCode);
-			PrerequisitesNotMetException.assertNotAlreadySet("key id", tmKey.get(strId), keyNew, strId, iCode, this);
+			PrerequisitesNotMetException.assertNotAlreadySet(tmKey.get(strId), keyNew, "key id", strId, iCode, this);
 			tmKey.put(strId, keyNew);
 			akeyList.add(keyNew);
 			

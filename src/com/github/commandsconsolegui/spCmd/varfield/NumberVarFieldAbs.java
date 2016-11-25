@@ -51,7 +51,7 @@ public abstract class NumberVarFieldAbs<VAL, THIS extends NumberVarFieldAbs<VAL,
 	}
 
 	public THIS setMin(VAL nMin) {
-		PrerequisitesNotMetException.assertNotAlreadySet("min", this.nMin, nMin, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.nMin, nMin, "min", this);
 		this.nMin = nMin;
 		return getThis();
 	}
@@ -65,7 +65,7 @@ public abstract class NumberVarFieldAbs<VAL, THIS extends NumberVarFieldAbs<VAL,
 	}
 	
 	public THIS setMax(VAL nMax) {
-		PrerequisitesNotMetException.assertNotAlreadySet("max", this.nMax, nMax, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.nMax, nMax, "max", this);
 		this.nMax = nMax;
 		return getThis();
 	}

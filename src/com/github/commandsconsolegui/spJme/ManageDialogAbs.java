@@ -41,6 +41,8 @@ import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.spCmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.spCmd.varfield.StringVarField;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
+import com.github.commandsconsolegui.spJme.misc.ManageEffectsJmeStateI.IEffect;
+import com.github.commandsconsolegui.spJme.misc.EffectLine;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.jme3.asset.AssetNotFoundException;
 import com.jme3.font.BitmapFont;
@@ -57,10 +59,27 @@ public abstract class ManageDialogAbs<T extends DialogStateAbs> implements IRefl
 		private CompositeControl(ManageDialogAbs casm){super(casm);};
 	};private CompositeControl ccSelf = new CompositeControl(this);
 	
+	private IEffect	ieffDragBorder = new EffectLine();
+
+	private IEffect	ieffLinkToParent = new EffectLine();
+	
 	public ManageDialogAbs() {
 		DelegateManagerI.i().addManager(this, DialogStateAbs.class);
 //		DelegateManagerI.i().add(this);
 //		ManageSingleInstanceI.i().add(this);
+	}
+	
+	public void setDragBorderEffect(IEffect ieff){
+		this.ieffDragBorder=ieff;
+	}
+	public IEffect getDragBorderEffect(){
+		return this.ieffDragBorder;
+	}
+	public void setLinkToParentEffect(IEffect ieff){
+		this.ieffLinkToParent=ieff;
+	}
+	public IEffect getLinkToParentEffectClone(){
+		return this.ieffLinkToParent.clone();
 	}
 	
 	public final String STYLE_CONSOLE="console";

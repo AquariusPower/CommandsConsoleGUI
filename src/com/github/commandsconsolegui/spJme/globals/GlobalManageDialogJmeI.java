@@ -25,26 +25,19 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.spLemur.globals;
+package com.github.commandsconsolegui.spJme.globals;
 
 import com.github.commandsconsolegui.spAppOs.globals.GlobalHolderAbs;
-import com.github.commandsconsolegui.spJme.globals.GlobalDialogHelperI;
-import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialogI;
+import com.github.commandsconsolegui.spJme.ManageDialogAbs;
+import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 
 /**
-* As you may not be using {@link SimpleApplication#}.
-*  
 * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 */
-public class GlobalLemurDialogHelperI extends GlobalHolderAbs<ManageLemurDialogI> {
-	private static GlobalLemurDialogHelperI instance = new GlobalLemurDialogHelperI();
-	public static GlobalLemurDialogHelperI iGlobal(){return instance;}
-	public static ManageLemurDialogI i(){return iGlobal().get();}
-	
-	@Override
-	public ManageLemurDialogI set(ManageLemurDialogI obj) {
-		GlobalDialogHelperI.iGlobal().set(obj);
-		return super.set(obj);
-	}
+public class GlobalManageDialogJmeI extends GlobalHolderAbs<ManageDialogAbs>{
+	private static GlobalManageDialogJmeI instance = new GlobalManageDialogJmeI();
+	public static GlobalManageDialogJmeI iGlobal(){return instance;}
+	public static ManageDialogAbs i(){return iGlobal().get();}
 }
 

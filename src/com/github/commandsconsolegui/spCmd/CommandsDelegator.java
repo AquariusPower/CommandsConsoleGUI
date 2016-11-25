@@ -44,9 +44,9 @@ import java.util.regex.Pattern;
 
 import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.ManageKeyCode.Key;
-import com.github.commandsconsolegui.spAppOs.globals.GlobalOSAppI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyCodeI;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalOSAppI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalConsoleUII;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
@@ -63,7 +63,6 @@ import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI.DebugData;
 import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI.EDbgStkOrigin;
-import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI.EStringMatchMode;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
@@ -348,7 +347,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	}
 	
 	public CommandsDelegator() {
-		DelegateManagerI.i().addManaged(this);
+		DelegateManagerI.i().addHandled(this);
 //		ManageSingleInstanceI.i().add(this);
 		
 		rsc.addClassesOf(this, true, true);
@@ -551,6 +550,10 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	public void cmdRequestCleanSafeNormalExit(){
 		if(bCleanExitAlreadyRequested)return;
 		
+//		Dialog d = new Dialog(owner)
+//		GlobalOSAppI.i().showSystemAlert("exiting!!!", this); //TODO requires one update at least...
+//		GlobalOSAppI.i().update(0.01f);
+		
 		if(bInitialized){
 			//TODO sleep or wait for application to stop outside here?
 			cmdDatabase(EDataBaseOperations.save);
@@ -581,7 +584,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	 */
 	private class PseudoSelfListener implements IReflexFillCfg,IConsoleCommandListener,ISingleInstance{
 		public PseudoSelfListener(){
-			DelegateManagerI.i().addManaged(this);
+			DelegateManagerI.i().addHandled(this);
 //			ManageSingleInstanceI.i().add(this);
 		}
 		@Override
@@ -842,7 +845,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 		Object obj;
 		private DebugData	dbg;
 		public ECmdReturnStatus setCustom(Object obj){
-			PrerequisitesNotMetException.assertNotAlreadySet("custom object", this.obj, obj, dbg, this);
+			PrerequisitesNotMetException.assertNotAlreadySet(this.obj, obj, "custom object", dbg, this);
 			if(RunMode.bValidateDevCode)dbg=ManageDebugDataI.i().setStack(dbg,EDbgStkOrigin.LastSetValue);
 			this.obj=obj;
 			return this;

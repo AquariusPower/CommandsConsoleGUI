@@ -186,7 +186,7 @@ public class ManageVarCmdFieldI implements IManager<VarCmdFieldAbs>{
 	 * @param cl
 	 */
 	public <V extends VarCmdFieldAbs> void putVarManager(IManager<V> imgrKey, Class<V> cl){
-		PrerequisitesNotMetException.assertNotAlreadySet("manager", hmManagers.get(imgrKey), cl, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(hmManagers.get(imgrKey), cl, "manager", this);
 		
 		VarMgr<V> vm = new VarMgr<V>();
 		vm.cl=cl;

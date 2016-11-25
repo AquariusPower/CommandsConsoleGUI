@@ -661,7 +661,7 @@ public class MiscI {
 	}
 	
 	public <T> T assertCurrentIsNull(T currentValue, T newValue){
-		PrerequisitesNotMetException.assertNotAlreadySet("Field", currentValue, newValue);
+		PrerequisitesNotMetException.assertNotAlreadySet(currentValue, newValue, "Field");
 		return newValue;
 	}
 	

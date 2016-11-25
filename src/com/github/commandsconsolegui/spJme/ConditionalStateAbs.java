@@ -1023,7 +1023,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 	
 	@Override
 	public void setHolder(HoldRestartable<IRestartable> hch) {
-		PrerequisitesNotMetException.assertNotAlreadySet("holder", this.hchHolder, hch, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.hchHolder, hch, "holder", this);
 		this.hchHolder=hch;
 	}
 
@@ -1066,7 +1066,7 @@ public abstract class ConditionalStateAbs<THIS extends ConditionalStateAbs<THIS>
 //	}
 	@Override
 	public ArrayList<IManager> getManagerList() {
-		return rscManager.getTargetList();
+		return rscManager.getTargetListCopy();
 	}
 	@Override
 	public void addManager(IManager imgr) {

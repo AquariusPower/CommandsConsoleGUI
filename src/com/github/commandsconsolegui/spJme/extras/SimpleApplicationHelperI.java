@@ -52,7 +52,7 @@ public class SimpleApplicationHelperI extends SimpleApplication implements ISing
 	public static SimpleApplicationHelperI i(){return instance;}
 	
 	public SimpleApplicationHelperI() {
-		DelegateManagerI.i().addManaged(this);
+		DelegateManagerI.i().addHandled(this);
 //		ManageSingleInstanceI.i().add(this);
 	}
 	

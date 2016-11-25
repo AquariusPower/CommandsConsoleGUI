@@ -238,7 +238,7 @@ public class SavableHelperI {
 		public void setOwner(OWNER owner) {
 //			assertIsfaOwner(isfaOwnerCheck);
 			if(owner==null)throw new PrerequisitesNotMetException("cannot erase (nullify) the owner", this.owner, this);
-			PrerequisitesNotMetException.assertNotAlreadySet("owner", this.owner, owner, this);
+			PrerequisitesNotMetException.assertNotAlreadySet(this.owner, owner, "owner", this);
 			this.owner = owner;
 		}
 		public boolean isFailedToLoad() {
@@ -255,7 +255,7 @@ public class SavableHelperI {
 //		public void setFieldExtraInfo(ISavableFieldAccess isfaOwnerCheck, HashMap<Field, FieldExtraInfo> hmFieldExtraInfo) {
 		private void setFieldExtraInfo(HashMap<Field, FieldExtraInfo> hmFieldExtraInfo) {
 //			assertIsfaOwner(isfaOwnerCheck);
-			PrerequisitesNotMetException.assertNotAlreadySet("extrainfo", this.hmFieldExtraInfo, hmFieldExtraInfo, this);
+			PrerequisitesNotMetException.assertNotAlreadySet(this.hmFieldExtraInfo, hmFieldExtraInfo, "extrainfo", this);
 			this.hmFieldExtraInfo = hmFieldExtraInfo;
 		}
 		

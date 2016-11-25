@@ -184,7 +184,7 @@ public class ManageCallQueueI implements IReflexFillCfg,IManager<ManageCallQueue
 		}
 		
 		public void setId(String strId) {
-			if(this.strId!=null)PrerequisitesNotMetException.assertNotAlreadySet("id", this.strId, strId, this);
+			if(this.strId!=null)PrerequisitesNotMetException.assertNotAlreadySet(this.strId, strId, "id", this);
 			if(strId==null)throw new PrerequisitesNotMetException("null id", this);
 			this.strId = CallableX.class.getSimpleName()+ReflexFillI.i().getCommandPartSeparator()+strId;
 		}

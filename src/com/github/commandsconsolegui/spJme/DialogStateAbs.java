@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 
+import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.HoldRestartable;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
@@ -59,16 +60,14 @@ import com.github.commandsconsolegui.spJme.cmd.CmdConditionalStateAbs;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.spJme.extras.UngrabMouseStateI;
 import com.github.commandsconsolegui.spJme.extras.UngrabMouseStateI.IUngrabMouse;
-import com.github.commandsconsolegui.spJme.globals.GlobalDialogHelperI;
-import com.github.commandsconsolegui.spJme.globals.GlobalSimpleAppRefI;
-import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI;
-import com.github.commandsconsolegui.spJme.misc.EffectsJmeStateI.EffectElectricity;
+import com.github.commandsconsolegui.spJme.globals.GlobalManageDialogJmeI;
 import com.github.commandsconsolegui.spJme.misc.ILinkedSpatial;
+import com.github.commandsconsolegui.spJme.misc.ManageEffectsJmeStateI;
+import com.github.commandsconsolegui.spJme.misc.ManageEffectsJmeStateI.IEffect;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spJme.savablevalues.CompositeSavableAbs;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -128,6 +127,10 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 	
 	protected abstract <N extends Node> void lineWrapDisableForChildrenOf(N node);
 	
+//	public DialogStateAbs() {
+////		DelegateManagerI.i().addHandled(this);
+//	}
+	
 	private Comparator<DialogListEntryData> cmpTextAtoZ = new Comparator<DialogListEntryData>() {
 		@Override
 		public int compare(DialogListEntryData o1, DialogListEntryData o2) {
@@ -174,7 +177,7 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 	}
 	
 	protected THIS setDialogMainContainer(ISpatialLayoutValidator spt){
-		PrerequisitesNotMetException.assertNotAlreadySet("diag main container", this.sptvDialogMainContainer, spt, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.sptvDialogMainContainer, spt, "diag main container", this);
 		this.sptvDialogMainContainer=spt;
 		
 //		for(Class<?> cl:MiscI.i().getSuperClassesOf(this)){
@@ -255,7 +258,7 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 		
 		public void setUIId(String strUIId){
 //			if(getId()!=null)throw new PrerequisitesNotMetException("UI Id already set",getId(),strUIId);
-			PrerequisitesNotMetException.assertNotAlreadySet("UI id", getId(), strUIId, this);
+			PrerequisitesNotMetException.assertNotAlreadySet(getId(), strUIId, "UI id", this);
 			setId(strUIId);
 		}
 		public boolean isInitiallyEnabled() {
@@ -389,7 +392,7 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 		return bdh().getTextFromField(getInputField());
 	}
 	private ManageDialogAbs bdh(){
-		return GlobalDialogHelperI.i();
+		return GlobalManageDialogJmeI.i();
 	}
 	
 	/**
@@ -399,7 +402,7 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 	@Override
 	protected boolean initAttempt() {
 		if(!isDiagStyleSet()){
-			setStyle(GlobalDialogHelperI.i().STYLE_CONSOLE);
+			setStyle(GlobalManageDialogJmeI.i().STYLE_CONSOLE);
 		}
 		if(!super.initAttempt())return false;
 		
@@ -428,7 +431,8 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 	protected void initSuccess() {
 		super.initSuccess();
 		
-		GlobalDialogHelperI.i().addHandled(this);
+//		DelegateManagerI.i().addHandled(this);
+//		GlobalManageDialogJmeI.i().addHandled(this);
 	}
 	
 	protected boolean initGUI(){
@@ -593,6 +597,7 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 	}
 	
 	boolean bParentDiagIsRequired=false;
+	private IEffect effLinkToParent;
 	/**
 	 * usually because a parent list entry will be required to perform things here and give it back.
 	 * @param b
@@ -600,7 +605,7 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 	protected void setParentDiagIsRequired(boolean  b){
 		this.bParentDiagIsRequired=b;
 	}
-	public boolean isParentDiagIsRequired(){
+	public boolean isParentDiagRequired(){
 		return this.bParentDiagIsRequired;
 	}
 	
@@ -611,7 +616,7 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 			MsgI.i().devWarn("gui elements layout is invalid", this);
 			return false;
 		}
-		if(isParentDiagIsRequired() && getParentDialog()==null){
+		if(isParentDiagRequired() && (getParentDialog()==null || getParentDialog().getDialogMainContainer()==null)){
 			MsgI.i().warn("a parent dialog is required to enable this one", this);
 			cancelEnableRequest();
 			return false;
@@ -648,16 +653,24 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 		return true;
 	}
 	
-	protected EffectElectricity createDiagLinkToParentEffect() {
+	protected IEffect createDiagLinkToParentEffect() {
 		float fZdispl=1f; //1f is like 100 stacked gui elements because each will heighten by 0.01f by lemur at least
-		EffectElectricity eff = new EffectElectricity(this)
+		if(effLinkToParent==null){
+			effLinkToParent = GlobalManageDialogJmeI.i().getLinkToParentEffectClone();
+//			effLinkToParent = new EffectElectricity(this)
+			effLinkToParent.setOwner(this);
+		}
+		
+		effLinkToParent
 			.setFollowFromTarget(getParentDialog().getDialogMainContainer(), new Vector3f(0,0,fZdispl))
 			.setFollowToTarget(this.getDialogMainContainer(), null)
+			.setPlay(true)
 			;
+			
+	//		ManageEffectsJmeStateI.i().addEffect(eff);
+//		}
 		
-		EffectsJmeStateI.i().addEffect(eff);
-		
-		return eff;
+		return effLinkToParent;
 	}
 
 	@Override
@@ -713,7 +726,8 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 //			hrdiagParent.getRef().removeModalDialog(this);
 //		}
 		
-		EffectsJmeStateI.i().discardEffectsForOwner(this);
+		if(effLinkToParent!=null)effLinkToParent.setPlay(false);
+//		ManageEffectsJmeStateI.i().discardEffectsForOwner(this);
 		
 		return true;
 	}
@@ -796,7 +810,7 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 	}
 	
 	public THIS addModalDialog(DialogStateAbs diagModal){
-		PrerequisitesNotMetException.assertNotAlreadySet("parent", diagModal.getParentDialog(), this, diagModal);
+		PrerequisitesNotMetException.assertNotAlreadySet(diagModal.getParentDialog(), this, "parent", diagModal);
 		diagModal.setDiagParent(this);
 		hmhrChildDiagModals.put(diagModal.getUniqueId(), new HoldRestartable(this,diagModal));
 		return getThis();
@@ -1663,7 +1677,7 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 		return this.sv!=null;
 	}
 	protected <CS extends SaveDiag<?>> void setCompositeSavable(CS sv) {
-		PrerequisitesNotMetException.assertNotAlreadySet(CompositeSavableAbs.class.getSimpleName(), this.sv, sv, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.sv, sv, CompositeSavableAbs.class.getSimpleName(), this);
 		this.sv = sv;
 	}
 	protected <CS extends SaveDiag<?>> CS getCompositeSavable(Class<CS> clCS) {

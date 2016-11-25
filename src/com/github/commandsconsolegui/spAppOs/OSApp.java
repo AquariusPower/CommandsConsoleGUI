@@ -79,7 +79,7 @@ public class OSApp implements IReflexFillCfg{
 	private String strApplicationBaseSaveDataPath = null;
 	public void setApplicationBaseSaveDataPath(String str) {
 //		if(this.strApplicationBaseSaveDataPath!=null)PrerequisitesNotMetException.assertNotAlreadySet("base application folder already set", this.strApplicationBaseSaveDataPath, str);
-		PrerequisitesNotMetException.assertNotAlreadySet("base application folder already set", this.strApplicationBaseSaveDataPath, str);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.strApplicationBaseSaveDataPath, str, "base application folder already set");
 		this.strApplicationBaseSaveDataPath = str;
 	}
 	public String getApplicationBaseFolderName(){
@@ -89,7 +89,7 @@ public class OSApp implements IReflexFillCfg{
 
 	private String strApplicationTitle = null;
 	public void setApplicationTitle(String strApplicationTitle) {
-		PrerequisitesNotMetException.assertNotAlreadySet("app title", this.strApplicationTitle, strApplicationTitle, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.strApplicationTitle, strApplicationTitle, "app title", this);
 		this.strApplicationTitle=strApplicationTitle;
 	}
 	
@@ -155,7 +155,7 @@ public class OSApp implements IReflexFillCfg{
 	}
 	
 	public StackTraceElement[] showSystemAlert(String strMsg, Object objActionSourceElement){
-		PrerequisitesNotMetException.assertNotAlreadySet("system alert message", this.strAlertMsg, strMsg, asteStackKeyRequestOrigin, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.strAlertMsg, strMsg, "system alert message", asteStackKeyRequestOrigin, this);
 		this.asteStackKeyRequestOrigin=Thread.currentThread().getStackTrace();
 		this.strAlertMsg=strMsg;
 		bFirstTimeQuickUpdate=true;

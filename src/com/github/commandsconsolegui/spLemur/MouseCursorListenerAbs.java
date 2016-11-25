@@ -31,14 +31,14 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spJme.ManageMouseCursorI;
+import com.github.commandsconsolegui.spJme.ManageMouseCursorI.EMouseCursorButton;
 import com.github.commandsconsolegui.spJme.MouseCursorButtonData;
 import com.github.commandsconsolegui.spJme.MouseCursorButtonsControl;
-import com.github.commandsconsolegui.spJme.ManageMouseCursorI.EMouseCursorButton;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI;
 import com.github.commandsconsolegui.spJme.misc.MiscJmeI.EUserDataMiscJme;
-import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialogI;
-import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialogI.DummyEffect;
+import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialog.DummyEffect;
 import com.github.commandsconsolegui.spLemur.extras.CellRendererDialogEntry.CellDialogEntry.EUserDataCellEntry;
+import com.github.commandsconsolegui.spLemur.globals.GlobalManageDialogLemurI;
 import com.github.commandsconsolegui.spLemur.misc.MiscLemurStateI;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Spatial;
@@ -268,7 +268,7 @@ public abstract class MouseCursorListenerAbs implements CursorListener {
 //	}
 	
 	public void addMouseCursorHighlightEffects(Button btn){
-		efDummy = ManageLemurDialogI.i().setupSimpleEffect(btn, Button.EFFECT_ACTIVATE, efHighLightBkg, efDummy);
+		efDummy = GlobalManageDialogLemurI.i().setupSimpleEffect(btn, Button.EFFECT_ACTIVATE, efHighLightBkg, efDummy);
 		btn.addEffect(Button.EFFECT_DEACTIVATE,efDummy);
 	}
 	

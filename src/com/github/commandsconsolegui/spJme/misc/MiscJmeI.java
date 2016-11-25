@@ -119,7 +119,7 @@ public class MiscJmeI implements IReflexFillCfg,ISingleInstance,IConfigure{
 	private final BoolTogglerCmdField btgUseXmlSaveMode = new BoolTogglerCmdField(this, false);
 	
 	public MiscJmeI() {
-		DelegateManagerI.i().addManaged(this);
+		DelegateManagerI.i().addHandled(this);
 //		ManageSingleInstanceI.i().add(this);
 	}
 	

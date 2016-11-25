@@ -38,7 +38,6 @@ import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
 import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
-import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
@@ -56,6 +55,8 @@ import com.github.commandsconsolegui.spExtras.SingleMandatoryAppInstanceI;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.spJme.extras.SimpleApplicationHelperI;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppSettingsI;
+import com.github.commandsconsolegui.spJme.globals.GlobalManageDialogJmeI;
+import com.github.commandsconsolegui.spJme.misc.EffectElectricity;
 import com.github.commandsconsolegui.spLemur.console.SimpleConsolePlugin;
 import com.github.commandsconsolegui.spLemur.dialog.MaintenanceListLemurDialogStateAbs;
 import com.github.commandsconsolegui.spLemur.dialog.SimpleDiagChoice;
@@ -111,7 +112,7 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		super();
 		bindListToggleEnable = new KeyBoundVarField(this);
 		ReflexFillI.i().assertReflexFillFieldsForOwner(this);
-		DelegateManagerI.i().addManaged(this);
+		DelegateManagerI.i().addHandled(this);
 //		ManageSingleInstanceI.i().add(this);
 	}
 	
@@ -154,6 +155,13 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		consolePlugin = new SimpleConsolePlugin(this);
 		consolePlugin.configure(new SimpleConsolePlugin.CfgParm(
 			ConsoleTestI.class.getName().replace(".",File.separator)));
+		
+		GlobalManageDialogJmeI.i().setLinkToParentEffect(new EffectElectricity());
+		GlobalManageDialogJmeI.i().setDragBorderEffect(
+			new EffectElectricity()
+				.setSkipDiscardingByOwner()
+				.setAmplitudePerc(0.05f)
+		);
 		
 		GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
 		

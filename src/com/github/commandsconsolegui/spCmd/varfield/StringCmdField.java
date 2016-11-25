@@ -54,20 +54,10 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 	 * a valid field (will still be null).
 	 */
 	public StringCmdField(IReflexFillCfg rfcfgOwner, String strReflexFillCfgCodePrefixVariant, String strHelpComment){ // int iReflexFillCfgVariant){
-//		this((String)null,strHelpComment);
 		super(rfcfgOwner, EVarCmdMode.Cmd, null, String.class, false);
 		setHelp(strHelpComment);
 		
 		setCodePrefixVariant(strReflexFillCfgCodePrefixVariant);
-////		this.iReflexFillCfgVariant=iReflexFillCfgVariant;
-//		this.strReflexFillCfgCodePrefixVariant = strReflexFillCfgCodePrefixVariant;
-//		if(this.strReflexFillCfgCodePrefixVariant==null){
-//			this.strReflexFillCfgCodePrefixVariant=StringCmdField.getCodePrefixDefault();
-//		}
-		
-//		ReflexFill.assertAndGetField(rfcfgOwner, this);
-		
-//		setOwner(rfcfgOwner);
 		
 		if(getOwner()==null){
 			throw new NullPointerException("cant be null for: "+IReflexFillCfg.class.getName());
@@ -81,44 +71,6 @@ public class StringCmdField extends VarCmdFieldAbs<String,StringCmdField>{
 	public StringCmdField(IReflexFillCfg rfcfgOwner, String strReflexFillCfgCodePrefixVariant){
 		this(rfcfgOwner, strReflexFillCfgCodePrefixVariant, null);
 	}
-	
-//	/**
-//	 * returns the string value stored on this field.
-//	 */
-//	@Override
-//	public String toString() {
-//		if(getUniqueCmdId()==null)chkAndInit();
-//		return getUniqueCmdId();
-//	}
-//	@Override
-//	public String getValueAsString() {
-////		if(getUniqueCmdId()==null)
-//		chkAndInit();
-//		return getUniqueCmdId();
-//	}
-//	@Override
-//	public String getValueAsString(int iIfFloatPrecision) {
-//		return getValueAsString();
-//	}
-	
-//	public String getHelpComment(){
-//		return strHelp;
-//	}
-	
-//	private void initialize(){
-//		/**
-//		 * This basically prevents recursive infinite loop,
-//		 * if this is called at reflex fill method.
-//		 */
-////		super.strCmdId=errorMessage();
-//		super.setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(getOwner(), this, false));
-////		throw new NullPointerException("not initialized properly: "+this);
-//	}
-	
-//	
-//	private String errorMessage(){
-//		return "ERROR: "+StringCmdField.class.getName()+" not yet properly initialized!";
-//	}
 	
 	/**
 	 * TODO one day, remove this override and try to not do this mess again!!! being verified since 20160928

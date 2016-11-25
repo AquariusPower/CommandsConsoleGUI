@@ -60,7 +60,7 @@ public class KeyBind {
 //	}
 	
 	public void setOwner(Object obj){
-		PrerequisitesNotMetException.assertNotAlreadySet("owner", this.objOwner, obj, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.objOwner, obj, "owner", this);
 		this.objOwner=obj;
 	}
 	
@@ -106,7 +106,7 @@ public class KeyBind {
 	}
 	
 	public void setActionKey(Key key) {
-		PrerequisitesNotMetException.assertNotAlreadySet("action key", this.keyAction, key, this);
+		PrerequisitesNotMetException.assertNotAlreadySet(this.keyAction, key, "action key", this);
 		PrerequisitesNotMetException.assertNotNull(key, "action key", this);
 		
 		this.keyAction=key;

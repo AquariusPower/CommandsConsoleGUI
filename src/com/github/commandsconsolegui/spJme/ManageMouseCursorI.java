@@ -62,7 +62,7 @@ public class ManageMouseCursorI implements IReflexFillCfg, IConsoleCommandListen
 	};private CompositeControl ccSelf = new CompositeControl(this);
 	
 	public ManageMouseCursorI() {
-		DelegateManagerI.i().addManaged(this);
+		DelegateManagerI.i().addHandled(this);
 //		ManageSingleInstanceI.i().add(this);
 	}
 	

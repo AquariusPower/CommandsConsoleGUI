@@ -161,14 +161,20 @@ public class PrerequisitesNotMetException extends NullPointerException { //@STAT
 		}
 	}
 	
-	public static void assertNotAlreadySet(String strDescWhat, Object objCurrent, Object objNew, Object... aobjMoreObjectsForDebugInfo){
+	/**
+	 * 
+	 * @param objCurrent
+	 * @param objNew this one is just for info
+	 * @param aobjMoreObjectsForDebugInfo
+	 */
+	public static void assertNotAlreadySet(Object objCurrent, Object objNew, Object... aobjMoreObjectsForDebugInfo){
 		if(objCurrent!=null){
 			ArrayList<Object> aobjAll = new ArrayList<Object>();
 			aobjAll.add(objCurrent);
 			aobjAll.add(objNew);
 			aobjAll.addAll(Arrays.asList(aobjMoreObjectsForDebugInfo));
 			
-			throw new PrerequisitesNotMetException(strDescWhat+": already set", aobjAll.toArray());
+			throw new PrerequisitesNotMetException("already set", aobjAll.toArray());
 		}
 	}
 	

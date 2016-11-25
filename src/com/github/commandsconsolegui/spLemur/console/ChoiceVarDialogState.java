@@ -94,13 +94,13 @@ public final class ChoiceVarDialogState<ACT extends Command<Button>> extends Cho
 	@SuppressWarnings("rawtypes")
 	@Override
 	protected boolean enableAttempt() {
-		if(!super.enableAttempt())return false;
-		
 		ArrayList<DialogListEntryData> adledAtParentList = getParentReferencedDledListCopy();
 		if(adledAtParentList.size()==0){
 			GlobalCommandsDelegatorI.i().dumpWarnEntry("no entry selected at parente dialog", this, getParentDialog());
+			cancelEnableRequest();
 			return false;
 		}
+		if(!super.enableAttempt())return false;
 		
 		dledAtParent = adledAtParentList.get(0);
 		Object objUser = dledAtParent.getLinkedObj();

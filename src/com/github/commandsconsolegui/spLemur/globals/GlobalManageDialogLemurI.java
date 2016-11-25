@@ -25,18 +25,24 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.spJme.globals;
+package com.github.commandsconsolegui.spLemur.globals;
 
 import com.github.commandsconsolegui.spAppOs.globals.GlobalHolderAbs;
-import com.github.commandsconsolegui.spJme.ManageDialogAbs;
+import com.github.commandsconsolegui.spJme.globals.GlobalManageDialogJmeI;
+import com.github.commandsconsolegui.spLemur.dialog.ManageLemurDialog;
 
 /**
-* As you may not be using {@link SimpleApplication#}.
-*  
 * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
 */
-public class GlobalDialogHelperI extends GlobalHolderAbs<ManageDialogAbs> {
-	private static GlobalDialogHelperI instance = new GlobalDialogHelperI();
-	public static GlobalDialogHelperI iGlobal(){return instance;}
-	public static ManageDialogAbs i(){return iGlobal().get();}
+public class GlobalManageDialogLemurI extends GlobalHolderAbs<ManageLemurDialog>{
+	private static GlobalManageDialogLemurI instance = new GlobalManageDialogLemurI();
+	public static GlobalManageDialogLemurI iGlobal(){return instance;}
+	public static ManageLemurDialog i(){return iGlobal().get();}
+	
+	@Override
+	public ManageLemurDialog set(ManageLemurDialog obj) {
+		GlobalManageDialogJmeI.iGlobal().set(obj);
+		return super.set(obj);
+	}
 }
+
