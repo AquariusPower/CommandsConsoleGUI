@@ -39,7 +39,7 @@
 		
 	<target name="CreateAllJars" description="Create all Jar files">
 		<!-- binary -->
-		<jar jarfile="${projv}-main.jar" >
+		<jar jarfile="${projv}-main.jar" compress="true" >
 			<fileset dir="./" includes="LICENSE" />
 			<!-- <fileset dir="./bin/" includes="**/*.class" /> -->
 			<fileset dir="./bin/" />
@@ -48,7 +48,7 @@
 		  </manifest>
 		</jar>
 		
-		<jar jarfile="${projv}-sources.jar" >
+		<jar jarfile="${projv}-sources.jar" compress="true" >
 			<fileset dir="./">
 				<include name=".jme3/**/ConsoleTestI/**/Console-Init.cfg" />
 				<include name=".settings/org.eclipse.jdt.core.prefs" />
@@ -66,7 +66,7 @@
 			<!-- <fileset dir="./src/" includes="**/*.java" /> -->
 		</jar>
 		
-		<jar jarfile="${projv}-assets.jar" >
+		<jar jarfile="${projv}-assets.jar" compress="true" >
 			<!-- each asset file or path must contain it's license --> 
 			<fileset dir="./assets/" />
 		</jar>
