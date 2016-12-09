@@ -55,7 +55,7 @@ public class DumpEntryData{
 	private Object[]	aobjCustom;
 	private String	strType;
 	private String	strKey = null;
-	private Exception	ex;
+	private Throwable	ex;
 	private boolean	bImportant;
 	private long	lMillis;
 	private boolean	bShowTime = true;
@@ -145,7 +145,7 @@ public class DumpEntryData{
 		this.aobjCustom=aobj;
 		return this;
 	}
-	public DumpEntryData setImportant(String strType, String strKey, Exception ex) {
+	public DumpEntryData setImportant(String strType, String strKey, Throwable ex) {
 		this.strType=strType;
 		this.strKey=strKey;
 		this.ex=ex;
@@ -161,7 +161,7 @@ public class DumpEntryData{
 	public String getKey() {
 		return strKey;
 	}
-	public Exception getException() {
+	public Throwable getException() {
 		return ex;
 	}
 

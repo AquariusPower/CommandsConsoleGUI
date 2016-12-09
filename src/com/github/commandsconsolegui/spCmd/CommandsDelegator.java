@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -205,6 +206,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	public final StringCmdField CMD_ECHO = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField scfListFiles = new StringCmdField(this);
 	public final StringCmdField scfListKeyCodes = new StringCmdField(this);
+//	public final StringCmdField scfTestException = new StringCmdField(this);
 	public final StringCmdField scfMessagesBufferClear = new StringCmdField(this);
 	public final StringCmdField scfChangeCommandSimpleId = new StringCmdField(this);
 	public final StringCmdField CMD_FIX_LINE_WRAP = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
@@ -220,7 +222,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	public final StringCmdField CMD_REPEAT = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField	CMD_STATS_FIELD_TOGGLE  = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField	CMD_STATS_SHOW_ALL = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
-	public final StringCmdField	CMD_TEST = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
+	public final StringCmdField	scfDevTest = new StringCmdField(this);
 	public final StringCmdField	CMD_VAR_ADD = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField	CMD_VAR_SET_CMP = new StringCmdField(this,CommandsHelperI.i().getCmdCodePrefix());
 	public final StringCmdField	scfVarShow = new StringCmdField(this);
@@ -844,21 +846,32 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 		
 		Object obj;
 		private DebugData	dbg;
-		public ECmdReturnStatus setCustom(Object obj){
-			PrerequisitesNotMetException.assertNotAlreadySet(this.obj, obj, "custom object", dbg, this);
+		public ECmdReturnStatus setCustomReturnValue(Object obj){
+			PrerequisitesNotMetException.assertNotAlreadySet(this.obj, obj, "custom return value should be extracted before setting a new one!", dbg, this);
 			if(RunMode.bValidateDevCode)dbg=ManageDebugDataI.i().setStack(dbg,EDbgStkOrigin.LastSetValue);
 			this.obj=obj;
 			return this;
 		}
-		public Object getAndResetCustom(){
-			PrerequisitesNotMetException.assertIsTrue("set", this.obj!=null, this);
+		public boolean isCustomReturnValueSet(){
+			return this.obj!=null;
+		}
+		public Object getCustomReturnValue(){
+			return this.obj;
+		}
+		public Object getExtractingCustomReturnValue(){
+			boolean bEnforceSetBeforeGet=false;
+			if(bEnforceSetBeforeGet){
+				PrerequisitesNotMetException.assertIsTrue("set", this.obj!=null, this);
+			}
+//			Object obj = isCustomReturnValueSet() ? getExtractingCustomReturnValue() : null; //to at least reset
 			Object objOut=this.obj;
-			this.obj=null;
+			this.obj=null; //reset to complete the extraction
 			return objOut;
 		}
-		public Exception getAndResetCustomIfException(){
+		public Exception getExtractingCustomReturnValueAsException(){
+			Object obj = getExtractingCustomReturnValue(); //to at least reset
 			if(this.compareTo(FoundAndExceptionHappened)!=0)return null;
-			return (Exception)getAndResetCustom();
+			return (Exception)obj;
 		}
 	}
 	
@@ -1334,7 +1347,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 			dumpAllStats();
 			bCmdWorked=true;
 		}else
-		if(checkCmdValidity(CMD_TEST,"[...] temporary developer tests")){
+		if(checkCmdValidity(scfDevTest,"[...] temporary developer tests")){
 			cmdTest();
 			bCmdWorked=true;
 		}else
@@ -1960,7 +1973,10 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 		 */
 		dumpExceptionEntryWork(null, imsg.getDumpEntryData().getException(), iShowStackElementsCount, false, imsg.getDumpEntryData().getCustomObjects());
 	}
-	public void dumpExceptionEntry(String strMsgOverride, Exception ex, Object... aobj){
+//	public void dumpExceptionEntry(String strMsgOverride, Throwable ex, Object... aobj){
+//		dumpExceptionEntryWork(strMsgOverride, ex, null, true, aobj);
+//	}
+	public void dumpExceptionEntry(String strMsgOverride, Throwable ex, Object... aobj){
 //		Exception exOverride=ex;
 //		if(strMsgOverride!=null){
 //			exOverride = new Exception(strMsgOverride+"; "+ex.getMessage());
@@ -1985,7 +2001,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	 * @param bAddToMsgBuffer
 	 */
 //	private void dumpExceptionEntryWork(String strMsgPrepend, Exception ex, StackTraceElement[] asteStackOverride, Integer iShowStackElementsCount, boolean bAddToMsgBuffer, Object... aobj){
-	private void dumpExceptionEntryWork(String strMsgPrepend, Exception ex, Integer iShowStackElementsCount, boolean bAddToMsgBuffer, Object... aobj){
+	private void dumpExceptionEntryWork(String strMsgPrepend, Throwable ex, Integer iShowStackElementsCount, boolean bAddToMsgBuffer, Object... aobj){
 		String strMsgFull=ex.getMessage();
 		if(strMsgPrepend!=null){
 			strMsgFull=strMsgPrepend+"; "+strMsgFull;
@@ -2071,7 +2087,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 			.setKey(strSubEntryPrefix+strMsg));
 	}
 	
-	public void dumpSubEntry(ArrayList<?> aobj){
+	public void dumpSubEntry(List<?> aobj){
 		for(Object obj:aobj)dumpSubEntry(obj.toString());
 	}
 	/**
@@ -3602,7 +3618,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 		}catch(Exception ex){
 			dumpExceptionEntry(ex);
 			
-			ecrs=ECmdReturnStatus.FoundAndExceptionHappened.setCustom(ex);
+			ecrs=ECmdReturnStatus.FoundAndExceptionHappened.setCustomReturnValue(ex);
 		}
 		
 //		catch(NumberFormatException e){
@@ -3870,10 +3886,11 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 			ECmdReturnStatus ecrs = executeCommand(strCmdOnQueue);
 			switch(ecrs){
 				case FoundAndWorked:
+					ecrs.getExtractingCustomReturnValue(); //just to reset
 //				case FoundCallerAndQueuedIt:
 					break;
 				default:
-					dumpWarnEntry(ecrs.getAndResetCustomIfException(),"QueueExecFail("+ecrs+"): "+strCmdOnQueue);
+					dumpWarnEntry(ecrs.getExtractingCustomReturnValueAsException(),"QueueExecFail("+ecrs+"): "+strCmdOnQueue);
 					break;
 			}
 //			if(ecrs.compareTo(ECmdReturnStatus.FoundAndWorked)!=0){
@@ -4269,25 +4286,36 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	
 	enum ETest{
 		fps,
-		allchars,
+		allChars,
 		stats,
-		exception
+		exception,
+		throwExceptionNPE,
+		throwExceptionPNME,
+		;
+		
+		public static ETest valueOfCaseInsensitive(String str){
+			for(ETest e:values()){
+				if(e.toString().toLowerCase().equals(str.toLowerCase()))return e;
+			}
+			return null;
+		}
 	}
 	private void cmdTest(){
 		dumpInfoEntry("testing...");
 		String strOption = ccl.paramString(1);
 		
 		if(strOption==null){
-			dumpSubEntry(Arrays.toString(ETest.values()));
+//			dumpSubEntry(Arrays.toString(ETest.values()));
+			dumpSubEntry(Arrays.asList(ETest.values()));
 			return;
 		}
 		
-		ETest et = ETest.valueOf(strOption.toLowerCase());
+		ETest et = ETest.valueOfCaseInsensitive(strOption);
 		switch(et){
 			case fps:
 //			sapp.setSettings(settings);
 				break;
-			case allchars:
+			case allChars:
 				for(char ch=0;ch<256;ch++){
 					dumpSubEntry(""+(int)ch+"='"+Character.toString(ch)+"'");
 				}
@@ -4300,6 +4328,10 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 				test2();
 				test3();
 				break;
+			case throwExceptionNPE:
+				throw new NullPointerException("test exception");
+			case throwExceptionPNME:
+				throw new PrerequisitesNotMetException("test exception");
 		}
 		
 	}
@@ -4661,12 +4693,12 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 			switch(ecrs){
 				case FoundAndExceptionHappened:
 				case FoundAndFailedGracefully:
-					dumpWarnEntry(strType+": FAIL("+ecrs+"): "+strCmd);
+					dumpWarnEntry(strType+": FAIL("+ecrs+"): "+strCmd, ecrs.getExtractingCustomReturnValue());
 					showHelpForFailedCommand(strCmd);
 					break;
 				case NotFound:
 				case Skip:
-					dumpWarnEntry(strType+": ("+ecrs+"): "+strCmd);
+					dumpWarnEntry(strType+": ("+ecrs+"): "+strCmd, ecrs.getExtractingCustomReturnValue());
 					break;
 			}
 			
@@ -4878,7 +4910,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	}
 
 	@Override
-	public boolean exception(String strMsgOverride, Exception ex, Object... aobj) {
+	public boolean exception(String strMsgOverride, Throwable ex, Object... aobj) {
 		dumpExceptionEntry(strMsgOverride, ex, aobj);
 		return true;
 	}

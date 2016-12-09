@@ -40,6 +40,7 @@ import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
+import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
@@ -56,6 +57,7 @@ import com.github.commandsconsolegui.spJme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.spJme.extras.SimpleApplicationHelperI;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppSettingsI;
 import com.github.commandsconsolegui.spJme.globals.GlobalManageDialogJmeI;
+import com.github.commandsconsolegui.spJme.misc.DebugTrackProblemsHKJme;
 import com.github.commandsconsolegui.spJme.misc.EffectElectricity;
 import com.github.commandsconsolegui.spLemur.console.SimpleConsolePlugin;
 import com.github.commandsconsolegui.spLemur.dialog.MaintenanceListLemurDialogStateAbs;
@@ -151,10 +153,11 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 			ConsoleTestI.class.getName().replace(".",File.separator)));
 		
 		/**
-		 * this adds otherwise impossible fixes and workarounds,
+		 * these adds otherwise impossible fixes and workarounds,
 		 * can be safely disabled.
 		 */
 		ReflexHacksPluginI.i().configure(GlobalCommandsDelegatorI.i());
+		PrerequisitesNotMetException.setProblemsChecker(new DebugTrackProblemsHKJme());
 		
 		GlobalManageDialogJmeI.i().setLinkToParentEffect(new EffectElectricity());
 		GlobalManageDialogJmeI.i().setDragBorderEffect(

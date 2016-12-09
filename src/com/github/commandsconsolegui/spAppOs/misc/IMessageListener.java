@@ -44,6 +44,6 @@ public interface IMessageListener{
 	 * @param aobj
 	 * @return
 	 */
-	public boolean exception(String strMsgOverride, Exception ex, Object... aobj);
+	public boolean exception(String strMsgOverride, Throwable ex, Object... aobj);
 	
 }

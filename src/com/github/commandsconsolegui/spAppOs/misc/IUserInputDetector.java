@@ -27,6 +27,7 @@
 package com.github.commandsconsolegui.spAppOs.misc;
 
 /**
+ * TODO this is apparently deprecated, explain how and where the alternative was implemented 
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *

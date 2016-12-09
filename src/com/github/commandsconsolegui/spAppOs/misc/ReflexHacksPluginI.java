@@ -90,11 +90,12 @@ public class ReflexHacksPluginI implements IConsoleCommandListener, IReflexFillC
 	 * @param clazzOfObjectFrom what superclass of the object from is to be used? if null, will use owner.class()
 	 * @param objFieldOwner if null, clazz must be set (will be refering to a static field then)
 	 * @param strFieldName this method will break if it gets changed by lib developers...
+	 * @param fldOverride use this or strFieldName
 	 * @param bSetValue
 	 * @param objSetNewValue
 	 * @return
 	 */
-	public Object getOrSetFieldValueHK(Class<?> clazzOfObjectFrom, Object objFieldOwner, String strFieldName, Field fldOverride, boolean bSetValue, Object objSetNewValue){
+	public <T> T getOrSetFieldValueHK(Class<?> clazzOfObjectFrom, Object objFieldOwner, String strFieldName, Class<T> clReturnType, Field fldOverride, boolean bSetValue, Object objSetNewValue){
 		if(!btgAllowHacks.b())return null;
 		
 		if(clazzOfObjectFrom==null)clazzOfObjectFrom=objFieldOwner.getClass();
@@ -115,7 +116,7 @@ public class ReflexHacksPluginI implements IConsoleCommandListener, IReflexFillC
 			ihe.handleExceptionThreaded(e);
 		}
 		
-		return objFieldValue;
+		return (T)objFieldValue;
 	}
 	
 	/**
@@ -173,8 +174,8 @@ public class ReflexHacksPluginI implements IConsoleCommandListener, IReflexFillC
 				)
 		){
 			// fix as upon restoring may ignore X configuration viewportin/viewportout
-			Object o = ReflexHacksPluginI.i().getOrSetFieldValueHK(XRandR.class, null, "savedConfiguration", null, true, null);
-			String str = scfHkFixXRandR.getUniqueCmdId()+", erased value: "+Arrays.toString((Screen[])o);
+			Screen[] o = ReflexHacksPluginI.i().getOrSetFieldValueHK(XRandR.class, null, "savedConfiguration", Screen[].class, null, true, null);
+			String str = scfHkFixXRandR.getUniqueCmdId()+", erased value: "+Arrays.toString(o);
 			cd.dumpInfoEntry(str, o);
 			
 			bCommandWorked = true;

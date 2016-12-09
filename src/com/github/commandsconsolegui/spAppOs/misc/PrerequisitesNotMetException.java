@@ -48,6 +48,15 @@ public class PrerequisitesNotMetException extends NullPointerException { //@STAT
 	private static String	strErrorMessage;
 	private static String strHeader = "["+PrerequisitesNotMetException.class.getSimpleName()+"]";
 	
+	public static interface ICheckProblems {
+		Object performChecks(String strMessage, Throwable thr);
+	}
+	private static ICheckProblems chkprb = null;
+	
+	public static void setProblemsChecker(ICheckProblems chkprb){
+		PrerequisitesNotMetException.chkprb=chkprb;
+	}
+	
 	private static String joinMessageWithObjects(String strMessage, Object... aobj){
 		if(MiscI.i().isRecursiveLoopOnMethod("<init>",PrerequisitesNotMetException.class)){
 			System.err.println(strHeader+"Recursive loop exception, stack dump below:");
@@ -213,6 +222,10 @@ public class PrerequisitesNotMetException extends NullPointerException { //@STAT
 	}
 	public static String getExitErrorMessage() {
 		return strErrorMessage;
+	}
+
+	public static void performBugTrackChecks() {
+		chkprb.performChecks(getExitErrorMessage(), getExitRequestCause());
 	}
 	
 }

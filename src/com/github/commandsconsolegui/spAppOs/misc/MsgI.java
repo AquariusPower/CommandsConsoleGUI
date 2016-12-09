@@ -105,7 +105,7 @@ public class MsgI implements IMessageListener{
 	 * @param strMsgOverride can be null
 	 */
 	@Override
-	public boolean exception(String strMsgOverride, Exception ex, Object... aobj) {
+	public boolean exception(String strMsgOverride, Throwable ex, Object... aobj) {
 		boolean bListened=false;
 		for(IMessageListener imsg:aimsgList){
 			if(imsg.exception(strMsgOverride, ex, aobj)){

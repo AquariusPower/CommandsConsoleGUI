@@ -306,6 +306,7 @@ public class SingleMandatoryAppInstanceI  { //implements IReflexFillCfg{
 			if(PrerequisitesNotMetException.getExitRequestCause()!=null){
 				outputTD("Exit because of exception:");
 				outputTD("ErrorMessage:"+PrerequisitesNotMetException.getExitErrorMessage());
+				PrerequisitesNotMetException.performBugTrackChecks();
 				PrerequisitesNotMetException.getExitRequestCause().printStackTrace();
 			}
 			
