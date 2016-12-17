@@ -28,7 +28,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.github.commandsconsolegui.spAppOs;
 
 import java.io.File;
+import java.lang.reflect.Field;
 
+import com.github.commandsconsolegui.spAppOs.misc.IReflexFieldSafeAccess;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 
@@ -38,7 +40,7 @@ import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class OSApp {//implements IReflexFillCfg{
+public class OSApp implements IReflexFieldSafeAccess {//implements IReflexFillCfg{
 //	private static OperationalSystem instance = new OperationalSystem();
 //	public static OperationalSystem i(){return instance;}
 	
@@ -178,14 +180,14 @@ public class OSApp {//implements IReflexFillCfg{
 	}
 
 
-//	@Override
-//	public Object getFieldValue(Field fld) throws IllegalArgumentException,IllegalAccessException {
-//		 return fld.get(this);
-//	}
-//	@Override
-//	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
-//		fld.set(this,value);
-//	}
+	@Override
+	public Object getFieldValue(Field fld) throws IllegalArgumentException,IllegalAccessException {
+		 return fld.get(this);
+	}
+	@Override
+	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+		fld.set(this,value);
+	}
 //	@Override
 //	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField) {
 //		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcvField);

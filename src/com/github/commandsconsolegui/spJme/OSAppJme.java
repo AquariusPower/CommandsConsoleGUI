@@ -86,12 +86,12 @@ public class OSAppJme extends OSApp implements ILinkedSpatial,IReflexFillCfg{
 	
 	@Override
 	public Object getFieldValue(Field fld) throws IllegalArgumentException,IllegalAccessException {
-//		if(fld.getDeclaringClass()!=OSAppJme.class)return super.getFieldValue(fld); //For subclasses uncomment this line
+		if(fld.getDeclaringClass()!=OSAppJme.class)return super.getFieldValue(fld); //For subclasses uncomment this line
 		return fld.get(this);
 	}
 	@Override
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
-//		if(fld.getDeclaringClass()!=OSAppJme.class){super.setFieldValue(fld,value);return;} //For subclasses uncomment this line
+		if(fld.getDeclaringClass()!=OSAppJme.class){super.setFieldValue(fld,value);return;} //For subclasses uncomment this line
 		fld.set(this,value);
 	}
 	@Override
