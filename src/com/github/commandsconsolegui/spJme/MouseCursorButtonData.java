@@ -29,8 +29,8 @@ package com.github.commandsconsolegui.spJme;
 
 import java.util.HashMap;
 
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spJme.ManageMouseCursorI.EMouseCursorButton;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;

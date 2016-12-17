@@ -28,11 +28,11 @@
 package com.github.commandsconsolegui.spAppOs.misc;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Collection;
 
 /**
+ * Simplifies usage of some java classes.
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *

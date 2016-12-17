@@ -27,7 +27,7 @@
 
 package com.github.commandsconsolegui.spCmd;
 
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
 
 /**
  * 

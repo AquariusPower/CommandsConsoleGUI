@@ -35,12 +35,12 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.IReflexFieldSafeAccess;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spCmd.varfield.EType;
 import com.github.commandsconsolegui.spCmd.varfield.VarCmdFieldAbs;
 import com.jme3.export.InputCapsule;

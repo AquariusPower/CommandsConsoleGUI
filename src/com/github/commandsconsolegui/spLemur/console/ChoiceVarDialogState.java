@@ -30,10 +30,10 @@ package com.github.commandsconsolegui.spLemur.console;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.RefHolder;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spCmd.varfield.ManageVarCmdFieldI;
 import com.github.commandsconsolegui.spCmd.varfield.NumberVarFieldAbs;
 import com.github.commandsconsolegui.spCmd.varfield.StringVarField;

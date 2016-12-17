@@ -30,9 +30,9 @@ package com.github.commandsconsolegui.spCmd;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.spAppOs.misc.DebugI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spCmd.misc.DebugI;
 
 /**
  * dump strings will always be logged to file even if disabled.

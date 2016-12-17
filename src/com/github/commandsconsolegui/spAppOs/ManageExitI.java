@@ -28,9 +28,9 @@ package com.github.commandsconsolegui.spAppOs;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 import com.github.commandsconsolegui.spAppOs.misc.ICleanExit;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
+import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 
 /**
  * 

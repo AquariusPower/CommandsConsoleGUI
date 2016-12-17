@@ -28,16 +28,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.github.commandsconsolegui.spAppOs;
 
 import java.io.File;
-import java.lang.reflect.Field;
 
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
-import com.jme3.scene.Spatial;
 
 /**
  * Very basic configurations related to the OS goes here.
@@ -45,7 +38,7 @@ import com.jme3.scene.Spatial;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class OSApp implements IReflexFillCfg{
+public class OSApp {//implements IReflexFillCfg{
 //	private static OperationalSystem instance = new OperationalSystem();
 //	public static OperationalSystem i(){return instance;}
 	
@@ -185,29 +178,18 @@ public class OSApp implements IReflexFillCfg{
 	}
 
 
-	@Override
-	public Object getFieldValue(Field fld) throws IllegalArgumentException,IllegalAccessException {
-		 return fld.get(this);
-	}
-
-
-	@Override
-	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
-		fld.set(this,value);
-	}
-
-
 //	@Override
-//	public String getUniqueId() {
-//		throw new UnsupportedOperationException("method not implemented yet");
+//	public Object getFieldValue(Field fld) throws IllegalArgumentException,IllegalAccessException {
+//		 return fld.get(this);
 //	}
-
-
-	@Override
-	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField) {
-		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcvField);
-	}
-
+//	@Override
+//	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
+//		fld.set(this,value);
+//	}
+//	@Override
+//	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField) {
+//		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcvField);
+//	}
 
 	public void setDynamicInfo(String str) {
 		this.strDynamicInfo=str;

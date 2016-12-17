@@ -31,28 +31,28 @@ import java.io.File;
 import java.lang.reflect.Field;
 
 import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
-import com.github.commandsconsolegui.spAppOs.globals.GlobalSingleMandatoryAppInstanceI;
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.HoldRestartable;
 import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
-import com.github.commandsconsolegui.spAppOs.misc.ReflexHacksPluginI;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.spCmd.CommandsHelperI;
 import com.github.commandsconsolegui.spCmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spCmd.misc.ReflexHacksPluginI;
+import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spCmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.spExtras.SingleMandatoryAppInstanceI;
+import com.github.commandsconsolegui.spExtras.globals.GlobalSingleMandatoryAppInstanceI;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.spJme.extras.SimpleApplicationHelperI;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppSettingsI;
@@ -179,6 +179,8 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		MsgI.i().setEnableDebugMessages(true);
 		
 		SimpleApplicationHelperI.i().simpleInitApp();
+		
+		GlobalSingleMandatoryAppInstanceI.i().configureRequiredAtApplicationInitialization();
 		
 		consolePlugin.initialize();
 		

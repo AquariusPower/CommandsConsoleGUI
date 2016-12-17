@@ -29,9 +29,9 @@ package com.github.commandsconsolegui.spLemur.misc;
 import java.lang.reflect.Field;
 import java.util.TreeMap;
 
-import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;

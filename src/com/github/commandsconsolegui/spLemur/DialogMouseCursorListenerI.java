@@ -29,8 +29,8 @@ package com.github.commandsconsolegui.spLemur;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableWeak;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI.CallableWeak;
 import com.github.commandsconsolegui.spJme.DialogStateAbs;
 import com.github.commandsconsolegui.spJme.MouseCursorButtonData;
 import com.github.commandsconsolegui.spJme.MultiClickCondStateI;

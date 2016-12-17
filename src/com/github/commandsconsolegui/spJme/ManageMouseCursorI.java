@@ -30,7 +30,6 @@ package com.github.commandsconsolegui.spJme;
 import java.lang.reflect.Field;
 
 import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
@@ -41,6 +40,7 @@ import com.github.commandsconsolegui.spCmd.CommandsDelegator;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.spCmd.CommandsHelperI;
 import com.github.commandsconsolegui.spCmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spCmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;

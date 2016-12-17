@@ -33,12 +33,8 @@ import java.lang.reflect.Field;
 import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.SimulationTime;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalMainThreadI;
-import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyCodeI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalSimulationTimeI;
-import com.github.commandsconsolegui.spAppOs.globals.GlobalSingleMandatoryAppInstanceI;
-import com.github.commandsconsolegui.spAppOs.globals.GlobalUpdaterI;
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.ISimpleGetThisTrickIndicator;
 import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI;
@@ -51,6 +47,9 @@ import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.spCmd.ScriptingCommandsDelegator;
 import com.github.commandsconsolegui.spCmd.Updater;
 import com.github.commandsconsolegui.spCmd.UserCmdStackTrace;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spCmd.globals.GlobalManageKeyBindI;
+import com.github.commandsconsolegui.spCmd.globals.GlobalUpdaterI;
 import com.github.commandsconsolegui.spJme.AudioUII;
 import com.github.commandsconsolegui.spJme.ManageKeyBindJme;
 import com.github.commandsconsolegui.spJme.ManageKeyCodeJme;
@@ -273,9 +272,9 @@ public class SimpleConsolePlugin implements IReflexFillCfg, ISingleInstance, ICo
 	public SimpleConsolePlugin initialize() {
 		ManageConfigI.i().assertConfigured(this);
 		
-		if(GlobalSingleMandatoryAppInstanceI.iGlobal().isSet()){
-			GlobalSingleMandatoryAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);
-		}
+//		if(GlobalSingleMandatoryAppInstanceI.iGlobal().isSet()){
+//			GlobalSingleMandatoryAppInstanceI.i().configureRequiredAtApplicationInitialization();//cc);
+//		}
 		
 		GlobalMainThreadI.iGlobal().set(Thread.currentThread());
 		

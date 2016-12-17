@@ -29,12 +29,12 @@ package com.github.commandsconsolegui.spCmd;
 
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.IHasOwnerInstance;
 import com.github.commandsconsolegui.spAppOs.misc.IDebugReport;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.RefHolder;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spCmd.varfield.VarCmdFieldAbs;
 
 /**

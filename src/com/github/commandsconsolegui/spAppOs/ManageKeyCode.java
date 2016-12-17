@@ -35,9 +35,9 @@ import java.util.TreeMap;
 
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyCodeI;
 import com.github.commandsconsolegui.spAppOs.misc.KeyBind;
-import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
 
 /**
  * 

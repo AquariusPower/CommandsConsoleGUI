@@ -27,32 +27,34 @@
 
 package com.github.commandsconsolegui.spCmd.varfield;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.IConstructed;
 import com.github.commandsconsolegui.spAppOs.misc.IDebugReport;
 import com.github.commandsconsolegui.spAppOs.misc.IHandled;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallerInfo;
 import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI;
+import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI.DebugData;
 import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI.EDbgStkOrigin;
+import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.RefHolder;
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.spAppOs.misc.RegisteredClasses;
 import com.github.commandsconsolegui.spAppOs.misc.RunMode;
 import com.github.commandsconsolegui.spCmd.CommandData;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
 import com.github.commandsconsolegui.spCmd.ConsoleVariable;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI;
+import com.github.commandsconsolegui.spCmd.misc.RegisteredClasses;
+import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI.CallableX;
+import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI.CallerInfo;
 
 /**
  * Do NOT put var cmds to be saved as JME j3o.
@@ -440,10 +442,10 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 //		this.rfcfgOwner = rfcfgOwner;
 //		return getThis();
 //	}
-
+	
 	protected void chkAndInit(){
 		if(vcuid==null){
-			setUniqueId(ReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this));
+			setUniqueId(VarCmdReflexFillI.i().createIdentifierWithFieldName(rfcfgOwner,this));
 		}
 	}
 	public String getUniqueCmdId(){

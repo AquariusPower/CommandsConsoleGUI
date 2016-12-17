@@ -25,17 +25,18 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.spAppOs.globals;
+package com.github.commandsconsolegui.spCmd.globals;
 
-import com.github.commandsconsolegui.spCmd.ManageKeyBind;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalHolderAbs;
+import com.github.commandsconsolegui.spCmd.Updater;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class GlobalManageKeyBindI extends GlobalHolderAbs<ManageKeyBind>{
-	private static GlobalManageKeyBindI instance = new GlobalManageKeyBindI();
-	public static GlobalManageKeyBindI iGlobal(){return instance;}
-	public static ManageKeyBind i(){return iGlobal().get();}
+public class GlobalUpdaterI extends GlobalHolderAbs<Updater>{
+	private static GlobalUpdaterI instance = new GlobalUpdaterI();
+	public static GlobalUpdaterI iGlobal(){return instance;}
+	public static Updater i(){return iGlobal().get();}
 }

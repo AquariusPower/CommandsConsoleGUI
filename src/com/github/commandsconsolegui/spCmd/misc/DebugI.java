@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.spAppOs.misc;
+package com.github.commandsconsolegui.spCmd.misc;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -34,12 +34,15 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
+import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
+import com.github.commandsconsolegui.spAppOs.misc.IUniqueId;
+import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.TimedDelayVarField;

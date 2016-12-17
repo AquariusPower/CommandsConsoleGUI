@@ -31,8 +31,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 
-import com.github.commandsconsolegui.spCmd.varfield.VarCmdUId;
-
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
@@ -169,7 +167,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 
 		public ReflexFillCfg(IReflexFillCfgVariant rfcv) {
 			super();
-			this.rfcv = rfcv;
+			this.setRfcv(rfcv);
 		}
 		
 		public ReflexFillCfg(ReflexFillCfg otherCopyBasicDataFrom, IReflexFillCfgVariant rfcv) {
@@ -182,7 +180,7 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 			this.bFirstLetterUpperCase = otherCopyBasicDataFrom.bFirstLetterUpperCase;
 			this.bIsCommandToo = otherCopyBasicDataFrom.bIsCommandToo;
 		}
-
+		
 		public void setAsCommandToo(boolean b) {
 			this.bIsCommandToo = b;
 		}
@@ -246,6 +244,14 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 
 		public void setUsePrefixDeclaringClass(boolean bUsePrefixDeclaringClass) {
 			this.bUsePrefixDeclaringClass = bUsePrefixDeclaringClass;
+		}
+
+		public IReflexFillCfgVariant getRfcv() {
+			return rfcv;
+		}
+
+		public void setRfcv(IReflexFillCfgVariant rfcv) {
+			this.rfcv = rfcv;
 		}
 		
 		
@@ -387,164 +393,164 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 	}
 	
 	
-	/**
-	 * Works on reflected variable name.
-	 * If it is all uppercase, it will be prettyfied.
-	 * 
-	 * IMPORTANT:
-	 * This cannot be used at constructors because it depends on the field value being set.
-	 * At the constructor, it has not returned yet, therefore the class field is still null!!!
-	 * 
-	 * @param rfcfgOwnerOfField
-	 * @param rfcvFieldAtTheOwner
-	 * @param bIsVariable otherwise is a command
-	 * @return
-	 */
-	public VarCmdUId createIdentifierWithFieldName(IReflexFillCfg rfcfgOwnerOfField, IReflexFillCfgVariant rfcvFieldAtTheOwner){//, boolean bIsVariable){
-		if(rfcfgOwnerOfField==null){
-			throw new PrerequisitesNotMetException("Invalid usage, "
-				+IReflexFillCfg.class.getName()+" owner is null, is this a local (non field) variable?");
-		}
-		
-		ReflexFillCfg rfcfg = rfcfgOwnerOfField.getReflexFillCfg(rfcvFieldAtTheOwner);
-		if(rfcfg==null){
-//			if(isUseDefaultCfgIfMissing()){
-				rfcfg = new ReflexFillCfg(rfcvFieldAtTheOwner);
+//	/**
+//	 * Works on reflected variable name.
+//	 * If it is all uppercase, it will be prettyfied.
+//	 * 
+//	 * IMPORTANT:
+//	 * This cannot be used at constructors because it depends on the field value being set.
+//	 * At the constructor, it has not returned yet, therefore the class field is still null!!!
+//	 * 
+//	 * @param rfcfgOwnerOfField
+//	 * @param rfcvFieldAtTheOwner
+//	 * @param bIsVariable otherwise is a command
+//	 * @return
+//	 */
+//	public VarCmdUId createIdentifierWithFieldName(IReflexFillCfg rfcfgOwnerOfField, IReflexFillCfgVariant rfcvFieldAtTheOwner){//, boolean bIsVariable){
+//		if(rfcfgOwnerOfField==null){
+//			throw new PrerequisitesNotMetException("Invalid usage, "
+//				+IReflexFillCfg.class.getName()+" owner is null, is this a local (non field) variable?");
+//		}
+//		
+//		ReflexFillCfg rfcfg = rfcfgOwnerOfField.getReflexFillCfg(rfcvFieldAtTheOwner);
+//		if(rfcfg==null){
+////			if(isUseDefaultCfgIfMissing()){
+//				rfcfg = new ReflexFillCfg(rfcvFieldAtTheOwner);
+////			}else{
+////				throw new PrerequisitesNotMetException("Configuration is missing for "
+////					+rfcfgOwnerOfField.getClass().getName()
+////					+" -> "
+////					+rfcvFieldAtTheOwner.getClass().getName()
+////					+":"
+////					+rfcvFieldAtTheOwner.getCodePrefixVariant());
+////			}
+//		}
+//		
+//		VarCmdUId vcid = new VarCmdUId();
+//		
+//		Field fld = assertAndGetField(rfcfgOwnerOfField, rfcvFieldAtTheOwner);
+//		Class<?> cl = fld.getDeclaringClass();
+//		
+//		String strFieldName=fld.getName();
+//		
+//		boolean bMakePretty=!strFieldName.matches(".*[a-z].*");
+//		
+//		String strCodeTypePrefix = rfcfg.strCodingStyleFieldNamePrefix;
+//		if(strCodeTypePrefix==null){
+//			strCodeTypePrefix=rfcvFieldAtTheOwner.getCodePrefixVariant();
+//		}
+//		
+//		String strCommandSimple = strFieldName;
+//		if(strCodeTypePrefix!=null){
+//			if(strCommandSimple.startsWith(strCodeTypePrefix)){
+//				//remove prefix
+//				strCommandSimple=strCommandSimple.substring(strCodeTypePrefix.length());
 //			}else{
-//				throw new PrerequisitesNotMetException("Configuration is missing for "
-//					+rfcfgOwnerOfField.getClass().getName()
-//					+" -> "
-//					+rfcvFieldAtTheOwner.getClass().getName()
-//					+":"
-//					+rfcvFieldAtTheOwner.getCodePrefixVariant());
+//				throw new PrerequisitesNotMetException(
+//					"code prefix was set but field doesnt begin with it",
+//					strCodeTypePrefix, strFieldName, strCommandSimple, rfcfgOwnerOfField, rfcvFieldAtTheOwner, rfcfg);
 //			}
-		}
-		
-		VarCmdUId id = new VarCmdUId();
-		
-		Field fld = assertAndGetField(rfcfgOwnerOfField, rfcvFieldAtTheOwner);
-		Class<?> cl = fld.getDeclaringClass();
-		
-		String strFieldName=fld.getName();
-		
-		boolean bMakePretty=!strFieldName.matches(".*[a-z].*");
-		
-		String strCodeTypePrefix = rfcfg.strCodingStyleFieldNamePrefix;
-		if(strCodeTypePrefix==null){
-			strCodeTypePrefix=rfcvFieldAtTheOwner.getCodePrefixVariant();
-		}
-		
-		String strCommandSimple = strFieldName;
-		if(strCodeTypePrefix!=null){
-			if(strCommandSimple.startsWith(strCodeTypePrefix)){
-				//remove prefix
-				strCommandSimple=strCommandSimple.substring(strCodeTypePrefix.length());
-			}else{
-				throw new PrerequisitesNotMetException(
-					"code prefix was set but field doesnt begin with it",
-					strCodeTypePrefix, strFieldName, strCommandSimple, rfcfgOwnerOfField, rfcvFieldAtTheOwner, rfcfg);
-			}
-		}
-		
-		if(bMakePretty){
-			strCommandSimple=MiscI.i().makePretty(strCommandSimple, rfcfg.bFirstLetterUpperCase);
-		}else{
-			/** Already nice to read field name. */
-			strCommandSimple=MiscI.i().firstLetter(strCommandSimple,rfcfg.bFirstLetterUpperCase);
-		}
-		
-		id.setUniqueId(prepareFullCommand(id, strCommandSimple, rfcfg));//, bIsVariable));
-//		id.strSimpleCmdId = rfcfg.getPrefixCustomId()+strCommandCore;
-		id.setPrefixCustom(rfcfg.getPrefixCustomId());
-		id.setSimpleId(strCommandSimple);
-//		id.setAsVariable(bIsVariable);
-		return id;
-	}
+//		}
+//		
+//		if(bMakePretty){
+//			strCommandSimple=MiscI.i().makePretty(strCommandSimple, rfcfg.bFirstLetterUpperCase);
+//		}else{
+//			/** Already nice to read field name. */
+//			strCommandSimple=MiscI.i().firstLetter(strCommandSimple,rfcfg.bFirstLetterUpperCase);
+//		}
+//		
+//		vcid.setUniqueId(prepareFullCommand(vcid, strCommandSimple, rfcfg));//, bIsVariable));
+////		id.strSimpleCmdId = rfcfg.getPrefixCustomId()+strCommandCore;
+//		vcid.setPrefixCustom(rfcfg.getPrefixCustomId());
+//		vcid.setSimpleId(strCommandSimple);
+////		id.setAsVariable(bIsVariable);
+//		return vcid;
+//	}
 	
-	/**
-	 * All these concatenated identifiers are good to make sure all commands are unique,
-	 * but... command's size get huge!
-	 * 
-	 * Also, there is redundancy cleaner, avoiding identifiers duplicity mess.
-	 * 
-	 * @param strCommandSimple
-	 * @param rfcfg
-	 * @return
-	 */
-	private String prepareFullCommand(VarCmdUId vcuid, String strCommandSimple, ReflexFillCfg rfcfg){//, boolean bIsVariable){
-//		DebugI.i().conditionalBreakpoint(rfcfg.getPrefixCustomId().equals("ConfigDialog"));
-		
-	//	strCommand=rfcfg.strPrefix+strCommand+rfcfg.strSuffix;
-		vcuid.setPartSeparator(strCommandPartSeparator);
-		vcuid.setVarType(rfcfg.getPrefixVar()+rfcfg.rfcv.getVariablePrefix());
-		vcuid.setPrefixCmd(rfcfg.getPrefixCmd());
-//		String strFullCommand=preparePart(bIsVariable?
-//			vcuid.getVarType():
-//			rfcfg.getPrefixCmd());
-		String strFullCommand="";
-		
-		boolean bUseCustomId=true;
-		
-		String strDeclaring="";
-		if(rfcfg.isUsePrefixDeclaringClass()){
-			if(rfcfg.getDeclaringClass()==null){
-				Field field = assertAndGetField(rfcfg.rfcv.getOwner(), rfcfg.rfcv);
-				rfcfg.setDeclaringClass(field.getDeclaringClass());
-			}
-			
-			strDeclaring=preparePart(rfcfg.getPrefixDeclaringClass());
-			
-			if(rfcfg.getPrefixCustomId().equalsIgnoreCase(rfcfg.getPrefixDeclaringClass())){
-				bUseCustomId=false;
-			}
-		}
-		vcuid.setDeclaringClass(rfcfg.getDeclaringClass(), strDeclaring);
-		
-		String strInstancedConcrete="";
-		if(rfcfg.isUsePrefixInstancedConcreteClass()){
-			if(rfcfg.getInstancedConcreteClass()==null){
-				rfcfg.setInstancedConcreteClass(rfcfg.rfcv.getOwner().getClass());
-			}
-			
-			vcuid.setConcreteClass(rfcfg.getInstancedConcreteClass(), preparePart(rfcfg.getPrefixInstancedConcreteClass()));
-			if(!rfcfg.getPrefixDeclaringClass().equalsIgnoreCase(rfcfg.getPrefixInstancedConcreteClass())){
-				strInstancedConcrete=vcuid.getConcreteClassSimpleName();
-				
-				if(rfcfg.getPrefixCustomId().equalsIgnoreCase(rfcfg.getPrefixInstancedConcreteClass())){
-					bUseCustomId=false;
-				}
-			}
-		}
-		
-		String strCustomId="";
-		if(bUseCustomId)strCustomId=preparePart(rfcfg.getPrefixCustomId());
-		vcuid.setPrefix(strCustomId);
-		
-		/**
-		 * this order is good for sorting, from more specific to more generic
-		 */
-		strFullCommand+=strCustomId+strInstancedConcrete+strDeclaring;
-				
-		strFullCommand+=strCommandSimple;
-//		id.setStrId(strCommandSimple);
-		
-		strFullCommand+=preparePart(rfcfg.getSuffix(),true);
-		vcuid.setSuffix(rfcfg.getSuffix());
-		
-		return strFullCommand;
-	}
-	
-	private String preparePart(String str){
-		return preparePart(str, false);
-	}
-	private String preparePart(String str, boolean bPrependSeparator){
-		if(str==null || str.isEmpty())return "";
-		if(bPrependSeparator){
-			return strCommandPartSeparator+str;
-		}else{
-			return str+strCommandPartSeparator;
-		}
-	}
+//	/**
+//	 * All these concatenated identifiers are good to make sure all commands are unique,
+//	 * but... command's size get huge!
+//	 * 
+//	 * Also, there is redundancy cleaner, avoiding identifiers duplicity mess.
+//	 * 
+//	 * @param strCommandSimple
+//	 * @param rfcfg
+//	 * @return
+//	 */
+//	private String prepareFullCommand(VarCmdUId vcuid, String strCommandSimple, ReflexFillCfg rfcfg){//, boolean bIsVariable){
+////		DebugI.i().conditionalBreakpoint(rfcfg.getPrefixCustomId().equals("ConfigDialog"));
+//		
+//	//	strCommand=rfcfg.strPrefix+strCommand+rfcfg.strSuffix;
+//		vcuid.setPartSeparator(strCommandPartSeparator);
+//		vcuid.setVarType(rfcfg.getPrefixVar()+rfcfg.rfcv.getVariablePrefix());
+//		vcuid.setPrefixCmd(rfcfg.getPrefixCmd());
+////		String strFullCommand=preparePart(bIsVariable?
+////			vcuid.getVarType():
+////			rfcfg.getPrefixCmd());
+//		String strFullCommand="";
+//		
+//		boolean bUseCustomId=true;
+//		
+//		String strDeclaring="";
+//		if(rfcfg.isUsePrefixDeclaringClass()){
+//			if(rfcfg.getDeclaringClass()==null){
+//				Field field = assertAndGetField(rfcfg.rfcv.getOwner(), rfcfg.rfcv);
+//				rfcfg.setDeclaringClass(field.getDeclaringClass());
+//			}
+//			
+//			strDeclaring=preparePart(rfcfg.getPrefixDeclaringClass());
+//			
+//			if(rfcfg.getPrefixCustomId().equalsIgnoreCase(rfcfg.getPrefixDeclaringClass())){
+//				bUseCustomId=false;
+//			}
+//		}
+//		vcuid.setDeclaringClass(rfcfg.getDeclaringClass(), strDeclaring);
+//		
+//		String strInstancedConcrete="";
+//		if(rfcfg.isUsePrefixInstancedConcreteClass()){
+//			if(rfcfg.getInstancedConcreteClass()==null){
+//				rfcfg.setInstancedConcreteClass(rfcfg.rfcv.getOwner().getClass());
+//			}
+//			
+//			vcuid.setConcreteClass(rfcfg.getInstancedConcreteClass(), preparePart(rfcfg.getPrefixInstancedConcreteClass()));
+//			if(!rfcfg.getPrefixDeclaringClass().equalsIgnoreCase(rfcfg.getPrefixInstancedConcreteClass())){
+//				strInstancedConcrete=vcuid.getConcreteClassSimpleName();
+//				
+//				if(rfcfg.getPrefixCustomId().equalsIgnoreCase(rfcfg.getPrefixInstancedConcreteClass())){
+//					bUseCustomId=false;
+//				}
+//			}
+//		}
+//		
+//		String strCustomId="";
+//		if(bUseCustomId)strCustomId=preparePart(rfcfg.getPrefixCustomId());
+//		vcuid.setPrefix(strCustomId);
+//		
+//		/**
+//		 * this order is good for sorting, from more specific to more generic
+//		 */
+//		strFullCommand+=strCustomId+strInstancedConcrete+strDeclaring;
+//				
+//		strFullCommand+=strCommandSimple;
+////		id.setStrId(strCommandSimple);
+//		
+//		strFullCommand+=preparePart(rfcfg.getSuffix(),true);
+//		vcuid.setSuffix(rfcfg.getSuffix());
+//		
+//		return strFullCommand;
+//	}
+//	
+//	private String preparePart(String str){
+//		return preparePart(str, false);
+//	}
+//	private String preparePart(String str, boolean bPrependSeparator){
+//		if(str==null || str.isEmpty())return "";
+//		if(bPrependSeparator){
+//			return strCommandPartSeparator+str;
+//		}else{
+//			return str+strCommandPartSeparator;
+//		}
+//	}
 	
 //	public boolean isUseDefaultCfgIfMissing() {
 //		return bUseDefaultCfgIfMissing;
@@ -570,10 +576,10 @@ public class ReflexFillI{ //implements IConsoleCommandListener{
 		return strCommandPartSeparator;
 	}
 
-	public void setCommandPartSeparator(String strCommandPartSeparator) {
-		this.strCommandPartSeparator = strCommandPartSeparator;
-		if(this.strCommandPartSeparator==null)throw new PrerequisitesNotMetException("use empty intead of null separator!");
-	}
+//	public void setCommandPartSeparator(String strCommandPartSeparator) {
+//		this.strCommandPartSeparator = strCommandPartSeparator;
+//		if(this.strCommandPartSeparator==null)throw new PrerequisitesNotMetException("use empty intead of null separator!");
+//	}
 	
 	/**
 	 * @param objClassToInspect surely works with anonymous (inner) classes, just like new ArrayList<String>(){}

@@ -32,25 +32,19 @@ import java.util.HashMap;
 import java.util.TreeMap;
 
 import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
-import com.github.commandsconsolegui.spAppOs.ManageKeyCode;
-import com.github.commandsconsolegui.spAppOs.ManageKeyCode.Key;
-import com.github.commandsconsolegui.spAppOs.globals.GlobalOSAppI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyCodeI;
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalOSAppI;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.IRefresh;
 import com.github.commandsconsolegui.spAppOs.misc.KeyBind;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
-import com.github.commandsconsolegui.spAppOs.misc.ManageSingleInstanceI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure.ICfgParm;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spCmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
-import com.github.commandsconsolegui.spJme.misc.ILinkedSpatial;
-import com.jme3.scene.Spatial;
 
 
 /**
@@ -134,7 +128,7 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField>,IConfi
 
 	private boolean	bConfigured;
 
-	private ILinkedSpatial ilge;
+	private Object objLinkedGuiElement;
 	
 	private boolean isWaitKeyRelease(){
 		/**
@@ -330,7 +324,7 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField>,IConfi
 							+" Re-binding keys for command:\n"
 							+"  "+bindCaptureToTarget.getKeyBindRunCommand()+"\n"
 							+" Current key bind: "+bindCaptureToTarget.getBindCfg()+"\n",
-							ilge
+							objLinkedGuiElement
 						);
 				}
 				break;
@@ -351,7 +345,7 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField>,IConfi
 					+strRequestUserDecision;
 				MsgI.i().warn(strMsg,	bindConflict,bindCaptureToTarget,kbCaptured,this);
 				
-				asteAlertFrom = GlobalOSAppI.i().showSystemAlert(strMsg,ilge);
+				asteAlertFrom = GlobalOSAppI.i().showSystemAlert(strMsg,objLinkedGuiElement);
 				
 				kbCaptured=null;
 				break;
@@ -404,7 +398,7 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField>,IConfi
 		return astr;
 	}
 
-	public void captureAndSetKeyBindAt(KeyBoundVarField bindTarget, IRefresh refreshOwner, ILinkedSpatial ilge) {
+	public void captureAndSetKeyBindAt(KeyBoundVarField bindTarget, IRefresh refreshOwner, Object objLinkedGuiElement) {
 		if(this.bindCaptureToTarget!=null){
 			MsgI.i().devWarn("already capturing keybind for", this.bindCaptureToTarget, this.refreshOwnerAfterCapture, this);
 			return;
@@ -412,7 +406,7 @@ public abstract class ManageKeyBind implements IManager<KeyBoundVarField>,IConfi
 		
 		this.refreshOwnerAfterCapture=refreshOwner;
 		this.bindCaptureToTarget=bindTarget;
-		this.ilge=ilge;
+		this.objLinkedGuiElement=objLinkedGuiElement;
 //		MsgI.i().info("For unconventional (more complex) key bindings, use the console command.", bindTarget); 
 //		bindTarget.setValue(captureKeyBind(bindTarget));
 	}

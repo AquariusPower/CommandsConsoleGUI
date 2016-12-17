@@ -30,10 +30,10 @@ package com.github.commandsconsolegui.spJme;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableWeak;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI.CallableWeak;
 
 /**
  * Dispatches multi-click cmds when they are ready.

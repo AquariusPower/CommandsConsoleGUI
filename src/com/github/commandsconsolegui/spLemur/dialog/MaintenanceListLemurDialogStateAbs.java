@@ -30,9 +30,9 @@ package com.github.commandsconsolegui.spLemur.dialog;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.HoldRestartable;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spJme.AudioUII;
 import com.github.commandsconsolegui.spJme.DialogStateAbs;
 import com.github.commandsconsolegui.spJme.AudioUII.EAudio;

@@ -29,12 +29,14 @@ package com.github.commandsconsolegui.spJme;
 
 import com.github.commandsconsolegui.spAppOs.ManageKeyCode.Key;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyCodeI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
-import com.github.commandsconsolegui.spAppOs.misc.MiscI;
+import com.github.commandsconsolegui.spAppOs.misc.IRefresh;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spCmd.ManageKeyBind;
+import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI;
+import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI.CallableX;
+import com.github.commandsconsolegui.spCmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
+import com.github.commandsconsolegui.spJme.misc.ILinkedSpatial;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
 
@@ -142,4 +144,7 @@ public class ManageKeyBindJme extends ManageKeyBind {
 //		GlobalAppRefI.i().getInputManager().addListener(alGeneralJmeKeyCodeListener, strMapping);
 //	}
 	
+//	public void captureAndSetKeyBindAt(KeyBoundVarField bindTarget, IRefresh refreshOwner, ILinkedSpatial ilge) {
+//		super.captureAndSetKeyBindAt(bindTarget, refreshOwner, ilge);
+//	}
 }

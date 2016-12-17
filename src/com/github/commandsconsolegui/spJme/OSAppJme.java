@@ -32,6 +32,10 @@ import java.lang.reflect.Field;
 
 import com.github.commandsconsolegui.spAppOs.OSApp;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
+import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppSettingsI;
 import com.github.commandsconsolegui.spJme.misc.ILinkedSpatial;
 import com.jme3.scene.Spatial;
@@ -43,7 +47,7 @@ import com.jme3.system.JmeSystem.StorageFolderType;
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
  */
-public class OSAppJme extends OSApp implements ILinkedSpatial{
+public class OSAppJme extends OSApp implements ILinkedSpatial,IReflexFillCfg{
 	public OSAppJme(String strApplicationBaseSaveDataPath,StorageFolderType esft) {
 		super(strApplicationBaseSaveDataPath);
 		
@@ -82,14 +86,17 @@ public class OSAppJme extends OSApp implements ILinkedSpatial{
 	
 	@Override
 	public Object getFieldValue(Field fld) throws IllegalArgumentException,IllegalAccessException {
-		if(fld.getDeclaringClass()!=OSAppJme.class)return super.getFieldValue(fld); //For subclasses uncomment this line
-		return fld.get(this);	}
-
-
+//		if(fld.getDeclaringClass()!=OSAppJme.class)return super.getFieldValue(fld); //For subclasses uncomment this line
+		return fld.get(this);
+	}
 	@Override
 	public void setFieldValue(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException {
-		if(fld.getDeclaringClass()!=OSAppJme.class){super.setFieldValue(fld,value);return;} //For subclasses uncomment this line
+//		if(fld.getDeclaringClass()!=OSAppJme.class){super.setFieldValue(fld,value);return;} //For subclasses uncomment this line
 		fld.set(this,value);
+	}
+	@Override
+	public ReflexFillCfg getReflexFillCfg(IReflexFillCfgVariant rfcvField) {
+		return GlobalCommandsDelegatorI.i().getReflexFillCfg(rfcvField);
 	}
 	
 	public void setAlertUserInteractionIndicator(Object obj){
@@ -104,4 +111,5 @@ public class OSAppJme extends OSApp implements ILinkedSpatial{
 	public Spatial getLinkedSpatial() {
 		return getAlertSpatial();
 	}
+
 }

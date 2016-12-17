@@ -25,7 +25,7 @@
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.spAppOs.misc;
+package com.github.commandsconsolegui.spCmd.misc;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -36,13 +36,17 @@ import org.lwjgl.opengl.XRandR;
 import org.lwjgl.opengl.XRandR.Screen;
 
 import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spAppOs.misc.IHandleExceptions;
+import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
+import com.github.commandsconsolegui.spAppOs.misc.MiscI;
+import com.github.commandsconsolegui.spAppOs.misc.SipmleHandleExceptionsI;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.spCmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
 

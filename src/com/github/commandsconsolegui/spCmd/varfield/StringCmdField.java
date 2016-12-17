@@ -32,10 +32,10 @@ import java.util.ArrayList;
 
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
 import com.github.commandsconsolegui.spCmd.ConsoleVariable;
+import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI.CallableX;
 
 /**
  * Represents a class field.

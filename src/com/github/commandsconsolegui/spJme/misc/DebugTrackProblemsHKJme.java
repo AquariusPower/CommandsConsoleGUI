@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException.ICheckProblems;
-import com.github.commandsconsolegui.spAppOs.misc.ReflexHacksPluginI;
+import com.github.commandsconsolegui.spCmd.misc.ReflexHacksPluginI;
 import com.github.commandsconsolegui.spJme.globals.GlobalGUINodeI;
 import com.github.commandsconsolegui.spJme.globals.GlobalRootNodeI;
 import com.jme3.scene.Node;

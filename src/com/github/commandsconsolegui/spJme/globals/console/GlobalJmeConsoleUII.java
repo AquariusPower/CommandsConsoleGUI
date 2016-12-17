@@ -28,7 +28,7 @@
 package com.github.commandsconsolegui.spJme.globals.console;
 
 import com.github.commandsconsolegui.spAppOs.globals.GlobalHolderAbs;
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalConsoleUII;
+import com.github.commandsconsolegui.spCmd.globals.GlobalConsoleUII;
 import com.github.commandsconsolegui.spJme.IJmeConsoleUI;
 
 /**

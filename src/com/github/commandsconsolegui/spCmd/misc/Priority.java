@@ -24,60 +24,41 @@
 	OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN 
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package com.github.commandsconsolegui.spAppOs.misc;
+package com.github.commandsconsolegui.spCmd.misc;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.TreeMap;
+import java.util.Comparator;
 
-import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
+import com.github.commandsconsolegui.spCmd.misc.Priority.IPriority;
 
 /**
- * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
- *
- * @param <E>
  */
-public class RegisteredClasses<E>{
-	RefHolder<TreeMap<String,Class<E>>> rhtmSubClass = new RefHolder<TreeMap<String,Class<E>>>(new TreeMap<String,Class<E>>());
-	BfdArrayList<E> aTargetList = new BfdArrayList<E>(){};
+public class Priority<IPriority> {
+	private static Priority<IPriority> instance = new Priority<IPriority>();
+	public static Priority<IPriority> i(){return instance;}
 	
-	/**
-	 * will add super classes basically
-	 * @param objTarget
-	 * @param bItsInnerClassesToo
-	 * @param bItsEnclosingClassesToo
-	 */
-	public void addClassesOf(E objTarget, boolean bItsInnerClassesToo, boolean bItsEnclosingClassesToo){
-		PrerequisitesNotMetException.assertNotNull(objTarget, "objTarget", this);
-		PrerequisitesNotMetException.assertNotAlreadyAdded(aTargetList, objTarget, this);
-		
-		for(Class cl:MiscI.i().getSuperClassesOf(objTarget,true)){
-			registerClass(cl);
-		}
-		
-		if(bItsInnerClassesToo){
-			for(Class cl:objTarget.getClass().getDeclaredClasses()){ //register inner classes
-				registerClass(cl);
-			}
-		}
-		
-		if(bItsEnclosingClassesToo){ //enclosing tree
-			for(Class cl:MiscI.i().getEnclosingClassesOf(objTarget)){
-				registerClass(cl);
-			}
-		}
-		
-		aTargetList.add(objTarget);
+	public static enum EPriority{
+		Top,
+		Before,
+		Normal,
+		After,
+		Last,
+		;
+		public String s(){return toString();}
 	}
-	public void registerClass(Class<E> cl){
-		rhtmSubClass.getRef().put(cl.getName(),cl);
+	
+	public static interface IPriority{
+		EPriority getPriority();
 	}
-	public boolean isContainClassTypeName(String strClassTypeKey){
-		Class<E> cl = (rhtmSubClass.getRef().get(MiscI.i().getEnclosingIfAnonymous(strClassTypeKey)));
-		return ( cl != null );
-	}
-	public ArrayList<E> getTargetListCopy(){
-		return new ArrayList<E>(Arrays.asList(aTargetList.toArray()));
+	
+	Comparator<IPriority> cmpPriorities = new Comparator<IPriority>(){
+		@Override
+		public int compare(IPriority o1, IPriority o2) {
+			return o1.getPriority().compareTo(o2.getPriority());
+		}
+	};
+	
+	public Comparator<IPriority> getComparator(){
+		return cmpPriorities;
 	}
 }

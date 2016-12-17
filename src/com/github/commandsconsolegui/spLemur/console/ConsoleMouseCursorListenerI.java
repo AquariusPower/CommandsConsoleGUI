@@ -27,8 +27,8 @@
 
 package com.github.commandsconsolegui.spLemur.console;
 
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spJme.ManageMouseCursorI;
 import com.github.commandsconsolegui.spJme.MouseCursorButtonData;
 import com.github.commandsconsolegui.spJme.globals.console.GlobalJmeConsoleUII;

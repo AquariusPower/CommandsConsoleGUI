@@ -25,18 +25,19 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.spAppOs.globals.cmd;
+package com.github.commandsconsolegui.spExtras.globals;
 
 import com.github.commandsconsolegui.spAppOs.globals.GlobalHolderAbs;
-import com.github.commandsconsolegui.spCmd.IConsoleUI;
+import com.github.commandsconsolegui.spExtras.SingleMandatoryAppInstanceI;
+
 
 /**
-* 
-* @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
-*
-*/
-public class GlobalConsoleUII extends GlobalHolderAbs<IConsoleUI>{
-	private static GlobalConsoleUII instance = new GlobalConsoleUII();
-	public static GlobalConsoleUII iGlobal(){return instance;}
-	public static IConsoleUI i(){return iGlobal().get();}
+ * 
+ * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
+ *
+ */
+public class GlobalSingleMandatoryAppInstanceI extends GlobalHolderAbs<SingleMandatoryAppInstanceI>{
+	private static GlobalSingleMandatoryAppInstanceI instance = new GlobalSingleMandatoryAppInstanceI();
+	public static GlobalSingleMandatoryAppInstanceI iGlobal(){return instance;}
+	public static SingleMandatoryAppInstanceI i(){return iGlobal().get();}
 }

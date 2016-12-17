@@ -31,14 +31,14 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
-import com.github.commandsconsolegui.spAppOs.misc.WorkAroundI;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spCmd.misc.WorkAroundI;
+import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData.CustomAction;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData.SliderValueData;

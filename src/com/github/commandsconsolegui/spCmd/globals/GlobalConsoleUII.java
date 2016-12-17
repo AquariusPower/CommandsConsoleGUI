@@ -25,17 +25,18 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.commandsconsolegui.spAppOs.globals;
+package com.github.commandsconsolegui.spCmd.globals;
 
-import com.github.commandsconsolegui.spCmd.Updater;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalHolderAbs;
+import com.github.commandsconsolegui.spCmd.IConsoleUI;
 
 /**
- * 
- * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
- *
- */
-public class GlobalUpdaterI extends GlobalHolderAbs<Updater>{
-	private static GlobalUpdaterI instance = new GlobalUpdaterI();
-	public static GlobalUpdaterI iGlobal(){return instance;}
-	public static Updater i(){return iGlobal().get();}
+* 
+* @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
+*
+*/
+public class GlobalConsoleUII extends GlobalHolderAbs<IConsoleUI>{
+	private static GlobalConsoleUII instance = new GlobalConsoleUII();
+	public static GlobalConsoleUII iGlobal(){return instance;}
+	public static IConsoleUI i(){return iGlobal().get();}
 }

@@ -24,60 +24,63 @@
 	OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN 
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+package com.github.commandsconsolegui.spCmd.misc;
 
-package com.github.commandsconsolegui.spAppOs.misc;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.TreeMap;
 
-import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
+import com.github.commandsconsolegui.spAppOs.misc.MiscI;
+import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.spAppOs.misc.RefHolder;
 import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 
 /**
  * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
  *
+ * @param <E>
  */
-public class ManageHoldRestartableI implements IManager<HoldRestartable<IRestartable>>{
-	private static ManageHoldRestartableI instance = new ManageHoldRestartableI();
-	public static ManageHoldRestartableI i(){return instance;}
+public class RegisteredClasses<E>{
+	RefHolder<TreeMap<String,Class<E>>> rhtmSubClass = new RefHolder<TreeMap<String,Class<E>>>(new TreeMap<String,Class<E>>());
+	BfdArrayList<E> aTargetList = new BfdArrayList<E>(){};
 	
-	public static final class CompositeControl extends CompositeControlAbs<ManageHoldRestartableI>{
-		private CompositeControl(ManageHoldRestartableI casm){super(casm);};
-	};private CompositeControl ccSelf = new CompositeControl(this);
-	
-	public ManageHoldRestartableI() {
-		DelegateManagerI.i().addManager(this, IRestartable.class);
-//		ManageSingleInstanceI.i().add(this);
-	}
-	
-	private BfdArrayList<HoldRestartable<IRestartable>> ahrList=new BfdArrayList<HoldRestartable<IRestartable>>(){};
-	
-	public void revalidateAndUpdateAllRestartableHoldersFor(IRestartable irDiscarding, IRestartable irNew){
-		for(HoldRestartable<IRestartable> hr:ahrList.toArray()){
-			// discard
-			if(hr.isDiscardSelf() || DiscardableInstanceI.i().isBeingDiscardedRecursiveOwner(hr)){
-				ahrList.remove(hr);
-				continue;
-			}
-			
-			// update ref
-			if(hr.getRef()==irDiscarding){
-				hr.setRef(irNew);
+	/**
+	 * will add super classes basically
+	 * @param objTarget
+	 * @param bItsInnerClassesToo
+	 * @param bItsEnclosingClassesToo
+	 */
+	public void addClassesOf(E objTarget, boolean bItsInnerClassesToo, boolean bItsEnclosingClassesToo){
+		PrerequisitesNotMetException.assertNotNull(objTarget, "objTarget", this);
+		PrerequisitesNotMetException.assertNotAlreadyAdded(aTargetList, objTarget, this);
+		
+		for(Class cl:MiscI.i().getSuperClassesOf(objTarget,true)){
+			registerClass(cl);
+		}
+		
+		if(bItsInnerClassesToo){
+			for(Class cl:objTarget.getClass().getDeclaredClasses()){ //register inner classes
+				registerClass(cl);
 			}
 		}
+		
+		if(bItsEnclosingClassesToo){ //enclosing tree
+			for(Class cl:MiscI.i().getEnclosingClassesOf(objTarget)){
+				registerClass(cl);
+			}
+		}
+		
+		aTargetList.add(objTarget);
 	}
-	
-	@Override
-	public boolean addHandled(HoldRestartable<IRestartable> hr){
-		PrerequisitesNotMetException.assertNotAlreadyAdded(ahrList, (HoldRestartable<IRestartable>)hr, this);
-		return ahrList.add((HoldRestartable<IRestartable>) hr);
+	public void registerClass(Class<E> cl){
+		rhtmSubClass.getRef().put(cl.getName(),cl);
 	}
-	
-	@Override
-	public BfdArrayList<HoldRestartable<IRestartable>> getHandledListCopy() {
-//		if(ahrList.size()==0)return new BfdArrayList<HoldRestartable<IRestartable>>(){};
-//		return ahrList.getGenericCopy();
-		return ahrList.getCopy();
+	public boolean isContainClassTypeName(String strClassTypeKey){
+		Class<E> cl = (rhtmSubClass.getRef().get(MiscI.i().getEnclosingIfAnonymous(strClassTypeKey)));
+		return ( cl != null );
 	}
-
-	@Override public String getUniqueId() {return MiscI.i().prepareUniqueId(this);}
-
+	public ArrayList<E> getTargetListCopy(){
+		return new ArrayList<E>(Arrays.asList(aTargetList.toArray()));
+	}
 }

@@ -28,10 +28,10 @@ package com.github.commandsconsolegui.spCmd;
 
 import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalOSAppI;
-import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalSimulationTimeI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.spCmd.globals.GlobalManageKeyBindI;
+import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI;
 
 /**
  * 

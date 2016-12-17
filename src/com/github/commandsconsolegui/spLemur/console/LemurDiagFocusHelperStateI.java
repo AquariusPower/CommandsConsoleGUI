@@ -31,14 +31,14 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI;
+import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spCmd.varfield.FloatDoubleVarField;
 import com.github.commandsconsolegui.spJme.DialogStateAbs;
 import com.github.commandsconsolegui.spJme.cmd.CmdConditionalStateAbs;

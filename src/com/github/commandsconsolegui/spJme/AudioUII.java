@@ -31,7 +31,6 @@ import java.lang.reflect.Field;
 import java.util.TreeMap;
 
 import com.github.commandsconsolegui.spAppOs.globals.GlobalOSAppI;
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
 import com.github.commandsconsolegui.spAppOs.misc.IUniqueId;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
@@ -43,6 +42,7 @@ import com.github.commandsconsolegui.spCmd.CommandsDelegator;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.spCmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.spCmd.UserCmdStackTrace;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.FileVarField;
 import com.github.commandsconsolegui.spCmd.varfield.FloatDoubleVarField;

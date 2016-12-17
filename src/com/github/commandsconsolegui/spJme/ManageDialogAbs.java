@@ -31,13 +31,13 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
+import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spCmd.varfield.IntLongVarField;
 import com.github.commandsconsolegui.spCmd.varfield.StringVarField;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;

@@ -24,41 +24,29 @@
 	OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN 
 	IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package com.github.commandsconsolegui.spAppOs.misc;
 
-import java.util.Comparator;
+package com.github.commandsconsolegui.spCmd.globals;
 
-import com.github.commandsconsolegui.spJme.extras.UngrabMouseStateI;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalHolderAbs;
+import com.github.commandsconsolegui.spCmd.CommandsDelegator;
 
 /**
+ * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
+ *
  */
-public class Priority<IPriority> {
-	private static Priority<IPriority> instance = new Priority<IPriority>();
-	public static Priority<IPriority> i(){return instance;}
+public class GlobalCommandsDelegatorI extends GlobalHolderAbs<CommandsDelegator> {
+	private static GlobalCommandsDelegatorI instance = new GlobalCommandsDelegatorI();
 	
-	public static enum EPriority{
-		Top,
-		Before,
-		Normal,
-		After,
-		Last,
-		;
-		public String s(){return toString();}
-	}
+	/**
+	 * This global holder class.
+	 * @return
+	 */
+	public static GlobalCommandsDelegatorI iGlobal(){return instance;}
 	
-	public static interface IPriority{
-		EPriority getPriority();
-	}
-	
-	Comparator<IPriority> cmpPriorities = new Comparator<IPriority>(){
-		@Override
-		public int compare(IPriority o1, IPriority o2) {
-			return o1.getPriority().compareTo(o2.getPriority());
-		}
-	};
-	
-	public Comparator<IPriority> getComparator(){
-		return cmpPriorities;
-	}
+	/**
+	 * The referenced class instance.
+	 * @return
+	 */
+	public static CommandsDelegator i(){return iGlobal().get();}
 }

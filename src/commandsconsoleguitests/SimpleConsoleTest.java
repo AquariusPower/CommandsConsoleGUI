@@ -29,9 +29,9 @@ package commandsconsoleguitests;
 
 import java.io.File;
 
-import com.github.commandsconsolegui.spAppOs.globals.GlobalSingleMandatoryAppInstanceI;
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spExtras.SingleMandatoryAppInstanceI;
+import com.github.commandsconsolegui.spExtras.globals.GlobalSingleMandatoryAppInstanceI;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppSettingsI;
 import com.github.commandsconsolegui.spLemur.console.SimpleConsolePlugin;
@@ -47,6 +47,9 @@ import com.jme3.system.AppSettings;
 public class SimpleConsoleTest extends SimpleApplication {
 	@Override
 	public void simpleInitApp() {
+		// if you have your own single instance code, you can safely remove this line below
+		GlobalSingleMandatoryAppInstanceI.i().configureRequiredAtApplicationInitialization();
+		
 		// here could be only it's initialize method, but will work this way also.
 		new SimpleConsolePlugin(this)
 			.configure(new SimpleConsolePlugin.CfgParm(this.getClass().getName().replace(".",File.separator)))

@@ -28,8 +28,8 @@ package com.github.commandsconsolegui.spLemur;
 
 import java.lang.reflect.Field;
 
-import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
+import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.TimedDelayVarField;
 import com.github.commandsconsolegui.spJme.ManageMouseCursorI;

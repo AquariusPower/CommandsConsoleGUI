@@ -29,14 +29,14 @@ package com.github.commandsconsolegui.spJme.cmd;
 
 import java.lang.reflect.Field;
 
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
 import com.github.commandsconsolegui.spCmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.spJme.ConditionalStateAbs;

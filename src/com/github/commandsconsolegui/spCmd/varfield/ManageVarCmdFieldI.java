@@ -38,7 +38,7 @@ import com.github.commandsconsolegui.spAppOs.misc.IMultiInstanceOverride;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.RefHolder;
-import com.github.commandsconsolegui.spAppOs.misc.RegisteredClasses;
+import com.github.commandsconsolegui.spCmd.misc.RegisteredClasses;
 
 /**
  * 

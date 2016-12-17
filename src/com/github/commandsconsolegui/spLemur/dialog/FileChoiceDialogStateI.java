@@ -30,10 +30,10 @@ import java.io.File;
 import java.lang.reflect.Field;
 
 import com.github.commandsconsolegui.spAppOs.globals.GlobalOSAppI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI;
+import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spCmd.varfield.FileVarField;
 import com.github.commandsconsolegui.spJme.DialogStateAbs;
 import com.github.commandsconsolegui.spJme.extras.DialogListEntryData;

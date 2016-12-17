@@ -32,17 +32,17 @@ import java.util.Collections;
 
 import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalOSAppI;
-import com.github.commandsconsolegui.spAppOs.globals.GlobalUpdaterI;
-import com.github.commandsconsolegui.spAppOs.globals.cmd.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
 import com.github.commandsconsolegui.spAppOs.misc.IInstance;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
-import com.github.commandsconsolegui.spAppOs.misc.ManageHoldRestartableI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
-import com.github.commandsconsolegui.spAppOs.misc.Priority;
+import com.github.commandsconsolegui.spAppOs.misc.Buffeds.BfdArrayList;
 import com.github.commandsconsolegui.spCmd.IConsoleCommandListener;
+import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
+import com.github.commandsconsolegui.spCmd.globals.GlobalUpdaterI;
+import com.github.commandsconsolegui.spCmd.misc.ManageHoldRestartableI;
+import com.github.commandsconsolegui.spCmd.misc.Priority;
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 
