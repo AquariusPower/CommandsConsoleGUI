@@ -32,6 +32,7 @@ import java.io.File;
 import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spExtras.SingleMandatoryAppInstanceI;
 import com.github.commandsconsolegui.spExtras.globals.GlobalSingleMandatoryAppInstanceI;
+import com.github.commandsconsolegui.spJme.extras.SimpleApplicationHelperI;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppSettingsI;
 import com.github.commandsconsolegui.spLemur.console.SimpleConsolePlugin;
@@ -74,16 +75,14 @@ public class SimpleConsoleTest extends SimpleApplication {
 		test.start();
 	}
 
-	/** This is called when pressing ESC key */
 	@Override
 	public void stop(boolean waitFor) {
-		GlobalCommandsDelegatorI.i().cmdRequestCleanSafeNormalExit();
+		SimpleApplicationHelperI.i().stop();
 		super.stop(waitFor);
 	}
-	/** this is directly called when window is closed using it's close button */
 	@Override
 	public void destroy() {
-		GlobalCommandsDelegatorI.i().cmdRequestCleanSafeNormalExit();
+		SimpleApplicationHelperI.i().destroy();
 		super.destroy();
 	}
 }	

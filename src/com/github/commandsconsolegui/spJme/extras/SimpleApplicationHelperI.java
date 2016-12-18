@@ -75,6 +75,14 @@ public class SimpleApplicationHelperI extends SimpleApplication implements ISing
 	}
 	
 	/**
+	 * This is called when pressing ESC key
+	 */
+	@Override
+	public void stop() {
+		GlobalCommandsDelegatorI.i().cmdRequestCleanSafeNormalExit();
+	}
+	
+	/**
 	 * this is directly called when window is closed using it's close button
 	 */
 	@Override

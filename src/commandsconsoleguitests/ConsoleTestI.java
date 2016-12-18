@@ -175,15 +175,15 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 	@Override
 	public void simpleInitApp() {
 		ManageConfigI.i().assertConfigured(this);
-		
 		MsgI.i().setEnableDebugMessages(true);
-		
 		SimpleApplicationHelperI.i().simpleInitApp();
-		
 		GlobalSingleMandatoryAppInstanceI.i().configureRequiredAtApplicationInitialization();
-		
 		consolePlugin.initialize();
 		
+		initThisTestStuff();
+	}
+	
+	private void initThisTestStuff(){
 		//////////////////////// config this test
 		SimpleDiagChoice<T> diagChoice = new SimpleDiagChoice<T>().configure(new SimpleDiagChoice.CfgParm(
 			0.6f, 0.5f, null, null));
@@ -337,12 +337,9 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		return rfcfg;
 	}
 
-	/**
-	 * This is called when pressing ESC key
-	 */
 	@Override
 	public void stop(boolean waitFor) {
-		GlobalCommandsDelegatorI.i().cmdRequestCleanSafeNormalExit();
+		SimpleApplicationHelperI.i().stop();
 		super.stop(waitFor);
 	}
 	
