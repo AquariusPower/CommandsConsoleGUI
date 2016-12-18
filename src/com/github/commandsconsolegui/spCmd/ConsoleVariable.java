@@ -110,6 +110,9 @@ public class ConsoleVariable<VAL> {
 	
 	private ConsoleVariable setRawValue(VAL objValue) {
 		if(getRestrictedVarOwner()!=null){
+			/**
+			 * this will also end by setting the value at this class object
+			 */
 			getRestrictedVarOwner().setObjectRawValue(objValue);
 		}else{
 			setRawValueDirectly(objValue);
@@ -118,6 +121,11 @@ public class ConsoleVariable<VAL> {
 		return this;
 	}
 	
+	public ConsoleVariable setRawValue(VarCmdFieldAbs.CompositeControl cc,VAL objValue) {
+		cc.assertSelfNotNull();
+		setRawValueDirectly(objValue);
+		return this;
+	}
 	/**
 	 * If restricted var owner is set, this is also it's value.
 	 * @param objValue
@@ -126,11 +134,6 @@ public class ConsoleVariable<VAL> {
 	public ConsoleVariable setRawValue(CommandsDelegator.CompositeControl cc, VAL objValue) {
 		cc.assertSelfNotNull();
 		setRawValue(objValue);
-		return this;
-	}
-	public ConsoleVariable setRawValue(VarCmdFieldAbs.CompositeControl cc,VAL objValue) {
-		cc.assertSelfNotNull();
-		setRawValueDirectly(objValue);
 		return this;
 	}
 	private ConsoleVariable setRawValueDirectly(VAL objValue) {

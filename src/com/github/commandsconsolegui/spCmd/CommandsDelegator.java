@@ -55,25 +55,26 @@ import com.github.commandsconsolegui.spAppOs.misc.IMultiInstanceOverride;
 import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
 import com.github.commandsconsolegui.spAppOs.misc.IUserInputDetector;
 import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI;
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI.DebugData;
 import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI.EDbgStkOrigin;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI.EStringMatchMode;
+import com.github.commandsconsolegui.spAppOs.misc.MsgI;
+import com.github.commandsconsolegui.spAppOs.misc.MsgI.PseudoException;
+import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
+import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
-import com.github.commandsconsolegui.spAppOs.misc.MsgI;
-import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.RunMode;
 import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spCmd.globals.GlobalConsoleUII;
 import com.github.commandsconsolegui.spCmd.globals.GlobalManageKeyBindI;
 import com.github.commandsconsolegui.spCmd.misc.DebugI;
-import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI;
-import com.github.commandsconsolegui.spCmd.misc.RegisteredClasses;
 import com.github.commandsconsolegui.spCmd.misc.DebugI.EDebugKey;
+import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI;
 import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI.CallableX;
+import com.github.commandsconsolegui.spCmd.misc.RegisteredClasses;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdField;
 import com.github.commandsconsolegui.spCmd.varfield.BoolTogglerCmdFieldAbs;
 import com.github.commandsconsolegui.spCmd.varfield.FloatDoubleVarField;
@@ -1815,7 +1816,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	}
 	public void dumpWarnEntry(Exception exUserCause, String strMessageKey, Object... aobj){
 		EMessageType e = EMessageType.Warn;
-		Exception ex = new Exception("(This is just a "+e.s()+" stacktrace) "+strMessageKey);
+		Exception ex = new PseudoException(e.s()+":"+strMessageKey);
 		ex.initCause(exUserCause);
 		ex.setStackTrace(Thread.currentThread().getStackTrace());
 		dumpEntry(new DumpEntryData()
@@ -1879,7 +1880,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	 */
 	public void dumpProblemEntry(String strMessageKey, Object... aobj){
 		EMessageType e = EMessageType.PROBLEM;
-		Exception ex = new Exception("(This is a "+e.s()+" stacktrace) "+strMessageKey);
+		Exception ex = new PseudoException(e.s()+":"+strMessageKey);
 		ex.setStackTrace(Thread.currentThread().getStackTrace());
 		dumpEntry(new DumpEntryData()
 			.setImportant(e.s(),strMessageKey,ex)
@@ -1900,7 +1901,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	 */
 	public void dumpUserErrorEntry(String strMessageKey, Object... aobj){
 		EMessageType e = EMessageType.UserInputError;
-		Exception ex = new Exception("(This is a "+e.s()+" stacktrace) "+strMessageKey);
+		Exception ex = new PseudoException(e.s()+":"+strMessageKey);
 		ex.setStackTrace(Thread.currentThread().getStackTrace());
 //		addImportantMsgToBuffer(strType,str,ex);
 		dumpEntry(new DumpEntryData()
@@ -1920,7 +1921,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	 */
 	public void dumpDevWarnEntry(String strMessageKey, Object... aobj){
 		EMessageType e = EMessageType.DevWarn;
-		Exception ex = new Exception("(This is just a "+e.s()+" stacktrace) "+strMessageKey);
+		Exception ex = new PseudoException(e.s()+":"+strMessageKey);
 		ex.setStackTrace(Thread.currentThread().getStackTrace());
 //		addImportantMsgToBuffer(strType,str,ex);
 //		dumpEntry(false, btgShowDeveloperWarn.get(), false, 
@@ -3084,6 +3085,12 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 	}
 	
 	private void fileAppendVar(String strVarId){
+		ConsoleVariable cvar = getVarFromRightSource(strVarId);
+		if(cvar.getRawValue()==null){
+			MsgI.i().devWarn("will not save a var with null value", strVarId);
+			return;
+		}
+		
 		String strCommentOut="";
 		String strReadOnlyComment="";
 		if(isRestrictedVar(strVarId)){
@@ -3363,8 +3370,13 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 		 * "null" is a reserved global keyword
 		 */
 		if(strValue.equals("null")){
-			strValue=null;
+			MsgI.i().devWarn("null value not allowed", strVarId); //TODO why it should be prevented? lets see how it works out...
+			return false;
 		}
+		
+//		if(strValue.equals("null")){
+//			strValue=null;
+//		}
 		
 		boolean bOk=varSetFixingType(new ConsoleVariable(strVarId, strValue, null, null), bSave);
 		
@@ -3399,7 +3411,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 			return false;
 		}
 		
-		if(cvar.getRawValue()==null)return false; //strValue=""; //just creates the var
+		if(cvar.getRawValue()==null)return false; // null has no type... 
 		
 		ConsoleVariable cvarExisting = getVarFromRightSource(cvar.getUniqueVarId(true));
 		if(cvarExisting!=null){

@@ -155,9 +155,13 @@ public class MsgI implements IMessageListener{
 		
 		if(!bListened){
 			System.err.println(MiscI.i().joinMessageWithObjects(true,strMsgHeader+"DEVWARN:"+str,aobj));
+			//TODO print only a few (may be 3) from Thread.currentThread().getStackTrace()
 		}
 		
 		return true;
 	}
+	
+	/** just for its clarifying name */
+	public static class PseudoException extends Exception{public PseudoException(String str){super(str);}}
 
 }
