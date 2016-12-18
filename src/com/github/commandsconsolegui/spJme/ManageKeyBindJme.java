@@ -31,6 +31,7 @@ import com.github.commandsconsolegui.spAppOs.ManageKeyCode.Key;
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyCodeI;
 import com.github.commandsconsolegui.spAppOs.misc.IRefresh;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
+import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spCmd.ManageKeyBind;
 import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI;
 import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI.CallableX;
@@ -78,20 +79,39 @@ public class ManageKeyBindJme extends ManageKeyBind {
 		
 	}
 	
+//	private boolean bRemoveConflictingKeyCodeMappings=false;
+//	public void setRemoveConflictingKeyCodeMappings(boolean b){
+//		this.bRemoveConflictingKeyCodeMappings=b;
+//	}
+	
 	private void addKeyCodeMapping(Key key){
 		if(!key.isModeKeyWithCode())return;
 		
-		removeKeyCodeMaping(key);
+//		if(bRemoveConflictingKeyCodeMappings)removeKeyCodeMaping(key);
 		
-		String strMapping=key.getId();
-		GlobalAppRefI.i().getInputManager().addMapping(strMapping, new KeyTrigger(key.getKeyCode()));
+		String strMapping=key.getFullId();
+//		if(GlobalAppRefI.i().getInputManager().hasMapping(strMapping)){
+//			throw new PrerequisitesNotMetException("this unique mapping should not be already set",strMapping);
+//		}
+		if(!GlobalAppRefI.i().getInputManager().hasMapping(strMapping)){
+			GlobalAppRefI.i().getInputManager().addMapping(strMapping, new KeyTrigger(key.getKeyCode()));
+		}
+		/**
+		 * if the "keycode id" mapping already existed, it will just add a listener to it!
+		 */
 		GlobalAppRefI.i().getInputManager().addListener(alGeneralJmeKeyCodeListener, strMapping);
 	}
 	
+	/**
+	 * Deprecated! keep as reference/info/reason to prevent reimplementation...
+	 * This would needlessly remove the keycode mappings for other already set before here.
+	 * The listener can be removed from all mappings if it becomes necessary...
+	 */
+	@Deprecated
 	private void removeKeyCodeMaping(Key key){
-		String strMapping=key.getId();
+		String strMapping=key.getFullId();
 		if(GlobalAppRefI.i().getInputManager().hasMapping(strMapping)){
-			MsgI.i().devWarn("keycode mapping already existed?", strMapping);
+			MsgI.i().devWarn("removing already existing keycode mapping", strMapping);
 			GlobalAppRefI.i().getInputManager().deleteMapping(strMapping);
 		}
 	}

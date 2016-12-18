@@ -277,7 +277,7 @@ public class KeyBind {
 //	}
 	
 	public boolean isEquivalentTo(KeyBind kbOther) {
-		if(getActionKey().getId().equals(kbOther.getActionKey().getId())){
+		if(getActionKey().getFullId().equals(kbOther.getActionKey().getFullId())){
 			if(getKeyModListSize()==kbOther.getKeyModListSize()){
 				if(getKeyModListSize()==0)return true;
 				

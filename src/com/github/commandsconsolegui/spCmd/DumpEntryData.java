@@ -30,6 +30,7 @@ package com.github.commandsconsolegui.spCmd;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
+import com.github.commandsconsolegui.spAppOs.globals.GlobalOSAppI;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spCmd.misc.DebugI;
@@ -138,7 +139,7 @@ public class DumpEntryData{
 		return this;
 	}
 	public void sendToPrintStream(){
-		String strOutput=("[CCUI]"+getLineFinal(true).replace("\t",MiscI.i().getTabAsSpaces())); //remove tabs for better compatibility (mainly with eclipse IDE source link)
+		String strOutput=("["+GlobalOSAppI.i().getCmdConsLibSimpleId()+"]"+getLineFinal(true).replace("\t",MiscI.i().getTabAsSpaces())); //remove tabs for better compatibility (mainly with eclipse IDE source link)
 		if(this.ps!=null)this.ps.println(strOutput);
 	}
 	public DumpEntryData setDumpObjects(Object[] aobj) {

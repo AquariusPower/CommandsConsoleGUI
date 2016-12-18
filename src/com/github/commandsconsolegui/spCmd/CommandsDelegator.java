@@ -970,7 +970,7 @@ public class CommandsDelegator implements IReflexFillCfg, ISingleInstance, IHand
 			String strNewKeyId = ccl.paramString(1);
 			
 			for(Key key:GlobalManageKeyCodeI.i().getKeyListCopy()){
-				if(key.getId().equalsIgnoreCase(strNewKeyId)){
+				if(key.getFullId().equalsIgnoreCase(strNewKeyId)){
 					dumpWarnEntry("conflicting with", key);
 					bCmdWorked=false;
 					break;

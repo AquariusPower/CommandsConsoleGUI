@@ -204,9 +204,15 @@ public class OSApp implements IReflexFieldSafeAccess {//implements IReflexFillCf
 	public boolean isDynamicInfoSet(){
 		return !strDynamicInfo.isEmpty();
 	}
-
-
+	
 	public String getAssetsFolder() {
 		return "./assets/";
+	}
+	
+	public String getCmdConsLibFullId(){
+		return "CommandsConsoleUI";
+	}
+	public String getCmdConsLibSimpleId(){
+		return "CCUI";
 	}
 }

@@ -34,6 +34,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import com.github.commandsconsolegui.spAppOs.globals.GlobalManageKeyCodeI;
+import com.github.commandsconsolegui.spAppOs.globals.GlobalOSAppI;
 import com.github.commandsconsolegui.spAppOs.misc.KeyBind;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
@@ -49,7 +50,8 @@ public abstract class ManageKeyCode implements IConfigure<ManageKeyCode>{
 //	public static ManageKeyCodeI i(){return instance;}
 	
 	public static class Key{
-		private String strId;
+		private String strFullId;
+		private String strSimpleId;
 		private Integer iKeyCode = null;
 		private boolean bPressed = false;
 		ArrayList<Key> akeyMonitoredList = null;
@@ -88,7 +90,13 @@ public abstract class ManageKeyCode implements IConfigure<ManageKeyCode>{
 		
 		private Key(String strId){
 			PrerequisitesNotMetException.assertNotEmpty("id", strId, this);
-			this.strId=strId;
+			
+			this.strFullId=strId;
+			prepareSimpleId();
+			
+			//will now be uniquely prefixed
+//			this.strFullId=GlobalOSAppI.i().getCmdConsLibFullId()+"_"+ManageKeyCode.class.getSimpleName()+"_"+this.strFullId;
+//			this.strFullId=GlobalManageKeyCodeI.i().prepareFullKeyId(this.strFullId);
 		}
 		
 		public ArrayList<Key> getKeysToMonitorCopy(){
@@ -155,21 +163,33 @@ public abstract class ManageKeyCode implements IConfigure<ManageKeyCode>{
 			this.bPressed = bPressed;
 		}
 		
-		public String getSimpleId(){
-			String strIdSimple = strId;
+		private void prepareSimpleId(){
+			this.strSimpleId = strFullId;
 			
 			String strPrefix=GlobalManageKeyCodeI.i().getKeyIdPrefixFilter();
 			if(strPrefix!=null){
-				if(strIdSimple.startsWith(strPrefix)){
-					strIdSimple=strIdSimple.substring(strPrefix.length());
+				if(strSimpleId.startsWith(strPrefix)){
+					strSimpleId=strSimpleId.substring(strPrefix.length());
 				}
 			}
-			
-			return strIdSimple;
 		}
 		
-		public String getId() {
-			return strId;
+		public String getSimpleId(){
+			return strSimpleId;
+//			String strIdSimple = strFullId;
+//			
+//			String strPrefix=GlobalManageKeyCodeI.i().getKeyIdPrefixFilter();
+//			if(strPrefix!=null){
+//				if(strIdSimple.startsWith(strPrefix)){
+//					strIdSimple=strIdSimple.substring(strPrefix.length());
+//				}
+//			}
+//			
+//			return strIdSimple;
+		}
+		
+		public String getFullId() {
+			return strFullId;
 		}
 
 		public boolean isMonitoredKey(Key key) {
@@ -197,6 +217,12 @@ public abstract class ManageKeyCode implements IConfigure<ManageKeyCode>{
 		return addKeyWorkFull(strId,null,akeyToMonitor);
 	}
 	
+//	private String prepareFullKeyId(String strKeyBaseId){
+//		return GlobalOSAppI.i().getCmdConsLibFullId()+"_"
+//			+ManageKeyCode.class.getSimpleName()+"_"
+//			+strKeyBaseId;
+//	}
+	
 	/**
 	 * 
 	 * @param strId
@@ -207,6 +233,8 @@ public abstract class ManageKeyCode implements IConfigure<ManageKeyCode>{
 		if(iCode!=null && akeyToMonitor.length>0){
 			throw new PrerequisitesNotMetException("both params were set...", iCode, akeyToMonitor);
 		}
+		
+//		strId=prepareFullKeyId(strId);
 		
 		Key keyExisting = tmKey.get(strId);
 		if(keyExisting!=null){
@@ -247,7 +275,7 @@ public abstract class ManageKeyCode implements IConfigure<ManageKeyCode>{
 				hm=new HashMap<String,Key>();
 				tmCodeKeys.put(iCode,hm);
 			}
-			hm.put(keyNew.getId(), keyNew);
+			hm.put(keyNew.getFullId(), keyNew);
 			
 			return keyNew;
 		}else
@@ -295,7 +323,7 @@ public abstract class ManageKeyCode implements IConfigure<ManageKeyCode>{
 	public ArrayList<String> getKeyCodeListReport(){
 		ArrayList<String> astr = new ArrayList<String>();
 		for(Key key:getKeyListCopy()){
-			astr.add(key.getId()+"="+key.getKeyCode());
+			astr.add(key.getFullId()+"="+key.getKeyCode());
 		}
 		Collections.sort(astr);
 		return astr;
@@ -360,7 +388,7 @@ public abstract class ManageKeyCode implements IConfigure<ManageKeyCode>{
 		for(Entry<String,Key> entry:tmKey.entrySet()){
 			Key key = entry.getValue();
 			if(!key.isModeKeyWithCode())continue;
-			if(key.getKeyCode()==iCode)return key.getId();
+			if(key.getKeyCode()==iCode)return key.getFullId();
 		}
 		return null;
 	}
