@@ -27,7 +27,6 @@
 
 package commandsconsoleguitests;
 
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
 import com.github.commandsconsolegui.spCmd.ScriptingCommandsDelegator;
 import com.github.commandsconsolegui.spJme.extras.FpsLimiterStateI;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;

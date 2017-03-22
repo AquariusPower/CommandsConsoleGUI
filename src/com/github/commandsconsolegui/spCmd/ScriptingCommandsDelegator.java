@@ -29,8 +29,14 @@ package com.github.commandsconsolegui.spCmd;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.TreeMap;
+
+import javax.script.Bindings;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
@@ -54,6 +60,8 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 	public final StringCmdField scfFunctionList = new StringCmdField(this);
 	public final StringCmdField scfFunctionShow = new StringCmdField(this);
 	
+	public final StringCmdField scfJs = new StringCmdField(this);
+	
 	/**
 	 * conditional user coding
 	 */
@@ -69,6 +77,14 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 	private Boolean	bIfConditionIsValid;
 	private Boolean	bIfConditionExecCommands;
 	private ArrayList<ConditionalNestedData> aIfConditionNestedList = new ArrayList<ConditionalNestedData>();
+	
+	
+	private ScriptEngine	jse  = new ScriptEngineManager().getEngineByMimeType("text/javascript");
+	private Bindings	bndJSE = jse.createBindings();
+	private Object	objJSLastEval;
+	public Object jsBindIdValue(String strBindId, Object objBindValue){
+		return bndJSE.put(strBindId,objBindValue);
+	}
 	
 	public TreeMap<String,ArrayList<String>> tmFunctions = 
 		new TreeMap<String, ArrayList<String>>(String.CASE_INSENSITIVE_ORDER);
@@ -224,6 +240,29 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 						}
 						dumpSubEntry(getCommandPrefixStr()+CMD_FUNCTION_END+getCommandDelimiter());
 						bCommandWorked=true;
+					}
+				}
+			}else
+			if(checkCmdValidity(scfJs,"<javascript>")){
+				String strJS = ccl.paramStringConcatenateAllFrom(1);
+				
+				if(strJS==null){
+					dumpSubEntry(bndJSE.keySet().toString());
+					bCommandWorked=true;
+				}else{
+					try {
+						objJSLastEval=jse.eval(strJS,bndJSE);
+						if(objJSLastEval==null){
+							dumpSubEntry("Return: null");
+						}else{
+							dumpSubEntry("Return: "+objJSLastEval.toString()+" ("+objJSLastEval.getClass()+")");
+//							if(!String.class.isInstance(objJSLastEval)){
+								dumpSubEntry(Arrays.asList(objJSLastEval.getClass().getMethods()));
+//							}
+						}
+						bCommandWorked=true;
+					} catch (ScriptException e) {
+						dumpExceptionEntry(e, strJS);
 					}
 				}
 			}else

@@ -27,6 +27,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.github.commandsconsolegui.spLemur.console;
 
+import java.io.File;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.reflect.Field;
 
@@ -49,6 +50,7 @@ import com.github.commandsconsolegui.spCmd.Updater;
 import com.github.commandsconsolegui.spCmd.UserCmdStackTrace;
 import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spCmd.globals.GlobalManageKeyBindI;
+import com.github.commandsconsolegui.spCmd.globals.GlobalScriptingCommandsDelegatorI;
 import com.github.commandsconsolegui.spCmd.globals.GlobalUpdaterI;
 import com.github.commandsconsolegui.spJme.AudioUII;
 import com.github.commandsconsolegui.spJme.ManageKeyBindJme;
@@ -127,6 +129,10 @@ public class SimpleConsolePlugin implements IReflexFillCfg, ISingleInstance, ICo
   public static class CfgParm implements ICfgParm {
   	private String strApplicationBaseSaveDataPath;
 
+		public CfgParm(Class clMainClassForAutoBaseSaveDataPath) {
+			this(clMainClassForAutoBaseSaveDataPath.getName().replace(".",File.separator));
+		}
+		
 		public CfgParm(String strApplicationBaseSaveDataPath) {
 			super();
 			this.strApplicationBaseSaveDataPath = strApplicationBaseSaveDataPath;
@@ -235,9 +241,9 @@ public class SimpleConsolePlugin implements IReflexFillCfg, ISingleInstance, ICo
   		GlobalSimulationTimeI.iGlobal().set(new SimulationTime(System.nanoTime()));
   	}
   	
-  	if(!GlobalCommandsDelegatorI.iGlobal().isSet()){
-  		// defaults to the more complex (scripting) one
-  		GlobalCommandsDelegatorI.iGlobal().set(new ScriptingCommandsDelegator());
+		// defaults to the one with currently most features
+  	if(!GlobalScriptingCommandsDelegatorI.iGlobal().isSet()){
+  		GlobalScriptingCommandsDelegatorI.iGlobal().set(new ScriptingCommandsDelegator());
   	}
   	
   	if(!GlobalManageKeyCodeI.iGlobal().isSet()){

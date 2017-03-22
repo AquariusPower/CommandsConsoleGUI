@@ -27,13 +27,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package commandsconsoleguitests;
 
-import java.io.File;
-
-import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spExtras.SingleMandatoryAppInstanceI;
 import com.github.commandsconsolegui.spExtras.globals.GlobalSingleMandatoryAppInstanceI;
 import com.github.commandsconsolegui.spJme.extras.SimpleApplicationHelperI;
-import com.github.commandsconsolegui.spJme.globals.GlobalAppRefI;
 import com.github.commandsconsolegui.spJme.globals.GlobalAppSettingsI;
 import com.github.commandsconsolegui.spLemur.console.SimpleConsolePlugin;
 import com.jme3.app.SimpleApplication;
@@ -53,8 +49,13 @@ public class SimpleConsoleTest extends SimpleApplication {
 		
 		// here could be only it's initialize method, but will work this way also.
 		new SimpleConsolePlugin(this)
-			.configure(new SimpleConsolePlugin.CfgParm(this.getClass().getName().replace(".",File.separator)))
+			.configure(new SimpleConsolePlugin.CfgParm(this.getClass()))
 			.initialize();
+		
+		/**
+		 * use this if going to exec cmd from this class: 
+				GlobalCommandsDelegatorI.i().addConsoleCommandListener(this);
+		 */
 	}
 	
 	public static void main( String... args ) {

@@ -27,18 +27,17 @@
 
 package commandsconsoleguitests;
 
-import java.io.File;
 import java.lang.reflect.Field;
 
 import com.github.commandsconsolegui.spAppOs.DelegateManagerI;
 import com.github.commandsconsolegui.spAppOs.misc.HoldRestartable;
 import com.github.commandsconsolegui.spAppOs.misc.ISingleInstance;
 import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI;
+import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
-import com.github.commandsconsolegui.spAppOs.misc.ManageConfigI.IConfigure;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
@@ -47,8 +46,9 @@ import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
 import com.github.commandsconsolegui.spCmd.CommandsHelperI;
 import com.github.commandsconsolegui.spCmd.IConsoleCommandListener;
 import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
-import com.github.commandsconsolegui.spCmd.misc.ReflexHacksPluginI;
+import com.github.commandsconsolegui.spCmd.globals.GlobalScriptingCommandsDelegatorI;
 import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI.CallableX;
+import com.github.commandsconsolegui.spCmd.misc.ReflexHacksPluginI;
 import com.github.commandsconsolegui.spCmd.varfield.KeyBoundVarField;
 import com.github.commandsconsolegui.spCmd.varfield.StringCmdField;
 import com.github.commandsconsolegui.spExtras.SingleMandatoryAppInstanceI;
@@ -145,12 +145,11 @@ public class ConsoleTestI<T extends Command<Button>> extends SimpleApplication i
 		 * Globals setup are actually very simple, and must come 1st!
 		 * Such classes shall have parameter-less default constructors.
 		 */
-		GlobalCommandsDelegatorI.iGlobal().set(new CommandsTest());
+		GlobalScriptingCommandsDelegatorI.iGlobal().set(new CommandsTest());
 //		GlobalConsoleGuiI.iGlobal().set(ConsoleLemurStateI.i());
 		
 		consolePlugin = new SimpleConsolePlugin(this);
-		consolePlugin.configure(new SimpleConsolePlugin.CfgParm(
-			ConsoleTestI.class.getName().replace(".",File.separator)));
+		consolePlugin.configure(new SimpleConsolePlugin.CfgParm(ConsoleTestI.class));
 		
 		/**
 		 * these adds otherwise impossible fixes and workarounds,

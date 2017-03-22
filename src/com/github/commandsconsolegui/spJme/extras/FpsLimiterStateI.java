@@ -33,6 +33,7 @@ import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.TimeHelperI;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator.ECmdReturnStatus;
+import com.github.commandsconsolegui.spCmd.globals.GlobalScriptingCommandsDelegatorI;
 import com.github.commandsconsolegui.spJme.cmd.CmdConditionalStateAbs;
 
 /**
@@ -68,6 +69,9 @@ public class FpsLimiterStateI extends CmdConditionalStateAbs<FpsLimiterStateI>{
 //		super.configure(new CmdConditionalStateAbs.CfgParm(FpsLimiterStateI.class.getSimpleName()));
 		super.configure(icfg);
 //		return storeCfgAndReturnSelf(cfg);
+		
+		GlobalScriptingCommandsDelegatorI.i().jsBindIdValue(FpsLimiterStateI.class.getSimpleName(), this);
+		
 		return getThis();
 	}
 	
