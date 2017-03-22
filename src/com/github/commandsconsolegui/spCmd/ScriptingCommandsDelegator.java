@@ -28,6 +28,8 @@
 package com.github.commandsconsolegui.spCmd;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -255,10 +257,46 @@ public class ScriptingCommandsDelegator extends CommandsDelegator {
 						if(objJSLastEval==null){
 							dumpSubEntry("Return: null");
 						}else{
-							dumpSubEntry("Return: "+objJSLastEval.toString()+" ("+objJSLastEval.getClass()+")");
-//							if(!String.class.isInstance(objJSLastEval)){
-								dumpSubEntry(Arrays.asList(objJSLastEval.getClass().getMethods()));
-//							}
+							dumpSubEntry("Return: "+objJSLastEval.toString()+" ("+objJSLastEval.getClass()+"), accessible methods:");
+							
+							Method[] am = objJSLastEval.getClass().getMethods();
+							ArrayList<String> astr = new ArrayList<String>();
+							for(Method m:am){
+								String strM = "";
+								String strClassSName=m.getDeclaringClass().getSimpleName();
+								strM+=strClassSName+"."+m.getName();
+								
+								strM+="(";
+								String strP="";
+								boolean bHasNonPrimitiveParam = false;
+								for(Class<?> p:m.getParameterTypes()){
+									if(!p.isPrimitive())bHasNonPrimitiveParam=true;
+									if(!strP.isEmpty())strP+=",";
+									strP+=p.getSimpleName();
+								}
+								strM+=strP+")";
+								
+								strM+=":"+m.getReturnType().getSimpleName();
+								
+								boolean bIsStatic=false;
+								if(Modifier.isStatic(m.getModifiers())){
+									strM+=" <STATIC>";
+									bIsStatic=true;
+								}
+								
+								if(
+										!bIsStatic &&
+										!bHasNonPrimitiveParam && 
+										!strClassSName.equals(Object.class.getSimpleName())
+								){
+									astr.add(strM);
+//									dumpSubEntry(strM);
+								}
+							}
+							
+							Collections.sort(astr);
+							
+							for(String str:astr)dumpSubEntry(str);
 						}
 						bCommandWorked=true;
 					} catch (ScriptException e) {
