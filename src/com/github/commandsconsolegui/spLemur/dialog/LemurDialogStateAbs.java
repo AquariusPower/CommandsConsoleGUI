@@ -505,7 +505,7 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 				requestDisable();
 			}else
 			if(source.equals(btnMinimize)){
-				//TODO this requires some kind of window management/lister/docking etc...
+				//TODO this requires some kind of window management/list/docking etc...
 			}else
 			if(source.equals(btnMaximize)){
 				applyCurrentSettings(true);
@@ -550,12 +550,12 @@ public abstract class LemurDialogStateAbs<ACT,THIS extends LemurDialogStateAbs<A
 	public void applyCurrentSettings(boolean bToggleMaximized) {
 		SaveLmrDiag lsv = getCompositeSavable(SaveLmrDiag.class);
 	//	IntLongVarField ilv = lsv.ilvBorderThickness;
-		boolean b = bToggleMaximized ? lsv.toggleMaximized() : lsv.isMaximized();
-		if(b){ //maximize
+		boolean bMaximize = bToggleMaximized ? lsv.toggleMaximized() : lsv.isMaximized();
+		if(bMaximize){
 			Vector3f v3fAppW = MiscJmeI.i().getAppWindowSize();
 			MiscLemurStateI.i().setPositionSafely(getDialogMainContainer(), new Vector3f(0,v3fAppW.y,0));
 			MiscLemurStateI.i().setPreferredSizeSafely(getDialogMainContainer(), v3fAppW, true);
-		}else{ //restore
+		}else{ //restore custom pos size
 			MiscLemurStateI.i().setPositionSafely(getDialogMainContainer(),
 				new Vector3f(lsv.getPosX(), lsv.getPosY(), 0));
 			MiscLemurStateI.i().setPreferredSizeSafely(getDialogMainContainer(), 

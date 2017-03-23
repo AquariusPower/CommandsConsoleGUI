@@ -1555,7 +1555,7 @@ public abstract class DialogStateAbs<ACT,THIS extends DialogStateAbs<ACT,THIS>> 
 			// basically update everything before writing, in case not done outside here
 //			strId=getOwner().getId();
 			
-			if(!bMaximized){
+			if(!bMaximized){ //will not store maximized useless data 
 				setPos(getOwner().getDialogMainContainer().getLocalTranslation().clone());
 				setSize(getOwner().getMainSizeCopy());
 			}

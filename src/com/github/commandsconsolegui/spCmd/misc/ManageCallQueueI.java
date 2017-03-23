@@ -101,8 +101,14 @@ public class ManageCallQueueI implements IReflexFillCfg,IManager<ManageCallQueue
 		}
 	}
 	
+	/**
+	 * 
+	 */
 	public static abstract class CallableX implements CallableWeak<Boolean>,IRetryListOwner{
 		@Override public abstract Boolean call(); //is here just to let the javadoc help be reached...
+		
+//		/** override to let self value be updated automatically */
+//		public Boolean callUpdateSelfValue(){return true;};
 		
 		private CallerInfo ci = new CallerInfo();
 		private boolean bPrepend;

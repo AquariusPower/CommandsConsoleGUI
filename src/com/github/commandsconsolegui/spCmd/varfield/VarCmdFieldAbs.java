@@ -27,7 +27,6 @@
 
 package com.github.commandsconsolegui.spCmd.varfield;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.github.commandsconsolegui.spAppOs.misc.CompositeControlAbs;
@@ -36,25 +35,25 @@ import com.github.commandsconsolegui.spAppOs.misc.IDebugReport;
 import com.github.commandsconsolegui.spAppOs.misc.IHandled;
 import com.github.commandsconsolegui.spAppOs.misc.IManager;
 import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI;
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
 import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI.DebugData;
 import com.github.commandsconsolegui.spAppOs.misc.ManageDebugDataI.EDbgStkOrigin;
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
-import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.ReflexFillCfg;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.MsgI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.RefHolder;
+import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI;
+import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfg;
+import com.github.commandsconsolegui.spAppOs.misc.ReflexFillI.IReflexFillCfgVariant;
 import com.github.commandsconsolegui.spAppOs.misc.RunMode;
 import com.github.commandsconsolegui.spCmd.CommandData;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
 import com.github.commandsconsolegui.spCmd.ConsoleVariable;
 import com.github.commandsconsolegui.spCmd.globals.GlobalCommandsDelegatorI;
 import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI;
-import com.github.commandsconsolegui.spCmd.misc.RegisteredClasses;
+import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI.CallableWeak;
 import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI.CallableX;
 import com.github.commandsconsolegui.spCmd.misc.ManageCallQueueI.CallerInfo;
+import com.github.commandsconsolegui.spCmd.misc.RegisteredClasses;
 
 /**
  * Do NOT put var cmds to be saved as JME j3o.
@@ -108,6 +107,8 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 	private boolean bAllowNullValue = true;
 
 	private CallableX	callerAssigned;
+//	private CallableX	callerUpdateSelfValue;
+	private CallableWeak<VAL> clwUpdateSelfValue;
 
 	private CompositeControlAbs	ccOwner;
 	
@@ -834,6 +835,12 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 		return getThis();
 	}
 	
+	public THIS setCallwUpdateSelfValue(CallableWeak<VAL> clwUpdateSelfValue){
+		PrerequisitesNotMetException.assertNotAlreadySet(this.clwUpdateSelfValue, clwUpdateSelfValue, "caller", this);
+		this.clwUpdateSelfValue=clwUpdateSelfValue;
+		return getThis();
+	}
+	
 	public boolean isCallerAssigned(){
 		return callerAssigned!=null;
 	}
@@ -857,6 +864,10 @@ public abstract class VarCmdFieldAbs<VAL,THIS extends VarCmdFieldAbs<VAL,THIS>> 
 //	public static String getCallerAssignedParamsKey(){
 //		return "Params";
 //	}
+	
+	public void callwUpdateSelfValueNow(){
+		setObjectRawValue(clwUpdateSelfValue.call(), true);
+	}
 	
 	public Boolean callerAssignedRunNow(){
 		return callerAssignedRunNow(new Object[]{});
