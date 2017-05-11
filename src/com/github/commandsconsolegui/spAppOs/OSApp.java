@@ -45,6 +45,14 @@ public class OSApp implements IReflexFieldSafeAccess {//implements IReflexFillCf
 //	public static OperationalSystem i(){return instance;}
 	
 	private File	flBaseSaveDataPath;
+	private boolean	bExiting=false;
+	private String	strAlertMsg;
+	private long	lLastAlertMilis;
+	private StackTraceElement[]	asteStackKeyRequestOrigin;
+	private boolean	bFirstTimeQuickUpdate;
+	private String	strDynamicInfo="";
+	private StackTraceElement[]	asteLastValidHideRequestOrigin;
+	private Object	objActionSourceElement;
 	
 	public OSApp(String strApplicationBaseSaveDataPath) {
 		setApplicationBaseSaveDataPath(strApplicationBaseSaveDataPath);
@@ -92,14 +100,6 @@ public class OSApp implements IReflexFieldSafeAccess {//implements IReflexFillCf
 		return strApplicationTitle;
 	}
 
-	private boolean	bExiting=false;
-	private String	strAlertMsg;
-	private long	lLastAlertMilis;
-	private StackTraceElement[]	asteStackKeyRequestOrigin;
-	private boolean	bFirstTimeQuickUpdate;
-	private String	strDynamicInfo="";
-	private StackTraceElement[]	asteLastValidHideRequestOrigin;
-	private Object	objActionSourceElement;
 	/**
 	 * this is important to let some other threads know the application is exiting and behave properly
 	 */

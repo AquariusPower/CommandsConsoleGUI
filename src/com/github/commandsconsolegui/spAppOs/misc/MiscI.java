@@ -337,15 +337,11 @@ public class MiscI {
 	}
 	
 	synchronized public BasicFileAttributes fileReadAttributesTS(File fl){
-//		if(fl.exists()){
-			try {
-				return Files.readAttributes(fl.toPath(), BasicFileAttributes.class);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-//		}else{
-//			ihe.handleException(new NullPointerException("file not found "+fl.getAbsolutePath()));
-//		}
+		try {
+			return Files.readAttributes(fl.toPath(), BasicFileAttributes.class);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		return null;
 	}

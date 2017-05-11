@@ -1,4 +1,5 @@
 # Power Developer Commands Console UI (Java)
+(Project deprecated, being reborn at https://github.com/AquariusPower/DevConsLeJME)
 
 ## Structure:  
 ConsoleCommands  

@@ -78,8 +78,7 @@ public class ManageCallQueueI implements IReflexFillCfg,IManager<ManageCallQueue
 		 * 
 		 * @return true if succeeded and the queue can be discarded, false if failed and it must be retried.
 		 */
-    @Override
-		V call();
+		@Override V call();
 	}
 	
 	/**

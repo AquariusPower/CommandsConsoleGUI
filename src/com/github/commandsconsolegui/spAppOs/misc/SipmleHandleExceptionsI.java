@@ -42,6 +42,6 @@ public class SipmleHandleExceptionsI implements IHandleExceptions{
 	
 	@Override
 	public void handleExceptionThreaded(Exception e) {
-		throw new ExceptionInInitializerError(e);
+		throw new ExceptionInInitializerError(e); //TODO what? in initializer why?
 	}
 }

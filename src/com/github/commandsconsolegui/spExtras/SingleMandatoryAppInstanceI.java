@@ -36,7 +36,6 @@ import com.github.commandsconsolegui.spAppOs.misc.MiscI;
 import com.github.commandsconsolegui.spAppOs.misc.PrerequisitesNotMetException;
 import com.github.commandsconsolegui.spAppOs.misc.RunMode;
 import com.github.commandsconsolegui.spCmd.CommandsDelegator;
-import com.github.commandsconsolegui.spCmd.misc.DebugI;
 
 /**
  * Locks have a short timeout.

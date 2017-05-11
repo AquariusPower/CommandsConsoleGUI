@@ -34,9 +34,7 @@ import java.util.Collections;
 import com.github.commandsconsolegui.spAppOs.misc.MiscI.EStringMatchMode;
 
 /**
- * 
  * @author Henrique Abdalla <https://github.com/AquariusPower><https://sourceforge.net/u/teike/profile/>
- *
  */
 public class AutoCompleteI {
 	public static AutoCompleteI instance = new AutoCompleteI();

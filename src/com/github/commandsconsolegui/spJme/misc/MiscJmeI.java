@@ -978,7 +978,6 @@ public class MiscJmeI implements IReflexFillCfg,ISingleInstance,IConfigure{
 		MiscJmeI.i().setUserDataPSH(spt, EUserDataMiscJme.strPopupHelp.s(), strHelp);
 		return spt;
 	}
-	
 	public String getPopupHelp(Spatial spt){
 		return MiscJmeI.i().getUserDataPSH(spt, EUserDataMiscJme.strPopupHelp.s());
 	}

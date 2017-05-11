@@ -10,7 +10,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/jme3libs"/>
 	<classpathentry kind="lib" path="lib/jME-TrueTypeFont-v1.22.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/lemur-1.9.1.jar" sourcepath="lib/lemur-1.9.1-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/lemur-proto-1.8.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lemur-proto-1.8.1.jar" sourcepath="lib/lemur-proto-1.8.1-sources.jar"/>
 	<classpathentry kind="lib" path="lib/JME-ShaderBlow-lib.jar" sourcepath="lib/JME-ShaderBlow-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
